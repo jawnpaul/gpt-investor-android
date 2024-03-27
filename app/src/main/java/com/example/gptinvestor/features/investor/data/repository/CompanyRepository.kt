@@ -4,13 +4,12 @@ import com.example.gptinvestor.core.functional.Either
 import com.example.gptinvestor.core.functional.Failure
 import com.example.gptinvestor.features.investor.domain.model.SectorInput
 import com.example.gptinvestor.features.investor.domain.repository.ICompanyRepository
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import javax.inject.Inject
 
 class CompanyRepository @Inject constructor() : ICompanyRepository {
     override suspend fun getAllCompanies(): Flow<Either<Failure, List<String>>> = flow {
-
     }
 
     override suspend fun getAllSector(): Flow<Either<Failure, List<SectorInput>>> = flow {

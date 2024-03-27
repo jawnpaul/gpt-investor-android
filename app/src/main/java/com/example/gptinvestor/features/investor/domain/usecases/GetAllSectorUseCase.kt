@@ -6,10 +6,10 @@ import com.example.gptinvestor.core.functional.Either
 import com.example.gptinvestor.core.functional.Failure
 import com.example.gptinvestor.features.investor.domain.model.SectorInput
 import com.example.gptinvestor.features.investor.domain.repository.ICompanyRepository
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
 
 class GetAllSectorUseCase @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,

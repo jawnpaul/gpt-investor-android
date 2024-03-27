@@ -13,14 +13,14 @@ import androidx.compose.ui.res.painterResource
 import com.example.gptinvestor.R
 import kotlinx.coroutines.delay
 
-private const val SplashWaitTime: Long = 2000
+private const val SPLASH_WAIT_TIME: Long = 2000
 
 @Composable
 fun LandingScreen(onTimeout: () -> Unit, modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         val currentOnTimeout by rememberUpdatedState(onTimeout)
         LaunchedEffect(Unit) {
-            delay(SplashWaitTime)
+            delay(SPLASH_WAIT_TIME)
             currentOnTimeout()
         }
 

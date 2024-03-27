@@ -14,7 +14,7 @@ abstract class BaseUseCase<in Params, out Type>(
     private val coroutineScope: CoroutineScope,
     private val dispatcher: CoroutineDispatcher
 )
-        where Type : Any {
+    where Type : Any {
 
     abstract suspend fun run(params: Params): Flow<Either<Failure, Type>>
 

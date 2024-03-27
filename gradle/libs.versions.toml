@@ -13,6 +13,7 @@ kapt = "1.9.0"
 timber = "5.0.1"
 navVersion = "2.7.7"
 hiltNavigation = "1.2.0"
+ktLint = "12.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,5 +42,6 @@ androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 hiltAndroid = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kapt" }
+ktLint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktLint" }
 
 

@@ -81,6 +81,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.dagger.hilt)
     implementation(libs.timber)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.hilt.navigation)
 
     kapt(libs.dagger.hilt.compiler)
 

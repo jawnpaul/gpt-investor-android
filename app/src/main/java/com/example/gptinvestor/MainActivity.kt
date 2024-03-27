@@ -10,7 +10,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.gptinvestor.investor.presentation.ui.MainScreen
+import androidx.navigation.compose.rememberNavController
+import com.example.gptinvestor.core.navigation.SetUpNavGraph
 import com.example.gptinvestor.ui.theme.GPTInvestorTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -24,7 +25,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainScreen()
+                    val navController = rememberNavController()
+                    SetUpNavGraph(navController = navController)
                 }
             }
         }

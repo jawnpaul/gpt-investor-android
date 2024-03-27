@@ -1,9 +1,17 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.kotlinKapt)
+    alias(libs.plugins.hiltAndroid)
 }
 
 android {
+
+    val localProperties = Properties()
+    localProperties.load(project.rootProject.file("local.properties").reader())
+
     namespace = "com.example.gptinvestor"
     compileSdk = 34
 
@@ -28,6 +36,17 @@ android {
                 "proguard-rules.pro"
             )
         }
+
+        debug {
+            val geminiApiKey: String = localProperties.getProperty("GEMINI_API_KEY")
+            buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+
+            isShrinkResources = false
+            isMinifyEnabled = false
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            isDebuggable = true
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -38,6 +57,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -59,6 +79,11 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.dagger.hilt)
+    implementation(libs.timber)
+
+    kapt(libs.dagger.hilt.compiler)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

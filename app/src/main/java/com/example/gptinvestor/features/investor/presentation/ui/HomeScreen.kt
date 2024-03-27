@@ -16,26 +16,23 @@ import timber.log.Timber
 
 @Composable
 fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: HomeViewModel) {
-
     var showLandingScreen by remember { mutableStateOf(true) }
     if (showLandingScreen) {
         LandingScreen(onTimeout = { showLandingScreen = false })
     } else {
-        //Home Screen
-        Box(modifier = Modifier.padding(horizontal = 8.dp)){
-
+        // Home Screen
+        Box(modifier = Modifier.padding(horizontal = 8.dp)) {
             val state = viewModel.allSector.collectAsState()
-            //row of sectors
+            // row of sectors
             SectorChoiceQuestion(
                 possibleAnswers = state.value.sectors,
                 selectedAnswer = state.value.selected,
                 onOptionSelected = {
                     Timber.e("Selected")
                     viewModel.selectSector(it)
-                })
-            //list of companies
+                }
+            )
+            // list of companies
         }
-
-
     }
 }

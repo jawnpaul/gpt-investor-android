@@ -6,10 +6,10 @@ import com.example.gptinvestor.features.investor.domain.model.SectorInput
 import com.example.gptinvestor.features.investor.domain.usecases.GetAllSectorUseCase
 import com.example.gptinvestor.features.investor.presentation.state.AllSectorView
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import timber.log.Timber
-import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(private val getAllSectorUseCase: GetAllSectorUseCase) :

@@ -1,6 +1,5 @@
 package com.example.gptinvestor.core.di
 
-import com.example.gptinvestor.core.di.DefaultDispatcher
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

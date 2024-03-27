@@ -1,10 +1,12 @@
 import java.util.Properties
+import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.kotlinKapt)
     alias(libs.plugins.hiltAndroid)
+    alias(libs.plugins.ktLint)
 }
 
 android {
@@ -67,6 +69,25 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+}
+
+tasks.getByPath("preBuild").dependsOn("ktlintFormat")
+
+ktlint {
+    android = true
+    ignoreFailures = false
+    reporters {
+        reporter(ReporterType.PLAIN)
+        reporter(ReporterType.CHECKSTYLE)
+        reporter(ReporterType.SARIF)
+    }
+    additionalEditorconfig.set(
+        mapOf(
+            "ktlint_code_style" to "android_studio",
+            "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
+            "max_line_length" to "140"
+        )
+    )
 }
 
 dependencies {

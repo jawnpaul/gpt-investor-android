@@ -5,7 +5,7 @@ import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 
 @HiltAndroidApp
-class GPTInvestorApplication: Application() {
+class GPTInvestorApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         if (BuildConfig.DEBUG) {

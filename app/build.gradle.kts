@@ -43,6 +43,9 @@ android {
             val geminiApiKey: String = localProperties.getProperty("GEMINI_API_KEY")
             buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
 
+            val baseUrl: String = localProperties.getProperty("BASE_URL")
+            buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+
             isShrinkResources = false
             isMinifyEnabled = false
             applicationIdSuffix = ".dev"
@@ -104,6 +107,9 @@ dependencies {
     implementation(libs.timber)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation)
+    implementation(libs.retrofit)
+    implementation(libs.moshi.converter)
+    implementation(libs.okhttp.logger)
 
     kapt(libs.dagger.hilt.compiler)
 

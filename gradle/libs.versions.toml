@@ -14,6 +14,8 @@ timber = "5.0.1"
 navVersion = "2.7.7"
 hiltNavigation = "1.2.0"
 ktLint = "12.1.0"
+retrofit = "2.9.0"
+okhttp = "4.12.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -35,6 +37,9 @@ dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compi
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navVersion" }
 androidx-hilt-navigation = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigation" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+moshi-converter = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
+okhttp-logger = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 
 
 [plugins]

@@ -17,6 +17,7 @@ ktLint = "12.1.0"
 retrofit = "2.9.0"
 okhttp = "4.12.0"
 coil = "2.5.0"
+room = "2.6.1"
 
 
 [libraries]
@@ -43,6 +44,9 @@ retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = 
 moshi-converter = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
 okhttp-logger = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+androidx-room = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 
 
 [plugins]

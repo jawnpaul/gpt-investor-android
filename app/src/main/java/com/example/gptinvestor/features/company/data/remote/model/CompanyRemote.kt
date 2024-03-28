@@ -1,6 +1,6 @@
 package com.example.gptinvestor.features.company.data.remote.model
 
-import com.example.gptinvestor.features.company.domain.model.Company
+import com.example.gptinvestor.features.company.data.local.model.CompanyEntity
 import com.squareup.moshi.Json
 
 data class CompanyRemote(
@@ -16,5 +16,17 @@ data class CompanyRemote(
     @field:Json(name = "website") val website: String,
     @field:Json(name = "date") val date: String
 ) {
-    fun toDomainObject() = Company(ticker = ticker, name = name, logo = logoUrl, summary = summary)
+    fun toEntity() = CompanyEntity(
+        ticker = ticker,
+        summary = summary,
+        industry = industry,
+        industryKey = industryKey,
+        sector = sector,
+        sectorKey = sectorKey,
+        country = country,
+        name = name,
+        logoUrl = logoUrl,
+        website = website,
+        date = date
+    )
 }

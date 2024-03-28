@@ -9,10 +9,10 @@ import com.example.gptinvestor.features.company.domain.usecases.GetAllSectorUseC
 import com.example.gptinvestor.features.company.presentation.state.AllCompanyView
 import com.example.gptinvestor.features.investor.presentation.state.AllSectorView
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -75,6 +75,8 @@ class HomeViewModel @Inject constructor(
         _allCompanies.update {
             it.copy(loading = false, error = "Something went wrong.")
         }
+        //TODO:Handle error to show retry button i.e if current list is empty and error happened
+        Timber.e(failure.toString())
     }
 
     private fun handleAllCompaniesSuccess(response: List<Company>) {

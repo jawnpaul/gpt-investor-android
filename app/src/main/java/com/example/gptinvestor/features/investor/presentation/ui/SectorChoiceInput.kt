@@ -20,7 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.gptinvestor.features.investor.domain.model.SectorInput
+import com.example.gptinvestor.features.company.domain.model.SectorInput
 import com.example.gptinvestor.ui.theme.GPTInvestorTheme
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -37,7 +37,7 @@ fun SectorChoiceQuestion(
         possibleAnswers.forEach {
             val selected = it == selectedAnswer
             SingleSectorChoice(
-                modifier = Modifier.padding(horizontal = 8.dp),
+                modifier = Modifier.padding(horizontal = 4.dp),
                 input = it,
                 selected = selected,
                 onOptionSelected = { onOptionSelected(it) }

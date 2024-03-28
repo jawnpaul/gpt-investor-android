@@ -110,6 +110,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.moshi.converter)
     implementation(libs.okhttp.logger)
+    implementation(libs.coil.compose)
 
     kapt(libs.dagger.hilt.compiler)
 

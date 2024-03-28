@@ -1,9 +1,9 @@
-package com.example.gptinvestor.features.investor.domain.repository
+package com.example.gptinvestor.features.company.domain.repository
 
 import com.example.gptinvestor.core.functional.Either
 import com.example.gptinvestor.core.functional.Failure
-import com.example.gptinvestor.features.investor.domain.model.Company
-import com.example.gptinvestor.features.investor.domain.model.SectorInput
+import com.example.gptinvestor.features.company.domain.model.Company
+import com.example.gptinvestor.features.company.domain.model.SectorInput
 import kotlinx.coroutines.flow.Flow
 
 interface ICompanyRepository {

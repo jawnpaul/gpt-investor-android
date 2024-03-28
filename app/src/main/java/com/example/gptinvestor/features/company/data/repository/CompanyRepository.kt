@@ -1,11 +1,11 @@
-package com.example.gptinvestor.features.investor.data.repository
+package com.example.gptinvestor.features.company.data.repository
 
 import com.example.gptinvestor.core.api.ApiService
 import com.example.gptinvestor.core.functional.Either
 import com.example.gptinvestor.core.functional.Failure
-import com.example.gptinvestor.features.investor.domain.model.Company
-import com.example.gptinvestor.features.investor.domain.model.SectorInput
-import com.example.gptinvestor.features.investor.domain.repository.ICompanyRepository
+import com.example.gptinvestor.features.company.domain.model.Company
+import com.example.gptinvestor.features.company.domain.model.SectorInput
+import com.example.gptinvestor.features.company.domain.repository.ICompanyRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

@@ -1,7 +1,10 @@
 package com.example.gptinvestor.features.investor.presentation.ui
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,10 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.gptinvestor.R
+import com.example.gptinvestor.features.company.presentation.ui.SingleCompanyItem
 import com.example.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
-import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,11 +54,10 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
                     },
                     actions = {
                         IconButton(onClick = {
-
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Search,
-                                contentDescription = "Localized description"
+                                contentDescription = "Search icon"
                             )
                         }
                     },
@@ -62,18 +65,34 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
                 )
             }
         ) { innerPadding ->
+            val sectorViewState = viewModel.allSector.collectAsState()
+            val allCompaniesViewState = viewModel.allCompanies.collectAsState()
 
-            Box(modifier = Modifier.padding(innerPadding)) {
-                val state = viewModel.allSector.collectAsState()
-                // row of sectors
-                SectorChoiceQuestion(
-                    possibleAnswers = state.value.sectors,
-                    selectedAnswer = state.value.selected,
-                    onOptionSelected = {
-                        viewModel.selectSector(it)
-                    }
-                )
-                // list of companies
+            LazyColumn(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .padding(horizontal = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                item {
+                    // row of sectors
+                    SectorChoiceQuestion(
+                        possibleAnswers = sectorViewState.value.sectors,
+                        selectedAnswer = sectorViewState.value.selected,
+                        onOptionSelected = {
+                            viewModel.selectSector(it)
+                        }
+                    )
+                }
+
+                items(
+                    items = allCompaniesViewState.value.companies,
+                    key = { company -> company.ticker }
+                ) { company ->
+                    SingleCompanyItem(modifier = Modifier, company = company, onClick = {
+                    })
+                }
             }
         }
     }

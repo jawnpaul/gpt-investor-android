@@ -1,6 +1,6 @@
-package com.example.gptinvestor.features.investor.data.remote.model
+package com.example.gptinvestor.features.company.data.remote.model
 
-import com.example.gptinvestor.features.investor.domain.model.Company
+import com.example.gptinvestor.features.company.domain.model.Company
 import com.squareup.moshi.Json
 
 data class CompanyRemote(

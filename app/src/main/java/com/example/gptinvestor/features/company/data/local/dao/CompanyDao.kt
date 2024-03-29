@@ -16,4 +16,7 @@ interface CompanyDao {
 
     @Query("SELECT * FROM company_table")
     suspend fun getAllCompanies(): List<CompanyEntity>
+
+    @Query("SELECT * FROM company_table WHERE ticker =:ticker")
+    suspend fun getCompany(ticker: String): CompanyEntity
 }

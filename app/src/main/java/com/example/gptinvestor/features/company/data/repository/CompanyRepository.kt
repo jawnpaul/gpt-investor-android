@@ -57,4 +57,9 @@ class CompanyRepository @Inject constructor(
 
         emit(Either.Right(list + others))
     }
+
+    override suspend fun getCompany(ticker: String): Flow<Either<Failure, Company>> = flow {
+        val company = companyDao.getCompany(ticker)
+        emit(Either.Right(company.toDomainObject()))
+    }
 }

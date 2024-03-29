@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">GPT Investor</string>
+    <string name="back">Back</string>
+    <string name="star">Star</string>
 </resources>

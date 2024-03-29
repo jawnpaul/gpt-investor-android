@@ -14,7 +14,7 @@ interface CompanyDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(companies: List<CompanyEntity>)
 
-    @Query("SELECT * FROM company_table")
+    @Query("SELECT * FROM company_table ORDER BY ticker")
     suspend fun getAllCompanies(): List<CompanyEntity>
 
     @Query("SELECT * FROM company_table WHERE ticker =:ticker")

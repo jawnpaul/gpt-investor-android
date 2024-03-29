@@ -26,7 +26,10 @@ data class CompanyFinancialsRemote(
         volume = volume,
         marketCap = marketCap,
         currency = currency,
-        news = news
+        news = news,
+        historicalData = historicalData,
+        balanceSheet = balanceSheet,
+        financials = financials
     )
 }
 
@@ -46,7 +49,8 @@ data class CompanyNews(
         type = type,
         relativeDate = TimeAgo.using(time = providerPublishTime.times(1000)),
         publisher = publisher,
-        imageUrl = if (thumbNail.resolutions.isNotEmpty()) thumbNail.resolutions.first().url else ""
+        imageUrl = if (thumbNail.resolutions.isNotEmpty()) thumbNail.resolutions.first().url else "",
+        link = link
     )
 }
 

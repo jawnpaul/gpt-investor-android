@@ -124,6 +124,8 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
     implementation(libs.timeAgo)
+    implementation(libs.jsoup)
+    implementation(libs.gemini)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

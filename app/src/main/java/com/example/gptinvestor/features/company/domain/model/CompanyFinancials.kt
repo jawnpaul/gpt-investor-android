@@ -13,7 +13,10 @@ data class CompanyFinancials(
     val high: Float,
     val currency: String,
     val marketCap: Long,
-    val news: List<CompanyNews>
+    val news: List<CompanyNews>,
+    val historicalData: String,
+    val balanceSheet: String,
+    val financials: String
 ) {
     fun toPresentation(): CompanyFinancialsPresentation {
         return CompanyFinancialsPresentation(
@@ -23,7 +26,10 @@ data class CompanyFinancials(
             volume = volume.toString(),
             high = high.toCurrency(getCurrencySymbol(currency)),
             marketCap = marketCap.toString(),
-            news = news.map { it.toPresentation() }
+            news = news.map { it.toPresentation() },
+            balanceSheet = balanceSheet,
+            historicalData = historicalData,
+            financials = financials
         )
     }
 }

@@ -13,6 +13,8 @@ import com.example.gptinvestor.features.company.domain.usecases.GetCompanyUseCas
 import com.example.gptinvestor.features.company.presentation.state.AllCompanyView
 import com.example.gptinvestor.features.company.presentation.state.CompanyFinancialsView
 import com.example.gptinvestor.features.company.presentation.state.SingleCompanyView
+import com.example.gptinvestor.features.investor.data.remote.SimilarCompanyRequest
+import com.example.gptinvestor.features.investor.domain.usecases.GetSimilarCompaniesUseCase
 import com.example.gptinvestor.features.investor.presentation.state.AllSectorView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -25,7 +27,8 @@ class HomeViewModel @Inject constructor(
     private val getAllSectorUseCase: GetAllSectorUseCase,
     private val getAllCompaniesUseCase: GetAllCompaniesUseCase,
     private val getCompanyUseCase: GetCompanyUseCase,
-    private val getCompanyFinancialsUseCase: GetCompanyFinancialsUseCase
+    private val getCompanyFinancialsUseCase: GetCompanyFinancialsUseCase,
+    private val getSimilarCompaniesUseCase: GetSimilarCompaniesUseCase
 ) :
     ViewModel() {
 
@@ -42,6 +45,8 @@ class HomeViewModel @Inject constructor(
 
     private val _companyFinancials = MutableStateFlow(CompanyFinancialsView())
     val companyFinancials get() = _companyFinancials
+
+    private var companyTicker = ""
 
     init {
         getAllSector()
@@ -100,6 +105,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getCompany(ticker: String) {
+        companyTicker = ticker
         getCompanyFinancials(ticker)
         getCompanyUseCase(ticker) {
             it.onFailure {
@@ -121,6 +127,27 @@ class HomeViewModel @Inject constructor(
             it.onSuccess { result ->
                 _companyFinancials.update { view ->
                     view.copy(financialsPresentation = result.toPresentation())
+                }
+            }
+        }
+    }
+
+    fun getSimilarCompanies() {
+        _companyFinancials.value.financialsPresentation?.let {
+            val request = SimilarCompanyRequest(
+                ticker = companyTicker,
+                historicalData = it.historicalData,
+                balanceSheet = it.balanceSheet,
+                financials = it.financials,
+                news = it.news
+            )
+            getSimilarCompaniesUseCase(request) { aa ->
+                aa.onSuccess { res ->
+                    res.forEach { ticker ->
+                        Timber.e(ticker)
+                    }
+                }
+                aa.onFailure {
                 }
             }
         }

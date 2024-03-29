@@ -7,7 +7,10 @@ data class CompanyFinancialsPresentation(
     val volume: String,
     val high: String,
     val marketCap: String,
-    val news: List<NewsPresentation>
+    val news: List<NewsPresentation>,
+    val historicalData: String,
+    val balanceSheet: String,
+    val financials: String
 )
 
 data class NewsPresentation(
@@ -16,5 +19,6 @@ data class NewsPresentation(
     val type: String,
     val relativeDate: String,
     val publisher: String,
-    val imageUrl: String
+    val imageUrl: String,
+    val link: String
 )

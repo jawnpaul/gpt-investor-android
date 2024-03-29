@@ -46,7 +46,7 @@ data class CompanyNews(
         type = type,
         relativeDate = TimeAgo.using(time = providerPublishTime.times(1000)),
         publisher = publisher,
-        imageUrl = thumbNail.resolutions.first().url
+        imageUrl = if (thumbNail.resolutions.isNotEmpty()) thumbNail.resolutions.first().url else ""
     )
 }
 

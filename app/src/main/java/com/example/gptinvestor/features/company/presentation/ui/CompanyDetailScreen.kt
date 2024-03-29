@@ -109,6 +109,10 @@ fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewMo
                     0 -> {
                         CompanyDataScreen(modifier = Modifier, viewModel = viewModel)
                     }
+
+                    1 -> {
+                        CompanyNewsScreen(modifier = Modifier, viewModel = viewModel)
+                    }
                 }
                 /* for (i in 0..15) {
                      Text(

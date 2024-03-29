@@ -123,6 +123,7 @@ dependencies {
     implementation(libs.androidx.room)
     implementation(libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
+    implementation(libs.timeAgo)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

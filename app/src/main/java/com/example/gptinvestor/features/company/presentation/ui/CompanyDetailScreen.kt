@@ -105,14 +105,18 @@ fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewMo
                         )
                     }
                 }
-
-               /* for (i in 0..15) {
-                    Text(
-                        modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 16.dp),
-                        text = "Text tab ${state + 1} selected",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }*/
+                when (state) {
+                    0 -> {
+                        CompanyDataScreen(modifier = Modifier, viewModel = viewModel)
+                    }
+                }
+                /* for (i in 0..15) {
+                     Text(
+                         modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 16.dp),
+                         text = "Text tab ${state + 1} selected",
+                         style = MaterialTheme.typography.bodyLarge
+                     )
+                 }*/
             }
         }
     }

@@ -6,6 +6,7 @@ import com.example.gptinvestor.core.functional.Failure
 import com.example.gptinvestor.features.company.data.local.dao.CompanyDao
 import com.example.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
 import com.example.gptinvestor.features.company.domain.model.Company
+import com.example.gptinvestor.features.company.domain.model.CompanyFinancials
 import com.example.gptinvestor.features.company.domain.model.SectorInput
 import com.example.gptinvestor.features.company.domain.repository.ICompanyRepository
 import javax.inject.Inject
@@ -64,13 +65,14 @@ class CompanyRepository @Inject constructor(
         emit(Either.Right(company.toDomainObject()))
     }
 
-    override suspend fun getCompanyFinancials(ticker: String): Flow<Either<Failure, Unit>> = flow {
+    override suspend fun getCompanyFinancials(ticker: String): Flow<Either<Failure, CompanyFinancials>> = flow {
         try {
             val request = CompanyFinancialsRequest(ticker = ticker, years = 1)
             val response = apiService.getCompanyFinancials(request)
             if (response.isSuccessful) {
                 response.body()?.let {
-
+                    val domainObject = it.toDomainObject()
+                    emit(Either.Right(domainObject))
                 }
             }
         } catch (e: Exception) {

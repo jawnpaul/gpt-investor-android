@@ -2,4 +2,14 @@
     <string name="app_name">GPT Investor</string>
     <string name="back">Back</string>
     <string name="star">Star</string>
+    <string name="show_less">Show less</string>
+    <string name="show_more">Show more</string>
+    <string name="about">About</string>
+    <string name="open">Open</string>
+    <string name="high">High</string>
+    <string name="low">Low</string>
+    <string name="close">Close</string>
+    <string name="volume">Volume</string>
+    <string name="market_cap">Market cap</string>
+    <string name="latest_financials">Latest financials</string>
 </resources>

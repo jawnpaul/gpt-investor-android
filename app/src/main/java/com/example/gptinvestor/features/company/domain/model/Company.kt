@@ -8,5 +8,5 @@ data class Company(
     val summary: String,
     val logo: String
 ) {
-    fun toPresentation() = CompanyPresentation(ticker = ticker, name = name, logo = logo)
+    fun toPresentation() = CompanyPresentation(ticker = ticker, name = name, logo = logo, summary = summary)
 }

@@ -8,8 +8,10 @@ import com.example.gptinvestor.features.company.domain.model.Company
 import com.example.gptinvestor.features.company.domain.model.SectorInput
 import com.example.gptinvestor.features.company.domain.usecases.GetAllCompaniesUseCase
 import com.example.gptinvestor.features.company.domain.usecases.GetAllSectorUseCase
+import com.example.gptinvestor.features.company.domain.usecases.GetCompanyFinancialsUseCase
 import com.example.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
 import com.example.gptinvestor.features.company.presentation.state.AllCompanyView
+import com.example.gptinvestor.features.company.presentation.state.CompanyFinancialsView
 import com.example.gptinvestor.features.company.presentation.state.SingleCompanyView
 import com.example.gptinvestor.features.investor.presentation.state.AllSectorView
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,7 +24,8 @@ import timber.log.Timber
 class HomeViewModel @Inject constructor(
     private val getAllSectorUseCase: GetAllSectorUseCase,
     private val getAllCompaniesUseCase: GetAllCompaniesUseCase,
-    private val getCompanyUseCase: GetCompanyUseCase
+    private val getCompanyUseCase: GetCompanyUseCase,
+    private val getCompanyFinancialsUseCase: GetCompanyFinancialsUseCase
 ) :
     ViewModel() {
 
@@ -36,6 +39,9 @@ class HomeViewModel @Inject constructor(
 
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
     val selectedCompany get() = _selectedCompany
+
+    private val _companyFinancials = MutableStateFlow(CompanyFinancialsView())
+    val companyFinancials get() = _companyFinancials
 
     init {
         getAllSector()
@@ -94,6 +100,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getCompany(ticker: String) {
+        getCompanyFinancials(ticker)
         getCompanyUseCase(ticker) {
             it.onFailure {
             }
@@ -101,6 +108,19 @@ class HomeViewModel @Inject constructor(
             it.onSuccess { company ->
                 _selectedCompany.update { view ->
                     view.copy(company = company.toPresentation())
+                }
+            }
+        }
+    }
+
+    private fun getCompanyFinancials(ticker: String) {
+        getCompanyFinancialsUseCase(ticker) {
+            it.onSuccess {
+            }
+
+            it.onSuccess { result ->
+                _companyFinancials.update { view ->
+                    view.copy(financialsPresentation = result.toPresentation())
                 }
             }
         }

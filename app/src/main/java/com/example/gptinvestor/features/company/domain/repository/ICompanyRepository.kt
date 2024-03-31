@@ -15,4 +15,6 @@ interface ICompanyRepository {
     suspend fun getCompany(ticker: String): Flow<Either<Failure, Company>>
 
     suspend fun getCompanyFinancials(ticker: String): Flow<Either<Failure, CompanyFinancials>>
+
+    suspend fun getCompaniesInSector(sector: String?): Flow<Either<Failure, List<Company>>>
 }

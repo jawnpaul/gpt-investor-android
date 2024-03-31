@@ -86,11 +86,11 @@ fun SectorPreview() {
             var selectedAnswer by remember { mutableStateOf<SectorInput?>(null) }
             val possibleAnswers = listOf(
                 SectorInput.AllSector,
-                SectorInput.CustomSector("Technology"),
-                SectorInput.CustomSector("Manufacturing"),
-                SectorInput.CustomSector("Sports"),
-                SectorInput.CustomSector("Security"),
-                SectorInput.CustomSector("Fashion")
+                SectorInput.CustomSector("Technology", ""),
+                SectorInput.CustomSector("Manufacturing", ""),
+                SectorInput.CustomSector("Sports", ""),
+                SectorInput.CustomSector("Security", ""),
+                SectorInput.CustomSector("Fashion", "")
             )
 
             SectorChoiceQuestion(

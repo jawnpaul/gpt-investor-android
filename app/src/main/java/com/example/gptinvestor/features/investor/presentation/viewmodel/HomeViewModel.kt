@@ -10,6 +10,7 @@ import com.example.gptinvestor.features.company.domain.usecases.GetAllCompaniesU
 import com.example.gptinvestor.features.company.domain.usecases.GetAllSectorUseCase
 import com.example.gptinvestor.features.company.domain.usecases.GetCompanyFinancialsUseCase
 import com.example.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
+import com.example.gptinvestor.features.company.domain.usecases.GetSectorCompaniesUseCase
 import com.example.gptinvestor.features.company.presentation.state.AllCompanyView
 import com.example.gptinvestor.features.company.presentation.state.CompanyFinancialsView
 import com.example.gptinvestor.features.company.presentation.state.SingleCompanyView
@@ -28,7 +29,8 @@ class HomeViewModel @Inject constructor(
     private val getAllCompaniesUseCase: GetAllCompaniesUseCase,
     private val getCompanyUseCase: GetCompanyUseCase,
     private val getCompanyFinancialsUseCase: GetCompanyFinancialsUseCase,
-    private val getSimilarCompaniesUseCase: GetSimilarCompaniesUseCase
+    private val getSimilarCompaniesUseCase: GetSimilarCompaniesUseCase,
+    private val getSectorCompaniesUseCase: GetSectorCompaniesUseCase
 ) :
     ViewModel() {
 
@@ -76,6 +78,7 @@ class HomeViewModel @Inject constructor(
         _allSector.update {
             it.copy(selected = selected)
         }
+        getSectorCompanies(selected)
     }
 
     private fun getAllCompanies() {
@@ -99,9 +102,10 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun handleAllCompaniesSuccess(response: List<Company>) {
-        _allCompanies.update { view ->
+        getSectorCompanies(_allSector.value.selected)
+        /*_allCompanies.update { view ->
             view.copy(loading = false, companies = response.map { it.toPresentation() })
-        }
+        }*/
     }
 
     fun getCompany(ticker: String) {
@@ -149,6 +153,29 @@ class HomeViewModel @Inject constructor(
                 }
                 aa.onFailure {
                 }
+            }
+        }
+    }
+
+    private fun getSectorCompanies(sectorInput: SectorInput) {
+        val sectorKey = when (sectorInput) {
+            is SectorInput.AllSector -> {
+                null
+            }
+
+            is SectorInput.CustomSector -> {
+                sectorInput.sectorKey
+            }
+        }
+
+        getSectorCompaniesUseCase(sectorKey) {
+            it.onSuccess { result ->
+                _allCompanies.update { view ->
+                    view.copy(loading = false, companies = result.map { aa -> aa.toPresentation() })
+                }
+            }
+            it.onFailure { failure ->
+                Timber.e(failure.toString())
             }
         }
     }

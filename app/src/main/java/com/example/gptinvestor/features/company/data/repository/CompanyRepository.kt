@@ -48,16 +48,24 @@ class CompanyRepository @Inject constructor(
 
     override suspend fun getAllSector(): Flow<Either<Failure, List<SectorInput>>> = flow {
         val list = listOf(SectorInput.AllSector)
-        // TODO: Show a predefined list
-        val others = listOf(
-            SectorInput.CustomSector("Technology"),
-            SectorInput.CustomSector("Manufacturing"),
-            SectorInput.CustomSector("Sports"),
-            SectorInput.CustomSector("Security"),
-            SectorInput.CustomSector("Fashion")
+        val companyList = companyDao.getAllCompanies()
+        val default = listOf(
+            SectorInput.CustomSector("Technology", sectorKey = "technology"),
+            SectorInput.CustomSector("Healthcare", sectorKey = "healthcare"),
+            SectorInput.CustomSector("Energy", sectorKey = "energy"),
+            SectorInput.CustomSector("Financial Services", sectorKey = "financial-services"),
+            SectorInput.CustomSector("Real Estate", sectorKey = "real-estate")
         )
 
-        emit(Either.Right(list + others))
+        if (companyList.isEmpty()) {
+            emit(Either.Right(list + default))
+        } else {
+            val sectors =
+                companyList.map { it.toSector() }.filterNot { it.sectorName.lowercase() == "n/a" }
+                    .toSet().take(5)
+
+            emit(Either.Right(list + sectors))
+        }
     }
 
     override suspend fun getCompany(ticker: String): Flow<Either<Failure, Company>> = flow {
@@ -78,6 +86,16 @@ class CompanyRepository @Inject constructor(
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.ServerError))
+        }
+    }
+
+    override suspend fun getCompaniesInSector(sector: String?): Flow<Either<Failure, List<Company>>> = flow {
+        if (sector == null) {
+            val companies = companyDao.getAllCompanies().map { it.toDomainObject() }
+            emit(Either.Right(companies))
+        } else {
+            val companies = companyDao.getCompaniesInSector(sector).map { it.toDomainObject() }
+            emit(Either.Right(companies))
         }
     }
 }

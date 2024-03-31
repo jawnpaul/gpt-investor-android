@@ -19,4 +19,7 @@ interface CompanyDao {
 
     @Query("SELECT * FROM company_table WHERE ticker =:ticker")
     suspend fun getCompany(ticker: String): CompanyEntity
+
+    @Query("SELECT * FROM company_table WHERE sectorKey =:sectorKey")
+    suspend fun getCompaniesInSector(sectorKey: String): List<CompanyEntity>
 }

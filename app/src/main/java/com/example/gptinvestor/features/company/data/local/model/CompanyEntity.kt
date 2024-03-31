@@ -3,6 +3,7 @@ package com.example.gptinvestor.features.company.data.local.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.gptinvestor.features.company.domain.model.Company
+import com.example.gptinvestor.features.company.domain.model.SectorInput
 
 @Entity(tableName = "company_table")
 data class CompanyEntity(
@@ -19,4 +20,6 @@ data class CompanyEntity(
     val date: String
 ) {
     fun toDomainObject() = Company(ticker = ticker, name = name, summary = summary, logo = logoUrl)
+
+    fun toSector() = SectorInput.CustomSector(sectorName = sector, sectorKey = sectorKey)
 }

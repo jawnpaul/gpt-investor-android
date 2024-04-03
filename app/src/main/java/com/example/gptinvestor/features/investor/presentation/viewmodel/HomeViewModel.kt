@@ -17,6 +17,7 @@ import com.example.gptinvestor.features.company.presentation.state.SingleCompany
 import com.example.gptinvestor.features.investor.data.remote.SimilarCompanyRequest
 import com.example.gptinvestor.features.investor.domain.usecases.GetSimilarCompaniesUseCase
 import com.example.gptinvestor.features.investor.presentation.state.AllSectorView
+import com.example.gptinvestor.features.investor.presentation.state.SimilarCompaniesView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,6 +48,9 @@ class HomeViewModel @Inject constructor(
 
     private val _companyFinancials = MutableStateFlow(CompanyFinancialsView())
     val companyFinancials get() = _companyFinancials
+
+    private val _similarCompanies = MutableStateFlow(SimilarCompaniesView())
+    val similarCompanies get() = _similarCompanies
 
     private var companyTicker = ""
 
@@ -145,14 +149,31 @@ class HomeViewModel @Inject constructor(
                 financials = it.financials,
                 news = it.news
             )
+            _similarCompanies.update { view ->
+                view.copy(loading = true)
+            }
             getSimilarCompaniesUseCase(request) { aa ->
                 aa.onSuccess { res ->
-                    res.forEach { ticker ->
-                        Timber.e(ticker)
+                    _similarCompanies.update { view ->
+                        view.copy(loading = false, result = res)
                     }
                 }
                 aa.onFailure {
                 }
+                    _similarCompanies.update { view ->
+                        view.copy(loading = false, error = "Something went wrong.")
+                    }
+                }
+            }
+        }
+    }
+
+    fun resetSimilarCompanies() {
+        _similarCompanies.update {
+            SimilarCompaniesView()
+        }
+    }
+
             }
         }
     }

@@ -37,13 +37,13 @@ class InvestorRepository @Inject constructor() : IInvestorRepository {
         )
     )
 
-    override suspend fun getSimilarCompanies(request: SimilarCompanyRequest): Flow<Either<Failure, List<String>>> = flow {
+    override suspend fun getSimilarCompanies(request: SimilarCompanyRequest): Flow<Either<Failure, SimilarCompanies>> = flow {
         try {
             var news = ""
-            request.news.take(1).forEach {
-                val text = getArticleText(it.link)?.trim()
-                news += "\n\n --- \n\nTitle:${it.title} \nText:$text"
-            }
+                /*request.news.take(1).forEach {
+                    val text = getArticleText(it.link)?.trim()
+                    news += "\n\n --- \n\nTitle:${it.title} \nText:$text"
+                }*/
             val systemPrompt =
                 "You are a financial analyst assistant. Analyze the given data for ${request.ticker} " +
                     "and suggest a few comparable companies to consider. Do so in a kotlin-parseable list."
@@ -55,9 +55,9 @@ class InvestorRepository @Inject constructor() : IInvestorRepository {
 
             val prompt = systemPrompt + additional
             val response = model.generateContent(prompt = prompt)
-            Timber.e(response.text)
             val list = getStockSymbols(response.text)
-            emit(Either.Right(list))
+            val obj = SimilarCompanies(codeText = response.text, companies = list)
+            emit(Either.Right(obj))
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
         }
@@ -81,17 +81,9 @@ class InvestorRepository @Inject constructor() : IInvestorRepository {
 
     private fun getStockSymbols(code: String?): List<String> {
         if (code == null) return emptyList()
-        val trimmedCode = code.trim()
-        Timber.e(trimmedCode)
-        val aa = trimmedCode.removePrefix("```kotlin")
-        Timber.e(aa)
-        // Remove leading/trailing whitespace and ```
-        if (!aa.startsWith("listOf(")) {
-            throw IllegalArgumentException("Invalid input format. Expected listOf( symbols)")
-        }
-        val symbolsString = aa.substringAfter("(") // Get everything after "("
-        return symbolsString.substringBeforeLast(")").splitToSequence(",") // Split by comma and remove trailing )
-            .map { it.trim() } // Remove leading/trailing spaces from each symbol
-            .toList()
+        val start = code.indexOf('(') + 1
+        val end = code.indexOf(')')
+        val sub = code.substring(start, end)
+        return sub.splitToSequence(",").map { it.trim() }.toList()
     }
 }

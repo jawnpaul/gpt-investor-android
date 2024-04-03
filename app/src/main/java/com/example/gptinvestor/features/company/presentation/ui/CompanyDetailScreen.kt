@@ -58,7 +58,10 @@ fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewMo
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(onClick = {
+                        navController.navigateUp()
+                        viewModel.resetSimilarCompanies()
+                    }) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = stringResource(id = R.string.back)

@@ -12,4 +12,6 @@
     <string name="volume">Volume</string>
     <string name="market_cap">Market cap</string>
     <string name="latest_financials">Latest financials</string>
+    <string name="discover_related_companies">Discover related companies</string>
+    <string name="explore_businesses">Explore businesses operating in similar sectors or industries</string>
 </resources>

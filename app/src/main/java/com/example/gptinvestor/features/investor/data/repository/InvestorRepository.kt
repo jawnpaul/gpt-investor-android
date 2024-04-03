@@ -5,6 +5,7 @@ import com.example.gptinvestor.core.api.ApiService
 import com.example.gptinvestor.core.functional.Either
 import com.example.gptinvestor.core.functional.Failure
 import com.example.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
+import com.example.gptinvestor.features.investor.data.remote.SaveComparisonRequest
 import com.example.gptinvestor.features.investor.data.remote.SimilarCompanyRequest
 import com.example.gptinvestor.features.investor.domain.model.CompareCompaniesRequest
 import com.example.gptinvestor.features.investor.domain.model.SimilarCompanies
@@ -100,8 +101,14 @@ class InvestorRepository @Inject constructor(private val apiService: ApiService)
                     val response = model.generateContent(prompt = prompt)
                     response.text?.let { geminiText ->
                         emit(Either.Right(geminiText))
+
+                        val saveRequest = SaveComparisonRequest(
+                            mainTicker = request.currentCompanyTicker,
+                            otherTicker = request.otherCompanyTicker,
+                            geminiText = geminiText
+                        )
+                        apiService.saveComparison(saveRequest)
                     }
-                    // save this response to mongodb
                 }
             } else {
                 emit(Either.Left(Failure.UnAvailableError))

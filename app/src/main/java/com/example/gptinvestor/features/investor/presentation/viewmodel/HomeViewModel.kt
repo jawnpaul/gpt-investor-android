@@ -15,8 +15,11 @@ import com.example.gptinvestor.features.company.presentation.state.AllCompanyVie
 import com.example.gptinvestor.features.company.presentation.state.CompanyFinancialsView
 import com.example.gptinvestor.features.company.presentation.state.SingleCompanyView
 import com.example.gptinvestor.features.investor.data.remote.SimilarCompanyRequest
+import com.example.gptinvestor.features.investor.domain.model.CompareCompaniesRequest
+import com.example.gptinvestor.features.investor.domain.usecases.CompareCompaniesUseCase
 import com.example.gptinvestor.features.investor.domain.usecases.GetSimilarCompaniesUseCase
 import com.example.gptinvestor.features.investor.presentation.state.AllSectorView
+import com.example.gptinvestor.features.investor.presentation.state.CompanyComparisonView
 import com.example.gptinvestor.features.investor.presentation.state.SimilarCompaniesView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -31,7 +34,8 @@ class HomeViewModel @Inject constructor(
     private val getCompanyUseCase: GetCompanyUseCase,
     private val getCompanyFinancialsUseCase: GetCompanyFinancialsUseCase,
     private val getSimilarCompaniesUseCase: GetSimilarCompaniesUseCase,
-    private val getSectorCompaniesUseCase: GetSectorCompaniesUseCase
+    private val getSectorCompaniesUseCase: GetSectorCompaniesUseCase,
+    private val compareCompaniesUseCase: CompareCompaniesUseCase
 ) :
     ViewModel() {
 
@@ -51,6 +55,9 @@ class HomeViewModel @Inject constructor(
 
     private val _similarCompanies = MutableStateFlow(SimilarCompaniesView())
     val similarCompanies get() = _similarCompanies
+
+    private val _companyComparison = MutableStateFlow(CompanyComparisonView())
+    val companyComparison get() = _companyComparison
 
     private var companyTicker = ""
 
@@ -159,7 +166,6 @@ class HomeViewModel @Inject constructor(
                     }
                 }
                 aa.onFailure {
-                }
                     _similarCompanies.update { view ->
                         view.copy(loading = false, error = "Something went wrong.")
                     }
@@ -174,7 +180,37 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun compareCompanies(ticker: String) {
+        _companyFinancials.value.financialsPresentation?.let {
+            val request = CompareCompaniesRequest(
+                currentCompany = it,
+                otherCompanyTicker = ticker,
+                currentCompanyTicker = companyTicker
+            )
+            _companyComparison.update { view ->
+                view.copy(loading = true, selectedCompany = ticker)
             }
+
+            compareCompaniesUseCase(request) { res ->
+                res.fold(
+                    ::handleComparisonFailure,
+                    ::handleComparisonSuccess
+                )
+            }
+        }
+    }
+
+    private fun handleComparisonFailure(failure: Failure) {
+        // make call to get comparison from database
+        Timber.e(failure.toString())
+        _companyComparison.update { view ->
+            view.copy(loading = false, error = "Something went wrong.")
+        }
+    }
+
+    private fun handleComparisonSuccess(result: String) {
+        _companyComparison.update { view ->
+            view.copy(loading = false, result = result)
         }
     }
 

@@ -1,5 +1,6 @@
 package com.example.gptinvestor.features.company.presentation.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,7 +15,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -109,29 +109,21 @@ fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewMo
                         )
                     }
                 }
-                when (state) {
-                    0 -> {
-                        CompanyDataScreen(modifier = Modifier, viewModel = viewModel)
-                    }
+                AnimatedContent(targetState = state) { targetState ->
+                    when (targetState) {
+                        0 -> {
+                            CompanyDataScreen(modifier = Modifier, viewModel = viewModel)
+                        }
 
-                    1 -> {
-                        CompanyNewsScreen(modifier = Modifier, viewModel = viewModel)
-                    }
-                    2 -> {
-                        OutlinedButton(onClick = {
-                            viewModel.getSimilarCompanies()
-                        }) {
-                            Text(text = "Click me")
+                        1 -> {
+                            CompanyNewsScreen(modifier = Modifier, viewModel = viewModel)
+                        }
+
+                        2 -> {
+                            AIInvestorScreen(modifier = Modifier, viewModel = viewModel)
                         }
                     }
                 }
-                /* for (i in 0..15) {
-                     Text(
-                         modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 16.dp),
-                         text = "Text tab ${state + 1} selected",
-                         style = MaterialTheme.typography.bodyLarge
-                     )
-                 }*/
             }
         }
     }

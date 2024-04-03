@@ -1,9 +1,13 @@
 package com.example.gptinvestor.features.investor.data.repository
 
 import com.example.gptinvestor.BuildConfig
+import com.example.gptinvestor.core.api.ApiService
 import com.example.gptinvestor.core.functional.Either
 import com.example.gptinvestor.core.functional.Failure
+import com.example.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
 import com.example.gptinvestor.features.investor.data.remote.SimilarCompanyRequest
+import com.example.gptinvestor.features.investor.domain.model.CompareCompaniesRequest
+import com.example.gptinvestor.features.investor.domain.model.SimilarCompanies
 import com.example.gptinvestor.features.investor.domain.repository.IInvestorRepository
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.BlockThreshold
@@ -16,8 +20,8 @@ import kotlinx.coroutines.flow.flow
 import org.jsoup.Jsoup
 import timber.log.Timber
 
-class InvestorRepository @Inject constructor() : IInvestorRepository {
-
+class InvestorRepository @Inject constructor(private val apiService: ApiService) :
+    IInvestorRepository {
     val model = GenerativeModel(
         modelName = "gemini-1.0-pro",
         // Retrieve API key as an environmental variable defined in a Build Configuration
@@ -60,6 +64,54 @@ class InvestorRepository @Inject constructor() : IInvestorRepository {
             emit(Either.Right(obj))
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
+        }
+    }
+
+    override suspend fun compareCompany(request: CompareCompaniesRequest): Flow<Either<Failure, String>> = flow {
+        try {
+            val otherCompany = apiService.getCompanyFinancials(
+                CompanyFinancialsRequest(
+                    ticker = request.otherCompanyTicker,
+                    years = 1
+                )
+            )
+            if (otherCompany.isSuccessful) {
+                otherCompany.body()?.let {
+                    val domainObject = it.toDomainObject()
+                    // make call to gemini
+                    val systemPrompt =
+                        "You are a financial analyst assistant. Compare the data of ${request.currentCompanyTicker} " +
+                            "against ${request.currentCompanyTicker} " +
+                            "and provide a detailed comparison, like a world-class analyst would. Be measured and discerning. " +
+                            "Truly think about the positives and negatives of each company. Be sure of your analysis. " +
+                            "You are a skeptical investor."
+
+                    val additional =
+                        "Data for ${request.currentCompanyTicker}:\n\nHistorical price data:\n" +
+                            "${request.currentCompany.historicalData}\n\n" +
+                            "Balance Sheet:\n${request.currentCompany.balanceSheet}\n\nFinancial Statements:" +
+                            "\n${request.currentCompany.financials}\n\n----\n\n" +
+                            "Data for ${request.otherCompanyTicker}:\n\nHistorical price data:\n${domainObject.historicalData}\n\n" +
+                            "Balance Sheet:\n${domainObject.balanceSheet}\n\nFinancial Statements:\n${domainObject.financials}" +
+                            "\n\n----\n\nNow, provide a detailed comparison of ${request.currentCompanyTicker} " +
+                            "against ${request.otherCompanyTicker}. " +
+                            "Explain your thinking very clearly."
+                    val prompt = systemPrompt + additional
+                    val response = model.generateContent(prompt = prompt)
+                    response.text?.let { geminiText ->
+                        emit(Either.Right(geminiText))
+                    }
+                    // save this response to mongodb
+                }
+            } else {
+                emit(Either.Left(Failure.UnAvailableError))
+            }
+        } catch (e: Exception) {
+            Timber.e(e.stackTraceToString())
+            when (e) {
+                is IllegalArgumentException -> {
+                }
+            }
         }
     }
 

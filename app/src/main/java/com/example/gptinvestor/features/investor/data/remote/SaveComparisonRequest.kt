@@ -8,6 +8,6 @@ data class SaveComparisonRequest(
     @field:Json(name = "gemini_text") val geminiText: String
 )
 
-data class SaveComparisonResponse(
+data class DefaultSaveResponse(
     @field:Json(name = "_id") val id: String
 )

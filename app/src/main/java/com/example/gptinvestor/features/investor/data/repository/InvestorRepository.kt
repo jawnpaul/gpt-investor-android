@@ -8,6 +8,7 @@ import com.example.gptinvestor.features.company.data.remote.model.CompanyFinanci
 import com.example.gptinvestor.features.investor.data.remote.SaveComparisonRequest
 import com.example.gptinvestor.features.investor.data.remote.SimilarCompanyRequest
 import com.example.gptinvestor.features.investor.domain.model.CompareCompaniesRequest
+import com.example.gptinvestor.features.investor.domain.model.SentimentAnalysisRequest
 import com.example.gptinvestor.features.investor.domain.model.SimilarCompanies
 import com.example.gptinvestor.features.investor.domain.repository.IInvestorRepository
 import com.google.ai.client.generativeai.GenerativeModel
@@ -122,7 +123,33 @@ class InvestorRepository @Inject constructor(private val apiService: ApiService)
         }
     }
 
-    private suspend fun getArticleText(link: String): String? {
+    override suspend fun getSentimentAnalysis(request: SentimentAnalysisRequest): Flow<Either<Failure, String>> = flow {
+        try {
+            var newsString = ""
+            request.news.forEach {
+                val text = getArticleText(it.link)?.trim()
+                newsString += "\n\n---\n\nDate: ${it.relativeDate}\nTitle: ${it.title}\nText: $text"
+            }
+            val systemPrompt =
+                "You are a sentiment analysis assistant. Analyze the sentiment of the given news articles for ${request.ticker} " +
+                    "and provide a summary of the overall sentiment and any notable changes " +
+                    "over time. Be measured and discerning. You are a skeptical investor."
+
+            val additionalPrompt =
+                "News articles for ${request.ticker}:\n${newsString}\n\n----\n\nProvide a summary of the overall sentiment " +
+                    "and any notable changes over time."
+
+            val prompt = systemPrompt + additionalPrompt
+            val response = model.generateContent(prompt = prompt)
+            response.text?.let {
+                emit(Either.Right(it))
+            }
+        } catch (e: Exception) {
+            Timber.e(e.stackTraceToString())
+        }
+    }
+
+    private fun getArticleText(link: String): String? {
         return try {
             var result = ""
             val document = Jsoup.connect(link).get()

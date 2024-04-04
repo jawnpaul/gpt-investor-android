@@ -10,9 +10,12 @@ import com.example.gptinvestor.features.company.presentation.state.CompanyFinanc
 import com.example.gptinvestor.features.company.presentation.state.SingleCompanyView
 import com.example.gptinvestor.features.investor.data.remote.SimilarCompanyRequest
 import com.example.gptinvestor.features.investor.domain.model.CompareCompaniesRequest
+import com.example.gptinvestor.features.investor.domain.model.SentimentAnalysisRequest
 import com.example.gptinvestor.features.investor.domain.usecases.CompareCompaniesUseCase
+import com.example.gptinvestor.features.investor.domain.usecases.GetCompanySentimentUseCase
 import com.example.gptinvestor.features.investor.domain.usecases.GetSimilarCompaniesUseCase
 import com.example.gptinvestor.features.investor.presentation.state.CompanyComparisonView
+import com.example.gptinvestor.features.investor.presentation.state.CompanySentimentView
 import com.example.gptinvestor.features.investor.presentation.state.SimilarCompaniesView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -25,7 +28,8 @@ class CompanyViewModel @Inject constructor(
     private val getCompanyUseCase: GetCompanyUseCase,
     private val getCompanyFinancialsUseCase: GetCompanyFinancialsUseCase,
     private val getSimilarCompaniesUseCase: GetSimilarCompaniesUseCase,
-    private val compareCompaniesUseCase: CompareCompaniesUseCase
+    private val compareCompaniesUseCase: CompareCompaniesUseCase,
+    private val sentimentUseCase: GetCompanySentimentUseCase
 ) : ViewModel() {
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
     val selectedCompany get() = _selectedCompany
@@ -38,6 +42,9 @@ class CompanyViewModel @Inject constructor(
 
     private val _companyComparison = MutableStateFlow(CompanyComparisonView())
     val companyComparison get() = _companyComparison
+
+    private val _companySentiment = MutableStateFlow(CompanySentimentView())
+    val companySentiment get() = _companySentiment
 
     private var companyTicker = ""
 
@@ -133,6 +140,34 @@ class CompanyViewModel @Inject constructor(
     private fun handleComparisonSuccess(result: String) {
         _companyComparison.update { view ->
             view.copy(loading = false, result = result)
+        }
+    }
+
+    fun getSentiment() {
+        _companyFinancials.value.financialsPresentation?.let {
+            val request = SentimentAnalysisRequest(ticker = companyTicker, news = it.news)
+            _companySentiment.update { view ->
+                view.copy(loading = true)
+            }
+            sentimentUseCase(request) { res ->
+                res.fold(
+                    ::handleSentimentFailure,
+                    ::handleSentimentSuccess
+                )
+            }
+        }
+    }
+
+    private fun handleSentimentFailure(failure: Failure) {
+        _companySentiment.update {
+            it.copy(loading = false, error = "Something went wrong.")
+        }
+        Timber.e(failure.toString())
+    }
+
+    private fun handleSentimentSuccess(sentiment: String) {
+        _companySentiment.update {
+            it.copy(loading = false, result = sentiment)
         }
     }
 }

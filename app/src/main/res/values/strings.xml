@@ -16,4 +16,8 @@
     <string name="explore_businesses">Explore businesses operating in similar sectors or industries</string>
     <string name="in_depth_company_comparison_analysis">In-depth company comparison analysis</string>
     <string name="gain_valuable_insight">Gain valuable insights by comparing key metrics and performance indicators across companies</string>
+    <string name="sentiment_analysis_insight">Sentiment analysis insight</string>
+    <string name="uncover_prevailing_market">Uncover prevailing market sentiment and public opinion towards %1$s</string>
+    <string name="tell_me">Tell me!</string>
+    <string name="go">Go!</string>
 </resources>

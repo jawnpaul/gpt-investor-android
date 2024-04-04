@@ -26,10 +26,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.gptinvestor.R
 import com.example.gptinvestor.features.company.presentation.model.CompanyFinancialsPresentation
-import com.example.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
+import com.example.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 
 @Composable
-fun CompanyDataScreen(modifier: Modifier, viewModel: HomeViewModel) {
+fun CompanyDataScreen(modifier: Modifier, viewModel: CompanyViewModel) {
     val company = viewModel.selectedCompany.collectAsState()
     val financials = viewModel.companyFinancials.collectAsState()
 

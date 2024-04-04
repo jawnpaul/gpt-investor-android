@@ -17,8 +17,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -28,11 +26,12 @@ import androidx.navigation.NavHostController
 import com.example.gptinvestor.R
 import com.example.gptinvestor.core.navigation.Screen
 import com.example.gptinvestor.features.company.presentation.ui.SingleCompanyItem
+import com.example.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 import com.example.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: HomeViewModel) {
+fun HomeScreen(modifier: Modifier, navController: NavHostController, homeViewModel: HomeViewModel, companyViewModel: CompanyViewModel) {
     // Home Screen
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
@@ -60,8 +59,8 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
             )
         }
     ) { innerPadding ->
-        val sectorViewState = viewModel.allSector.collectAsState()
-        val allCompaniesViewState = viewModel.allCompanies.collectAsState()
+        val sectorViewState = homeViewModel.allSector.collectAsState()
+        val allCompaniesViewState = homeViewModel.allCompanies.collectAsState()
 
         LazyColumn(
             modifier = Modifier
@@ -76,7 +75,7 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
                     possibleAnswers = sectorViewState.value.sectors,
                     selectedAnswer = sectorViewState.value.selected,
                     onOptionSelected = {
-                        viewModel.selectSector(it)
+                        homeViewModel.selectSector(it)
                     }
                 )
             }
@@ -86,7 +85,7 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
                 key = { company -> company.ticker }
             ) { company ->
                 SingleCompanyItem(modifier = Modifier, company = company, onClick = {
-                    viewModel.getCompany(it)
+                    companyViewModel.getCompany(it)
                     navController.navigate(Screen.CompanyDetailScreen.route)
                 })
             }

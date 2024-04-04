@@ -6,10 +6,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
+import com.example.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 
 @Composable
-fun CompanyNewsScreen(modifier: Modifier, viewModel: HomeViewModel) {
+fun CompanyNewsScreen(modifier: Modifier, viewModel: CompanyViewModel) {
     val financials = viewModel.companyFinancials.collectAsState()
 
     Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp)) {

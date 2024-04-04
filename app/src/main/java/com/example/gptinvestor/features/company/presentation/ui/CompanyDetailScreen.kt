@@ -34,11 +34,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.gptinvestor.R
-import com.example.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
+import com.example.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewModel: HomeViewModel) {
+fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewModel: CompanyViewModel) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val selectedCompany = viewModel.selectedCompany.collectAsState()
 

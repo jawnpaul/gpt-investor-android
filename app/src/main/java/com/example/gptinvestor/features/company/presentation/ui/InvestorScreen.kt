@@ -19,10 +19,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.gptinvestor.R
-import com.example.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
+import com.example.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 
 @Composable
-fun AIInvestorScreen(modifier: Modifier, viewModel: HomeViewModel) {
+fun AIInvestorScreen(modifier: Modifier, viewModel: CompanyViewModel) {
     val similarCompanies = viewModel.similarCompanies.collectAsState()
     val visible = similarCompanies.value.result != null
     val compareCompanies = viewModel.companyComparison.collectAsState()

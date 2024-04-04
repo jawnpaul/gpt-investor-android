@@ -3,6 +3,8 @@ package com.example.gptinvestor.core.api
 import com.example.gptinvestor.features.company.data.remote.model.CompanyFinancialsRemote
 import com.example.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
 import com.example.gptinvestor.features.company.data.remote.model.CompanyRemote
+import com.example.gptinvestor.features.investor.data.remote.AnalystRatingRequest
+import com.example.gptinvestor.features.investor.data.remote.AnalystRatingResponse
 import com.example.gptinvestor.features.investor.data.remote.SaveComparisonRequest
 import com.example.gptinvestor.features.investor.data.remote.DefaultSaveResponse
 import com.example.gptinvestor.features.investor.data.remote.SaveSentimentRequest
@@ -23,4 +25,7 @@ interface ApiService {
 
     @POST("/save-sentiment")
     suspend fun saveSentiment(@Body request: SaveSentimentRequest): Response<DefaultSaveResponse>
+
+    @GET("/get-analyst-rating")
+    suspend fun getAnalystRating(@Body request: AnalystRatingRequest): Response<AnalystRatingResponse>
 }

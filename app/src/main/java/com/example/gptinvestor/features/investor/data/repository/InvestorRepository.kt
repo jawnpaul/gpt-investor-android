@@ -5,6 +5,7 @@ import com.example.gptinvestor.core.api.ApiService
 import com.example.gptinvestor.core.functional.Either
 import com.example.gptinvestor.core.functional.Failure
 import com.example.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
+import com.example.gptinvestor.features.investor.data.remote.AnalystRatingRequest
 import com.example.gptinvestor.features.investor.data.remote.SaveComparisonRequest
 import com.example.gptinvestor.features.investor.data.remote.SaveSentimentRequest
 import com.example.gptinvestor.features.investor.data.remote.SimilarCompanyRequest
@@ -155,6 +156,21 @@ class InvestorRepository @Inject constructor(private val apiService: ApiService)
                 Timber.e(e.stackTraceToString())
             }
         }
+
+    override suspend fun getAnalystRating(ticker: String): Flow<Either<Failure, String>> = flow {
+        try {
+            val request = AnalystRatingRequest(ticker = ticker)
+            val response = apiService.getAnalystRating(request)
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    emit(Either.Right(it.rating))
+                } ?: emit(Either.Left(Failure.DataError))
+            }
+        } catch (e: Exception) {
+            Timber.e(e.stackTraceToString())
+            emit(Either.Left(Failure.ServerError))
+        }
+    }
 
     private fun getArticleText(link: String): String? {
         return try {

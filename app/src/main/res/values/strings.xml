@@ -20,4 +20,11 @@
     <string name="uncover_prevailing_market">Uncover prevailing market sentiment and public opinion towards %1$s</string>
     <string name="tell_me">Tell me!</string>
     <string name="go">Go!</string>
+    <string name="analyst_ratings_and_recommendation">Analyst ratings and recommendations</string>
+    <string name="leverage_expert_insight">Leverage expert insights to guide your investment decision</string>
+    <string name="industry_trends_and_analysis">Industry trends and analysis</string>
+    <string name="explore_the_competitive_landscape">Explore the competitive landscape and identify emerging opportunities</string>
+    <string name="comprehensive_analysis_summary">Comprehensive analysis summary</string>
+    <string name="synthesize_key_findings">Synthesize key findings into an actionable investment strategy</string>
+    <string name="let_s_go">Let\'s go!</string>
 </resources>

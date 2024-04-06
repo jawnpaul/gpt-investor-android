@@ -10,12 +10,19 @@ import com.example.gptinvestor.features.company.presentation.state.CompanyFinanc
 import com.example.gptinvestor.features.company.presentation.state.SingleCompanyView
 import com.example.gptinvestor.features.investor.data.remote.SimilarCompanyRequest
 import com.example.gptinvestor.features.investor.domain.model.CompareCompaniesRequest
+import com.example.gptinvestor.features.investor.domain.model.FinalAnalysisRequest
 import com.example.gptinvestor.features.investor.domain.model.SentimentAnalysisRequest
 import com.example.gptinvestor.features.investor.domain.usecases.CompareCompaniesUseCase
+import com.example.gptinvestor.features.investor.domain.usecases.GetAnalystRatingUseCase
 import com.example.gptinvestor.features.investor.domain.usecases.GetCompanySentimentUseCase
+import com.example.gptinvestor.features.investor.domain.usecases.GetFinalRatingUseCase
+import com.example.gptinvestor.features.investor.domain.usecases.GetIndustryRatingUseCase
 import com.example.gptinvestor.features.investor.domain.usecases.GetSimilarCompaniesUseCase
+import com.example.gptinvestor.features.investor.presentation.state.AnalystRatingView
 import com.example.gptinvestor.features.investor.presentation.state.CompanyComparisonView
 import com.example.gptinvestor.features.investor.presentation.state.CompanySentimentView
+import com.example.gptinvestor.features.investor.presentation.state.FinalAnalysisView
+import com.example.gptinvestor.features.investor.presentation.state.IndustryRatingView
 import com.example.gptinvestor.features.investor.presentation.state.SimilarCompaniesView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -29,7 +36,10 @@ class CompanyViewModel @Inject constructor(
     private val getCompanyFinancialsUseCase: GetCompanyFinancialsUseCase,
     private val getSimilarCompaniesUseCase: GetSimilarCompaniesUseCase,
     private val compareCompaniesUseCase: CompareCompaniesUseCase,
-    private val sentimentUseCase: GetCompanySentimentUseCase
+    private val sentimentUseCase: GetCompanySentimentUseCase,
+    private val analystRatingUseCase: GetAnalystRatingUseCase,
+    private val industryRatingUseCase: GetIndustryRatingUseCase,
+    private val finalRatingUseCase: GetFinalRatingUseCase
 ) : ViewModel() {
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
     val selectedCompany get() = _selectedCompany
@@ -45,6 +55,15 @@ class CompanyViewModel @Inject constructor(
 
     private val _companySentiment = MutableStateFlow(CompanySentimentView())
     val companySentiment get() = _companySentiment
+
+    private val _analystRating = MutableStateFlow(AnalystRatingView())
+    val analystRating get() = _analystRating
+
+    private val _industryRating = MutableStateFlow(IndustryRatingView())
+    val industryRating get() = _industryRating
+
+    private val _finalAnalysis = MutableStateFlow(FinalAnalysisView())
+    val finalAnalysis get() = _finalAnalysis
 
     private var companyTicker = ""
 
@@ -168,6 +187,88 @@ class CompanyViewModel @Inject constructor(
     private fun handleSentimentSuccess(sentiment: String) {
         _companySentiment.update {
             it.copy(loading = false, result = sentiment)
+        }
+    }
+
+    fun getAnalystRating() {
+        _analystRating.update {
+            it.copy(loading = true)
+        }
+        analystRatingUseCase(companyTicker) {
+            it.fold(
+                ::handleAnalystRatingFailure,
+                ::handleAnalystRatingSuccess
+            )
+        }
+    }
+
+    private fun handleAnalystRatingFailure(failure: Failure) {
+        _analystRating.update {
+            it.copy(loading = false, error = "Something went wrong.")
+        }
+        Timber.e(failure.toString())
+    }
+
+    private fun handleAnalystRatingSuccess(rating: String) {
+        _analystRating.update {
+            it.copy(loading = false, result = rating)
+        }
+    }
+
+    fun getIndustryRating() {
+        _industryRating.update {
+            it.copy(loading = true)
+        }
+        industryRatingUseCase(companyTicker) {
+            it.fold(
+                ::handleIndustryRatingFailure,
+                ::handleIndustryRatingSuccess
+            )
+        }
+    }
+
+    private fun handleIndustryRatingFailure(failure: Failure) {
+        _industryRating.update {
+            it.copy(loading = false, error = "Something went wrong.")
+        }
+        Timber.e(failure.toString())
+    }
+
+    private fun handleIndustryRatingSuccess(rating: String) {
+        _industryRating.update {
+            it.copy(loading = false, result = rating)
+        }
+    }
+
+    fun getFinalRating() {
+        _finalAnalysis.update {
+            it.copy(loading = true)
+        }
+        val request = FinalAnalysisRequest(
+            ticker = companyTicker,
+            comparison = _companyComparison.value.result,
+            sentiment = _companySentiment.value.result,
+            analystRating = "",
+            industryRating = ""
+        )
+        finalRatingUseCase(request) {
+            it.fold(
+                ::handleFinalRatingFailure,
+                ::handleFinalRatingSuccess
+            )
+        }
+    }
+
+    private fun handleFinalRatingFailure(failure: Failure) {
+        _finalAnalysis.update {
+            it.copy(loading = false, error = "Something went wrong.")
+        }
+        Timber.e(failure.toString())
+    }
+
+    private fun handleFinalRatingSuccess(rating: String) {
+        _finalAnalysis.update {
+            it.copy(loading = false, result = rating)
         }
     }
 }

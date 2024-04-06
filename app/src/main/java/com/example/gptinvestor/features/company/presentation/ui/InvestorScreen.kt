@@ -11,8 +11,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -123,7 +121,7 @@ fun AIInvestorScreen(modifier: Modifier, viewModel: CompanyViewModel) {
                     }
 
                     if (compareCompanies.value.result != null) {
-                        Text(
+                        ExpandableText(
                             text = compareCompanies.value.result!!,
                             modifier = Modifier.padding(8.dp)
                         )
@@ -170,10 +168,7 @@ fun AIInvestorScreen(modifier: Modifier, viewModel: CompanyViewModel) {
                         Text(text = stringResource(id = R.string.tell_me))
                     }
                 } else {
-                    Text(
-                        text = sentimentAnalysis.value.result!!,
-                        modifier = Modifier.padding(8.dp)
-                    )
+                    ExpandableText(text = sentimentAnalysis.value.result!!, modifier = Modifier.padding(8.dp))
                 }
             }
         }
@@ -214,7 +209,7 @@ fun AIInvestorScreen(modifier: Modifier, viewModel: CompanyViewModel) {
                         Text(text = stringResource(id = R.string.tell_me))
                     }
                 } else {
-                    Text(
+                    ExpandableText(
                         text = analystRating.value.result!!,
                         modifier = Modifier.padding(8.dp)
                     )
@@ -258,7 +253,7 @@ fun AIInvestorScreen(modifier: Modifier, viewModel: CompanyViewModel) {
                         Text(text = stringResource(id = R.string.go))
                     }
                 } else {
-                    Text(
+                    ExpandableText(
                         text = industryRating.value.result!!,
                         modifier = Modifier.padding(8.dp)
                     )
@@ -302,7 +297,7 @@ fun AIInvestorScreen(modifier: Modifier, viewModel: CompanyViewModel) {
                         Text(text = stringResource(id = R.string.let_s_go))
                     }
                 } else {
-                    Text(
+                    ExpandableText(
                         text = finalRating.value.result!!,
                         modifier = Modifier.padding(8.dp)
                     )

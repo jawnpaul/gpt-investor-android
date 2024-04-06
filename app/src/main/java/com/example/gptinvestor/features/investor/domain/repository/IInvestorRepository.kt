@@ -16,4 +16,6 @@ interface IInvestorRepository {
     suspend fun getSentimentAnalysis(request: SentimentAnalysisRequest): Flow<Either<Failure, String>>
 
     suspend fun getAnalystRating(ticker:String): Flow<Either<Failure, String>>
+
+    suspend fun getIndustryAnalysis(ticker:String): Flow<Either<Failure, String>>
 }

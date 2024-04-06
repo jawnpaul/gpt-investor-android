@@ -7,6 +7,7 @@ import com.example.gptinvestor.features.investor.data.remote.AnalystRatingReques
 import com.example.gptinvestor.features.investor.data.remote.AnalystRatingResponse
 import com.example.gptinvestor.features.investor.data.remote.SaveComparisonRequest
 import com.example.gptinvestor.features.investor.data.remote.DefaultSaveResponse
+import com.example.gptinvestor.features.investor.data.remote.IndustryRatingRequest
 import com.example.gptinvestor.features.investor.data.remote.SaveSentimentRequest
 import retrofit2.Response
 import retrofit2.http.Body
@@ -28,4 +29,7 @@ interface ApiService {
 
     @GET("/get-analyst-rating")
     suspend fun getAnalystRating(@Body request: AnalystRatingRequest): Response<AnalystRatingResponse>
+
+    @POST("/save-industry-rating")
+    suspend fun saveIndustryRating(@Body request: IndustryRatingRequest): Response<DefaultSaveResponse>
 }

@@ -4,8 +4,10 @@ import com.example.gptinvestor.BuildConfig
 import com.example.gptinvestor.core.api.ApiService
 import com.example.gptinvestor.core.functional.Either
 import com.example.gptinvestor.core.functional.Failure
+import com.example.gptinvestor.features.company.data.local.dao.CompanyDao
 import com.example.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
 import com.example.gptinvestor.features.investor.data.remote.AnalystRatingRequest
+import com.example.gptinvestor.features.investor.data.remote.IndustryRatingRequest
 import com.example.gptinvestor.features.investor.data.remote.SaveComparisonRequest
 import com.example.gptinvestor.features.investor.data.remote.SaveSentimentRequest
 import com.example.gptinvestor.features.investor.data.remote.SimilarCompanyRequest
@@ -15,6 +17,7 @@ import com.example.gptinvestor.features.investor.domain.model.SimilarCompanies
 import com.example.gptinvestor.features.investor.domain.repository.IInvestorRepository
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.BlockThreshold
+import com.google.ai.client.generativeai.type.GoogleGenerativeAIException
 import com.google.ai.client.generativeai.type.HarmCategory
 import com.google.ai.client.generativeai.type.SafetySetting
 import com.google.ai.client.generativeai.type.generationConfig
@@ -24,7 +27,10 @@ import org.jsoup.Jsoup
 import timber.log.Timber
 import javax.inject.Inject
 
-class InvestorRepository @Inject constructor(private val apiService: ApiService) :
+class InvestorRepository @Inject constructor(
+    private val apiService: ApiService,
+    private val companyDao: CompanyDao
+) :
     IInvestorRepository {
     val model = GenerativeModel(
         modelName = "gemini-1.0-pro",
@@ -48,11 +54,7 @@ class InvestorRepository @Inject constructor(private val apiService: ApiService)
     override suspend fun getSimilarCompanies(request: SimilarCompanyRequest): Flow<Either<Failure, SimilarCompanies>> =
         flow {
             try {
-                var news = ""
-                /*request.news.take(1).forEach {
-                    val text = getArticleText(it.link)?.trim()
-                    news += "\n\n --- \n\nTitle:${it.title} \nText:$text"
-                }*/
+                val news = ""
                 val systemPrompt =
                     "You are a financial analyst assistant. Analyze the given data for ${request.ticker} " +
                             "and suggest a few comparable companies to consider. Do so in a kotlin-parseable list."
@@ -119,9 +121,14 @@ class InvestorRepository @Inject constructor(private val apiService: ApiService)
                     emit(Either.Left(Failure.UnAvailableError))
                 }
             } catch (e: Exception) {
-                Timber.e(e.stackTraceToString())
                 when (e) {
-                    is IllegalArgumentException -> {
+                    is GoogleGenerativeAIException -> {
+                        //call api for saved
+                    }
+
+                    else -> {
+
+                        Timber.e(e.stackTraceToString())
                     }
                 }
             }
@@ -153,7 +160,16 @@ class InvestorRepository @Inject constructor(private val apiService: ApiService)
                     apiService.saveSentiment(saveRequest)
                 }
             } catch (e: Exception) {
-                Timber.e(e.stackTraceToString())
+                when (e) {
+                    is GoogleGenerativeAIException -> {
+                        //call api for saved
+                    }
+
+                    else -> {
+
+                        Timber.e(e.stackTraceToString())
+                    }
+                }
             }
         }
 
@@ -169,6 +185,43 @@ class InvestorRepository @Inject constructor(private val apiService: ApiService)
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.ServerError))
+        }
+    }
+
+    override suspend fun getIndustryAnalysis(ticker: String): Flow<Either<Failure, String>> = flow {
+        try {
+            val company = companyDao.getCompany(ticker)
+            val systemPrompt =
+                "You are an industry analysis assistant. Provide an analysis of the ${company.industry} industry and " +
+                        "${company.sector} sector, including trends, growth prospects, regulatory changes, and competitive landscape. " +
+                        "Be measured and discerning. Truly think about the positives and negatives of the stock. Be sure of your analysis. " +
+                        "You are a skeptical investor."
+            val additionalPrompt =
+                "Provide an analysis of the ${company.industry} industry and ${company.sector} sector."
+            val prompt = systemPrompt + additionalPrompt
+            val response = model.generateContent(prompt = prompt)
+            response.text?.let {
+                emit(Either.Right(it))
+
+                val request = IndustryRatingRequest(
+                    industry = company.industry,
+                    sector = company.sector,
+                    rating = it
+                )
+                apiService.saveIndustryRating(request)
+            }
+
+        } catch (e: Exception) {
+            when (e) {
+                is GoogleGenerativeAIException -> {
+                    //call api for saved
+                }
+
+                else -> {
+
+                    Timber.e(e.stackTraceToString())
+                }
+            }
         }
     }
 

@@ -126,6 +126,8 @@ dependencies {
     implementation(libs.timeAgo)
     implementation(libs.jsoup)
     implementation(libs.gemini)
+    implementation(libs.richtext.compose)
+    implementation(libs.richtext.commonmark)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

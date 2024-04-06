@@ -121,7 +121,7 @@ fun AIInvestorScreen(modifier: Modifier, viewModel: CompanyViewModel) {
                     }
 
                     if (compareCompanies.value.result != null) {
-                        ExpandableText(
+                        ExpandableRichText(
                             text = compareCompanies.value.result!!,
                             modifier = Modifier.padding(8.dp)
                         )
@@ -168,7 +168,10 @@ fun AIInvestorScreen(modifier: Modifier, viewModel: CompanyViewModel) {
                         Text(text = stringResource(id = R.string.tell_me))
                     }
                 } else {
-                    ExpandableText(text = sentimentAnalysis.value.result!!, modifier = Modifier.padding(8.dp))
+                    ExpandableRichText(
+                        text = sentimentAnalysis.value.result!!,
+                        modifier = Modifier.padding(8.dp)
+                    )
                 }
             }
         }
@@ -209,7 +212,7 @@ fun AIInvestorScreen(modifier: Modifier, viewModel: CompanyViewModel) {
                         Text(text = stringResource(id = R.string.tell_me))
                     }
                 } else {
-                    ExpandableText(
+                    Text(
                         text = analystRating.value.result!!,
                         modifier = Modifier.padding(8.dp)
                     )
@@ -253,7 +256,7 @@ fun AIInvestorScreen(modifier: Modifier, viewModel: CompanyViewModel) {
                         Text(text = stringResource(id = R.string.go))
                     }
                 } else {
-                    ExpandableText(
+                    ExpandableRichText(
                         text = industryRating.value.result!!,
                         modifier = Modifier.padding(8.dp)
                     )
@@ -297,7 +300,7 @@ fun AIInvestorScreen(modifier: Modifier, viewModel: CompanyViewModel) {
                         Text(text = stringResource(id = R.string.let_s_go))
                     }
                 } else {
-                    ExpandableText(
+                    ExpandableRichText(
                         text = finalRating.value.result!!,
                         modifier = Modifier.padding(8.dp)
                     )

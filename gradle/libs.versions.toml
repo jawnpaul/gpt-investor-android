@@ -21,6 +21,7 @@ room = "2.6.1"
 timeAgo = "4.0.3"
 jsoup = "1.17.2"
 gemini = "0.2.2"
+richText = "1.0.0-alpha01"
 
 
 [libraries]
@@ -53,6 +54,8 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 timeAgo = { group = "com.github.marlonlom", name = "timeago", version.ref = "timeAgo" }
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 gemini = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "gemini" }
+richtext-compose = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "richText" }
+richtext-commonmark = {group = "com.halilibo.compose-richtext", name = "richtext-commonmark", version.ref = "richText"}
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -64,9 +64,9 @@ class HomeViewModel @Inject constructor(
         getSectorCompanies(selected)
     }
 
-    private fun getAllCompanies() {
+    fun getAllCompanies() {
         _allCompanies.update {
-            it.copy(loading = true)
+            it.copy(loading = true, error = null)
         }
         getAllCompaniesUseCase(GetAllCompaniesUseCase.None()) {
             it.fold(
@@ -80,7 +80,6 @@ class HomeViewModel @Inject constructor(
         _allCompanies.update {
             it.copy(loading = false, error = "Something went wrong.")
         }
-        // TODO:Handle error to show retry button i.e if current list is empty and error happened
         Timber.e(failure.toString())
     }
 

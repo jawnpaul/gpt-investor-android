@@ -27,4 +27,6 @@
     <string name="comprehensive_analysis_summary">Comprehensive analysis summary</string>
     <string name="synthesize_key_findings">Synthesize key findings into an actionable investment strategy</string>
     <string name="let_s_go">Let\'s go!</string>
+    <string name="retry">Retry</string>
+    <string name="something_went_wrong">Something went wrong</string>
 </resources>

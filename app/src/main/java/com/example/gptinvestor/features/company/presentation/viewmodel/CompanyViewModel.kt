@@ -126,6 +126,8 @@ class CompanyViewModel @Inject constructor(
         _similarCompanies.update {
             SimilarCompaniesView()
         }
+        resetCompanyComparison()
+        resetGenerativeAIViews()
     }
 
     fun compareCompanies(ticker: String) {
@@ -136,7 +138,7 @@ class CompanyViewModel @Inject constructor(
                 currentCompanyTicker = companyTicker
             )
             _companyComparison.update { view ->
-                view.copy(loading = true, selectedCompany = ticker)
+                view.copy(loading = true, selectedCompany = ticker, result = null)
             }
 
             compareCompaniesUseCase(request) { res ->
@@ -145,11 +147,12 @@ class CompanyViewModel @Inject constructor(
                     ::handleComparisonSuccess
                 )
             }
+            // reset the gen AI views if a new company is selected
+            resetGenerativeAIViews()
         }
     }
 
     private fun handleComparisonFailure(failure: Failure) {
-        // make call to get comparison from database
         Timber.e(failure.toString())
         _companyComparison.update { view ->
             view.copy(loading = false, error = "Something went wrong.")
@@ -269,6 +272,30 @@ class CompanyViewModel @Inject constructor(
     private fun handleFinalRatingSuccess(rating: String) {
         _finalAnalysis.update {
             it.copy(loading = false, result = rating)
+        }
+    }
+
+    private fun resetCompanyComparison()  {
+        _companyComparison.update {
+            CompanyComparisonView()
+        }
+    }
+
+    private fun resetGenerativeAIViews() {
+        _companySentiment.update {
+            CompanySentimentView()
+        }
+
+        _analystRating.update {
+            AnalystRatingView()
+        }
+
+        _industryRating.update {
+            IndustryRatingView()
+        }
+
+        _finalAnalysis.update {
+            FinalAnalysisView()
         }
     }
 }

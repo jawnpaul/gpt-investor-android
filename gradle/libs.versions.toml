@@ -22,6 +22,9 @@ timeAgo = "4.0.3"
 jsoup = "1.17.2"
 gemini = "0.2.2"
 richText = "1.0.0-alpha01"
+googleServices = "4.4.1"
+firebaseBom = "32.8.0"
+crashlytics = "2.9.9"
 
 
 [libraries]
@@ -56,6 +59,9 @@ jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 gemini = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "gemini" }
 richtext-compose = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "richText" }
 richtext-commonmark = {group = "com.halilibo.compose-richtext", name = "richtext-commonmark", version.ref = "richText"}
+firebase-compose-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-analaytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -63,5 +69,7 @@ jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "k
 hiltAndroid = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kapt" }
 ktLint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktLint" }
+googleServices = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
 
 

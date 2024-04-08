@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.kotlinKapt)
     alias(libs.plugins.hiltAndroid)
     alias(libs.plugins.ktLint)
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.crashlytics)
 }
 
 android {
@@ -56,7 +58,6 @@ android {
 
             isShrinkResources = false
             isMinifyEnabled = false
-            applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
             isDebuggable = true
         }
@@ -128,6 +129,9 @@ dependencies {
     implementation(libs.gemini)
     implementation(libs.richtext.compose)
     implementation(libs.richtext.commonmark)
+    implementation(platform(libs.firebase.compose.bom))
+    implementation(libs.firebase.analaytics)
+    implementation(libs.firebase.crashlytics)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -15,21 +15,21 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface ApiService {
-    @GET("/companies")
+    @GET("companies")
     suspend fun getCompanies(): Response<List<CompanyRemote>>
 
-    @POST("/company")
+    @POST("company")
     suspend fun getCompanyFinancials(@Body request: CompanyFinancialsRequest): Response<CompanyFinancialsRemote>
 
-    @POST("/save-comparison")
+    @POST("save-comparison")
     suspend fun saveComparison(@Body request: SaveComparisonRequest): Response<DefaultSaveResponse>
 
-    @POST("/save-sentiment")
+    @POST("save-sentiment")
     suspend fun saveSentiment(@Body request: SaveSentimentRequest): Response<DefaultSaveResponse>
 
-    @POST("/get-analyst-rating")
+    @POST("get-analyst-rating")
     suspend fun getAnalystRating(@Body request: AnalystRatingRequest): Response<AnalystRatingResponse>
 
-    @POST("/save-industry-rating")
+    @POST("save-industry-rating")
     suspend fun saveIndustryRating(@Body request: IndustryRatingRequest): Response<DefaultSaveResponse>
 }

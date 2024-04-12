@@ -6,6 +6,8 @@ import com.example.gptinvestor.features.company.data.remote.model.CompanyRemote
 import com.example.gptinvestor.features.investor.data.remote.AnalystRatingRequest
 import com.example.gptinvestor.features.investor.data.remote.AnalystRatingResponse
 import com.example.gptinvestor.features.investor.data.remote.DefaultSaveResponse
+import com.example.gptinvestor.features.investor.data.remote.DownloadPdfRequest
+import com.example.gptinvestor.features.investor.data.remote.DownloadPdfResponse
 import com.example.gptinvestor.features.investor.data.remote.IndustryRatingRequest
 import com.example.gptinvestor.features.investor.data.remote.SaveComparisonRequest
 import com.example.gptinvestor.features.investor.data.remote.SaveSentimentRequest
@@ -32,4 +34,7 @@ interface ApiService {
 
     @POST("save-industry-rating")
     suspend fun saveIndustryRating(@Body request: IndustryRatingRequest): Response<DefaultSaveResponse>
+
+    @POST("create-pdf")
+    suspend fun createPdf(@Body request: DownloadPdfRequest): Response<DownloadPdfResponse>
 }

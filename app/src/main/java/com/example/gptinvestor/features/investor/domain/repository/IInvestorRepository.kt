@@ -5,6 +5,7 @@ import com.example.gptinvestor.core.functional.Failure
 import com.example.gptinvestor.features.investor.data.remote.SimilarCompanyRequest
 import com.example.gptinvestor.features.investor.domain.model.CompareCompaniesRequest
 import com.example.gptinvestor.features.investor.domain.model.FinalAnalysisRequest
+import com.example.gptinvestor.features.investor.domain.model.GetPdfRequest
 import com.example.gptinvestor.features.investor.domain.model.SentimentAnalysisRequest
 import com.example.gptinvestor.features.investor.domain.model.SimilarCompanies
 import kotlinx.coroutines.flow.Flow
@@ -21,4 +22,6 @@ interface IInvestorRepository {
     suspend fun getIndustryAnalysis(ticker: String): Flow<Either<Failure, String>>
 
     suspend fun getFinalAnalysis(request: FinalAnalysisRequest): Flow<Either<Failure, String>>
+
+    suspend fun downloadAnalysisPdf(request:GetPdfRequest): Flow<Either<Failure, String>>
 }

@@ -11,8 +11,10 @@ import com.example.gptinvestor.features.company.presentation.state.SingleCompany
 import com.example.gptinvestor.features.investor.data.remote.SimilarCompanyRequest
 import com.example.gptinvestor.features.investor.domain.model.CompareCompaniesRequest
 import com.example.gptinvestor.features.investor.domain.model.FinalAnalysisRequest
+import com.example.gptinvestor.features.investor.domain.model.GetPdfRequest
 import com.example.gptinvestor.features.investor.domain.model.SentimentAnalysisRequest
 import com.example.gptinvestor.features.investor.domain.usecases.CompareCompaniesUseCase
+import com.example.gptinvestor.features.investor.domain.usecases.DownloadPdfUseCase
 import com.example.gptinvestor.features.investor.domain.usecases.GetAnalystRatingUseCase
 import com.example.gptinvestor.features.investor.domain.usecases.GetCompanySentimentUseCase
 import com.example.gptinvestor.features.investor.domain.usecases.GetFinalRatingUseCase
@@ -21,14 +23,15 @@ import com.example.gptinvestor.features.investor.domain.usecases.GetSimilarCompa
 import com.example.gptinvestor.features.investor.presentation.state.AnalystRatingView
 import com.example.gptinvestor.features.investor.presentation.state.CompanyComparisonView
 import com.example.gptinvestor.features.investor.presentation.state.CompanySentimentView
+import com.example.gptinvestor.features.investor.presentation.state.DownloadPdfView
 import com.example.gptinvestor.features.investor.presentation.state.FinalAnalysisView
 import com.example.gptinvestor.features.investor.presentation.state.IndustryRatingView
 import com.example.gptinvestor.features.investor.presentation.state.SimilarCompaniesView
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltViewModel
 class CompanyViewModel @Inject constructor(
@@ -39,7 +42,9 @@ class CompanyViewModel @Inject constructor(
     private val sentimentUseCase: GetCompanySentimentUseCase,
     private val analystRatingUseCase: GetAnalystRatingUseCase,
     private val industryRatingUseCase: GetIndustryRatingUseCase,
-    private val finalRatingUseCase: GetFinalRatingUseCase
+    private val finalRatingUseCase: GetFinalRatingUseCase,
+    private val downloadPdfUseCase: DownloadPdfUseCase
+
 ) : ViewModel() {
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
     val selectedCompany get() = _selectedCompany
@@ -64,6 +69,9 @@ class CompanyViewModel @Inject constructor(
 
     private val _finalAnalysis = MutableStateFlow(FinalAnalysisView())
     val finalAnalysis get() = _finalAnalysis
+
+    private val _downloadPdf = MutableStateFlow(DownloadPdfView())
+    val downloadPdf get() = _downloadPdf
 
     private var companyTicker = ""
 
@@ -275,7 +283,7 @@ class CompanyViewModel @Inject constructor(
         }
     }
 
-    private fun resetCompanyComparison()  {
+    private fun resetCompanyComparison() {
         _companyComparison.update {
             CompanyComparisonView()
         }
@@ -296,6 +304,50 @@ class CompanyViewModel @Inject constructor(
 
         _finalAnalysis.update {
             FinalAnalysisView()
+        }
+
+        _downloadPdf.update {
+            DownloadPdfView()
+        }
+    }
+
+    fun downloadPdf() {
+        val request = GetPdfRequest(
+            ticker = companyTicker,
+            finalRating = _finalAnalysis.value.result ?: "",
+            similarCompanies = _similarCompanies.value.result?.codeText ?: "",
+            sentiment = _companySentiment.value.result ?: "",
+            comparison = _companyComparison.value.result ?: "",
+            analystRating = _analystRating.value.result ?: "",
+            industryRating = _industryRating.value.result ?: "",
+            open = _companyFinancials.value.financialsPresentation?.open ?: "",
+            high = _companyFinancials.value.financialsPresentation?.high ?: "",
+            low = _companyFinancials.value.financialsPresentation?.low ?: "",
+            close = _companyFinancials.value.financialsPresentation?.close ?: "",
+            volume = _companyFinancials.value.financialsPresentation?.volume ?: "",
+            marketCap = _companyFinancials.value.financialsPresentation?.marketCap ?: ""
+        )
+        _downloadPdf.update {
+            it.copy(loading = true)
+        }
+        downloadPdfUseCase(request) {
+            it.fold(
+                ::handleDownloadFailure,
+                ::handleDownloadSuccess
+            )
+        }
+    }
+
+    private fun handleDownloadFailure(failure: Failure) {
+        _downloadPdf.update {
+            it.copy(loading = false, error = "Something went wrong.")
+        }
+        Timber.e(failure.toString())
+    }
+
+    private fun handleDownloadSuccess(url: String) {
+        _downloadPdf.update {
+            it.copy(loading = false, result = url)
         }
     }
 }

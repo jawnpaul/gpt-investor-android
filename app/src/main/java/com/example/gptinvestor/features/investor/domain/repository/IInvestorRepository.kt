@@ -23,5 +23,5 @@ interface IInvestorRepository {
 
     suspend fun getFinalAnalysis(request: FinalAnalysisRequest): Flow<Either<Failure, String>>
 
-    suspend fun downloadAnalysisPdf(request:GetPdfRequest): Flow<Either<Failure, String>>
+    suspend fun downloadAnalysisPdf(request: GetPdfRequest): Flow<Either<Failure, String>>
 }

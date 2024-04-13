@@ -29,4 +29,7 @@
     <string name="let_s_go">Let\'s go!</string>
     <string name="retry">Retry</string>
     <string name="something_went_wrong">Something went wrong</string>
+    <string name="download_report">Download report</string>
+    <string name="save_the_full_analysis">Save the full analysis as a PDF for offline reference</string>
+    <string name="download">Download</string>
 </resources>

@@ -8,6 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
+import com.example.gptinvestor.features.company.presentation.ui.WebViewScreen
 import com.example.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 import com.example.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.example.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
@@ -37,6 +38,16 @@ fun SetUpNavGraph(navController: NavHostController) {
                 navController = navController,
                 viewModel = parentViewModel
             )
+        }
+
+        composable(
+            route = Screen.WebViewScreen.route
+        ) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(Screen.HomeScreen.route)
+            }
+            val parentViewModel = hiltViewModel<CompanyViewModel>(parentEntry)
+            WebViewScreen(navController = navController, viewModel = parentViewModel)
         }
     }
 }

@@ -28,10 +28,10 @@ import com.example.gptinvestor.features.investor.presentation.state.FinalAnalysi
 import com.example.gptinvestor.features.investor.presentation.state.IndustryRatingView
 import com.example.gptinvestor.features.investor.presentation.state.SimilarCompaniesView
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import timber.log.Timber
-import javax.inject.Inject
 
 @HiltViewModel
 class CompanyViewModel @Inject constructor(
@@ -72,6 +72,12 @@ class CompanyViewModel @Inject constructor(
 
     private val _downloadPdf = MutableStateFlow(DownloadPdfView())
     val downloadPdf get() = _downloadPdf
+
+    private val _urlToLoad = MutableStateFlow(String())
+    val urlToLoad get() = _urlToLoad
+
+    private val _selectedTab = MutableStateFlow(0)
+    val selectedTab get() = _selectedTab
 
     private var companyTicker = ""
 
@@ -349,5 +355,13 @@ class CompanyViewModel @Inject constructor(
         _downloadPdf.update {
             it.copy(loading = false, result = url)
         }
+    }
+
+    fun setUrlToLoad(url: String) {
+        _urlToLoad.update { url }
+    }
+
+    fun selectTab(tabIndex: Int) {
+        _selectedTab.update { tabIndex }
     }
 }

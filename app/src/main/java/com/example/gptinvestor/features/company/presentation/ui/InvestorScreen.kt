@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.LinearProgressIndicator
@@ -12,17 +13,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.gptinvestor.R
 import com.example.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 
 @Composable
-fun AIInvestorScreen(modifier: Modifier, viewModel: CompanyViewModel) {
+fun AIInvestorScreen(modifier: Modifier, navController: NavController, viewModel: CompanyViewModel) {
     val company = viewModel.selectedCompany.collectAsState()
     val similarCompanies = viewModel.similarCompanies.collectAsState()
     val comparisonCardVisible = similarCompanies.value.result != null
@@ -35,6 +41,9 @@ fun AIInvestorScreen(modifier: Modifier, viewModel: CompanyViewModel) {
     val industryRating = viewModel.industryRating.collectAsState()
     val finalRatingCardVisible = industryRating.value.result != null
     val finalRating = viewModel.finalAnalysis.collectAsState()
+    val savePdfCardVisible = finalRating.value.result != null
+    val savePdf = viewModel.downloadPdf.collectAsState()
+    val uriHandler = LocalUriHandler.current
 
     Column {
         // Discover similar companies
@@ -304,6 +313,70 @@ fun AIInvestorScreen(modifier: Modifier, viewModel: CompanyViewModel) {
                         text = finalRating.value.result!!,
                         modifier = Modifier.padding(8.dp)
                     )
+                }
+            }
+        }
+
+        // Save PDF
+        AnimatedVisibility(visible = savePdfCardVisible) {
+            ElevatedCard(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 32.dp)) {
+                Text(
+                    text = stringResource(id = R.string.download_report),
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp)
+                )
+                Text(
+                    text = stringResource(
+                        id = R.string.save_the_full_analysis
+                    ),
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp)
+                )
+
+                if (savePdf.value.loading) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
+
+                if (savePdf.value.result == null) {
+                    Button(
+                        onClick = {
+                            viewModel.downloadPdf()
+                        },
+                        enabled = !savePdf.value.loading,
+                        modifier = Modifier.padding(
+                            start = 8.dp,
+                            end = 8.dp,
+                            top = 8.dp,
+                            bottom = 8.dp
+                        )
+                    ) {
+                        Text(text = stringResource(id = R.string.download))
+                    }
+                } else {
+                    val annotatedUrlLink: AnnotatedString = buildAnnotatedString {
+                        withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onSurface)) {
+                            append("Download link: ")
+                        }
+
+                        withStyle(
+                            style = SpanStyle(
+                                color = Color.Blue,
+                                textDecoration = TextDecoration.Underline
+                            )
+                        ) {
+                            append(savePdf.value.result)
+                        }
+                    }
+
+                    ClickableText(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        text = annotatedUrlLink
+                    ) {
+                        val url = savePdf.value.result ?: ""
+                        uriHandler.openUri(url)
+                    }
                 }
             }
         }

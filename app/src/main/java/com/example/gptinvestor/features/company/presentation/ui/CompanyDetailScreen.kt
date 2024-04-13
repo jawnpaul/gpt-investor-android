@@ -23,10 +23,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -81,7 +77,8 @@ fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewMo
             )
         }
     ) { innerPadding ->
-        var state by remember { mutableIntStateOf(0) }
+        val state = viewModel.selectedTab.collectAsState()
+
         val titles = listOf("Data", "News", "AI")
         Box(
             modifier = Modifier
@@ -94,11 +91,13 @@ fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewMo
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 0.dp)
             ) {
-                PrimaryTabRow(selectedTabIndex = state) {
+                PrimaryTabRow(selectedTabIndex = state.value) {
                     titles.forEachIndexed { index, title ->
                         Tab(
-                            selected = state == index,
-                            onClick = { state = index },
+                            selected = state.value == index,
+                            onClick = {
+                                viewModel.selectTab(index)
+                            },
                             text = {
                                 Text(
                                     text = title,
@@ -109,18 +108,26 @@ fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewMo
                         )
                     }
                 }
-                AnimatedContent(targetState = state) { targetState ->
+                AnimatedContent(targetState = state.value) { targetState ->
                     when (targetState) {
                         0 -> {
                             CompanyDataScreen(modifier = Modifier, viewModel = viewModel)
                         }
 
                         1 -> {
-                            CompanyNewsScreen(modifier = Modifier, viewModel = viewModel)
+                            CompanyNewsScreen(
+                                modifier = Modifier,
+                                navController = navController,
+                                viewModel = viewModel
+                            )
                         }
 
                         2 -> {
-                            AIInvestorScreen(modifier = Modifier, viewModel = viewModel)
+                            AIInvestorScreen(
+                                modifier = Modifier,
+                                navController = navController,
+                                viewModel = viewModel
+                            )
                         }
                     }
                 }

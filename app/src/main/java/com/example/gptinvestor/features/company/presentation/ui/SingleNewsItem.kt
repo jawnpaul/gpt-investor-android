@@ -19,8 +19,10 @@ import coil.compose.AsyncImage
 import com.example.gptinvestor.features.company.presentation.model.NewsPresentation
 
 @Composable
-fun SingleNewsItem(modifier: Modifier, newsPresentation: NewsPresentation) {
-    ElevatedCard(modifier = Modifier.padding(16.dp)) {
+fun SingleNewsItem(modifier: Modifier, newsPresentation: NewsPresentation, onClick: (String) -> Unit) {
+    ElevatedCard(modifier = Modifier.padding(16.dp), onClick = {
+        onClick(newsPresentation.link)
+    }) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()

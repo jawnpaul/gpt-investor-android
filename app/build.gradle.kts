@@ -16,11 +16,11 @@ android {
     val localProperties = Properties()
     localProperties.load(project.rootProject.file("local.properties").reader())
 
-    namespace = "com.example.gptinvestor"
+    namespace = "com.thejawnpaul.gptinvestor"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.gptinvestor"
+        applicationId = "com.thejawnpaul.gptinvestor"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -42,6 +42,12 @@ android {
 
     buildTypes {
         release {
+            val geminiApiKey: String = localProperties.getProperty("GEMINI_API_KEY")
+            buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+
+            val baseUrl: String = localProperties.getProperty("BASE_URL")
+            buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

@@ -56,7 +56,7 @@ android {
         }
 
         debug {
-            val geminiApiKey: String = localProperties.getProperty("GEMINI_API_KEY")
+            val geminiApiKey: String = localProperties.getProperty("GEMINI_DEBUG_KEY")
             buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
 
             val baseUrl: String = localProperties.getProperty("BASE_URL")

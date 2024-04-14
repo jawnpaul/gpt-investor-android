@@ -1,4 +1,4 @@
-package com.example.gptinvestor
+package com.thejawnpaul.gptinvestor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry

@@ -1,4 +1,4 @@
-package com.example.gptinvestor
+package com.thejawnpaul.gptinvestor
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

@@ -44,7 +44,7 @@ jobs:
           
             
       - name: Run Ktlint
-        run: ./gradlew ktlintCheck
+        run: ./gradlew ktlint
         
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest

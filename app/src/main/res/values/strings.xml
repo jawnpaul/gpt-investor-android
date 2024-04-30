@@ -1,3 +1,35 @@
 <resources>
     <string name="app_name">GPT Investor</string>
+    <string name="back">Back</string>
+    <string name="star">Star</string>
+    <string name="show_less">Show less</string>
+    <string name="show_more">Show more</string>
+    <string name="about">About</string>
+    <string name="open">Open</string>
+    <string name="high">High</string>
+    <string name="low">Low</string>
+    <string name="close">Close</string>
+    <string name="volume">Volume</string>
+    <string name="market_cap">Market cap</string>
+    <string name="latest_financials">Latest financials</string>
+    <string name="discover_related_companies">Discover related companies</string>
+    <string name="explore_businesses">Explore businesses operating in similar sectors or industries</string>
+    <string name="in_depth_company_comparison_analysis">In-depth company comparison analysis</string>
+    <string name="gain_valuable_insight">Gain valuable insights by comparing key metrics and performance indicators across companies</string>
+    <string name="sentiment_analysis_insight">Sentiment analysis insight</string>
+    <string name="uncover_prevailing_market">Uncover prevailing market sentiment and public opinion towards %1$s</string>
+    <string name="tell_me">Tell me!</string>
+    <string name="go">Go!</string>
+    <string name="analyst_ratings_and_recommendation">Analyst ratings and recommendations</string>
+    <string name="leverage_expert_insight">Leverage expert insights to guide your investment decision</string>
+    <string name="industry_trends_and_analysis">Industry trends and analysis</string>
+    <string name="explore_the_competitive_landscape">Explore the competitive landscape and identify emerging opportunities</string>
+    <string name="comprehensive_analysis_summary">Comprehensive analysis summary</string>
+    <string name="synthesize_key_findings">Synthesize key findings into an actionable investment strategy</string>
+    <string name="let_s_go">Let\'s go!</string>
+    <string name="retry">Retry</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="download_report">Download report</string>
+    <string name="save_the_full_analysis">Save the full analysis as a PDF for offline reference</string>
+    <string name="download">Download</string>
 </resources>

@@ -42,7 +42,10 @@ jobs:
                 echo "GEMINI_DEBUG_KEY=${{ secrets.GEMINI_DEBUG_KEY }}" >> local.properties
                 echo "ACCESS_TOKEN=${{ secrets.ACCESS_TOKEN }}" >> local.properties
           
-            
+      - name: Load Google Service file
+        env:
+          DATA: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: echo $DATA | base64 -di > app/google-services.json       
         
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest

@@ -1,0 +1,57 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Android Build
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+        
+      - name: Setup Java JDK 
+        uses: actions/setup-java@v2.0.0
+        with:
+          distribution: 'adopt'
+          java-version: 17
+          
+          
+      - name: Create properties file
+        uses: "finnp/create-file-action@af8500fe0b0c5d8e04934f8bb62b9dda872c5803"
+        env:
+            FILE_NAME: "local.properties"
+            run: |
+                echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > local.properties
+                echo "BASE_URL=${{ secrets.BASE_URL }}" >> local.properties
+                echo "GEMINI_DEBUG_KEY=${{ secrets.GEMINI_DEBUG_KEY }}" >> local.properties
+                echo "ACCESS_TOKEN=${{ secrets.ACCESS_TOKEN }}" >> local.properties
+          
+            
+        
+      - name: Run Unit Tests
+        run: ./gradlew testDebugUnitTest
+      
+      - name: Upload Unit Test Report
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: test-reports
+          path: '**/build/reports/tests/'
+        
+      - name: Build Project
+        run: ./gradlew assembleDebug

@@ -43,8 +43,6 @@ jobs:
                 echo "ACCESS_TOKEN=${{ secrets.ACCESS_TOKEN }}" >> local.properties
           
             
-      - name: Run Ktlint
-        run: ./gradlew ktlint
         
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest

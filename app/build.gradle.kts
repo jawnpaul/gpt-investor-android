@@ -48,6 +48,9 @@ android {
             val baseUrl: String = localProperties.getProperty("BASE_URL")
             buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
 
+            val accessToken: String = localProperties.getProperty("ACCESS_TOKEN")
+            buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
+
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -61,6 +64,9 @@ android {
 
             val baseUrl: String = localProperties.getProperty("BASE_URL")
             buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+
+            val accessToken: String = localProperties.getProperty("ACCESS_TOKEN")
+            buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
 
             isShrinkResources = false
             isMinifyEnabled = false

@@ -2,6 +2,7 @@ package com.thejawnpaul.gptinvestor.core.di
 
 import com.thejawnpaul.gptinvestor.BuildConfig
 import com.thejawnpaul.gptinvestor.core.api.ApiService
+import com.thejawnpaul.gptinvestor.core.api.AuthenticationInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,14 +34,17 @@ object ApiModule {
 
     @Provides
     fun provideOkHttpClient(): OkHttpClient {
+        val authenticationInterceptor = AuthenticationInterceptor()
         if (BuildConfig.DEBUG) {
             val loggingInterceptor =
                 HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
             return OkHttpClient.Builder()
+                .addInterceptor(authenticationInterceptor)
                 .addInterceptor(loggingInterceptor)
                 .build()
         }
         return OkHttpClient.Builder()
+            .addInterceptor(authenticationInterceptor)
             .build()
     }
 }

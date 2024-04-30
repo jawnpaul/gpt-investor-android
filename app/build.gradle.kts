@@ -1,5 +1,5 @@
-import java.util.Properties
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -42,13 +42,13 @@ android {
 
     buildTypes {
         release {
-            val geminiApiKey: String = localProperties.getProperty("GEMINI_API_KEY")
+            val geminiApiKey: String = localProperties.getProperty("GEMINI_API_KEY") ?: ""
             buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
 
-            val baseUrl: String = localProperties.getProperty("BASE_URL")
+            val baseUrl: String = localProperties.getProperty("BASE_URL") ?: ""
             buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
 
-            val accessToken: String = localProperties.getProperty("ACCESS_TOKEN")
+            val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
             buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
 
             isMinifyEnabled = false
@@ -59,13 +59,13 @@ android {
         }
 
         debug {
-            val geminiApiKey: String = localProperties.getProperty("GEMINI_DEBUG_KEY")
+            val geminiApiKey: String = localProperties.getProperty("GEMINI_DEBUG_KEY") ?: ""
             buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
 
-            val baseUrl: String = localProperties.getProperty("BASE_URL")
+            val baseUrl: String = localProperties.getProperty("BASE_URL") ?: ""
             buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
 
-            val accessToken: String = localProperties.getProperty("ACCESS_TOKEN")
+            val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
             buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
 
             isShrinkResources = false

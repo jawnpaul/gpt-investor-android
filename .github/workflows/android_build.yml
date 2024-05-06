@@ -45,7 +45,30 @@ jobs:
       - name: Load Google Service file
         env:
           DATA: ${{ secrets.GOOGLE_SERVICES_JSON }}
-        run: echo $DATA | base64 -di > app/google-services.json       
+        run: echo $DATA | base64 -di > app/google-services.json     
+
+      - name: Decode Keystore File
+        uses: timheuer/base64-to-file@v1.2
+        id: decode_keystore
+        with:
+          fileName: 'android_keystore.jks'
+          fileDir: '/home/runner/work/gpt-investor-android/gpt-investor-android/app/keystore/'
+          encodedString: ${{ secrets.STORE_FILE }}   
+
+      - name: Write multiple values to keystore.properties file
+        uses: GuillaumeFalourd/write-java-properties-file@v1
+        with:
+          file_path: keystore.properties
+          property: |
+            KEY_STORE_PASSWORD
+            KEY_PASSWORD
+            KEY_ALIAS
+            STORE_FILE
+          value: |
+            ${{ secrets.KEY_STORE_PASSWORD }}
+            ${{ secrets.KEY_PASSWORD }}
+            ${{ secrets.KEY_ALIAS }}
+            ${{ steps.decode_keystore.outputs.filePath }}     
         
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest

@@ -20,7 +20,6 @@ The application consumes data from [yfinance](https://github.com/ranaroussi/yfin
 
 ## Architecture
 
-Since the application is expected to scale with multiple developers working on it, I used Clean architectural principles to build the application. I choose this architecture because it fosters better separation of concerns and testability.
 
 The Application is split into a three layer architecture:
 
@@ -124,7 +123,7 @@ Build System: [Gradle](https://gradle.org/)
 ## Demo
 We're waiting for the app to be published on Google playstore but while waiting you can:
 1. Join internal test [here](https://docs.google.com/forms/d/e/1FAIpQLSegV83xaYvknPPQhv4QKpViYeFSAhff3CvlsrPY-YZ_c_eX_g/viewform?usp=sf_link)
-2. Download apk directly [here](https://drive.google.com/file/d/1HKRyyRjgeREINzYCxuXbrnGoX6h72opb/view?usp=sharing)
+2. Download apk directly [here](https://drive.google.com/file/d/1r1tWwWXEBNbqPEEG4y2YiaRov7P7TIez/view?usp=drive_link)
 
 Find below screenshots of the application
 

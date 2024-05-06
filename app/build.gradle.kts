@@ -1,5 +1,5 @@
-import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 import java.util.Properties
+import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -10,6 +10,9 @@ plugins {
     alias(libs.plugins.googleServices)
     alias(libs.plugins.crashlytics)
 }
+
+val keystoreProperties = Properties()
+keystoreProperties.load(project.rootProject.file("keystore.properties").reader())
 
 android {
 
@@ -23,8 +26,8 @@ android {
         applicationId = "com.thejawnpaul.gptinvestor"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -40,8 +43,19 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties.getProperty("KEY_ALIAS") ?: ""
+            keyPassword = keystoreProperties.getProperty("KEY_PASSWORD") ?: ""
+            storeFile = file(keystoreProperties.getProperty("STORE_FILE") ?: "")
+            storePassword = keystoreProperties.getProperty("KEY_STORE_PASSWORD") ?: ""
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
+
             val geminiApiKey: String = localProperties.getProperty("GEMINI_API_KEY") ?: ""
             buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
 
@@ -51,7 +65,7 @@ android {
             val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
             buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
 
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

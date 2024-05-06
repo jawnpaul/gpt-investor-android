@@ -119,6 +119,14 @@ Build System: [Gradle](https://gradle.org/)
    BASE_URL=https://gpt-investor-api.onrender.com/api/v1/
    ACCESS_TOKEN=<Enter your access token>
     ```
+6. Create a `keystore.properties` file and add the following.
+    ```sh
+   KEY_ALIAS=abcd
+   KEY_PASSWORD=abcd
+   KEY_STORE_PASSWORD=abcd
+   STORE_FILE=/user/abcd/
+    ```
+    **N.B**: Replace the values in the `keystore.properties` file with the correct values if you plan to release on Google playstore. Further instructions can be found [here](https://developer.android.com/studio/publish/app-signing)   
 
 ## Demo
 We're waiting for the app to be published on Google playstore but while waiting you can:

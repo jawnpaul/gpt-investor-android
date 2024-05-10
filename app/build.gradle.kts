@@ -159,7 +159,13 @@ dependencies {
     implementation(libs.firebase.analaytics)
     implementation(libs.firebase.crashlytics)
 
+    // test
     testImplementation(libs.junit)
+    testImplementation(libs.google.truth)
+    testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(libs.mockk)
+    testImplementation(libs.coroutine.test)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

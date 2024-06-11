@@ -1,8 +1,10 @@
 package com.thejawnpaul.gptinvestor.features.company.data.remote.model
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.thejawnpaul.gptinvestor.features.company.data.local.model.CompanyEntity
 
+@JsonClass(generateAdapter = true)
 data class CompanyRemote(
     @field:Json(name = "ticker") val ticker: String,
     @field:Json(name = "summary") val summary: String,

@@ -1,30 +1,36 @@
 [versions]
-agp = "8.3.0-alpha18"
-kotlin = "1.9.0"
-coreKtx = "1.12.0"
+agp = "8.3.2"
+kotlin = "2.0.0"
+coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
-lifecycleRuntimeKtx = "2.7.0"
-activityCompose = "1.8.2"
-composeBom = "2024.03.00"
-hilt = "2.48"
-kapt = "1.9.0"
+lifecycleRuntimeKtx = "2.8.1"
+activityCompose = "1.9.0"
+composeBom = "2024.05.00"
+hilt = "2.51"
 timber = "5.0.1"
 navVersion = "2.7.7"
 hiltNavigation = "1.2.0"
 ktLint = "12.1.0"
-retrofit = "2.9.0"
+retrofit = "2.11.0"
 okhttp = "4.12.0"
 coil = "2.5.0"
 room = "2.6.1"
 timeAgo = "4.0.3"
 jsoup = "1.17.2"
-gemini = "0.2.2"
+gemini = "0.8.0"
 richText = "1.0.0-alpha01"
-googleServices = "4.4.1"
-firebaseBom = "32.8.0"
-crashlytics = "2.9.9"
+googleServices = "4.4.2"
+firebaseBom = "33.1.0"
+crashlytics = "3.0.1"
+truth = "1.4.2"
+mockk = "1.13.9"
+coroutineTest = "1.8.0-RC2"
+coreKtxVersion = "1.5.0"
+junitKtx = "1.1.5"
+moshi = "1.15.1"
+ksp = "2.0.0-1.0.21"
 
 
 [libraries]
@@ -49,6 +55,8 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 androidx-hilt-navigation = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigation" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 moshi-converter = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
+moshi-codeGen = { group = "com.squareup.moshi", name = "moshi-kotlin-codegen", version.ref = "moshi" }
+moshi = { group = "com.squareup.moshi", name = "moshi", version.ref = "moshi" }
 okhttp-logger = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 androidx-room = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
@@ -62,14 +70,21 @@ richtext-commonmark = {group = "com.halilibo.compose-richtext", name = "richtext
 firebase-compose-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-analaytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
+okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+coroutine-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutineTest" }
+google-truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
+core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
+androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
-jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hiltAndroid = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kapt" }
 ktLint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktLint" }
 googleServices = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
-
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 

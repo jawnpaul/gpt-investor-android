@@ -2,9 +2,11 @@ package com.thejawnpaul.gptinvestor.features.company.data.remote.model
 
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyFinancials
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.NewsPresentation
 
+@JsonClass(generateAdapter = true)
 data class CompanyFinancialsRemote(
     @field:Json(name = "balance_sheet") val balanceSheet: String,
     @field:Json(name = "close") val close: Float,
@@ -33,6 +35,7 @@ data class CompanyFinancialsRemote(
     )
 }
 
+@JsonClass(generateAdapter = true)
 data class CompanyNews(
     @field:Json(name = "link") val link: String,
     @field:Json(name = "providerPublishTime") val providerPublishTime: Long,
@@ -54,10 +57,12 @@ data class CompanyNews(
     )
 }
 
+@JsonClass(generateAdapter = true)
 data class NewsThumbNail(
     @field:Json(name = "resolutions") val resolutions: List<NewsResolution> = emptyList()
 )
 
+@JsonClass(generateAdapter = true)
 data class NewsResolution(
     @field:Json(name = "height") val height: Int,
     @field:Json(name = "tag") val tag: String,
@@ -65,6 +70,7 @@ data class NewsResolution(
     @field:Json(name = "width") val width: Int
 )
 
+@JsonClass(generateAdapter = true)
 data class CompanyFinancialsRequest(
     @field:Json(name = "ticker") val ticker: String,
     @field:Json(name = "years") val years: Int

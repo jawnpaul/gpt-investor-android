@@ -3,8 +3,9 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.jetbrainsKotlinAndroid)
-    alias(libs.plugins.kotlinKapt)
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.hiltAndroid)
     alias(libs.plugins.ktLint)
     alias(libs.plugins.googleServices)
@@ -146,10 +147,14 @@ dependencies {
     implementation(libs.moshi.converter)
     implementation(libs.okhttp.logger)
     implementation(libs.coil.compose)
-    kapt(libs.dagger.hilt.compiler)
+    implementation(libs.core.ktx)
+    implementation(libs.androidx.junit.ktx)
+    ksp(libs.dagger.hilt.compiler)
     implementation(libs.androidx.room)
     implementation(libs.androidx.room.ktx)
-    kapt(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.moshi)
+    ksp(libs.moshi.codeGen)
     implementation(libs.timeAgo)
     implementation(libs.jsoup)
     implementation(libs.gemini)
@@ -159,7 +164,13 @@ dependencies {
     implementation(libs.firebase.analaytics)
     implementation(libs.firebase.crashlytics)
 
+    // test
     testImplementation(libs.junit)
+    testImplementation(libs.google.truth)
+    testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(libs.mockk)
+    testImplementation(libs.coroutine.test)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

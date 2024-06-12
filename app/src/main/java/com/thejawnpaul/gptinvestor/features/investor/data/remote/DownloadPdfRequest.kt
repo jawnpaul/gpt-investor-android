@@ -1,7 +1,9 @@
 package com.thejawnpaul.gptinvestor.features.investor.data.remote
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
+@JsonClass(generateAdapter = true)
 data class DownloadPdfRequest(
     @field:Json(name = "name")val name: String,
     @field:Json(name = "about")val about: String,
@@ -19,6 +21,7 @@ data class DownloadPdfRequest(
     @field:Json(name = "market_cap")val marketCap: String
 )
 
+@JsonClass(generateAdapter = true)
 data class DownloadPdfResponse(
     @field:Json(name = "url")val url: String
 )

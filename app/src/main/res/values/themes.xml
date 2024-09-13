@@ -2,4 +2,10 @@
 <resources>
 
     <style name="Theme.GPTInvestor" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/default_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/asset_3_1</item>
+        <item name="postSplashScreenTheme">@style/Theme.GPTInvestor</item>
+    </style>
 </resources>

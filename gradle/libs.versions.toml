@@ -31,6 +31,7 @@ coreKtxVersion = "1.5.0"
 junitKtx = "1.1.5"
 moshi = "1.15.1"
 ksp = "2.0.0-1.0.21"
+spalshScreen = "1.0.1"
 
 
 [libraries]
@@ -48,6 +49,7 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-core-splashscreen = {group = "androidx.core", name = "core-splashscreen", version.ref = "spalshScreen"}
 dagger-hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }

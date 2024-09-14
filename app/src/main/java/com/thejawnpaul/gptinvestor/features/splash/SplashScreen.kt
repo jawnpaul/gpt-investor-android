@@ -59,7 +59,7 @@ fun CustomSplashScreen(onSplashScreenFinished: () -> Unit) {
                         modifier = Modifier.fillMaxSize(),
                         painter = painterResource(R.drawable.interlaced),
                         contentDescription = null,
-                        contentScale = ContentScale.FillBounds
+                        contentScale = ContentScale.Crop
                     )
 
                     Image(

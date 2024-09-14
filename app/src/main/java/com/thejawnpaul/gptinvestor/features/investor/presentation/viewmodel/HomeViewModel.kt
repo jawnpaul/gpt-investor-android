@@ -112,4 +112,8 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+    fun doSomething() {
+        Timber.e("Log click event")
+    }
 }

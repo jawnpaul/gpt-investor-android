@@ -1,0 +1,118 @@
+package com.thejawnpaul.gptinvestor.features.investor.presentation.ui
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import com.thejawnpaul.gptinvestor.R
+import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
+
+@Composable
+fun SingleTrendingStockItem(
+    modifier: Modifier = Modifier,
+    onClick: (tickerSymbol: String) -> Unit,
+    trendingStock: TrendingStockPresentation
+) {
+    Surface(
+        modifier = Modifier.height(52.dp),
+        onClick = {
+            onClick(trendingStock.tickerSymbol)
+        },
+        shape = RoundedCornerShape(corner = CornerSize(8.dp)),
+        border = BorderStroke(width = 2.dp, color = Color(227, 239, 252))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(
+                trendingStock.companyName,
+                maxLines = 1,
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Image(
+                modifier = Modifier.padding(8.dp),
+                painter = painterResource(R.drawable.trending_ellipse),
+                contentDescription = null
+            )
+
+            AsyncImage(
+                model = trendingStock.imageUrl,
+                modifier = Modifier.width(100.dp),
+                contentDescription = null,
+                contentScale = ContentScale.Crop
+            )
+
+            Image(
+                modifier = Modifier.padding(8.dp),
+                painter = painterResource(R.drawable.trending_ellipse),
+                contentDescription = null
+            )
+
+            if (trendingStock.percentageChange < 0) {
+                Image(
+                    modifier = Modifier.padding(end = 2.dp),
+                    painter = painterResource(R.drawable.trending_down),
+                    contentDescription = null
+                )
+                Text(
+                    "${trendingStock.percentageChange}%",
+                    color = Color(212, 38, 32),
+                    style = MaterialTheme.typography.titleMedium
+                )
+            } else {
+                Image(
+                    modifier = Modifier.padding(end = 2.dp),
+                    painter = painterResource(R.drawable.trending_up),
+                    contentDescription = null
+                )
+                Text(
+                    "+${trendingStock.percentageChange}%",
+                    color = Color(15, 151, 61),
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TrendingStockList(modifier: Modifier = Modifier, list: List<TrendingStockPresentation>, onClick: (tickerSymbol: String) -> Unit) {
+    LazyHorizontalGrid(
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        modifier = Modifier.fillMaxWidth().height(112.dp),
+        rows = GridCells.Fixed(2),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(
+            items = list,
+            key = { item -> item.tickerSymbol }
+        ) { item ->
+            SingleTrendingStockItem(onClick = onClick, trendingStock = item)
+        }
+    }
+}

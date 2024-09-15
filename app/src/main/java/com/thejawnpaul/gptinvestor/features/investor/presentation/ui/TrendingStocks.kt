@@ -11,9 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -131,13 +132,13 @@ fun TrendingStockList(
         }
 
         if (state.companies.isNotEmpty()) {
-            LazyHorizontalGrid(
+            LazyHorizontalStaggeredGrid(
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 modifier = Modifier
                     .fillMaxSize(),
-                rows = GridCells.Fixed(2),
+                rows = StaggeredGridCells.Fixed(2),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalItemSpacing = 8.dp
             ) {
                 items(
                     items = state.companies,

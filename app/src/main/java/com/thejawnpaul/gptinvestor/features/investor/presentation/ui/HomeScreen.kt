@@ -20,11 +20,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.thejawnpaul.gptinvestor.R
+import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(modifier: Modifier, navController: NavHostController? = null, viewModel: HomeViewModel) {
+fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: HomeViewModel) {
     // Home Screen
 
     val trendingStock = viewModel.trendingCompanies.collectAsState()
@@ -79,10 +80,12 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController? = null, vie
             },
             onSendClick = {
                 // navigate
+                navController.navigate(Screen.ConversationScreen.route)
             },
             onBarClick = {
                 // navigate
                 // viewModel.doSomething()
+                navController.navigate(Screen.ConversationScreen.route)
             },
             modifier = Modifier
                 .fillMaxWidth()

@@ -4,6 +4,7 @@ import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFin
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyRemote
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.TrendingRemote
+import com.thejawnpaul.gptinvestor.features.conversation.data.remote.DefaultPromptRemote
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.AnalystRatingRequest
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.AnalystRatingResponse
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.DefaultSaveResponse
@@ -41,4 +42,7 @@ interface ApiService {
 
     @GET("trending-tickers")
     suspend fun getTrendingTickers(): Response<List<TrendingRemote>>
+
+    @GET("default-prompts")
+    suspend fun getDefaultPrompts(): Response<List<DefaultPromptRemote>>
 }

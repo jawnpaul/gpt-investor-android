@@ -11,6 +11,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ConversationScreen
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationViewModel
 import com.thejawnpaul.gptinvestor.features.discover.DiscoverScreen
 import com.thejawnpaul.gptinvestor.features.history.HistoryScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.BottomNavBar
@@ -93,6 +95,12 @@ fun SetUpNavGraph(navController: NavHostController) {
                     navController = navController,
                     viewModel = parentViewModel
                 )
+            }
+
+            composable(route = Screen.ConversationScreen.route) {
+                val viewModel = hiltViewModel<ConversationViewModel>()
+
+                ConversationScreen(modifier = Modifier, viewModel = viewModel)
             }
         }
     }

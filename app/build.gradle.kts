@@ -83,6 +83,7 @@ android {
             val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
             buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
 
+            applicationIdSuffix = ".dev"
             isShrinkResources = false
             isMinifyEnabled = false
             versionNameSuffix = "-dev"

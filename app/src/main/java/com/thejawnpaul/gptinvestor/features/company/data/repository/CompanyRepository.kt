@@ -8,6 +8,7 @@ import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFin
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyFinancials
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
+import com.thejawnpaul.gptinvestor.features.company.domain.model.TrendingCompany
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -96,6 +97,32 @@ class CompanyRepository @Inject constructor(
         } else {
             val companies = companyDao.getCompaniesInSector(sector).map { it.toDomainObject() }
             emit(Either.Right(companies))
+        }
+    }
+
+    override suspend fun getTrendingCompanies(): Flow<Either<Failure, List<TrendingCompany>>> = flow {
+        try {
+            val response = apiService.getTrendingTickers()
+            if (response.isSuccessful) {
+                response.body()?.let { trendingRemoteList ->
+                    val trendingCompanies = trendingRemoteList.map { remote ->
+                        val company = companyDao.getCompany(remote.tickerSymbol)
+                        with(remote) {
+                            TrendingCompany(
+                                tickerSymbol = tickerSymbol,
+                                companyName = company.name,
+                                percentageChange = percentageChange,
+                                imageUrl = company.logoUrl
+                            )
+                        }
+                    }.sortedByDescending { it.change }.take(20)
+
+                    emit(Either.Right(trendingCompanies))
+                }
+            }
+        } catch (e: Exception) {
+            Timber.e(e.stackTraceToString())
+            emit(Either.Left(Failure.ServerError))
         }
     }
 }

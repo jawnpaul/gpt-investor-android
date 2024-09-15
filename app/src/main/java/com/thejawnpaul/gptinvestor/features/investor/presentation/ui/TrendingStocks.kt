@@ -3,8 +3,10 @@ package com.thejawnpaul.gptinvestor.features.investor.presentation.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,6 +16,8 @@ import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -23,10 +27,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
+import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 
 @Composable
 fun SingleTrendingStockItem(
@@ -48,9 +55,11 @@ fun SingleTrendingStockItem(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Text(
-                trendingStock.companyName,
+                modifier = Modifier.width(100.dp),
+                text = trendingStock.companyName,
                 maxLines = 1,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                overflow = TextOverflow.Ellipsis
             )
 
             Image(
@@ -61,9 +70,9 @@ fun SingleTrendingStockItem(
 
             AsyncImage(
                 model = trendingStock.imageUrl,
-                modifier = Modifier.width(100.dp),
+                modifier = Modifier.padding(vertical = 10.dp),
                 contentDescription = null,
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Inside
             )
 
             Image(
@@ -100,19 +109,43 @@ fun SingleTrendingStockItem(
 }
 
 @Composable
-fun TrendingStockList(modifier: Modifier = Modifier, list: List<TrendingStockPresentation>, onClick: (tickerSymbol: String) -> Unit) {
-    LazyHorizontalGrid(
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        modifier = Modifier.fillMaxWidth().height(112.dp),
-        rows = GridCells.Fixed(2),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+fun TrendingStockList(
+    modifier: Modifier = Modifier,
+    state: TrendingCompaniesView,
+    onClick: (tickerSymbol: String) -> Unit,
+    onClickRetry: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(112.dp)
     ) {
-        items(
-            items = list,
-            key = { item -> item.tickerSymbol }
-        ) { item ->
-            SingleTrendingStockItem(onClick = onClick, trendingStock = item)
+        if (state.loading) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
+
+        if (state.error != null && state.companies.isEmpty()) {
+            Button(onClick = onClickRetry, modifier = Modifier.align(Alignment.Center), enabled = !state.loading) {
+                Text(stringResource(R.string.retry))
+            }
+        }
+
+        if (state.companies.isNotEmpty()) {
+            LazyHorizontalGrid(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                modifier = Modifier
+                    .fillMaxSize(),
+                rows = GridCells.Fixed(2),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(
+                    items = state.companies,
+                    key = { item -> item.tickerSymbol }
+                ) { item ->
+                    SingleTrendingStockItem(onClick = onClick, trendingStock = item)
+                }
+            }
         }
     }
 }

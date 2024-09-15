@@ -8,6 +8,10 @@ fun Float.toCurrency(currencySymbol: String): String {
     return currencySymbol + res
 }
 
+fun Float.toTwoDecimalPlaces(): Float {
+    return kotlin.math.round(this * 100) / 100f
+}
+
 fun getCurrencySymbol(currency: String): String {
     return when (currency.lowercase()) {
         "ngn" -> {

@@ -5,6 +5,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyFinancials
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
+import com.thejawnpaul.gptinvestor.features.company.domain.model.TrendingCompany
 import kotlinx.coroutines.flow.Flow
 
 interface ICompanyRepository {
@@ -17,4 +18,6 @@ interface ICompanyRepository {
     suspend fun getCompanyFinancials(ticker: String): Flow<Either<Failure, CompanyFinancials>>
 
     suspend fun getCompaniesInSector(sector: String?): Flow<Either<Failure, List<Company>>>
+
+    suspend fun getTrendingCompanies(): Flow<Either<Failure, List<TrendingCompany>>>
 }

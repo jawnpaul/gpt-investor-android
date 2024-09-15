@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.core.api
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRemote
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyRemote
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.TrendingRemote
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.AnalystRatingRequest
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.AnalystRatingResponse
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.DefaultSaveResponse
@@ -37,4 +38,7 @@ interface ApiService {
 
     @POST("create-pdf")
     suspend fun createPdf(@Body request: DownloadPdfRequest): Response<DownloadPdfResponse>
+
+    @GET("trending-tickers")
+    suspend fun getTrendingTickers(): Response<List<TrendingRemote>>
 }

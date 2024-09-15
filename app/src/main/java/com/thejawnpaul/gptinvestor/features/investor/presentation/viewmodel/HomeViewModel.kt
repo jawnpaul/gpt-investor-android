@@ -4,13 +4,17 @@ import androidx.lifecycle.ViewModel
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
+import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetAllCompaniesUseCase
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetAllSectorUseCase
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetSectorCompaniesUseCase
+import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetTrendingCompaniesUseCase
+import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.AllCompanyView
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.AllSectorView
+import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +25,8 @@ import timber.log.Timber
 class HomeViewModel @Inject constructor(
     private val getAllSectorUseCase: GetAllSectorUseCase,
     private val getAllCompaniesUseCase: GetAllCompaniesUseCase,
-    private val getSectorCompaniesUseCase: GetSectorCompaniesUseCase
+    private val getSectorCompaniesUseCase: GetSectorCompaniesUseCase,
+    private val getTrendingCompaniesUseCase: GetTrendingCompaniesUseCase
 ) :
     ViewModel() {
 
@@ -33,9 +38,13 @@ class HomeViewModel @Inject constructor(
         MutableStateFlow(AllCompanyView())
     val allCompanies get() = _allCompanies
 
+    private val _trendingCompanies = MutableStateFlow(TrendingCompaniesView())
+    val trendingCompanies get() = _trendingCompanies
+
     init {
         getAllSector()
         getAllCompanies()
+        getTrendingCompanies()
     }
 
     private fun getAllSector() {
@@ -113,7 +122,36 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun doSomething() {
-        Timber.e("Log click event")
+    fun getTrendingCompanies() {
+        _trendingCompanies.update { it.copy(loading = true) }
+
+        getTrendingCompaniesUseCase(GetTrendingCompaniesUseCase.None()) {
+            it.onFailure {
+                _trendingCompanies.update { state ->
+                    state.copy(
+                        loading = false,
+                        error = "Something went wrong."
+                    )
+                }
+            }
+
+            it.onSuccess { result ->
+                _trendingCompanies.update { state ->
+                    state.copy(
+                        loading = false,
+                        companies = result.map { company ->
+                            with(company) {
+                                TrendingStockPresentation(
+                                    companyName = companyName,
+                                    tickerSymbol = tickerSymbol,
+                                    imageUrl = imageUrl,
+                                    percentageChange = percentageChange.toTwoDecimalPlaces()
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+        }
     }
 }

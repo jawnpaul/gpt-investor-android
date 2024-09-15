@@ -10,6 +10,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -19,7 +20,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,34 +27,7 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.Home
 fun HomeScreen(modifier: Modifier, navController: NavHostController? = null, viewModel: HomeViewModel) {
     // Home Screen
 
-    val trendingStock =
-        listOf(
-            TrendingStockPresentation(
-                companyName = "Apple",
-                tickerSymbol = "AAPL",
-                imageUrl = "",
-                1.0f
-            ),
-            TrendingStockPresentation(
-                companyName = "Microsoft",
-                tickerSymbol = "MSFT",
-                imageUrl = "",
-                -1.0f
-            ),
-
-            TrendingStockPresentation(
-                companyName = "Google",
-                tickerSymbol = "GOOGL",
-                imageUrl = "",
-                -1.0f
-            ),
-            TrendingStockPresentation(
-                companyName = "META",
-                tickerSymbol = "FB",
-                imageUrl = "",
-                -1.0f
-            )
-        )
+    val trendingStock = viewModel.trendingCompanies.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -91,8 +64,12 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController? = null, vie
             )
 
             // Trending
-            TrendingStockList(list = trendingStock) {
-            }
+            TrendingStockList(
+                modifier = Modifier,
+                state = trendingStock.value,
+                onClick = {},
+                onClickRetry = { viewModel.getTrendingCompanies() }
+            )
         }
 
         // Input layout

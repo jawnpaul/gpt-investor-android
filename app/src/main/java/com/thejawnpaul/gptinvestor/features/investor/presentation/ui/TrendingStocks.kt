@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
@@ -30,11 +30,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
+import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
 
 @Composable
 fun SingleTrendingStockItem(
@@ -71,9 +74,11 @@ fun SingleTrendingStockItem(
 
             AsyncImage(
                 model = trendingStock.imageUrl,
-                modifier = Modifier.padding(vertical = 10.dp),
+                modifier = Modifier
+                    .padding(vertical = 0.dp)
+                    .size(width = 50.dp, height = 20.dp),
                 contentDescription = null,
-                contentScale = ContentScale.Inside
+                contentScale = ContentScale.Crop
             )
 
             Image(
@@ -126,7 +131,11 @@ fun TrendingStockList(
         }
 
         if (state.error != null && state.companies.isEmpty()) {
-            Button(onClick = onClickRetry, modifier = Modifier.align(Alignment.Center), enabled = !state.loading) {
+            Button(
+                onClick = onClickRetry,
+                modifier = Modifier.align(Alignment.Center),
+                enabled = !state.loading
+            ) {
                 Text(stringResource(R.string.retry))
             }
         }
@@ -146,6 +155,62 @@ fun TrendingStockList(
                 ) { item ->
                     SingleTrendingStockItem(onClick = onClick, trendingStock = item)
                 }
+            }
+        }
+    }
+}
+
+@Preview(name = "Pixel 4", device = Devices.PHONE)
+@Composable
+fun TrendingPreview(modifier: Modifier = Modifier) {
+    val companies = listOf(
+        TrendingStockPresentation(
+            companyName = "Apple Inc",
+            tickerSymbol = "AAPL",
+            imageUrl = "",
+            percentageChange = 1.0f
+        ),
+        TrendingStockPresentation(
+            companyName = "Microsoft",
+            tickerSymbol = "MSFT",
+            imageUrl = "",
+            percentageChange = -1.0f
+        ),
+        TrendingStockPresentation(
+            companyName = "Google",
+            tickerSymbol = "GOOGL",
+            imageUrl = "",
+            percentageChange = 1.0f
+        ),
+        TrendingStockPresentation(
+            companyName = "Netflix",
+            tickerSymbol = "NTF",
+            imageUrl = "https://logo.clearbit.com/netflix.com",
+            percentageChange = 1.0f
+        ),
+        TrendingStockPresentation(
+            companyName = "Nvidia",
+            tickerSymbol = "NVDA",
+            imageUrl = "",
+            percentageChange = 1.0f
+        ),
+        TrendingStockPresentation(
+            companyName = "META",
+            tickerSymbol = "FB",
+            imageUrl = "",
+            percentageChange = -1.0f
+        )
+    )
+    val state = TrendingCompaniesView(loading = false, companies = companies, error = null)
+    GPTInvestorTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                TrendingStockList(
+                    modifier = Modifier,
+                    state = state,
+                    onClick = {},
+                    onClickRetry = {}
+                )
             }
         }
     }

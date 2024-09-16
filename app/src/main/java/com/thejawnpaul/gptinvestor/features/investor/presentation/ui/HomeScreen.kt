@@ -1,13 +1,21 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -30,7 +38,11 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
 
     val trendingStock = viewModel.trendingCompanies.collectAsState()
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
         Column(
             modifier = Modifier
                 .align(Alignment.TopStart)
@@ -73,24 +85,43 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
             )
         }
 
-        // Input layout
-        ClickableInputBar(
-            input = "",
-            onInputChanged = {
-            },
-            onSendClick = {
-                // navigate
-                navController.navigate(Screen.ConversationScreen.route)
-            },
-            onBarClick = {
-                // navigate
-                // viewModel.doSomething()
-                navController.navigate(Screen.ConversationScreen.route)
-            },
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .align(alignment = Alignment.BottomStart),
-            sendEnabled = true
-        )
+                .height(80.dp)
+                .align(Alignment.BottomStart),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp),
+                shape = RoundedCornerShape(corner = CornerSize(8.dp)),
+                border = BorderStroke(
+                    width = DividerDefaults.Thickness,
+                    color = DividerDefaults.color
+                ),
+                onClick = {
+                    navController.navigate(Screen.ConversationScreen.route)
+                }
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Text(
+                        stringResource(R.string.ask_anything_about_stocks),
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .padding(start = 16.dp)
+                    )
+
+                    Image(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 16.dp),
+                        painter = painterResource(R.drawable.send_icon),
+                        contentDescription = null
+                    )
+                }
+            }
+        }
     }
 }

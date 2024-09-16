@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
@@ -38,15 +39,20 @@ import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
 
 @Composable
-fun ConversationScreen(modifier: Modifier = Modifier, viewModel: ConversationViewModel) {
+fun ConversationScreen(modifier: Modifier = Modifier, viewModel: ConversationViewModel, navController: NavController) {
     val conversation = viewModel.conversation.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         when (conversation.value.conversation) {
             is DefaultConversation -> {
                 val default = conversation.value.conversation as DefaultConversation
-                DefaultConversationScreen(modifier = Modifier, conversation = default) {
-                }
+                DefaultConversationScreen(
+                    modifier = Modifier,
+                    conversation = default,
+                    onNavigateUp = { navController.navigateUp() },
+                    onPromptClicked = {
+                    }
+                )
             }
 
             is StructuredConversation -> {
@@ -72,7 +78,9 @@ fun ConversationScreen(modifier: Modifier = Modifier, viewModel: ConversationVie
                 viewModel.updateInput(input = input)
             },
             onSendClick = {
-            }
+            },
+            placeholder = "Ask anything about stocks",
+            shouldRequestFocus = true
         )
     }
 }
@@ -82,7 +90,8 @@ fun ConversationScreen(modifier: Modifier = Modifier, viewModel: ConversationVie
 fun DefaultConversationScreen(
     modifier: Modifier = Modifier,
     conversation: DefaultConversation,
-    onPromptClicked: (prompt: DefaultPrompt) -> Unit
+    onPromptClicked: (prompt: DefaultPrompt) -> Unit,
+    onNavigateUp: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -93,13 +102,12 @@ fun DefaultConversationScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp),
+                .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = {
-            }) {
+            IconButton(onClick = onNavigateUp) {
                 Icon(
-                    imageVector = Icons.Filled.Close,
+                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
                     contentDescription = stringResource(id = R.string.back)
                 )
             }
@@ -121,7 +129,9 @@ fun DefaultConversationScreen(
 
         // Flow row
         DefaultPrompts(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
             prompts = conversation.prompts,
             onClick = onPromptClicked
         )

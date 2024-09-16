@@ -100,7 +100,11 @@ fun SetUpNavGraph(navController: NavHostController) {
             composable(route = Screen.ConversationScreen.route) {
                 val viewModel = hiltViewModel<ConversationViewModel>()
 
-                ConversationScreen(modifier = Modifier, viewModel = viewModel)
+                ConversationScreen(
+                    modifier = Modifier,
+                    viewModel = viewModel,
+                    navController = navController
+                )
             }
         }
     }

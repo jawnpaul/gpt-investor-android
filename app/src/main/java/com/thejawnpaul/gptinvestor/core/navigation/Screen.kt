@@ -6,7 +6,7 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
     data object WebViewScreen : Screen("web_view_screen", false)
     data object ConversationScreen : Screen("conversation_screen", false)
 
-    data object HomeTabScreen : Screen("home_tab_screen", true)
+    data object HomeTabScreen : Screen("Ask AI_tab_screen", true)
     data object DiscoverTabScreen : Screen("discover_tab_screen", true)
     data object HistoryTabScreen : Screen("history_tab_screen", true)
 }

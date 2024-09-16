@@ -37,4 +37,5 @@
     <string name="ask_gpt_investor">Ask GPT Investor</string>
     <string name="ask_about">Ask about …</string>
     <string name="ask_anything_about_stocks">Ask anything about stocks …</string>
+    <string name="analysing_response">Analysing response …</string>
 </resources>

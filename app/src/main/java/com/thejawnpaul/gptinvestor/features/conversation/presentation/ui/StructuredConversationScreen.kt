@@ -42,7 +42,8 @@ import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
 fun StructuredConversationScreen(
     modifier: Modifier = Modifier,
     conversation: StructuredConversation,
-    onNavigateUp: () -> Unit
+    onNavigateUp: () -> Unit,
+    text: String
 ) {
     Column(
         modifier = Modifier
@@ -79,7 +80,7 @@ fun StructuredConversationScreen(
                 items(
                     items = conversation.messageList
                 ) { genAiMessage ->
-                    SingleStructuredResponse(modifier = Modifier, genAiMessage = genAiMessage)
+                    SingleStructuredResponse(modifier = Modifier, genAiMessage = genAiMessage, text = text)
                 }
 
                 item {
@@ -91,7 +92,11 @@ fun StructuredConversationScreen(
 }
 
 @Composable
-fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiMessage) {
+fun SingleStructuredResponse(
+    modifier: Modifier = Modifier,
+    genAiMessage: GenAiMessage,
+    text: String = ""
+) {
     if (genAiMessage.loading) {
         Column(
             modifier = Modifier
@@ -133,7 +138,7 @@ fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiM
             }
         }
     } else {
-        genAiMessage.response?.let { text ->
+        genAiMessage.response?.let { b ->
             OutlinedCard(modifier = Modifier.padding(16.dp)) {
                 Text(
                     genAiMessage.query,
@@ -141,7 +146,7 @@ fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiM
                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
                 )
 
-                ExpandableRichText(text = text, modifier = Modifier.padding(8.dp))
+                ExpandableRichText(text = b, modifier = Modifier.padding(8.dp))
             }
         }
     }
@@ -168,9 +173,11 @@ fun ConversationPreview(modifier: Modifier = Modifier) {
         StructuredConversation(id = 1, title = "Aak me", messageList = messages.toMutableList())
     GPTInvestorTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            StructuredConversationScreen(modifier = Modifier, conversation = conversation) {
-
-            }
+            StructuredConversationScreen(
+                modifier = Modifier,
+                conversation = conversation,
+                text = "",
+                onNavigateUp = {})
         }
     }
 }

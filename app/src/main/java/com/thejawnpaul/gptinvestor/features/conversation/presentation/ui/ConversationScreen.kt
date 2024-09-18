@@ -11,9 +11,12 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
@@ -27,7 +30,8 @@ fun ConversationScreen(
     viewModel: ConversationViewModel,
     navController: NavController
 ) {
-    val conversation = viewModel.conversation.collectAsState()
+    val conversation = viewModel.conversation.collectAsStateWithLifecycle()
+    val genText = viewModel.genText.collectAsStateWithLifecycle()
 
     Box(modifier = Modifier.fillMaxSize()) {
         when (conversation.value.conversation) {
@@ -44,12 +48,12 @@ fun ConversationScreen(
             }
 
             is StructuredConversation -> {
-                val structuredConversation =
-                    conversation.value.conversation as StructuredConversation
+                //Try to pass in the VM instance down
                 StructuredConversationScreen(
                     modifier = Modifier,
-                    conversation = structuredConversation,
-                    onNavigateUp = { navController.navigateUp() })
+                    conversation = conversation.value.conversation as StructuredConversation,
+                    onNavigateUp = { navController.navigateUp() }, text = genText.value
+                )
             }
 
             is UnStructuredConversation -> {

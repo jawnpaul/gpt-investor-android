@@ -24,6 +24,9 @@ class ConversationViewModel @Inject constructor(
     private val conversationViewMutableStateFlow = MutableStateFlow(ConversationView())
     val conversation get() = conversationViewMutableStateFlow
 
+    private val _genText = MutableStateFlow("I am default")
+    val genText = _genText
+
     init {
         getDefaultPrompts()
     }
@@ -54,8 +57,11 @@ class ConversationViewModel @Inject constructor(
             }
             it.onSuccess { result ->
                 val a = result as StructuredConversation
+                _genText.update {
+                    a.messageList.first().response.toString()
+                }
                 conversationViewMutableStateFlow.update { state ->
-                    state.copy(loading = a.messageList.last().loading, conversation = result)
+                    state.copy(loading = a.messageList.last().loading, conversation = a)
                 }
             }
         }

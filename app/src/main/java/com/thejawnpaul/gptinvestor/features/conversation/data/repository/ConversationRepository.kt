@@ -71,6 +71,8 @@ class ConversationRepository @Inject constructor(
         flow {
             try {
 
+                val chunk = StringBuilder()
+
                 analyticsLogger.logDefaultPromptSelected(
                     promptTitle = prompt.title,
                     promptQuery = prompt.query
@@ -96,7 +98,25 @@ class ConversationRepository @Inject constructor(
                     }
                 }
 
-                val response = model.generateContent(prompt.query)
+                val response = model.generateContentStream(prompt = prompt.query)
+                response.collect{ result->
+                    result.text?.let { responseText->
+
+                        chunk.append(responseText)
+
+                        val lastIndex = structuredConversation.messageList.lastIndex
+                        val last = structuredConversation.messageList[lastIndex].copy(
+                            query = prompt.query,
+                            response = chunk.toString(),
+                            loading = false
+                        )
+                        structuredConversation.messageList[lastIndex] = last
+
+                        emit(Either.Right(structuredConversation))
+                    }
+                }
+
+                /*val response = model.generateContent(prompt.query)
                 response.text?.let { responseText ->
                     // create conversation object
 
@@ -109,7 +129,7 @@ class ConversationRepository @Inject constructor(
                     structuredConversation.messageList[lastIndex] = last
 
                     emit(Either.Right(structuredConversation))
-                }
+                }*/
             } catch (e: Exception) {
                 when (e) {
                     is GoogleGenerativeAIException -> {

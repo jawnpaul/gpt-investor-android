@@ -8,6 +8,7 @@ import com.google.ai.client.generativeai.type.SafetySetting
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
 import com.thejawnpaul.gptinvestor.BuildConfig
+import com.thejawnpaul.gptinvestor.core.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
@@ -21,18 +22,23 @@ import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import javax.inject.Inject
 
-class ConversationRepository @Inject constructor(private val apiService: ApiService) :
+class ConversationRepository @Inject constructor(
+    private val apiService: ApiService,
+    private val analyticsLogger: AnalyticsLogger
+) :
     IConversationRepository {
     private val newModel = "gemini-1.5-pro-latest"
     private val oldModel = "gemini-1.0-pro"
+    private val flashModel = "gemini-1.5-flash"
+
     private val generativeModel = GenerativeModel(
-        modelName = newModel,
+        modelName = flashModel,
         apiKey = BuildConfig.GEMINI_API_KEY,
         generationConfig = generationConfig {
             temperature = 0.2f
             topK = 1
             topP = 1f
-            maxOutputTokens = 2048
+            maxOutputTokens = 1024
         },
         safetySettings = listOf(
             SafetySetting(HarmCategory.HARASSMENT, BlockThreshold.MEDIUM_AND_ABOVE),
@@ -64,6 +70,12 @@ class ConversationRepository @Inject constructor(private val apiService: ApiServ
     override suspend fun getDefaultPromptResponse(prompt: DefaultPrompt): Flow<Either<Failure, Conversation>> =
         flow {
             try {
+
+                analyticsLogger.logDefaultPromptSelected(
+                    promptTitle = prompt.title,
+                    promptQuery = prompt.query
+                )
+
                 val structuredConversation = StructuredConversation(
                     id = 0,
                     title = prompt.title,

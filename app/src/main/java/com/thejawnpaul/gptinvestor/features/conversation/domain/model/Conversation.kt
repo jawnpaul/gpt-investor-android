@@ -18,4 +18,9 @@ data class DefaultConversation(
     val prompts: List<DefaultPrompt> = emptyList()
 ) : Conversation
 
-data class GenAiMessage(val query: String, val response: String? = null, val loading: Boolean = true)
+data class GenAiMessage(
+    val id: Long = 0,
+    val query: String,
+    val response: String? = null,
+    val loading: Boolean = true
+)

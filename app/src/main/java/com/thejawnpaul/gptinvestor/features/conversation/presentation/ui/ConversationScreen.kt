@@ -10,9 +10,6 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -25,11 +22,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
 
 @Composable
-fun ConversationScreen(
-    modifier: Modifier = Modifier,
-    viewModel: ConversationViewModel,
-    navController: NavController
-) {
+fun ConversationScreen(modifier: Modifier = Modifier, viewModel: ConversationViewModel, navController: NavController) {
     val conversation = viewModel.conversation.collectAsStateWithLifecycle()
     val genText = viewModel.genText.collectAsStateWithLifecycle()
 
@@ -48,11 +41,12 @@ fun ConversationScreen(
             }
 
             is StructuredConversation -> {
-                //Try to pass in the VM instance down
+                // Try to pass in the VM instance down
                 StructuredConversationScreen(
                     modifier = Modifier,
                     conversation = conversation.value.conversation as StructuredConversation,
-                    onNavigateUp = { navController.navigateUp() }, text = genText.value
+                    onNavigateUp = { navController.navigateUp() },
+                    text = genText.value
                 )
             }
 
@@ -76,6 +70,7 @@ fun ConversationScreen(
                 viewModel.updateInput(input = input)
             },
             onSendClick = {
+                viewModel.getInputResponse()
             },
             placeholder = "Ask anything about stocks",
             shouldRequestFocus = true

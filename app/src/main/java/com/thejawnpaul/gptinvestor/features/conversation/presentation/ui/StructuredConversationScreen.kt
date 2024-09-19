@@ -73,14 +73,19 @@ fun StructuredConversationScreen(
 
         if (conversation.messageList.isNotEmpty()) {
             LazyColumn(
-                contentPadding = PaddingValues(vertical = 0.dp),
+                contentPadding = PaddingValues(vertical = 16.dp),
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(
-                    items = conversation.messageList
+                    items = conversation.messageList,
+                    key = { item -> item.id }
                 ) { genAiMessage ->
-                    SingleStructuredResponse(modifier = Modifier, genAiMessage = genAiMessage, text = text)
+                    SingleStructuredResponse(
+                        modifier = Modifier,
+                        genAiMessage = genAiMessage,
+                        text = text
+                    )
                 }
 
                 item {
@@ -92,11 +97,7 @@ fun StructuredConversationScreen(
 }
 
 @Composable
-fun SingleStructuredResponse(
-    modifier: Modifier = Modifier,
-    genAiMessage: GenAiMessage,
-    text: String = ""
-) {
+fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiMessage, text: String = "") {
     if (genAiMessage.loading) {
         Column(
             modifier = Modifier
@@ -139,7 +140,7 @@ fun SingleStructuredResponse(
         }
     } else {
         genAiMessage.response?.let { b ->
-            OutlinedCard(modifier = Modifier.padding(16.dp)) {
+            OutlinedCard(modifier = Modifier.padding(horizontal = 16.dp)) {
                 Text(
                     genAiMessage.query,
                     modifier = Modifier.padding(8.dp),
@@ -150,7 +151,6 @@ fun SingleStructuredResponse(
             }
         }
     }
-
 }
 
 @Preview
@@ -165,8 +165,7 @@ fun ConversationPreview(modifier: Modifier = Modifier) {
         GenAiMessage(
             query = "What are the latest prediction for netflix stock price?",
             loading = false,
-            response = "I am a fan of Manchester United based in Nigeria and also interested in the success of the club in general so I want the club to success so much so that it" +
-                    "can be well with the club in all endeavours"
+            response = ""
         )
     )
     val conversation =
@@ -177,7 +176,8 @@ fun ConversationPreview(modifier: Modifier = Modifier) {
                 modifier = Modifier,
                 conversation = conversation,
                 text = "",
-                onNavigateUp = {})
+                onNavigateUp = {}
+            )
         }
     }
 }

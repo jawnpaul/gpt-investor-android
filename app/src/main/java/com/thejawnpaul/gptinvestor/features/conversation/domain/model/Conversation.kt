@@ -1,5 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.conversation.domain.model
 
+import com.thejawnpaul.gptinvestor.features.company.data.local.model.CompanyEntity
+
 sealed interface Conversation {
 
     val id: Long
@@ -18,9 +20,23 @@ data class DefaultConversation(
     val prompts: List<DefaultPrompt> = emptyList()
 ) : Conversation
 
-data class GenAiMessage(
-    val id: Long = 0,
+data class GenAiTextMessage(
+    override val id: Long = 0,
     val query: String,
-    val response: String? = null,
-    val loading: Boolean = true
-)
+    override val response: String? = null,
+    override val loading: Boolean = true
+) : GenAiMessage
+
+sealed interface GenAiMessage {
+    val id: Long
+    val response: String?
+    val loading: Boolean
+}
+
+data class GenAiEntityMessage(override val id: Long = 1, val entity: CompanyEntity? = null) :
+    GenAiMessage {
+    override val response: String
+        get() = ""
+    override val loading: Boolean
+        get() = true
+}

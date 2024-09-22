@@ -2,6 +2,7 @@ package com.thejawnpaul.gptinvestor.features.conversation.data.repository
 
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.BlockThreshold
+import com.google.ai.client.generativeai.type.Content
 import com.google.ai.client.generativeai.type.GoogleGenerativeAIException
 import com.google.ai.client.generativeai.type.HarmCategory
 import com.google.ai.client.generativeai.type.SafetySetting
@@ -13,11 +14,15 @@ import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.utility.Constants
+import com.thejawnpaul.gptinvestor.features.company.data.local.dao.CompanyDao
+import com.thejawnpaul.gptinvestor.features.company.data.local.model.CompanyEntity
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
+import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityRequest
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.ConversationPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
-import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiMessage
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntityMessage
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
 import javax.inject.Inject
@@ -27,7 +32,8 @@ import timber.log.Timber
 
 class ConversationRepository @Inject constructor(
     private val apiService: ApiService,
-    private val analyticsLogger: AnalyticsLogger
+    private val analyticsLogger: AnalyticsLogger,
+    private val companyDao: CompanyDao
 ) :
     IConversationRepository {
 
@@ -78,8 +84,6 @@ class ConversationRepository @Inject constructor(
 
     override suspend fun getDefaultPromptResponse(prompt: DefaultPrompt): Flow<Either<Failure, Conversation>> = flow {
         try {
-            // Create a new conversation object, get its id, use the id as Conversation_id
-
             val chunk = StringBuilder()
 
             analyticsLogger.logDefaultPromptSelected(
@@ -91,19 +95,24 @@ class ConversationRepository @Inject constructor(
                 id = conversationId,
                 title = prompt.title,
                 messageList = mutableListOf(
-                    GenAiMessage(query = prompt.query, loading = true)
+                    GenAiTextMessage(query = prompt.query, loading = true)
                 )
             )
             emit(Either.Right(structuredConversation))
 
-            val response = generativeModel.generateContentStream(prompt = prompt.query)
+            val m = generativeModel.startChat(history = getHistory(structuredConversation))
+
+            val response = m.sendMessageStream(prompt.query)
+
             response.collect { result ->
                 result.text?.let { responseText ->
 
                     chunk.append(responseText)
 
                     val lastIndex = structuredConversation.messageList.lastIndex
-                    val last = structuredConversation.messageList[lastIndex].copy(
+                    val message =
+                        structuredConversation.messageList[lastIndex] as GenAiTextMessage
+                    val last = message.copy(
                         query = prompt.query,
                         response = chunk.toString(),
                         loading = false
@@ -115,21 +124,6 @@ class ConversationRepository @Inject constructor(
                     database[conversationId] = structuredConversation
                 }
             }
-
-                /*val response = model.generateContent(prompt.query)
-                response.text?.let { responseText ->
-                    // create conversation object
-
-                    val lastIndex = structuredConversation.messageList.lastIndex
-                    val last = structuredConversation.messageList[lastIndex].copy(
-                        query = prompt.query,
-                        response = responseText,
-                        loading = false
-                    )
-                    structuredConversation.messageList[lastIndex] = last
-
-                    emit(Either.Right(structuredConversation))
-                }*/
         } catch (e: Exception) {
             when (e) {
                 is GoogleGenerativeAIException -> {
@@ -147,84 +141,126 @@ class ConversationRepository @Inject constructor(
 
     override suspend fun getInputResponse(prompt: ConversationPrompt): Flow<Either<Failure, Conversation>> = flow {
         try {
+            val conversation = getConversation(prompt)
+
+            var entity: CompanyEntity? = null
+            // check if input string contains entity
+            val entityList = containsEntity(prompt.query)
+            if (entityList.isNotEmpty()) {
+                val ticker = entityList.first()
+                val company = companyDao.getCompany(ticker)
+                // emit company
+                val newId =
+                    if (conversation.messageList.isNotEmpty()) conversation.messageList.last().id + 1 else 0
+                conversation.messageList.add(GenAiEntityMessage(id = newId, entity = company))
+
+                emit(Either.Right(conversation))
+
+                // add company to conversation history
+
+                entity = company
+            }
+
             // if there's an existing conversation, append new message else create a new conversation
             if (database.containsKey(prompt.conversationId)) {
                 Timber.e("Existing conversation")
+
                 val chunk = StringBuilder()
 
                 // get the previous messages in the conversation, add as context
-                val conv = database[prompt.conversationId] as StructuredConversation
-                val prevMessageList = conv.messageList
 
-                val newMessageId = prevMessageList.last().id + 1
+                val newMessageId =
+                    if (conversation.messageList.isNotEmpty()) conversation.messageList.last().id + 1 else 0
                 val message =
-                    GenAiMessage(id = newMessageId, query = prompt.query, loading = true)
+                    GenAiTextMessage(id = newMessageId, query = prompt.query, loading = true)
 
-                prevMessageList.add(message)
+                conversation.messageList.add(message)
 
-                emit(Either.Right(conv))
+                emit(Either.Right(conversation))
 
-                val model = generativeModel.apply {
-                    content {
-                        text(Constants.SYSTEM_INSTRUCTIONS)
-                    }
-                }
+                Timber.e(conversation.toString())
 
-                val response = model.generateContentStream(prompt.query)
+                val m = generativeModel.startChat(history = getHistory(conversation))
+
+                val response = m.sendMessageStream(prompt.query)
                 response.collect { result ->
                     result.text?.let { responseText ->
 
                         chunk.append(responseText)
 
-                        val lastIndex = conv.messageList.lastIndex
-                        val last = conv.messageList[lastIndex].copy(
-                            query = prompt.query,
-                            response = chunk.toString(),
-                            loading = false
-                        )
-                        conv.messageList[lastIndex] = last
+                        val lastIndex = conversation.messageList.lastIndex
+                        val lastMessage =
+                            conversation.messageList[lastIndex]
 
-                        emit(Either.Right(conv))
+                        when (lastMessage) {
+                            is GenAiTextMessage -> {
+                                val last = lastMessage.copy(
+                                    query = prompt.query,
+                                    response = chunk.toString(),
+                                    loading = false
+                                )
+                                conversation.messageList[lastIndex] = last
 
-                        database[conversationId] = conv
+                                emit(Either.Right(conversation))
+
+                                database[conversationId] = conversation
+                            }
+
+                            is GenAiEntityMessage -> {
+                                Timber.e("Last message is Gen AI entity message")
+                            }
+                        }
                     }
                 }
             } else {
                 Timber.e("No existing conversation")
                 val chunk = StringBuilder()
 
-                val structuredConversation = StructuredConversation(
-                    id = conversationId,
-                    title = "Default title",
-                    messageList = mutableListOf(
-                        GenAiMessage(query = prompt.query, loading = true)
+                val newMessageId =
+                    if (conversation.messageList.isNotEmpty()) conversation.messageList.last().id + 1 else 0
+
+                conversation.messageList.add(
+                    GenAiTextMessage(
+                        id = newMessageId,
+                        query = prompt.query,
+                        loading = true
                     )
                 )
-                emit(Either.Right(structuredConversation))
 
-                val model = generativeModel.apply {
-                    content {
-                        text(Constants.SYSTEM_INSTRUCTIONS)
-                    }
-                }
+                emit(Either.Right(conversation))
 
-                val response = model.generateContentStream(prompt = prompt.query)
+                Timber.e(conversation.toString())
+
+                val m = generativeModel.startChat(history = getHistory(conversation))
+
+                val response = m.sendMessageStream(prompt.query)
                 response.collect { result ->
                     result.text?.let { responseText ->
 
                         chunk.append(responseText)
 
-                        val lastIndex = structuredConversation.messageList.lastIndex
-                        val last = structuredConversation.messageList[lastIndex].copy(
-                            query = prompt.query,
-                            response = chunk.toString(),
-                            loading = false
-                        )
-                        structuredConversation.messageList[lastIndex] = last
+                        val lastIndex = conversation.messageList.lastIndex
+                        val lastMessage =
+                            conversation.messageList[lastIndex]
 
-                        emit(Either.Right(structuredConversation))
+                        when (lastMessage) {
+                            is GenAiTextMessage -> {
+                                val last = lastMessage.copy(
+                                    query = prompt.query,
+                                    response = chunk.toString(),
+                                    loading = false
+                                )
+                                conversation.messageList[lastIndex] = last
 
-                        database[conversationId] = structuredConversation
+                                emit(Either.Right(conversation))
+
+                                database[conversationId] = conversation
+                            }
+
+                            is GenAiEntityMessage -> {
+                                Timber.e("Last message is Gen AI entity message")
+                            }
+                        }
                     }
                 }
             }
@@ -241,5 +277,43 @@ class ConversationRepository @Inject constructor(
                 }
             }
         }
+    }
+
+    private suspend fun containsEntity(input: String): List<String> {
+        return apiService.getEntity(GetEntityRequest(query = input)).body()?.entityList
+            ?: emptyList()
+    }
+
+    private fun getConversation(conversation: ConversationPrompt): StructuredConversation {
+        return if (database.containsKey(conversation.conversationId)) {
+            database[conversation.conversationId]!! as StructuredConversation
+        } else {
+            StructuredConversation(
+                id = conversationId,
+                title = "Default title",
+                messageList = mutableListOf()
+            )
+        }
+    }
+
+    private fun getHistory(conversation: StructuredConversation): List<Content> {
+        val history = mutableListOf<Content>()
+        conversation.messageList.forEach { message ->
+            when (message) {
+                is GenAiTextMessage -> {
+                    history.addAll(
+                        listOf(
+                            content(role = "user") { text(message.query) },
+                            content(role = "model") { text(message.response.toString()) }
+                        )
+                    )
+                }
+
+                is GenAiEntityMessage -> {
+                    history.add(content(role = "user") { text(message.entity.toString()) })
+                }
+            }
+        }
+        return history
     }
 }

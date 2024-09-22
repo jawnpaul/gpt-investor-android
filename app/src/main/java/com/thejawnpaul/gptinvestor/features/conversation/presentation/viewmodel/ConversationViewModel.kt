@@ -9,7 +9,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversati
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.ConversationPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
-import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiMessage
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefaultPromptResponseUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefaultPromptsUseCase
@@ -35,7 +35,7 @@ class ConversationViewModel @Inject constructor(
     private val _genText = MutableStateFlow("I am default")
     val genText = _genText
 
-    private val _conversationMessages = MutableStateFlow(mutableListOf<GenAiMessage>())
+    private val _conversationMessages = MutableStateFlow(mutableListOf<GenAiTextMessage>())
     val conversationMessages get() = _conversationMessages
 
     private val _selectedConversationId = MutableStateFlow(0L)
@@ -126,6 +126,7 @@ class ConversationViewModel @Inject constructor(
         _genText.update {
             conversation.messageList.last().response.toString()
         }
+
         conversationViewMutableStateFlow.update { state ->
             state.copy(
                 query = "",

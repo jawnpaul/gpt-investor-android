@@ -34,7 +34,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.ExpandableRichText
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntityMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiMessage
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
 
@@ -98,57 +100,68 @@ fun StructuredConversationScreen(
 
 @Composable
 fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiMessage, text: String = "") {
-    if (genAiMessage.loading) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Card {
-                Row(
-                    horizontalArrangement = Arrangement.Absolute.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    Text(genAiMessage.query, modifier = Modifier.padding(horizontal = 8.dp))
-
-                    Image(
-                        painter = painterResource(R.drawable.user_icon),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .padding(8.dp)
-                            .drawBehind {
-                                drawCircle(color = Color(245, 245, 245))
-                            }
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.size(16.dp))
-
-            Card {
-                Text(
-                    stringResource(R.string.analysing_response),
+    when (genAiMessage) {
+        is GenAiTextMessage -> {
+            if (genAiMessage.loading) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
-                )
+                ) {
+                    Card {
+                        Row(
+                            horizontalArrangement = Arrangement.Absolute.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                        ) {
+                            Text(
+                                genAiMessage.query,
+                                modifier = Modifier.padding(horizontal = 8.dp)
+                            )
+
+                            Image(
+                                painter = painterResource(R.drawable.user_icon),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .padding(8.dp)
+                                    .drawBehind {
+                                        drawCircle(color = Color(245, 245, 245))
+                                    }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.size(16.dp))
+
+                    Card {
+                        Text(
+                            stringResource(R.string.analysing_response),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        )
+                    }
+                }
+            } else {
+                genAiMessage.response?.let { b ->
+                    OutlinedCard(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        Text(
+                            genAiMessage.query,
+                            modifier = Modifier.padding(8.dp),
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
+                        )
+
+                        ExpandableRichText(text = b, modifier = Modifier.padding(8.dp))
+                    }
+                }
             }
         }
-    } else {
-        genAiMessage.response?.let { b ->
-            OutlinedCard(modifier = Modifier.padding(horizontal = 16.dp)) {
-                Text(
-                    genAiMessage.query,
-                    modifier = Modifier.padding(8.dp),
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
-                )
 
-                ExpandableRichText(text = b, modifier = Modifier.padding(8.dp))
-            }
+        is GenAiEntityMessage -> {
+            // Show company ui
         }
     }
 }
@@ -157,12 +170,12 @@ fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiM
 @Composable
 fun ConversationPreview(modifier: Modifier = Modifier) {
     val messages = listOf(
-        GenAiMessage(
+        GenAiTextMessage(
             query = "I am the best",
             loading = true,
             response = "I am a fan of Manchester United based in Nigeria and also interested in the success of the club in general"
         ),
-        GenAiMessage(
+        GenAiTextMessage(
             query = "What are the latest prediction for netflix stock price?",
             loading = false,
             response = ""

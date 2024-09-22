@@ -5,6 +5,8 @@ import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFin
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyRemote
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.TrendingRemote
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.DefaultPromptRemote
+import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityRequest
+import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityResponse
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.AnalystRatingRequest
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.AnalystRatingResponse
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.DefaultSaveResponse
@@ -45,4 +47,7 @@ interface ApiService {
 
     @GET("default-prompts")
     suspend fun getDefaultPrompts(): Response<List<DefaultPromptRemote>>
+
+    @POST("get-entity")
+    suspend fun getEntity(@Body request: GetEntityRequest): Response<GetEntityResponse>
 }

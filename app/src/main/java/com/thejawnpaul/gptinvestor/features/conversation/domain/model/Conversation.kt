@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.conversation.domain.model
 
 import com.thejawnpaul.gptinvestor.features.company.data.local.model.CompanyEntity
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 
 sealed interface Conversation {
 
@@ -33,7 +34,7 @@ sealed interface GenAiMessage {
     val loading: Boolean
 }
 
-data class GenAiEntityMessage(override val id: Long = 1, val entity: CompanyEntity? = null) :
+data class GenAiEntityMessage(override val id: Long = 1, val entity: CompanyDetailRemoteResponse? = null) :
     GenAiMessage {
     override val response: String
         get() = ""

@@ -33,6 +33,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.R
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.AboutStockCard
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailDataSource
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailPriceCard
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.ExpandableRichText
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntityMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiMessage
@@ -99,7 +102,11 @@ fun StructuredConversationScreen(
 }
 
 @Composable
-fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiMessage, text: String = "") {
+fun SingleStructuredResponse(
+    modifier: Modifier = Modifier,
+    genAiMessage: GenAiMessage,
+    text: String = ""
+) {
     when (genAiMessage) {
         is GenAiTextMessage -> {
             if (genAiMessage.loading) {
@@ -162,6 +169,28 @@ fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiM
 
         is GenAiEntityMessage -> {
             // Show company ui
+            Column(modifier = Modifier.fillMaxWidth()) {
+                genAiMessage.entity?.let { entity ->
+
+                    //data source
+                    CompanyDetailDataSource(list = entity.news.map { it.toPresentation() }
+                        ?: emptyList())
+
+                    //price card
+                    CompanyDetailPriceCard(
+                        ticker = entity.ticker,
+                        price = entity.price,
+                        change = entity.change,
+                        imageUrl = entity.imageUrl
+                    )
+
+                    //about company card
+                    AboutStockCard(
+                        companySummary = entity.about,
+                        companyName = entity.name
+                    )
+                }
+            }
         }
     }
 }

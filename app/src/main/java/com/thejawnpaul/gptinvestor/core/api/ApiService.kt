@@ -1,5 +1,7 @@
 package com.thejawnpaul.gptinvestor.core.api
 
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRemote
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyRemote
@@ -50,4 +52,7 @@ interface ApiService {
 
     @POST("get-entity")
     suspend fun getEntity(@Body request: GetEntityRequest): Response<GetEntityResponse>
+
+    @POST("company-info")
+    suspend fun getCompanyInfo(@Body request: CompanyDetailRemoteRequest): Response<CompanyDetailRemoteResponse>
 }

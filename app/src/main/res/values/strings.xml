@@ -38,4 +38,6 @@
     <string name="ask_about">Ask about …</string>
     <string name="ask_anything_about_stocks">Ask anything about stocks …</string>
     <string name="analysing_response">Analysing response …</string>
+    <string name="data_from">Data from</string>
+    <string name="about_company_name">About %1$s</string>
 </resources>

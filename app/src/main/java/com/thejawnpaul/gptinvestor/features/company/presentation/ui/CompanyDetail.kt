@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,12 +24,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,7 +50,9 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.HistoricalData
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.NewsPresentation
+import com.thejawnpaul.gptinvestor.features.company.presentation.state.TimePeriod
 import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
 
 @Composable
@@ -241,11 +248,13 @@ fun AboutStockCard(modifier: Modifier = Modifier, companySummary: String, compan
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CompanyDetailTab(
     modifier: Modifier = Modifier,
     selectedTabIndex: Int,
+    historicalData: List<HistoricalData>,
     onClickTab: (index: Int) -> Unit
 ) {
     val titles = listOf("Overview", "Key ratios", "News")
@@ -272,7 +281,9 @@ fun CompanyDetailTab(
 
             when (targetState) {
                 0 -> {
-
+                    CompanyHistoryGraph(
+                        historicalData = historicalData
+                    )
                 }
 
                 1 -> {
@@ -287,6 +298,87 @@ fun CompanyDetailTab(
 
     }
 }
+
+
+@Composable
+fun CompanyHistoryGraph(
+    modifier: Modifier = Modifier,
+    historicalData: List<HistoricalData>
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        var selected by remember { mutableStateOf<TimePeriod>(TimePeriod.OneYear()) }
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Start)
+            ) {
+                val default = listOf(GraphPoint(date = "", 2.0F))
+                val graphPoints = historicalData.map {
+                    with(it) {
+                        GraphPoint(
+                            date = date,
+                            amount = close.toTwoDecimalPlaces()
+                        )
+                    }
+                }
+                val points = graphPoints.ifEmpty { default }
+                when (selected) {
+                    is TimePeriod.OneYear -> {
+                        SmoothLineGraph(points)
+                    }
+
+                    is TimePeriod.OneMonth -> {
+                        SmoothLineGraph(points.takeLast(30))
+                    }
+
+                    is TimePeriod.OneWeek -> {
+                        SmoothLineGraph(points.takeLast(7))
+                    }
+
+                    is TimePeriod.ThreeMonths -> {
+                        SmoothLineGraph(points.takeLast(90))
+                    }
+                }
+            }
+
+            val options = listOf(
+                TimePeriod.OneWeek(),
+                TimePeriod.OneMonth(),
+                TimePeriod.ThreeMonths(),
+                TimePeriod.OneYear()
+            )
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
+            ) {
+                options.forEachIndexed { index, timePeriod ->
+                    SegmentedButton(
+                        icon = {},
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = options.size
+                        ),
+                        onClick = {
+                            selected = options[index]
+                        },
+                        selected = selected == timePeriod
+                    ) {
+                        Text(timePeriod.title)
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 @Preview
 @Composable
@@ -308,7 +400,10 @@ fun PreviewComposable(modifier: Modifier = Modifier) {
                     companyName = "Microsoft corporation"
                 )
 
-                CompanyDetailTab(selectedTabIndex = 1) { }
+                CompanyDetailTab(
+                    selectedTabIndex = 0,
+                    historicalData = emptyList(),
+                    onClickTab = {})
             }
         }
     }

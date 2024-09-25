@@ -36,6 +36,7 @@ import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.AboutStockCard
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailDataSource
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailPriceCard
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailTab
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.ExpandableRichText
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntityMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiMessage
@@ -173,8 +174,7 @@ fun SingleStructuredResponse(
                 genAiMessage.entity?.let { entity ->
 
                     //data source
-                    CompanyDetailDataSource(list = entity.news.map { it.toPresentation() }
-                        ?: emptyList())
+                    CompanyDetailDataSource(list = entity.news.map { it.toPresentation() })
 
                     //price card
                     CompanyDetailPriceCard(
@@ -188,6 +188,13 @@ fun SingleStructuredResponse(
                     AboutStockCard(
                         companySummary = entity.about,
                         companyName = entity.name
+                    )
+
+                    // tabs
+                    CompanyDetailTab(
+                        selectedTabIndex = 0,
+                        onClickTab = {},
+                        historicalData = entity.historicalData
                     )
                 }
             }

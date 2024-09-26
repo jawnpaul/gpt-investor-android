@@ -49,7 +49,8 @@ fun StructuredConversationScreen(
     modifier: Modifier = Modifier,
     conversation: StructuredConversation,
     onNavigateUp: () -> Unit,
-    text: String
+    text: String,
+    onClickNews: (url: String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -90,7 +91,8 @@ fun StructuredConversationScreen(
                     SingleStructuredResponse(
                         modifier = Modifier,
                         genAiMessage = genAiMessage,
-                        text = text
+                        text = text,
+                        onClickNews = onClickNews
                     )
                 }
 
@@ -106,7 +108,8 @@ fun StructuredConversationScreen(
 fun SingleStructuredResponse(
     modifier: Modifier = Modifier,
     genAiMessage: GenAiMessage,
-    text: String = ""
+    text: String = "",
+    onClickNews:(url:String) -> Unit
 ) {
     when (genAiMessage) {
         is GenAiTextMessage -> {
@@ -192,7 +195,8 @@ fun SingleStructuredResponse(
 
                     // tabs
                     CompanyDetailTab(
-                        company = entity
+                        company = entity,
+                        onClickNews = onClickNews
                     )
                 }
             }
@@ -223,7 +227,8 @@ fun ConversationPreview(modifier: Modifier = Modifier) {
                 modifier = Modifier,
                 conversation = conversation,
                 text = "",
-                onNavigateUp = {}
+                onNavigateUp = {},
+                onClickNews = {}
             )
         }
     }

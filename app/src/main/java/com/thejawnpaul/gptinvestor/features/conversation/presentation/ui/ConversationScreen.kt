@@ -22,7 +22,11 @@ import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
 
 @Composable
-fun ConversationScreen(modifier: Modifier = Modifier, viewModel: ConversationViewModel, navController: NavController) {
+fun ConversationScreen(
+    modifier: Modifier = Modifier,
+    viewModel: ConversationViewModel,
+    navController: NavController
+) {
     val conversation = viewModel.conversation.collectAsStateWithLifecycle()
     val genText = viewModel.genText.collectAsStateWithLifecycle()
 
@@ -46,7 +50,8 @@ fun ConversationScreen(modifier: Modifier = Modifier, viewModel: ConversationVie
                     modifier = Modifier,
                     conversation = conversation.value.conversation as StructuredConversation,
                     onNavigateUp = { navController.navigateUp() },
-                    text = genText.value
+                    text = genText.value,
+                    onClickNews = {}
                 )
             }
 

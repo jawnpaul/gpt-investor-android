@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.features.company.presentation.ui
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -257,7 +259,8 @@ fun AboutStockCard(modifier: Modifier = Modifier, companySummary: String, compan
 @Composable
 fun CompanyDetailTab(
     modifier: Modifier = Modifier,
-    company: CompanyDetailRemoteResponse
+    company: CompanyDetailRemoteResponse,
+    onClickNews: (url: String) -> Unit
 ) {
     val titles = listOf("Overview", "Key ratios", "News")
     val selectedTabIndex = remember { mutableIntStateOf(0) }
@@ -302,7 +305,10 @@ fun CompanyDetailTab(
                 }
 
                 2 -> {
-                    Text("News")
+                    CompanyDetailsNews(
+                        modifier = Modifier,
+                        news = company.news.map { it.toPresentation() }, onClick = onClickNews
+                    )
                 }
             }
         }
@@ -436,6 +442,62 @@ fun CompanyKeyRatios(
     }
 }
 
+@Composable
+fun CompanyDetailsNews(
+    modifier: Modifier = Modifier,
+    news: List<NewsPresentation>,
+    onClick: (url: String) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        news.take(3).forEach { item ->
+            CompanyDetailNewsItem(news = item, onClick = onClick)
+        }
+    }
+}
+
+@Composable
+fun CompanyDetailNewsItem(
+    modifier: Modifier = Modifier,
+    news: NewsPresentation,
+    onClick: (url: String) -> Unit
+) {
+    OutlinedCard(modifier = Modifier.padding(top = 16.dp)) {
+        Column(modifier = Modifier.padding(8.dp)) {
+            Text(
+                text = news.publisher,
+                modifier = Modifier.padding(bottom = 8.dp),
+                maxLines = 2,
+                style = MaterialTheme.typography.titleMedium,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Text(
+                modifier = Modifier.padding(bottom = 8.dp),
+                text = news.title,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Column(modifier = Modifier
+                .padding(bottom = 4.dp)
+                .clickable { onClick(news.link) }) {
+                Row {
+                    Text(stringResource(R.string.learn_more).uppercase())
+                    Image(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = null
+                    )
+                }
+                HorizontalDivider(modifier = Modifier.width(128.dp))
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 fun PreviewComposable(modifier: Modifier = Modifier) {
@@ -457,6 +519,19 @@ fun PreviewComposable(modifier: Modifier = Modifier) {
                 )
 
                 CompanyKeyRatios(marketCap = 120000000L, peRatio = 45.3F, revenue = 1010000L)
+
+                CompanyDetailNewsItem(
+                    news = NewsPresentation(
+                        title = "The strength of the black panther has been stripped away",
+                        id = "",
+                        type = "",
+                        relativeDate = "",
+                        publisher = "Yahoo Finance",
+                        imageUrl = "",
+                        link = ""
+                    )
+                ) { }
+
             }
         }
     }

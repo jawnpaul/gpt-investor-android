@@ -40,4 +40,6 @@
     <string name="analysing_response">Analysing response …</string>
     <string name="data_from">Data from</string>
     <string name="about_company_name">About %1$s</string>
+    <string name="pe_ratio">p/e ratio</string>
+    <string name="revenue">revenue</string>
 </resources>

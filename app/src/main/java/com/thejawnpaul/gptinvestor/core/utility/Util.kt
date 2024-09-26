@@ -35,3 +35,13 @@ fun getCurrencySymbol(currency: String): String {
         }
     }
 }
+
+fun Long.toReadable(): String {
+    return when {
+        this >= 1_000_000_000_000 -> "${"%.1f".format(this / 1e12)}T"
+        this >= 1_000_000_000 -> "${"%.1f".format(this / 1e9)}B"
+        this >= 1_000_000 -> "${"%.1f".format(this / 1e6)}M"
+        this >= 1_000 -> "${"%.1f".format(this / 1e3)}K"
+        else -> this.toString()
+    }
+}

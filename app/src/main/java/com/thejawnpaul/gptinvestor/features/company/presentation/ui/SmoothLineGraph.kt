@@ -212,6 +212,7 @@ fun DrawScope.drawHighlight(
     labelTextStyle: TextStyle
 ) {
     val amount = graphData[highlightedWeek].amount
+    val date = graphData[highlightedWeek].date
     val minAmount = graphData.minBy { it.amount }.amount
     val range = graphData.maxBy { it.amount }.amount - minAmount
     val percentageHeight = ((amount - minAmount) / range)
@@ -234,7 +235,12 @@ fun DrawScope.drawHighlight(
     )
 
     // draw info box
-    val textLayoutResult = textMeasurer.measure("$${amount}", style = labelTextStyle)
+    val textLayoutResult = textMeasurer.measure(buildString {
+        append("$${amount}")
+        append("\n")
+        append(date)
+
+    }, style = labelTextStyle)
     val highlightContainerSize = (textLayoutResult.size).toIntRect().inflate(4.dp.roundToPx()).size
     val boxTopLeft = (x - (highlightContainerSize.width / 2f))
         .coerceIn(0f, size.width - highlightContainerSize.width)
@@ -259,5 +265,5 @@ val BarColor = Color(0xffEEF3FA)
 val HighlightColor = Color.White.copy(alpha = 0.7f)
 
 /** Many thanks to
- https://github.com/riggaroo/compose-playtime/blob/main/app/src/main/java/dev/riggaroo/composeplaytime/SmoothLineGraph.kt
+https://github.com/riggaroo/compose-playtime/blob/main/app/src/main/java/dev/riggaroo/composeplaytime/SmoothLineGraph.kt
  **/

@@ -192,9 +192,7 @@ fun SingleStructuredResponse(
 
                     // tabs
                     CompanyDetailTab(
-                        selectedTabIndex = 0,
-                        onClickTab = {},
-                        historicalData = entity.historicalData
+                        company = entity
                     )
                 }
             }

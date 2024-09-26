@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +33,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -49,7 +51,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
+import com.thejawnpaul.gptinvestor.core.utility.toReadable
 import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.HistoricalData
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.NewsPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.TimePeriod
@@ -253,18 +257,17 @@ fun AboutStockCard(modifier: Modifier = Modifier, companySummary: String, compan
 @Composable
 fun CompanyDetailTab(
     modifier: Modifier = Modifier,
-    selectedTabIndex: Int,
-    historicalData: List<HistoricalData>,
-    onClickTab: (index: Int) -> Unit
+    company: CompanyDetailRemoteResponse
 ) {
     val titles = listOf("Overview", "Key ratios", "News")
+    val selectedTabIndex = remember { mutableIntStateOf(0) }
     Column(modifier = Modifier.fillMaxSize()) {
-        PrimaryTabRow(selectedTabIndex = selectedTabIndex) {
+        PrimaryTabRow(selectedTabIndex = selectedTabIndex.intValue) {
             titles.forEachIndexed { index, title ->
                 Tab(
-                    selected = selectedTabIndex == index,
+                    selected = selectedTabIndex.intValue == index,
                     onClick = {
-                        onClickTab(index)
+                        selectedTabIndex.intValue = index
                     },
                     text = {
                         Text(
@@ -277,21 +280,29 @@ fun CompanyDetailTab(
             }
         }
 
-        AnimatedContent(targetState = selectedTabIndex, label = "AnimatedContent") { targetState ->
+        AnimatedContent(
+            targetState = selectedTabIndex.intValue,
+            label = "AnimatedContent"
+        ) { targetState ->
 
             when (targetState) {
                 0 -> {
                     CompanyHistoryGraph(
-                        historicalData = historicalData
+                        historicalData = company.historicalData
                     )
                 }
 
                 1 -> {
-
+                    CompanyKeyRatios(
+                        modifier = Modifier,
+                        marketCap = company.marketCap,
+                        peRatio = company.peRatio,
+                        revenue = company.revenue
+                    )
                 }
 
                 2 -> {
-
+                    Text("News")
                 }
             }
         }
@@ -380,6 +391,51 @@ fun CompanyHistoryGraph(
 }
 
 
+@Composable
+fun CompanyKeyRatios(
+    modifier: Modifier = Modifier,
+    marketCap: Long,
+    peRatio: Float,
+    revenue: Long
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+
+        Column(modifier = Modifier.padding(top = 16.dp)) {
+            Text(
+                modifier = Modifier.padding(bottom = 16.dp),
+                text = stringResource(R.string.market_cap).uppercase(),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text("$${marketCap.toReadable()}")
+            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+        }
+
+        Column(modifier = Modifier.padding(top = 16.dp)) {
+            Text(
+                modifier = Modifier.padding(bottom = 16.dp),
+                text = stringResource(R.string.pe_ratio).uppercase(),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text("${peRatio.toTwoDecimalPlaces()}")
+            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+        }
+
+        Column(modifier = Modifier.padding(top = 16.dp)) {
+            Text(
+                modifier = Modifier.padding(bottom = 16.dp),
+                text = stringResource(R.string.revenue).uppercase(),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text("$${revenue.toReadable()}")
+            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+        }
+    }
+}
+
 @Preview
 @Composable
 fun PreviewComposable(modifier: Modifier = Modifier) {
@@ -400,10 +456,7 @@ fun PreviewComposable(modifier: Modifier = Modifier) {
                     companyName = "Microsoft corporation"
                 )
 
-                CompanyDetailTab(
-                    selectedTabIndex = 0,
-                    historicalData = emptyList(),
-                    onClickTab = {})
+                CompanyKeyRatios(marketCap = 120000000L, peRatio = 45.3F, revenue = 1010000L)
             }
         }
     }

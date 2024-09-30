@@ -15,20 +15,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun WebViewScreen(navController: NavController, viewModel: CompanyViewModel) {
-    val url = viewModel.urlToLoad.collectAsState()
+fun WebViewScreen(navController: NavController, url: String) {
 
     Scaffold(
         topBar = {
@@ -71,7 +68,7 @@ fun WebViewScreen(navController: NavController, viewModel: CompanyViewModel) {
             },
 
             update = { webView ->
-                webView.loadUrl(url.value)
+                webView.loadUrl(url)
             }
         )
     }

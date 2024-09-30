@@ -10,6 +10,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.WebViewScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ConversationScreen
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationViewModel
@@ -31,40 +32,6 @@ fun SetUpNavGraph(navController: NavHostController) {
             startDestination = Screen.HomeTabScreen.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            /*composable(route = Screen.HomeScreen.route) {
-                val homeViewModel = hiltViewModel<HomeViewModel>()
-                val companyViewModel = hiltViewModel<CompanyViewModel>()
-                HomeScreen(
-                    modifier = Modifier,
-                    navController = navController,
-                    homeViewModel = homeViewModel,
-                    companyViewModel = companyViewModel
-                )
-            }
-
-            composable(route = Screen.CompanyDetailScreen.route) { backStackEntry ->
-                val parentEntry = remember(backStackEntry) {
-                    navController.getBackStackEntry(Screen.HomeScreen.route)
-                }
-                val parentViewModel = hiltViewModel<CompanyViewModel>(parentEntry)
-
-                CompanyDetailScreen(
-                    modifier = Modifier,
-                    navController = navController,
-                    viewModel = parentViewModel
-                )
-            }
-
-            composable(
-                route = Screen.WebViewScreen.route
-            ) { backStackEntry ->
-                val parentEntry = remember(backStackEntry) {
-                    navController.getBackStackEntry(Screen.HomeScreen.route)
-                }
-                val parentViewModel = hiltViewModel<CompanyViewModel>(parentEntry)
-                WebViewScreen(navController = navController, viewModel = parentViewModel)
-            }*/
-
             composable(Screen.HomeTabScreen.route) {
                 val homeViewModel = hiltViewModel<HomeViewModel>()
                 val companyViewModel = hiltViewModel<CompanyViewModel>()
@@ -105,6 +72,12 @@ fun SetUpNavGraph(navController: NavHostController) {
                     viewModel = viewModel,
                     navController = navController
                 )
+            }
+
+            composable(route = Screen.WebViewScreen.route) { navBackStackEntry ->
+
+                val data = navBackStackEntry.arguments?.getString("url") ?: ""
+                WebViewScreen(navController = navController, url = data)
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.company.presentation.ui
 
+import android.net.Uri
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -484,7 +485,7 @@ fun CompanyDetailNewsItem(
 
             Column(modifier = Modifier
                 .padding(bottom = 4.dp)
-                .clickable { onClick(news.link) }) {
+                .clickable { onClick(Uri.encode(news.link)) }) {
                 Row {
                     Text(stringResource(R.string.learn_more).uppercase())
                     Image(

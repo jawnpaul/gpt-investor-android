@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.UnStructuredConversation
@@ -51,7 +52,9 @@ fun ConversationScreen(
                     conversation = conversation.value.conversation as StructuredConversation,
                     onNavigateUp = { navController.navigateUp() },
                     text = genText.value,
-                    onClickNews = {}
+                    onClickNews = {
+                        navController.navigate(Screen.WebViewScreen.createRoute(it))
+                    }
                 )
             }
 

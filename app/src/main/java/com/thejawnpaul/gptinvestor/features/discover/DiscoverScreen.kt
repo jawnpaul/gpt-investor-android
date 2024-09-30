@@ -110,8 +110,7 @@ fun DiscoverScreen(
                     key = { company -> company.ticker }
                 ) { company ->
                     SingleCompanyItem(modifier = Modifier, company = company, onClick = {
-                        companyViewModel.getCompany(it)
-                        navController.navigate(Screen.CompanyDetailScreen.route)
+
                     })
                 }
             }

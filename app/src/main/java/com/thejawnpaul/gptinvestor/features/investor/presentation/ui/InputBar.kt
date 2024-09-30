@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.R
@@ -86,7 +87,13 @@ fun InputBar(
                         imeAction = ImeAction.Send
                     ),
                     keyboardActions = KeyboardActions(onSend = { onSendClick() }),
-                    placeholder = { Text(text = placeholder) },
+                    placeholder = {
+                        Text(
+                            text = placeholder,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.background,
                         unfocusedContainerColor = MaterialTheme.colorScheme.background,

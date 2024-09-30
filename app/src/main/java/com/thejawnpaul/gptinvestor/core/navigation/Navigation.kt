@@ -54,13 +54,13 @@ fun SetUpNavGraph(navController: NavHostController) {
             composable(Screen.HistoryTabScreen.route) { HistoryScreen() }
 
             composable(route = Screen.CompanyDetailScreen.route) { backStackEntry ->
-
                 val parentViewModel = hiltViewModel<CompanyViewModel>()
-
+                val ticker = backStackEntry.arguments?.getString("ticker") ?: ""
                 CompanyDetailScreen(
                     modifier = Modifier,
                     navController = navController,
-                    viewModel = parentViewModel
+                    viewModel = parentViewModel,
+                    ticker = ticker
                 )
             }
 

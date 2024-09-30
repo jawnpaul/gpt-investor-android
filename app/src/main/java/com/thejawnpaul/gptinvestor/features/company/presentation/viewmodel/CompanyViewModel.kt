@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
@@ -28,10 +29,10 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.state.FinalAna
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.IndustryRatingView
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.SimilarCompaniesView
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltViewModel
 class CompanyViewModel @Inject constructor(
@@ -43,7 +44,8 @@ class CompanyViewModel @Inject constructor(
     private val analystRatingUseCase: GetAnalystRatingUseCase,
     private val industryRatingUseCase: GetIndustryRatingUseCase,
     private val finalRatingUseCase: GetFinalRatingUseCase,
-    private val downloadPdfUseCase: DownloadPdfUseCase
+    private val downloadPdfUseCase: DownloadPdfUseCase,
+    private val savedStateHandle: SavedStateHandle
 
 ) : ViewModel() {
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
@@ -81,16 +83,30 @@ class CompanyViewModel @Inject constructor(
 
     private var companyTicker = ""
 
-    fun getCompany(ticker: String) {
-        companyTicker = ticker
-        getCompanyFinancials(ticker)
-        getCompanyUseCase(ticker) {
-            it.onFailure {
-            }
+    private val selectedCompanyTicker: String?
+        get() = savedStateHandle.get<String>("ticker")
 
-            it.onSuccess { company ->
-                _selectedCompany.update { view ->
-                    view.copy(company = company.toPresentation())
+    fun updateTicker(ticker: String) {
+        savedStateHandle["ticker"] = ticker
+        getCompany()
+    }
+
+    private fun getCompany() {
+        selectedCompanyTicker?.let { ticker ->
+            _selectedCompany.update { it.copy(loading = true) }
+            getCompanyUseCase(ticker) {
+                it.onFailure {
+                    _selectedCompany.update { state ->
+                        state.copy(
+                            loading = false,
+                            error = "Something went wrong."
+                        )
+                    }
+                }
+                it.onSuccess { company ->
+                    _selectedCompany.update { view ->
+                        view.copy(company = company, loading = false)
+                    }
                 }
             }
         }

@@ -1,137 +1,145 @@
 package com.thejawnpaul.gptinvestor.features.company.presentation.ui
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumTopAppBar
-import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.thejawnpaul.gptinvestor.R
+import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewModel: CompanyViewModel) {
+fun CompanyDetailScreen(
+    modifier: Modifier,
+    navController: NavController,
+    viewModel: CompanyViewModel,
+    ticker: String
+) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val selectedCompany = viewModel.selectedCompany.collectAsState()
 
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            MediumTopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary
-                ),
-                title = {
-                    Text(
-                        text = selectedCompany.value.company?.name ?: "",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        navController.navigateUp()
-                        viewModel.resetSimilarCompanies()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = stringResource(id = R.string.back)
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = {
-                    }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Star,
-                            contentDescription = stringResource(id = R.string.star)
-                        )
-                    }
-                },
-                scrollBehavior = scrollBehavior
-            )
-        }
-    ) { innerPadding ->
-        val state = viewModel.selectedTab.collectAsState()
+    LaunchedEffect(ticker) {
+        viewModel.updateTicker(ticker)
+    }
 
-        val titles = listOf("Data", "News", "AI")
-        Box(
+    Column(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .padding(innerPadding)
-                .fillMaxSize()
+                .fillMaxWidth()
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
         ) {
-            Column(
+
+            Row(
                 modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 0.dp)
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                PrimaryTabRow(selectedTabIndex = state.value) {
-                    titles.forEachIndexed { index, title ->
-                        Tab(
-                            selected = state.value == index,
-                            onClick = {
-                                viewModel.selectTab(index)
-                            },
-                            text = {
-                                Text(
-                                    text = title,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        )
-                    }
+                IconButton(onClick = { navController.navigateUp() }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                        contentDescription = stringResource(id = R.string.back)
+                    )
                 }
-                AnimatedContent(targetState = state.value) { targetState ->
-                    when (targetState) {
-                        0 -> {
-                            CompanyDataScreen(modifier = Modifier, viewModel = viewModel)
-                        }
 
-                        1 -> {
-                            CompanyNewsScreen(
-                                modifier = Modifier,
-                                navController = navController,
-                                viewModel = viewModel
-                            )
-                        }
-
-                        2 -> {
-                            AIInvestorScreen(
-                                modifier = Modifier,
-                                navController = navController,
-                                viewModel = viewModel
-                            )
-                        }
-                    }
-                }
+                Text(
+                    text = selectedCompany.value.company?.name ?: "",
+                    style = MaterialTheme.typography.headlineSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
+
+            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+
+            if (selectedCompany.value.loading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
+
+            selectedCompany.value.company?.let { company ->
+                //data source
+                CompanyDetailDataSource(
+                    list = company.news.map { it.toPresentation() },
+                    source = company.newsSourcesString
+                )
+
+                //price card
+                CompanyDetailPriceCard(
+                    ticker = company.ticker,
+                    price = company.price,
+                    change = company.change,
+                    imageUrl = company.imageUrl
+                )
+
+                //about company card
+                AboutStockCard(
+                    companySummary = company.about,
+                    companyName = company.name
+                )
+
+                // tabs
+                CompanyDetailTab(
+                    company = company,
+                    onClickNews = {
+                        navController.navigate(Screen.WebViewScreen.createRoute(it))
+                    }
+                )
+            }
+
         }
+        InputBar(
+            modifier = Modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(
+                    WindowInsets.ime.exclude(
+                        WindowInsets.navigationBars
+                    )
+                ),
+            input = "",
+            contentPadding = PaddingValues(0.dp),
+            sendEnabled = false,
+            onInputChanged = { input ->
+
+            },
+            onSendClick = {
+            },
+            placeholder = stringResource(
+                R.string.ask_anything_about,
+                selectedCompany.value.company?.name ?: ""
+            ),
+            shouldRequestFocus = false
+        )
     }
 }

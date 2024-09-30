@@ -15,7 +15,6 @@ import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.utility.Constants
 import com.thejawnpaul.gptinvestor.features.company.data.local.dao.CompanyDao
-import com.thejawnpaul.gptinvestor.features.company.data.local.model.CompanyEntity
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
@@ -103,9 +102,9 @@ class ConversationRepository @Inject constructor(
                 )
                 emit(Either.Right(structuredConversation))
 
-                val m = generativeModel.startChat(history = getHistory(structuredConversation))
+                val chat = generativeModel.startChat(history = getHistory(structuredConversation))
 
-                val response = m.sendMessageStream(prompt.query)
+                val response = chat.sendMessageStream(prompt.query)
 
                 response.collect { result ->
                     result.text?.let { responseText ->
@@ -152,14 +151,44 @@ class ConversationRepository @Inject constructor(
                 if (entityList.isNotEmpty()) {
                     val ticker = entityList.first()
                     val company = getCompanyDetail(ticker)
-                    company?.let {
-                        // emit company
-                        val newId =
-                            if (conversation.messageList.isNotEmpty()) conversation.messageList.last().id + 1 else 0
-                        conversation.messageList.add(GenAiEntityMessage(id = newId, entity = company))
 
-                        emit(Either.Right(conversation))
-                        // add company to conversation history
+                    if (conversation.messageList.isEmpty()) {
+
+                        company?.let {
+                            // emit company
+                            val newId = 0L
+                            conversation.messageList.add(
+                                GenAiEntityMessage(
+                                    id = newId,
+                                    entity = company
+                                )
+                            )
+
+                            emit(Either.Right(conversation))
+                            // add company to conversation history
+                        }
+                    } else {
+                        // check if this returned entity doesn't exist in the conversation, add it
+                        val existingEntity = conversation.messageList.filterIsInstance<GenAiEntityMessage>().find { it.entity?.ticker == ticker }
+                        if (existingEntity == null){
+                            //add it to the conversation
+                            company?.let {
+                                // emit company
+                                val newId = conversation.messageList.last().id + 1
+                                conversation.messageList.add(
+                                    GenAiEntityMessage(
+                                        id = newId,
+                                        entity = company
+                                    )
+                                )
+
+                                emit(Either.Right(conversation))
+                                // add company to conversation history
+                            }
+                        } else {
+                            // do nothing or update it
+                        }
+
                     }
 
                 }
@@ -183,9 +212,9 @@ class ConversationRepository @Inject constructor(
 
                     Timber.e(conversation.toString())
 
-                    val m = generativeModel.startChat(history = getHistory(conversation))
+                    val chat = generativeModel.startChat(history = getHistory(conversation))
 
-                    val response = m.sendMessageStream(prompt.query)
+                    val response = chat.sendMessageStream(prompt.query)
                     response.collect { result ->
                         result.text?.let { responseText ->
 
@@ -234,9 +263,9 @@ class ConversationRepository @Inject constructor(
 
                     Timber.e(conversation.toString())
 
-                    val m = generativeModel.startChat(history = getHistory(conversation))
+                    val chat = generativeModel.startChat(history = getHistory(conversation))
 
-                    val response = m.sendMessageStream(prompt.query)
+                    val response = chat.sendMessageStream(prompt.query)
                     response.collect { result ->
                         result.text?.let { responseText ->
 

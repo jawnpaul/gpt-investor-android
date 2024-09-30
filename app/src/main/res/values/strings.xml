@@ -43,4 +43,5 @@
     <string name="pe_ratio">p/e ratio</string>
     <string name="revenue">revenue</string>
     <string name="learn_more">Learn more</string>
+    <string name="ask_anything_about">Ask anything about %1$s</string>
 </resources>

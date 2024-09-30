@@ -80,7 +80,9 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
             TrendingStockList(
                 modifier = Modifier,
                 state = trendingStock.value,
-                onClick = {},
+                onClick = {
+                    navController.navigate(Screen.CompanyDetailScreen.createRoute(it))
+                },
                 onClickRetry = { viewModel.getTrendingCompanies() }
             )
         }

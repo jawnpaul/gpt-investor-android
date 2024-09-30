@@ -51,7 +51,12 @@ data class CompanyDetailRemoteResponse(
     @field:Json(name = "historical_data") val historicalData: List<HistoricalData>,
     @field:Json(name = "company_name") val name: String,
     @field:Json(name = "logo_url") val imageUrl: String,
-)
+){
+    val newsSourcesString = buildString {
+        appendLine("- [Yahoo finance](https://finance.yahoo.com/quote/$ticker)")
+        news.forEach { appendLine("- [${it.publisher}](${it.link})") }
+    }
+}
 
 @JsonClass(generateAdapter = true)
 data class HistoricalData(

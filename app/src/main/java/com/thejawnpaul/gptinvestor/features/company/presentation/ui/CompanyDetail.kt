@@ -53,6 +53,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.halilibo.richtext.commonmark.Markdown
+import com.halilibo.richtext.ui.material3.RichText
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.core.utility.toReadable
 import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
@@ -65,14 +67,40 @@ import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
 @Composable
 fun CompanyDetailDataSource(
     modifier: Modifier = Modifier,
-    list: List<NewsPresentation> = emptyList()
+    list: List<NewsPresentation> = emptyList(),
+    source: String
 ) {
 
     var expanded by rememberSaveable { mutableStateOf(false) }
 
     OutlinedCard(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
         if (expanded) {
+            Box(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth()
+            ) {
+                RichText(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)) {
+                    Markdown(content = source)
+                }
 
+                IconButton(modifier = Modifier.align(Alignment.TopEnd), onClick = {
+                    expanded = !expanded
+                }) {
+                    Icon(
+                        imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                        contentDescription = if (expanded) {
+                            stringResource(R.string.show_less)
+                        } else {
+                            stringResource(R.string.show_more)
+                        }
+                    )
+                }
+
+
+            }
         } else {
             Row(
                 modifier = Modifier
@@ -120,7 +148,7 @@ fun CompanyDetailDataSource(
 
 
                     IconButton(onClick = {
-                        //expanded = !expanded
+                        expanded = !expanded
                     }) {
                         Icon(
                             imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
@@ -505,7 +533,7 @@ fun PreviewComposable(modifier: Modifier = Modifier) {
     GPTInvestorTheme {
         Surface {
             Column(modifier = Modifier.fillMaxSize()) {
-                CompanyDetailDataSource(list = listOf())
+                CompanyDetailDataSource(list = listOf(), source = "")
 
                 CompanyDetailPriceCard(
                     ticker = "AAPL",

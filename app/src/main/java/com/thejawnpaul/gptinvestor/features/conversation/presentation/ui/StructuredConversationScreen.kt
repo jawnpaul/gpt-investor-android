@@ -109,7 +109,7 @@ fun SingleStructuredResponse(
     modifier: Modifier = Modifier,
     genAiMessage: GenAiMessage,
     text: String = "",
-    onClickNews:(url:String) -> Unit
+    onClickNews: (url: String) -> Unit
 ) {
     when (genAiMessage) {
         is GenAiTextMessage -> {
@@ -177,7 +177,10 @@ fun SingleStructuredResponse(
                 genAiMessage.entity?.let { entity ->
 
                     //data source
-                    CompanyDetailDataSource(list = entity.news.map { it.toPresentation() })
+                    CompanyDetailDataSource(
+                        list = entity.news.map { it.toPresentation() },
+                        source = entity.newsSourcesString
+                    )
 
                     //price card
                     CompanyDetailPriceCard(

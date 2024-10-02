@@ -142,7 +142,7 @@ fun AIInvestorScreen(modifier: Modifier, navController: NavController, viewModel
         // Sentiment analysis
         AnimatedVisibility(visible = sentimentCardVisible) {
             ElevatedCard(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
-                val companyName = company.value.company?.name ?: ""
+                val companyName = company.value.companyName
                 Text(
                     text = stringResource(id = R.string.sentiment_analysis_insight),
                     style = MaterialTheme.typography.headlineSmall,

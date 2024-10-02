@@ -19,6 +19,7 @@ import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDet
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityRequest
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.ConversationPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
@@ -169,8 +170,10 @@ class ConversationRepository @Inject constructor(
                         }
                     } else {
                         // check if this returned entity doesn't exist in the conversation, add it
-                        val existingEntity = conversation.messageList.filterIsInstance<GenAiEntityMessage>().find { it.entity?.ticker == ticker }
-                        if (existingEntity == null){
+                        val existingEntity =
+                            conversation.messageList.filterIsInstance<GenAiEntityMessage>()
+                                .find { it.entity?.ticker == ticker }
+                        if (existingEntity == null) {
                             //add it to the conversation
                             company?.let {
                                 // emit company
@@ -296,6 +299,78 @@ class ConversationRepository @Inject constructor(
                         }
                     }
                 }
+            } catch (e: Exception) {
+                when (e) {
+                    is GoogleGenerativeAIException -> {
+                        Timber.e(e.stackTraceToString())
+                        emit(Either.Left(GenAIException()))
+                    }
+
+                    else -> {
+                        Timber.e(e.stackTraceToString())
+                        emit(Either.Left(Failure.ServerError))
+                    }
+                }
+            }
+        }
+
+    override suspend fun getCompanyInputResponse(prompt: CompanyPrompt): Flow<Either<Failure, Conversation>> =
+        flow {
+            try {
+                val chunk = StringBuilder()
+                Timber.e(prompt.toString())
+
+                //get conversation
+                val conversation = getConversation(ConversationPrompt(0, prompt.query))
+                if (prompt.company != null) {
+                    conversation.messageList.add(
+                        GenAiEntityMessage(id = 1, entity = prompt.company)
+                    )
+                }
+
+                val newIndex =
+                    if (conversation.messageList.isNotEmpty()) conversation.messageList.last().id + 1 else 1
+
+                conversation.messageList.add(GenAiTextMessage(id = newIndex, prompt.query))
+
+                emit(Either.Right(conversation))
+                Timber.e(conversation.toString())
+                // add query
+                val chat = generativeModel.startChat(history = getHistory(conversation))
+
+                //add text response
+                val lastIndex = conversation.messageList.lastIndex
+
+                val response = chat.sendMessageStream(prompt.query)
+                response.collect { result ->
+                    result.text?.let { responseText ->
+                        chunk.append(responseText)
+
+                        val lastMessage =
+                            conversation.messageList[lastIndex]
+
+                        when (lastMessage) {
+                            is GenAiTextMessage -> {
+                                val last = lastMessage.copy(
+                                    query = prompt.query,
+                                    response = chunk.toString(),
+                                    loading = false
+                                )
+                                conversation.messageList[lastIndex] = last
+
+                                emit(Either.Right(conversation))
+
+                                database[conversationId] = conversation
+                            }
+
+                            is GenAiEntityMessage -> {
+                                Timber.e("Last message is Gen AI entity message")
+                            }
+                        }
+                    }
+
+                }
+
             } catch (e: Exception) {
                 when (e) {
                     is GoogleGenerativeAIException -> {

@@ -42,7 +42,7 @@ fun CompanyDataScreen(modifier: Modifier, viewModel: CompanyViewModel) {
         ElevatedCard(modifier = Modifier.padding(bottom = 16.dp)) {
             CardContent(
                 title = stringResource(id = R.string.about),
-                content = company.value.company?.about ?: ""
+                content = ""
             )
         }
 

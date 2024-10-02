@@ -5,10 +5,15 @@ import androidx.lifecycle.ViewModel
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
+import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyDetailInputResponseUseCase
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyFinancialsUseCase
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyFinancialsView
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCompanyView
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyDetailDefaultConversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyPrompt
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.SimilarCompanyRequest
 import com.thejawnpaul.gptinvestor.features.investor.domain.model.CompareCompaniesRequest
 import com.thejawnpaul.gptinvestor.features.investor.domain.model.FinalAnalysisRequest
@@ -45,7 +50,8 @@ class CompanyViewModel @Inject constructor(
     private val industryRatingUseCase: GetIndustryRatingUseCase,
     private val finalRatingUseCase: GetFinalRatingUseCase,
     private val downloadPdfUseCase: DownloadPdfUseCase,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val companyDetailInputResponseUseCase: GetCompanyDetailInputResponseUseCase
 
 ) : ViewModel() {
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
@@ -81,6 +87,9 @@ class CompanyViewModel @Inject constructor(
     private val _selectedTab = MutableStateFlow(0)
     val selectedTab get() = _selectedTab
 
+    private val _genText = MutableStateFlow("")
+    val genText get() = _genText
+
     private var companyTicker = ""
 
     private val selectedCompanyTicker: String?
@@ -105,7 +114,12 @@ class CompanyViewModel @Inject constructor(
                 }
                 it.onSuccess { company ->
                     _selectedCompany.update { view ->
-                        view.copy(company = company, loading = false)
+                        view.copy(
+                            conversation = CompanyDetailDefaultConversation(
+                                id = 0,
+                                response = company
+                            ), loading = false, companyName = company.name
+                        )
                     }
                 }
             }
@@ -380,4 +394,60 @@ class CompanyViewModel @Inject constructor(
     fun selectTab(tabIndex: Int) {
         _selectedTab.update { tabIndex }
     }
+
+    fun getQuery(query: String) {
+        _selectedCompany.update { it.copy(inputQuery = query) }
+    }
+
+    fun getInputResponse() {
+        _selectedCompany.update { it.copy(loading = true) }
+        when (_selectedCompany.value.conversation) {
+            is CompanyDetailDefaultConversation -> {
+                val prompt = CompanyPrompt(
+                    query = _selectedCompany.value.inputQuery,
+                    company = (_selectedCompany.value.conversation as CompanyDetailDefaultConversation).response
+                )
+                companyDetailInputResponseUseCase(params = prompt) {
+                    it.fold(
+                        ::handleCompanyInputResponseFailure,
+                        ::handleCompanyInputResponseSuccess
+                    )
+                }
+            }
+
+            is StructuredConversation -> {
+                val prompt = CompanyPrompt(
+                    query = _selectedCompany.value.inputQuery
+                )
+                companyDetailInputResponseUseCase(params = prompt) {
+                    it.fold(
+                        ::handleCompanyInputResponseFailure,
+                        ::handleCompanyInputResponseSuccess
+                    )
+                }
+            }
+
+            else -> {
+
+            }
+        }
+    }
+
+    private fun handleCompanyInputResponseFailure(failure: Failure) {
+        _selectedCompany.update { it.copy(error = "Something went wrong.", loading = false, inputQuery = "") }
+    }
+
+    private fun handleCompanyInputResponseSuccess(conversation: Conversation) {
+        val s = conversation as StructuredConversation
+        _selectedCompany.update {
+            it.copy(
+                conversation = conversation,
+                loading = false,
+                inputQuery = ""
+            )
+        }
+        _genText.update { s.messageList.last().response.toString() }
+
+    }
+
 }

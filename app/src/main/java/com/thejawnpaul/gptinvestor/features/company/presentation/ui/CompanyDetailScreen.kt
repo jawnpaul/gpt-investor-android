@@ -32,10 +32,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyDetailDefaultConversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.StructuredConversationScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,6 +52,7 @@ fun CompanyDetailScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val selectedCompany = viewModel.selectedCompany.collectAsState()
+    val genText = viewModel.genText.collectAsStateWithLifecycle()
 
     LaunchedEffect(ticker) {
         viewModel.updateTicker(ticker)
@@ -58,64 +63,91 @@ fun CompanyDetailScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .verticalScroll(rememberScrollState())
         ) {
+            selectedCompany.value.conversation.let { conversation ->
+                when (conversation) {
+                    is CompanyDetailDefaultConversation -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .verticalScroll(rememberScrollState())
+                        ) {
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { navController.navigateUp() }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = stringResource(id = R.string.back)
-                    )
-                }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                IconButton(onClick = { navController.navigateUp() }) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                                        contentDescription = stringResource(id = R.string.back)
+                                    )
+                                }
 
-                Text(
-                    text = selectedCompany.value.company?.name ?: "",
-                    style = MaterialTheme.typography.headlineSmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+                                Text(
+                                    text = selectedCompany.value.companyName,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
 
-            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+                            HorizontalDivider(modifier = Modifier.fillMaxWidth())
 
-            if (selectedCompany.value.loading) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            }
+                            if (selectedCompany.value.loading) {
+                                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                            }
 
-            selectedCompany.value.company?.let { company ->
-                //data source
-                CompanyDetailDataSource(
-                    list = company.news.map { it.toPresentation() },
-                    source = company.newsSourcesString
-                )
+                            conversation.response?.let { company ->
+                                //data source
+                                CompanyDetailDataSource(
+                                    list = company.news.map { it.toPresentation() },
+                                    source = company.newsSourcesString
+                                )
 
-                //price card
-                CompanyDetailPriceCard(
-                    ticker = company.ticker,
-                    price = company.price,
-                    change = company.change,
-                    imageUrl = company.imageUrl
-                )
+                                //price card
+                                CompanyDetailPriceCard(
+                                    ticker = company.ticker,
+                                    price = company.price,
+                                    change = company.change,
+                                    imageUrl = company.imageUrl
+                                )
 
-                //about company card
-                AboutStockCard(
-                    companySummary = company.about,
-                    companyName = company.name
-                )
+                                //about company card
+                                AboutStockCard(
+                                    companySummary = company.about,
+                                    companyName = company.name
+                                )
 
-                // tabs
-                CompanyDetailTab(
-                    company = company,
-                    onClickNews = {
-                        navController.navigate(Screen.WebViewScreen.createRoute(it))
+                                // tabs
+                                CompanyDetailTab(
+                                    company = company,
+                                    onClickNews = {
+                                        navController.navigate(Screen.WebViewScreen.createRoute(it))
+                                    }
+                                )
+                            }
+                        }
                     }
-                )
+
+                    is StructuredConversation -> {
+                        StructuredConversationScreen(
+                            modifier = Modifier,
+                            conversation = conversation,
+                            onNavigateUp = { navController.navigateUp() },
+                            text = genText.value,
+                            onClickNews = {
+                                navController.navigate(Screen.WebViewScreen.createRoute(it))
+                            }
+                        )
+                    }
+
+                    else -> {
+
+                    }
+                }
             }
 
         }
@@ -127,17 +159,18 @@ fun CompanyDetailScreen(
                         WindowInsets.navigationBars
                     )
                 ),
-            input = "",
+            input = selectedCompany.value.inputQuery,
             contentPadding = PaddingValues(0.dp),
-            sendEnabled = false,
+            sendEnabled = selectedCompany.value.enableSend,
             onInputChanged = { input ->
-
+                viewModel.getQuery(input)
             },
             onSendClick = {
+                viewModel.getInputResponse()
             },
             placeholder = stringResource(
                 R.string.ask_anything_about,
-                selectedCompany.value.company?.name ?: ""
+                selectedCompany.value.companyName
             ),
             shouldRequestFocus = false
         )

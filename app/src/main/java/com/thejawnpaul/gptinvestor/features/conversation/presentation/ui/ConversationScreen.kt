@@ -58,7 +58,7 @@ fun ConversationScreen(
                 )
             }
 
-            is UnStructuredConversation -> {
+            else -> {
             }
         }
 

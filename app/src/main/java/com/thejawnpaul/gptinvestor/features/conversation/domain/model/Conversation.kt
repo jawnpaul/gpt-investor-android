@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.conversation.domain.model
 
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
+import com.thejawnpaul.gptinvestor.features.conversation.data.repository.Suggestion
 
 sealed interface Conversation {
 
@@ -10,7 +11,8 @@ sealed interface Conversation {
 data class StructuredConversation(
     override val id: Long,
     val title: String,
-    val messageList: MutableList<GenAiMessage> = mutableListOf()
+    val messageList: MutableList<GenAiMessage> = mutableListOf(),
+    val suggestedPrompts: List<Suggestion> = emptyList()
 ) : Conversation
 
 data class UnStructuredConversation(override val id: Long) : Conversation

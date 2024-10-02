@@ -29,6 +29,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Structured
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onCompletion
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -107,7 +108,11 @@ class ConversationRepository @Inject constructor(
 
                 val response = chat.sendMessageStream(prompt.query)
 
-                response.collect { result ->
+                response.onCompletion {
+                    val suggested = getSuggestedPrompts(conversationId)
+                    emit(Either.Right(structuredConversation.copy(suggestedPrompts = suggested)))
+                    Timber.e("Completed")
+                }.collect { result ->
                     result.text?.let { responseText ->
 
                         chunk.append(responseText)
@@ -127,6 +132,7 @@ class ConversationRepository @Inject constructor(
                         database[conversationId] = structuredConversation
                     }
                 }
+
             } catch (e: Exception) {
                 when (e) {
                     is GoogleGenerativeAIException -> {
@@ -385,6 +391,30 @@ class ConversationRepository @Inject constructor(
                 }
             }
         }
+
+    private suspend fun getSuggestedPrompts(conversationId: Long): List<Suggestion> {
+        return try {
+            val result = mutableListOf<Suggestion>()
+            val parser = SuggestionParser()
+
+            val conversation =
+                getConversation(ConversationPrompt(conversationId = conversationId, query = ""))
+            val chat = generativeModel.startChat(history = getHistory(conversation))
+            val response = chat.sendMessage(prompt = Constants.SUGGESTION_PROMPT)
+            response.text?.let {
+                val text = it.trimIndent()
+                val suggestions = parser.parseSuggestions(text)
+                suggestions?.let { suggestionsResponse ->
+                    result.addAll(suggestionsResponse.suggestions)
+                }
+            }
+            result
+
+        } catch (e: Exception) {
+            Timber.e(e.stackTraceToString())
+            emptyList()
+        }
+    }
 
     private suspend fun containsEntity(input: String): List<String> {
         return apiService.getEntity(GetEntityRequest(query = input)).body()?.entityList

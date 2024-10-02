@@ -96,6 +96,14 @@ fun StructuredConversationScreen(
                     )
                 }
 
+                item{
+                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)){
+                        conversation.suggestedPrompts.forEach {
+                            Text(it.label)
+                        }
+                    }
+                }
+
                 item {
                     Spacer(modifier = Modifier.size(100.dp))
                 }

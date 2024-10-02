@@ -147,6 +147,7 @@ dependencies {
     implementation(libs.androidx.hilt.navigation)
     implementation(libs.retrofit)
     implementation(libs.moshi.converter)
+    implementation(libs.moshi.kotlin)
     implementation(libs.okhttp.logger)
     implementation(libs.coil.compose)
     implementation(libs.core.ktx)

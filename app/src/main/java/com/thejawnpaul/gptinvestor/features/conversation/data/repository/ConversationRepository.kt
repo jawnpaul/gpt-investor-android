@@ -111,7 +111,6 @@ class ConversationRepository @Inject constructor(
                 response.onCompletion {
                     val suggested = getSuggestedPrompts(conversationId)
                     emit(Either.Right(structuredConversation.copy(suggestedPrompts = suggested)))
-                    Timber.e("Completed")
                 }.collect { result ->
                     result.text?.let { responseText ->
 
@@ -219,12 +218,14 @@ class ConversationRepository @Inject constructor(
 
                     emit(Either.Right(conversation))
 
-                    Timber.e(conversation.toString())
-
                     val chat = generativeModel.startChat(history = getHistory(conversation))
 
                     val response = chat.sendMessageStream(prompt.query)
-                    response.collect { result ->
+                    response.onCompletion {
+                        val suggested = getSuggestedPrompts(conversation.id)
+                        emit(Either.Right(conversation.copy(suggestedPrompts = suggested)))
+                        Timber.e("Completed")
+                    }.collect { result ->
                         result.text?.let { responseText ->
 
                             chunk.append(responseText)
@@ -275,7 +276,11 @@ class ConversationRepository @Inject constructor(
                     val chat = generativeModel.startChat(history = getHistory(conversation))
 
                     val response = chat.sendMessageStream(prompt.query)
-                    response.collect { result ->
+                    response.onCompletion {
+                        val suggested = getSuggestedPrompts(conversation.id)
+                        emit(Either.Right(conversation.copy(suggestedPrompts = suggested)))
+                        Timber.e("Completed")
+                    }.collect { result ->
                         result.text?.let { responseText ->
 
                             chunk.append(responseText)
@@ -348,7 +353,11 @@ class ConversationRepository @Inject constructor(
                 val lastIndex = conversation.messageList.lastIndex
 
                 val response = chat.sendMessageStream(prompt.query)
-                response.collect { result ->
+                response.onCompletion {
+                    val suggested = getSuggestedPrompts(conversation.id)
+                    emit(Either.Right(conversation.copy(suggestedPrompts = suggested)))
+                    Timber.e("Completed")
+                }.collect { result ->
                     result.text?.let { responseText ->
                         chunk.append(responseText)
 

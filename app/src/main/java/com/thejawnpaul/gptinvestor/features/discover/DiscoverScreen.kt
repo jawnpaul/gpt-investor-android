@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -47,10 +48,18 @@ fun DiscoverScreen(
             .fillMaxSize()
     ) {
         Column(modifier = Modifier) {
+            Text(
+                text = stringResource(R.string.discover_gpt_investor),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleLarge
+            )
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
+                    .padding(horizontal = 0.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 item {
@@ -62,6 +71,10 @@ fun DiscoverScreen(
                             homeViewModel.selectSector(it)
                         }
                     )
+                }
+
+                item {
+                    HorizontalDivider(modifier = Modifier.fillMaxWidth())
                 }
 
                 if (allCompaniesViewState.value.loading) {
@@ -110,7 +123,7 @@ fun DiscoverScreen(
                     key = { company -> company.ticker }
                 ) { company ->
                     SingleCompanyItem(modifier = Modifier, company = company, onClick = {
-
+                        navController.navigate(Screen.CompanyDetailScreen.createRoute(it))
                     })
                 }
             }

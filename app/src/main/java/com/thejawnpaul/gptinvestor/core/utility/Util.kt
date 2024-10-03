@@ -1,6 +1,10 @@
 package com.thejawnpaul.gptinvestor.core.utility
 
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 fun Float.toCurrency(currencySymbol: String): String {
     val formatter = DecimalFormat("###,###,##0.00")
@@ -43,5 +47,30 @@ fun Long.toReadable(): String {
         this >= 1_000_000 -> "${"%.1f".format(this / 1e6)}M"
         this >= 1_000 -> "${"%.1f".format(this / 1e3)}K"
         else -> this.toString()
+    }
+}
+
+fun Long.toReadableString(): String {
+    val currentDate = Date(this)
+    val cal = Calendar.getInstance()
+    cal.apply {
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }
+
+    // If timestamp is of today, return hh:mm format
+    if (currentDate.after(cal.time)) {
+        return "today"
+    }
+
+    cal.add(Calendar.DATE, -1)
+    return if (currentDate.after(cal.time)) {
+        // If timestamp is of yesterday return "Yesterday"
+        "Yesterday"
+    } else {
+        // If timestamp is older return the date, for eg. "Jul 05"
+        SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(currentDate)
     }
 }

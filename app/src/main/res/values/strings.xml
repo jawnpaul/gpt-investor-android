@@ -46,4 +46,5 @@
     <string name="ask_anything_about">Ask anything about %1$s</string>
     <string name="related">Related</string>
     <string name="related_to">Related to %1$s</string>
+    <string name="discover_gpt_investor">Discover GPT Investor</string>
 </resources>

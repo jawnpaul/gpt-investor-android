@@ -1,66 +1,64 @@
 package com.thejawnpaul.gptinvestor.features.company.presentation.ui
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
 
 @Composable
 fun SingleCompanyItem(modifier: Modifier, company: CompanyPresentation, onClick: (String) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .clickable {
-                onClick(company.ticker)
-            }
-    ) {
-        AsyncImage(
-            model = company.logo,
-            contentDescription = null,
+
+    OutlinedCard(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        onClick = { onClick(company.ticker) }) {
+        Column(
             modifier = Modifier
-                .padding(top = 8.dp, start = 16.dp, bottom = 0.dp)
-                .size(40.dp)
-                .clip(CircleShape),
-            contentScale = ContentScale.Crop,
-            placeholder = painterResource(id = R.drawable.baseline_downloading_24),
-            error = painterResource(id = R.drawable.baseline_error_outline_24)
-        )
+                .padding(16.dp)
+                .fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    //Text
+                    Text(text = company.ticker, style = MaterialTheme.typography.titleLarge)
 
-        Spacer(modifier = Modifier.size(8.dp))
+                    //price
+                    StockPriceText(currencySymbol = "$", amount = company.price)
 
-        Box(modifier = Modifier.fillMaxSize()) {
+                    //change pill
+                    PercentageChangePill(change = company.change, date = company.changeReadableDate)
+
+                }
+
+                AsyncImage(
+                    model = company.logo,
+                    contentDescription = null,
+                    modifier = Modifier,
+                    contentScale = ContentScale.Inside
+                )
+
+            }
+            //About
             Text(
-                text = company.name,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(top = 4.dp),
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = company.ticker,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(bottom = 4.dp),
-                style = MaterialTheme.typography.bodyLarge
+                modifier = Modifier.padding(top = 16.dp),
+                text = company.summary,
+                maxLines = 4,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

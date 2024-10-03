@@ -433,8 +433,28 @@ class CompanyViewModel @Inject constructor(
         }
     }
 
+    fun getSuggestedPromptResponse(query: String) {
+        _selectedCompany.update { it.copy(loading = true) }
+        val prompt = CompanyPrompt(
+            query = query
+        )
+        companyDetailInputResponseUseCase(params = prompt) {
+            it.fold(
+                ::handleCompanyInputResponseFailure,
+                ::handleCompanyInputResponseSuccess
+            )
+        }
+    }
+
     private fun handleCompanyInputResponseFailure(failure: Failure) {
-        _selectedCompany.update { it.copy(error = "Something went wrong.", loading = false, inputQuery = "") }
+        Timber.e(failure.toString())
+        _selectedCompany.update {
+            it.copy(
+                error = "Something went wrong.",
+                loading = false,
+                inputQuery = ""
+            )
+        }
     }
 
     private fun handleCompanyInputResponseSuccess(conversation: Conversation) {

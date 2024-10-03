@@ -140,6 +140,9 @@ fun CompanyDetailScreen(
                             text = genText.value,
                             onClickNews = {
                                 navController.navigate(Screen.WebViewScreen.createRoute(it))
+                            },
+                            onClickSuggestion = {
+                                viewModel.getSuggestedPromptResponse(it.query)
                             }
                         )
                     }

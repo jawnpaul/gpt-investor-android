@@ -30,7 +30,8 @@ object Constants {
 
 
     const val SUGGESTION_PROMPT =
-        "Based on our conversation history, generate two relevant follow-up prompts that the user might find helpful or interesting. Format your response as a JSON object with an array of two suggestions. Each suggestion should have:\n" +
+        "Based on our conversation history, generate two relevant follow-up prompts that the user might find helpful or interesting. Make the suggestions relevant and natural follow-ups to our discussion, varying in focus or approach. Ensure the suggestions are specific and actionable, not generic." +
+                "Format your response as a JSON object with an array of two suggestions. Each suggestion should have:\n" +
                 "1. A \"label\" field with a brief, descriptive label (3-5 words)\n" +
                 "2. A \"query\" field containing the full, detailed prompt\n" +
                 "\n" +

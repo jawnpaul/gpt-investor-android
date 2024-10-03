@@ -18,7 +18,6 @@ import androidx.navigation.NavController
 import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
-import com.thejawnpaul.gptinvestor.features.conversation.domain.model.UnStructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationViewModel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
 
@@ -54,7 +53,8 @@ fun ConversationScreen(
                     text = genText.value,
                     onClickNews = {
                         navController.navigate(Screen.WebViewScreen.createRoute(it))
-                    }
+                    },
+                    onClickSuggestion = { viewModel.getSuggestedPromptResponse(it.query) }
                 )
             }
 

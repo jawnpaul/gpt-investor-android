@@ -494,7 +494,7 @@ fun CompanyDetailNewsItem(
     news: NewsPresentation,
     onClick: (url: String) -> Unit
 ) {
-    OutlinedCard(modifier = Modifier.padding(top = 16.dp)) {
+    OutlinedCard(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
         Column(modifier = Modifier.padding(8.dp)) {
             Text(
                 text = news.publisher,

@@ -103,6 +103,23 @@ class ConversationViewModel @Inject constructor(
         }
     }
 
+    fun getSuggestedPromptResponse(query:String) {
+        conversationViewMutableStateFlow.update {
+            it.copy(loading = true)
+        }
+        getInputPromptUseCase(
+            ConversationPrompt(
+                conversationId = _selectedConversationId.value,
+                query = query
+            )
+        ) {
+            it.fold(
+                ::handleInputResponseFailure,
+                ::handleInputResponseSuccess
+            )
+        }
+    }
+
     private fun handleInputResponseFailure(failure: Failure) {
         when (failure) {
             is GenAIException -> {

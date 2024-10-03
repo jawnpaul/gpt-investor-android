@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.conversation.presentation.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -30,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.R
@@ -38,6 +40,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetai
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailPriceCard
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailTab
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.ExpandableRichText
+import com.thejawnpaul.gptinvestor.features.conversation.data.repository.Suggestion
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntityMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
@@ -50,7 +53,8 @@ fun StructuredConversationScreen(
     conversation: StructuredConversation,
     onNavigateUp: () -> Unit,
     text: String,
-    onClickNews: (url: String) -> Unit
+    onClickNews: (url: String) -> Unit,
+    onClickSuggestion: (prompt: Suggestion) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -96,10 +100,18 @@ fun StructuredConversationScreen(
                     )
                 }
 
-                item{
-                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)){
-                        conversation.suggestedPrompts.forEach {
-                            Text(it.label)
+                item {
+                    if (conversation.suggestedPrompts.isNotEmpty()) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                        ) {
+                            FollowUpQuestions(
+                                entity = null,
+                                list = conversation.suggestedPrompts,
+                                onClick = onClickSuggestion
+                            )
                         }
                     }
                 }
@@ -215,6 +227,57 @@ fun SingleStructuredResponse(
     }
 }
 
+@Composable
+fun FollowUpQuestions(
+    modifier: Modifier = Modifier,
+    entity: String? = null,
+    list: List<Suggestion>,
+    onClick: (prompt: Suggestion) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        if (entity != null) {
+            Text(
+                stringResource(R.string.related_to, entity),
+                modifier = Modifier.padding(bottom = 4.dp),
+                style = MaterialTheme.typography.titleMedium
+            )
+        } else {
+            Text(
+                stringResource(R.string.related), modifier = Modifier.padding(bottom = 8.dp),
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+
+        list.forEach {
+            Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onClick(it) }
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        it.label,
+                        modifier = Modifier.weight(1.2f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Image(
+                        painterResource(R.drawable.arrow_right),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .weight(0.2f)
+                    )
+                }
+
+                HorizontalDivider()
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 fun ConversationPreview(modifier: Modifier = Modifier) {
@@ -232,15 +295,24 @@ fun ConversationPreview(modifier: Modifier = Modifier) {
     )
     val conversation =
         StructuredConversation(id = 1, title = "Aak me", messageList = messages.toMutableList())
+    val prompts = listOf(
+        Suggestion(
+            label = "Netflix stock prices is going " +
+                    "really high and things are expected tp go higher the more this season",
+            query = ""
+        ), Suggestion(
+            label = "Netflix stock prices is going " +
+                    "really high and things are expected tp go higher the more this season",
+            query = ""
+        ), Suggestion(
+            label = "Netflix stock prices is going " +
+                    "really high and things are expected tp go higher the more this season",
+            query = ""
+        )
+    )
     GPTInvestorTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            StructuredConversationScreen(
-                modifier = Modifier,
-                conversation = conversation,
-                text = "",
-                onNavigateUp = {},
-                onClickNews = {}
-            )
+            FollowUpQuestions(entity = "Netflix", list = prompts) { }
         }
     }
 }

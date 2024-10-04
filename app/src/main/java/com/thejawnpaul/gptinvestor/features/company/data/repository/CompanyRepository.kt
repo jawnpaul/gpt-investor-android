@@ -123,13 +123,12 @@ class CompanyRepository @Inject constructor(
                 if (response.isSuccessful) {
                     response.body()?.let { trendingRemoteList ->
                         val trendingCompanies = trendingRemoteList.map { remote ->
-                            val company = companyDao.getCompany(remote.tickerSymbol)
                             with(remote) {
                                 TrendingCompany(
                                     tickerSymbol = tickerSymbol,
-                                    companyName = company.name,
+                                    companyName = name,
                                     percentageChange = percentageChange,
-                                    imageUrl = company.logoUrl
+                                    imageUrl = logo
                                 )
                             }
                         }.sortedByDescending { it.change }.take(20)

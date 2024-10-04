@@ -35,6 +35,10 @@ android {
             useSupportLibrary = true
         }
 
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
+        }
+
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments += mapOf(

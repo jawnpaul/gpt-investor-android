@@ -4,6 +4,8 @@ import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDet
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRemote
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyPriceRequest
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyPriceResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyRemote
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.TrendingRemote
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.DefaultPromptRemote
@@ -55,4 +57,7 @@ interface ApiService {
 
     @POST("company-info")
     suspend fun getCompanyInfo(@Body request: CompanyDetailRemoteRequest): Response<CompanyDetailRemoteResponse>
+
+    @POST("company-price")
+    suspend fun getCompanyPrice(@Body request: CompanyPriceRequest): Response<List<CompanyPriceResponse>>
 }

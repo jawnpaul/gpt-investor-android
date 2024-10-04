@@ -15,6 +15,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.thejawnpaul.gptinvestor.core.utility.toReadableString
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
 
 @Composable
@@ -40,8 +41,11 @@ fun SingleCompanyItem(modifier: Modifier, company: CompanyPresentation, onClick:
                     //price
                     StockPriceText(currencySymbol = "$", amount = company.price)
 
+
                     //change pill
-                    PercentageChangePill(change = company.change, date = company.changeReadableDate)
+                    company.priceChange?.let {
+                        PercentageChangePill(change = it.change, date = it.date.toReadableString())
+                    }
 
                 }
 

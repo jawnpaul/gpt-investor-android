@@ -4,9 +4,11 @@ import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.company.data.local.dao.CompanyDao
+import com.thejawnpaul.gptinvestor.features.company.data.local.model.PriceChange
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyPriceRequest
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyFinancials
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
@@ -36,12 +38,18 @@ class CompanyRepository @Inject constructor(
             if (response.isSuccessful) {
                 response.body()?.let {
                     val entities = it.map { companyRemote -> companyRemote.toEntity() }
-                    companyDao.insertAll(entities)
+
+                    if (local.isEmpty()) {
+                        companyDao.insertAll(entities)
+                    }
 
                     val updatedList = companyDao.getAllCompanies()
                         .map { companyEntity -> companyEntity.toDomainObject() }
                     emit(Either.Right(updatedList))
                 } ?: emit(Either.Left(Failure.DataError))
+            }
+            updateCompanyList()?.let {
+                emit(Either.Right(it))
             }
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
@@ -141,4 +149,38 @@ class CompanyRepository @Inject constructor(
                 emit(Either.Left(Failure.ServerError))
             }
         }
+
+    private suspend fun updateCompanyList(): List<Company>? {
+        try {
+            val tickers = companyDao.getAllCompanies().map { it.ticker }
+            val batches = tickers.chunked(100)
+            val start = System.currentTimeMillis()
+            batches.forEach { batch ->
+                val request = CompanyPriceRequest(tickers = batch)
+                val response = apiService.getCompanyPrice(request)
+                if (response.isSuccessful) {
+                    response.body()?.let { responseList ->
+                        val entities = responseList.map { priceResponse ->
+                            companyDao.getCompany(priceResponse.ticker)
+                                .copy(
+                                    currentPrice = priceResponse.price,
+                                    priceChange = PriceChange(
+                                        change = priceResponse.change,
+                                        date = System.currentTimeMillis()
+                                    )
+                                )
+                        }
+                        companyDao.updateCompanies(entities)
+                    }
+                }
+            }
+            val end = System.currentTimeMillis()
+            //This takes about 30 seconds to complete
+            Timber.e("Elapsed: ${end - start}")
+            return companyDao.getAllCompanies().map { it.toDomainObject() }
+        } catch (e: Exception) {
+            Timber.e(e.stackTraceToString())
+            return null
+        }
+    }
 }

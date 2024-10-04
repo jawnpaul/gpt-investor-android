@@ -67,3 +67,13 @@ data class HistoricalData(
     @field:Json(name = "Open") val open: Float,
     @field:Json(name = "Volume") val volume: Long
 )
+
+@JsonClass(generateAdapter = true)
+data class CompanyPriceRequest(@field:Json(name = "tickers") val tickers: List<String>)
+
+@JsonClass(generateAdapter = true)
+data class CompanyPriceResponse(
+    @field:Json(name = "change") val change: Float,
+    @field:Json(name = "price") val price: Float,
+    @field:Json(name = "ticker") val ticker: String
+)

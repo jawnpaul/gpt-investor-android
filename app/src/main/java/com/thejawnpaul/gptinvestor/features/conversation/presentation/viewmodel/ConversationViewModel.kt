@@ -38,7 +38,7 @@ class ConversationViewModel @Inject constructor(
     private val _conversationMessages = MutableStateFlow(mutableListOf<GenAiTextMessage>())
     val conversationMessages get() = _conversationMessages
 
-    private val _selectedConversationId = MutableStateFlow(0L)
+    private val _selectedConversationId = MutableStateFlow(-1L)
 
     init {
         getDefaultPrompts()

@@ -92,6 +92,8 @@ class CompanyViewModel @Inject constructor(
 
     private var companyTicker = ""
 
+    private val _selectedConversationId = MutableStateFlow(-1L)
+
     private val selectedCompanyTicker: String?
         get() = savedStateHandle.get<String>("ticker")
 
@@ -405,7 +407,8 @@ class CompanyViewModel @Inject constructor(
             is CompanyDetailDefaultConversation -> {
                 val prompt = CompanyPrompt(
                     query = _selectedCompany.value.inputQuery,
-                    company = (_selectedCompany.value.conversation as CompanyDetailDefaultConversation).response
+                    company = (_selectedCompany.value.conversation as CompanyDetailDefaultConversation).response,
+                    conversationId = -1L
                 )
                 companyDetailInputResponseUseCase(params = prompt) {
                     it.fold(
@@ -417,7 +420,8 @@ class CompanyViewModel @Inject constructor(
 
             is StructuredConversation -> {
                 val prompt = CompanyPrompt(
-                    query = _selectedCompany.value.inputQuery
+                    query = _selectedCompany.value.inputQuery,
+                    conversationId = _selectedConversationId.value
                 )
                 companyDetailInputResponseUseCase(params = prompt) {
                     it.fold(
@@ -436,7 +440,8 @@ class CompanyViewModel @Inject constructor(
     fun getSuggestedPromptResponse(query: String) {
         _selectedCompany.update { it.copy(loading = true) }
         val prompt = CompanyPrompt(
-            query = query
+            query = query,
+            conversationId = _selectedConversationId.value
         )
         companyDetailInputResponseUseCase(params = prompt) {
             it.fold(
@@ -467,6 +472,7 @@ class CompanyViewModel @Inject constructor(
             )
         }
         _genText.update { s.messageList.last().response.toString() }
+        _selectedConversationId.update { s.id }
 
     }
 

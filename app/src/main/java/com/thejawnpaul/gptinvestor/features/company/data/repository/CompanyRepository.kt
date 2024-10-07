@@ -37,10 +37,19 @@ class CompanyRepository @Inject constructor(
             val response = apiService.getCompanies()
             if (response.isSuccessful) {
                 response.body()?.let {
-                    val entities = it.map { companyRemote -> companyRemote.toEntity() }
+                    val remoteEntities = it.map { companyRemote -> companyRemote.toEntity() }
 
                     if (local.isEmpty()) {
-                        companyDao.insertAll(entities)
+                        companyDao.insertAll(remoteEntities)
+                    } else {
+                        //update with new data coming from remote
+                        val updatedEntities = remoteEntities.map { entity ->
+                            companyDao.getCompany(entity.ticker)
+                                .copy(
+                                    summary = entity.summary
+                                )
+                        }
+                        companyDao.updateCompanies(updatedEntities)
                     }
 
                     val updatedList = companyDao.getAllCompanies()

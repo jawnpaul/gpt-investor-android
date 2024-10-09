@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.ConversationEntity
 
 @Dao
@@ -21,4 +22,7 @@ interface ConversationDao {
 
     @Delete
     suspend fun deleteConversation(conversation: ConversationEntity)
+
+    @Update
+    suspend fun updateConversation(conversation: ConversationEntity)
 }

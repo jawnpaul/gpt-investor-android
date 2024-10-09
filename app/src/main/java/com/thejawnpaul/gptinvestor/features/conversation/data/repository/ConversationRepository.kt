@@ -112,7 +112,8 @@ class ConversationRepository @Inject constructor(
                 )
                 emit(Either.Right(structuredConversation))
 
-                val chat = generativeModel.startChat(history = getHistory(structuredConversation.id))
+                val chat =
+                    generativeModel.startChat(history = getHistory(structuredConversation.id))
 
                 val response = chat.sendMessageStream(prompt.query)
 
@@ -167,6 +168,8 @@ class ConversationRepository @Inject constructor(
             try {
                 val conversation = getConversation(prompt)
                 Timber.e(conversation.id.toString())
+
+                //TODO: Emit default loading state from here
 
                 // check if input string contains entity
                 val entityList = containsEntity(prompt.query)
@@ -262,6 +265,14 @@ class ConversationRepository @Inject constructor(
                     val updatedEntity = messageDao.getSingleMessage(newMessageId)
                         .copy(response = conversation.messageList.last().response)
                     messageDao.updateMessage(updatedEntity)
+
+                    getConversationTitle(conversation.id)?.let { title ->
+                        emit(Either.Right(conversation.copy(title = title)))
+                        val entity = conversationDao.getSingleConversation(conversation.id)
+                        entity?.let {
+                            conversationDao.updateConversation(it.copy(title = title))
+                        }
+                    }
                 }.collect { result ->
                     result.text?.let { responseText ->
 
@@ -348,11 +359,19 @@ class ConversationRepository @Inject constructor(
                 response.onCompletion {
                     val suggested = getSuggestedPrompts(conversation.id)
                     emit(Either.Right(conversation.copy(suggestedPrompts = suggested)))
-                    Timber.e("Completed")
 
                     val updatedEntity = messageDao.getSingleMessage(newIndex)
                         .copy(response = conversation.messageList.last().response)
                     messageDao.updateMessage(updatedEntity)
+
+                    getConversationTitle(conversation.id)?.let { title ->
+                        emit(Either.Right(conversation.copy(title = title)))
+                        val entity = conversationDao.getSingleConversation(conversation.id)
+                        entity?.let {
+                            conversationDao.updateConversation(it.copy(title = title))
+                        }
+                    }
+
                 }.collect { result ->
                     result.text?.let { responseText ->
                         chunk.append(responseText)
@@ -476,5 +495,29 @@ class ConversationRepository @Inject constructor(
 
     private suspend fun getCompanyDetail(ticker: String): CompanyDetailRemoteResponse? {
         return apiService.getCompanyInfo(CompanyDetailRemoteRequest(ticker = ticker)).body()
+    }
+
+    private suspend fun getConversationTitle(conversationId: Long): String? {
+        return try {
+            val parser = ConversationTitleParser()
+            val conversationEntity = conversationDao.getSingleConversation(conversationId)
+            conversationEntity?.let { conversation ->
+                if (conversation.title == "Default title" || conversation.title.isEmpty()) {
+                    val history = getHistory(conversationId)
+
+                    val chat = generativeModel.startChat(history = history)
+                    val response = chat.sendMessage(prompt = Constants.TITLE_PROMPT)
+                    response.text?.let {
+                        val text = it.trimIndent()
+                        parser.parseTitle(text)?.title
+                    }
+                } else {
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            Timber.e(e.stackTraceToString())
+            null
+        }
     }
 }

@@ -50,4 +50,22 @@ object Constants {
                 "    }\n" +
                 "  ]\n" +
                 "}"
+
+    const val TITLE_PROMPT =
+        "Based on our conversation history, generate a concise and descriptive title that captures the main topic or theme discussed. The title should be between 3-7 words long and be specific enough to distinguish this conversation from others. Format your response as a JSON object with a single 'title' field. Your response should follow this exact format:\n" +
+                "\n" +
+                "{\n" +
+                "  \"title\": \"[Your generated title here]\"\n" +
+                "}\n" +
+                "\n" +
+                "Guidelines for title generation:\n" +
+                "- Focus on the primary topic or goal of the conversation\n" +
+                "- Use key terms that were frequently discussed\n" +
+                "- Make it specific rather than generic\n" +
+                "- Avoid unnecessary articles (a, an, the) unless essential for clarity\n" +
+                "- If multiple topics were discussed, prioritize the most significant one\",\n" +
+                "\n" +
+                "  \"example_response\": {\n" +
+                "    \"title\": \"Finance Stop Words Implementation\"\n" +
+                "  }"
 }

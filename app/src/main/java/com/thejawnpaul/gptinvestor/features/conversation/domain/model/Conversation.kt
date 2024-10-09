@@ -31,7 +31,7 @@ data class GenAiTextMessage(
     override val id: Long = 0,
     val query: String,
     override val response: String? = null,
-    override val loading: Boolean = true
+    override val loading: Boolean = false
 ) : GenAiMessage
 
 sealed interface GenAiMessage {

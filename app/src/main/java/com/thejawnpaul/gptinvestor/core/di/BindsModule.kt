@@ -4,6 +4,8 @@ import com.thejawnpaul.gptinvestor.features.company.data.repository.CompanyRepos
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import com.thejawnpaul.gptinvestor.features.conversation.data.repository.ConversationRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
+import com.thejawnpaul.gptinvestor.features.history.data.repository.HistoryRepository
+import com.thejawnpaul.gptinvestor.features.history.domain.repository.IHistoryRepository
 import com.thejawnpaul.gptinvestor.features.investor.data.repository.InvestorRepository
 import com.thejawnpaul.gptinvestor.features.investor.domain.repository.IInvestorRepository
 import dagger.Binds
@@ -23,4 +25,7 @@ abstract class BindsModule {
 
     @Binds
     abstract fun providesConversationRepository(repository: ConversationRepository): IConversationRepository
+
+    @Binds
+    abstract fun providesHistoryRepository(repository: HistoryRepository): IHistoryRepository
 }

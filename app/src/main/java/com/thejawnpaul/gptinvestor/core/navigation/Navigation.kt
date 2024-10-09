@@ -15,7 +15,8 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.Compa
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ConversationScreen
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationViewModel
 import com.thejawnpaul.gptinvestor.features.discover.DiscoverScreen
-import com.thejawnpaul.gptinvestor.features.history.HistoryScreen
+import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryScreen
+import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.BottomNavBar
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeBackground
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
@@ -51,7 +52,14 @@ fun SetUpNavGraph(navController: NavHostController) {
                     companyViewModel = companyViewModel
                 )
             }
-            composable(Screen.HistoryTabScreen.route) { HistoryScreen() }
+            composable(Screen.HistoryTabScreen.route) {
+                val viewModel = hiltViewModel<HistoryViewModel>()
+                HistoryScreen(
+                    modifier = Modifier,
+                    navController = navController,
+                    viewModel = viewModel
+                )
+            }
 
             composable(route = Screen.CompanyDetailScreen.route) { backStackEntry ->
                 val parentViewModel = hiltViewModel<CompanyViewModel>()

@@ -48,5 +48,5 @@ data class GenAiEntityMessage(
     override val response: String
         get() = ""
     override val loading: Boolean
-        get() = true
+        get() = false
 }

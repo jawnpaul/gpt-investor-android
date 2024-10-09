@@ -112,7 +112,7 @@ class ConversationRepository @Inject constructor(
                 )
                 emit(Either.Right(structuredConversation))
 
-                val chat = generativeModel.startChat(history = getHistory(structuredConversation))
+                val chat = generativeModel.startChat(history = getHistory(structuredConversation.id))
 
                 val response = chat.sendMessageStream(prompt.query)
 
@@ -250,7 +250,7 @@ class ConversationRepository @Inject constructor(
 
                 emit(Either.Right(conversation))
 
-                val chat = generativeModel.startChat(history = getHistory(conversation))
+                val chat = generativeModel.startChat(history = getHistory(conversation.id))
 
                 val response = chat.sendMessageStream(prompt.query)
                 response.onCompletion {
@@ -339,7 +339,7 @@ class ConversationRepository @Inject constructor(
                 emit(Either.Right(conversation))
                 Timber.e(conversation.toString())
                 // add query
-                val chat = generativeModel.startChat(history = getHistory(conversation))
+                val chat = generativeModel.startChat(history = getHistory(conversation.id))
 
                 //add text response
                 val lastIndex = conversation.messageList.lastIndex
@@ -402,7 +402,7 @@ class ConversationRepository @Inject constructor(
 
             val conversation =
                 getConversation(ConversationPrompt(conversationId = conversationId, query = ""))
-            val chat = generativeModel.startChat(history = getHistory(conversation))
+            val chat = generativeModel.startChat(history = getHistory(conversation.id))
             val response = chat.sendMessage(prompt = Constants.SUGGESTION_PROMPT)
             response.text?.let {
                 val text = it.trimIndent()
@@ -452,9 +452,9 @@ class ConversationRepository @Inject constructor(
         }
     }
 
-    private suspend fun getHistory(conversation: StructuredConversation): List<Content> {
+    private suspend fun getHistory(conversationId: Long): List<Content> {
         val history = mutableListOf<Content>()
-        val messageEntities = messageDao.getMessagesForConversation(conversation.id)
+        val messageEntities = messageDao.getMessagesForConversation(conversationId)
         messageEntities.map { it.toGenAiMessage() }.forEach { message ->
             when (message) {
                 is GenAiTextMessage -> {

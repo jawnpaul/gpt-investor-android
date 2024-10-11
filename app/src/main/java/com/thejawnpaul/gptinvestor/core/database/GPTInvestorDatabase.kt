@@ -9,13 +9,15 @@ import com.thejawnpaul.gptinvestor.features.company.data.local.model.CompanyEnti
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.dao.ConversationDao
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.dao.MessageDao
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.ConversationEntity
+import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.ConversationWithLastMessage
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.MessageEntity
 
 @Database(
     entities = [CompanyEntity::class, ConversationEntity::class, MessageEntity::class],
     autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3)],
     version = 3,
-    exportSchema = true
+    exportSchema = true,
+    views = [ConversationWithLastMessage::class]
 )
 @TypeConverters(Converters::class)
 abstract class GPTInvestorDatabase : RoomDatabase() {

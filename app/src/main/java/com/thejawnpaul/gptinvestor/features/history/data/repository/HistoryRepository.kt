@@ -16,12 +16,34 @@ class HistoryRepository @Inject constructor(private val conversationDao: Convers
         flow {
             try {
 
-                val conversations = conversationDao.getAllConversations().map { entity ->
+                val conversations = conversationDao.getConversationsWithMessages().map { entity ->
                     with(entity) {
-                        StructuredConversation(id = conversationId, title = title)
+                        StructuredConversation(
+                            id = conversation.conversationId,
+                            title = conversation.title
+                        )
                     }
                 }
                 emit(Either.Right(conversations))
+            } catch (e: Exception) {
+                Timber.e(e.stackTraceToString())
+                emit(Either.Left(Failure.DataError))
+            }
+        }
+
+    override suspend fun getSingleHistory(id: Long): Flow<Either<Failure, StructuredConversation>> =
+        flow {
+            try {
+                val conversation = with(conversationDao.getSingleConversationWithMessages(id)) {
+                    StructuredConversation(
+                        id = conversation.conversationId,
+                        title = conversation.title,
+                        messageList = messages.map { it.toGenAiMessage() }.toMutableList()
+                    )
+                }
+
+                emit(Either.Right(conversation))
+
             } catch (e: Exception) {
                 Timber.e(e.stackTraceToString())
                 emit(Either.Left(Failure.DataError))

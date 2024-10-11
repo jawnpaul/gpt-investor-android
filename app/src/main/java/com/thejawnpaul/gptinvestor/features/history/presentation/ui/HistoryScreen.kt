@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.features.history.presentation.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.thejawnpaul.gptinvestor.R
+import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
 
 @Composable
@@ -31,7 +33,7 @@ fun HistoryScreen(
 
     val historyViewState = viewModel.historyScreenView.collectAsStateWithLifecycle()
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
 
         Column(modifier = Modifier) {
             Text(
@@ -45,7 +47,8 @@ fun HistoryScreen(
 
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp)
             ) {
                 if (historyViewState.value.loading) {
                     item {
@@ -56,9 +59,12 @@ fun HistoryScreen(
                 items(
                     items = historyViewState.value.list,
                     key = { conversation -> conversation.id }) { conversation ->
-                    SingleHistoryItem(modifier = Modifier, conversation = conversation, onClick = {
-
-                    })
+                    SingleHistoryItem(
+                        modifier = Modifier,
+                        conversation = conversation,
+                        onClick = { id ->
+                            navController.navigate(Screen.HistoryDetailScreen.createRoute(id))
+                        })
                 }
             }
         }

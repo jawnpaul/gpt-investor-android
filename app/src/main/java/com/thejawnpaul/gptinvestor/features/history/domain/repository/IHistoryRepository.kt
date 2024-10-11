@@ -7,4 +7,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface IHistoryRepository {
     suspend fun getAllHistory(): Flow<Either<Failure, List<StructuredConversation>>>
+
+    suspend fun getSingleHistory(id: Long): Flow<Either<Failure, StructuredConversation>>
 }

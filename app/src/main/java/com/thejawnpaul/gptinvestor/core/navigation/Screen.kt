@@ -12,6 +12,10 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
         }
     }
 
+    data object HistoryDetailScreen : Screen("history_detail_screen/{conversationId}", false) {
+        fun createRoute(conversationId: Long) = "history_detail_screen/$conversationId"
+    }
+
     data object ConversationScreen : Screen("conversation_screen", false)
 
     data object HomeTabScreen : Screen("Ask AI_tab_screen", true)

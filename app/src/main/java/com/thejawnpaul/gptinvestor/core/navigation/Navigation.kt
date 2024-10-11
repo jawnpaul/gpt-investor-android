@@ -7,14 +7,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.WebViewScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ConversationScreen
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationViewModel
 import com.thejawnpaul.gptinvestor.features.discover.DiscoverScreen
+import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryDetailScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.BottomNavBar
@@ -86,6 +89,21 @@ fun SetUpNavGraph(navController: NavHostController) {
 
                 val data = navBackStackEntry.arguments?.getString("url") ?: ""
                 WebViewScreen(navController = navController, url = data)
+            }
+
+            composable(
+                route = Screen.HistoryDetailScreen.route,
+                arguments = listOf(navArgument("conversationId") { NavType.StringType })
+            ) { navBackStackEntry ->
+                val viewModel = hiltViewModel<HistoryViewModel>()
+                val id = navBackStackEntry.arguments?.getString("conversationId")?: ""
+
+                HistoryDetailScreen(
+                    modifier = Modifier,
+                    navController = navController,
+                    conversationId = id,
+                    viewModel = viewModel
+                )
             }
         }
     }

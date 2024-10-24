@@ -2,6 +2,7 @@ package com.thejawnpaul.gptinvestor.features.investor.presentation.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -23,6 +25,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,6 +42,7 @@ import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
+import kotlinx.coroutines.delay
 
 @Composable
 fun SingleTrendingStockItem(
@@ -121,6 +126,23 @@ fun TrendingStockList(
     onClick: (tickerSymbol: String) -> Unit,
     onClickRetry: () -> Unit
 ) {
+
+    val lazyGridState = rememberLazyStaggeredGridState()
+    val coroutineScope = rememberCoroutineScope()
+    val isScrollInProgress = lazyGridState.isScrollInProgress
+
+    LaunchedEffect(state.companies, isScrollInProgress) {
+        if (state.companies.isNotEmpty() && !isScrollInProgress) {
+            while (true) {
+                lazyGridState.scroll(MutatePriority.PreventUserInput) {
+                    // Continuously scroll by 3 pixel every frame
+                    scrollBy(3f)
+                    delay(16) // Approximately 60 FPS
+                }
+            }
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -141,17 +163,26 @@ fun TrendingStockList(
         }
 
         if (state.companies.isNotEmpty()) {
+
+            val repeatedItems = buildList {
+                repeat(2) {
+                    addAll(state.companies)
+                }
+            }
+
             LazyHorizontalStaggeredGrid(
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 modifier = Modifier
                     .fillMaxSize(),
                 rows = StaggeredGridCells.Fixed(2),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalItemSpacing = 8.dp
+                horizontalItemSpacing = 8.dp,
+                state = lazyGridState,
+                userScrollEnabled = true
             ) {
                 items(
-                    items = state.companies,
-                    key = { item -> item.tickerSymbol }
+                    items = repeatedItems,
+                    key = { item -> "${item.tickerSymbol}-${item.hashCode()}" }
                 ) { item ->
                     SingleTrendingStockItem(onClick = onClick, trendingStock = item)
                 }

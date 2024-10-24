@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.company.data.repository
 
+import com.thejawnpaul.gptinvestor.core.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
@@ -21,7 +22,8 @@ import javax.inject.Inject
 
 class CompanyRepository @Inject constructor(
     private val apiService: ApiService,
-    private val companyDao: CompanyDao
+    private val companyDao: CompanyDao,
+    private val analyticsLogger: AnalyticsLogger
 ) :
     ICompanyRepository {
 
@@ -91,6 +93,7 @@ class CompanyRepository @Inject constructor(
     override suspend fun getCompany(ticker: String): Flow<Either<Failure, CompanyDetailRemoteResponse>> =
         flow {
             try {
+                analyticsLogger.logCompanySelected(companyTicker = ticker)
                 val response =
                     apiService.getCompanyInfo(request = CompanyDetailRemoteRequest(ticker = ticker))
                 if (response.isSuccessful) {

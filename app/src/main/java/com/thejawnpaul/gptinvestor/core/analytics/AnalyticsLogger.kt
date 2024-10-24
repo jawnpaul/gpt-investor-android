@@ -10,10 +10,23 @@ class AnalyticsLogger @Inject constructor(private val firebaseAnalytics: Firebas
 
     fun logDefaultPromptSelected(promptTitle: String, promptQuery: String) {
         val bundle = Bundle().apply {
-            putString(FirebaseAnalytics.Param.ITEM_ID, promptTitle)
-            putString(FirebaseAnalytics.Param.ITEM_NAME, promptQuery)
-            putString(FirebaseAnalytics.Param.CONTENT_TYPE, "default_prompt")
+            putString("prompt_title", promptTitle)
+            putString("prompt_query", promptQuery)
         }
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle)
+        firebaseAnalytics.logEvent("default_prompt", bundle)
+    }
+
+    fun logCompanySelected(companyTicker: String) {
+        val bundle = Bundle().apply {
+            putString("company_ticker", companyTicker)
+        }
+        firebaseAnalytics.logEvent("company_selected", bundle)
+    }
+
+    fun logCompanyIdentified(companyTicker: String) {
+        val bundle = Bundle().apply {
+            putString("company_ticker", companyTicker)
+        }
+        firebaseAnalytics.logEvent("company_identified", bundle)
     }
 }

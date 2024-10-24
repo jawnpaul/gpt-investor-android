@@ -223,6 +223,10 @@ class ConversationRepository @Inject constructor(
 
                                 emit(Either.Right(conversation))
                                 // add company to conversation history
+
+                                analyticsLogger.logCompanyIdentified(
+                                    companyTicker = company.ticker
+                                )
                             }
                         } else {
                             // do nothing or update it

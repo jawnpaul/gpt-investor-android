@@ -76,7 +76,9 @@ fun StructuredConversationScreen(
 
             Text(
                 text = conversation.title,
-                style = MaterialTheme.typography.headlineSmall
+                style = MaterialTheme.typography.headlineSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
 

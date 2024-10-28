@@ -71,7 +71,7 @@ jobs:
             ${{ steps.decode_keystore.outputs.filePath }}     
         
       - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew testReleaseUnitTest
       
       - name: Upload Unit Test Report
         uses: actions/upload-artifact@v4
@@ -80,4 +80,4 @@ jobs:
           path: '**/build/reports/tests/'
         
       - name: Build Project
-        run: ./gradlew assembleDebug
+        run: ./gradlew bundleRelease

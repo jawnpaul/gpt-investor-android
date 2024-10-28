@@ -65,12 +65,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.state.TimePerio
 import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
 
 @Composable
-fun CompanyDetailDataSource(
-    modifier: Modifier = Modifier,
-    list: List<NewsPresentation> = emptyList(),
-    source: String
-) {
-
+fun CompanyDetailDataSource(modifier: Modifier = Modifier, list: List<NewsPresentation> = emptyList(), source: String) {
     var expanded by rememberSaveable { mutableStateOf(false) }
 
     OutlinedCard(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
@@ -80,9 +75,11 @@ fun CompanyDetailDataSource(
                     .padding(8.dp)
                     .fillMaxWidth()
             ) {
-                RichText(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)) {
+                RichText(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                ) {
                     Markdown(content = source)
                 }
 
@@ -98,8 +95,6 @@ fun CompanyDetailDataSource(
                         }
                     )
                 }
-
-
             }
         } else {
             Row(
@@ -123,7 +118,6 @@ fun CompanyDetailDataSource(
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         list.take(4).forEachIndexed { i, it ->
                             Surface(
@@ -141,11 +135,9 @@ fun CompanyDetailDataSource(
                                         .align(Alignment.CenterVertically),
                                     contentScale = ContentScale.Crop
                                 )
-
                             }
                         }
                     }
-
 
                     IconButton(onClick = {
                         expanded = !expanded
@@ -159,22 +151,14 @@ fun CompanyDetailDataSource(
                             }
                         )
                     }
-
                 }
             }
         }
     }
-
 }
 
 @Composable
-fun CompanyDetailPriceCard(
-    modifier: Modifier = Modifier,
-    ticker: String,
-    price: Float,
-    imageUrl: String,
-    change: Float
-) {
+fun CompanyDetailPriceCard(modifier: Modifier = Modifier, ticker: String, price: Float, imageUrl: String, change: Float) {
     OutlinedCard(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
         Row(
             modifier = Modifier
@@ -185,15 +169,14 @@ fun CompanyDetailPriceCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                //Text
+                // Text
                 Text(text = ticker, style = MaterialTheme.typography.titleLarge)
 
-                //price
+                // price
                 StockPriceText(currencySymbol = "$", amount = price)
 
-                //change pill
+                // change pill
                 PercentageChangePill(change = change, date = "today")
-
             }
 
             AsyncImage(
@@ -232,7 +215,6 @@ fun PercentageChangePill(modifier: Modifier = Modifier, change: Float, date: Str
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-
             if (change < 0) {
                 Image(
                     modifier = Modifier.padding(end = 2.dp),
@@ -283,14 +265,9 @@ fun AboutStockCard(modifier: Modifier = Modifier, companySummary: String, compan
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CompanyDetailTab(
-    modifier: Modifier = Modifier,
-    company: CompanyDetailRemoteResponse,
-    onClickNews: (url: String) -> Unit
-) {
+fun CompanyDetailTab(modifier: Modifier = Modifier, company: CompanyDetailRemoteResponse, onClickNews: (url: String) -> Unit) {
     val titles = listOf("Overview", "Key ratios", "News")
     val selectedTabIndex = remember { mutableIntStateOf(0) }
     Column(modifier = Modifier.fillMaxSize()) {
@@ -336,21 +313,17 @@ fun CompanyDetailTab(
                 2 -> {
                     CompanyDetailsNews(
                         modifier = Modifier,
-                        news = company.news.map { it.toPresentation() }, onClick = onClickNews
+                        news = company.news.map { it.toPresentation() },
+                        onClick = onClickNews
                     )
                 }
             }
         }
-
     }
 }
 
-
 @Composable
-fun CompanyHistoryGraph(
-    modifier: Modifier = Modifier,
-    historicalData: List<HistoricalData>
-) {
+fun CompanyHistoryGraph(modifier: Modifier = Modifier, historicalData: List<HistoricalData>) {
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -359,7 +332,6 @@ fun CompanyHistoryGraph(
         var selected by remember { mutableStateOf<TimePeriod>(TimePeriod.OneYear()) }
 
         Column(modifier = Modifier.fillMaxWidth()) {
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -425,20 +397,13 @@ fun CompanyHistoryGraph(
     }
 }
 
-
 @Composable
-fun CompanyKeyRatios(
-    modifier: Modifier = Modifier,
-    marketCap: Long,
-    peRatio: Float,
-    revenue: Long
-) {
+fun CompanyKeyRatios(modifier: Modifier = Modifier, marketCap: Long, peRatio: Float, revenue: Long) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
-
         Column(modifier = Modifier.padding(top = 16.dp)) {
             Text(
                 modifier = Modifier.padding(bottom = 16.dp),
@@ -472,11 +437,7 @@ fun CompanyKeyRatios(
 }
 
 @Composable
-fun CompanyDetailsNews(
-    modifier: Modifier = Modifier,
-    news: List<NewsPresentation>,
-    onClick: (url: String) -> Unit
-) {
+fun CompanyDetailsNews(modifier: Modifier = Modifier, news: List<NewsPresentation>, onClick: (url: String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -489,11 +450,7 @@ fun CompanyDetailsNews(
 }
 
 @Composable
-fun CompanyDetailNewsItem(
-    modifier: Modifier = Modifier,
-    news: NewsPresentation,
-    onClick: (url: String) -> Unit
-) {
+fun CompanyDetailNewsItem(modifier: Modifier = Modifier, news: NewsPresentation, onClick: (url: String) -> Unit) {
     OutlinedCard(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
         Column(modifier = Modifier.padding(8.dp)) {
             Text(
@@ -511,9 +468,11 @@ fun CompanyDetailNewsItem(
                 overflow = TextOverflow.Ellipsis
             )
 
-            Column(modifier = Modifier
-                .padding(bottom = 4.dp)
-                .clickable { onClick(Uri.encode(news.link)) }) {
+            Column(
+                modifier = Modifier
+                    .padding(bottom = 4.dp)
+                    .clickable { onClick(Uri.encode(news.link)) }
+            ) {
                 Row {
                     Text(stringResource(R.string.learn_more).uppercase())
                     Image(
@@ -560,7 +519,6 @@ fun PreviewComposable(modifier: Modifier = Modifier) {
                         link = ""
                     )
                 ) { }
-
             }
         }
     }

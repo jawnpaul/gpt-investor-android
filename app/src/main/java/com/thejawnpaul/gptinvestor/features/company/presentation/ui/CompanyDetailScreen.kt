@@ -4,11 +4,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -45,12 +43,7 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CompanyDetailScreen(
-    modifier: Modifier,
-    navController: NavController,
-    viewModel: CompanyViewModel,
-    ticker: String
-) {
+fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewModel: CompanyViewModel, ticker: String) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val selectedCompany = viewModel.selectedCompany.collectAsState()
     val genText = viewModel.genText.collectAsStateWithLifecycle()
@@ -73,7 +66,6 @@ fun CompanyDetailScreen(
                                 .fillMaxWidth()
                                 .verticalScroll(rememberScrollState())
                         ) {
-
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -102,13 +94,13 @@ fun CompanyDetailScreen(
                             }
 
                             conversation.response?.let { company ->
-                                //data source
+                                // data source
                                 CompanyDetailDataSource(
                                     list = company.news.map { it.toPresentation() },
                                     source = company.newsSourcesString
                                 )
 
-                                //price card
+                                // price card
                                 CompanyDetailPriceCard(
                                     ticker = company.ticker,
                                     price = company.price,
@@ -116,7 +108,7 @@ fun CompanyDetailScreen(
                                     imageUrl = company.imageUrl
                                 )
 
-                                //about company card
+                                // about company card
                                 AboutStockCard(
                                     companySummary = company.about,
                                     companyName = company.name
@@ -149,11 +141,9 @@ fun CompanyDetailScreen(
                     }
 
                     else -> {
-
                     }
                 }
             }
-
         }
         InputBar(
             modifier = Modifier

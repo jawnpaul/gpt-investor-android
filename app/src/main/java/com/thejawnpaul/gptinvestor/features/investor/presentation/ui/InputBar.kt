@@ -64,7 +64,7 @@ fun InputBar(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(8.dp),
             shape = RoundedCornerShape(corner = CornerSize(8.dp)),
             color = MaterialTheme.colorScheme.background
         ) {

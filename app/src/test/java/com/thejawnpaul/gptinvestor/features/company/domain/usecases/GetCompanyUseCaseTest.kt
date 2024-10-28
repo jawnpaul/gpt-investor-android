@@ -2,6 +2,7 @@ package com.thejawnpaul.gptinvestor.features.company.domain.usecases
 
 import com.google.common.truth.Truth.assertThat
 import com.thejawnpaul.gptinvestor.core.functional.Either
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import io.mockk.MockKAnnotations
@@ -40,11 +41,18 @@ class GetCompanyUseCaseTest {
         coEvery { repository.getCompany(ticker) } returns flow {
             emit(
                 Either.Right(
-                    Company(
-                        "",
-                        "",
-                        "",
-                        ""
+                    CompanyDetailRemoteResponse(
+                        ticker = "",
+                        about = "",
+                        marketCap = 1L,
+                        news = emptyList(),
+                        peRatio = 1.3F,
+                        change = 2.0F,
+                        revenue = 1L,
+                        price = 20.0F,
+                        historicalData = emptyList(),
+                        name = "",
+                        imageUrl = ""
                     )
                 )
             )
@@ -60,11 +68,18 @@ class GetCompanyUseCaseTest {
         coEvery { repository.getCompany(ticker) } returns flow {
             emit(
                 Either.Right(
-                    Company(
-                        "",
-                        "",
-                        "",
-                        ""
+                    CompanyDetailRemoteResponse(
+                        ticker = "",
+                        about = "",
+                        marketCap = 1L,
+                        news = emptyList(),
+                        peRatio = 1.3F,
+                        change = 2.0F,
+                        revenue = 1L,
+                        price = 20.0F,
+                        historicalData = emptyList(),
+                        name = "",
+                        imageUrl = ""
                     )
                 )
             )
@@ -73,7 +88,7 @@ class GetCompanyUseCaseTest {
         repository.getCompany(ticker).collect {
             assertThat(it.isRight).isTrue()
             it as Either.Right
-            assertThat(it.b).isInstanceOf(Company::class.java)
+            assertThat(it.b).isInstanceOf(CompanyDetailRemoteResponse::class.java)
         }
     }
 }

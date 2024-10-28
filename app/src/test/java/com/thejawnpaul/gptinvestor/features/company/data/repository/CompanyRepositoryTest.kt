@@ -32,16 +32,4 @@ class CompanyRepositoryTest {
             gptInvestorDatabase.companyDao()
         )
     }*/
-
-    @Test
-    fun `is addition correct`() = runTest {
-        val a = 1 + 1
-        companyRepository.getAllCompanies()
-        assertThat(a).isEqualTo(2)
-    }
-
-    @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
-    }
 }

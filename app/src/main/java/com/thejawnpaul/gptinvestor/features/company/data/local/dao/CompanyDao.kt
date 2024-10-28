@@ -4,7 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.thejawnpaul.gptinvestor.features.company.data.local.model.CompanyEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CompanyDao {
@@ -17,9 +19,21 @@ interface CompanyDao {
     @Query("SELECT * FROM company_table ORDER BY ticker")
     suspend fun getAllCompanies(): List<CompanyEntity>
 
+    @Query("SELECT * FROM company_table ORDER BY ticker")
+    fun getAllCompaniesFlow(): Flow<List<CompanyEntity>>
+
     @Query("SELECT * FROM company_table WHERE ticker =:ticker")
     suspend fun getCompany(ticker: String): CompanyEntity
 
     @Query("SELECT * FROM company_table WHERE sectorKey =:sectorKey")
     suspend fun getCompaniesInSector(sectorKey: String): List<CompanyEntity>
+
+    @Query("SELECT * FROM company_table WHERE ticker IN (:ids)")
+    suspend fun getCompaniesByTicker(ids: List<String>): List<CompanyEntity>
+
+    @Update
+    suspend fun updateCompanies(companies: List<CompanyEntity>)
+
+    @Update
+    suspend fun updateCompany(companies: CompanyEntity)
 }

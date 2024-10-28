@@ -27,12 +27,16 @@ android {
         applicationId = "com.thejawnpaul.gptinvestor"
         minSdk = 24
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 4
+        versionName = "1.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
         }
 
         javaCompileOptions {
@@ -83,6 +87,7 @@ android {
             val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
             buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
 
+            applicationIdSuffix = ".dev"
             isShrinkResources = false
             isMinifyEnabled = false
             versionNameSuffix = "-dev"
@@ -110,8 +115,6 @@ android {
     }
 }
 
-tasks.getByPath("preBuild").dependsOn("ktlintFormat")
-
 ktlint {
     android = true
     ignoreFailures = false
@@ -124,10 +127,17 @@ ktlint {
         mapOf(
             "ktlint_code_style" to "android_studio",
             "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
-            "max_line_length" to "140"
+            "max_line_length" to "190"
         )
     )
 }
+
+tasks.register<Copy>("installGitHook") {
+    from(file("${rootProject.rootDir}/scripts/pre-commit"))
+    into(file("${rootProject.rootDir}/.git/hooks"))
+}
+
+tasks.getByPath(":app:preBuild").dependsOn("installGitHook")
 
 dependencies {
 
@@ -139,12 +149,14 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.dagger.hilt)
     implementation(libs.timber)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation)
     implementation(libs.retrofit)
     implementation(libs.moshi.converter)
+    implementation(libs.moshi.kotlin)
     implementation(libs.okhttp.logger)
     implementation(libs.coil.compose)
     implementation(libs.core.ktx)

@@ -1,13 +1,19 @@
 package com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
+import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyDetailInputResponseUseCase
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyFinancialsUseCase
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyFinancialsView
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCompanyView
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyDetailDefaultConversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyPrompt
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.SimilarCompanyRequest
 import com.thejawnpaul.gptinvestor.features.investor.domain.model.CompareCompaniesRequest
 import com.thejawnpaul.gptinvestor.features.investor.domain.model.FinalAnalysisRequest
@@ -43,7 +49,9 @@ class CompanyViewModel @Inject constructor(
     private val analystRatingUseCase: GetAnalystRatingUseCase,
     private val industryRatingUseCase: GetIndustryRatingUseCase,
     private val finalRatingUseCase: GetFinalRatingUseCase,
-    private val downloadPdfUseCase: DownloadPdfUseCase
+    private val downloadPdfUseCase: DownloadPdfUseCase,
+    private val savedStateHandle: SavedStateHandle,
+    private val companyDetailInputResponseUseCase: GetCompanyDetailInputResponseUseCase
 
 ) : ViewModel() {
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
@@ -79,18 +87,44 @@ class CompanyViewModel @Inject constructor(
     private val _selectedTab = MutableStateFlow(0)
     val selectedTab get() = _selectedTab
 
+    private val _genText = MutableStateFlow("")
+    val genText get() = _genText
+
     private var companyTicker = ""
 
-    fun getCompany(ticker: String) {
-        companyTicker = ticker
-        getCompanyFinancials(ticker)
-        getCompanyUseCase(ticker) {
-            it.onFailure {
-            }
+    private val selectedConversationId = MutableStateFlow(-1L)
 
-            it.onSuccess { company ->
-                _selectedCompany.update { view ->
-                    view.copy(company = company.toPresentation())
+    private val selectedCompanyTicker: String?
+        get() = savedStateHandle.get<String>("ticker")
+
+    fun updateTicker(ticker: String) {
+        savedStateHandle["ticker"] = ticker
+        getCompany()
+    }
+
+    private fun getCompany() {
+        selectedCompanyTicker?.let { ticker ->
+            _selectedCompany.update { it.copy(loading = true) }
+            getCompanyUseCase(ticker) {
+                it.onFailure {
+                    _selectedCompany.update { state ->
+                        state.copy(
+                            loading = false,
+                            error = "Something went wrong."
+                        )
+                    }
+                }
+                it.onSuccess { company ->
+                    _selectedCompany.update { view ->
+                        view.copy(
+                            conversation = CompanyDetailDefaultConversation(
+                                id = 0,
+                                response = company
+                            ),
+                            loading = false,
+                            companyName = company.name
+                        )
+                    }
                 }
             }
         }
@@ -363,5 +397,84 @@ class CompanyViewModel @Inject constructor(
 
     fun selectTab(tabIndex: Int) {
         _selectedTab.update { tabIndex }
+    }
+
+    fun getQuery(query: String) {
+        _selectedCompany.update { it.copy(inputQuery = query) }
+    }
+
+    fun getInputResponse() {
+        if (_selectedCompany.value.inputQuery.trim().isNotEmpty()) {
+            _selectedCompany.update { it.copy(loading = true) }
+            when (_selectedCompany.value.conversation) {
+                is CompanyDetailDefaultConversation -> {
+                    val prompt = CompanyPrompt(
+                        query = _selectedCompany.value.inputQuery,
+                        company = (_selectedCompany.value.conversation as CompanyDetailDefaultConversation).response,
+                        conversationId = -1L
+                    )
+                    companyDetailInputResponseUseCase(params = prompt) {
+                        it.fold(
+                            ::handleCompanyInputResponseFailure,
+                            ::handleCompanyInputResponseSuccess
+                        )
+                    }
+                }
+
+                is StructuredConversation -> {
+                    val prompt = CompanyPrompt(
+                        query = _selectedCompany.value.inputQuery,
+                        conversationId = selectedConversationId.value
+                    )
+                    companyDetailInputResponseUseCase(params = prompt) {
+                        it.fold(
+                            ::handleCompanyInputResponseFailure,
+                            ::handleCompanyInputResponseSuccess
+                        )
+                    }
+                }
+
+                else -> {
+                }
+            }
+        }
+    }
+
+    fun getSuggestedPromptResponse(query: String) {
+        _selectedCompany.update { it.copy(loading = true) }
+        val prompt = CompanyPrompt(
+            query = query,
+            conversationId = selectedConversationId.value
+        )
+        companyDetailInputResponseUseCase(params = prompt) {
+            it.fold(
+                ::handleCompanyInputResponseFailure,
+                ::handleCompanyInputResponseSuccess
+            )
+        }
+    }
+
+    private fun handleCompanyInputResponseFailure(failure: Failure) {
+        Timber.e(failure.toString())
+        _selectedCompany.update {
+            it.copy(
+                error = "Something went wrong.",
+                loading = false,
+                inputQuery = ""
+            )
+        }
+    }
+
+    private fun handleCompanyInputResponseSuccess(conversation: Conversation) {
+        val s = conversation as StructuredConversation
+        _selectedCompany.update {
+            it.copy(
+                conversation = conversation,
+                loading = false,
+                inputQuery = ""
+            )
+        }
+        _genText.update { s.messageList.last().response.toString() }
+        selectedConversationId.update { s.id }
     }
 }

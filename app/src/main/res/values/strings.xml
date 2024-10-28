@@ -32,4 +32,20 @@
     <string name="download_report">Download report</string>
     <string name="save_the_full_analysis">Save the full analysis as a PDF for offline reference</string>
     <string name="download">Download</string>
+    <string name="informed_investment_decision_powered_by_ai">Informed Investment Decision Powered By AI</string>
+    <string name="start_trading_tending_stocks">Start trading trending stocks …</string>
+    <string name="ask_gpt_investor">Ask GPT Investor</string>
+    <string name="ask_about">Ask about …</string>
+    <string name="ask_anything_about_stocks">Ask anything about stocks …</string>
+    <string name="analysing_response">Analysing response …</string>
+    <string name="data_from">Data from</string>
+    <string name="about_company_name">About %1$s</string>
+    <string name="pe_ratio">p/e ratio</string>
+    <string name="revenue">revenue</string>
+    <string name="learn_more">Learn more</string>
+    <string name="ask_anything_about">Ask anything about %1$s</string>
+    <string name="related">Related</string>
+    <string name="related_to">Related to %1$s</string>
+    <string name="discover_gpt_investor">Discover GPT Investor</string>
+    <string name="your_gpt_investor_history">Your GPT Investor History</string>
 </resources>

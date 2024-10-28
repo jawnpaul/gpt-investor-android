@@ -1,8 +1,16 @@
 package com.thejawnpaul.gptinvestor.core.api
 
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRemote
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyPriceRequest
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyPriceResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyRemote
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.TrendingRemote
+import com.thejawnpaul.gptinvestor.features.conversation.data.remote.DefaultPromptRemote
+import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityRequest
+import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityResponse
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.AnalystRatingRequest
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.AnalystRatingResponse
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.DefaultSaveResponse
@@ -37,4 +45,19 @@ interface ApiService {
 
     @POST("create-pdf")
     suspend fun createPdf(@Body request: DownloadPdfRequest): Response<DownloadPdfResponse>
+
+    @GET("trending-tickers")
+    suspend fun getTrendingTickers(): Response<List<TrendingRemote>>
+
+    @GET("default-prompts")
+    suspend fun getDefaultPrompts(): Response<List<DefaultPromptRemote>>
+
+    @POST("get-entity")
+    suspend fun getEntity(@Body request: GetEntityRequest): Response<GetEntityResponse>
+
+    @POST("company-info")
+    suspend fun getCompanyInfo(@Body request: CompanyDetailRemoteRequest): Response<CompanyDetailRemoteResponse>
+
+    @POST("company-price")
+    suspend fun getCompanyPrice(@Body request: CompanyPriceRequest): Response<List<CompanyPriceResponse>>
 }

@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "............Starting ktlint check......................................"
+echo "Started Formatting...."
+./gradlew ktlintFormat
+echo "Completed.............................................................."

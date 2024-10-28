@@ -84,7 +84,7 @@ class CompanyRepository @Inject constructor(
         } else {
             val sectors =
                 companyList.map { it.toSector() }.filterNot { it.sectorName.lowercase() == "n/a" }
-                    .toSet().take(5)
+                    .toSet()
 
             emit(Either.Right(list + sectors))
         }

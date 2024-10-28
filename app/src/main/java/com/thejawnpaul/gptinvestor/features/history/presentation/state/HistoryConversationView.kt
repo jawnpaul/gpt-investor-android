@@ -8,5 +8,5 @@ data class HistoryConversationView(
     val query: String = "",
     val loading: Boolean = false
 ){
-    val enableSend = !loading && query.isNotEmpty()
+    val enableSend = !loading && query.trim().isNotEmpty()
 }

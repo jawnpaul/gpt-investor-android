@@ -43,9 +43,8 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toIntRect
 import androidx.compose.ui.unit.toSize
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-
+import kotlinx.coroutines.launch
 
 @Composable
 fun SmoothLineGraph(data: List<GraphPoint>) {
@@ -160,9 +159,9 @@ fun SmoothLineGraph(data: List<GraphPoint>) {
                                 labelTextStyle
                             )
                         }
-
                     }
-                })
+                }
+        )
     }
 }
 
@@ -183,20 +182,23 @@ fun generateSmoothPath(data: List<GraphPoint>, size: Size): Path {
             path.moveTo(
                 0f,
                 size.height - (balance.amount - min.amount) *
-                        heightPxPerAmount
+                    heightPxPerAmount
             )
-
         }
 
         val balanceX = i * weekWidth
         val balanceY = size.height - (balance.amount - min.amount) *
-                heightPxPerAmount
+            heightPxPerAmount
         // to do smooth curve graph - we use cubicTo, uncomment section below for non-curve
         val controlPoint1 = PointF((balanceX + previousPointX) / 2f, previousPointY)
         val controlPoint2 = PointF((balanceX + previousPointX) / 2f, balanceY)
         path.cubicTo(
-            controlPoint1.x, controlPoint1.y, controlPoint2.x, controlPoint2.y,
-            balanceX, balanceY
+            controlPoint1.x,
+            controlPoint1.y,
+            controlPoint2.x,
+            controlPoint2.y,
+            balanceX,
+            balanceY
         )
 
         previousPointX = balanceX
@@ -205,12 +207,7 @@ fun generateSmoothPath(data: List<GraphPoint>, size: Size): Path {
     return path
 }
 
-fun DrawScope.drawHighlight(
-    highlightedWeek: Int,
-    graphData: List<GraphPoint>,
-    textMeasurer: TextMeasurer,
-    labelTextStyle: TextStyle
-) {
+fun DrawScope.drawHighlight(highlightedWeek: Int, graphData: List<GraphPoint>, textMeasurer: TextMeasurer, labelTextStyle: TextStyle) {
     val amount = graphData[highlightedWeek].amount
     val date = graphData[highlightedWeek].date
     val minAmount = graphData.minBy { it.amount }.amount
@@ -235,12 +232,14 @@ fun DrawScope.drawHighlight(
     )
 
     // draw info box
-    val textLayoutResult = textMeasurer.measure(buildString {
-        append("$${amount}")
-        append("\n")
-        append(date)
-
-    }, style = labelTextStyle)
+    val textLayoutResult = textMeasurer.measure(
+        buildString {
+            append("$$amount")
+            append("\n")
+            append(date)
+        },
+        style = labelTextStyle
+    )
     val highlightContainerSize = (textLayoutResult.size).toIntRect().inflate(4.dp.roundToPx()).size
     val boxTopLeft = (x - (highlightContainerSize.width / 2f))
         .coerceIn(0f, size.width - highlightContainerSize.width)
@@ -256,7 +255,6 @@ fun DrawScope.drawHighlight(
         topLeft = Offset(boxTopLeft + 4.dp.toPx(), 4.dp.toPx())
     )
 }
-
 
 data class GraphPoint(val date: String, val amount: Float)
 

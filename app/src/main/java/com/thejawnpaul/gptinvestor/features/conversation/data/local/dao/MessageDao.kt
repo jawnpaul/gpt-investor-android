@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.ConversationEntity
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.MessageEntity
 
 @Dao

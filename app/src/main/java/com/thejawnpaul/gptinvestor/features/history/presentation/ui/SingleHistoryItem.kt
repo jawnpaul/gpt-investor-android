@@ -23,11 +23,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Structured
 import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
 
 @Composable
-fun SingleHistoryItem(
-    modifier: Modifier = Modifier,
-    conversation: StructuredConversation,
-    onClick: (id: Long) -> Unit
-) {
+fun SingleHistoryItem(modifier: Modifier = Modifier, conversation: StructuredConversation, onClick: (id: Long) -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 0.dp)) {
         Row(
             modifier = Modifier
@@ -35,7 +31,7 @@ fun SingleHistoryItem(
                 .clickable { onClick(conversation.id) }
                 .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 conversation.title,
@@ -61,7 +57,6 @@ fun ItemPreview(modifier: Modifier = Modifier) {
     GPTInvestorTheme {
         Surface {
             Column(modifier = Modifier.fillMaxSize()) {
-
                 SingleHistoryItem(
                     modifier = Modifier,
                     conversation = StructuredConversation(

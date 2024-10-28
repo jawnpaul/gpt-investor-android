@@ -20,10 +20,10 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPr
 
 @Composable
 fun SingleCompanyItem(modifier: Modifier, company: CompanyPresentation, onClick: (String) -> Unit) {
-
     OutlinedCard(
         modifier = Modifier.padding(horizontal = 16.dp),
-        onClick = { onClick(company.ticker) }) {
+        onClick = { onClick(company.ticker) }
+    ) {
         Column(
             modifier = Modifier
                 .padding(16.dp)
@@ -35,18 +35,16 @@ fun SingleCompanyItem(modifier: Modifier, company: CompanyPresentation, onClick:
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    //Text
+                    // Text
                     Text(text = company.ticker, style = MaterialTheme.typography.titleLarge)
 
-                    //price
+                    // price
                     StockPriceText(currencySymbol = "$", amount = company.price)
 
-
-                    //change pill
+                    // change pill
                     company.priceChange?.let {
                         PercentageChangePill(change = it.change, date = it.date.toReadableString())
                     }
-
                 }
 
                 AsyncImage(
@@ -55,9 +53,8 @@ fun SingleCompanyItem(modifier: Modifier, company: CompanyPresentation, onClick:
                     modifier = Modifier,
                     contentScale = ContentScale.Inside
                 )
-
             }
-            //About
+            // About
             Text(
                 modifier = Modifier.padding(top = 16.dp),
                 text = company.summary,

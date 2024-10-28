@@ -21,11 +21,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
 
 @Composable
-fun ConversationScreen(
-    modifier: Modifier = Modifier,
-    viewModel: ConversationViewModel,
-    navController: NavController
-) {
+fun ConversationScreen(modifier: Modifier = Modifier, viewModel: ConversationViewModel, navController: NavController) {
     val conversation = viewModel.conversation.collectAsStateWithLifecycle()
     val genText = viewModel.genText.collectAsStateWithLifecycle()
 

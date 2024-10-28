@@ -6,10 +6,10 @@ import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.history.domain.repository.IHistoryRepository
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
 
 class GetSingleHistoryUseCase @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,

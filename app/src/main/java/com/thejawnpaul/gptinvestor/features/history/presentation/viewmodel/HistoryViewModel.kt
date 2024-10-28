@@ -13,10 +13,10 @@ import com.thejawnpaul.gptinvestor.features.history.domain.usecases.GetSingleHis
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryConversationView
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryScreenView
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import timber.log.Timber
-import javax.inject.Inject
 
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
@@ -60,7 +60,6 @@ class HistoryViewModel @Inject constructor(
 
     private fun handleGetAllHistorySuccess(response: List<StructuredConversation>) {
         _historyScreenView.update { it.copy(loading = false, list = response) }
-
     }
 
     fun updateConversationId(conversationId: String) {

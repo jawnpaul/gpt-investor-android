@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
 
-
 @Composable
 fun SectorChoiceQuestion(
     possibleAnswers: List<SectorInput>,
@@ -43,14 +42,8 @@ fun SectorChoiceQuestion(
     }
 }
 
-
 @Composable
-fun SingleSectorChoice(
-    input: SectorInput,
-    selected: Boolean,
-    onOptionSelected: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun SingleSectorChoice(input: SectorInput, selected: Boolean, onOptionSelected: () -> Unit, modifier: Modifier = Modifier) {
     when (input) {
         is SectorInput.AllSector -> {
             // Text(text = "All")
@@ -58,7 +51,8 @@ fun SingleSectorChoice(
                 modifier = Modifier,
                 selected = selected,
                 onClick = onOptionSelected,
-                label = { Text(text = "All") })
+                label = { Text(text = "All") }
+            )
         }
 
         is SectorInput.CustomSector -> {
@@ -67,10 +61,10 @@ fun SingleSectorChoice(
                 modifier = Modifier,
                 selected = selected,
                 onClick = onOptionSelected,
-                label = { Text(text = input.sectorName) })
+                label = { Text(text = input.sectorName) }
+            )
         }
     }
-
 }
 
 @Preview

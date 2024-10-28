@@ -198,13 +198,13 @@ fun SingleStructuredResponse(
             Column(modifier = Modifier.fillMaxWidth()) {
                 genAiMessage.entity?.let { entity ->
 
-                    //data source
+                    // data source
                     CompanyDetailDataSource(
                         list = entity.news.map { it.toPresentation() },
                         source = entity.newsSourcesString
                     )
 
-                    //price card
+                    // price card
                     CompanyDetailPriceCard(
                         ticker = entity.ticker,
                         price = entity.price,
@@ -212,7 +212,7 @@ fun SingleStructuredResponse(
                         imageUrl = entity.imageUrl
                     )
 
-                    //about company card
+                    // about company card
                     AboutStockCard(
                         companySummary = entity.about,
                         companyName = entity.name
@@ -245,7 +245,8 @@ fun FollowUpQuestions(
             )
         } else {
             Text(
-                stringResource(R.string.related), modifier = Modifier.padding(bottom = 8.dp),
+                stringResource(R.string.related),
+                modifier = Modifier.padding(bottom = 8.dp),
                 style = MaterialTheme.typography.titleMedium
             )
         }
@@ -258,7 +259,7 @@ fun FollowUpQuestions(
                         .clickable { onClick(it) }
                         .padding(vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         it.label,
@@ -300,15 +301,17 @@ fun ConversationPreview(modifier: Modifier = Modifier) {
     val prompts = listOf(
         Suggestion(
             label = "Netflix stock prices is going " +
-                    "really high and things are expected tp go higher the more this season",
+                "really high and things are expected tp go higher the more this season",
             query = ""
-        ), Suggestion(
+        ),
+        Suggestion(
             label = "Netflix stock prices is going " +
-                    "really high and things are expected tp go higher the more this season",
+                "really high and things are expected tp go higher the more this season",
             query = ""
-        ), Suggestion(
+        ),
+        Suggestion(
             label = "Netflix stock prices is going " +
-                    "really high and things are expected tp go higher the more this season",
+                "really high and things are expected tp go higher the more this season",
             query = ""
         )
     )

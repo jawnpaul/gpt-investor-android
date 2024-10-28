@@ -5,7 +5,6 @@ import com.thejawnpaul.gptinvestor.core.di.IoDispatcher
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
-import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher

@@ -34,10 +34,10 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.state.FinalAna
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.IndustryRatingView
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.SimilarCompaniesView
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import timber.log.Timber
-import javax.inject.Inject
 
 @HiltViewModel
 class CompanyViewModel @Inject constructor(
@@ -92,7 +92,7 @@ class CompanyViewModel @Inject constructor(
 
     private var companyTicker = ""
 
-    private val _selectedConversationId = MutableStateFlow(-1L)
+    private val selectedConversationId = MutableStateFlow(-1L)
 
     private val selectedCompanyTicker: String?
         get() = savedStateHandle.get<String>("ticker")
@@ -120,7 +120,9 @@ class CompanyViewModel @Inject constructor(
                             conversation = CompanyDetailDefaultConversation(
                                 id = 0,
                                 response = company
-                            ), loading = false, companyName = company.name
+                            ),
+                            loading = false,
+                            companyName = company.name
                         )
                     }
                 }
@@ -422,7 +424,7 @@ class CompanyViewModel @Inject constructor(
                 is StructuredConversation -> {
                     val prompt = CompanyPrompt(
                         query = _selectedCompany.value.inputQuery,
-                        conversationId = _selectedConversationId.value
+                        conversationId = selectedConversationId.value
                     )
                     companyDetailInputResponseUseCase(params = prompt) {
                         it.fold(
@@ -433,7 +435,6 @@ class CompanyViewModel @Inject constructor(
                 }
 
                 else -> {
-
                 }
             }
         }
@@ -443,7 +444,7 @@ class CompanyViewModel @Inject constructor(
         _selectedCompany.update { it.copy(loading = true) }
         val prompt = CompanyPrompt(
             query = query,
-            conversationId = _selectedConversationId.value
+            conversationId = selectedConversationId.value
         )
         companyDetailInputResponseUseCase(params = prompt) {
             it.fold(
@@ -474,8 +475,6 @@ class CompanyViewModel @Inject constructor(
             )
         }
         _genText.update { s.messageList.last().response.toString() }
-        _selectedConversationId.update { s.id }
-
+        selectedConversationId.update { s.id }
     }
-
 }

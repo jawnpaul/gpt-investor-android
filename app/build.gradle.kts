@@ -115,8 +115,6 @@ android {
     }
 }
 
-//tasks.getByPath("preBuild").dependsOn("ktlintFormat")
-
 ktlint {
     android = true
     ignoreFailures = false
@@ -129,10 +127,17 @@ ktlint {
         mapOf(
             "ktlint_code_style" to "android_studio",
             "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
-            "max_line_length" to "140"
+            "max_line_length" to "190"
         )
     )
 }
+
+tasks.register<Copy>("installGitHook") {
+    from(file("${rootProject.rootDir}/scripts/pre-commit"))
+    into(file("${rootProject.rootDir}/.git/hooks"))
+}
+
+tasks.getByPath(":app:preBuild").dependsOn("installGitHook")
 
 dependencies {
 

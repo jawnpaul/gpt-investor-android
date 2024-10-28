@@ -30,11 +30,11 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntit
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onCompletion
 import timber.log.Timber
-import javax.inject.Inject
 
 class ConversationRepository @Inject constructor(
     private val apiService: ApiService,
@@ -85,100 +85,122 @@ class ConversationRepository @Inject constructor(
         }
     }
 
-    override suspend fun getDefaultPromptResponse(prompt: DefaultPrompt): Flow<Either<Failure, Conversation>> =
-        flow {
-            try {
-                val chunk = StringBuilder()
+    override suspend fun getDefaultPromptResponse(prompt: DefaultPrompt): Flow<Either<Failure, Conversation>> = flow {
+        try {
+            val chunk = StringBuilder()
 
-                analyticsLogger.logDefaultPromptSelected(
-                    promptTitle = prompt.title,
-                    promptQuery = prompt.query
-                )
+            analyticsLogger.logDefaultPromptSelected(
+                promptTitle = prompt.title,
+                promptQuery = prompt.query
+            )
 
-                //Always create a new conversation entity
-                val conversationId = conversationDao.insertConversation(
-                    ConversationEntity(
-                        title = prompt.title,
-                        createdAt = System.currentTimeMillis()
-                    )
-                )
-
-                val structuredConversation = StructuredConversation(
-                    id = conversationId,
+            // Always create a new conversation entity
+            val conversationId = conversationDao.insertConversation(
+                ConversationEntity(
                     title = prompt.title,
-                    messageList = mutableListOf(
-                        GenAiTextMessage(query = prompt.query, loading = true)
-                    )
+                    createdAt = System.currentTimeMillis()
                 )
-                emit(Either.Right(structuredConversation))
+            )
 
-                val chat =
-                    generativeModel.startChat(history = getHistory(structuredConversation.id))
+            val structuredConversation = StructuredConversation(
+                id = conversationId,
+                title = prompt.title,
+                messageList = mutableListOf(
+                    GenAiTextMessage(query = prompt.query, loading = true)
+                )
+            )
+            emit(Either.Right(structuredConversation))
 
-                val response = chat.sendMessageStream(prompt.query)
+            val chat =
+                generativeModel.startChat(history = getHistory(structuredConversation.id))
 
-                response.onCompletion {
-                    val suggested = getSuggestedPrompts(conversationId)
-                    emit(Either.Right(structuredConversation.copy(suggestedPrompts = suggested)))
+            val response = chat.sendMessageStream(prompt.query)
 
-                    //insert new message entity
-                    val message = MessageEntity(
-                        conversationId = conversationId,
+            response.onCompletion {
+                val suggested = getSuggestedPrompts(conversationId)
+                emit(Either.Right(structuredConversation.copy(suggestedPrompts = suggested)))
+
+                // insert new message entity
+                val message = MessageEntity(
+                    conversationId = conversationId,
+                    query = prompt.query,
+                    response = structuredConversation.messageList.last().response,
+                    createdAt = System.currentTimeMillis()
+                )
+                messageDao.insertMessage(message)
+            }.collect { result ->
+                result.text?.let { responseText ->
+
+                    chunk.append(responseText)
+
+                    val lastIndex = structuredConversation.messageList.lastIndex
+                    val message =
+                        structuredConversation.messageList[lastIndex] as GenAiTextMessage
+                    val last = message.copy(
                         query = prompt.query,
-                        response = structuredConversation.messageList.last().response,
-                        createdAt = System.currentTimeMillis()
+                        response = chunk.toString(),
+                        loading = false
                     )
-                    messageDao.insertMessage(message)
-                }.collect { result ->
-                    result.text?.let { responseText ->
+                    structuredConversation.messageList[lastIndex] = last
 
-                        chunk.append(responseText)
-
-                        val lastIndex = structuredConversation.messageList.lastIndex
-                        val message =
-                            structuredConversation.messageList[lastIndex] as GenAiTextMessage
-                        val last = message.copy(
-                            query = prompt.query,
-                            response = chunk.toString(),
-                            loading = false
-                        )
-                        structuredConversation.messageList[lastIndex] = last
-
-                        emit(Either.Right(structuredConversation))
-                    }
+                    emit(Either.Right(structuredConversation))
+                }
+            }
+        } catch (e: Exception) {
+            when (e) {
+                is GoogleGenerativeAIException -> {
+                    emit(Either.Left(GenAIException()))
+                    Timber.e(e.stackTraceToString())
                 }
 
-            } catch (e: Exception) {
-                when (e) {
-                    is GoogleGenerativeAIException -> {
-                        emit(Either.Left(GenAIException()))
-                        Timber.e(e.stackTraceToString())
-                    }
-
-                    else -> {
-                        Timber.e(e.stackTraceToString())
-                        emit(Either.Left(Failure.ServerError))
-                    }
+                else -> {
+                    Timber.e(e.stackTraceToString())
+                    emit(Either.Left(Failure.ServerError))
                 }
             }
         }
+    }
 
-    override suspend fun getInputResponse(prompt: ConversationPrompt): Flow<Either<Failure, Conversation>> =
-        flow {
-            try {
-                val conversation = getConversation(prompt)
-                Timber.e(conversation.id.toString())
+    override suspend fun getInputResponse(prompt: ConversationPrompt): Flow<Either<Failure, Conversation>> = flow {
+        try {
+            val conversation = getConversation(prompt)
+            Timber.e(conversation.id.toString())
 
-                //TODO: Emit default loading state from here
+            // TODO: Emit default loading state from here
 
-                // check if input string contains entity
-                val entityList = containsEntity(prompt.query)
-                if (entityList.isNotEmpty()) {
-                    val ticker = entityList.first()
-                    val company = getCompanyDetail(ticker)
+            // check if input string contains entity
+            val entityList = containsEntity(prompt.query)
+            if (entityList.isNotEmpty()) {
+                val ticker = entityList.first()
+                val company = getCompanyDetail(ticker)
 
-                    if (conversation.messageList.isEmpty()) {
+                if (conversation.messageList.isEmpty()) {
+                    company?.let {
+                        // emit company
+                        val newId = messageDao.insertMessage(
+                            MessageEntity(
+                                conversationId = conversation.id,
+                                companyDetailRemoteResponse = company,
+                                createdAt = System.currentTimeMillis()
+                            )
+                        )
+                        conversation.messageList.add(
+                            GenAiEntityMessage(
+                                id = newId,
+                                entity = company
+                            )
+                        )
 
+                        emit(Either.Right(conversation))
+                        // add company to conversation history
+                    }
+                } else {
+                    // check if this returned entity doesn't exist in the conversation, add it
+                    val existingEntity =
+                        conversation.messageList.filterIsInstance<GenAiEntityMessage>()
+                            .find { it.entity?.ticker == ticker }
+                    if (existingEntity == null) {
+                        // add it to the conversation
                         company?.let {
                             // emit company
                             val newId = messageDao.insertMessage(
@@ -197,151 +219,21 @@ class ConversationRepository @Inject constructor(
 
                             emit(Either.Right(conversation))
                             // add company to conversation history
+
+                            analyticsLogger.logCompanyIdentified(
+                                companyTicker = company.ticker
+                            )
                         }
                     } else {
-                        // check if this returned entity doesn't exist in the conversation, add it
-                        val existingEntity =
-                            conversation.messageList.filterIsInstance<GenAiEntityMessage>()
-                                .find { it.entity?.ticker == ticker }
-                        if (existingEntity == null) {
-                            //add it to the conversation
-                            company?.let {
-                                // emit company
-                                val newId = messageDao.insertMessage(
-                                    MessageEntity(
-                                        conversationId = conversation.id,
-                                        companyDetailRemoteResponse = company,
-                                        createdAt = System.currentTimeMillis()
-                                    )
-                                )
-                                conversation.messageList.add(
-                                    GenAiEntityMessage(
-                                        id = newId,
-                                        entity = company
-                                    )
-                                )
-
-                                emit(Either.Right(conversation))
-                                // add company to conversation history
-
-                                analyticsLogger.logCompanyIdentified(
-                                    companyTicker = company.ticker
-                                )
-                            }
-                        } else {
-                            // do nothing or update it
-                        }
-
-                    }
-
-                }
-
-                val chunk = StringBuilder()
-
-                val newMessageId =
-                    messageDao.insertMessage(
-                        MessageEntity(
-                            conversationId = conversation.id,
-                            createdAt = System.currentTimeMillis(),
-                            query = prompt.query
-                        )
-                    )
-
-                conversation.messageList.add(
-                    GenAiTextMessage(
-                        id = newMessageId,
-                        query = prompt.query,
-                        loading = true
-                    )
-                )
-
-                emit(Either.Right(conversation))
-
-                val chat = generativeModel.startChat(history = getHistory(conversation.id))
-
-                val response = chat.sendMessageStream(prompt.query)
-                response.onCompletion {
-                    val suggested = getSuggestedPrompts(conversation.id)
-                    emit(Either.Right(conversation.copy(suggestedPrompts = suggested)))
-                    Timber.e("Completed")
-
-                    //update message with complete response
-                    val updatedEntity = messageDao.getSingleMessage(newMessageId)
-                        .copy(response = conversation.messageList.last().response)
-                    messageDao.updateMessage(updatedEntity)
-
-                    getConversationTitle(conversation.id)?.let { title ->
-                        emit(Either.Right(conversation.copy(title = title)))
-                        val entity = conversationDao.getSingleConversation(conversation.id)
-                        entity?.let {
-                            conversationDao.updateConversation(it.copy(title = title))
-                        }
-                    }
-                }.collect { result ->
-                    result.text?.let { responseText ->
-
-                        chunk.append(responseText)
-
-                        val lastIndex = conversation.messageList.lastIndex
-                        val lastMessage =
-                            conversation.messageList[lastIndex]
-
-                        when (lastMessage) {
-                            is GenAiTextMessage -> {
-                                val last = lastMessage.copy(
-                                    query = prompt.query,
-                                    response = chunk.toString(),
-                                    loading = false
-                                )
-                                conversation.messageList[lastIndex] = last
-
-                                emit(Either.Right(conversation))
-                            }
-
-                            is GenAiEntityMessage -> {
-                                Timber.e("Last message is Gen AI entity message")
-                            }
-                        }
-                    }
-                }
-
-            } catch (e: Exception) {
-                when (e) {
-                    is GoogleGenerativeAIException -> {
-                        Timber.e(e.stackTraceToString())
-                        emit(Either.Left(GenAIException()))
-                    }
-
-                    else -> {
-                        Timber.e(e.stackTraceToString())
-                        emit(Either.Left(Failure.ServerError))
+                        // do nothing or update it
                     }
                 }
             }
-        }
 
-    override suspend fun getCompanyInputResponse(prompt: CompanyPrompt): Flow<Either<Failure, Conversation>> =
-        flow {
-            try {
-                val chunk = StringBuilder()
+            val chunk = StringBuilder()
 
-                //get conversation
-                val conversation =
-                    getConversation(ConversationPrompt(prompt.conversationId, prompt.query))
-                if (prompt.company != null) {
-                    val id = messageDao.insertMessage(
-                        MessageEntity(
-                            conversationId = conversation.id,
-                            createdAt = System.currentTimeMillis(),
-                            companyDetailRemoteResponse = prompt.company
-                        )
-                    )
-                    conversation.messageList.add(
-                        GenAiEntityMessage(id = id, entity = prompt.company)
-                    )
-                }
-
-                val newIndex = messageDao.insertMessage(
+            val newMessageId =
+                messageDao.insertMessage(
                     MessageEntity(
                         conversationId = conversation.id,
                         createdAt = System.currentTimeMillis(),
@@ -349,74 +241,171 @@ class ConversationRepository @Inject constructor(
                     )
                 )
 
-                conversation.messageList.add(GenAiTextMessage(id = newIndex, prompt.query))
+            conversation.messageList.add(
+                GenAiTextMessage(
+                    id = newMessageId,
+                    query = prompt.query,
+                    loading = true
+                )
+            )
 
-                emit(Either.Right(conversation))
-                Timber.e(conversation.toString())
-                // add query
-                val chat = generativeModel.startChat(history = getHistory(conversation.id))
+            emit(Either.Right(conversation))
 
-                //add text response
-                val lastIndex = conversation.messageList.lastIndex
+            val chat = generativeModel.startChat(history = getHistory(conversation.id))
 
-                val response = chat.sendMessageStream(prompt.query)
-                response.onCompletion {
-                    val suggested = getSuggestedPrompts(conversation.id)
-                    emit(Either.Right(conversation.copy(suggestedPrompts = suggested)))
+            val response = chat.sendMessageStream(prompt.query)
+            response.onCompletion {
+                val suggested = getSuggestedPrompts(conversation.id)
+                emit(Either.Right(conversation.copy(suggestedPrompts = suggested)))
+                Timber.e("Completed")
 
-                    val updatedEntity = messageDao.getSingleMessage(newIndex)
-                        .copy(response = conversation.messageList.last().response)
-                    messageDao.updateMessage(updatedEntity)
+                // update message with complete response
+                val updatedEntity = messageDao.getSingleMessage(newMessageId)
+                    .copy(response = conversation.messageList.last().response)
+                messageDao.updateMessage(updatedEntity)
 
-                    getConversationTitle(conversation.id)?.let { title ->
-                        emit(Either.Right(conversation.copy(title = title)))
-                        val entity = conversationDao.getSingleConversation(conversation.id)
-                        entity?.let {
-                            conversationDao.updateConversation(it.copy(title = title))
-                        }
+                getConversationTitle(conversation.id)?.let { title ->
+                    emit(Either.Right(conversation.copy(title = title)))
+                    val entity = conversationDao.getSingleConversation(conversation.id)
+                    entity?.let {
+                        conversationDao.updateConversation(it.copy(title = title))
                     }
-
-                }.collect { result ->
-                    result.text?.let { responseText ->
-                        chunk.append(responseText)
-
-                        val lastMessage =
-                            conversation.messageList[lastIndex]
-
-                        when (lastMessage) {
-                            is GenAiTextMessage -> {
-                                val last = lastMessage.copy(
-                                    query = prompt.query,
-                                    response = chunk.toString(),
-                                    loading = false
-                                )
-                                conversation.messageList[lastIndex] = last
-
-                                emit(Either.Right(conversation))
-                            }
-
-                            is GenAiEntityMessage -> {
-                                Timber.e("Last message is Gen AI entity message")
-                            }
-                        }
-                    }
-
                 }
+            }.collect { result ->
+                result.text?.let { responseText ->
 
-            } catch (e: Exception) {
-                when (e) {
-                    is GoogleGenerativeAIException -> {
-                        Timber.e(e.stackTraceToString())
-                        emit(Either.Left(GenAIException()))
-                    }
+                    chunk.append(responseText)
 
-                    else -> {
-                        Timber.e(e.stackTraceToString())
-                        emit(Either.Left(Failure.ServerError))
+                    val lastIndex = conversation.messageList.lastIndex
+                    val lastMessage =
+                        conversation.messageList[lastIndex]
+
+                    when (lastMessage) {
+                        is GenAiTextMessage -> {
+                            val last = lastMessage.copy(
+                                query = prompt.query,
+                                response = chunk.toString(),
+                                loading = false
+                            )
+                            conversation.messageList[lastIndex] = last
+
+                            emit(Either.Right(conversation))
+                        }
+
+                        is GenAiEntityMessage -> {
+                            Timber.e("Last message is Gen AI entity message")
+                        }
                     }
                 }
             }
+        } catch (e: Exception) {
+            when (e) {
+                is GoogleGenerativeAIException -> {
+                    Timber.e(e.stackTraceToString())
+                    emit(Either.Left(GenAIException()))
+                }
+
+                else -> {
+                    Timber.e(e.stackTraceToString())
+                    emit(Either.Left(Failure.ServerError))
+                }
+            }
         }
+    }
+
+    override suspend fun getCompanyInputResponse(prompt: CompanyPrompt): Flow<Either<Failure, Conversation>> = flow {
+        try {
+            val chunk = StringBuilder()
+
+            // get conversation
+            val conversation =
+                getConversation(ConversationPrompt(prompt.conversationId, prompt.query))
+            if (prompt.company != null) {
+                val id = messageDao.insertMessage(
+                    MessageEntity(
+                        conversationId = conversation.id,
+                        createdAt = System.currentTimeMillis(),
+                        companyDetailRemoteResponse = prompt.company
+                    )
+                )
+                conversation.messageList.add(
+                    GenAiEntityMessage(id = id, entity = prompt.company)
+                )
+            }
+
+            val newIndex = messageDao.insertMessage(
+                MessageEntity(
+                    conversationId = conversation.id,
+                    createdAt = System.currentTimeMillis(),
+                    query = prompt.query
+                )
+            )
+
+            conversation.messageList.add(GenAiTextMessage(id = newIndex, prompt.query))
+
+            emit(Either.Right(conversation))
+            Timber.e(conversation.toString())
+            // add query
+            val chat = generativeModel.startChat(history = getHistory(conversation.id))
+
+            // add text response
+            val lastIndex = conversation.messageList.lastIndex
+
+            val response = chat.sendMessageStream(prompt.query)
+            response.onCompletion {
+                val suggested = getSuggestedPrompts(conversation.id)
+                emit(Either.Right(conversation.copy(suggestedPrompts = suggested)))
+
+                val updatedEntity = messageDao.getSingleMessage(newIndex)
+                    .copy(response = conversation.messageList.last().response)
+                messageDao.updateMessage(updatedEntity)
+
+                getConversationTitle(conversation.id)?.let { title ->
+                    emit(Either.Right(conversation.copy(title = title)))
+                    val entity = conversationDao.getSingleConversation(conversation.id)
+                    entity?.let {
+                        conversationDao.updateConversation(it.copy(title = title))
+                    }
+                }
+            }.collect { result ->
+                result.text?.let { responseText ->
+                    chunk.append(responseText)
+
+                    val lastMessage =
+                        conversation.messageList[lastIndex]
+
+                    when (lastMessage) {
+                        is GenAiTextMessage -> {
+                            val last = lastMessage.copy(
+                                query = prompt.query,
+                                response = chunk.toString(),
+                                loading = false
+                            )
+                            conversation.messageList[lastIndex] = last
+
+                            emit(Either.Right(conversation))
+                        }
+
+                        is GenAiEntityMessage -> {
+                            Timber.e("Last message is Gen AI entity message")
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            when (e) {
+                is GoogleGenerativeAIException -> {
+                    Timber.e(e.stackTraceToString())
+                    emit(Either.Left(GenAIException()))
+                }
+
+                else -> {
+                    Timber.e(e.stackTraceToString())
+                    emit(Either.Left(Failure.ServerError))
+                }
+            }
+        }
+    }
 
     private suspend fun getSuggestedPrompts(conversationId: Long): List<Suggestion> {
         return try {
@@ -435,7 +424,6 @@ class ConversationRepository @Inject constructor(
                 }
             }
             result
-
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emptyList()
@@ -459,7 +447,7 @@ class ConversationRepository @Inject constructor(
                 messageList = messages
             )
         } else {
-            //create new conversation
+            // create new conversation
             val id = conversationDao.insertConversation(
                 ConversationEntity(
                     title = "Default title",

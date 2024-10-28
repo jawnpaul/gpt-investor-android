@@ -16,10 +16,10 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefa
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.state.ConversationView
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import timber.log.Timber
-import javax.inject.Inject
 
 @HiltViewModel
 class ConversationViewModel @Inject constructor(
@@ -38,7 +38,7 @@ class ConversationViewModel @Inject constructor(
     private val _conversationMessages = MutableStateFlow(mutableListOf<GenAiTextMessage>())
     val conversationMessages get() = _conversationMessages
 
-    private val _selectedConversationId = MutableStateFlow(-1L)
+    private val selectedConversationId = MutableStateFlow(-1L)
 
     init {
         getDefaultPrompts()
@@ -71,7 +71,7 @@ class ConversationViewModel @Inject constructor(
             it.onSuccess { result ->
                 result as StructuredConversation
                 // update the id of the conversation
-                _selectedConversationId.update {
+                selectedConversationId.update {
                     Timber.e(result.id.toString())
                     result.id
                 }
@@ -88,13 +88,12 @@ class ConversationViewModel @Inject constructor(
 
     fun getInputResponse() {
         if (conversation.value.query.trim().isNotEmpty()) {
-
             conversationViewMutableStateFlow.update {
                 it.copy(loading = true)
             }
             getInputPromptUseCase(
                 ConversationPrompt(
-                    conversationId = _selectedConversationId.value,
+                    conversationId = selectedConversationId.value,
                     query = conversation.value.query
                 )
             ) {
@@ -112,7 +111,7 @@ class ConversationViewModel @Inject constructor(
         }
         getInputPromptUseCase(
             ConversationPrompt(
-                conversationId = _selectedConversationId.value,
+                conversationId = selectedConversationId.value,
                 query = query
             )
         ) {
@@ -138,7 +137,7 @@ class ConversationViewModel @Inject constructor(
     private fun handleInputResponseSuccess(conversation: Conversation) {
         conversation as StructuredConversation
 
-        _selectedConversationId.update {
+        selectedConversationId.update {
             Timber.e(conversation.id.toString())
             conversation.id
         }

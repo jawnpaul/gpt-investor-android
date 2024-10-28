@@ -9,6 +9,6 @@ data class SingleCompanyView(
     val error: String? = null,
     val companyName: String = "",
     val inputQuery: String = ""
-){
+) {
     val enableSend = inputQuery.trim().isNotEmpty()
 }

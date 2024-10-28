@@ -7,6 +7,6 @@ data class HistoryConversationView(
     val conversation: Conversation = DefaultConversation(),
     val query: String = "",
     val loading: Boolean = false
-){
+) {
     val enableSend = !loading && query.trim().isNotEmpty()
 }

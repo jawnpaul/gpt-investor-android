@@ -31,10 +31,10 @@ data class ConversationWithMessages(
     SELECT c.conversationId, MAX(m.createdAt) as timestamp, c.title
     FROM conversation_table as c INNER JOIN message_table as m on c.conversationId = m.conversationId 
     GROUP BY c.conversationId
-""",
+"""
 )
 data class ConversationWithLastMessage(
     val conversationId: Long,
     val title: String = "",
-    val timestamp: Long = -1,
+    val timestamp: Long = -1
 )

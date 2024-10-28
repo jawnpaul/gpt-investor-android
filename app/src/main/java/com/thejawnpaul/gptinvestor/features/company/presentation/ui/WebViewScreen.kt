@@ -26,7 +26,6 @@ import com.thejawnpaul.gptinvestor.R
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun WebViewScreen(navController: NavController, url: String) {
-
     Scaffold(
         topBar = {
             TopAppBar(

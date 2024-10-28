@@ -96,7 +96,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 arguments = listOf(navArgument("conversationId") { NavType.StringType })
             ) { navBackStackEntry ->
                 val viewModel = hiltViewModel<HistoryViewModel>()
-                val id = navBackStackEntry.arguments?.getString("conversationId")?: ""
+                val id = navBackStackEntry.arguments?.getString("conversationId") ?: ""
 
                 HistoryDetailScreen(
                     modifier = Modifier,

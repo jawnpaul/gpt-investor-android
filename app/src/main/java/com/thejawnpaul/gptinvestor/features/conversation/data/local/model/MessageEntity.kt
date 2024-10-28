@@ -11,12 +11,14 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextM
 
 @Entity(
     tableName = "message_table",
-    foreignKeys = [ForeignKey(
-        entity = ConversationEntity::class,
-        parentColumns = ["conversationId"],
-        childColumns = ["conversationId"],
-        onDelete = ForeignKey.CASCADE
-    )],
+    foreignKeys = [
+        ForeignKey(
+            entity = ConversationEntity::class,
+            parentColumns = ["conversationId"],
+            childColumns = ["conversationId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
     indices = [Index("conversationId")]
 )
 data class MessageEntity(

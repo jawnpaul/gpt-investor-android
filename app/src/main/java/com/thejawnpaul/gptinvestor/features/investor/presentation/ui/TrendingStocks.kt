@@ -126,7 +126,6 @@ fun TrendingStockList(
     onClick: (tickerSymbol: String) -> Unit,
     onClickRetry: () -> Unit
 ) {
-
     val lazyGridState = rememberLazyStaggeredGridState()
     val coroutineScope = rememberCoroutineScope()
     val isScrollInProgress = lazyGridState.isScrollInProgress
@@ -163,7 +162,6 @@ fun TrendingStockList(
         }
 
         if (state.companies.isNotEmpty()) {
-
             val repeatedItems = buildList {
                 repeat(2) {
                     addAll(state.companies)

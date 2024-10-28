@@ -7,10 +7,10 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
 
 class GetCompanyDetailInputResponseUseCase @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,

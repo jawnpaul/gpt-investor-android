@@ -3,11 +3,9 @@ package com.thejawnpaul.gptinvestor.features.history.presentation.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
@@ -25,12 +23,7 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.Histo
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
 
 @Composable
-fun HistoryDetailScreen(
-    modifier: Modifier = Modifier,
-    navController: NavController,
-    conversationId: String,
-    viewModel: HistoryViewModel
-) {
+fun HistoryDetailScreen(modifier: Modifier = Modifier, navController: NavController, conversationId: String, viewModel: HistoryViewModel) {
     LaunchedEffect(conversationId) {
         viewModel.updateConversationId(conversationId)
     }
@@ -41,7 +34,6 @@ fun HistoryDetailScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         when (conversation.value.conversation) {
             is DefaultConversation -> {
-
             }
 
             is StructuredConversation -> {
@@ -58,7 +50,6 @@ fun HistoryDetailScreen(
             }
 
             else -> {
-
             }
         }
 

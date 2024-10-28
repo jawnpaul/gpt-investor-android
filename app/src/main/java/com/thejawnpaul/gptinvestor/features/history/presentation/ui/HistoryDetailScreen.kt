@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -66,10 +67,9 @@ fun HistoryDetailScreen(
                 .fillMaxWidth()
                 .align(Alignment.BottomStart)
                 .windowInsetsPadding(
-                    WindowInsets.ime.exclude(
-                        WindowInsets.navigationBars
-                    )
-                ),
+                    WindowInsets.ime
+                )
+                .navigationBarsPadding(),
             input = conversation.value.query,
             contentPadding = PaddingValues(0.dp),
             sendEnabled = conversation.value.enableSend,

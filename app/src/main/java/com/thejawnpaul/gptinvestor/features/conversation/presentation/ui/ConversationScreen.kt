@@ -3,11 +3,10 @@ package com.thejawnpaul.gptinvestor.features.conversation.presentation.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -67,10 +66,9 @@ fun ConversationScreen(
                 .fillMaxWidth()
                 .align(Alignment.BottomStart)
                 .windowInsetsPadding(
-                    WindowInsets.ime.exclude(
-                        WindowInsets.navigationBars
-                    )
-                ),
+                    WindowInsets.ime
+                )
+                .navigationBarsPadding(),
             input = conversation.value.query,
             contentPadding = PaddingValues(0.dp),
             sendEnabled = conversation.value.enableSend,

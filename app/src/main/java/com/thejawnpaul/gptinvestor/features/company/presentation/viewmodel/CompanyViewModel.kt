@@ -402,37 +402,39 @@ class CompanyViewModel @Inject constructor(
     }
 
     fun getInputResponse() {
-        _selectedCompany.update { it.copy(loading = true) }
-        when (_selectedCompany.value.conversation) {
-            is CompanyDetailDefaultConversation -> {
-                val prompt = CompanyPrompt(
-                    query = _selectedCompany.value.inputQuery,
-                    company = (_selectedCompany.value.conversation as CompanyDetailDefaultConversation).response,
-                    conversationId = -1L
-                )
-                companyDetailInputResponseUseCase(params = prompt) {
-                    it.fold(
-                        ::handleCompanyInputResponseFailure,
-                        ::handleCompanyInputResponseSuccess
+        if (_selectedCompany.value.inputQuery.trim().isNotEmpty()) {
+            _selectedCompany.update { it.copy(loading = true) }
+            when (_selectedCompany.value.conversation) {
+                is CompanyDetailDefaultConversation -> {
+                    val prompt = CompanyPrompt(
+                        query = _selectedCompany.value.inputQuery,
+                        company = (_selectedCompany.value.conversation as CompanyDetailDefaultConversation).response,
+                        conversationId = -1L
                     )
+                    companyDetailInputResponseUseCase(params = prompt) {
+                        it.fold(
+                            ::handleCompanyInputResponseFailure,
+                            ::handleCompanyInputResponseSuccess
+                        )
+                    }
                 }
-            }
 
-            is StructuredConversation -> {
-                val prompt = CompanyPrompt(
-                    query = _selectedCompany.value.inputQuery,
-                    conversationId = _selectedConversationId.value
-                )
-                companyDetailInputResponseUseCase(params = prompt) {
-                    it.fold(
-                        ::handleCompanyInputResponseFailure,
-                        ::handleCompanyInputResponseSuccess
+                is StructuredConversation -> {
+                    val prompt = CompanyPrompt(
+                        query = _selectedCompany.value.inputQuery,
+                        conversationId = _selectedConversationId.value
                     )
+                    companyDetailInputResponseUseCase(params = prompt) {
+                        it.fold(
+                            ::handleCompanyInputResponseFailure,
+                            ::handleCompanyInputResponseSuccess
+                        )
+                    }
                 }
-            }
 
-            else -> {
+                else -> {
 
+                }
             }
         }
     }

@@ -95,19 +95,21 @@ class HistoryViewModel @Inject constructor(
     }
 
     fun getInputResponse() {
-        _conversationView.update {
-            it.copy(loading = true)
-        }
-        getInputPromptUseCase(
-            ConversationPrompt(
-                conversationId = conversationId ?: -1L,
-                query = conversation.value.query
-            )
-        ) {
-            it.fold(
-                ::handleInputResponseFailure,
-                ::handleInputResponseSuccess
-            )
+        if (conversation.value.query.trim().isNotEmpty()) {
+            _conversationView.update {
+                it.copy(loading = true)
+            }
+            getInputPromptUseCase(
+                ConversationPrompt(
+                    conversationId = conversationId ?: -1L,
+                    query = conversation.value.query
+                )
+            ) {
+                it.fold(
+                    ::handleInputResponseFailure,
+                    ::handleInputResponseSuccess
+                )
+            }
         }
     }
 

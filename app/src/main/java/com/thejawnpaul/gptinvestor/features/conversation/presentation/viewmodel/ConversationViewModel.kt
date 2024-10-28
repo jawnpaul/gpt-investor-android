@@ -16,10 +16,10 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefa
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.state.ConversationView
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltViewModel
 class ConversationViewModel @Inject constructor(
@@ -87,23 +87,26 @@ class ConversationViewModel @Inject constructor(
     }
 
     fun getInputResponse() {
-        conversationViewMutableStateFlow.update {
-            it.copy(loading = true)
-        }
-        getInputPromptUseCase(
-            ConversationPrompt(
-                conversationId = _selectedConversationId.value,
-                query = conversation.value.query
-            )
-        ) {
-            it.fold(
-                ::handleInputResponseFailure,
-                ::handleInputResponseSuccess
-            )
+        if (conversation.value.query.trim().isNotEmpty()) {
+
+            conversationViewMutableStateFlow.update {
+                it.copy(loading = true)
+            }
+            getInputPromptUseCase(
+                ConversationPrompt(
+                    conversationId = _selectedConversationId.value,
+                    query = conversation.value.query
+                )
+            ) {
+                it.fold(
+                    ::handleInputResponseFailure,
+                    ::handleInputResponseSuccess
+                )
+            }
         }
     }
 
-    fun getSuggestedPromptResponse(query:String) {
+    fun getSuggestedPromptResponse(query: String) {
         conversationViewMutableStateFlow.update {
             it.copy(loading = true)
         }

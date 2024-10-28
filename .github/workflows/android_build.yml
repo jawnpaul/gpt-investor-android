@@ -79,5 +79,3 @@ jobs:
           name: test-reports
           path: '**/build/reports/tests/'
         
-      - name: Build Project
-        run: ./gradlew bundleRelease

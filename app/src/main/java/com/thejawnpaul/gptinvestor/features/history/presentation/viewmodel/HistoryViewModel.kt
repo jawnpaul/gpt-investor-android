@@ -30,8 +30,8 @@ class HistoryViewModel @Inject constructor(
     private val _historyScreenView = MutableStateFlow(HistoryScreenView())
     val historyScreenView get() = _historyScreenView
 
-    private val _conversationView = MutableStateFlow(HistoryConversationView())
-    val conversation get() = _conversationView
+    private val conversationView = MutableStateFlow(HistoryConversationView())
+    val conversation get() = conversationView
 
     private val _genText = MutableStateFlow("")
     val genText = _genText
@@ -68,7 +68,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun getConversation() {
-        _conversationView.update { it.copy(loading = true) }
+        conversationView.update { it.copy(loading = true) }
         conversationId?.let { id ->
 
             getSingleHistoryUseCase(id) {
@@ -81,21 +81,21 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun handleGetSingleHistoryFailure(failure: Failure) {
-        _conversationView.update { it.copy(loading = false) }
+        conversationView.update { it.copy(loading = false) }
         Timber.e(failure.toString())
     }
 
     private fun handleGetSingleHistorySuccess(conversation: StructuredConversation) {
-        _conversationView.update { it.copy(loading = false, conversation = conversation) }
+        conversationView.update { it.copy(loading = false, conversation = conversation) }
     }
 
     fun updateInput(input: String) {
-        _conversationView.update { it.copy(query = input) }
+        conversationView.update { it.copy(query = input) }
     }
 
     fun getInputResponse() {
         if (conversation.value.query.trim().isNotEmpty()) {
-            _conversationView.update {
+            conversationView.update {
                 it.copy(loading = true)
             }
             getInputPromptUseCase(
@@ -131,7 +131,7 @@ class HistoryViewModel @Inject constructor(
             conversation.messageList.last().response.toString()
         }
 
-        _conversationView.update { state ->
+        conversationView.update { state ->
             state.copy(
                 query = "",
                 loading = conversation.messageList.last().loading,
@@ -141,7 +141,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     fun getSuggestedPromptResponse(query: String) {
-        _conversationView.update {
+        conversationView.update {
             it.copy(loading = true)
         }
         getInputPromptUseCase(

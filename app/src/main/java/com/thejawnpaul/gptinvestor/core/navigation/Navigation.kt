@@ -30,7 +30,6 @@ fun SetUpNavGraph(navController: NavHostController) {
     Scaffold(
         bottomBar = { BottomNavBar(navController) }
     ) { innerPadding ->
-        HomeBackground(modifier = Modifier.fillMaxSize())
         NavHost(
             navController = navController,
             startDestination = Screen.HomeTabScreen.route,

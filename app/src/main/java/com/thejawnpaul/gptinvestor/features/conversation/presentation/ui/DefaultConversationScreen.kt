@@ -24,12 +24,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultCon
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
 
 @Composable
-fun DefaultConversationScreen(
-    modifier: Modifier = Modifier,
-    conversation: DefaultConversation,
-    onPromptClicked: (prompt: DefaultPrompt) -> Unit,
-    onNavigateUp: () -> Unit
-) {
+fun DefaultConversationScreen(modifier: Modifier = Modifier, conversation: DefaultConversation, onPromptClicked: (prompt: DefaultPrompt) -> Unit, onNavigateUp: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()

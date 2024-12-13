@@ -32,12 +32,7 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.SectorChoic
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 
 @Composable
-fun DiscoverScreen(
-    modifier: Modifier = Modifier,
-    navController: NavHostController,
-    homeViewModel: HomeViewModel,
-    companyViewModel: CompanyViewModel
-) {
+fun DiscoverScreen(modifier: Modifier = Modifier, navController: NavHostController, homeViewModel: HomeViewModel, companyViewModel: CompanyViewModel) {
     // Discover Screen
 
     val sectorViewState = homeViewModel.allSector.collectAsState()

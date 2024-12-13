@@ -1,13 +1,9 @@
 package com.thejawnpaul.gptinvestor.features.company.data.repository
 
-import com.google.common.truth.Truth.assertThat
 import com.thejawnpaul.gptinvestor.core.database.GPTInvestorDatabase
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import io.mockk.impl.annotations.MockK
-import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockWebServer
-import org.junit.Assert.assertEquals
-import org.junit.Test
 
 class CompanyRepositoryTest {
 

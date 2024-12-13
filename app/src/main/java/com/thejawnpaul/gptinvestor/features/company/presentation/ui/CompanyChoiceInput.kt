@@ -16,13 +16,7 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun CompanyChoiceQuestion(
-    possibleAnswers: List<String>,
-    selectedAnswer: String?,
-    onOptionSelected: (String) -> Unit,
-    enabled: Boolean,
-    modifier: Modifier = Modifier
-) {
+fun CompanyChoiceQuestion(possibleAnswers: List<String>, selectedAnswer: String?, onOptionSelected: (String) -> Unit, enabled: Boolean, modifier: Modifier = Modifier) {
     FlowRow(modifier = modifier.padding(start = 8.dp, end = 8.dp)) {
         possibleAnswers.forEach {
             val selected = it == selectedAnswer

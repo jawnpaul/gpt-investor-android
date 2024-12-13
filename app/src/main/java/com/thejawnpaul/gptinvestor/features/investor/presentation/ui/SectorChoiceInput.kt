@@ -20,12 +20,7 @@ import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
 
 @Composable
-fun SectorChoiceQuestion(
-    possibleAnswers: List<SectorInput>,
-    selectedAnswer: SectorInput?,
-    onOptionSelected: (SectorInput) -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun SectorChoiceQuestion(possibleAnswers: List<SectorInput>, selectedAnswer: SectorInput?, onOptionSelected: (SectorInput) -> Unit, modifier: Modifier = Modifier) {
     LazyRow(
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = 16.dp),

@@ -3,7 +3,6 @@ package com.thejawnpaul.gptinvestor.features.company.domain.usecases
 import com.google.common.truth.Truth.assertThat
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
-import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery

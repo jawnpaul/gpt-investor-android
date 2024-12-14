@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -29,27 +30,33 @@ import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.SingleCompanyItem
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.SectorChoiceQuestion
-import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 
 @Composable
-fun DiscoverScreen(modifier: Modifier = Modifier, navController: NavHostController, homeViewModel: HomeViewModel, companyViewModel: CompanyViewModel) {
+fun DiscoverScreen(modifier: Modifier = Modifier, navController: NavHostController, companyViewModel: CompanyViewModel) {
     // Discover Screen
+    val keyboardController = LocalSoftwareKeyboardController.current
 
-    val sectorViewState = homeViewModel.allSector.collectAsState()
-    val allCompaniesViewState = homeViewModel.allCompanies.collectAsState()
+    val sectorViewState = companyViewModel.allSector.collectAsState()
+    val allCompaniesViewState = companyViewModel.allCompanies.collectAsState()
 
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
         Column(modifier = Modifier) {
-            Text(
-                text = stringResource(R.string.discover_gpt_investor),
+            SearchBarCustom(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleLarge
+                query = allCompaniesViewState.value.query,
+                placeHolder = sectorViewState.value.searchPlaceHolder,
+                onQueryChange = { newQuery ->
+                    companyViewModel.updateSearchQuery(newQuery)
+                },
+                onSearch = {
+                    keyboardController?.hide()
+                    companyViewModel.searchCompany()
+                }
             )
             LazyColumn(
                 modifier = Modifier
@@ -63,7 +70,7 @@ fun DiscoverScreen(modifier: Modifier = Modifier, navController: NavHostControll
                         possibleAnswers = sectorViewState.value.sectors,
                         selectedAnswer = sectorViewState.value.selected,
                         onOptionSelected = {
-                            homeViewModel.selectSector(it)
+                            companyViewModel.selectSector(it)
                         }
                     )
                 }
@@ -104,10 +111,38 @@ fun DiscoverScreen(modifier: Modifier = Modifier, navController: NavHostControll
 
                                 Spacer(modifier = Modifier.padding(8.dp))
                                 OutlinedButton(onClick = {
-                                    homeViewModel.getAllCompanies()
+                                    companyViewModel.getAllCompanies()
                                 }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
                                     Text(text = stringResource(id = R.string.retry))
                                 }
+                            }
+                        }
+                    }
+                }
+
+                if (allCompaniesViewState.value.showSearchError) {
+                    item {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Column(modifier = Modifier.align(Alignment.Center)) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.empty),
+                                    contentDescription = "Empty",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(
+                                            start = 8.dp,
+                                            end = 8.dp,
+                                            bottom = 8.dp,
+                                            top = 8.dp
+                                        )
+                                )
+
+                                Text(
+                                    text = stringResource(id = R.string.no_search_result),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
                             }
                         }
                     }

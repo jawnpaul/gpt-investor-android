@@ -43,12 +43,10 @@ fun SetUpNavGraph(navController: NavHostController) {
                 )
             }
             composable(Screen.DiscoverTabScreen.route) {
-                val homeViewModel = hiltViewModel<HomeViewModel>()
                 val companyViewModel = hiltViewModel<CompanyViewModel>()
                 DiscoverScreen(
                     modifier = Modifier,
                     navController = navController,
-                    homeViewModel = homeViewModel,
                     companyViewModel = companyViewModel
                 )
             }

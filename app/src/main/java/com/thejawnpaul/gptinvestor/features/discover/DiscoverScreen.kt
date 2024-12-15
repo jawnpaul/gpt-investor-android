@@ -32,7 +32,11 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.Compa
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.SectorChoiceQuestion
 
 @Composable
-fun DiscoverScreen(modifier: Modifier = Modifier, navController: NavHostController, companyViewModel: CompanyViewModel) {
+fun DiscoverScreen(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    companyViewModel: CompanyViewModel
+) {
     // Discover Screen
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -41,13 +45,13 @@ fun DiscoverScreen(modifier: Modifier = Modifier, navController: NavHostControll
 
     Box(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxSize(), contentAlignment = Alignment.TopStart
     ) {
         Column(modifier = Modifier) {
             SearchBarCustom(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                 query = allCompaniesViewState.value.query,
                 placeHolder = sectorViewState.value.searchPlaceHolder,
                 onQueryChange = { newQuery ->

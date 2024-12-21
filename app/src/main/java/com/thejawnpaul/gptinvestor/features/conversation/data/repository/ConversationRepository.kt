@@ -417,7 +417,7 @@ class ConversationRepository @Inject constructor(
             val chat = generativeModel.startChat(history = getHistory(conversation.id))
             val response = chat.sendMessage(prompt = Constants.SUGGESTION_PROMPT)
             response.text?.let {
-                val text = it.trimIndent()
+                val text = it.trimIndent().removeSurrounding("```").removePrefix("json")
                 val suggestions = parser.parseSuggestions(text)
                 suggestions?.let { suggestionsResponse ->
                     result.addAll(suggestionsResponse.suggestions)

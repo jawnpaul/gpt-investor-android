@@ -28,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -47,6 +48,7 @@ fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewMo
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val selectedCompany = viewModel.selectedCompany.collectAsState()
     val genText = viewModel.genText.collectAsStateWithLifecycle()
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(ticker) {
         viewModel.updateTicker(ticker)
@@ -159,6 +161,7 @@ fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewMo
                 viewModel.getQuery(input)
             },
             onSendClick = {
+                keyboardController?.hide()
                 viewModel.getInputResponse()
             },
             placeholder = stringResource(

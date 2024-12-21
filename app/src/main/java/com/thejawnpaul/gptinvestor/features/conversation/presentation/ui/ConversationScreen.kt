@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -24,6 +25,7 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
 fun ConversationScreen(modifier: Modifier = Modifier, viewModel: ConversationViewModel, navController: NavController) {
     val conversation = viewModel.conversation.collectAsStateWithLifecycle()
     val genText = viewModel.genText.collectAsStateWithLifecycle()
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Box(modifier = Modifier.fillMaxSize()) {
         when (conversation.value.conversation) {
@@ -72,6 +74,7 @@ fun ConversationScreen(modifier: Modifier = Modifier, viewModel: ConversationVie
                 viewModel.updateInput(input = input)
             },
             onSendClick = {
+                keyboardController?.hide()
                 viewModel.getInputResponse()
             },
             placeholder = "Ask anything about stocks",

@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -27,6 +28,7 @@ fun HistoryDetailScreen(modifier: Modifier = Modifier, navController: NavControl
     LaunchedEffect(conversationId) {
         viewModel.updateConversationId(conversationId)
     }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     val conversation = viewModel.conversation.collectAsStateWithLifecycle()
     val genText = viewModel.genText.collectAsStateWithLifecycle()
@@ -68,6 +70,7 @@ fun HistoryDetailScreen(modifier: Modifier = Modifier, navController: NavControl
                 viewModel.updateInput(input = input)
             },
             onSendClick = {
+                keyboardController?.hide()
                 viewModel.getInputResponse()
             },
             placeholder = "Ask anything about stocks",

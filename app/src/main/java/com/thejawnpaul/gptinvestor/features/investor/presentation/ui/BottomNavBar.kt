@@ -55,7 +55,7 @@ fun BottomNavBar(navController: NavController) {
     val items = listOf(
         Screen.HomeTabScreen to ImageVector.vectorResource(R.drawable.ask_ai_icon),
         Screen.DiscoverTabScreen to ImageVector.vectorResource(R.drawable.discover_icon),
-        Screen.HistoryTabScreen to ImageVector.vectorResource(R.drawable.history_icon)
+        Screen.HistoryTabScreen to ImageVector.vectorResource(R.drawable.history_icon_2)
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()

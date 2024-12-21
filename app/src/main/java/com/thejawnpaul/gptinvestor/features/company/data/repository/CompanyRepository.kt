@@ -12,6 +12,7 @@ import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFin
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyPriceRequest
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyFinancials
+import com.thejawnpaul.gptinvestor.features.company.domain.model.SearchCompanyQuery
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.company.domain.model.TrendingCompany
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
@@ -154,6 +155,29 @@ class CompanyRepository @Inject constructor(
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.ServerError))
+        }
+    }
+
+    override suspend fun searchCompany(query: SearchCompanyQuery): Flow<Either<Failure, List<Company>>> = flow {
+        try {
+            if (query.sector == null) {
+                // search entire table
+                val companies =
+                    companyDao.searchAllCompanies(query = query.query).map { it.toDomainObject() }
+                emit(Either.Right(companies))
+            } else {
+                // filter by column name
+                val companies =
+                    companyDao.searchCompaniesInSector(
+                        query = query.query.trim(),
+                        sectorKey = query.sector
+                    )
+                        .map { it.toDomainObject() }
+                emit(Either.Right(companies))
+            }
+        } catch (e: Exception) {
+            Timber.e(e.stackTraceToString())
+            emit(Either.Left(Failure.DataError))
         }
     }
 

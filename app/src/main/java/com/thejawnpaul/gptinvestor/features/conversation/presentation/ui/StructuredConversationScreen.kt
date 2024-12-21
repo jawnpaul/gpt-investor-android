@@ -127,12 +127,7 @@ fun StructuredConversationScreen(
 }
 
 @Composable
-fun SingleStructuredResponse(
-    modifier: Modifier = Modifier,
-    genAiMessage: GenAiMessage,
-    text: String = "",
-    onClickNews: (url: String) -> Unit
-) {
+fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiMessage, text: String = "", onClickNews: (url: String) -> Unit) {
     when (genAiMessage) {
         is GenAiTextMessage -> {
             if (genAiMessage.loading) {
@@ -230,12 +225,7 @@ fun SingleStructuredResponse(
 }
 
 @Composable
-fun FollowUpQuestions(
-    modifier: Modifier = Modifier,
-    entity: String? = null,
-    list: List<Suggestion>,
-    onClick: (prompt: Suggestion) -> Unit
-) {
+fun FollowUpQuestions(modifier: Modifier = Modifier, entity: String? = null, list: List<Suggestion>, onClick: (prompt: Suggestion) -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
         if (entity != null) {
             Text(

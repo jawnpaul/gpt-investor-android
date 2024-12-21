@@ -1,6 +1,5 @@
 package com.thejawnpaul.gptinvestor.core.navigation
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -21,7 +20,6 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryDetai
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.BottomNavBar
-import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeBackground
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 
@@ -30,7 +28,6 @@ fun SetUpNavGraph(navController: NavHostController) {
     Scaffold(
         bottomBar = { BottomNavBar(navController) }
     ) { innerPadding ->
-        HomeBackground(modifier = Modifier.fillMaxSize())
         NavHost(
             navController = navController,
             startDestination = Screen.HomeTabScreen.route,
@@ -46,12 +43,10 @@ fun SetUpNavGraph(navController: NavHostController) {
                 )
             }
             composable(Screen.DiscoverTabScreen.route) {
-                val homeViewModel = hiltViewModel<HomeViewModel>()
                 val companyViewModel = hiltViewModel<CompanyViewModel>()
                 DiscoverScreen(
                     modifier = Modifier,
                     navController = navController,
-                    homeViewModel = homeViewModel,
                     companyViewModel = companyViewModel
                 )
             }

@@ -500,7 +500,7 @@ class ConversationRepository @Inject constructor(
                     val chat = generativeModel.startChat(history = history)
                     val response = chat.sendMessage(prompt = Constants.TITLE_PROMPT)
                     response.text?.let {
-                        val text = it.trimIndent()
+                        val text = it.trimIndent().removeSurrounding("```").removePrefix("json")
                         parser.parseTitle(text)?.title
                     }
                 } else {

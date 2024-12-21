@@ -45,11 +45,7 @@ import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
 import kotlinx.coroutines.delay
 
 @Composable
-fun SingleTrendingStockItem(
-    modifier: Modifier = Modifier,
-    onClick: (tickerSymbol: String) -> Unit,
-    trendingStock: TrendingStockPresentation
-) {
+fun SingleTrendingStockItem(modifier: Modifier = Modifier, onClick: (tickerSymbol: String) -> Unit, trendingStock: TrendingStockPresentation) {
     Surface(
         modifier = Modifier.height(52.dp),
         onClick = {
@@ -120,12 +116,7 @@ fun SingleTrendingStockItem(
 }
 
 @Composable
-fun TrendingStockList(
-    modifier: Modifier = Modifier,
-    state: TrendingCompaniesView,
-    onClick: (tickerSymbol: String) -> Unit,
-    onClickRetry: () -> Unit
-) {
+fun TrendingStockList(modifier: Modifier = Modifier, state: TrendingCompaniesView, onClick: (tickerSymbol: String) -> Unit, onClickRetry: () -> Unit) {
     val lazyGridState = rememberLazyStaggeredGridState()
     val coroutineScope = rememberCoroutineScope()
     val isScrollInProgress = lazyGridState.isScrollInProgress

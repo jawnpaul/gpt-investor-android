@@ -28,12 +28,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             var showSplash by remember { mutableStateOf(true) }
 
-            if (showSplash) {
-                CustomSplashScreen {
-                    showSplash = false
-                }
-            } else {
-                GPTInvestorTheme {
+            GPTInvestorTheme {
+                if (showSplash) {
+                    CustomSplashScreen {
+                        showSplash = false
+                    }
+                } else {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background

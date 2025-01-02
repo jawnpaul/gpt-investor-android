@@ -106,7 +106,7 @@ compileSdkVersion: 34
 Build System: [Gradle](https://gradle.org/)
 
 1. Get a free Gemini API key at [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)
-2. Get access token at [http://gpt-investor-api.onrender.com/get-token](http://gpt-investor-api.onrender.com/get-token)
+2. Get access token at [here](https://m7mxrc35hp.us-west-2.awsapprunner.com/get-token)
 3. Create a project on firebase and add the `google-services.json` file in the app folder. See [here](https://firebase.google.com/docs/android/setup) for further instructions.
 4. Clone the repo
    ```sh
@@ -116,7 +116,7 @@ Build System: [Gradle](https://gradle.org/)
    ```sh
    GEMINI_API_KEY=<Enter your GEMINI API KEY>
    GEMINI_DEBUG_KEY=<Enter your GEMINI API KEY>
-   BASE_URL=https://gpt-investor-api.onrender.com/api/v1/
+   BASE_URL=https://m7mxrc35hp.us-west-2.awsapprunner.com/api/v1/
    ACCESS_TOKEN=<Enter your access token>
     ```
 6. Create a `keystore.properties` file and add the following.
@@ -129,9 +129,8 @@ Build System: [Gradle](https://gradle.org/)
     **N.B**: Replace the values in the `keystore.properties` file with the correct values if you plan to release on Google playstore. Further instructions can be found [here](https://developer.android.com/studio/publish/app-signing)   
 
 ## Demo
-We're waiting for the app to be published on Google playstore but while waiting you can:
-1. Join internal test [here](https://docs.google.com/forms/d/e/1FAIpQLSegV83xaYvknPPQhv4QKpViYeFSAhff3CvlsrPY-YZ_c_eX_g/viewform?usp=sf_link)
-2. Download apk directly [here](https://drive.google.com/file/d/1r1tWwWXEBNbqPEEG4y2YiaRov7P7TIez/view?usp=drive_link)
+1. Download on Google Playstore [here](https://play.google.com/store/apps/details?id=com.thejawnpaul.gptinvestor&pcampaignid=web_share)
+2. Join internal test [here](https://forms.gle/8yZcWdjP1bXqB5pH8)
 
 Find below screenshots of the application
 
@@ -155,8 +154,6 @@ Find below screenshots of the application
 
 |<img src="https://github.com/jawnpaul/gpt-investor-android/assets/29982834/c0c5bd94-8927-4f0c-8f01-565dc08c4828" width=200/>|<img src="https://github.com/jawnpaul/gpt-investor-android/assets/29982834/934536d5-970b-4048-99f8-94680b4eb7ee" width=200/>|
 |:----:|:----:|
-
-Check out an example [pdf report](https://storage.googleapis.com/gpt-investor.appspot.com/user-pdfs/6fb2a334-0d5b-414e-871a-c0506c9271ea.pdf)
 
 ## Disclaimer
 GPT Investor is an educational and informational tool designed to assist in investment analysis. It should not be considered as financial advice or a substitute for professional investment guidance. Always conduct thorough research and consult with a qualified financial advisor before making any investment decisions. 

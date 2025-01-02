@@ -134,25 +134,25 @@ Build System: [Gradle](https://gradle.org/)
 
 Find below screenshots of the application
 
-|<img src="https://github.com/jawnpaul/gpt-investor-android/assets/29982834/39986ffd-92ae-4ec3-b2f1-0ab50f2a089c" width=200/>|<img src="https://github.com/jawnpaul/gpt-investor-android/assets/29982834/ce485437-735d-4aaa-ad9e-79d411a667ca" width=200/>|
+|<img src="https://github.com/user-attachments/assets/bc5a8e3c-02ad-4e7b-9be9-124555edcd4d" width=200/>|<img src="https://github.com/user-attachments/assets/d9ecef74-2a66-4368-9d3c-cad9808684e1" width=200/>|
 |:----:|:----:|
 
-|<img src="https://github.com/jawnpaul/gpt-investor-android/assets/29982834/4a55a377-2328-4d14-bb31-1c97e04b313b" width=200/>|<img src="https://github.com/jawnpaul/gpt-investor-android/assets/29982834/228ef994-5546-4ccf-99c7-e9b15be00f7a" width=200/>|
+|<img src="https://github.com/user-attachments/assets/d7430e1b-e897-488d-a9ec-956229f6ea4d" width=200/>|<img src="https://github.com/user-attachments/assets/f28e3bdf-291b-4f16-ad23-ab922479aad3" width=200/>|
 |:----:|:----:|
 
-|<img src="https://github.com/jawnpaul/gpt-investor-android/assets/29982834/fc58cf05-d4e1-4ac6-91f3-0024b43fb824" width=200/>|<img src="https://github.com/jawnpaul/gpt-investor-android/assets/29982834/b9751290-3b93-419d-8898-fa4a3a600701" width=200/>|
+|<img src="https://github.com/user-attachments/assets/78289988-fc8e-4390-9942-d9d6ab8bba07" width=200/>|<img src="https://github.com/user-attachments/assets/fff0c230-7cad-4142-872d-72cb3c84885a" width=200/>|
 |:----:|:----:|
 
-|<img src="https://github.com/jawnpaul/gpt-investor-android/assets/29982834/d944860a-49d4-4e5b-a2e5-a955b4d70a16" width=200/>|<img src="https://github.com/jawnpaul/gpt-investor-android/assets/29982834/ab322ab7-9ece-4065-b8c2-b05f709e8b21" width=200/>|
+|<img src="https://github.com/user-attachments/assets/aa17dbd4-a504-450a-8030-d798002d2815" width=200/>|<img src="https://github.com/user-attachments/assets/80054760-f304-4020-8f1a-d45ff86fae81" width=200/>|
 |:----:|:----:|
 
-|<img src="https://github.com/jawnpaul/gpt-investor-android/assets/29982834/56057463-4f09-435a-84d0-e6c826c8006d" width=200/>|<img src="https://github.com/jawnpaul/gpt-investor-android/assets/29982834/4bc9a5e5-6fa9-4d3f-8c03-7513735d1f05" width=200/>|
+|<img src="https://github.com/user-attachments/assets/88f1e6df-6f4a-4922-8606-09995abff534" width=200/>|<img src="https://github.com/user-attachments/assets/3b61f11e-8696-45d3-a230-754d4861fb0e" width=200/>|
 |:----:|:----:|
 
-|<img src="https://github.com/jawnpaul/gpt-investor-android/assets/29982834/b59e1288-f578-42e2-8e2c-3a270c9e68fb" width=200/>|<img src="https://github.com/jawnpaul/gpt-investor-android/assets/29982834/38237d33-2b19-4124-9eeb-14acdbdffbe7" width=200/>|
+|<img src="https://github.com/user-attachments/assets/a5523cd4-6a26-4b2b-8f22-91fd4aba9989" width=200/>|<img src="https://github.com/user-attachments/assets/62882c1c-47de-40d2-a790-ed00622df9f7" width=200/>|
 |:----:|:----:|
 
-|<img src="https://github.com/jawnpaul/gpt-investor-android/assets/29982834/c0c5bd94-8927-4f0c-8f01-565dc08c4828" width=200/>|<img src="https://github.com/jawnpaul/gpt-investor-android/assets/29982834/934536d5-970b-4048-99f8-94680b4eb7ee" width=200/>|
+|<img src="https://github.com/user-attachments/assets/357b245a-d649-4551-b48f-f05c37686483" width=200/>|<img src="https://github.com/user-attachments/assets/46097dcb-c49b-412d-a980-7497490c5da7" width=200/>|
 |:----:|:----:|
 
 ## Disclaimer

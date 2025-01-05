@@ -7,10 +7,10 @@ import com.thejawnpaul.gptinvestor.features.toppick.data.local.dao.TopPickDao
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.model.TopPickEntity
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
-import javax.inject.Inject
 
 class TopPickRepository @Inject constructor(
     private val apiService: ApiService,
@@ -57,7 +57,7 @@ class TopPickRepository @Inject constructor(
                 } ?: emit(Either.Left(Failure.DataError))
             }
 
-            //emit local
+            // emit local
             emit(
                 Either.Right(
                     topPickDao.getAllTopPicks().map { entity ->
@@ -75,7 +75,6 @@ class TopPickRepository @Inject constructor(
                     }
                 )
             )
-
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.ServerError))
@@ -117,7 +116,7 @@ class TopPickRepository @Inject constructor(
     }
 
     override suspend fun shareTopPick(id: Long): Flow<Either<Failure, String>> = flow {
-        //TODO: Log share event to firebase
+        // TODO: Log share event to firebase
     }
 
     override suspend fun getSavedTopPicks(): Flow<Either<Failure, List<TopPick>>> = flow {

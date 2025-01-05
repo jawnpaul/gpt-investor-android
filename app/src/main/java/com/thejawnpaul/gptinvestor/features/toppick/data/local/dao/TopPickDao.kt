@@ -1,6 +1,5 @@
 package com.thejawnpaul.gptinvestor.features.toppick.data.local.dao
 
-
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy

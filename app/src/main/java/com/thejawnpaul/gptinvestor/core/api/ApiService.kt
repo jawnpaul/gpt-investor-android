@@ -19,6 +19,7 @@ import com.thejawnpaul.gptinvestor.features.investor.data.remote.DownloadPdfResp
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.IndustryRatingRequest
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.SaveComparisonRequest
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.SaveSentimentRequest
+import com.thejawnpaul.gptinvestor.features.toppick.data.remote.TopPickRemote
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -60,4 +61,7 @@ interface ApiService {
 
     @POST("company-price")
     suspend fun getCompanyPrice(@Body request: CompanyPriceRequest): Response<List<CompanyPriceResponse>>
+
+    @GET("top-picks")
+    suspend fun getTopPicks(): Response<List<TopPickRemote>>
 }

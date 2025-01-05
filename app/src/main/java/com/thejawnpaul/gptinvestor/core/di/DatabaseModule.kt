@@ -39,5 +39,9 @@ abstract class DatabaseModule {
         @Singleton
         @Provides
         fun providesMessageDao(db: GPTInvestorDatabase) = db.messageDao()
+
+        @Singleton
+        @Provides
+        fun providesTopPicksDao(db: GPTInvestorDatabase) = db.topPicksDao()
     }
 }

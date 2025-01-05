@@ -23,13 +23,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPicks
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +37,7 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
     // Home Screen
 
     val trendingStock = viewModel.trendingCompanies.collectAsState()
+    val topPicks = viewModel.topPicks.collectAsState()
 
     Box(
         modifier = Modifier
@@ -66,7 +67,7 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
                     .padding(16.dp)
             )
 
-            // Text
+            /*// Text
             Text(
                 text = stringResource(R.string.start_trading_tending_stocks),
                 modifier = Modifier
@@ -84,7 +85,12 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
                     navController.navigate(Screen.CompanyDetailScreen.createRoute(it))
                 },
                 onClickRetry = { viewModel.getTrendingCompanies() }
-            )
+            )*/
+
+            // Top Picks
+            TopPicks(modifier = Modifier, state = topPicks.value, onClick = {
+            }, onClickRetry = {}, onClickSeeAll = {
+            })
         }
 
         Column(

@@ -6,4 +6,6 @@ data class TrendingCompaniesView(
     val loading: Boolean = false,
     val companies: List<TrendingStockPresentation> = emptyList(),
     val error: String? = null
-)
+) {
+    val showError = error != null && companies.isEmpty()
+}

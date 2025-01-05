@@ -49,4 +49,6 @@
     <string name="discover_gpt_investor">Discover GPT Investor</string>
     <string name="your_gpt_investor_history">Your GPT Investor History</string>
     <string name="no_search_result">No result matching your search query</string>
+    <string name="top_picks">Top picks</string>
+    <string name="see_all">See all</string>
 </resources>

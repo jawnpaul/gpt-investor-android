@@ -8,6 +8,7 @@ import com.thejawnpaul.gptinvestor.features.history.data.repository.HistoryRepos
 import com.thejawnpaul.gptinvestor.features.history.domain.repository.IHistoryRepository
 import com.thejawnpaul.gptinvestor.features.investor.data.repository.InvestorRepository
 import com.thejawnpaul.gptinvestor.features.investor.domain.repository.IInvestorRepository
+import com.thejawnpaul.gptinvestor.features.toppick.data.repository.TopPickRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
 import dagger.Binds
 import dagger.Module
@@ -31,5 +32,5 @@ abstract class BindsModule {
     abstract fun providesHistoryRepository(repository: HistoryRepository): IHistoryRepository
 
     @Binds
-    abstract fun providesTopPicksRepository(repository: ITopPickRepository): ITopPickRepository
+    abstract fun providesTopPicksRepository(repository: TopPickRepository): ITopPickRepository
 }

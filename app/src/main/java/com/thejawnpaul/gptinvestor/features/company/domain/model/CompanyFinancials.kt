@@ -2,7 +2,7 @@ package com.thejawnpaul.gptinvestor.features.company.domain.model
 
 import com.thejawnpaul.gptinvestor.core.utility.getCurrencySymbol
 import com.thejawnpaul.gptinvestor.core.utility.toCurrency
-import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyNews
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyNewsTwo
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyFinancialsPresentation
 
 data class CompanyFinancials(
@@ -13,7 +13,7 @@ data class CompanyFinancials(
     val high: Float,
     val currency: String,
     val marketCap: Long,
-    val news: List<CompanyNews>,
+    val news: List<CompanyNewsTwo>,
     val historicalData: String,
     val balanceSheet: String,
     val financials: String

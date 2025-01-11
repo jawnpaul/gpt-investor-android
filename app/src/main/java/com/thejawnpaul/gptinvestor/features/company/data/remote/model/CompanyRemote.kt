@@ -43,7 +43,7 @@ data class CompanyDetailRemoteResponse(
     @field:Json(name = "ticker") val ticker: String,
     @field:Json(name = "summary") val about: String,
     @field:Json(name = "market_cap") val marketCap: Long,
-    @field:Json(name = "news") val news: List<CompanyNews>,
+    @field:Json(name = "news") val news: List<CompanyNewsTwo>,
     @field:Json(name = "pe_ratio") val peRatio: Float,
     @field:Json(name = "percentage_change") val change: Float,
     @field:Json(name = "revenue") val revenue: Long,
@@ -54,7 +54,7 @@ data class CompanyDetailRemoteResponse(
 ) {
     val newsSourcesString = buildString {
         appendLine("- [Yahoo finance](https://finance.yahoo.com/quote/$ticker)")
-        news.forEach { appendLine("- [${it.publisher}](${it.link})") }
+        news.forEach { appendLine("- [${it.newsContent.provider?.displayName}](${it.newsContent.provider?.url})") }
     }
 }
 

@@ -22,6 +22,8 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.Histo
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.BottomNavBar
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewModel
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPickDetailScreen
 
 @Composable
 fun SetUpNavGraph(navController: NavHostController) {
@@ -97,6 +99,20 @@ fun SetUpNavGraph(navController: NavHostController) {
                     modifier = Modifier,
                     navController = navController,
                     conversationId = id,
+                    viewModel = viewModel
+                )
+            }
+
+            composable(
+                route = Screen.TopPickDetailScreen.route,
+                arguments = listOf(navArgument("topPickId") { NavType.StringType })
+            ) { navBackStackEntry ->
+                val viewModel = hiltViewModel<TopPickViewModel>()
+                val id = navBackStackEntry.arguments?.getString("topPickId") ?: ""
+                TopPickDetailScreen(
+                    modifier = Modifier,
+                    navController = navController,
+                    topPickId = id,
                     viewModel = viewModel
                 )
             }

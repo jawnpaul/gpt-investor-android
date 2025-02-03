@@ -89,6 +89,7 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
 
             // Top Picks
             TopPicks(modifier = Modifier, state = topPicks.value, onClick = {
+                navController.navigate(Screen.TopPickDetailScreen.createRoute(it))
             }, onClickRetry = {}, onClickSeeAll = {
             })
         }

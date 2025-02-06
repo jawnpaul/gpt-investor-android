@@ -64,5 +64,10 @@ class TopPickViewModel @Inject constructor(
                 }
             )
         }
+        Timber.e(topPick.toString())
+    }
+
+    fun loginUser() {
+        _topPickView.update { it.copy(isLoggedIn = true) }
     }
 }

@@ -51,4 +51,10 @@
     <string name="no_search_result">No result matching your search query</string>
     <string name="top_picks">Top picks</string>
     <string name="see_all">See all</string>
+    <string name="top_pick_details">Top Pick Details</string>
+    <string name="investment_rationale">Investment Rationale</string>
+    <string name="key_metrics">Key Metrics</string>
+    <string name="key_risks">Key Risks</string>
+    <string name="sign_in">Sign in</string>
+    <string name="sign_in_to_view_full_details">Sign in to view full details</string>
 </resources>

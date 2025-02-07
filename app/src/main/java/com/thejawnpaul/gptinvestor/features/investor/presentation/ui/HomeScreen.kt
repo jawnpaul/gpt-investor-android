@@ -91,6 +91,7 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
             TopPicks(modifier = Modifier, state = topPicks.value, onClick = {
                 navController.navigate(Screen.TopPickDetailScreen.createRoute(it))
             }, onClickRetry = {}, onClickSeeAll = {
+                navController.navigate(Screen.AllTopPicksScreen.route)
             })
         }
 

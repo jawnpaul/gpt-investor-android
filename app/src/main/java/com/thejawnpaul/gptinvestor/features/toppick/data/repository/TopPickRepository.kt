@@ -81,9 +81,9 @@ class TopPickRepository @Inject constructor(
         }
     }
 
-    override suspend fun getSingleTopPick(id: Long): Flow<Either<Failure, TopPick>> = flow {
+    override suspend fun getSingleTopPick(pickId: Long): Flow<Either<Failure, TopPick>> = flow {
         try {
-            val pick = with(topPickDao.getSingleTopPick(id)) {
+            val pick = with(topPickDao.getSingleTopPick(pickId)) {
                 TopPick(id, companyName, ticker, rationale, metrics, risks, confidenceScore)
             }
             emit(Either.Right(pick))
@@ -142,5 +142,22 @@ class TopPickRepository @Inject constructor(
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.DataError))
         }
+    }
+
+    override suspend fun getLocalTopPicks(): Flow<Either<Failure, List<TopPick>>> = flow {
+        val local = topPickDao.getAllTopPicks().map { entity ->
+            with(entity) {
+                TopPick(
+                    id = id,
+                    companyName = companyName,
+                    ticker = ticker,
+                    rationale = rationale,
+                    metrics = metrics,
+                    risks = risks,
+                    confidenceScore = confidenceScore
+                )
+            }
+        }
+        emit(Either.Right(local))
     }
 }

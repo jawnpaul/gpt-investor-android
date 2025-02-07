@@ -3,10 +3,14 @@ package com.thejawnpaul.gptinvestor.features.toppick.presentation
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.core.functional.onFailure
+import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
+import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetLocalTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetSingleTopPickUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPickDetailView
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +20,8 @@ import timber.log.Timber
 @HiltViewModel
 class TopPickViewModel @Inject constructor(
     private val getSingleTopPickUseCase: GetSingleTopPickUseCase,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val getLocalTopPicksUseCase: GetLocalTopPicksUseCase
 ) : ViewModel() {
 
     private val topPickId: Long?
@@ -25,12 +30,16 @@ class TopPickViewModel @Inject constructor(
     private val _topPickView = MutableStateFlow(TopPickDetailView())
     val topPickView get() = _topPickView
 
+    private val _allTopPicks = MutableStateFlow(TopPicksView())
+    val allTopPicks get() = _allTopPicks
+
     fun updateTopPickId(topPickId: String) {
         savedStateHandle["topPickId"] = topPickId.toLong()
         getTopPick()
     }
 
     private fun getTopPick() {
+        Timber.e(topPickId.toString())
         _topPickView.update { it.copy(loading = true) }
         topPickId?.let { id ->
             getSingleTopPickUseCase(id) {
@@ -69,5 +78,41 @@ class TopPickViewModel @Inject constructor(
 
     fun loginUser() {
         _topPickView.update { it.copy(isLoggedIn = true) }
+    }
+
+    fun getAllTopPicks() {
+        _allTopPicks.update { it.copy(loading = true) }
+
+        getLocalTopPicksUseCase(GetLocalTopPicksUseCase.None()) {
+            it.onFailure {
+                _allTopPicks.update { state ->
+                    state.copy(
+                        loading = false,
+                        error = "Something went wrong."
+                    )
+                }
+            }
+
+            it.onSuccess { result ->
+                _allTopPicks.update { state ->
+                    state.copy(
+                        loading = false,
+                        topPicks = result.map { topPick ->
+                            with(topPick) {
+                                TopPickPresentation(
+                                    id,
+                                    companyName,
+                                    ticker,
+                                    rationale,
+                                    metrics,
+                                    risks,
+                                    confidenceScore
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+        }
     }
 }

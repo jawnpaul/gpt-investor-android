@@ -32,7 +32,7 @@ class TopPickRepository @Inject constructor(
                         confidenceScore = confidenceScore
                     )
                 }
-            }
+            }.sortedByDescending { it.confidenceScore }
 
             if (local.isNotEmpty()) {
                 Either.Right(local)
@@ -72,7 +72,7 @@ class TopPickRepository @Inject constructor(
                                 confidenceScore = confidenceScore
                             )
                         }
-                    }
+                    }.sortedByDescending { it.confidenceScore }
                 )
             )
         } catch (e: Exception) {
@@ -157,7 +157,7 @@ class TopPickRepository @Inject constructor(
                     confidenceScore = confidenceScore
                 )
             }
-        }
+        }.sortedByDescending { it.confidenceScore }
         emit(Either.Right(local))
     }
 }

@@ -58,4 +58,5 @@
     <string name="sign_in">Sign in</string>
     <string name="sign_in_to_view_full_details">Sign in to view full details</string>
     <string name="all_top_picks">All Top Picks</string>
+    <string name="retry_sign_in">Retry Sign in</string>
 </resources>

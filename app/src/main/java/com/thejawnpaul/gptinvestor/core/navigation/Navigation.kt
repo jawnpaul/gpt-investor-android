@@ -10,6 +10,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.AuthenticationScreen
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.AuthenticationViewModel
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.WebViewScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
@@ -124,6 +126,15 @@ fun SetUpNavGraph(navController: NavHostController) {
                     modifier = Modifier,
                     navController = navController,
                     viewModel = viewModel
+                )
+            }
+            composable(route = Screen.AuthenticationScreen.route) {
+                val viewModel = hiltViewModel<AuthenticationViewModel>()
+                AuthenticationScreen(
+                    viewModel = viewModel,
+                    onSignInSuccess = {
+                        navController.popBackStack()
+                    }
                 )
             }
         }

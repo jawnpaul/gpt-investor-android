@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.thejawnpaul.gptinvestor.R
+import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -236,7 +237,7 @@ fun TopPickDetailScreen(modifier: Modifier = Modifier, navController: NavControl
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Button(
-                                onClick = { viewModel.loginUser() },
+                                onClick = { navController.navigate(Screen.AuthenticationScreen.route) },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(stringResource(R.string.sign_in))

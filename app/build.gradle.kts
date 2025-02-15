@@ -173,6 +173,7 @@ dependencies {
     implementation(platform(libs.firebase.compose.bom))
     implementation(libs.firebase.analaytics)
     implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.ui.auth)
 
     // test
     testImplementation(project(":remote:remotetest"))

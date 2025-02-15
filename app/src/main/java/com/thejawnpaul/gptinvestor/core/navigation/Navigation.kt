@@ -27,6 +27,8 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryScree
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
+import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsScreen
+import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsViewModel
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewModel
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.AllTopPicksScreen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SavedTopPicksScreen
@@ -167,6 +169,15 @@ fun SetUpNavGraph(navController: NavHostController) {
                 composable(route = Screen.SavedTopPicksScreen.route) {
                     val viewModel = hiltViewModel<TopPickViewModel>()
                     SavedTopPicksScreen(
+                        modifier = Modifier,
+                        navController = navController,
+                        viewModel = viewModel
+                    )
+                }
+
+                composable(route = Screen.SettingsScreen.route) {
+                    val viewModel = hiltViewModel<SettingsViewModel>()
+                    SettingsScreen(
                         modifier = Modifier,
                         navController = navController,
                         viewModel = viewModel

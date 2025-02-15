@@ -70,7 +70,7 @@ fun NavDrawerContent(navController: NavHostController, onCloseDrawer: () -> Unit
             icon = Icons.Default.Settings,
             label = stringResource(R.string.settings),
             onClick = {
-                // Navigate to settings
+                navController.navigate(Screen.SettingsScreen.route)
                 onCloseDrawer()
             }
         )

@@ -62,4 +62,8 @@
     <string name="sign_out">Sign out</string>
     <string name="settings">Settings</string>
     <string name="saved_picks">Saved picks</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="are_you_sure_you_want_to_delete_your_account">Are you sure you want to delete your account? This action cannot be undone.</string>
 </resources>

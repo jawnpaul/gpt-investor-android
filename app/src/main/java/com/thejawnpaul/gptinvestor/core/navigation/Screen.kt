@@ -24,6 +24,8 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
 
     data object SavedTopPicksScreen : Screen("saved_top_picks", false)
 
+    data object SettingsScreen : Screen("settings_screen", false)
+
     data object AuthenticationScreen : Screen("authentication_screen", false)
 
     data object ConversationScreen : Screen("conversation_screen", false)

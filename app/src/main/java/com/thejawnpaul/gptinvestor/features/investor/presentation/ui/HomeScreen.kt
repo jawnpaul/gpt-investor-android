@@ -43,7 +43,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPicks
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: HomeViewModel) {
+fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: HomeViewModel, onMenuClick: () -> Unit) {
     // Home Screen
 
     val trendingStock = viewModel.trendingCompanies.collectAsState()
@@ -67,8 +67,7 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = {
-                }) {
+                IconButton(onClick = onMenuClick) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.baseline_menu_24),
                         contentDescription = null
@@ -107,7 +106,9 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
                     }
                 } else {
                     IconButton(
-                        onClick = {},
+                        onClick = {
+                            navController.navigate(Screen.AuthenticationScreen.route)
+                        },
                         modifier = Modifier.size(40.dp),
                         enabled = true
                     ) {

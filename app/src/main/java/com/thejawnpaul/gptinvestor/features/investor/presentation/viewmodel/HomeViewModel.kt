@@ -1,9 +1,12 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseUser
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
+import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetTrendingCompaniesUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
@@ -14,11 +17,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getTrendingCompaniesUseCase: GetTrendingCompaniesUseCase,
-    private val getTopPicksUseCase: GetTopPicksUseCase
+    private val getTopPicksUseCase: GetTopPicksUseCase,
+    private val authenticationRepository: AuthenticationRepository
 ) :
     ViewModel() {
 
@@ -28,12 +33,16 @@ class HomeViewModel @Inject constructor(
     private val _topPicks = MutableStateFlow(TopPicksView())
     val topPicks get() = _topPicks
 
+    private val _currentUser = MutableStateFlow<FirebaseUser?>(null)
+    val currentUser get() = _currentUser
+
     init {
         getTrendingCompanies()
         getTopPicks()
+        getCurrentUser()
     }
 
-    fun getTrendingCompanies() {
+    private fun getTrendingCompanies() {
         _trendingCompanies.update { it.copy(loading = true) }
 
         getTrendingCompaniesUseCase(GetTrendingCompaniesUseCase.None()) {
@@ -98,6 +107,14 @@ class HomeViewModel @Inject constructor(
                         }
                     )
                 }
+            }
+        }
+    }
+
+    private fun getCurrentUser() {
+        viewModelScope.launch {
+            authenticationRepository.getAuthState().collect { isSignedIn ->
+                _currentUser.update { if (isSignedIn) authenticationRepository.currentUser else null }
             }
         }
     }

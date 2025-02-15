@@ -29,6 +29,7 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewModel
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.AllTopPicksScreen
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SavedTopPicksScreen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPickDetailScreen
 import kotlinx.coroutines.launch
 
@@ -160,6 +161,15 @@ fun SetUpNavGraph(navController: NavHostController) {
                         onSignInSuccess = {
                             navController.popBackStack()
                         }
+                    )
+                }
+
+                composable(route = Screen.SavedTopPicksScreen.route) {
+                    val viewModel = hiltViewModel<TopPickViewModel>()
+                    SavedTopPicksScreen(
+                        modifier = Modifier,
+                        navController = navController,
+                        viewModel = viewModel
                     )
                 }
             }

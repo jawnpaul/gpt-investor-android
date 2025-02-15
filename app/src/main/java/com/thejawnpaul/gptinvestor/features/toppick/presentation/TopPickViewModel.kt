@@ -9,7 +9,10 @@ import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetLocalTopPicksUseCase
+import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetSavedTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetSingleTopPickUseCase
+import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.RemoveTopPickFromSavedUseCase
+import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.SaveTopPickUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPickDetailView
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
@@ -25,7 +28,10 @@ class TopPickViewModel @Inject constructor(
     private val getSingleTopPickUseCase: GetSingleTopPickUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val getLocalTopPicksUseCase: GetLocalTopPicksUseCase,
-    private val authenticationRepository: AuthenticationRepository
+    private val authenticationRepository: AuthenticationRepository,
+    private val saveTopPickUseCase: SaveTopPickUseCase,
+    private val removeTopPickFromSavedUseCase: RemoveTopPickFromSavedUseCase,
+    private val getSavedTopPicksUseCase: GetSavedTopPicksUseCase
 ) : ViewModel() {
 
     private val topPickId: Long?
@@ -36,6 +42,9 @@ class TopPickViewModel @Inject constructor(
 
     private val _allTopPicks = MutableStateFlow(TopPicksView())
     val allTopPicks get() = _allTopPicks
+
+    private val _savedTopPicks = MutableStateFlow(TopPicksView())
+    val savedTopPicks get() = _savedTopPicks
 
     init {
         viewModelScope.launch {
@@ -80,7 +89,8 @@ class TopPickViewModel @Inject constructor(
                         rationale = rationale,
                         metrics = metrics,
                         risks = risks,
-                        confidenceScore = confidenceScore
+                        confidenceScore = confidenceScore,
+                        isSaved = isSaved
                     )
                 }
             )
@@ -114,7 +124,111 @@ class TopPickViewModel @Inject constructor(
                                     rationale,
                                     metrics,
                                     risks,
-                                    confidenceScore
+                                    confidenceScore,
+                                    isSaved
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    fun handleSave() {
+        if (_topPickView.value.topPick?.isSaved == true) {
+            removeTopPickFromSaved()
+        } else {
+            saveTopPick()
+        }
+    }
+
+    private fun saveTopPick() {
+        topPickId?.let { id ->
+            saveTopPickUseCase(id) {
+                it.onSuccess { topPick ->
+                    _topPickView.update { state ->
+                        state.copy(
+                            loading = false,
+                            topPick = with(topPick) {
+                                TopPickPresentation(
+                                    id = id,
+                                    companyName = companyName,
+                                    ticker = ticker,
+                                    rationale = rationale,
+                                    metrics = metrics,
+                                    risks = risks,
+                                    confidenceScore = confidenceScore,
+                                    isSaved = isSaved
+                                )
+                            }
+                        )
+                    }
+                }
+
+                it.onFailure { failure ->
+                    Timber.e(failure.toString())
+                }
+            }
+        }
+    }
+
+    private fun removeTopPickFromSaved() {
+        topPickId?.let { id ->
+            removeTopPickFromSavedUseCase(id) {
+                it.onSuccess { topPick ->
+                    _topPickView.update { state ->
+                        state.copy(
+                            loading = false,
+                            topPick = with(topPick) {
+                                TopPickPresentation(
+                                    id = id,
+                                    companyName = companyName,
+                                    ticker = ticker,
+                                    rationale = rationale,
+                                    metrics = metrics,
+                                    risks = risks,
+                                    confidenceScore = confidenceScore,
+                                    isSaved = isSaved
+                                )
+                            }
+                        )
+                    }
+                }
+
+                it.onFailure { failure ->
+                    Timber.e(failure.toString())
+                }
+            }
+        }
+    }
+
+    fun getSavedTopPicks() {
+        getSavedTopPicksUseCase(GetSavedTopPicksUseCase.None()) {
+            it.onFailure {
+                _savedTopPicks.update { state ->
+                    state.copy(
+                        loading = false,
+                        error = "Something went wrong."
+                    )
+                }
+            }
+
+            it.onSuccess { result ->
+                _savedTopPicks.update { state ->
+                    state.copy(
+                        loading = false,
+                        topPicks = result.map { topPick ->
+                            with(topPick) {
+                                TopPickPresentation(
+                                    id,
+                                    companyName,
+                                    ticker,
+                                    rationale,
+                                    metrics,
+                                    risks,
+                                    confidenceScore,
+                                    isSaved
                                 )
                             }
                         }

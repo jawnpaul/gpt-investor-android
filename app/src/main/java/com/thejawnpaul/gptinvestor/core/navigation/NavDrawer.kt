@@ -61,6 +61,7 @@ fun NavDrawerContent(navController: NavHostController, onCloseDrawer: () -> Unit
             label = stringResource(R.string.saved_picks),
             onClick = {
                 // Navigate to saved picks
+                navController.navigate(Screen.SavedTopPicksScreen.route)
                 onCloseDrawer()
             }
         )

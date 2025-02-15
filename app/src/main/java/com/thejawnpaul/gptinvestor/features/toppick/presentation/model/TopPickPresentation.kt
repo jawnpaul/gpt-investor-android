@@ -7,5 +7,6 @@ data class TopPickPresentation(
     val rationale: String,
     val metrics: List<String>,
     val risks: List<String>,
-    val confidenceScore: Int
+    val confidenceScore: Int,
+    val isSaved: Boolean
 )

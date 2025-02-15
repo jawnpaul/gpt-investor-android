@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Warning
@@ -71,7 +72,13 @@ fun TopPickDetailScreen(modifier: Modifier = Modifier, navController: NavControl
                         contentDescription = null
                     )
                 }
-                IconButton(onClick = {}) {
+                IconButton(onClick = { viewModel.handleSave() }) {
+                    if (state.value.topPick?.isSaved == true) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = null
+                        )
+                    }
                     Icon(
                         imageVector = Icons.Default.FavoriteBorder,
                         contentDescription = null

@@ -29,7 +29,8 @@ class TopPickRepository @Inject constructor(
                         rationale = rationale,
                         metrics = metrics,
                         risks = risks,
-                        confidenceScore = confidenceScore
+                        confidenceScore = confidenceScore,
+                        isSaved = isSaved
                     )
                 }
             }.sortedByDescending { it.confidenceScore }
@@ -69,7 +70,8 @@ class TopPickRepository @Inject constructor(
                                 rationale = rationale,
                                 metrics = metrics,
                                 risks = risks,
-                                confidenceScore = confidenceScore
+                                confidenceScore = confidenceScore,
+                                isSaved = isSaved
                             )
                         }
                     }.sortedByDescending { it.confidenceScore }
@@ -84,7 +86,7 @@ class TopPickRepository @Inject constructor(
     override suspend fun getSingleTopPick(pickId: Long): Flow<Either<Failure, TopPick>> = flow {
         try {
             val pick = with(topPickDao.getSingleTopPick(pickId)) {
-                TopPick(id, companyName, ticker, rationale, metrics, risks, confidenceScore)
+                TopPick(id, companyName, ticker, rationale, metrics, risks, confidenceScore, isSaved)
             }
             emit(Either.Right(pick))
         } catch (e: Exception) {
@@ -93,22 +95,28 @@ class TopPickRepository @Inject constructor(
         }
     }
 
-    override suspend fun saveTopPick(id: Long): Flow<Either<Failure, Unit>> = flow {
+    override suspend fun saveTopPick(id: Long): Flow<Either<Failure, TopPick>> = flow {
         try {
             val entity = topPickDao.getSingleTopPick(id).copy(isSaved = true)
             topPickDao.updateTopPick(entity)
-            emit(Either.Right(Unit))
+            val pick = with(topPickDao.getSingleTopPick(id)) {
+                TopPick(id, companyName, ticker, rationale, metrics, risks, confidenceScore, isSaved)
+            }
+            emit(Either.Right(pick))
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.DataError))
         }
     }
 
-    override suspend fun removeSavedTopPick(id: Long): Flow<Either<Failure, Unit>> = flow {
+    override suspend fun removeSavedTopPick(id: Long): Flow<Either<Failure, TopPick>> = flow {
         try {
             val entity = topPickDao.getSingleTopPick(id).copy(isSaved = false)
             topPickDao.updateTopPick(entity)
-            emit(Either.Right(Unit))
+            val pick = with(topPickDao.getSingleTopPick(id)) {
+                TopPick(id, companyName, ticker, rationale, metrics, risks, confidenceScore, isSaved)
+            }
+            emit(Either.Right(pick))
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.DataError))
@@ -132,7 +140,8 @@ class TopPickRepository @Inject constructor(
                                 rationale = rationale,
                                 metrics = metrics,
                                 risks = risks,
-                                confidenceScore = confidenceScore
+                                confidenceScore = confidenceScore,
+                                isSaved = isSaved
                             )
                         }
                     }
@@ -154,7 +163,8 @@ class TopPickRepository @Inject constructor(
                     rationale = rationale,
                     metrics = metrics,
                     risks = risks,
-                    confidenceScore = confidenceScore
+                    confidenceScore = confidenceScore,
+                    isSaved = isSaved
                 )
             }
         }.sortedByDescending { it.confidenceScore }

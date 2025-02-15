@@ -101,7 +101,8 @@ class HomeViewModel @Inject constructor(
                                     rationale,
                                     metrics,
                                     risks,
-                                    confidenceScore
+                                    confidenceScore,
+                                    isSaved
                                 )
                             }
                         }

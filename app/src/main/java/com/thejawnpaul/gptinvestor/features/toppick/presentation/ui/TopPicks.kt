@@ -101,7 +101,8 @@ fun TopPicksPreview(modifier: Modifier = Modifier) {
                                 rationale = "This is the day that the Lord has made I will be glad and rejoice in it because, oh well it is just blah lorem ipsum ",
                                 confidenceScore = 2,
                                 metrics = emptyList(),
-                                risks = emptyList()
+                                risks = emptyList(),
+                                isSaved = true
                             ),
                             TopPickPresentation(
                                 id = 2,
@@ -110,7 +111,8 @@ fun TopPicksPreview(modifier: Modifier = Modifier) {
                                 rationale = "This is the day that the Lord has made I will be glad and rejoice in it because, oh well it is just blah lorem ipsum ",
                                 confidenceScore = 2,
                                 metrics = emptyList(),
-                                risks = emptyList()
+                                risks = emptyList(),
+                                isSaved = false
                             ),
                             TopPickPresentation(
                                 id = 2,
@@ -119,7 +121,8 @@ fun TopPicksPreview(modifier: Modifier = Modifier) {
                                 rationale = "This is the day that the Lord has made I will be glad and rejoice in it because, oh well it is just blah lorem ipsum ",
                                 confidenceScore = 2,
                                 metrics = emptyList(),
-                                risks = emptyList()
+                                risks = emptyList(),
+                                isSaved = true
                             )
                         )
                     ),

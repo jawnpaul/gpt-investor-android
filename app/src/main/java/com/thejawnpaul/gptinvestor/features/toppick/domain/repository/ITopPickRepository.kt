@@ -11,9 +11,9 @@ interface ITopPickRepository {
 
     suspend fun getSingleTopPick(pickId: Long): Flow<Either<Failure, TopPick>>
 
-    suspend fun saveTopPick(id: Long): Flow<Either<Failure, Unit>>
+    suspend fun saveTopPick(id: Long): Flow<Either<Failure, TopPick>>
 
-    suspend fun removeSavedTopPick(id: Long): Flow<Either<Failure, Unit>>
+    suspend fun removeSavedTopPick(id: Long): Flow<Either<Failure, TopPick>>
 
     suspend fun shareTopPick(id: Long): Flow<Either<Failure, String>>
 

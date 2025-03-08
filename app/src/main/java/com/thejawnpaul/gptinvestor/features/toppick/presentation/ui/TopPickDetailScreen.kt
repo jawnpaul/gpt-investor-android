@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.toppick.presentation.ui
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,10 +28,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,7 +42,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.core.navigation.Screen
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickAction
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,6 +54,24 @@ fun TopPickDetailScreen(modifier: Modifier = Modifier, navController: NavControl
     }
 
     val state = viewModel.topPickView.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(Unit) {
+        scope.launch {
+            viewModel.actions.collect { action ->
+                when (action) {
+                    is TopPickAction.OnShare -> {
+                        val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_SUBJECT, "Top pick")
+                            putExtra(Intent.EXTRA_TEXT, action.url)
+                        }
+                        context.startActivity(Intent.createChooser(sendIntent, "Share via"))
+                    }
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier

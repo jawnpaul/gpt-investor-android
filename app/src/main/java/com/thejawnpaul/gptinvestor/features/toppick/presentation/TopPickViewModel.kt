@@ -19,6 +19,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPickDe
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -41,6 +42,9 @@ class TopPickViewModel @Inject constructor(
 
     private val _topPickView = MutableStateFlow(TopPickDetailView())
     val topPickView get() = _topPickView
+
+    private val _actions = MutableSharedFlow<TopPickAction>()
+    val actions get() = _actions
 
     private val _allTopPicks = MutableStateFlow(TopPicksView())
     val allTopPicks get() = _allTopPicks
@@ -244,7 +248,9 @@ class TopPickViewModel @Inject constructor(
         topPickId?.let { id ->
             shareTopPickUseCase(id) {
                 it.onSuccess { result ->
-                    Timber.e(result)
+                    viewModelScope.launch {
+                        _actions.emit(TopPickAction.OnShare(result))
+                    }
                 }
                 it.onFailure {
                     Timber.e(it.toString())
@@ -252,4 +258,8 @@ class TopPickViewModel @Inject constructor(
             }
         }
     }
+}
+
+sealed interface TopPickAction {
+    data class OnShare(val url: String) : TopPickAction
 }

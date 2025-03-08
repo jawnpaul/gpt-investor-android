@@ -164,9 +164,16 @@ class TopPickRepository @Inject constructor(
         try {
             val pick = topPickDao.getSingleTopPick(id)
             val domain = remoteConfig.fetchAndActivateStringValue("website_domain")
+
             val urlToShare = "${domain}single-pick/${pick.id}"
 
-            emit(Either.Right(urlToShare))
+            val data = "Check out my Top Pick: ${pick.companyName}! \uD83D\uDE80\n" +
+                "\n" +
+                "I found this amazing opportunity and wanted to share it with you.\n" +
+                "\n" +
+                "View all the details here: $urlToShare"
+
+            emit(Either.Right(data))
 
             analyticsLogger.logShareEvent(contentType = "top_pick", contentName = pick.companyName)
         } catch (e: Exception) {

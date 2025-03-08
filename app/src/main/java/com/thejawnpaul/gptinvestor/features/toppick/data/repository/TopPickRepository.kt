@@ -1,8 +1,10 @@
 package com.thejawnpaul.gptinvestor.features.toppick.data.repository
 
+import com.thejawnpaul.gptinvestor.core.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfig
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.dao.TopPickDao
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.model.TopPickEntity
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
@@ -17,7 +19,9 @@ import timber.log.Timber
 
 class TopPickRepository @Inject constructor(
     private val apiService: ApiService,
-    private val topPickDao: TopPickDao
+    private val topPickDao: TopPickDao,
+    private val analyticsLogger: AnalyticsLogger,
+    private val remoteConfig: RemoteConfig
 ) :
     ITopPickRepository {
     override suspend fun getTopPicks(): Flow<Either<Failure, List<TopPick>>> = flow {
@@ -126,6 +130,7 @@ class TopPickRepository @Inject constructor(
                 )
             }
             emit(Either.Right(pick))
+            analyticsLogger.logSaveEvent(contentType = "top_pick", contentName = pick.companyName)
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.DataError))
@@ -156,7 +161,18 @@ class TopPickRepository @Inject constructor(
     }
 
     override suspend fun shareTopPick(id: String): Flow<Either<Failure, String>> = flow {
-        // TODO: Log share event to firebase
+        try {
+            val pick = topPickDao.getSingleTopPick(id)
+            val domain = remoteConfig.fetchAndActivateStringValue("website_domain")
+            val urlToShare = "${domain}single-pick/${pick.id}"
+
+            emit(Either.Right(urlToShare))
+
+            analyticsLogger.logShareEvent(contentType = "top_pick", contentName = pick.companyName)
+        } catch (e: Exception) {
+            Timber.e(e.stackTraceToString())
+            emit(Either.Left(Failure.DataError))
+        }
     }
 
     override suspend fun getSavedTopPicks(): Flow<Either<Failure, List<TopPick>>> = flow {

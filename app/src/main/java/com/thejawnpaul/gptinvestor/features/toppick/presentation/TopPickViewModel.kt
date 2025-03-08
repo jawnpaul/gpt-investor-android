@@ -13,6 +13,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetSavedTopP
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetSingleTopPickUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.RemoveTopPickFromSavedUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.SaveTopPickUseCase
+import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.ShareTopPickUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPickDetailView
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
@@ -31,7 +32,8 @@ class TopPickViewModel @Inject constructor(
     private val authenticationRepository: AuthenticationRepository,
     private val saveTopPickUseCase: SaveTopPickUseCase,
     private val removeTopPickFromSavedUseCase: RemoveTopPickFromSavedUseCase,
-    private val getSavedTopPicksUseCase: GetSavedTopPicksUseCase
+    private val getSavedTopPicksUseCase: GetSavedTopPicksUseCase,
+    private val shareTopPickUseCase: ShareTopPickUseCase
 ) : ViewModel() {
 
     private val topPickId: String?
@@ -233,6 +235,19 @@ class TopPickViewModel @Inject constructor(
                             }
                         }
                     )
+                }
+            }
+        }
+    }
+
+    fun shareTopPick() {
+        topPickId?.let { id ->
+            shareTopPickUseCase(id) {
+                it.onSuccess { result ->
+                    Timber.e(result)
+                }
+                it.onFailure {
+                    Timber.e(it.toString())
                 }
             }
         }

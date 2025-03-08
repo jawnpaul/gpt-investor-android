@@ -66,7 +66,7 @@ fun TopPickDetailScreen(modifier: Modifier = Modifier, navController: NavControl
                 }
             },
             actions = {
-                IconButton(onClick = { }) {
+                IconButton(onClick = { viewModel.shareTopPick() }) {
                     Icon(
                         imageVector = Icons.Default.Share,
                         contentDescription = null

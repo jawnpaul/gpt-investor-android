@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<defaults>
+  <entry>
+    <key>website_domain</key>
+    <value>https://m7mxrc35hp.us-west-2.awsapprunner.com/</value>
+  </entry>
+  <entry>
+    <key>free_prompt_count</key>
+    <value>2</value>
+  </entry>
+  <entry>
+    <key>prompt_count</key>
+    <value>100</value>
+  </entry>
+</defaults>

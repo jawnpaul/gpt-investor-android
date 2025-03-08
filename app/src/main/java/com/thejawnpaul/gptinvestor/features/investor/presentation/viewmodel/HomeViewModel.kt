@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
+import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfig
 import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetTrendingCompaniesUseCase
@@ -23,7 +24,8 @@ import kotlinx.coroutines.launch
 class HomeViewModel @Inject constructor(
     private val getTrendingCompaniesUseCase: GetTrendingCompaniesUseCase,
     private val getTopPicksUseCase: GetTopPicksUseCase,
-    private val authenticationRepository: AuthenticationRepository
+    private val authenticationRepository: AuthenticationRepository,
+    private val remoteConfig: RemoteConfig
 ) :
     ViewModel() {
 
@@ -38,6 +40,7 @@ class HomeViewModel @Inject constructor(
 
     init {
         // getTrendingCompanies()
+        remoteConfig.init()
         getTopPicks()
         getCurrentUser()
     }

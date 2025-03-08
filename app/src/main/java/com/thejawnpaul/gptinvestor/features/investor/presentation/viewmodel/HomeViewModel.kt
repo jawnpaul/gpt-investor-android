@@ -11,6 +11,7 @@ import com.thejawnpaul.gptinvestor.features.authentication.domain.Authentication
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetTrendingCompaniesUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
+import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetLocalTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
@@ -25,6 +26,7 @@ class HomeViewModel @Inject constructor(
     private val getTrendingCompaniesUseCase: GetTrendingCompaniesUseCase,
     private val getTopPicksUseCase: GetTopPicksUseCase,
     private val authenticationRepository: AuthenticationRepository,
+    private val getLocalTopPicksUseCase: GetLocalTopPicksUseCase,
     private val remoteConfig: RemoteConfig
 ) :
     ViewModel() {
@@ -34,6 +36,9 @@ class HomeViewModel @Inject constructor(
 
     private val _topPicks = MutableStateFlow(TopPicksView())
     val topPicks get() = _topPicks
+
+    private val _allTopPicks = MutableStateFlow(TopPicksView())
+    val allTopPicks get() = _allTopPicks
 
     private val _currentUser = MutableStateFlow<FirebaseUser?>(null)
     val currentUser get() = _currentUser
@@ -78,7 +83,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun getTopPicks() {
+    fun getTopPicks() {
         _topPicks.update { it.copy(loading = true) }
 
         getTopPicksUseCase(GetTopPicksUseCase.None()) {
@@ -89,6 +94,7 @@ class HomeViewModel @Inject constructor(
                         error = "Something went wrong."
                     )
                 }
+                getLocalPicks()
             }
 
             it.onSuccess { result ->
@@ -119,6 +125,41 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             authenticationRepository.getAuthState().collect { isSignedIn ->
                 _currentUser.update { if (isSignedIn) authenticationRepository.currentUser else null }
+            }
+        }
+    }
+
+    private fun getLocalPicks() {
+        getLocalTopPicksUseCase(GetLocalTopPicksUseCase.None()) {
+            it.onFailure {
+                _topPicks.update { state ->
+                    state.copy(
+                        loading = false,
+                        error = "Something went wrong."
+                    )
+                }
+            }
+
+            it.onSuccess { result ->
+                _topPicks.update { state ->
+                    state.copy(
+                        loading = false,
+                        topPicks = result.map { topPick ->
+                            with(topPick) {
+                                TopPickPresentation(
+                                    id,
+                                    companyName,
+                                    ticker,
+                                    rationale,
+                                    metrics,
+                                    risks,
+                                    confidenceScore,
+                                    isSaved
+                                )
+                            }
+                        }
+                    )
+                }
             }
         }
     }

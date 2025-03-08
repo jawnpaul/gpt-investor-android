@@ -1,7 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.toppick.presentation.model
 
 data class TopPickPresentation(
-    val id: Long,
+    val id: String,
     val companyName: String,
     val ticker: String,
     val rationale: String,

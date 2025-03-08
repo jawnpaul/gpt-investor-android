@@ -34,8 +34,8 @@ class TopPickViewModel @Inject constructor(
     private val getSavedTopPicksUseCase: GetSavedTopPicksUseCase
 ) : ViewModel() {
 
-    private val topPickId: Long?
-        get() = savedStateHandle.get<Long>("topPickId")
+    private val topPickId: String?
+        get() = savedStateHandle.get<String>("topPickId")
 
     private val _topPickView = MutableStateFlow(TopPickDetailView())
     val topPickView get() = _topPickView
@@ -55,7 +55,7 @@ class TopPickViewModel @Inject constructor(
     }
 
     fun updateTopPickId(topPickId: String) {
-        savedStateHandle["topPickId"] = topPickId.toLong()
+        savedStateHandle["topPickId"] = topPickId
         getTopPick()
     }
 

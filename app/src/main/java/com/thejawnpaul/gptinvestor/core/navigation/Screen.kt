@@ -17,7 +17,7 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
     }
 
     data object TopPickDetailScreen : Screen("top_pick_detail_screen/{topPickId}", false) {
-        fun createRoute(topPickId: Long) = "top_pick_detail_screen/$topPickId"
+        fun createRoute(topPickId: String) = "top_pick_detail_screen/$topPickId"
     }
 
     data object AllTopPicksScreen : Screen("all_top_picks_screen", false)

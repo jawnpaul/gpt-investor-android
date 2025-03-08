@@ -22,7 +22,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPr
 import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
 
 @Composable
-fun SingleTopPickItem(modifier: Modifier = Modifier, pickPresentation: TopPickPresentation, onClick: (Long) -> Unit) {
+fun SingleTopPickItem(modifier: Modifier = Modifier, pickPresentation: TopPickPresentation, onClick: (String) -> Unit) {
     OutlinedCard(
         modifier = Modifier.padding(horizontal = 16.dp),
         onClick = { onClick(pickPresentation.id) }
@@ -61,7 +61,7 @@ fun SinglePickPreview(modifier: Modifier = Modifier) {
         Surface {
             Column(modifier = Modifier.fillMaxSize()) {
                 val pick = TopPickPresentation(
-                    id = 1,
+                    id = "1",
                     ticker = "AAPL",
                     companyName = "Microsoft",
                     rationale = "This is the day that the Lord has made I will be glad and rejoice in it because, oh well it is just blah lorem ipsum ",

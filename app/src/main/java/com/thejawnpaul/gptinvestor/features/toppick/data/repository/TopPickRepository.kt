@@ -7,6 +7,9 @@ import com.thejawnpaul.gptinvestor.features.toppick.data.local.dao.TopPickDao
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.model.TopPickEntity
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -38,19 +41,21 @@ class TopPickRepository @Inject constructor(
             if (local.isNotEmpty()) {
                 Either.Right(local)
             }
-
-            val response = apiService.getTopPicks()
+            val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+            val response = apiService.getTopPicks(date = today)
             if (response.isSuccessful) {
                 response.body()?.let {
                     val newPicks = it.map { aa ->
                         with(aa) {
                             TopPickEntity(
+                                id = id,
                                 companyName = companyName,
                                 ticker = ticker,
                                 rationale = rationale,
                                 metrics = metrics,
                                 risks = risks,
-                                confidenceScore = confidenceScore
+                                confidenceScore = confidenceScore,
+                                date = date
                             )
                         }
                     }
@@ -83,10 +88,19 @@ class TopPickRepository @Inject constructor(
         }
     }
 
-    override suspend fun getSingleTopPick(pickId: Long): Flow<Either<Failure, TopPick>> = flow {
+    override suspend fun getSingleTopPick(pickId: String): Flow<Either<Failure, TopPick>> = flow {
         try {
             val pick = with(topPickDao.getSingleTopPick(pickId)) {
-                TopPick(id, companyName, ticker, rationale, metrics, risks, confidenceScore, isSaved)
+                TopPick(
+                    id,
+                    companyName,
+                    ticker,
+                    rationale,
+                    metrics,
+                    risks,
+                    confidenceScore,
+                    isSaved
+                )
             }
             emit(Either.Right(pick))
         } catch (e: Exception) {
@@ -95,12 +109,21 @@ class TopPickRepository @Inject constructor(
         }
     }
 
-    override suspend fun saveTopPick(id: Long): Flow<Either<Failure, TopPick>> = flow {
+    override suspend fun saveTopPick(id: String): Flow<Either<Failure, TopPick>> = flow {
         try {
             val entity = topPickDao.getSingleTopPick(id).copy(isSaved = true)
             topPickDao.updateTopPick(entity)
             val pick = with(topPickDao.getSingleTopPick(id)) {
-                TopPick(id, companyName, ticker, rationale, metrics, risks, confidenceScore, isSaved)
+                TopPick(
+                    id,
+                    companyName,
+                    ticker,
+                    rationale,
+                    metrics,
+                    risks,
+                    confidenceScore,
+                    isSaved
+                )
             }
             emit(Either.Right(pick))
         } catch (e: Exception) {
@@ -109,12 +132,21 @@ class TopPickRepository @Inject constructor(
         }
     }
 
-    override suspend fun removeSavedTopPick(id: Long): Flow<Either<Failure, TopPick>> = flow {
+    override suspend fun removeSavedTopPick(id: String): Flow<Either<Failure, TopPick>> = flow {
         try {
             val entity = topPickDao.getSingleTopPick(id).copy(isSaved = false)
             topPickDao.updateTopPick(entity)
             val pick = with(topPickDao.getSingleTopPick(id)) {
-                TopPick(id, companyName, ticker, rationale, metrics, risks, confidenceScore, isSaved)
+                TopPick(
+                    id,
+                    companyName,
+                    ticker,
+                    rationale,
+                    metrics,
+                    risks,
+                    confidenceScore,
+                    isSaved
+                )
             }
             emit(Either.Right(pick))
         } catch (e: Exception) {
@@ -123,7 +155,7 @@ class TopPickRepository @Inject constructor(
         }
     }
 
-    override suspend fun shareTopPick(id: Long): Flow<Either<Failure, String>> = flow {
+    override suspend fun shareTopPick(id: String): Flow<Either<Failure, String>> = flow {
         // TODO: Log share event to firebase
     }
 

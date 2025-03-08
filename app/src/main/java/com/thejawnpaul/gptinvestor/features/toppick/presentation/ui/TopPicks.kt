@@ -27,7 +27,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksV
 import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
 
 @Composable
-fun TopPicks(modifier: Modifier = Modifier, state: TopPicksView, onClickRetry: () -> Unit, onClick: (id: Long) -> Unit, onClickSeeAll: () -> Unit) {
+fun TopPicks(modifier: Modifier = Modifier, state: TopPicksView, onClickRetry: () -> Unit, onClick: (id: String) -> Unit, onClickSeeAll: () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
         if (state.loading) {
             // Text
@@ -95,7 +95,7 @@ fun TopPicksPreview(modifier: Modifier = Modifier) {
                         error = null,
                         topPicks = listOf(
                             TopPickPresentation(
-                                id = 1,
+                                id = "1",
                                 ticker = "AAPL",
                                 companyName = "Apple",
                                 rationale = "This is the day that the Lord has made I will be glad and rejoice in it because, oh well it is just blah lorem ipsum ",
@@ -105,7 +105,7 @@ fun TopPicksPreview(modifier: Modifier = Modifier) {
                                 isSaved = true
                             ),
                             TopPickPresentation(
-                                id = 2,
+                                id = "2",
                                 ticker = "AAPL",
                                 companyName = "Microsoft corporation",
                                 rationale = "This is the day that the Lord has made I will be glad and rejoice in it because, oh well it is just blah lorem ipsum ",
@@ -115,7 +115,7 @@ fun TopPicksPreview(modifier: Modifier = Modifier) {
                                 isSaved = false
                             ),
                             TopPickPresentation(
-                                id = 2,
+                                id = "2",
                                 ticker = "AAPL",
                                 companyName = "Netflix",
                                 rationale = "This is the day that the Lord has made I will be glad and rejoice in it because, oh well it is just blah lorem ipsum ",

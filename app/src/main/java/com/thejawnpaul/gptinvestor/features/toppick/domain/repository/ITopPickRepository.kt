@@ -9,13 +9,13 @@ interface ITopPickRepository {
 
     suspend fun getTopPicks(): Flow<Either<Failure, List<TopPick>>>
 
-    suspend fun getSingleTopPick(pickId: Long): Flow<Either<Failure, TopPick>>
+    suspend fun getSingleTopPick(pickId: String): Flow<Either<Failure, TopPick>>
 
-    suspend fun saveTopPick(id: Long): Flow<Either<Failure, TopPick>>
+    suspend fun saveTopPick(id: String): Flow<Either<Failure, TopPick>>
 
-    suspend fun removeSavedTopPick(id: Long): Flow<Either<Failure, TopPick>>
+    suspend fun removeSavedTopPick(id: String): Flow<Either<Failure, TopPick>>
 
-    suspend fun shareTopPick(id: Long): Flow<Either<Failure, String>>
+    suspend fun shareTopPick(id: String): Flow<Either<Failure, String>>
 
     suspend fun getSavedTopPicks(): Flow<Either<Failure, List<TopPick>>>
 

@@ -15,12 +15,12 @@ class SaveTopPickUseCase @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: ITopPickRepository
-) : BaseUseCase<Long, TopPick>(
+) : BaseUseCase<String, TopPick>(
     coroutineScope,
     dispatcher
 ) {
 
-    override suspend fun run(params: Long): Flow<Either<Failure, TopPick>> {
+    override suspend fun run(params: String): Flow<Either<Failure, TopPick>> {
         return repository.saveTopPick(params)
     }
 }

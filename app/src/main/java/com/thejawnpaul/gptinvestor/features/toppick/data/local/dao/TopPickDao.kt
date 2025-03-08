@@ -11,7 +11,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.data.local.model.TopPickEnti
 @Dao
 interface TopPickDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertTopPicks(list: List<TopPickEntity>)
 
     @Query("SELECT * FROM top_picks_table ORDER BY id")
@@ -21,7 +21,7 @@ interface TopPickDao {
     suspend fun deleteUnsavedTopPicks()
 
     @Query("SELECT * FROM top_picks_table WHERE id =:id")
-    suspend fun getSingleTopPick(id: Long): TopPickEntity
+    suspend fun getSingleTopPick(id: String): TopPickEntity
 
     @Update
     suspend fun updateTopPick(topPickEntity: TopPickEntity)

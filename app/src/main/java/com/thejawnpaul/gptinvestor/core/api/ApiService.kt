@@ -24,6 +24,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface ApiService {
     @GET("companies")
@@ -63,5 +64,5 @@ interface ApiService {
     suspend fun getCompanyPrice(@Body request: CompanyPriceRequest): Response<List<CompanyPriceResponse>>
 
     @GET("top-picks")
-    suspend fun getTopPicks(): Response<List<TopPickRemote>>
+    suspend fun getTopPicks(@Query("date") date: String): Response<List<TopPickRemote>>
 }

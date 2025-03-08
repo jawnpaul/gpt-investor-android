@@ -37,7 +37,7 @@ class HomeViewModel @Inject constructor(
     val currentUser get() = _currentUser
 
     init {
-        getTrendingCompanies()
+        // getTrendingCompanies()
         getTopPicks()
         getCurrentUser()
     }

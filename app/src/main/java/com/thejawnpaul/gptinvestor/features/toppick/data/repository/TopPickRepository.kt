@@ -28,7 +28,7 @@ class TopPickRepository @Inject constructor(
         try {
             val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
             // emit local
-            val local = topPickDao.getAllTopPicks(date = today).map { entity ->
+            val local = topPickDao.getAllTopPicks().filter { it.date == today }.map { entity ->
                 with(entity) {
                     TopPick(
                         id = id,
@@ -71,7 +71,7 @@ class TopPickRepository @Inject constructor(
             // emit local
             emit(
                 Either.Right(
-                    topPickDao.getAllTopPicks(date = today).map { entity ->
+                    topPickDao.getAllTopPicks().filter { it.date == today }.map { entity ->
                         with(entity) {
                             TopPick(
                                 id = id,
@@ -213,7 +213,7 @@ class TopPickRepository @Inject constructor(
 
     override suspend fun getLocalTopPicks(): Flow<Either<Failure, List<TopPick>>> = flow {
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        val local = topPickDao.getAllTopPicks(date = today).map { entity ->
+        val local = topPickDao.getAllTopPicks().map { entity ->
             with(entity) {
                 TopPick(
                     id = id,

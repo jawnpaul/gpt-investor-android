@@ -44,13 +44,13 @@ class HomeViewModel @Inject constructor(
     val currentUser get() = _currentUser
 
     init {
-        // getTrendingCompanies()
+        getTrendingCompanies()
         remoteConfig.init()
         getTopPicks()
         getCurrentUser()
     }
 
-    private fun getTrendingCompanies() {
+    fun getTrendingCompanies() {
         _trendingCompanies.update { it.copy(loading = true) }
 
         getTrendingCompaniesUseCase(GetTrendingCompaniesUseCase.None()) {

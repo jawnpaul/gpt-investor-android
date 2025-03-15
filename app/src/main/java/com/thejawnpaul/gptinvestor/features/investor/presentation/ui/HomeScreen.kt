@@ -98,9 +98,11 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
                             )
                         } else {
                             Box {
-                                val firstChar =
-                                    currentUser.value!!.displayName?.first().toString().uppercase()
-                                Text(firstChar, modifier = Modifier.align(Alignment.Center))
+                                val firstChar = runCatching {
+                                    currentUser.value?.displayName?.first()?.toString()?.uppercase()
+                                }.getOrDefault("A")
+
+                                Text(firstChar ?: "A", modifier = Modifier.align(Alignment.Center))
                             }
                         }
                     }
@@ -127,6 +129,16 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(16.dp)
+            )
+
+            // Trending
+            TrendingStockList(
+                modifier = Modifier,
+                state = trendingStock.value,
+                onClick = {
+                    navController.navigate(Screen.CompanyDetailScreen.createRoute(it))
+                },
+                onClickRetry = { viewModel.getTrendingCompanies() }
             )
 
             // Top Picks

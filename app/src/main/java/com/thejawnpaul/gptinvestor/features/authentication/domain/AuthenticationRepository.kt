@@ -11,13 +11,15 @@ import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import timber.log.Timber
 
 interface AuthenticationRepository {
     val currentUser: FirebaseUser?
-    suspend fun signIn(launcher: ActivityResultLauncher<Intent>)
+    suspend fun signUp(launcher: ActivityResultLauncher<Intent>)
     suspend fun signOut()
     fun getAuthState(): Flow<Boolean>
     suspend fun deleteAccount()
+    suspend fun login(email: String, password: String): Flow<Boolean>
 }
 
 class AuthenticationRepositoryImpl @Inject constructor(
@@ -28,7 +30,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
     override val currentUser: FirebaseUser?
         get() = auth.currentUser
 
-    override suspend fun signIn(launcher: ActivityResultLauncher<Intent>) {
+    override suspend fun signUp(launcher: ActivityResultLauncher<Intent>) {
         val providers = arrayListOf(
             AuthUI.IdpConfig.GoogleBuilder().build(),
             AuthUI.IdpConfig.EmailBuilder().build()
@@ -69,5 +71,17 @@ class AuthenticationRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    override suspend fun login(email: String, password: String): Flow<Boolean> = callbackFlow {
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                trySend(task.isSuccessful)
+                getAuthState()
+            }
+            .addOnFailureListener { e ->
+                Timber.e(e.stackTraceToString())
+            }
+        awaitClose()
     }
 }

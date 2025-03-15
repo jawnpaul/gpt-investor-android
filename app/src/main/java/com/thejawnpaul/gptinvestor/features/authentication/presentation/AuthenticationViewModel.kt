@@ -36,7 +36,7 @@ class AuthenticationViewModel @Inject constructor(private val authRepository: Au
     fun signIn(launcher: ActivityResultLauncher<Intent>) {
         viewModelScope.launch {
             _authState.update { it.copy(loading = true) }
-            authRepository.signIn(launcher)
+            authRepository.signUp(launcher)
         }
     }
 
@@ -57,6 +57,42 @@ class AuthenticationViewModel @Inject constructor(private val authRepository: Au
             }
         }
     }
+
+    fun login() {
+        val email = _authState.value.email
+        val password = _authState.value.password
+        _authState.update {
+            it.copy(
+                loading = true
+            )
+        }
+        viewModelScope.launch {
+            authRepository.login(email, password).collect { isSuccessful ->
+                if (isSuccessful) {
+                    _authState.update {
+                        it.copy(
+                            loading = false,
+                            user = authRepository.currentUser
+                        )
+                    }
+                } else {
+                    _authState.update { it.copy(loading = false, errorMessage = "Login failed") }
+                }
+            }
+        }
+    }
+
+    fun showLoginInput() {
+        _authState.update { it.copy(showLoginInput = true) }
+    }
+
+    fun updateEmail(email: String) {
+        _authState.update { it.copy(email = email) }
+    }
+
+    fun updatePassword(password: String) {
+        _authState.update { it.copy(password = password) }
+    }
 }
 
 sealed class AuthResult<T> {
@@ -69,5 +105,10 @@ data class AuthenticationUIState(
     val isUserSignedIn: Boolean = false,
     val user: FirebaseUser? = null,
     val loading: Boolean = false,
-    val errorMessage: String? = null
-)
+    val errorMessage: String? = null,
+    val showLoginInput: Boolean = false,
+    val email: String = "",
+    val password: String = ""
+) {
+    val enableLoginButton = email.trim().isNotEmpty() && password.trim().isNotEmpty()
+}

@@ -167,11 +167,13 @@ class TopPickRepository @Inject constructor(
 
             val urlToShare = "${domain}single-pick/${pick.id}"
 
-            val data = "Check out my Top Pick: ${pick.companyName}! \uD83D\uDE80\n" +
+            val data = "\uD83D\uDCC8 Stock Pick Alert: ${pick.companyName}\n" +
                 "\n" +
-                "I found this amazing opportunity and wanted to share it with you.\n" +
+                "I just uncovered a high-potential opportunity using GPT Investor and had to share it with you.\n" +
                 "\n" +
-                "View all the details here: $urlToShare"
+                "\uD83D\uDD0D See the full analysis here: ${urlToShare}\n" +
+                "\n" +
+                "Check it out and let me know what you think!"
 
             emit(Either.Right(data))
 

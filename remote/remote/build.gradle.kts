@@ -10,7 +10,7 @@ plugins {
 android {
     val localProperties = Properties()
     localProperties.load(project.rootProject.file("local.properties").reader())
-    namespace = "com.thejawnpaul.gptinvestor"
+    namespace = "com.thejawnpaul.gptinvestor.remote"
     compileSdk = 34
     defaultConfig.minSdk = 24
     buildTypes {

@@ -29,4 +29,23 @@ class AnalyticsLogger @Inject constructor(private val firebaseAnalytics: Firebas
         }
         firebaseAnalytics.logEvent("company_identified", bundle)
     }
+
+    fun logCompanySaved(companyTicker: String) {
+    }
+
+    fun logShareEvent(contentType: String, contentName: String) {
+        val bundle = Bundle().apply {
+            putString(FirebaseAnalytics.Param.CONTENT_TYPE, contentType)
+            putString(FirebaseAnalytics.Param.ITEM_NAME, contentName)
+        }
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SHARE, bundle)
+    }
+
+    fun logSaveEvent(contentType: String, contentName: String) {
+        val bundle = Bundle().apply {
+            putString(FirebaseAnalytics.Param.CONTENT_TYPE, contentType)
+            putString(FirebaseAnalytics.Param.ITEM_NAME, contentName)
+        }
+        firebaseAnalytics.logEvent("save_event", bundle)
+    }
 }

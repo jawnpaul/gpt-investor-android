@@ -1,4 +1,4 @@
-package com.thejawnpaul.gptinvestor.features.investor.presentation.ui
+package com.thejawnpaul.gptinvestor.core.navigation
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,37 +18,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.core.navigation.Screen
-
-/*@Composable
-fun BottomNavBar(navController: NavController) {
-    val items = listOf(
-        Screen.HomeTabScreen to Icons.Default.Home,
-        Screen.DiscoverTabScreen to Icons.Default.Search,
-        Screen.HistoryTabScreen to Icons.Default.Menu
-    )
-
-    BottomAppBar {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
-
-        if (items.any { it.first.route == currentRoute }) {
-            items.forEach { (screen, icon) ->
-                NavigationBarItem(
-                    icon = { Icon(icon, contentDescription = screen.route) },
-                    label = { Text(screen.route) },
-                    selected = currentRoute == screen.route,
-                    onClick = {
-                        navController.navigate(screen.route) {
-                            popUpTo(navController.graph.startDestinationId)
-                            launchSingleTop = true
-                        }
-                    }
-                )
-            }
-        }
-    }
-}*/
 
 @Composable
 fun BottomNavBar(navController: NavController) {

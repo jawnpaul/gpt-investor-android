@@ -49,4 +49,25 @@
     <string name="discover_gpt_investor">Discover GPT Investor</string>
     <string name="your_gpt_investor_history">Your GPT Investor History</string>
     <string name="no_search_result">No result matching your search query</string>
+    <string name="top_picks">Top picks</string>
+    <string name="see_all">See all</string>
+    <string name="top_pick_details">Top Pick Details</string>
+    <string name="investment_rationale">Investment Rationale</string>
+    <string name="key_metrics">Key Metrics</string>
+    <string name="key_risks">Key Risks</string>
+    <string name="sign_in">Sign up</string>
+    <string name="sign_in_to_view_full_details">Sign in to view full details</string>
+    <string name="all_top_picks">All Top Picks</string>
+    <string name="retry_sign_in">Retry Sign in</string>
+    <string name="sign_out">Sign out</string>
+    <string name="settings">Settings</string>
+    <string name="saved_picks">Saved picks</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="are_you_sure_you_want_to_delete_your_account">Are you sure you want to delete your account? This action cannot be undone.</string>
+    <string name="login">Log in</string>
+    <string name="email_address">Email address</string>
+    <string name="password">Password</string>
+    <string name="done">Done</string>
 </resources>

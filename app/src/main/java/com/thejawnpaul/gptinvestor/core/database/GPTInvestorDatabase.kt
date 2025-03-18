@@ -11,11 +11,18 @@ import com.thejawnpaul.gptinvestor.features.conversation.data.local.dao.MessageD
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.ConversationEntity
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.ConversationWithLastMessage
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.MessageEntity
+import com.thejawnpaul.gptinvestor.features.toppick.data.local.dao.TopPickDao
+import com.thejawnpaul.gptinvestor.features.toppick.data.local.model.TopPickEntity
 
 @Database(
-    entities = [CompanyEntity::class, ConversationEntity::class, MessageEntity::class],
-    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3)],
-    version = 3,
+    entities = [CompanyEntity::class, ConversationEntity::class, MessageEntity::class, TopPickEntity::class],
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2), AutoMigration(
+            from = 2,
+            to = 3
+        ), AutoMigration(from = 3, to = 4)
+    ],
+    version = 4,
     exportSchema = true,
     views = [ConversationWithLastMessage::class]
 )
@@ -31,4 +38,6 @@ abstract class GPTInvestorDatabase : RoomDatabase() {
     abstract fun conversationDao(): ConversationDao
 
     abstract fun messageDao(): MessageDao
+
+    abstract fun topPicksDao(): TopPickDao
 }

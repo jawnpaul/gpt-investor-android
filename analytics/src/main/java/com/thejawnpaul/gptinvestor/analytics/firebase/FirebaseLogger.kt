@@ -15,7 +15,6 @@ class FirebaseLogger @Inject constructor(private val firebaseAnalytics: Firebase
             putString("prompt_query", promptQuery)
         }
         firebaseAnalytics.logEvent("default_prompt", bundle)
-        println("Log default prompt to firebase")
     }
 
     override fun logSelectedCompany(companyTicker: String) {
@@ -23,7 +22,6 @@ class FirebaseLogger @Inject constructor(private val firebaseAnalytics: Firebase
             putString("company_ticker", companyTicker)
         }
         firebaseAnalytics.logEvent("company_selected", bundle)
-        println("Log company to firebase $companyTicker")
     }
 
     override fun logCompanyIdentified(companyTicker: String) {
@@ -47,6 +45,14 @@ class FirebaseLogger @Inject constructor(private val firebaseAnalytics: Firebase
             putString(FirebaseAnalytics.Param.ITEM_NAME, contentName)
         }
         firebaseAnalytics.logEvent("save_event", bundle)
+    }
+
+    override fun logTopPickSelected(companyTicker: String, companyName: String) {
+        val bundle = Bundle().apply {
+            putString("company_ticker", companyTicker)
+            putString("company_name", companyName)
+        }
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle)
     }
 
 }

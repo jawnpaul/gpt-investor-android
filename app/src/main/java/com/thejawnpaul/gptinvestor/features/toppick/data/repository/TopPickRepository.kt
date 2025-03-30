@@ -108,6 +108,10 @@ class TopPickRepository @Inject constructor(
                 )
             }
             emit(Either.Right(pick))
+            analyticsLogger.logTopPickSelected(
+                companyTicker = pick.ticker,
+                companyName = pick.companyName
+            )
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.UnAvailableError))

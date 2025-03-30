@@ -60,6 +60,14 @@ class CompositeLogger private constructor(private val loggers: Map<Analytics.Pro
         }
     }
 
+    override fun logTopPickSelected(companyTicker: String, companyName: String) {
+        loggers.forEach { (provider, logger) ->
+            if (isProviderActive(provider)) {
+                logger.logTopPickSelected(companyTicker, companyName)
+            }
+        }
+    }
+
     class Builder @Inject constructor(
         @FirebaseAnalytics private val firebaseLogger: Analytics,
         @MixpanelAnalytics private val mixpanelLogger: Analytics

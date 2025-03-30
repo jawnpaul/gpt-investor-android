@@ -46,4 +46,12 @@ class MixpanelLogger @Inject constructor(private val mixpanel: MixpanelAPI) : An
         mixpanel.track("Content Saved", props)
     }
 
+    override fun logTopPickSelected(companyTicker: String, companyName: String) {
+        val props = JSONObject().apply {
+            put("company_ticker", companyTicker)
+            put("company_name", companyName)
+        }
+        mixpanel.track("Top Pick Selected", props)
+    }
+
 }

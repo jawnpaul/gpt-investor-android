@@ -33,6 +33,7 @@ moshi = "1.15.1"
 ksp = "2.0.0-1.0.23"
 spalshScreen = "1.0.1"
 firebaseUI = "8.0.2"
+mixpanel = "8.0.2"
 
 
 [libraries]
@@ -82,6 +83,7 @@ google-truth = { group = "com.google.truth", name = "truth", version.ref = "trut
 core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
 androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
 firebase-ui-auth = { group = "com.firebaseui", name = "firebase-ui-auth", version.ref = "firebaseUI" }
+mixpanel-android = {group = "com.mixpanel.android", name= "mixpanel-android", version.ref="mixpanel"}
 
 
 [plugins]

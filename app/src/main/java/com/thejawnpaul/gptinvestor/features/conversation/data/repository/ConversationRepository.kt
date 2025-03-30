@@ -9,7 +9,7 @@ import com.google.ai.client.generativeai.type.SafetySetting
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
 import com.thejawnpaul.gptinvestor.BuildConfig
-import com.thejawnpaul.gptinvestor.core.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.analytics.composite.CompositeLogger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
@@ -38,7 +38,7 @@ import timber.log.Timber
 
 class ConversationRepository @Inject constructor(
     private val apiService: ApiService,
-    private val analyticsLogger: AnalyticsLogger,
+    private val analyticsLogger: CompositeLogger,
     private val messageDao: MessageDao,
     private val conversationDao: ConversationDao
 ) :
@@ -89,7 +89,7 @@ class ConversationRepository @Inject constructor(
         try {
             val chunk = StringBuilder()
 
-            analyticsLogger.logDefaultPromptSelected(
+            analyticsLogger.logDefaultPrompt(
                 promptTitle = prompt.title,
                 promptQuery = prompt.query
             )

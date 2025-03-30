@@ -1,6 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.company.data.repository
 
-import com.thejawnpaul.gptinvestor.core.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.analytics.composite.CompositeLogger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
@@ -24,7 +24,7 @@ import timber.log.Timber
 class CompanyRepository @Inject constructor(
     private val apiService: ApiService,
     private val companyDao: CompanyDao,
-    private val analyticsLogger: AnalyticsLogger
+    private val analyticsLogger: CompositeLogger
 ) :
     ICompanyRepository {
 
@@ -93,7 +93,7 @@ class CompanyRepository @Inject constructor(
 
     override suspend fun getCompany(ticker: String): Flow<Either<Failure, CompanyDetailRemoteResponse>> = flow {
         try {
-            analyticsLogger.logCompanySelected(companyTicker = ticker)
+            analyticsLogger.logSelectedCompany(companyTicker = ticker)
             val response =
                 apiService.getCompanyInfo(request = CompanyDetailRemoteRequest(ticker = ticker))
             if (response.isSuccessful) {
@@ -163,7 +163,8 @@ class CompanyRepository @Inject constructor(
             if (query.sector == null) {
                 // search entire table
                 val companies =
-                    companyDao.searchAllCompanies(query = query.query).map { it.toDomainObject() }
+                    companyDao.searchAllCompanies(query = query.query)
+                        .map { it.toDomainObject() }
                 emit(Either.Right(companies))
             } else {
                 // filter by column name

@@ -171,10 +171,10 @@ dependencies {
     implementation(libs.richtext.compose)
     implementation(libs.richtext.commonmark)
     implementation(platform(libs.firebase.compose.bom))
-    implementation(libs.firebase.analaytics)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.ui.auth)
     implementation(libs.firebase.config)
+    implementation(project(":analytics"))
 
     // test
     testImplementation(project(":remote:remotetest"))

@@ -1,11 +1,15 @@
-package com.thejawnpaul.gptinvestor.core.analytics
+package com.thejawnpaul.gptinvestor.analytics.di
 
+import android.content.Context
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
+import com.mixpanel.android.mpmetrics.MixpanelAPI
+import com.thejawnpaul.gptinvestor.analytics.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -21,7 +25,7 @@ object AnalyticsModule {
 
     @Provides
     @Singleton
-    fun provideAnalyticsLogger(firebaseAnalytics: FirebaseAnalytics): AnalyticsLogger {
-        return AnalyticsLogger(firebaseAnalytics)
+    fun provideMixpanelAPI(@ApplicationContext context: Context): MixpanelAPI {
+        return MixpanelAPI.getInstance(context, BuildConfig.MIXPANEL_TOKEN, false)
     }
 }

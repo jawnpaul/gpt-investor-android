@@ -15,6 +15,7 @@ class FirebaseLogger @Inject constructor(private val firebaseAnalytics: Firebase
             putString("prompt_query", promptQuery)
         }
         firebaseAnalytics.logEvent("default_prompt", bundle)
+        println("Log default prompt to firebase")
     }
 
     override fun logSelectedCompany(companyTicker: String) {
@@ -22,6 +23,7 @@ class FirebaseLogger @Inject constructor(private val firebaseAnalytics: Firebase
             putString("company_ticker", companyTicker)
         }
         firebaseAnalytics.logEvent("company_selected", bundle)
+        println("Log company to firebase $companyTicker")
     }
 
     override fun logCompanyIdentified(companyTicker: String) {

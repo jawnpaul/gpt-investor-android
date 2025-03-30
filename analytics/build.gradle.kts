@@ -15,11 +15,11 @@ android {
     defaultConfig.minSdk = 24
     buildTypes {
         release {
-            val mixpanelToken: String = localProperties.getProperty("MIXPANEL_DEV_TOKEN") ?: ""
+            val mixpanelToken: String = localProperties.getProperty("MIXPANEL_PROD_TOKEN") ?: ""
             buildConfigField("String", "MIXPANEL_TOKEN", "\"$mixpanelToken\"")
         }
         debug {
-            val mixpanelToken: String = localProperties.getProperty("MIXPANEL_PROD_TOKEN") ?: ""
+            val mixpanelToken: String = localProperties.getProperty("MIXPANEL_DEV_TOKEN") ?: ""
             buildConfigField("String", "MIXPANEL_TOKEN", "\"$mixpanelToken\"")
         }
     }

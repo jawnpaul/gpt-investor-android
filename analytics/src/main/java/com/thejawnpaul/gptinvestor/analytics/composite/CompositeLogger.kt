@@ -20,50 +20,21 @@ class CompositeLogger @Inject constructor(private val loggers: Map<Analytics.Pro
         return activeProviders.contains(Analytics.Provider.ALL) || activeProviders.contains(provider)
     }
 
-    override fun logDefaultPrompt(promptTitle: String, promptQuery: String) {
+    override fun logEvent(
+        eventName: String,
+        params: Map<String, Any>
+    ) {
         loggers.forEach { (provider, logger) ->
             if (isProviderActive(provider)) {
-                logger.logDefaultPrompt(promptTitle, promptQuery)
+                logger.logEvent(eventName, params)
             }
         }
     }
 
-    override fun logSelectedCompany(companyTicker: String) {
+    override fun logViewEvent(screenName: String) {
         loggers.forEach { (provider, logger) ->
             if (isProviderActive(provider)) {
-                logger.logSelectedCompany(companyTicker)
-            }
-        }
-    }
-
-    override fun logCompanyIdentified(companyTicker: String) {
-        loggers.forEach { (provider, logger) ->
-            if (isProviderActive(provider)) {
-                logger.logCompanyIdentified(companyTicker)
-            }
-        }
-    }
-
-    override fun logShareEvent(contentType: String, contentName: String) {
-        loggers.forEach { (provider, logger) ->
-            if (isProviderActive(provider)) {
-                logger.logShareEvent(contentType, contentName)
-            }
-        }
-    }
-
-    override fun logSaveEvent(contentType: String, contentName: String) {
-        loggers.forEach { (provider, logger) ->
-            if (isProviderActive(provider)) {
-                logger.logSaveEvent(contentType, contentName)
-            }
-        }
-    }
-
-    override fun logTopPickSelected(companyTicker: String, companyName: String) {
-        loggers.forEach { (provider, logger) ->
-            if (isProviderActive(provider)) {
-                logger.logTopPickSelected(companyTicker, companyName)
+                logger.logViewEvent(screenName)
             }
         }
     }

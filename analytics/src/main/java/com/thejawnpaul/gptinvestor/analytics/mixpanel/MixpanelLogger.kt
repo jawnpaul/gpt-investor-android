@@ -8,50 +8,40 @@ import javax.inject.Singleton
 
 @Singleton
 class MixpanelLogger @Inject constructor(private val mixpanel: MixpanelAPI) : Analytics {
-    override fun logDefaultPrompt(promptTitle: String, promptQuery: String) {
-        val props = JSONObject().apply {
-            put("prompt_title", promptTitle)
-            put("prompt_query", promptQuery)
+
+    override fun logEvent(
+        eventName: String,
+        params: Map<String, Any>
+    ) {
+        when (eventName.lowercase()) {
+            "sign up" -> {
+
+            }
+
+            "log in" -> {
+
+            }
+
+            "log out" -> {
+
+            }
+
+            "delete account" -> {
+
+            }
+
+            else -> {
+                val props = JSONObject()
+                params.forEach { (key, value) ->
+                    props.put(key, value)
+                }
+                mixpanel.track(eventName, props)
+            }
         }
-        mixpanel.track("Default Prompt Selected", props)
     }
 
-    override fun logSelectedCompany(companyTicker: String) {
-        val props = JSONObject().apply {
-            put("company_ticker", companyTicker)
-        }
-        mixpanel.track("Company Selected", props)
-    }
+    override fun logViewEvent(screenName: String) {
 
-    override fun logCompanyIdentified(companyTicker: String) {
-        val props = JSONObject().apply {
-            put("company_ticker", companyTicker)
-        }
-        mixpanel.track("Company Identified", props)
-    }
-
-    override fun logShareEvent(contentType: String, contentName: String) {
-        val props = JSONObject().apply {
-            put("content_type", contentType)
-            put("item_name", contentName)
-        }
-        mixpanel.track("Content Shared", props)
-    }
-
-    override fun logSaveEvent(contentType: String, contentName: String) {
-        val props = JSONObject().apply {
-            put("content_type", contentType)
-            put("item_name", contentName)
-        }
-        mixpanel.track("Content Saved", props)
-    }
-
-    override fun logTopPickSelected(companyTicker: String, companyName: String) {
-        val props = JSONObject().apply {
-            put("company_ticker", companyTicker)
-            put("company_name", companyName)
-        }
-        mixpanel.track("Top Pick Selected", props)
     }
 
 }

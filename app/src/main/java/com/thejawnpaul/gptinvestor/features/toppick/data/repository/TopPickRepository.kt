@@ -108,9 +108,9 @@ class TopPickRepository @Inject constructor(
                 )
             }
             emit(Either.Right(pick))
-            analyticsLogger.logTopPickSelected(
-                companyTicker = pick.ticker,
-                companyName = pick.companyName
+            analyticsLogger.logEvent(
+                eventName = "Top Pick Selected",
+                params = mapOf("company_ticker" to pick.ticker, "company_name" to pick.companyName)
             )
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
@@ -135,7 +135,10 @@ class TopPickRepository @Inject constructor(
                 )
             }
             emit(Either.Right(pick))
-            analyticsLogger.logSaveEvent(contentType = "top_pick", contentName = pick.companyName)
+            analyticsLogger.logEvent(
+                eventName = "save",
+                params = mapOf("content_type" to "top_pick", "company_ticker" to pick.ticker)
+            )
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.DataError))
@@ -182,7 +185,14 @@ class TopPickRepository @Inject constructor(
 
             emit(Either.Right(data))
 
-            analyticsLogger.logShareEvent(contentType = "top_pick", contentName = pick.companyName)
+            analyticsLogger.logEvent(
+                eventName = "share",
+                params = mapOf(
+                    "content_type" to "top_pick",
+                    "company_name" to pick.companyName,
+                    "company_ticker" to pick.ticker
+                )
+            )
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.DataError))

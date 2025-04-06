@@ -93,12 +93,15 @@ class CompanyRepository @Inject constructor(
 
     override suspend fun getCompany(ticker: String): Flow<Either<Failure, CompanyDetailRemoteResponse>> = flow {
         try {
-            analyticsLogger.logSelectedCompany(companyTicker = ticker)
             val response =
                 apiService.getCompanyInfo(request = CompanyDetailRemoteRequest(ticker = ticker))
             if (response.isSuccessful) {
                 response.body()?.let {
                     emit(Either.Right(it))
+                    analyticsLogger.logEvent(
+                        eventName = "Company Selected",
+                        params = mapOf("company_ticker" to ticker, "company_name" to it.name)
+                    )
                 }
             }
         } catch (e: Exception) {

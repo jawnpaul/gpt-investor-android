@@ -89,9 +89,9 @@ class ConversationRepository @Inject constructor(
         try {
             val chunk = StringBuilder()
 
-            analyticsLogger.logDefaultPrompt(
-                promptTitle = prompt.title,
-                promptQuery = prompt.query
+            analyticsLogger.logEvent(
+                eventName = "Default Prompt Selected",
+                params = mapOf("prompt_title" to prompt.title, "prompt_query" to prompt.query)
             )
 
             // Always create a new conversation entity
@@ -220,8 +220,9 @@ class ConversationRepository @Inject constructor(
                             emit(Either.Right(conversation))
                             // add company to conversation history
 
-                            analyticsLogger.logCompanyIdentified(
-                                companyTicker = company.ticker
+                            analyticsLogger.logEvent(
+                                eventName = "Company Identified",
+                                params = mapOf("company_ticker" to company.ticker)
                             )
                         }
                     } else {

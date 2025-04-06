@@ -7,7 +7,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class CompositeLogger private constructor(private val loggers: Map<Analytics.Provider, Analytics>) :
+class CompositeLogger @Inject constructor(private val loggers: Map<Analytics.Provider, Analytics>) :
     Analytics {
 
     private var activeProviders = setOf(Analytics.Provider.ALL)

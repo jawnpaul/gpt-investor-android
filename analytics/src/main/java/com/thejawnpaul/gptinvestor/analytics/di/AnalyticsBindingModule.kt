@@ -42,7 +42,7 @@ abstract class AnalyticsBindingModule {
          */
         @Provides
         @Singleton
-        fun provideDefaultAnalyticsLogger(builder: CompositeLogger.Builder): CompositeLogger {
+        fun provideDefaultAnalyticsLogger(builder: CompositeLogger.Builder): Analytics {
             return builder.withAllLoggers().build()
         }
     }

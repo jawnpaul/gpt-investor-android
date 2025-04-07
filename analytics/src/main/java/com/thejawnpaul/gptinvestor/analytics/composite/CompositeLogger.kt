@@ -1,68 +1,28 @@
 package com.thejawnpaul.gptinvestor.analytics.composite
 
-import com.thejawnpaul.gptinvestor.analytics.Analytics
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.analytics.di.FirebaseAnalytics
 import com.thejawnpaul.gptinvestor.analytics.di.MixpanelAnalytics
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class CompositeLogger @Inject constructor(private val loggers: Map<Analytics.Provider, Analytics>) :
-    Analytics {
-
-    private var activeProviders = setOf(Analytics.Provider.ALL)
-
-    fun setActiveProviders(providers: Set<Analytics.Provider>) {
-        activeProviders = providers
-    }
-
-    private fun isProviderActive(provider: Analytics.Provider): Boolean {
-        return activeProviders.contains(Analytics.Provider.ALL) || activeProviders.contains(provider)
-    }
+class CompositeLogger @Inject constructor(
+    @FirebaseAnalytics private val firebaseLogger: AnalyticsLogger,
+    @MixpanelAnalytics private val mixpanelLogger: AnalyticsLogger
+) :
+    AnalyticsLogger {
 
     override fun logEvent(
         eventName: String,
         params: Map<String, Any>
     ) {
-        loggers.forEach { (provider, logger) ->
-            if (isProviderActive(provider)) {
-                logger.logEvent(eventName, params)
-            }
-        }
+        firebaseLogger.logEvent(eventName = eventName, params = params)
+        mixpanelLogger.logEvent(eventName = eventName, params = params)
     }
 
     override fun logViewEvent(screenName: String) {
-        loggers.forEach { (provider, logger) ->
-            if (isProviderActive(provider)) {
-                logger.logViewEvent(screenName)
-            }
-        }
+        firebaseLogger.logViewEvent(screenName = screenName)
+        mixpanelLogger.logViewEvent(screenName = screenName)
     }
-
-    class Builder @Inject constructor(
-        @FirebaseAnalytics private val firebaseLogger: Analytics,
-        @MixpanelAnalytics private val mixpanelLogger: Analytics
-    ) {
-        private val loggers = mutableMapOf<Analytics.Provider, Analytics>()
-
-        fun withFirebase(): Builder {
-            loggers[Analytics.Provider.FIREBASE] = firebaseLogger
-            return this
-        }
-
-        fun withMixpanel(): Builder {
-            loggers[Analytics.Provider.MIXPANEL] = mixpanelLogger
-            return this
-        }
-
-        fun withAllLoggers(): Builder {
-            return withFirebase().withMixpanel()
-        }
-
-        fun build(): CompositeLogger {
-            require(loggers.isNotEmpty()) { "At least one logger must be added" }
-            return CompositeLogger(loggers)
-        }
-    }
-
 }

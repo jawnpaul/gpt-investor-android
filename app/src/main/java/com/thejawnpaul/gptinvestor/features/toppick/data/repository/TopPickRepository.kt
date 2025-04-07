@@ -1,6 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.toppick.data.repository
 
-import com.thejawnpaul.gptinvestor.analytics.Analytics
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
@@ -20,7 +20,7 @@ import timber.log.Timber
 class TopPickRepository @Inject constructor(
     private val apiService: ApiService,
     private val topPickDao: TopPickDao,
-    private val analyticsLogger: Analytics,
+    private val analyticsLogger: AnalyticsLogger,
     private val remoteConfig: RemoteConfig
 ) :
     ITopPickRepository {

@@ -1,15 +1,14 @@
 package com.thejawnpaul.gptinvestor.analytics.firebase
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.thejawnpaul.gptinvestor.analytics.Analytics
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class FirebaseLogger @Inject constructor(private val firebaseAnalytics: FirebaseAnalytics) :
-    Analytics {
+    AnalyticsLogger {
 
     override fun logEvent(
         eventName: String,

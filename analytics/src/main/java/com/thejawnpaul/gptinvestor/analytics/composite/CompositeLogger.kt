@@ -25,4 +25,17 @@ class CompositeLogger @Inject constructor(
         firebaseLogger.logViewEvent(screenName = screenName)
         mixpanelLogger.logViewEvent(screenName = screenName)
     }
+
+    override fun identifyUser(
+        eventName: String,
+        params: Map<String, Any>
+    ) {
+        firebaseLogger.identifyUser(eventName = eventName, params = params)
+        mixpanelLogger.identifyUser(eventName = eventName, params = params)
+    }
+
+    override fun resetUser() {
+        firebaseLogger.resetUser()
+        mixpanelLogger.resetUser()
+    }
 }

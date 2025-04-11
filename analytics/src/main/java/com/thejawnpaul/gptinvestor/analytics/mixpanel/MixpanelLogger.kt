@@ -13,35 +13,32 @@ class MixpanelLogger @Inject constructor(private val mixpanel: MixpanelAPI) : An
         eventName: String,
         params: Map<String, Any>
     ) {
-        when (eventName.lowercase()) {
-            "sign up" -> {
-
-            }
-
-            "log in" -> {
-
-            }
-
-            "log out" -> {
-
-            }
-
-            "delete account" -> {
-
-            }
-
-            else -> {
-                val props = JSONObject()
-                params.forEach { (key, value) ->
-                    props.put(key, value)
-                }
-                mixpanel.track(eventName, props)
-            }
+        val props = JSONObject()
+        params.forEach { (key, value) ->
+            props.put(key, value)
         }
+        mixpanel.track(eventName, props)
     }
 
     override fun logViewEvent(screenName: String) {
 
+    }
+
+    override fun identifyUser(eventName: String, params: Map<String, Any>) {
+        mixpanel.track(eventName)
+        val props = JSONObject()
+        params.forEach { (key, value) ->
+            if (key != "user_id") {
+                props.put(key, value)
+            }
+        }
+        mixpanel.identify(params["user_id"].toString(), true)
+        mixpanel.people.set(props)
+    }
+
+    override fun resetUser() {
+        mixpanel.track("log out")
+        mixpanel.reset()
     }
 
 }

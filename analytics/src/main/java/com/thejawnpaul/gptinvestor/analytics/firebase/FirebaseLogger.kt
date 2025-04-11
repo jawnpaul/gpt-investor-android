@@ -14,35 +14,24 @@ class FirebaseLogger @Inject constructor(private val firebaseAnalytics: Firebase
         eventName: String,
         params: Map<String, Any>
     ) {
-        when (eventName.lowercase()) {
-            "sign up" -> {
-
-            }
-
-            "log in" -> {
-
-            }
-
-            "log out" -> {
-
-            }
-
-            "delete account" -> {
-
-            }
-
-            else -> {
-                val bundle = Bundle()
-                params.forEach { (key, value) ->
-                    bundle.putString(key, value.toString())
-                }
-                firebaseAnalytics.logEvent(eventName, bundle)
-            }
+        val bundle = Bundle()
+        params.forEach { (key, value) ->
+            bundle.putString(key, value.toString())
         }
+        firebaseAnalytics.logEvent(eventName, bundle)
     }
 
     override fun logViewEvent(screenName: String) {
 
+    }
+
+    override fun identifyUser(eventName: String, params: Map<String, Any>) {
+        firebaseAnalytics.setUserProperty("user_id", params["user_id"].toString())
+
+    }
+
+    override fun resetUser() {
+        firebaseAnalytics.resetAnalyticsData()
     }
 
 }

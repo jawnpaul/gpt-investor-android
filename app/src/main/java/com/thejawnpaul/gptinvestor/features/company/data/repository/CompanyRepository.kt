@@ -133,6 +133,10 @@ class CompanyRepository @Inject constructor(
         } else {
             val companies = companyDao.getCompaniesInSector(sector).map { it.toDomainObject() }
             emit(Either.Right(companies))
+            analyticsLogger.logEvent(
+                eventName = "Industry Category Selected",
+                params = mapOf("industry_name" to sector)
+            )
         }
     }
 

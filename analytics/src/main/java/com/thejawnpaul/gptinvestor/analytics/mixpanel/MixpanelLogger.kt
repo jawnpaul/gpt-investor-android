@@ -36,8 +36,8 @@ class MixpanelLogger @Inject constructor(private val mixpanel: MixpanelAPI) : An
         mixpanel.people.set(props)
     }
 
-    override fun resetUser() {
-        mixpanel.track("log out")
+    override fun resetUser(eventName: String) {
+        mixpanel.track(eventName)
         mixpanel.reset()
     }
 

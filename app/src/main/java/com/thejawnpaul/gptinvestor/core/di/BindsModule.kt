@@ -1,5 +1,7 @@
 package com.thejawnpaul.gptinvestor.core.di
 
+import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
+import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepositoryImpl
 import com.thejawnpaul.gptinvestor.features.company.data.repository.CompanyRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import com.thejawnpaul.gptinvestor.features.conversation.data.repository.ConversationRepository
@@ -33,4 +35,7 @@ abstract class BindsModule {
 
     @Binds
     abstract fun providesTopPicksRepository(repository: TopPickRepository): ITopPickRepository
+
+    @Binds
+    abstract fun providesAuthRepository(repository: AuthenticationRepositoryImpl): AuthenticationRepository
 }

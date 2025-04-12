@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
@@ -24,7 +25,8 @@ interface AuthenticationRepository {
 
 class AuthenticationRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth,
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val analyticsLogger: AnalyticsLogger
 ) :
     AuthenticationRepository {
     override val currentUser: FirebaseUser?
@@ -48,6 +50,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
         try {
             auth.signOut()
             AuthUI.getInstance().signOut(context)
+            analyticsLogger.resetUser(eventName = "Log Out")
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -68,6 +71,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
         try {
             auth.currentUser?.delete()
             AuthUI.getInstance().delete(context)
+            analyticsLogger.resetUser(eventName = "Delete Account")
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -78,6 +82,12 @@ class AuthenticationRepositoryImpl @Inject constructor(
             .addOnCompleteListener { task ->
                 trySend(task.isSuccessful)
                 getAuthState()
+                if (task.isSuccessful) {
+                    analyticsLogger.identifyUser(
+                        eventName = "Log in",
+                        params = mapOf("user_id" to auth.currentUser?.uid.toString(), "email" to email)
+                    )
+                }
             }
             .addOnFailureListener { e ->
                 Timber.e(e.stackTraceToString())

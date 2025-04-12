@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.history.data.repository
 
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.dao.ConversationDao
@@ -10,7 +11,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 
-class HistoryRepository @Inject constructor(private val conversationDao: ConversationDao) :
+class HistoryRepository @Inject constructor(
+    private val conversationDao: ConversationDao,
+    private val analyticsLogger: AnalyticsLogger
+) :
     IHistoryRepository {
     override suspend fun getAllHistory(): Flow<Either<Failure, List<StructuredConversation>>> = flow {
         try {
@@ -38,8 +42,11 @@ class HistoryRepository @Inject constructor(private val conversationDao: Convers
                     messageList = messages.map { it.toGenAiMessage() }.toMutableList()
                 )
             }
-
             emit(Either.Right(conversation))
+            analyticsLogger.logEvent(
+                eventName = "History Selected",
+                params = mapOf("chat_title" to conversation.title)
+            )
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.DataError))

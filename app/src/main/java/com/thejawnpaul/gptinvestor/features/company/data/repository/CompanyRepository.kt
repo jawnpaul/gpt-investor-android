@@ -1,6 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.company.data.repository
 
-import com.thejawnpaul.gptinvestor.core.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
@@ -93,12 +93,15 @@ class CompanyRepository @Inject constructor(
 
     override suspend fun getCompany(ticker: String): Flow<Either<Failure, CompanyDetailRemoteResponse>> = flow {
         try {
-            analyticsLogger.logCompanySelected(companyTicker = ticker)
             val response =
                 apiService.getCompanyInfo(request = CompanyDetailRemoteRequest(ticker = ticker))
             if (response.isSuccessful) {
                 response.body()?.let {
                     emit(Either.Right(it))
+                    analyticsLogger.logEvent(
+                        eventName = "Company Selected",
+                        params = mapOf("company_ticker" to ticker, "company_name" to it.name)
+                    )
                 }
             }
         } catch (e: Exception) {
@@ -163,7 +166,8 @@ class CompanyRepository @Inject constructor(
             if (query.sector == null) {
                 // search entire table
                 val companies =
-                    companyDao.searchAllCompanies(query = query.query).map { it.toDomainObject() }
+                    companyDao.searchAllCompanies(query = query.query)
+                        .map { it.toDomainObject() }
                 emit(Either.Right(companies))
             } else {
                 // filter by column name

@@ -118,6 +118,8 @@ Build System: [Gradle](https://gradle.org/)
    GEMINI_DEBUG_KEY=<Enter your GEMINI API KEY>
    BASE_URL=https://m7mxrc35hp.us-west-2.awsapprunner.com/api/v1/
    ACCESS_TOKEN=<Enter your access token>
+   MIXPANEL_DEV_TOKEN=<Enter your access token>
+   MIXPANEL_PROD_TOKEN=<Enter your access token>
     ```
 6. Create a `keystore.properties` file and add the following.
     ```sh

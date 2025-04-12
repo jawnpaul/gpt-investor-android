@@ -34,8 +34,8 @@ class CompositeLogger @Inject constructor(
         mixpanelLogger.identifyUser(eventName = eventName, params = params)
     }
 
-    override fun resetUser() {
-        firebaseLogger.resetUser()
-        mixpanelLogger.resetUser()
+    override fun resetUser(eventName: String) {
+        firebaseLogger.resetUser(eventName)
+        mixpanelLogger.resetUser(eventName)
     }
 }

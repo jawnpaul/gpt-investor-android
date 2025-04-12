@@ -299,6 +299,8 @@ class ConversationRepository @Inject constructor(
                     }
                 }
             }
+
+            analyticsLogger.logEvent(eventName = "Query Submitted", params = mapOf())
         } catch (e: Exception) {
             when (e) {
                 is GoogleGenerativeAIException -> {

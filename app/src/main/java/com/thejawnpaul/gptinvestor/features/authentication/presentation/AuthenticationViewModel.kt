@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -16,7 +17,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class AuthenticationViewModel @Inject constructor(private val authRepository: AuthenticationRepository) :
+class AuthenticationViewModel @Inject constructor(
+    private val authRepository: AuthenticationRepository,
+    private val analyticsLogger: AnalyticsLogger
+) :
     ViewModel() {
 
     private val _authState = MutableStateFlow(AuthenticationUIState())
@@ -50,6 +54,15 @@ class AuthenticationViewModel @Inject constructor(private val authRepository: Au
         when (result.resultCode) {
             Activity.RESULT_OK -> {
                 _authState.update { it.copy(loading = false, user = authRepository.currentUser) }
+                analyticsLogger.identifyUser(
+                    eventName = "Sign Up",
+                    params = mapOf(
+                        "user_id" to authRepository.currentUser?.uid.toString(),
+                        "email" to authRepository.currentUser?.email.toString(),
+                        "name" to authRepository.currentUser?.displayName.toString(),
+                        "sign_up_method" to authRepository.currentUser?.providerId.toString()
+                    )
+                )
             }
 
             else -> {

@@ -26,11 +26,10 @@ class FirebaseLogger @Inject constructor(private val firebaseAnalytics: Firebase
     }
 
     override fun identifyUser(eventName: String, params: Map<String, Any>) {
-        firebaseAnalytics.setUserProperty("user_id", params["user_id"].toString())
-
+        firebaseAnalytics.setUserId(params["user_id"].toString())
     }
 
-    override fun resetUser() {
+    override fun resetUser(eventName: String) {
         firebaseAnalytics.resetAnalyticsData()
     }
 

@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -35,7 +33,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import coil.compose.rememberAsyncImagePainter
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
@@ -63,77 +60,43 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 0.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onMenuClick) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.baseline_menu_24),
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_menu),
                         contentDescription = null
                     )
                 }
 
                 Text(
-                    text = stringResource(R.string.app_name),
-                    modifier = Modifier
-                        .padding(16.dp),
+                    text = stringResource(R.string.gpt_investor),
+                    modifier = Modifier,
                     textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleMedium
                 )
 
-                if (currentUser.value != null) {
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .padding(8.dp)
-                    ) {
-                        if (currentUser.value!!.photoUrl != null) {
-                            Image(
-                                painter = rememberAsyncImagePainter(currentUser.value!!.photoUrl),
-                                contentDescription = null,
-                                modifier = Modifier
-                            )
-                        } else {
-                            Box {
-                                val firstChar = runCatching {
-                                    currentUser.value?.displayName?.first()?.toString()?.uppercase()
-                                }.getOrDefault("A")
-
-                                Text(firstChar ?: "A", modifier = Modifier.align(Alignment.Center))
-                            }
-                        }
-                    }
-                } else {
-                    IconButton(
-                        onClick = {
-                            navController.navigate(Screen.AuthenticationScreen.route)
-                        },
-                        modifier = Modifier.size(40.dp),
-                        enabled = true
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.baseline_account_circle_24),
-                            contentDescription = null
-                        )
-                    }
+                Row(
+                    modifier = Modifier.padding(end = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_sun),
+                        contentDescription = null
+                    )
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_down),
+                        contentDescription = null
+                    )
                 }
             }
 
-            // Image
-            Image(
-                painter = painterResource(R.drawable.asset_3_1),
-                contentDescription = null,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(16.dp)
-            )
-
             // Trending
             TrendingStockList(
-                modifier = Modifier,
+                modifier = Modifier.padding(vertical = 16.dp),
                 state = trendingStock.value,
                 onClick = {
                     navController.navigate(Screen.CompanyDetailScreen.createRoute(it))

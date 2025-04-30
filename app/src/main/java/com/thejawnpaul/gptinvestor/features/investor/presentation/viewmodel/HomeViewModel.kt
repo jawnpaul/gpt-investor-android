@@ -104,14 +104,17 @@ class HomeViewModel @Inject constructor(
                         topPicks = result.map { topPick ->
                             with(topPick) {
                                 TopPickPresentation(
-                                    id,
-                                    companyName,
-                                    ticker,
-                                    rationale,
-                                    metrics,
-                                    risks,
-                                    confidenceScore,
-                                    isSaved
+                                    id = id,
+                                    companyName = companyName,
+                                    ticker = ticker,
+                                    rationale = rationale,
+                                    metrics = metrics,
+                                    risks = risks,
+                                    confidenceScore = confidenceScore,
+                                    isSaved = isSaved,
+                                    imageUrl = imageUrl,
+                                    percentageChange = percentageChange,
+                                    currentPrice = currentPrice
                                 )
                             }
                         }
@@ -147,14 +150,17 @@ class HomeViewModel @Inject constructor(
                         topPicks = result.map { topPick ->
                             with(topPick) {
                                 TopPickPresentation(
-                                    id,
-                                    companyName,
-                                    ticker,
-                                    rationale,
-                                    metrics,
-                                    risks,
-                                    confidenceScore,
-                                    isSaved
+                                    id = id,
+                                    companyName = companyName,
+                                    ticker = ticker,
+                                    rationale = rationale,
+                                    metrics = metrics,
+                                    risks = risks,
+                                    confidenceScore = confidenceScore,
+                                    isSaved = isSaved,
+                                    imageUrl = imageUrl,
+                                    percentageChange = percentageChange,
+                                    currentPrice = currentPrice
                                 )
                             }
                         }

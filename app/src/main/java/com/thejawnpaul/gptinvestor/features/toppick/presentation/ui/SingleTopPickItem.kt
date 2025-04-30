@@ -1,11 +1,19 @@
 package com.thejawnpaul.gptinvestor.features.toppick.presentation.ui
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
@@ -13,13 +21,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.thejawnpaul.gptinvestor.R
+import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
-import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 
 @Composable
 fun SingleTopPickItem(modifier: Modifier = Modifier, pickPresentation: TopPickPresentation, onClick: (String) -> Unit) {
@@ -54,6 +68,103 @@ fun SingleTopPickItem(modifier: Modifier = Modifier, pickPresentation: TopPickPr
     }
 }
 
+@Composable
+fun HomeTopPickItem(modifier: Modifier, pickPresentation: TopPickPresentation, onClick: (String) -> Unit) {
+    Column(modifier = modifier.clickable { onClick(pickPresentation.id) }) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Surface(
+                modifier = Modifier.size(32.dp),
+                shape = CircleShape
+            ) {
+                AsyncImage(
+                    model = pickPresentation.imageUrl,
+                    modifier = Modifier.fillMaxSize(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    // Text - company ticker
+                    Text(
+                        text = pickPresentation.ticker,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    // Text - company name
+                    Text(
+                        modifier = Modifier,
+                        text = pickPresentation.companyName,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    // Text - company price
+                    Text(
+                        text = "$${pickPresentation.currentPrice.toTwoDecimalPlaces()}",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    // Text - percentage change
+                    if (pickPresentation.percentageChange < 0) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Image(
+                                modifier = Modifier.size(12.dp),
+                                painter = painterResource(R.drawable.trending_down),
+                                contentDescription = null
+                            )
+                            Text(
+                                text = "${pickPresentation.percentageChange}%",
+                                color = Color(212, 38, 32),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    } else {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Image(
+                                modifier = Modifier.size(12.dp),
+                                painter = painterResource(R.drawable.trending_up),
+                                contentDescription = null
+                            )
+                            Text(
+                                text = "+${pickPresentation.percentageChange}%",
+                                color = Color(15, 151, 61),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            modifier = Modifier,
+            text = pickPresentation.rationale,
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
 @Preview
 @Composable
 fun SinglePickPreview(modifier: Modifier = Modifier) {
@@ -68,7 +179,10 @@ fun SinglePickPreview(modifier: Modifier = Modifier) {
                     confidenceScore = 2,
                     metrics = emptyList(),
                     risks = emptyList(),
-                    isSaved = false
+                    isSaved = false,
+                    imageUrl = "",
+                    percentageChange = 0.0f,
+                    currentPrice = 0.0f
                 )
 
                 SingleTopPickItem(modifier = Modifier, pickPresentation = pick) { }

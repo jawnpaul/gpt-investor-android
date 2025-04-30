@@ -5,6 +5,7 @@ import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfig
+import com.thejawnpaul.gptinvestor.features.company.data.local.dao.CompanyDao
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.dao.TopPickDao
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.model.TopPickEntity
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
@@ -20,6 +21,7 @@ import timber.log.Timber
 class TopPickRepository @Inject constructor(
     private val apiService: ApiService,
     private val topPickDao: TopPickDao,
+    private val companyDao: CompanyDao,
     private val analyticsLogger: AnalyticsLogger,
     private val remoteConfig: RemoteConfig
 ) :
@@ -38,7 +40,10 @@ class TopPickRepository @Inject constructor(
                         metrics = metrics,
                         risks = risks,
                         confidenceScore = confidenceScore,
-                        isSaved = isSaved
+                        isSaved = isSaved,
+                        imageUrl = companyDao.getCompany(ticker).logoUrl,
+                        percentageChange = 10.19f,
+                        currentPrice = companyDao.getCompany(ticker).currentPrice ?: 0.0f
                     )
                 }
             }.sortedByDescending { it.confidenceScore }
@@ -81,7 +86,10 @@ class TopPickRepository @Inject constructor(
                                 metrics = metrics,
                                 risks = risks,
                                 confidenceScore = confidenceScore,
-                                isSaved = isSaved
+                                isSaved = isSaved,
+                                imageUrl = companyDao.getCompany(ticker).logoUrl,
+                                percentageChange = 10.19f,
+                                currentPrice = companyDao.getCompany(ticker).currentPrice ?: 0.0f
                             )
                         }
                     }.sortedByDescending { it.confidenceScore }
@@ -97,14 +105,17 @@ class TopPickRepository @Inject constructor(
         try {
             val pick = with(topPickDao.getSingleTopPick(pickId)) {
                 TopPick(
-                    id,
-                    companyName,
-                    ticker,
-                    rationale,
-                    metrics,
-                    risks,
-                    confidenceScore,
-                    isSaved
+                    id = id,
+                    companyName = companyName,
+                    ticker = ticker,
+                    rationale = rationale,
+                    metrics = metrics,
+                    risks = risks,
+                    confidenceScore = confidenceScore,
+                    isSaved = isSaved,
+                    imageUrl = companyDao.getCompany(ticker).logoUrl,
+                    percentageChange = 10.19f,
+                    currentPrice = companyDao.getCompany(ticker).currentPrice ?: 0.0f
                 )
             }
             emit(Either.Right(pick))
@@ -124,14 +135,17 @@ class TopPickRepository @Inject constructor(
             topPickDao.updateTopPick(entity)
             val pick = with(topPickDao.getSingleTopPick(id)) {
                 TopPick(
-                    id,
-                    companyName,
-                    ticker,
-                    rationale,
-                    metrics,
-                    risks,
-                    confidenceScore,
-                    isSaved
+                    id = id,
+                    companyName = companyName,
+                    ticker = ticker,
+                    rationale = rationale,
+                    metrics = metrics,
+                    risks = risks,
+                    confidenceScore = confidenceScore,
+                    isSaved = isSaved,
+                    imageUrl = companyDao.getCompany(ticker).logoUrl,
+                    percentageChange = 10.19f,
+                    currentPrice = companyDao.getCompany(ticker).currentPrice ?: 0.0f
                 )
             }
             emit(Either.Right(pick))
@@ -151,14 +165,17 @@ class TopPickRepository @Inject constructor(
             topPickDao.updateTopPick(entity)
             val pick = with(topPickDao.getSingleTopPick(id)) {
                 TopPick(
-                    id,
-                    companyName,
-                    ticker,
-                    rationale,
-                    metrics,
-                    risks,
-                    confidenceScore,
-                    isSaved
+                    id = id,
+                    companyName = companyName,
+                    ticker = ticker,
+                    rationale = rationale,
+                    metrics = metrics,
+                    risks = risks,
+                    confidenceScore = confidenceScore,
+                    isSaved = isSaved,
+                    imageUrl = companyDao.getCompany(ticker).logoUrl,
+                    percentageChange = 10.19f,
+                    currentPrice = companyDao.getCompany(ticker).currentPrice ?: 0.0f
                 )
             }
             emit(Either.Right(pick))
@@ -213,7 +230,11 @@ class TopPickRepository @Inject constructor(
                                 metrics = metrics,
                                 risks = risks,
                                 confidenceScore = confidenceScore,
-                                isSaved = isSaved
+                                isSaved = isSaved,
+                                imageUrl = companyDao.getCompany(ticker).logoUrl,
+                                percentageChange = 10.19f,
+                                currentPrice = companyDao.getCompany(ticker).currentPrice ?: 0.0f
+
                             )
                         }
                     }
@@ -237,7 +258,10 @@ class TopPickRepository @Inject constructor(
                     metrics = metrics,
                     risks = risks,
                     confidenceScore = confidenceScore,
-                    isSaved = isSaved
+                    isSaved = isSaved,
+                    imageUrl = companyDao.getCompany(ticker).logoUrl,
+                    percentageChange = 10.19f,
+                    currentPrice = companyDao.getCompany(ticker).currentPrice ?: 0.0f
                 )
             }
         }.sortedByDescending { it.confidenceScore }

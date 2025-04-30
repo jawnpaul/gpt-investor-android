@@ -15,7 +15,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 
 @Composable
 fun HomeBackground(modifier: Modifier = Modifier) {
@@ -45,39 +45,6 @@ fun HomeBackground(modifier: Modifier = Modifier) {
                 .fillMaxSize()
         )
     }
-
-    /*Box(
-        modifier = Modifier
-            .fillMaxSize(),
-        // This ensures content doesn't overlap with system bars
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painter = painterResource(R.drawable.interlaced),
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    // Extend behind system bars
-                    clip = false
-                    alpha = 1f
-                }
-                .drawWithContent {
-                    drawContent()
-                    drawRect(
-                        brush = Brush.linearGradient(
-                            colors = listOf(
-                                Color.Red,
-                                Color.Transparent
-                            ),
-                            start = Offset(0f, size.height),
-                            end = Offset(0f, size.height * 0.2f)
-                        )
-                    )
-                },
-            contentScale = ContentScale.Crop,
-            contentDescription = null
-        )
-    }*/
 }
 
 @Preview

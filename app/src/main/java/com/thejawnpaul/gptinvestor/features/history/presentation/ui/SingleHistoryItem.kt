@@ -20,7 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
-import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 
 @Composable
 fun SingleHistoryItem(modifier: Modifier = Modifier, conversation: StructuredConversation, onClick: (id: Long) -> Unit) {

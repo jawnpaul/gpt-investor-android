@@ -62,7 +62,7 @@ import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDet
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.HistoricalData
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.NewsPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.TimePeriod
-import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 
 @Composable
 fun CompanyDetailDataSource(modifier: Modifier = Modifier, list: List<NewsPresentation> = emptyList(), source: String) {

@@ -26,7 +26,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.ui.theme.BottomSheetShape
 import kotlinx.coroutines.delay
 
 private const val SPLASH_WAIT_TIME: Long = 2000
@@ -49,7 +48,6 @@ fun CustomSplashScreen(onSplashScreenFinished: () -> Unit) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Surface(
-                shape = BottomSheetShape,
                 modifier = Modifier
                     .weight(0.5f)
                     .padding(horizontal = 16.dp)

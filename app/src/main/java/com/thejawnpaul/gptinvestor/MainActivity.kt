@@ -16,7 +16,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import com.thejawnpaul.gptinvestor.core.navigation.SetUpNavGraph
 import com.thejawnpaul.gptinvestor.features.splash.CustomSplashScreen
-import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

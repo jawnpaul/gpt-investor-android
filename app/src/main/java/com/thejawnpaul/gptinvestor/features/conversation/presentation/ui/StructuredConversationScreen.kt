@@ -45,7 +45,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntit
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
-import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 
 @Composable
 fun StructuredConversationScreen(

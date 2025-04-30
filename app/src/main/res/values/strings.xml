@@ -71,4 +71,6 @@
     <string name="password">Password</string>
     <string name="done">Done</string>
     <string name="gpt_investor">Gpt Investor</string>
+    <string name="what_do_you_want_to_know">What do you want to know?</string>
+    <string name="ask_me_a_question">Ask me a question</string>
 </resources>

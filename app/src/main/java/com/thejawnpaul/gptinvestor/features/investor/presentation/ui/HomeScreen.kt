@@ -1,32 +1,26 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.ui
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -35,8 +29,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.core.navigation.Screen
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.QuestionInput
+import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
+import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPicks
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,6 +45,22 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
     val trendingStock = viewModel.trendingCompanies.collectAsState()
     val topPicks = viewModel.topPicks.collectAsState()
     val currentUser = viewModel.currentUser.collectAsStateWithLifecycle()
+    val homeState = viewModel.homeState.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        viewModel.actions.onEach { action ->
+            when (action) {
+                is HomeAction.OnSendClick -> {
+                    navController.navigate(
+                        Screen.ConversationScreen.createRoute(
+                            chatInput = action.input ?: ""
+                        )
+                    )
+                }
+            }
+        }.launchIn(scope)
+    }
 
     Box(
         modifier = Modifier
@@ -104,6 +119,18 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
                 onClickRetry = { viewModel.getTrendingCompanies() }
             )
 
+            QuestionInput(
+                modifier = Modifier,
+                onSendClicked = {
+                    viewModel.handleEvent(HomeEvent.SendClick)
+                },
+                hint = stringResource(R.string.ask_me_a_question),
+                onTextChange = {
+                    viewModel.handleEvent(HomeEvent.ChatInputChanged(it))
+                },
+                text = homeState.value.chatInput ?: ""
+            )
+
             // Top Picks
             TopPicks(modifier = Modifier, state = topPicks.value, onClick = {
                 navController.navigate(Screen.TopPickDetailScreen.createRoute(it))
@@ -114,7 +141,7 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
             })
         }
 
-        Column(
+        /*Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(80.dp)
@@ -151,6 +178,6 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
                     )
                 }
             }
-        }
+        }*/
     }
 }

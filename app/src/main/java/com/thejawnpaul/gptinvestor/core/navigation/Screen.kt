@@ -28,7 +28,9 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
 
     data object AuthenticationScreen : Screen("authentication_screen", false)
 
-    data object ConversationScreen : Screen("conversation_screen", false)
+    data object ConversationScreen : Screen("conversation_screen/{chatInput}", false) {
+        fun createRoute(chatInput: String) = "conversation_screen/$chatInput"
+    }
 
     data object HomeTabScreen : Screen("Ask AI_tab_screen", true)
     data object DiscoverTabScreen : Screen("discover_tab_screen", true)

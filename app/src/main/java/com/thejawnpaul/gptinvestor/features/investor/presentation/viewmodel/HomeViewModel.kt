@@ -17,6 +17,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPr
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -42,6 +43,12 @@ class HomeViewModel @Inject constructor(
 
     private val _currentUser = MutableStateFlow<FirebaseUser?>(null)
     val currentUser get() = _currentUser
+
+    private val _homeState = MutableStateFlow(HomeState())
+    val homeState get() = _homeState
+
+    private val _actions = MutableSharedFlow<HomeAction>()
+    val actions get() = _actions
 
     init {
         getTrendingCompanies()
@@ -169,4 +176,31 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+    fun handleEvent(event: HomeEvent) {
+        viewModelScope.launch {
+            when (event) {
+                is HomeEvent.ChatInputChanged -> {
+                    _homeState.update { it.copy(chatInput = event.input) }
+                }
+
+                is HomeEvent.SendClick -> {
+                    _actions.emit(HomeAction.OnSendClick(_homeState.value.chatInput))
+                }
+            }
+        }
+    }
+}
+
+data class HomeState(
+    val chatInput: String? = null
+)
+
+sealed interface HomeEvent {
+    data class ChatInputChanged(val input: String) : HomeEvent
+    data object SendClick : HomeEvent
+}
+
+sealed interface HomeAction {
+    data class OnSendClick(val input: String? = null) : HomeAction
 }

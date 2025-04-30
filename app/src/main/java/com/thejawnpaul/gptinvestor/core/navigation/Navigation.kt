@@ -103,13 +103,18 @@ fun SetUpNavGraph(navController: NavHostController) {
                     )
                 }
 
-                composable(route = Screen.ConversationScreen.route) {
+                composable(
+                    route = Screen.ConversationScreen.route,
+                    arguments = listOf(navArgument("chatInput") { NavType.StringType })
+                ) { navBackStackEntry ->
                     val viewModel = hiltViewModel<ConversationViewModel>()
+                    val chatInput = navBackStackEntry.arguments?.getString("chatInput") ?: ""
 
                     ConversationScreen(
                         modifier = Modifier,
                         viewModel = viewModel,
-                        navController = navController
+                        navController = navController,
+                        chatInput = chatInput
                     )
                 }
 

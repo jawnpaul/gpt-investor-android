@@ -175,6 +175,7 @@ dependencies {
     implementation(libs.firebase.ui.auth)
     implementation(libs.firebase.config)
     implementation(project(":analytics"))
+    implementation(project(":theme"))
 
     // test
     testImplementation(project(":remote:remotetest"))

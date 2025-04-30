@@ -70,4 +70,5 @@
     <string name="email_address">Email address</string>
     <string name="password">Password</string>
     <string name="done">Done</string>
+    <string name="gpt_investor">Gpt Investor</string>
 </resources>

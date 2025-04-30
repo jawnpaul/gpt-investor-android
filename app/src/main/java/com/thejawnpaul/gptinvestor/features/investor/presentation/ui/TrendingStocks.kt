@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGri
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -41,82 +43,99 @@ import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
-import com.thejawnpaul.gptinvestor.ui.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import kotlinx.coroutines.delay
 
 @Composable
 fun SingleTrendingStockItem(modifier: Modifier = Modifier, onClick: (tickerSymbol: String) -> Unit, trendingStock: TrendingStockPresentation) {
     Surface(
-        modifier = Modifier.height(52.dp),
+        modifier = modifier.height(52.dp),
         onClick = {
             onClick(trendingStock.tickerSymbol)
         },
-        shape = RoundedCornerShape(corner = CornerSize(8.dp)),
-        border = BorderStroke(width = 2.dp, color = Color(227, 239, 252))
+        shape = RoundedCornerShape(corner = CornerSize(12.dp)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 8.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                modifier = Modifier.width(100.dp),
-                text = trendingStock.companyName,
-                maxLines = 1,
-                style = MaterialTheme.typography.titleMedium,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Image(
-                modifier = Modifier.padding(8.dp),
-                painter = painterResource(R.drawable.trending_ellipse),
-                contentDescription = null
-            )
-
-            AsyncImage(
-                model = trendingStock.imageUrl,
-                modifier = Modifier
-                    .padding(vertical = 0.dp)
-                    .size(width = 50.dp, height = 20.dp),
-                contentDescription = null,
-                contentScale = ContentScale.Crop
-            )
-
-            Image(
-                modifier = Modifier.padding(8.dp),
-                painter = painterResource(R.drawable.trending_ellipse),
-                contentDescription = null
-            )
-
-            if (trendingStock.percentageChange < 0) {
-                Image(
-                    modifier = Modifier.padding(end = 2.dp),
-                    painter = painterResource(R.drawable.trending_down),
-                    contentDescription = null
+            // Image
+            Surface(
+                modifier = Modifier.size(28.dp),
+                shape = CircleShape
+            ) {
+                AsyncImage(
+                    model = trendingStock.imageUrl,
+                    modifier = Modifier.fillMaxSize(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
                 )
-                Text(
-                    "${trendingStock.percentageChange}%",
-                    color = Color(212, 38, 32),
-                    style = MaterialTheme.typography.titleMedium
-                )
-            } else {
-                Image(
-                    modifier = Modifier.padding(end = 2.dp),
-                    painter = painterResource(R.drawable.trending_up),
-                    contentDescription = null
-                )
-                Text(
-                    "+${trendingStock.percentageChange}%",
-                    color = Color(15, 151, 61),
-                    style = MaterialTheme.typography.titleMedium
-                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    // Text - company ticker
+                    Text(
+                        text = trendingStock.tickerSymbol,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    // Text - company name
+                    Text(
+                        modifier = Modifier.width(50.dp),
+                        text = trendingStock.companyName,
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Column {
+                    // Text - company price
+                    Text(
+                        text = "#100",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    // Text - percentage change
+                    if (trendingStock.percentageChange < 0) {
+                        Row {
+                            Image(
+                                modifier = Modifier.size(12.dp),
+                                painter = painterResource(R.drawable.trending_down),
+                                contentDescription = null
+                            )
+                            Text(
+                                "${trendingStock.percentageChange}%",
+                                color = Color(212, 38, 32),
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    } else {
+                        Row {
+                            Image(
+                                modifier = Modifier.size(12.dp),
+                                painter = painterResource(R.drawable.trending_up),
+                                contentDescription = null
+                            )
+                            Text(
+                                "+${trendingStock.percentageChange}%",
+                                color = Color(15, 151, 61),
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun TrendingStockList(modifier: Modifier = Modifier, state: TrendingCompaniesView, onClick: (tickerSymbol: String) -> Unit, onClickRetry: () -> Unit) {
+fun TrendingStockList(modifier: Modifier, state: TrendingCompaniesView, onClick: (tickerSymbol: String) -> Unit, onClickRetry: () -> Unit) {
     val lazyGridState = rememberLazyStaggeredGridState()
     val coroutineScope = rememberCoroutineScope()
     val isScrollInProgress = lazyGridState.isScrollInProgress
@@ -134,7 +153,7 @@ fun TrendingStockList(modifier: Modifier = Modifier, state: TrendingCompaniesVie
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(112.dp)
     ) {

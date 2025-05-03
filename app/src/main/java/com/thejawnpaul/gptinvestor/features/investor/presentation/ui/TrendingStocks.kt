@@ -32,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -44,6 +45,7 @@ import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.gptInvestorColors
 import kotlinx.coroutines.delay
 
 @Composable
@@ -90,7 +92,8 @@ fun SingleTrendingStockItem(modifier: Modifier = Modifier, onClick: (tickerSymbo
                         text = trendingStock.companyName,
                         style = MaterialTheme.typography.labelSmall,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        color = gptInvestorColors.textColors.secondary50
                     )
                 }
 
@@ -119,11 +122,12 @@ fun SingleTrendingStockItem(modifier: Modifier = Modifier, onClick: (tickerSymbo
                             Image(
                                 modifier = Modifier.size(12.dp),
                                 painter = painterResource(R.drawable.trending_up),
-                                contentDescription = null
+                                contentDescription = null,
+                                colorFilter = ColorFilter.tint(gptInvestorColors.greenColors.defaultGreen)
                             )
                             Text(
                                 "+${trendingStock.percentageChange}%",
-                                color = Color(15, 151, 61),
+                                color = gptInvestorColors.greenColors.defaultGreen,
                                 style = MaterialTheme.typography.labelSmall
                             )
                         }

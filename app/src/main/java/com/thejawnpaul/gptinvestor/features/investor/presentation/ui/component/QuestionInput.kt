@@ -2,6 +2,7 @@ package com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.bodyChatBody
+import com.thejawnpaul.gptinvestor.theme.gptInvestorColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +50,7 @@ fun QuestionInput(modifier: Modifier, text: String = "", hint: String = "", onTe
             .fillMaxWidth()
             .padding(16.dp)
             .clip(RoundedCornerShape(16.dp))
+            .background(color = gptInvestorColors.utilColors.allDark2)
             .border(
                 width = 1.dp,
                 brush = Brush.horizontalGradient(
@@ -83,7 +86,7 @@ fun QuestionInput(modifier: Modifier, text: String = "", hint: String = "", onTe
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(corner = CornerSize(16.dp)),
                 color = Color.Transparent,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                border = BorderStroke(1.dp, color = gptInvestorColors.utilColors.borderBright10)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),

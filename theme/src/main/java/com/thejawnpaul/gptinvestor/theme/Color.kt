@@ -67,9 +67,10 @@ val md_theme_dark_scrim = Color(0xFF000000)
 
 val seed = Color(0xFF1976D2)
 
-
 data class GPTInvestorColors(
-    val textColors: TextColors,
+     val textColors: TextColors,
+     val greenColors: GreenColors,
+     val utilColors: UtilColors
 )
 
 @Immutable
@@ -77,8 +78,28 @@ data class TextColors(
     val secondary50: Color,
 )
 
+@Immutable
+data class GreenColors(
+    val defaultGreen: Color,
+)
+
+@Immutable
+data class UtilColors(
+    val allDark2: Color,
+    val borderBright10: Color
+)
+
+
 val gptInvestorColors = GPTInvestorColors(
     textColors = TextColors(
         secondary50 = Color(0xFF89868C),
+    ),
+    greenColors = GreenColors(
+        defaultGreen = Color(0xFF05C702),
+    ),
+    utilColors = UtilColors(
+        allDark2 = Color(0xFF180C25),
+        borderBright10 = Color(0xFF2C2531)
+
     )
 )

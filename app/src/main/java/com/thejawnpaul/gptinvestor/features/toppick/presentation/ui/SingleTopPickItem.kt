@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,6 +35,7 @@ import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.gptInvestorColors
 
 @Composable
 fun SingleTopPickItem(modifier: Modifier = Modifier, pickPresentation: TopPickPresentation, onClick: (String) -> Unit) {
@@ -103,7 +105,8 @@ fun HomeTopPickItem(modifier: Modifier, pickPresentation: TopPickPresentation, o
                         text = pickPresentation.companyName,
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        color = gptInvestorColors.textColors.secondary50
                     )
                 }
 
@@ -140,11 +143,14 @@ fun HomeTopPickItem(modifier: Modifier, pickPresentation: TopPickPresentation, o
                             Image(
                                 modifier = Modifier.size(12.dp),
                                 painter = painterResource(R.drawable.trending_up),
-                                contentDescription = null
+                                contentDescription = null,
+                                colorFilter = ColorFilter.tint(
+                                    gptInvestorColors.greenColors.defaultGreen
+                                )
                             )
                             Text(
                                 text = "+${pickPresentation.percentageChange}%",
-                                color = Color(15, 151, 61),
+                                color = gptInvestorColors.greenColors.defaultGreen,
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }

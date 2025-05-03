@@ -140,44 +140,5 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
                 navController.navigate(Screen.AllTopPicksScreen.route)
             })
         }
-
-        /*Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(80.dp)
-                .align(Alignment.BottomStart),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp),
-                shape = RoundedCornerShape(corner = CornerSize(8.dp)),
-                border = BorderStroke(
-                    width = DividerDefaults.Thickness,
-                    color = DividerDefaults.color
-                ),
-                onClick = {
-                    navController.navigate(Screen.ConversationScreen.route)
-                }
-            ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        stringResource(R.string.ask_anything_about_stocks),
-                        modifier = Modifier
-                            .align(Alignment.CenterStart)
-                            .padding(start = 16.dp)
-                    )
-
-                    Image(
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .padding(end = 16.dp),
-                        painter = painterResource(R.drawable.send_icon),
-                        contentDescription = null
-                    )
-                }
-            }
-        }*/
     }
 }

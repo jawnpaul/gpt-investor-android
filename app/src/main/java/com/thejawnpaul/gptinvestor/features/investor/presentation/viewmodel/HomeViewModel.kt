@@ -186,6 +186,7 @@ class HomeViewModel @Inject constructor(
 
                 is HomeEvent.SendClick -> {
                     _actions.emit(HomeAction.OnSendClick(_homeState.value.chatInput))
+                    _homeState.update { it.copy(chatInput = null) }
                 }
             }
         }

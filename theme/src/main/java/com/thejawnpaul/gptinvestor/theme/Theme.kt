@@ -95,7 +95,7 @@ fun GPTInvestorTheme(
             }
 
             darkTheme -> DarkColors
-            else -> DarkColors
+            else -> LightColors
         }
 
     CompositionLocalProvider(

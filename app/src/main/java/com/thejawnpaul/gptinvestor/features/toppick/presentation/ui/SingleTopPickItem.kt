@@ -72,7 +72,13 @@ fun SingleTopPickItem(modifier: Modifier = Modifier, pickPresentation: TopPickPr
 
 @Composable
 fun HomeTopPickItem(modifier: Modifier, pickPresentation: TopPickPresentation, onClick: (String) -> Unit) {
-    Column(modifier = modifier.clickable { onClick(pickPresentation.id) }) {
+    Column(
+        modifier = modifier.clickable(
+            interactionSource = null,
+            onClick = { onClick(pickPresentation.id) },
+            indication = null
+        )
+    ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Surface(
                 modifier = Modifier.size(32.dp),

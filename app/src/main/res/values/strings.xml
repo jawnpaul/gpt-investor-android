@@ -74,4 +74,10 @@
     <string name="what_do_you_want_to_know">What do you want to know?</string>
     <string name="ask_me_a_question">Ask me a question</string>
     <string name="type_something_like">Type something like:</string>
+    <string name="too_complex">Too complex</string>
+    <string name="inaccurate">Inaccurate</string>
+    <string name="not_actionable">Not actionable</string>
+    <string name="others">Others</string>
+    <string name="send">Send</string>
+    <string name="copy">Copy</string>
 </resources>

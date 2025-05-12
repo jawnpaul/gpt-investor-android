@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.conversation.presentation.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,7 +13,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
@@ -20,17 +24,19 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,6 +52,9 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiMessa
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import com.thejawnpaul.gptinvestor.theme.bodyChatBody
+import kotlinx.coroutines.delay
 
 @Composable
 fun StructuredConversationScreen(
@@ -128,6 +137,8 @@ fun StructuredConversationScreen(
 
 @Composable
 fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiMessage, text: String = "", onClickNews: (url: String) -> Unit) {
+    val gptInvestorColors = LocalGPTInvestorColors.current
+
     when (genAiMessage) {
         is GenAiTextMessage -> {
             if (genAiMessage.loading) {
@@ -174,15 +185,149 @@ fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiM
                     }
                 }
             } else {
-                genAiMessage.response?.let { b ->
-                    OutlinedCard(modifier = Modifier.padding(horizontal = 16.dp)) {
-                        Text(
-                            genAiMessage.query,
-                            modifier = Modifier.padding(8.dp),
-                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
-                        )
+                genAiMessage.response?.let { modelResponse ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        val showDislikeReasons = remember { mutableStateOf(false) }
+                        val feedBackState = remember { mutableStateOf(0) }
 
-                        ExpandableRichText(text = b, modifier = Modifier.padding(8.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Spacer(modifier = Modifier.weight(0.1f))
+                            Surface(
+                                modifier = Modifier.weight(0.9f),
+                                shape = RoundedCornerShape(corner = CornerSize(12.dp))
+                            ) {
+                                Text(
+                                    modifier = Modifier.padding(16.dp),
+                                    text = genAiMessage.query,
+                                    style = MaterialTheme.typography.bodyChatBody,
+                                    textAlign = TextAlign.Start
+                                )
+                            }
+                        }
+
+                        Column {
+                            ExpandableRichText(
+                                text = modelResponse,
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
+
+                            val dislikeReasons =
+                                listOf(
+                                    R.string.too_complex,
+                                    R.string.inaccurate,
+                                    R.string.not_actionable,
+                                    R.string.others
+                                )
+
+                            if (showDislikeReasons.value) {
+                                // list of dislike reasons
+                                LazyRow(
+                                    modifier = Modifier.padding(top = 8.dp),
+                                    contentPadding = PaddingValues(horizontal = 16.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    items(dislikeReasons) { reason ->
+                                        Surface(
+                                            modifier = modifier,
+                                            onClick = {
+                                                feedBackState.value = -1
+                                                showDislikeReasons.value = false
+                                            },
+                                            shape = RoundedCornerShape(corner = CornerSize(20.dp)),
+                                            border = BorderStroke(
+                                                1.dp,
+                                                MaterialTheme.colorScheme.outlineVariant
+                                            )
+                                        ) {
+                                            Text(
+                                                text = stringResource(reason),
+                                                modifier = Modifier
+                                                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                                                style = MaterialTheme.typography.labelMedium,
+                                                textAlign = TextAlign.Center
+                                            )
+                                        }
+                                    }
+                                }
+                                // show it for 15 seconds
+                                LaunchedEffect(Unit) {
+                                    delay(15000L)
+                                    showDislikeReasons.value = false
+                                }
+                            } else {
+                                Row(
+                                    modifier = Modifier.padding(start = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // copy
+                                    IconButton(onClick = {
+                                    }) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_copy),
+                                            contentDescription = "Send"
+                                        )
+                                    }
+
+                                    when (feedBackState.value) {
+                                        1 -> {
+                                            // like chosen
+                                            IconButton(onClick = {
+                                            }) {
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.ic_like_filled),
+                                                    contentDescription = "Send"
+                                                )
+                                            }
+                                        }
+
+                                        -1 -> {
+                                            // dislike chosen
+                                            IconButton(onClick = {}) {
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.ic_dislike_filled),
+                                                    contentDescription = "Send"
+                                                )
+                                            }
+                                        }
+
+                                        else -> {
+                                            // none chosen
+
+                                            // like
+                                            IconButton(onClick = {
+                                                feedBackState.value = 1
+                                            }) {
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.ic_like),
+                                                    contentDescription = "Send"
+                                                )
+                                            }
+
+                                            // dislike
+                                            IconButton(onClick = {
+                                                showDislikeReasons.value = true
+                                                feedBackState.value = -1
+                                            }) {
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.ic_dislike),
+                                                    contentDescription = "Send"
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

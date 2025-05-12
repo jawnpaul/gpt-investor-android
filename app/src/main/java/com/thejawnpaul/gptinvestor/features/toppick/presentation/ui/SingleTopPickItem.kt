@@ -35,10 +35,12 @@ import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
-import com.thejawnpaul.gptinvestor.theme.gptInvestorColors
+import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
 fun SingleTopPickItem(modifier: Modifier = Modifier, pickPresentation: TopPickPresentation, onClick: (String) -> Unit) {
+    val gptInvestorColors = LocalGPTInvestorColors.current
+
     OutlinedCard(
         modifier = Modifier.padding(horizontal = 16.dp),
         onClick = { onClick(pickPresentation.id) }
@@ -72,6 +74,8 @@ fun SingleTopPickItem(modifier: Modifier = Modifier, pickPresentation: TopPickPr
 
 @Composable
 fun HomeTopPickItem(modifier: Modifier, pickPresentation: TopPickPresentation, onClick: (String) -> Unit) {
+    val gptInvestorColors = LocalGPTInvestorColors.current
+
     Column(
         modifier = modifier.clickable(
             interactionSource = null,

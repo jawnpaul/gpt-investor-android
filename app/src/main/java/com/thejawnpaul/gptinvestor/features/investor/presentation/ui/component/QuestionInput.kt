@@ -39,12 +39,14 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.theme.bodyChatBody
-import com.thejawnpaul.gptinvestor.theme.gptInvestorColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionInput(modifier: Modifier, text: String = "", hint: String = "", onTextChange: (String) -> Unit = {}, onSendClicked: () -> Unit) {
+    val gptInvestorColors = LocalGPTInvestorColors.current
+
     Box(
         modifier = modifier
             .fillMaxWidth()

@@ -78,7 +78,7 @@ private val DarkColors =
         scrim = md_theme_dark_scrim,
     )
 
-val LocalGPTInvestorColors = staticCompositionLocalOf { gptInvestorColors }
+val LocalGPTInvestorColors = staticCompositionLocalOf { gptInvestorColorsDark }
 
 @Composable
 fun GPTInvestorTheme(
@@ -97,6 +97,8 @@ fun GPTInvestorTheme(
             darkTheme -> DarkColors
             else -> LightColors
         }
+
+    val gptInvestorColors = if (darkTheme) gptInvestorColorsDark else gptInvestorColorsLight
 
     CompositionLocalProvider(
         LocalGPTInvestorColors provides gptInvestorColors

@@ -83,7 +83,7 @@ fun InputBar(
                 modifier = Modifier
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(corner = CornerSize(16.dp)),
-                color = Color.Transparent
+                color = MaterialTheme.colorScheme.background
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),

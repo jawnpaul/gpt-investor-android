@@ -90,7 +90,7 @@ data class UtilColors(
 )
 
 
-val gptInvestorColors = GPTInvestorColors(
+val gptInvestorColorsDark = GPTInvestorColors(
     textColors = TextColors(
         secondary50 = Color(0xFF89868C),
     ),
@@ -101,5 +101,18 @@ val gptInvestorColors = GPTInvestorColors(
         allDark2 = Color(0xFF180C25),
         borderBright10 = Color(0xFF2C2531)
 
+    )
+)
+
+val gptInvestorColorsLight = GPTInvestorColors(
+    textColors = TextColors(
+        secondary50 = Color(0xFF89868C),
+    ),
+    greenColors = GreenColors(
+        defaultGreen = Color(0xFF05C702),
+    ),
+    utilColors = UtilColors(
+        allDark2 = Color(0xFFFBFAFD),
+        borderBright10 = Color(0xFFE7E7E8)
     )
 )

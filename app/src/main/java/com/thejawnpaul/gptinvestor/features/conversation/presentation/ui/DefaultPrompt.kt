@@ -26,11 +26,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
-import com.thejawnpaul.gptinvestor.theme.gptInvestorColors
+import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import kotlinx.coroutines.delay
 
 @Composable
 fun SingleDefaultPrompt(modifier: Modifier = Modifier, prompt: DefaultPrompt, onClick: (prompt: DefaultPrompt) -> Unit) {
+    val gptInvestorColors = LocalGPTInvestorColors.current
+
     Surface(
         onClick = { onClick(prompt) },
         modifier = modifier.padding(horizontal = 8.dp),
@@ -52,6 +54,7 @@ fun SingleDefaultPrompt(modifier: Modifier = Modifier, prompt: DefaultPrompt, on
 fun DefaultPrompts(modifier: Modifier, prompts: List<DefaultPrompt>, onClick: (prompt: DefaultPrompt) -> Unit) {
     var currentPrompts by remember { mutableStateOf(listOf<DefaultPrompt>()) }
     var visible by remember { mutableStateOf(true) }
+    val gptInvestorColors = LocalGPTInvestorColors.current
 
     // Loop every 5 seconds: fade out -> update prompts -> fade in
     LaunchedEffect(prompts) {

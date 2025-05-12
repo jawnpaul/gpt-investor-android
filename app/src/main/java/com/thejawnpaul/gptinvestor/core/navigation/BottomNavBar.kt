@@ -25,10 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.theme.gptInvestorColors
+import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
 fun BottomNavBar(navController: NavController) {
+    val gptInvestorColors = LocalGPTInvestorColors.current
+
     val items = listOf(
         Screen.HomeTabScreen to ImageVector.vectorResource(R.drawable.ic_home_trend_up),
         Screen.DiscoverTabScreen to ImageVector.vectorResource(R.drawable.ic_search_status),

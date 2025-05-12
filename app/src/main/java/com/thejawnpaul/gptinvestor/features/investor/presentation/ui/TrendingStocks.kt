@@ -45,11 +45,13 @@ import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
-import com.thejawnpaul.gptinvestor.theme.gptInvestorColors
+import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import kotlinx.coroutines.delay
 
 @Composable
 fun SingleTrendingStockItem(modifier: Modifier = Modifier, onClick: (tickerSymbol: String) -> Unit, trendingStock: TrendingStockPresentation) {
+    val gptInvestorColors = LocalGPTInvestorColors.current
+
     Surface(
         modifier = modifier.height(52.dp),
         onClick = {

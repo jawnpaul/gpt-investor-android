@@ -46,7 +46,7 @@ class ConversationRepository @Inject constructor(
 
     private val newModel = "gemini-1.5-pro-latest"
     private val oldModel = "gemini-1.0-pro"
-    private val flashModel = "gemini-1.5-flash"
+    private val flashModel = "gemini-2.0-flash"
 
     private val generativeModel = GenerativeModel(
         modelName = flashModel,
@@ -161,7 +161,7 @@ class ConversationRepository @Inject constructor(
         }
     }
 
-    override suspend fun getInputResponse(prompt: ConversationPrompt): Flow<Either<Failure, Conversation>> = flow {
+    /*override suspend fun getInputResponse(prompt: ConversationPrompt): Flow<Either<Failure, Conversation>> = flow {
         try {
             val conversation = getConversation(prompt)
             Timber.e(conversation.id.toString())
@@ -295,6 +295,210 @@ class ConversationRepository @Inject constructor(
 
                         is GenAiEntityMessage -> {
                             Timber.e("Last message is Gen AI entity message")
+                        }
+                    }
+                }
+            }
+
+            analyticsLogger.logEvent(eventName = "Query Submitted", params = mapOf())
+        } catch (e: Exception) {
+            when (e) {
+                is GoogleGenerativeAIException -> {
+                    Timber.e(e.stackTraceToString())
+                    emit(Either.Left(GenAIException()))
+                }
+
+                else -> {
+                    Timber.e(e.stackTraceToString())
+                    emit(Either.Left(Failure.ServerError))
+                }
+            }
+        }
+    }*/
+
+    override suspend fun getInputResponse(prompt: ConversationPrompt): Flow<Either<Failure, Conversation>> = flow {
+        try {
+            // Use 'var' to allow reassignment of the conversation object
+            var currentConversation = getConversation(prompt)
+            Timber.e(currentConversation.id.toString())
+
+            // TODO: Emit default loading state from here
+
+            // check if input string contains entity
+            val entityList = containsEntity(prompt.query)
+            if (entityList.isNotEmpty()) {
+                val ticker = entityList.first()
+                val company = getCompanyDetail(ticker)
+
+                // Ensure we are modifying a mutable list or creating new lists when copying
+                val newMessages = ArrayList(currentConversation.messageList)
+
+                if (newMessages.isEmpty()) {
+                    company?.let {
+                        val newId = messageDao.insertMessage(
+                            MessageEntity(
+                                conversationId = currentConversation.id,
+                                companyDetailRemoteResponse = company,
+                                createdAt = System.currentTimeMillis()
+                            )
+                        )
+                        newMessages.add(
+                            GenAiEntityMessage(
+                                id = newId,
+                                entity = company
+                            )
+                        )
+                        currentConversation =
+                            currentConversation.copy(messageList = newMessages)
+                        emit(Either.Right(currentConversation))
+                    }
+                } else {
+                    val existingEntity =
+                        newMessages.filterIsInstance<GenAiEntityMessage>()
+                            .find { it.entity?.ticker == ticker }
+                    if (existingEntity == null) {
+                        company?.let {
+                            val newId = messageDao.insertMessage(
+                                MessageEntity(
+                                    conversationId = currentConversation.id,
+                                    companyDetailRemoteResponse = company,
+                                    createdAt = System.currentTimeMillis()
+                                )
+                            )
+                            newMessages.add(
+                                GenAiEntityMessage(
+                                    id = newId,
+                                    entity = company
+                                )
+                            )
+                            currentConversation =
+                                currentConversation.copy(messageList = newMessages)
+                            emit(Either.Right(currentConversation))
+
+                            analyticsLogger.logEvent(
+                                eventName = "Company Identified",
+                                params = mapOf("company_ticker" to company.ticker)
+                            )
+                        }
+                    }
+                }
+            }
+
+            val chunk = StringBuilder()
+
+            val newMessageId =
+                messageDao.insertMessage(
+                    MessageEntity(
+                        conversationId = currentConversation.id,
+                        createdAt = System.currentTimeMillis(),
+                        query = prompt.query
+                    )
+                )
+
+            // Ensure we are modifying a mutable list or creating new lists when copying
+            val messagesWithNewQuery = ArrayList(currentConversation.messageList)
+            messagesWithNewQuery.add(
+                GenAiTextMessage(
+                    id = newMessageId,
+                    query = prompt.query,
+                    loading = true
+                )
+            )
+            currentConversation = currentConversation.copy(messageList = messagesWithNewQuery)
+            emit(Either.Right(currentConversation))
+
+            val chat = generativeModel.startChat(history = getHistory(currentConversation.id))
+
+            val response = chat.sendMessageStream(prompt.query)
+            response.onCompletion {
+                val suggested = getSuggestedPrompts(currentConversation.id)
+
+                currentConversation = currentConversation.copy(suggestedPrompts = suggested)
+
+                emit(Either.Right(currentConversation))
+
+                Timber.e("Completed")
+
+                // update message with complete response in DB
+                // It's safer to find the message by ID and update its response
+                // as the 'last' message might not be the one we intend to update if other messages were added.
+                // However, given the current flow, messageList.last() should be the GenAiTextMessage.
+                val finalResponseText = currentConversation.messageList
+                    .filterIsInstance<GenAiTextMessage>()
+                    .find { it.id == newMessageId }?.response
+                    ?: chunk.toString() // Fallback to chunk if not found or not updated in currentConversation
+
+                val updatedMessageEntity = messageDao.getSingleMessage(newMessageId)
+                    .copy(response = finalResponseText) // Use the response from the conversation state
+                messageDao.updateMessage(updatedMessageEntity)
+
+                getConversationTitle(currentConversation.id)?.let { title ->
+                    // NOW, currentConversation already has suggestedPrompts.
+                    // So, copying it and adding the title will preserve them.
+                    currentConversation = currentConversation.copy(title = title)
+                    emit(Either.Right(currentConversation))
+                    val entity = conversationDao.getSingleConversation(currentConversation.id)
+                    entity?.let {
+                        // Ensure the DAO is updated with both the new title and existing suggested prompts
+                        // if your DAO's updateConversation can take the whole Conversation object or specific fields.
+                        // If 'it' (entity from DAO) doesn't have suggested prompts,
+                        // you might need to merge: it.copy(title = title, suggestedPrompts = currentConversation.suggestedPrompts)
+                        // However, it's generally better to update the DAO with the 'currentConversation' state if possible.
+                        conversationDao.updateConversation(it.copy(title = title)) // This only updates the title in DAO.
+                        // Consider if suggestedPrompts also need to be persisted here.
+                        // A safer bet if your DAO takes the whole object or specific fields:
+                        // conversationDao.updateConversation(currentConversation.toEntity())
+                        // or if you want to be explicit:
+                        // conversationDao.updateConversation(it.copy(title = title, suggestedPrompts = currentConversation.suggestedPrompts))
+                    }
+                }
+            }.collect { result ->
+                result.text?.let { responseText ->
+                    chunk.append(responseText)
+
+                    // Create a new list for modification to maintain immutability
+                    val updatedMessagesDuringStream = ArrayList(currentConversation.messageList)
+                    val lastIndex = updatedMessagesDuringStream.lastIndex
+
+                    if (lastIndex >= 0) { // Ensure the list is not empty
+                        val lastMessage = updatedMessagesDuringStream[lastIndex]
+
+                        when (lastMessage) {
+                            is GenAiTextMessage -> {
+                                val updatedTextMessage = lastMessage.copy(
+                                    // query = prompt.query, // Query is already set when message was added
+                                    response = chunk.toString(),
+                                    loading = false
+                                )
+                                updatedMessagesDuringStream[lastIndex] = updatedTextMessage
+                                currentConversation =
+                                    currentConversation.copy(messageList = updatedMessagesDuringStream)
+                                emit(Either.Right(currentConversation))
+                            }
+
+                            is GenAiEntityMessage -> {
+                                Timber.e("Last message is Gen AI entity message, not updating with streaming text.")
+                                // If an entity message was the last one, and a text response is streaming,
+                                // you might need to decide how to handle this.
+                                // Potentially, the new GenAiTextMessage for the query (added before starting chat)
+                                // should be the one updated.
+                                // Let's refine this to ensure we update the correct message:
+
+                                val messageToUpdateIndex =
+                                    updatedMessagesDuringStream.indexOfFirst { it.id == newMessageId && it is GenAiTextMessage }
+                                if (messageToUpdateIndex != -1) {
+                                    val textMessageToUpdate =
+                                        updatedMessagesDuringStream[messageToUpdateIndex] as GenAiTextMessage
+                                    updatedMessagesDuringStream[messageToUpdateIndex] =
+                                        textMessageToUpdate.copy(
+                                            response = chunk.toString(),
+                                            loading = false
+                                        )
+                                    currentConversation =
+                                        currentConversation.copy(messageList = updatedMessagesDuringStream)
+                                    emit(Either.Right(currentConversation))
+                                }
+                            }
                         }
                     }
                 }

@@ -42,7 +42,7 @@ import kotlinx.coroutines.flow.onEach
 fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: HomeViewModel, onMenuClick: () -> Unit) {
     // Home Screen
 
-    val trendingStock = viewModel.trendingCompanies.collectAsState()
+    val trendingStock = viewModel.trendingCompanies.collectAsStateWithLifecycle()
     val topPicks = viewModel.topPicks.collectAsState()
     val currentUser = viewModel.currentUser.collectAsStateWithLifecycle()
     val homeState = viewModel.homeState.collectAsStateWithLifecycle()

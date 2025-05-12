@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -62,6 +63,7 @@ class HomeViewModel @Inject constructor(
 
         getTrendingCompaniesUseCase(GetTrendingCompaniesUseCase.None()) {
             it.onFailure {
+                Timber.e("Something went wrong trending stocks")
                 _trendingCompanies.update { state ->
                     state.copy(
                         loading = false,

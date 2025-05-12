@@ -2,7 +2,6 @@ package com.thejawnpaul.gptinvestor.features.conversation.presentation.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -112,22 +111,6 @@ fun StructuredConversationScreen(
                 }
 
                 item {
-                    if (conversation.suggestedPrompts.isNotEmpty()) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                        ) {
-                            FollowUpQuestions(
-                                entity = null,
-                                list = conversation.suggestedPrompts,
-                                onClick = onClickSuggestion
-                            )
-                        }
-                    }
-                }
-
-                item {
                     Spacer(modifier = Modifier.size(100.dp))
                 }
             }
@@ -189,7 +172,6 @@ fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiM
                     Column(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         val showDislikeReasons = remember { mutableStateOf(false) }
@@ -215,7 +197,12 @@ fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiM
                             }
                         }
 
-                        Column {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.Start)
+                                .padding(bottom = 16.dp)
+                        ) {
                             ExpandableRichText(
                                 text = modelResponse,
                                 modifier = Modifier.padding(horizontal = 16.dp)
@@ -370,47 +357,33 @@ fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiM
 }
 
 @Composable
-fun FollowUpQuestions(modifier: Modifier = Modifier, entity: String? = null, list: List<Suggestion>, onClick: (prompt: Suggestion) -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        if (entity != null) {
-            Text(
-                stringResource(R.string.related_to, entity),
-                modifier = Modifier.padding(bottom = 4.dp),
-                style = MaterialTheme.typography.titleMedium
-            )
-        } else {
-            Text(
-                stringResource(R.string.related),
-                modifier = Modifier.padding(bottom = 8.dp),
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
-
-        list.forEach {
-            Column {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onClick(it) }
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+fun FollowUpQuestions(modifier: Modifier, entity: String? = null, list: List<Suggestion>, onClick: (prompt: Suggestion) -> Unit) {
+    if (list.isNotEmpty()) {
+        LazyRow(
+            modifier = Modifier,
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(items = list) { suggestion ->
+                Surface(
+                    modifier = modifier,
+                    onClick = {
+                        onClick(suggestion)
+                    },
+                    shape = RoundedCornerShape(corner = CornerSize(20.dp)),
+                    border = BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.outlineVariant
+                    )
                 ) {
                     Text(
-                        it.label,
-                        modifier = Modifier.weight(1.2f),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Image(
-                        painterResource(R.drawable.arrow_right),
-                        contentDescription = null,
+                        text = suggestion.label,
                         modifier = Modifier
-                            .weight(0.2f)
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center
                     )
                 }
-
-                HorizontalDivider()
             }
         }
     }
@@ -435,8 +408,7 @@ fun ConversationPreview(modifier: Modifier = Modifier) {
         StructuredConversation(id = 1, title = "Aak me", messageList = messages.toMutableList())
     val prompts = listOf(
         Suggestion(
-            label = "Netflix stock prices is going " +
-                "really high and things are expected tp go higher the more this season",
+            label = "Netflix stock prices is going ",
             query = ""
         ),
         Suggestion(
@@ -452,7 +424,7 @@ fun ConversationPreview(modifier: Modifier = Modifier) {
     )
     GPTInvestorTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            FollowUpQuestions(entity = "Netflix", list = prompts) { }
+            FollowUpQuestions(modifier = Modifier, entity = "Netflix", list = prompts) { }
         }
     }
 }

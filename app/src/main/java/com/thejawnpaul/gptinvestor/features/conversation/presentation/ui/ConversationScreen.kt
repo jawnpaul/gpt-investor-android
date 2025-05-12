@@ -1,6 +1,8 @@
 package com.thejawnpaul.gptinvestor.features.conversation.presentation.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -67,26 +70,53 @@ fun ConversationScreen(modifier: Modifier = Modifier, viewModel: ConversationVie
             }
         }
 
-        InputBar(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(color = MaterialTheme.colorScheme.background)
                 .align(Alignment.BottomStart)
-                .windowInsetsPadding(
-                    WindowInsets.ime
-                )
-                .navigationBarsPadding(),
-            input = conversation.value.query,
-            contentPadding = PaddingValues(0.dp),
-            sendEnabled = conversation.value.enableSend,
-            onInputChanged = { input ->
-                viewModel.updateInput(input = input)
-            },
-            onSendClick = {
-                keyboardController?.hide()
-                viewModel.getInputResponse()
-            },
-            placeholder = "Ask anything about stocks",
-            shouldRequestFocus = true
-        )
+        ) {
+            when (conversation.value.conversation) {
+                is StructuredConversation -> {
+                    val a = conversation.value.conversation as StructuredConversation
+
+                    if (a.suggestedPrompts.isNotEmpty()) {
+                        // Follow up questions
+                        FollowUpQuestions(
+                            modifier = Modifier,
+                            entity = null,
+                            list = a.suggestedPrompts,
+                            onClick = { prompt ->
+                                viewModel.getSuggestedPromptResponse(prompt.query)
+                            }
+                        )
+                    }
+                }
+
+                else -> {
+                }
+            }
+
+            InputBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .windowInsetsPadding(
+                        WindowInsets.ime
+                    )
+                    .navigationBarsPadding(),
+                input = conversation.value.query,
+                contentPadding = PaddingValues(0.dp),
+                sendEnabled = conversation.value.enableSend,
+                onInputChanged = { input ->
+                    viewModel.updateInput(input = input)
+                },
+                onSendClick = {
+                    keyboardController?.hide()
+                    viewModel.getInputResponse()
+                },
+                placeholder = "Ask anything about stocks",
+                shouldRequestFocus = true
+            )
+        }
     }
 }

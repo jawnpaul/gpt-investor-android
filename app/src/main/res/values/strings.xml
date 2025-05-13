@@ -80,4 +80,9 @@
     <string name="others">Others</string>
     <string name="send">Send</string>
     <string name="copy">Copy</string>
+    <string name="like">Like</string>
+    <string name="dislike">Dislike</string>
+    <string name="like_chosen">Like chosen</string>
+    <string name="dislike_chosen">Dislike chosen</string>
+    <string name="none_chosen">None chosen</string>
 </resources>

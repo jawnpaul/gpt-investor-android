@@ -30,6 +30,7 @@ data class CompanyDetailDefaultConversation(
 data class GenAiTextMessage(
     override val id: Long = 0,
     val query: String,
+    val feedbackStatus: Int,
     override val response: String? = null,
     override val loading: Boolean = false
 ) : GenAiMessage

@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
@@ -15,17 +16,20 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefa
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefaultPromptsUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.state.ConversationView
+import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @HiltViewModel
 class ConversationViewModel @Inject constructor(
     private val getDefaultPromptsUseCase: GetDefaultPromptsUseCase,
     private val getDefaultPromptResponseUseCase: GetDefaultPromptResponseUseCase,
-    private val getInputPromptUseCase: GetInputPromptUseCase
+    private val getInputPromptUseCase: GetInputPromptUseCase,
+    private val fedBackRepository: FeedbackRepository
 ) :
     ViewModel() {
 
@@ -154,4 +158,46 @@ class ConversationViewModel @Inject constructor(
             )
         }
     }
+
+    fun handleEvent(event: ConversationEvent) {
+        when (event) {
+            is ConversationEvent.CopyToClipboard -> {
+                copyToClipboard(event.text)
+            }
+
+            is ConversationEvent.SendFeedback -> {
+                sendFeedback(event.messageId, event.status, event.reason)
+            }
+        }
+    }
+
+    private fun copyToClipboard(text: String) {
+    }
+
+    private fun sendFeedback(messageId: Long, status: Int, reason: String?) {
+        conversationViewMutableStateFlow.update {
+            (it.conversation as? StructuredConversation)?.let { conversation ->
+                val updatedMessages = conversation.messageList.map { message ->
+                    if (message.id == messageId) {
+                        (message as? GenAiTextMessage)?.copy(feedbackStatus = status)
+                            ?: message
+                    } else {
+                        message
+                    }
+                }
+                it.copy(conversation = conversation.copy(messageList = updatedMessages.toMutableList()))
+            } ?: it
+        }
+        viewModelScope.launch {
+            fedBackRepository.giveFeedback(messageId, status, reason)
+        }
+    }
+}
+
+sealed interface ConversationEvent {
+
+    data class CopyToClipboard(val text: String) : ConversationEvent
+
+    data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) :
+        ConversationEvent
 }

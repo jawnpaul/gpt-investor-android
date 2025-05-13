@@ -62,7 +62,8 @@ fun StructuredConversationScreen(
     onNavigateUp: () -> Unit,
     text: String,
     onClickNews: (url: String) -> Unit,
-    onClickSuggestion: (prompt: Suggestion) -> Unit
+    onClickFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
+    onCopy: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -106,7 +107,9 @@ fun StructuredConversationScreen(
                         modifier = Modifier,
                         genAiMessage = genAiMessage,
                         text = text,
-                        onClickNews = onClickNews
+                        onClickNews = onClickNews,
+                        onClickFeedback = onClickFeedback,
+                        onCopy = onCopy
                     )
                 }
 
@@ -119,7 +122,14 @@ fun StructuredConversationScreen(
 }
 
 @Composable
-fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiMessage, text: String = "", onClickNews: (url: String) -> Unit) {
+fun SingleStructuredResponse(
+    modifier: Modifier = Modifier,
+    genAiMessage: GenAiMessage,
+    text: String = "",
+    onClickNews: (url: String) -> Unit,
+    onClickFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
+    onCopy: (text: String) -> Unit
+) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     when (genAiMessage) {
@@ -175,7 +185,7 @@ fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiM
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         val showDislikeReasons = remember { mutableStateOf(false) }
-                        val feedBackState = remember { mutableStateOf(0) }
+                        val feedBackState = remember { mutableStateOf(genAiMessage.feedbackStatus) }
 
                         Row(
                             modifier = Modifier
@@ -224,9 +234,15 @@ fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiM
                                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                                 ) {
                                     items(dislikeReasons) { reason ->
+                                        val stringReason = stringResource(reason)
                                         Surface(
                                             modifier = modifier,
                                             onClick = {
+                                                onClickFeedback(
+                                                    genAiMessage.id,
+                                                    -1,
+                                                    stringReason
+                                                )
                                                 feedBackState.value = -1
                                                 showDislikeReasons.value = false
                                             },
@@ -237,7 +253,7 @@ fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiM
                                             )
                                         ) {
                                             Text(
-                                                text = stringResource(reason),
+                                                text = stringReason,
                                                 modifier = Modifier
                                                     .padding(horizontal = 16.dp, vertical = 10.dp),
                                                 style = MaterialTheme.typography.labelMedium,
@@ -258,10 +274,11 @@ fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiM
                                 ) {
                                     // copy
                                     IconButton(onClick = {
+                                        onCopy(modelResponse)
                                     }) {
                                         Icon(
                                             painter = painterResource(id = R.drawable.ic_copy),
-                                            contentDescription = "Send"
+                                            contentDescription = stringResource(R.string.copy)
                                         )
                                     }
 
@@ -272,17 +289,18 @@ fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiM
                                             }) {
                                                 Icon(
                                                     painter = painterResource(id = R.drawable.ic_like_filled),
-                                                    contentDescription = "Send"
+                                                    contentDescription = stringResource(R.string.like_chosen)
                                                 )
                                             }
                                         }
 
                                         -1 -> {
                                             // dislike chosen
-                                            IconButton(onClick = {}) {
+                                            IconButton(onClick = {
+                                            }) {
                                                 Icon(
                                                     painter = painterResource(id = R.drawable.ic_dislike_filled),
-                                                    contentDescription = "Send"
+                                                    contentDescription = stringResource(R.string.dislike_chosen)
                                                 )
                                             }
                                         }
@@ -293,10 +311,11 @@ fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiM
                                             // like
                                             IconButton(onClick = {
                                                 feedBackState.value = 1
+                                                onClickFeedback(genAiMessage.id, 1, null)
                                             }) {
                                                 Icon(
                                                     painter = painterResource(id = R.drawable.ic_like),
-                                                    contentDescription = "Send"
+                                                    contentDescription = stringResource(R.string.like)
                                                 )
                                             }
 
@@ -304,10 +323,11 @@ fun SingleStructuredResponse(modifier: Modifier = Modifier, genAiMessage: GenAiM
                                             IconButton(onClick = {
                                                 showDislikeReasons.value = true
                                                 feedBackState.value = -1
+                                                onClickFeedback(genAiMessage.id, -1, null)
                                             }) {
                                                 Icon(
                                                     painter = painterResource(id = R.drawable.ic_dislike),
-                                                    contentDescription = "Send"
+                                                    contentDescription = stringResource(R.string.dislike)
                                                 )
                                             }
                                         }
@@ -396,12 +416,14 @@ fun ConversationPreview(modifier: Modifier = Modifier) {
         GenAiTextMessage(
             query = "I am the best",
             loading = true,
-            response = "I am a fan of Manchester United based in Nigeria and also interested in the success of the club in general"
+            response = "I am a fan of Manchester United based in Nigeria and also interested in the success of the club in general",
+            feedbackStatus = 0
         ),
         GenAiTextMessage(
             query = "What are the latest prediction for netflix stock price?",
             loading = false,
-            response = ""
+            response = "",
+            feedbackStatus = 1
         )
     )
     val conversation =

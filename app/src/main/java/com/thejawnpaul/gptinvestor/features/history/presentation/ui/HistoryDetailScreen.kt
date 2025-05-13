@@ -51,7 +51,6 @@ fun HistoryDetailScreen(modifier: Modifier = Modifier, navController: NavControl
                         viewModel.sendFeedback(messageId, status, reason)
                     },
                     onCopy = { text ->
-
                     }
                 )
             }

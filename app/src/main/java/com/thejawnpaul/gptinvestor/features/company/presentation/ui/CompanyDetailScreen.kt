@@ -136,8 +136,9 @@ fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewMo
                             onClickNews = {
                                 navController.navigate(Screen.WebViewScreen.createRoute(it))
                             },
-                            onClickSuggestion = {
-                                viewModel.getSuggestedPromptResponse(it.query)
+                            onClickFeedback = { messageId, status, reason ->
+                            },
+                            onCopy = {
                             }
                         )
                     }

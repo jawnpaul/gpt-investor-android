@@ -149,8 +149,12 @@ class HistoryViewModel @Inject constructor(
         conversationView.update {
             (it.conversation as? StructuredConversation)?.let { conversation ->
                 val updatedMessages = conversation.messageList.map { message ->
-                    if (message.id == messageId) (message as? GenAiTextMessage)?.copy(feedbackStatus = status)
-                        ?: message else message
+                    if (message.id == messageId) {
+                        (message as? GenAiTextMessage)?.copy(feedbackStatus = status)
+                            ?: message
+                    } else {
+                        message
+                    }
                 }
                 it.copy(conversation = conversation.copy(messageList = updatedMessages.toMutableList()))
             } ?: it

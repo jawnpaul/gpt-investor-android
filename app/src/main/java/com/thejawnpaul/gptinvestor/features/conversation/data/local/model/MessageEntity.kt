@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.conversation.data.local.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -28,7 +29,9 @@ data class MessageEntity(
     val query: String? = null,
     val response: String? = null,
     val companyDetailRemoteResponse: CompanyDetailRemoteResponse? = null,
-    val createdAt: Long
+    val createdAt: Long,
+    @ColumnInfo(defaultValue = "0")
+    val feedbackStatus: Int = 0
 ) {
     fun toGenAiMessage(): GenAiMessage {
         return if (companyDetailRemoteResponse != null) {
@@ -37,7 +40,8 @@ data class MessageEntity(
             GenAiTextMessage(
                 id = messageId,
                 query = query.toString(),
-                response = response.toString()
+                response = response.toString(),
+                feedbackStatus = feedbackStatus
             )
         }
     }

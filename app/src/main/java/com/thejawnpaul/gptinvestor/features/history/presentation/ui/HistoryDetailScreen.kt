@@ -47,7 +47,12 @@ fun HistoryDetailScreen(modifier: Modifier = Modifier, navController: NavControl
                     onClickNews = {
                         navController.navigate(Screen.WebViewScreen.createRoute(it))
                     },
-                    onClickSuggestion = { viewModel.getSuggestedPromptResponse(it.query) }
+                    onClickFeedback = { messageId, status, reason ->
+                        viewModel.sendFeedback(messageId, status, reason)
+                    },
+                    onCopy = { text ->
+
+                    }
                 )
             }
 

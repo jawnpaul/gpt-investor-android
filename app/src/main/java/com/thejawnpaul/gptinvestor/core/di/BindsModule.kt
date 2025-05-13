@@ -6,6 +6,8 @@ import com.thejawnpaul.gptinvestor.features.company.data.repository.CompanyRepos
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import com.thejawnpaul.gptinvestor.features.conversation.data.repository.ConversationRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
+import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
+import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepositoryImpl
 import com.thejawnpaul.gptinvestor.features.history.data.repository.HistoryRepository
 import com.thejawnpaul.gptinvestor.features.history.domain.repository.IHistoryRepository
 import com.thejawnpaul.gptinvestor.features.investor.data.repository.InvestorRepository
@@ -38,4 +40,7 @@ abstract class BindsModule {
 
     @Binds
     abstract fun providesAuthRepository(repository: AuthenticationRepositoryImpl): AuthenticationRepository
+
+    @Binds
+    abstract fun providesFeedbackRepository(repository: FeedbackRepositoryImpl): FeedbackRepository
 }

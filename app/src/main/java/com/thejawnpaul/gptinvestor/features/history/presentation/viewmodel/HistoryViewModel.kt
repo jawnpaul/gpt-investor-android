@@ -2,12 +2,15 @@ package com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.ConversationPrompt
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
+import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
 import com.thejawnpaul.gptinvestor.features.history.domain.usecases.GetAllHistoryUseCase
 import com.thejawnpaul.gptinvestor.features.history.domain.usecases.GetSingleHistoryUseCase
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryConversationView
@@ -16,6 +19,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @HiltViewModel
@@ -23,7 +27,8 @@ class HistoryViewModel @Inject constructor(
     private val getAllHistoryUseCase: GetAllHistoryUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val getSingleHistoryUseCase: GetSingleHistoryUseCase,
-    private val getInputPromptUseCase: GetInputPromptUseCase
+    private val getInputPromptUseCase: GetInputPromptUseCase,
+    private val fedBackRepository: FeedbackRepository
 ) :
     ViewModel() {
 
@@ -137,6 +142,21 @@ class HistoryViewModel @Inject constructor(
                 loading = conversation.messageList.last().loading,
                 conversation = conversation
             )
+        }
+    }
+
+    fun sendFeedback(messageId: Long, status: Int, reason: String?) {
+        conversationView.update {
+            (it.conversation as? StructuredConversation)?.let { conversation ->
+                val updatedMessages = conversation.messageList.map { message ->
+                    if (message.id == messageId) (message as? GenAiTextMessage)?.copy(feedbackStatus = status)
+                        ?: message else message
+                }
+                it.copy(conversation = conversation.copy(messageList = updatedMessages.toMutableList()))
+            } ?: it
+        }
+        viewModelScope.launch {
+            fedBackRepository.giveFeedback(messageId, status, reason)
         }
     }
 

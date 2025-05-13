@@ -8,7 +8,16 @@ data class SingleCompanyView(
     val conversation: Conversation = CompanyDetailDefaultConversation(id = 0, response = null),
     val error: String? = null,
     val companyName: String = "",
-    val inputQuery: String = ""
+    val inputQuery: String = "",
+    val header: CompanyHeaderPresentation = CompanyHeaderPresentation()
 ) {
     val enableSend = inputQuery.trim().isNotEmpty()
 }
+
+data class CompanyHeaderPresentation(
+    val companyTicker: String = "",
+    val companyLogo: String = "",
+    val price: Float = 0f,
+    val percentageChange: Float = 0f,
+    val companyName: String = ""
+)

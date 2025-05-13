@@ -17,6 +17,7 @@ import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetSectorCom
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.SearchCompaniesUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.AllCompanyView
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyFinancialsView
+import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCompanyView
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyDetailDefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyPrompt
@@ -98,7 +99,14 @@ class CompanyViewModel @Inject constructor(
                                 response = company
                             ),
                             loading = false,
-                            companyName = company.name
+                            companyName = company.name,
+                            header = CompanyHeaderPresentation(
+                                companyTicker = company.ticker,
+                                companyLogo = company.imageUrl,
+                                price = company.price,
+                                percentageChange = company.change,
+                                companyName = company.name
+                            )
                         )
                     }
                 }

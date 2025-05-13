@@ -4,10 +4,12 @@ import android.net.Uri
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,6 +45,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -63,6 +66,7 @@ import com.thejawnpaul.gptinvestor.features.company.data.remote.model.Historical
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.NewsPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.TimePeriod
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
 fun CompanyDetailDataSource(modifier: Modifier = Modifier, list: List<NewsPresentation> = emptyList(), source: String) {
@@ -267,22 +271,39 @@ fun AboutStockCard(modifier: Modifier = Modifier, companySummary: String, compan
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CompanyDetailTab(modifier: Modifier = Modifier, company: CompanyDetailRemoteResponse, onClickNews: (url: String) -> Unit) {
+fun CompanyDetailTab(modifier: Modifier, company: CompanyDetailRemoteResponse, onClickNews: (url: String) -> Unit) {
     val titles = listOf("Overview", "Key ratios", "News")
     val selectedTabIndex = remember { mutableIntStateOf(0) }
-    Column(modifier = Modifier.fillMaxSize()) {
-        PrimaryTabRow(selectedTabIndex = selectedTabIndex.intValue) {
+    val gptInvestorColors = LocalGPTInvestorColors.current
+    Column(modifier = modifier) {
+        PrimaryTabRow(
+            modifier = Modifier.padding(horizontal = 16.dp)
+                .clip(RoundedCornerShape(50)),
+            selectedTabIndex = selectedTabIndex.intValue,
+            indicator = {},
+            containerColor = MaterialTheme.colorScheme.surface
+        ) {
             titles.forEachIndexed { index, title ->
+                val isSelected = selectedTabIndex.intValue == index
+
+                val backgroundColor = if (isSelected) gptInvestorColors.utilColors.borderBright10 else Color.Transparent
+
                 Tab(
-                    selected = selectedTabIndex.intValue == index,
+                    modifier = Modifier
+                        .height(IntrinsicSize.Min)
+                        .clip(RoundedCornerShape(50))
+                        .background(backgroundColor),
+                    selected = isSelected,
+                    unselectedContentColor = gptInvestorColors.textColors.secondary50,
                     onClick = {
                         selectedTabIndex.intValue = index
                     },
                     text = {
                         Text(
                             text = title,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = if (isSelected) MaterialTheme.typography.labelLarge else MaterialTheme.typography.bodyMedium
                         )
                     }
                 )
@@ -451,7 +472,11 @@ fun CompanyDetailsNews(modifier: Modifier = Modifier, news: List<NewsPresentatio
 
 @Composable
 fun CompanyDetailNewsItem(modifier: Modifier = Modifier, news: NewsPresentation, onClick: (url: String) -> Unit) {
-    OutlinedCard(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp)
+    ) {
         Column(modifier = Modifier.padding(8.dp)) {
             Text(
                 text = news.publisher,
@@ -492,6 +517,9 @@ fun PreviewComposable(modifier: Modifier = Modifier) {
     GPTInvestorTheme {
         Surface {
             Column(modifier = Modifier.fillMaxSize()) {
+                val tabs = listOf("Overview", "Key Ratio", "News", "Another Tab")
+                var selectedTabIndex by remember { mutableIntStateOf(0) }
+
                 CompanyDetailDataSource(list = listOf(), source = "")
 
                 CompanyDetailPriceCard(

@@ -35,7 +35,7 @@ class CompanyRepository @Inject constructor(
                 emit(Either.Right(local))
             }
 
-            val response = apiService.getCompanies()
+            /*val response = apiService.getCompanies()
             if (response.isSuccessful) {
                 response.body()?.let {
                     val remoteEntities = it.map { companyRemote -> companyRemote.toEntity() }
@@ -60,7 +60,7 @@ class CompanyRepository @Inject constructor(
             }
             updateCompanyList()?.let {
                 emit(Either.Right(it))
-            }
+            }*/
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.ServerError))

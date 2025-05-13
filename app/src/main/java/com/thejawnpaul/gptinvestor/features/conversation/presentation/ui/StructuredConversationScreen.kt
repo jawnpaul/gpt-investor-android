@@ -367,6 +367,7 @@ fun SingleStructuredResponse(
 
                     // tabs
                     CompanyDetailTab(
+                        modifier = Modifier.fillMaxWidth(),
                         company = entity,
                         onClickNews = onClickNews
                     )

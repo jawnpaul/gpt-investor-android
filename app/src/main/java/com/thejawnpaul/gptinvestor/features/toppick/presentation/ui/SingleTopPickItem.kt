@@ -3,7 +3,6 @@ package com.thejawnpaul.gptinvestor.features.toppick.presentation.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,11 +24,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
@@ -45,28 +42,112 @@ fun SingleTopPickItem(modifier: Modifier = Modifier, pickPresentation: TopPickPr
         modifier = Modifier.padding(horizontal = 16.dp),
         onClick = { onClick(pickPresentation.id) }
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
+        Column(
+            modifier = modifier
                 .padding(16.dp)
-                .height(60.dp)
-
+                .clickable(
+                    interactionSource = null,
+                    onClick = { onClick(pickPresentation.id) },
+                    indication = null
+                )
         ) {
-            Text(
-                text = pickPresentation.companyName,
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 20.sp
-                ),
-                maxLines = 1,
-                modifier = Modifier.align(Alignment.TopStart)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Surface(
+                    modifier = Modifier.size(32.dp),
+                    shape = CircleShape
+                ) {
+                    AsyncImage(
+                        model = pickPresentation.imageUrl,
+                        modifier = Modifier.fillMaxSize(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        // Text - company ticker
+                        Text(
+                            text = pickPresentation.ticker,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        // Text - company name
+                        Text(
+                            modifier = Modifier,
+                            text = pickPresentation.companyName,
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = gptInvestorColors.textColors.secondary50
+                        )
+                    }
+
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        // Text - company price
+                        Text(
+                            text = "$${pickPresentation.currentPrice.toTwoDecimalPlaces()}",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        // Text - percentage change
+                        if (pickPresentation.percentageChange < 0) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Image(
+                                    modifier = Modifier.size(12.dp),
+                                    painter = painterResource(R.drawable.trending_down),
+                                    contentDescription = null
+                                )
+                                Text(
+                                    text = "${pickPresentation.percentageChange}%",
+                                    color = Color(212, 38, 32),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        } else {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Image(
+                                    modifier = Modifier.size(12.dp),
+                                    painter = painterResource(R.drawable.trending_up),
+                                    contentDescription = null,
+                                    colorFilter = ColorFilter.tint(
+                                        gptInvestorColors.greenColors.defaultGreen
+                                    )
+                                )
+                                Text(
+                                    text = "+${pickPresentation.percentageChange}%",
+                                    color = gptInvestorColors.greenColors.defaultGreen,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
+                modifier = Modifier,
                 text = pickPresentation.rationale,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.align(Alignment.BottomStart)
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

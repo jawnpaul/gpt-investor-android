@@ -24,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -53,12 +54,12 @@ fun AllTopPicksScreen(modifier: Modifier = Modifier, navController: NavControlle
                         contentDescription = stringResource(id = R.string.back)
                     )
                 }
-
                 Text(
                     text = stringResource(R.string.all_top_picks),
                     style = MaterialTheme.typography.headlineSmall,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center
                 )
             }
 

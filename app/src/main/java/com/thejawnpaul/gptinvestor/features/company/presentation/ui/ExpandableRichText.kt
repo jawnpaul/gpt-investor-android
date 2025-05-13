@@ -4,8 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,18 +56,28 @@ fun ExpandableRichText(modifier: Modifier = Modifier, textModifier: Modifier = M
                 val textToShow = if (isExpanded) {
                     text
                 } else {
-                    text.substring(startIndex = 0, endIndex = text.length.div(6))
-                        .dropLastWhile { Character.isWhitespace(it) || it == '.' }
+                    if (text.length < 250) {
+                        text
+                    } else {
+                        text.substring(startIndex = 0, endIndex = text.length.div(6))
+                            .dropLastWhile { Character.isWhitespace(it) || it == '.' }
+                    }
                 }
                 Markdown(content = textToShow)
 
-                OutlinedButton(onClick = {
-                    isExpanded = !isExpanded
-                }, modifier = Modifier.align(Alignment.BottomEnd)) {
-                    if (isExpanded) {
-                        Text(text = "Show less")
-                    } else {
-                        Text(text = "Show more")
+                if (text.length > 250) {
+                    TextButton(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd),
+                        onClick = {
+                            isExpanded = !isExpanded
+                        }
+                    ) {
+                        if (isExpanded) {
+                            Text(text = "Show less")
+                        } else {
+                            Text(text = "Show more")
+                        }
                     }
                 }
             }

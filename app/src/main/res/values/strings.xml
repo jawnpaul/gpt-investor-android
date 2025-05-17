@@ -85,4 +85,7 @@
     <string name="like_chosen">Like chosen</string>
     <string name="dislike_chosen">Dislike chosen</string>
     <string name="none_chosen">None chosen</string>
+    <string name="read_more">Read more</string>
+    <string name="read_less">Read less</string>
+    <string name="sources">Sources</string>
 </resources>

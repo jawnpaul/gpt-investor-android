@@ -118,7 +118,7 @@ fun SmoothLineGraph(data: List<GraphPoint>) {
                         repeat(horizontalLines) { i ->
                             val startY = sectionSize * (i + 1)
                             drawLine(
-                                color = gptInvestorColors.textColors.secondary50,
+                                color = gptInvestorColors.utilColors.borderBright10,
                                 start = Offset(0f, startY),
                                 end = Offset(size.width, startY),
                                 strokeWidth = barWidthPx,

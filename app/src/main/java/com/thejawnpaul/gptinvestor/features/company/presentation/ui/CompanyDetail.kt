@@ -19,8 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -74,7 +72,10 @@ fun CompanyDetailDataSource(modifier: Modifier, list: List<NewsPresentation> = e
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(text = "Sources", style = MaterialTheme.typography.bodySmall)
+            Text(
+                text = stringResource(R.string.sources),
+                style = MaterialTheme.typography.bodySmall
+            )
             OverlappingIcons(
                 modifier = Modifier,
                 images = list.map { it.imageUrl }.take(4)
@@ -206,13 +207,13 @@ fun AboutStockCard(modifier: Modifier, companySummary: String, companyName: Stri
             text = companySummary,
             collapsedMaxLine = 4,
             style = MaterialTheme.typography.bodyMedium,
-            showMoreText = "Read More",
+            showMoreText = stringResource(R.string.read_more),
             showMoreStyle = SpanStyle(
                 textDecoration = TextDecoration.Underline,
                 fontStyle = MaterialTheme.typography.linkMedium.fontStyle,
                 fontWeight = FontWeight.W500
             ),
-            showLessText = "Read Less",
+            showLessText = stringResource(R.string.read_less),
             showLessStyle = SpanStyle(
                 textDecoration = TextDecoration.Underline,
                 fontStyle = MaterialTheme.typography.linkMedium.fontStyle,
@@ -356,7 +357,9 @@ fun CompanyHistoryGraph(modifier: Modifier, historicalData: List<HistoricalData>
             )
 
             TimePeriodRow(
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
                 list = options,
                 selected = selected,
                 onClick = {
@@ -488,55 +491,64 @@ fun CompanyKeyRatios(modifier: Modifier, marketCap: Long, peRatio: Float, revenu
 }
 
 @Composable
-fun CompanyDetailsNews(modifier: Modifier = Modifier, news: List<NewsPresentation>, onClick: (url: String) -> Unit) {
-    Column(
-        modifier = Modifier
+fun CompanyDetailsNews(modifier: Modifier, news: List<NewsPresentation>, onClick: (url: String) -> Unit) {
+    Surface(
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .padding(16.dp),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        news.take(3).forEach { item ->
-            CompanyDetailNewsItem(news = item, onClick = onClick)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            news.take(3).forEachIndexed { index, item ->
+                CompanyDetailNewsItem(
+                    modifier = Modifier,
+                    news = item,
+                    onClick = onClick
+                )
+
+                if (index < 2) {
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun CompanyDetailNewsItem(modifier: Modifier = Modifier, news: NewsPresentation, onClick: (url: String) -> Unit) {
-    OutlinedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp)
-    ) {
-        Column(modifier = Modifier.padding(8.dp)) {
-            Text(
-                text = news.publisher,
-                modifier = Modifier.padding(bottom = 8.dp),
-                maxLines = 2,
-                style = MaterialTheme.typography.titleMedium,
-                overflow = TextOverflow.Ellipsis
-            )
+fun CompanyDetailNewsItem(modifier: Modifier, news: NewsPresentation, onClick: (url: String) -> Unit) {
+    Column(modifier = modifier) {
+        Text(
+            text = news.publisher,
+            modifier = Modifier.padding(bottom = 8.dp),
+            maxLines = 2,
+            style = MaterialTheme.typography.titleMedium,
+            overflow = TextOverflow.Ellipsis
+        )
 
-            Text(
-                modifier = Modifier.padding(bottom = 8.dp),
-                text = news.title,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
+        Text(
+            modifier = Modifier.padding(bottom = 8.dp),
+            text = news.title,
+            style = MaterialTheme.typography.bodyMedium
+        )
 
-            Column(
-                modifier = Modifier
-                    .padding(bottom = 4.dp)
-                    .clickable { onClick(Uri.encode(news.link)) }
-            ) {
-                Row {
-                    Text(stringResource(R.string.learn_more).uppercase())
-                    Image(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = null
-                    )
-                }
-                HorizontalDivider(modifier = Modifier.width(128.dp))
-            }
+        Column(
+            modifier = Modifier
+                .padding(bottom = 4.dp)
+                .clickable { onClick(Uri.encode(news.link)) }
+        ) {
+            Text(
+                text = stringResource(R.string.read_more),
+                style = MaterialTheme.typography.linkMedium,
+                textDecoration = TextDecoration.Underline
+            )
         }
     }
 }
@@ -573,6 +585,7 @@ fun PreviewComposable(modifier: Modifier = Modifier) {
                 )
 
                 CompanyDetailNewsItem(
+                    modifier = Modifier,
                     news = NewsPresentation(
                         title = "The strength of the black panther has been stripped away",
                         id = "",

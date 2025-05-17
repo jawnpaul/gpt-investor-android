@@ -80,6 +80,7 @@ fun ExpandableText(
                     if (isExpanded) {
                         // Display the full text and "Show Less" button when expanded.
                         append(text)
+                        append(" ")
                         withStyle(style = showLessStyle) { append(showLessText) }
                     } else {
                         // Display truncated text and "Show More" button when collapsed.
@@ -87,7 +88,10 @@ fun ExpandableText(
                             .dropLast(showMoreText.length)
                             .dropLastWhile { Character.isWhitespace(it) || it == '.' }
                         append(adjustText)
-                        withStyle(style = showMoreStyle) { append(showMoreText) }
+                        append("...")
+                        withStyle(style = showMoreStyle) {
+                            append(showMoreText)
+                        }
                     }
                 } else {
                     // Display the full text when not clickable.

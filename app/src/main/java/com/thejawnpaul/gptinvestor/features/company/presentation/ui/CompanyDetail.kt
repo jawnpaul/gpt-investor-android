@@ -27,9 +27,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -357,27 +354,15 @@ fun CompanyHistoryGraph(modifier: Modifier, historicalData: List<HistoricalData>
                 TimePeriod.ThreeMonths(),
                 TimePeriod.OneYear()
             )
-            SingleChoiceSegmentedButtonRow(
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
-            ) {
-                options.forEachIndexed { index, timePeriod ->
-                    SegmentedButton(
-                        icon = {},
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = options.size
-                        ),
-                        onClick = {
-                            selected = options[index]
-                        },
-                        selected = selected == timePeriod
-                    ) {
-                        Text(timePeriod.title)
-                    }
+
+            TimePeriodRow(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                list = options,
+                selected = selected,
+                onClick = {
+                    selected = it
                 }
-            }
+            )
 
             HorizontalDivider(
                 modifier = Modifier
@@ -388,7 +373,7 @@ fun CompanyHistoryGraph(modifier: Modifier, historicalData: List<HistoricalData>
 
             // About company card
             AboutStockCard(
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp),
                 companySummary = companySummary,
                 companyName = companyName
             )
@@ -398,6 +383,49 @@ fun CompanyHistoryGraph(modifier: Modifier, historicalData: List<HistoricalData>
                 list = sources
             )
         }
+    }
+}
+
+@Composable
+fun TimePeriodRow(modifier: Modifier, list: List<TimePeriod>, selected: TimePeriod, onClick: (period: TimePeriod) -> Unit) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        list.forEach {
+            SingleTimePeriod(
+                modifier = Modifier.padding(end = 8.dp),
+                period = it,
+                isSelected = it == selected,
+                onClick = onClick
+            )
+        }
+    }
+}
+
+@Composable
+fun SingleTimePeriod(modifier: Modifier, period: TimePeriod, isSelected: Boolean, onClick: (period: TimePeriod) -> Unit) {
+    if (isSelected) {
+        Surface(
+            modifier = modifier,
+            shape = RoundedCornerShape(8.dp),
+            onClick = { onClick(period) },
+            color = LocalGPTInvestorColors.current.utilColors.borderBright10
+        ) {
+            Text(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp),
+                text = period.title,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+    } else {
+        Text(
+            modifier = Modifier.clickable { onClick(period) },
+            text = period.title,
+            style = MaterialTheme.typography.bodySmall,
+            color = LocalGPTInvestorColors.current.textColors.secondary50
+        )
     }
 }
 
@@ -450,7 +478,10 @@ fun CompanyKeyRatios(modifier: Modifier, marketCap: Long, peRatio: Float, revenu
                     text = stringResource(R.string.revenue).uppercase(),
                     style = MaterialTheme.typography.titleMedium
                 )
-                Text(text = "$${revenue.toReadable()}", style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = "$${revenue.toReadable()}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
     }

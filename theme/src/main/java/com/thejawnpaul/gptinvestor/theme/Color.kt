@@ -81,6 +81,7 @@ data class TextColors(
 @Immutable
 data class GreenColors(
     val defaultGreen: Color,
+    val allGreen: Color
 )
 
 @Immutable
@@ -96,6 +97,7 @@ val gptInvestorColorsDark = GPTInvestorColors(
     ),
     greenColors = GreenColors(
         defaultGreen = Color(0xFF05C702),
+        allGreen = Color(0xFF02A400)
     ),
     utilColors = UtilColors(
         allDark2 = Color(0xFF180C25),
@@ -110,6 +112,7 @@ val gptInvestorColorsLight = GPTInvestorColors(
     ),
     greenColors = GreenColors(
         defaultGreen = Color(0xFF05C702),
+        allGreen = Color(0xFF02A400)
     ),
     utilColors = UtilColors(
         allDark2 = Color(0xFFFBFAFD),

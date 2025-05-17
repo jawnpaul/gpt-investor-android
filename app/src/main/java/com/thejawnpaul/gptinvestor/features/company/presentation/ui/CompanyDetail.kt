@@ -21,12 +21,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.PrimaryTabRow
@@ -41,7 +38,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,14 +46,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.halilibo.richtext.commonmark.Markdown
-import com.halilibo.richtext.ui.material3.RichText
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.core.utility.toReadable
 import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
@@ -67,96 +63,42 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.model.NewsPrese
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.TimePeriod
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import com.thejawnpaul.gptinvestor.theme.linkMedium
 
 @Composable
-fun CompanyDetailDataSource(modifier: Modifier = Modifier, list: List<NewsPresentation> = emptyList(), source: String) {
-    var expanded by rememberSaveable { mutableStateOf(false) }
+fun CompanyDetailDataSource(modifier: Modifier, list: List<NewsPresentation> = emptyList()) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(width = 2.dp, color = DividerDefaults.color)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(text = "Sources", style = MaterialTheme.typography.bodySmall)
+            OverlappingIcons(
+                modifier = Modifier,
+                images = list.map { it.imageUrl }.take(4)
+            )
+        }
+    }
+}
 
-    OutlinedCard(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
-        if (expanded) {
-            Box(
+@Composable
+fun OverlappingIcons(modifier: Modifier, images: List<String>) {
+    Box(modifier) {
+        images.reversed().forEachIndexed { index, it ->
+            AsyncImage(
+                model = it,
                 modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxWidth()
-            ) {
-                RichText(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                ) {
-                    Markdown(content = source)
-                }
-
-                IconButton(modifier = Modifier.align(Alignment.TopEnd), onClick = {
-                    expanded = !expanded
-                }) {
-                    Icon(
-                        imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                        contentDescription = if (expanded) {
-                            stringResource(R.string.show_less)
-                        } else {
-                            stringResource(R.string.show_more)
-                        }
-                    )
-                }
-            }
-        } else {
-            Row(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Image(
-                        modifier = Modifier.padding(end = 4.dp),
-                        painter = painterResource(R.drawable.data_from_icon),
-                        contentDescription = null
-                    )
-
-                    Text(
-                        text = stringResource(R.string.data_from),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        list.take(4).forEachIndexed { i, it ->
-                            Surface(
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .padding(),
-                                shape = CircleShape,
-                                border = BorderStroke(width = 2.dp, color = Color(227, 239, 252))
-                            ) {
-                                AsyncImage(
-                                    model = it.imageUrl,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(16.dp)
-                                        .align(Alignment.CenterVertically),
-                                    contentScale = ContentScale.Crop
-                                )
-                            }
-                        }
-                    }
-
-                    IconButton(onClick = {
-                        expanded = !expanded
-                    }) {
-                        Icon(
-                            imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                            contentDescription = if (expanded) {
-                                stringResource(R.string.show_less)
-                            } else {
-                                stringResource(R.string.show_more)
-                            }
-                        )
-                    }
-                }
-            }
+                    .padding(start = (index * 12).dp)
+                    .size(20.dp)
+                    .clip(CircleShape),
+                contentDescription = null,
+                contentScale = ContentScale.Crop
+            )
         }
     }
 }
@@ -255,17 +197,31 @@ fun PercentageChangePill(modifier: Modifier = Modifier, change: Float, date: Str
 }
 
 @Composable
-fun AboutStockCard(modifier: Modifier = Modifier, companySummary: String, companyName: String) {
-    OutlinedCard(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
-        Column(modifier = Modifier.padding(8.dp)) {
-            Text(
-                stringResource(R.string.about_company_name, companyName),
-                modifier = Modifier.padding(bottom = 8.dp),
-                style = MaterialTheme.typography.titleMedium
-            )
+fun AboutStockCard(modifier: Modifier, companySummary: String, companyName: String) {
+    Column(modifier = modifier) {
+        Text(
+            text = stringResource(R.string.about_company_name, companyName),
+            modifier = Modifier.padding(bottom = 8.dp),
+            style = MaterialTheme.typography.titleMedium
+        )
 
-            ExpandableText(text = companySummary, collapsedMaxLine = 4)
-        }
+        ExpandableText(
+            text = companySummary,
+            collapsedMaxLine = 4,
+            style = MaterialTheme.typography.bodyMedium,
+            showMoreText = "Read More",
+            showMoreStyle = SpanStyle(
+                textDecoration = TextDecoration.Underline,
+                fontStyle = MaterialTheme.typography.linkMedium.fontStyle,
+                fontWeight = FontWeight.W500
+            ),
+            showLessText = "Read Less",
+            showLessStyle = SpanStyle(
+                textDecoration = TextDecoration.Underline,
+                fontStyle = MaterialTheme.typography.linkMedium.fontStyle,
+                fontWeight = FontWeight.W500
+            )
+        )
     }
 }
 
@@ -277,7 +233,8 @@ fun CompanyDetailTab(modifier: Modifier, company: CompanyDetailRemoteResponse, o
     val gptInvestorColors = LocalGPTInvestorColors.current
     Column(modifier = modifier) {
         PrimaryTabRow(
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
                 .clip(RoundedCornerShape(50)),
             selectedTabIndex = selectedTabIndex.intValue,
             indicator = {},
@@ -286,7 +243,8 @@ fun CompanyDetailTab(modifier: Modifier, company: CompanyDetailRemoteResponse, o
             titles.forEachIndexed { index, title ->
                 val isSelected = selectedTabIndex.intValue == index
 
-                val backgroundColor = if (isSelected) gptInvestorColors.utilColors.borderBright10 else Color.Transparent
+                val backgroundColor =
+                    if (isSelected) gptInvestorColors.utilColors.borderBright10 else Color.Transparent
 
                 Tab(
                     modifier = Modifier
@@ -318,7 +276,11 @@ fun CompanyDetailTab(modifier: Modifier, company: CompanyDetailRemoteResponse, o
             when (targetState) {
                 0 -> {
                     CompanyHistoryGraph(
-                        historicalData = company.historicalData
+                        modifier = Modifier,
+                        historicalData = company.historicalData,
+                        companySummary = company.about,
+                        companyName = company.name,
+                        sources = company.news.map { it.toPresentation() }
                     )
                 }
 
@@ -344,11 +306,13 @@ fun CompanyDetailTab(modifier: Modifier, company: CompanyDetailRemoteResponse, o
 }
 
 @Composable
-fun CompanyHistoryGraph(modifier: Modifier = Modifier, historicalData: List<HistoricalData>) {
+fun CompanyHistoryGraph(modifier: Modifier, historicalData: List<HistoricalData>, companyName: String, companySummary: String, sources: List<NewsPresentation> = emptyList()) {
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(width = 2.dp, color = DividerDefaults.color)
     ) {
         var selected by remember { mutableStateOf<TimePeriod>(TimePeriod.OneYear()) }
 
@@ -414,45 +378,80 @@ fun CompanyHistoryGraph(modifier: Modifier = Modifier, historicalData: List<Hist
                     }
                 }
             }
+
+            HorizontalDivider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                thickness = 2.dp
+            )
+
+            // About company card
+            AboutStockCard(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                companySummary = companySummary,
+                companyName = companyName
+            )
+
+            CompanyDetailDataSource(
+                modifier = Modifier.padding(16.dp),
+                list = sources
+            )
         }
     }
 }
 
 @Composable
-fun CompanyKeyRatios(modifier: Modifier = Modifier, marketCap: Long, peRatio: Float, revenue: Long) {
-    Column(
-        modifier = Modifier
+fun CompanyKeyRatios(modifier: Modifier, marketCap: Long, peRatio: Float, revenue: Long) {
+    Surface(
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .padding(16.dp),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(width = 2.dp, color = DividerDefaults.color)
     ) {
-        Column(modifier = Modifier.padding(top = 16.dp)) {
-            Text(
-                modifier = Modifier.padding(bottom = 16.dp),
-                text = stringResource(R.string.market_cap).uppercase(),
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text("$${marketCap.toReadable()}")
-            HorizontalDivider(modifier = Modifier.fillMaxWidth())
-        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Column(modifier = Modifier.padding()) {
+                Text(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    text = stringResource(R.string.market_cap).uppercase(),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = "$${marketCap.toReadable()}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
 
-        Column(modifier = Modifier.padding(top = 16.dp)) {
-            Text(
-                modifier = Modifier.padding(bottom = 16.dp),
-                text = stringResource(R.string.pe_ratio).uppercase(),
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text("${peRatio.toTwoDecimalPlaces()}")
-            HorizontalDivider(modifier = Modifier.fillMaxWidth())
-        }
+            HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
 
-        Column(modifier = Modifier.padding(top = 16.dp)) {
-            Text(
-                modifier = Modifier.padding(bottom = 16.dp),
-                text = stringResource(R.string.revenue).uppercase(),
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text("$${revenue.toReadable()}")
-            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+            Column(modifier = Modifier.padding()) {
+                Text(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    text = stringResource(R.string.pe_ratio).uppercase(),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = "${peRatio.toTwoDecimalPlaces()}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+
+            HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
+
+            Column(modifier = Modifier.padding()) {
+                Text(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    text = stringResource(R.string.revenue).uppercase(),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(text = "$${revenue.toReadable()}", style = MaterialTheme.typography.bodyLarge)
+            }
         }
     }
 }
@@ -520,7 +519,7 @@ fun PreviewComposable(modifier: Modifier = Modifier) {
                 val tabs = listOf("Overview", "Key Ratio", "News", "Another Tab")
                 var selectedTabIndex by remember { mutableIntStateOf(0) }
 
-                CompanyDetailDataSource(list = listOf(), source = "")
+                CompanyDetailDataSource(modifier = Modifier, list = listOf())
 
                 CompanyDetailPriceCard(
                     ticker = "AAPL",
@@ -530,11 +529,17 @@ fun PreviewComposable(modifier: Modifier = Modifier) {
                 )
 
                 AboutStockCard(
+                    modifier = Modifier,
                     companySummary = "I am\nthe best \n of",
                     companyName = "Microsoft corporation"
                 )
 
-                CompanyKeyRatios(marketCap = 120000000L, peRatio = 45.3F, revenue = 1010000L)
+                CompanyKeyRatios(
+                    modifier = Modifier,
+                    marketCap = 120000000L,
+                    peRatio = 45.3F,
+                    revenue = 1010000L
+                )
 
                 CompanyDetailNewsItem(
                     news = NewsPresentation(

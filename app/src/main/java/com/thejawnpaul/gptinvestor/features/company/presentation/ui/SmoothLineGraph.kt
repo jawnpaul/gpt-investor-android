@@ -43,11 +43,13 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toIntRect
 import androidx.compose.ui.unit.toSize
+import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
 @Composable
 fun SmoothLineGraph(data: List<GraphPoint>) {
+    val gptInvestorColors = LocalGPTInvestorColors.current
     Box(
         modifier = Modifier
             .background(Color.Transparent)
@@ -109,14 +111,17 @@ fun SmoothLineGraph(data: List<GraphPoint>) {
 
                     onDrawBehind {
                         val barWidthPx = 1.dp.toPx()
-                        drawRect(BarColor, style = Stroke(barWidthPx))
+                        drawRect(
+                            gptInvestorColors.textColors.secondary50,
+                            style = Stroke(barWidthPx)
+                        )
 
                         val verticalLines = 4
                         val verticalSize = size.width / (verticalLines + 1)
                         repeat(verticalLines) { i ->
                             val startX = verticalSize * (i + 1)
                             drawLine(
-                                BarColor,
+                                gptInvestorColors.textColors.secondary50,
                                 start = Offset(startX, 0f),
                                 end = Offset(startX, size.height),
                                 strokeWidth = barWidthPx
@@ -127,7 +132,7 @@ fun SmoothLineGraph(data: List<GraphPoint>) {
                         repeat(horizontalLines) { i ->
                             val startY = sectionSize * (i + 1)
                             drawLine(
-                                BarColor,
+                                gptInvestorColors.textColors.secondary50,
                                 start = Offset(0f, startY),
                                 end = Offset(size.width, startY),
                                 strokeWidth = barWidthPx
@@ -259,7 +264,6 @@ fun DrawScope.drawHighlight(highlightedWeek: Int, graphData: List<GraphPoint>, t
 data class GraphPoint(val date: String, val amount: Float)
 
 val PurpleBackgroundColor = Color(0xff322049)
-val BarColor = Color(0xffEEF3FA)
 val HighlightColor = Color.White.copy(alpha = 0.7f)
 
 /** Many thanks to

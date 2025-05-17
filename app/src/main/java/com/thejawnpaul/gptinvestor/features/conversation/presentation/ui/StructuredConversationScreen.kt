@@ -347,8 +347,8 @@ fun SingleStructuredResponse(
 
                     // data source
                     CompanyDetailDataSource(
-                        list = entity.news.map { it.toPresentation() },
-                        source = entity.newsSourcesString
+                        modifier = Modifier,
+                        list = entity.news.map { it.toPresentation() }
                     )
 
                     // price card
@@ -361,6 +361,7 @@ fun SingleStructuredResponse(
 
                     // about company card
                     AboutStockCard(
+                        modifier = Modifier,
                         companySummary = entity.about,
                         companyName = entity.name
                     )

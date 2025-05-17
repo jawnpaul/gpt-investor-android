@@ -97,11 +97,6 @@ fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewMo
                                             )
                                         }
                                     )
-                                    // about company card
-                                    AboutStockCard(
-                                        companySummary = company.about,
-                                        companyName = company.name
-                                    )
                                 }
                             }
                         }

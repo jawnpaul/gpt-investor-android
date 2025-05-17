@@ -61,11 +61,12 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.theme.linkMedium
 
 @Composable
-fun CompanyDetailDataSource(modifier: Modifier, list: List<NewsPresentation> = emptyList()) {
+fun CompanyDetailDataSource(modifier: Modifier, list: List<NewsPresentation> = emptyList(), onClick: () -> Unit) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(width = 2.dp, color = DividerDefaults.color)
+        border = BorderStroke(width = 2.dp, color = DividerDefaults.color),
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -225,7 +226,7 @@ fun AboutStockCard(modifier: Modifier, companySummary: String, companyName: Stri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CompanyDetailTab(modifier: Modifier, company: CompanyDetailRemoteResponse, onClickNews: (url: String) -> Unit) {
+fun CompanyDetailTab(modifier: Modifier, company: CompanyDetailRemoteResponse, onClickNews: (url: String) -> Unit, onClickSources: () -> Unit) {
     val titles = listOf("Overview", "Key ratios", "News")
     val selectedTabIndex = remember { mutableIntStateOf(0) }
     val gptInvestorColors = LocalGPTInvestorColors.current
@@ -278,7 +279,8 @@ fun CompanyDetailTab(modifier: Modifier, company: CompanyDetailRemoteResponse, o
                         historicalData = company.historicalData,
                         companySummary = company.about,
                         companyName = company.name,
-                        sources = company.news.map { it.toPresentation() }
+                        sources = company.news.map { it.toPresentation() },
+                        onClickSources = onClickSources
                     )
                 }
 
@@ -304,7 +306,14 @@ fun CompanyDetailTab(modifier: Modifier, company: CompanyDetailRemoteResponse, o
 }
 
 @Composable
-fun CompanyHistoryGraph(modifier: Modifier, historicalData: List<HistoricalData>, companyName: String, companySummary: String, sources: List<NewsPresentation> = emptyList()) {
+fun CompanyHistoryGraph(
+    modifier: Modifier,
+    historicalData: List<HistoricalData>,
+    companyName: String,
+    companySummary: String,
+    sources: List<NewsPresentation> = emptyList(),
+    onClickSources: () -> Unit
+) {
     Surface(
         modifier = modifier
             .fillMaxSize()
@@ -383,7 +392,8 @@ fun CompanyHistoryGraph(modifier: Modifier, historicalData: List<HistoricalData>
 
             CompanyDetailDataSource(
                 modifier = Modifier.padding(16.dp),
-                list = sources
+                list = sources,
+                onClick = onClickSources
             )
         }
     }
@@ -562,7 +572,7 @@ fun PreviewComposable(modifier: Modifier = Modifier) {
                 val tabs = listOf("Overview", "Key Ratio", "News", "Another Tab")
                 var selectedTabIndex by remember { mutableIntStateOf(0) }
 
-                CompanyDetailDataSource(modifier = Modifier, list = listOf())
+                CompanyDetailDataSource(modifier = Modifier, list = listOf(), onClick = {})
 
                 CompanyDetailPriceCard(
                     ticker = "AAPL",

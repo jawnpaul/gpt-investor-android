@@ -14,37 +14,45 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.AboutStockCard
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailDataSource
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailPriceCard
+import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailHeader
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailTab
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.ExpandableRichText
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
 import com.thejawnpaul.gptinvestor.features.conversation.data.repository.Suggestion
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntityMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiMessage
@@ -55,6 +63,7 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.theme.bodyChatBody
 import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StructuredConversationScreen(
     modifier: Modifier = Modifier,
@@ -65,56 +74,128 @@ fun StructuredConversationScreen(
     onClickFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
     onCopy: (String) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onNavigateUp) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                    contentDescription = stringResource(id = R.string.back)
+    val company = conversation.messageList.filterIsInstance<GenAiEntityMessage>().firstOrNull()
+
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = {
+            company?.let {
+                CompanyDetailHeader(
+                    modifier = Modifier.fillMaxWidth(),
+                    onNavigateUp = onNavigateUp,
+                    companyHeader = CompanyHeaderPresentation(
+                        companyTicker = it.entity?.ticker ?: "",
+                        companyName = it.entity?.name ?: "",
+                        companyLogo = it.entity?.imageUrl ?: "",
+                        price = it.entity?.price ?: 0f,
+                        percentageChange = it.entity?.change ?: 0f
+                    )
                 )
-            }
-
-            Text(
-                text = conversation.title,
-                style = MaterialTheme.typography.headlineSmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-
-        HorizontalDivider(modifier = Modifier.fillMaxWidth())
-
-        if (conversation.messageList.isNotEmpty()) {
-            LazyColumn(
-                contentPadding = PaddingValues(vertical = 16.dp),
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+            } ?: Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(
-                    items = conversation.messageList,
-                    key = { item -> item.id }
-                ) { genAiMessage ->
-                    SingleStructuredResponse(
-                        modifier = Modifier,
-                        genAiMessage = genAiMessage,
-                        text = text,
-                        onClickNews = onClickNews,
-                        onClickFeedback = onClickFeedback,
-                        onCopy = onCopy
+                IconButton(onClick = onNavigateUp) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null
                     )
                 }
+                Text(
+                    text = conversation.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    ) { innerPadding ->
 
-                item {
-                    Spacer(modifier = Modifier.size(100.dp))
+        var showBottomSheet by remember { mutableStateOf(false) }
+
+        if (showBottomSheet) {
+            GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
+                showBottomSheet = false
+            }) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.sources),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+
+                    company?.entity?.news?.map { it.toPresentation() }?.let { news ->
+                        news.forEachIndexed { index, item ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(
+                                    8.dp
+                                )
+                            ) {
+                                AsyncImage(
+                                    model = item.imageUrl,
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .clip(CircleShape),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop
+                                )
+
+                                Text(
+                                    text = item.publisher,
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                            }
+
+                            if (index != news.lastIndex) {
+                                HorizontalDivider()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxWidth()
+
+        ) {
+            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+
+            if (conversation.messageList.isNotEmpty()) {
+                LazyColumn(
+                    contentPadding = PaddingValues(vertical = 16.dp),
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(
+                        items = conversation.messageList,
+                        key = { item -> item.id }
+                    ) { genAiMessage ->
+                        SingleStructuredResponse(
+                            modifier = Modifier,
+                            genAiMessage = genAiMessage,
+                            text = text,
+                            onClickNews = onClickNews,
+                            onClickFeedback = onClickFeedback,
+                            onCopy = onCopy,
+                            onClickSource = {
+                                showBottomSheet = true
+                            }
+                        )
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.size(100.dp))
+                    }
                 }
             }
         }
@@ -128,7 +209,8 @@ fun SingleStructuredResponse(
     text: String = "",
     onClickNews: (url: String) -> Unit,
     onClickFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
-    onCopy: (text: String) -> Unit
+    onCopy: (text: String) -> Unit,
+    onClickSource: () -> Unit
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
@@ -345,32 +427,12 @@ fun SingleStructuredResponse(
             Column(modifier = Modifier.fillMaxWidth()) {
                 genAiMessage.entity?.let { entity ->
 
-                    // data source
-                    CompanyDetailDataSource(
-                        modifier = Modifier,
-                        list = entity.news.map { it.toPresentation() }
-                    )
-
-                    // price card
-                    CompanyDetailPriceCard(
-                        ticker = entity.ticker,
-                        price = entity.price,
-                        change = entity.change,
-                        imageUrl = entity.imageUrl
-                    )
-
-                    // about company card
-                    AboutStockCard(
-                        modifier = Modifier,
-                        companySummary = entity.about,
-                        companyName = entity.name
-                    )
-
                     // tabs
                     CompanyDetailTab(
                         modifier = Modifier.fillMaxWidth(),
                         company = entity,
-                        onClickNews = onClickNews
+                        onClickNews = onClickNews,
+                        onClickSources = onClickSource
                     )
                 }
             }

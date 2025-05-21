@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -73,7 +72,7 @@ fun DiscoverScreen(modifier: Modifier, navController: NavHostController, company
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 0.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 item {
                     // row of sectors
@@ -84,10 +83,6 @@ fun DiscoverScreen(modifier: Modifier, navController: NavHostController, company
                             companyViewModel.selectSector(it)
                         }
                     )
-                }
-
-                item {
-                    HorizontalDivider(modifier = Modifier.fillMaxWidth())
                 }
 
                 if (allCompaniesViewState.value.loading) {

@@ -61,7 +61,7 @@ fun BottomNavBar(navController: NavController) {
                                             .align(Alignment.CenterHorizontally)
                                             .padding(top = 4.dp)
                                             .clip(RoundedCornerShape(4.dp))
-                                            .background(Color.White)
+                                            .background(MaterialTheme.colorScheme.onSurface)
                                             .size(24.dp, 4.dp)
                                     )
                                 }

@@ -9,7 +9,7 @@ data class Company(
     val summary: String,
     val logo: String,
     val price: Float? = null,
-    val change: PriceChange? = null
+    val change: PriceChange
 ) {
     fun toPresentation() = CompanyPresentation(
         ticker = ticker,

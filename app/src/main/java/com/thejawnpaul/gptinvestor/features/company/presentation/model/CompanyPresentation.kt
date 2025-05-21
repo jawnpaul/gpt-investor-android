@@ -8,5 +8,5 @@ data class CompanyPresentation(
     val logo: String,
     val summary: String,
     val price: Float,
-    val priceChange: PriceChange? = null
+    val priceChange: PriceChange
 )

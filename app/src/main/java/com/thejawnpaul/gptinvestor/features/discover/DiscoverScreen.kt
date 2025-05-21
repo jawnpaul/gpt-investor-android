@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +15,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -32,33 +34,41 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.Compa
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.SectorChoiceQuestion
 
 @Composable
-fun DiscoverScreen(modifier: Modifier = Modifier, navController: NavHostController, companyViewModel: CompanyViewModel) {
+fun DiscoverScreen(modifier: Modifier, navController: NavHostController, companyViewModel: CompanyViewModel) {
     // Discover Screen
     val keyboardController = LocalSoftwareKeyboardController.current
 
     val sectorViewState = companyViewModel.allSector.collectAsState()
     val allCompaniesViewState = companyViewModel.allCompanies.collectAsState()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.TopStart
-    ) {
-        Column(modifier = Modifier) {
-            SearchBarCustom(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                query = allCompaniesViewState.value.query,
-                placeHolder = sectorViewState.value.searchPlaceHolder,
-                onQueryChange = { newQuery ->
-                    companyViewModel.updateSearchQuery(newQuery)
-                },
-                onSearch = {
-                    keyboardController?.hide()
-                    companyViewModel.searchCompany()
-                }
-            )
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            ) {
+                SearchBarCustom(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    query = allCompaniesViewState.value.query,
+                    placeHolder = sectorViewState.value.searchPlaceHolder,
+                    onQueryChange = { newQuery ->
+                        companyViewModel.updateSearchQuery(newQuery)
+                    },
+                    onSearch = {
+                        keyboardController?.hide()
+                        companyViewModel.searchCompany()
+                    }
+                )
+            }
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()

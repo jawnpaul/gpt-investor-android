@@ -78,7 +78,7 @@ fun AllTopPicksScreen(modifier: Modifier = Modifier, navController: NavControlle
                     items = state.value.topPicks,
                     key = { topPickPresentation -> topPickPresentation.id }
                 ) { pickPresentation ->
-                    SingleTopPickItem(pickPresentation = pickPresentation, onClick = {
+                    SingleTopPickItem(modifier = Modifier, pickPresentation = pickPresentation, onClick = {
                         navController.navigate(Screen.TopPickDetailScreen.createRoute(it))
                     })
                     Spacer(modifier = Modifier.size(16.dp))

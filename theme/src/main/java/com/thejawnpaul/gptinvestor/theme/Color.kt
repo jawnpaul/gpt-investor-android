@@ -68,9 +68,10 @@ val md_theme_dark_scrim = Color(0xFF000000)
 val seed = Color(0xFF1976D2)
 
 data class GPTInvestorColors(
-     val textColors: TextColors,
-     val greenColors: GreenColors,
-     val utilColors: UtilColors
+    val textColors: TextColors,
+    val greenColors: GreenColors,
+    val utilColors: UtilColors,
+    val accentColors: AccentColors
 )
 
 @Immutable
@@ -90,6 +91,11 @@ data class UtilColors(
     val borderBright10: Color
 )
 
+@Immutable
+data class AccentColors(
+    val allAccent: Color
+)
+
 
 val gptInvestorColorsDark = GPTInvestorColors(
     textColors = TextColors(
@@ -103,6 +109,9 @@ val gptInvestorColorsDark = GPTInvestorColors(
         allDark2 = Color(0xFF180C25),
         borderBright10 = Color(0xFF2C2531)
 
+    ),
+    accentColors = AccentColors(
+        allAccent = Color(0xFF3F008B)
     )
 )
 
@@ -117,5 +126,11 @@ val gptInvestorColorsLight = GPTInvestorColors(
     utilColors = UtilColors(
         allDark2 = Color(0xFFFBFAFD),
         borderBright10 = Color(0xFFE7E7E8)
+    ),
+    accentColors = AccentColors(
+        allAccent = Color(
+            0xFF3F008B
+        )
     )
+
 )

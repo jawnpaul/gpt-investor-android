@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
@@ -32,7 +33,8 @@ class HomeViewModel @Inject constructor(
     private val authenticationRepository: AuthenticationRepository,
     private val getLocalTopPicksUseCase: GetLocalTopPicksUseCase,
     private val remoteConfig: RemoteConfig,
-    private val preferences: GPTInvestorPreferences
+    private val preferences: GPTInvestorPreferences,
+    private val analyticsLogger: AnalyticsLogger
 ) :
     ViewModel() {
 
@@ -198,6 +200,10 @@ class HomeViewModel @Inject constructor(
 
                 is HomeEvent.ChangeTheme -> {
                     preferences.setThemePreference(event.theme)
+                    analyticsLogger.logEvent(
+                        eventName = "Theme Changed",
+                        params = mapOf("theme" to event.theme)
+                    )
                 }
             }
         }

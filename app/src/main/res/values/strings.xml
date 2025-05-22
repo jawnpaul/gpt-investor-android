@@ -88,4 +88,8 @@
     <string name="read_more">Read more</string>
     <string name="read_less">Read less</string>
     <string name="sources">Sources</string>
+    <string name="top_pick_rationale">Top pick rationale</string>
+    <string name="sign_up">Sign up</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="don_t_have_an_account">Don\'t have an account?</string>
 </resources>

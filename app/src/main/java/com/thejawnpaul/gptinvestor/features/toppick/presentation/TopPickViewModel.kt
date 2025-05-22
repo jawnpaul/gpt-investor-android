@@ -7,6 +7,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
+import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetLocalTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetSavedTopPicksUseCase
@@ -19,6 +20,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPickDe
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -34,7 +36,8 @@ class TopPickViewModel @Inject constructor(
     private val saveTopPickUseCase: SaveTopPickUseCase,
     private val removeTopPickFromSavedUseCase: RemoveTopPickFromSavedUseCase,
     private val getSavedTopPicksUseCase: GetSavedTopPicksUseCase,
-    private val shareTopPickUseCase: ShareTopPickUseCase
+    private val shareTopPickUseCase: ShareTopPickUseCase,
+    private val getCompanyUseCase: GetCompanyUseCase
 ) : ViewModel() {
 
     private val topPickId: String?
@@ -104,6 +107,7 @@ class TopPickViewModel @Inject constructor(
                 }
             )
         }
+        getCompanyFinancials(ticker = topPick.ticker)
         Timber.e(topPick.toString())
     }
 
@@ -273,8 +277,35 @@ class TopPickViewModel @Inject constructor(
             }
         }
     }
+
+    fun getCompanyFinancials(ticker: String) {
+        getCompanyUseCase(ticker) {
+            it.onSuccess { result ->
+                _topPickView.update { state ->
+                    state.copy(
+                        companyPresentation = result
+                    )
+                }
+            }
+            it.onFailure {
+                Timber.e(it.toString())
+            }
+        }
+    }
+
+    fun handleEvent(event: TopPickEvent) {
+        when (event) {
+            is TopPickEvent.Authenticate -> {
+                _topPickView.update { it.copy(showAuthenticateDialog = event.showDialog) }
+            }
+        }
+    }
 }
 
 sealed interface TopPickAction {
     data class OnShare(val url: String) : TopPickAction
+}
+
+sealed interface TopPickEvent {
+    data class Authenticate(val showDialog: Boolean) : TopPickEvent
 }

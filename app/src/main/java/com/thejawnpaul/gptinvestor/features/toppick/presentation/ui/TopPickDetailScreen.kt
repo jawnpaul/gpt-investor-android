@@ -1,49 +1,66 @@
 package com.thejawnpaul.gptinvestor.features.toppick.presentation.ui
 
 import android.content.Intent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.List
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.core.navigation.Screen
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.NewAuthenticationScreen
+import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailHeader
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailTab
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.ExpandableText
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickAction
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickEvent
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewModel
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPickDetailView
+import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import com.thejawnpaul.gptinvestor.theme.linkMedium
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,6 +73,7 @@ fun TopPickDetailScreen(modifier: Modifier = Modifier, navController: NavControl
     val state = viewModel.topPickView.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val keyboardController = LocalSoftwareKeyboardController.current
     LaunchedEffect(Unit) {
         scope.launch {
             viewModel.actions.collect { action ->
@@ -73,206 +91,285 @@ fun TopPickDetailScreen(modifier: Modifier = Modifier, navController: NavControl
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-    ) {
-        TopAppBar(
-            title = { Text(stringResource(R.string.top_pick_details)) },
-            navigationIcon = {
+    Scaffold(
+        topBar = {
+            state.value.companyPresentation?.let { company ->
+                CompanyDetailHeader(
+                    modifier = Modifier,
+                    companyHeader = CompanyHeaderPresentation(
+                        companyTicker = company.ticker,
+                        companyName = company.name,
+                        price = company.price,
+                        percentageChange = company.change,
+                        companyLogo = company.imageUrl
+                    ),
+                    onNavigateUp = { navController.navigateUp() }
+                )
+            } ?: Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 IconButton(onClick = { navController.navigateUp() }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = null
+                        contentDescription = stringResource(id = R.string.back)
                     )
                 }
-            },
-            actions = {
-                IconButton(onClick = { viewModel.shareTopPick() }) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = null
-                    )
-                }
-                IconButton(onClick = { viewModel.handleSave() }) {
-                    if (state.value.topPick?.isSaved == true) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = null
-                        )
-                    }
-                    Icon(
-                        imageVector = Icons.Default.FavoriteBorder,
-                        contentDescription = null
-                    )
-                }
+                Text(text = stringResource(R.string.top_pick_details))
             }
-        )
-
-        Column(
+        },
+        bottomBar = {
+            InputBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .windowInsetsPadding(
+                        WindowInsets.ime
+                    )
+                    .navigationBarsPadding(),
+                input = "",
+                contentPadding = PaddingValues(0.dp),
+                sendEnabled = false,
+                onInputChanged = { input ->
+                },
+                onSendClick = {
+                    keyboardController?.hide()
+                    // send query
+                },
+                placeholder = stringResource(
+                    R.string.ask_anything_about,
+                    "this top pick"
+                ),
+                shouldRequestFocus = false
+            )
+        }
+    ) { innerPadding ->
+        Box(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(innerPadding)
+                .fillMaxSize()
         ) {
-            // Header with Company Name, Ticker, and Confidence Score (always visible)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(0.7f)) {
-                    Text(
-                        text = state.value.topPick?.companyName ?: "",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        overflow = TextOverflow.Clip,
-                        maxLines = 1
-                    )
-                    Text(
-                        text = state.value.topPick?.ticker ?: "",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+            ContentView(
+                modifier = Modifier.fillMaxSize(),
+                state = state.value,
+                onEvent = viewModel::handleEvent
+            )
+        }
+    }
+}
 
-                Surface(
-                    color = Color(0xFFE8F5E9),
-                    shape = RoundedCornerShape(4.dp),
-                    modifier = Modifier.padding(4.dp)
+@Composable
+private fun ContentView(modifier: Modifier, state: TopPickDetailView, onEvent: (TopPickEvent) -> Unit) {
+    val gptInvestorColors = LocalGPTInvestorColors.current
+    Box(
+        modifier = modifier.clickable(interactionSource = null, indication = null, onClick = {
+            onEvent(TopPickEvent.Authenticate(showDialog = false))
+        })
+    ) {
+        if (state.showAuthenticateDialog) {
+            NewAuthenticationScreen(modifier = Modifier.align(Alignment.Center))
+            Column(modifier = Modifier.blur(radius = 8.dp)) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.ic_top_pick_rationale),
+                                contentDescription = null
+                            )
+
+                            Text(
+                                text = stringResource(R.string.top_pick_rationale),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = gptInvestorColors.utilColors.borderBright10,
+                            contentColor = gptInvestorColors.greenColors.allGreen
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                text = "Score: ${state.topPick?.confidenceScore}/10",
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                    }
+                    Column {
                         Text(
-                            text = "${state.value.topPick?.confidenceScore}/10",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Color(0xFF2E7D32)
+                            text = state.topPick?.rationale ?: "",
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis
                         )
+                        TextButton(onClick = {
+                            onEvent(TopPickEvent.Authenticate(showDialog = true))
+                        }) {
+                            Text(text = "Read more")
+                        }
                     }
                 }
             }
-
-            // Protected content
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
+        } else {
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
             ) {
-                // Content (blurred when not signed in)
-                Column(
+                // rationale card
+                OutlinedCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .then(
-                            if (!state.value.isLoggedIn) {
-                                Modifier.blur(radius = 8.dp)
-                            } else {
-                                Modifier
-                            }
-                        )
-                        .padding(bottom = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(16.dp)
                 ) {
-                    // Rationale
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            text = "Investment Rationale",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Text(
-                            text = state.value.topPick?.rationale ?: ""
-                        )
-                    }
-
-                    // Metrics
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Outlined.List,
-                                contentDescription = null
-                            )
-                            Text(
-                                text = stringResource(R.string.key_metrics),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.ic_top_pick_rationale),
+                                    contentDescription = null
+                                )
 
-                        state.value.topPick?.let { topPick ->
-                            topPick.metrics.forEach { metric ->
                                 Text(
-                                    text = metric
+                                    text = stringResource(R.string.top_pick_rationale),
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            }
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = gptInvestorColors.utilColors.borderBright10,
+                                contentColor = gptInvestorColors.greenColors.allGreen
+                            ) {
+                                Text(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    text = "Score: ${state.topPick?.confidenceScore}/10",
+                                    style = MaterialTheme.typography.labelMedium
                                 )
                             }
                         }
-                    }
-
-                    // Risks
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Warning,
-                                contentDescription = null
+                        if (state.isLoggedIn) {
+                            ExpandableText(
+                                text = state.topPick?.rationale ?: "",
+                                collapsedMaxLine = 4,
+                                style = MaterialTheme.typography.bodyMedium,
+                                showMoreText = stringResource(R.string.read_more),
+                                showMoreStyle = SpanStyle(
+                                    textDecoration = TextDecoration.Underline,
+                                    fontStyle = MaterialTheme.typography.linkMedium.fontStyle,
+                                    fontWeight = FontWeight.W500
+                                ),
+                                showLessText = stringResource(R.string.read_less),
+                                showLessStyle = SpanStyle(
+                                    textDecoration = TextDecoration.Underline,
+                                    fontStyle = MaterialTheme.typography.linkMedium.fontStyle,
+                                    fontWeight = FontWeight.W500
+                                )
                             )
-                            Text(
-                                text = stringResource(R.string.key_risks),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
 
-                        state.value.topPick?.risks.let { risks ->
-                            risks?.forEach { risk ->
+                            // Metrics
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    modifier = Modifier.padding(start = 16.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        text = "•"
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Outlined.List,
+                                        contentDescription = null
                                     )
                                     Text(
-                                        text = risk
+                                        text = stringResource(R.string.key_metrics),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold
                                     )
+                                }
+
+                                state.topPick?.let { topPick ->
+                                    topPick.metrics.forEach { metric ->
+                                        Text(
+                                            text = metric
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Risks
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Warning,
+                                        contentDescription = null
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.key_risks),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+
+                                state.topPick?.risks.let { risks ->
+                                    risks?.forEach { risk ->
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            modifier = Modifier.padding(start = 16.dp)
+                                        ) {
+                                            Text(
+                                                text = "•"
+                                            )
+                                            Text(
+                                                text = risk
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            Column {
+                                Text(
+                                    text = state.topPick?.rationale ?: "",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 3,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                TextButton(onClick = {
+                                    onEvent(TopPickEvent.Authenticate(showDialog = true))
+                                }) {
+                                    Text(text = "Read more")
                                 }
                             }
                         }
                     }
                 }
 
-                // Login overlay (only shown when not signed in)
-                if (!state.value.isLoggedIn) {
-                    Surface(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.sign_in_to_view_full_details),
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Button(
-                                onClick = { navController.navigate(Screen.AuthenticationScreen.route) },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(stringResource(R.string.sign_in))
+                // company detail
+                if (state.isLoggedIn) {
+                    state.companyPresentation?.let { company ->
+                        CompanyDetailTab(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            company = company,
+                            onClickNews = {
+                            },
+                            onClickSources = {
                             }
-                        }
+                        )
                     }
                 }
             }

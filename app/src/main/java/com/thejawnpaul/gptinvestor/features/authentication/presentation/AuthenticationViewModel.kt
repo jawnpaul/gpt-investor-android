@@ -29,6 +29,9 @@ class AuthenticationViewModel @Inject constructor(
     private val _isUserSignedIn = MutableStateFlow(false)
     val isUserSignedIn = _isUserSignedIn.asStateFlow()
 
+    private val _newAuthState = MutableStateFlow(NewAuthenticationUIState())
+    val newAuthState get() = _newAuthState
+
     init {
         viewModelScope.launch {
             authRepository.getAuthState().collect { isSignedIn ->
@@ -106,6 +109,46 @@ class AuthenticationViewModel @Inject constructor(
     fun updatePassword(password: String) {
         _authState.update { it.copy(password = password) }
     }
+
+    fun handleEvent(event: AuthenticationEvent) {
+        when (event) {
+            AuthenticationEvent.GoToLoginScreen -> {
+                _newAuthState.update {
+                    it.copy(
+                        authenticationScreen = AuthenticationScreen.Login,
+                        email = "",
+                        password = ""
+                    )
+                }
+            }
+
+            AuthenticationEvent.GoToSignUpScreen -> {
+                _newAuthState.update {
+                    it.copy(
+                        authenticationScreen = AuthenticationScreen.SignUp,
+                        email = "",
+                        password = ""
+                    )
+                }
+            }
+
+            is AuthenticationEvent.Login -> {
+                // perform login
+            }
+
+            is AuthenticationEvent.SignUp -> {
+                // perform sign up
+            }
+
+            is AuthenticationEvent.EmailChanged -> {
+                _newAuthState.update { it.copy(email = event.email) }
+            }
+
+            is AuthenticationEvent.PasswordChanged -> {
+                _newAuthState.update { it.copy(password = event.password) }
+            }
+        }
+    }
 }
 
 sealed class AuthResult<T> {
@@ -124,4 +167,26 @@ data class AuthenticationUIState(
     val password: String = ""
 ) {
     val enableLoginButton = email.trim().isNotEmpty() && password.trim().isNotEmpty()
+}
+
+data class NewAuthenticationUIState(
+    val authenticationScreen: AuthenticationScreen = AuthenticationScreen.Login,
+    val email: String = "",
+    val password: String = ""
+) {
+    val enableButton = email.trim().isNotEmpty() && password.trim().isNotEmpty()
+}
+
+sealed interface AuthenticationScreen {
+    object Login : AuthenticationScreen
+    object SignUp : AuthenticationScreen
+}
+
+sealed interface AuthenticationEvent {
+    data object GoToLoginScreen : AuthenticationEvent
+    data object GoToSignUpScreen : AuthenticationEvent
+    data class Login(val email: String, val password: String) : AuthenticationEvent
+    data class SignUp(val email: String, val password: String) : AuthenticationEvent
+    data class EmailChanged(val email: String) : AuthenticationEvent
+    data class PasswordChanged(val password: String) : AuthenticationEvent
 }

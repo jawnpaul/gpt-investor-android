@@ -45,6 +45,7 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
     val trendingStock = viewModel.trendingCompanies.collectAsStateWithLifecycle()
     val topPicks = viewModel.topPicks.collectAsState()
     val currentUser = viewModel.currentUser.collectAsStateWithLifecycle()
+    val selectedTheme = viewModel.theme.collectAsState(initial = "Dark")
     val homeState = viewModel.homeState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
@@ -92,21 +93,14 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleMedium
                 )
-
-                Row(
-                    modifier = Modifier.padding(end = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_sun),
-                        contentDescription = null
-                    )
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_down),
-                        contentDescription = null
-                    )
-                }
+                ThemeDropdown(
+                    modifier = Modifier,
+                    onClick = {
+                        viewModel.handleEvent(HomeEvent.ChangeTheme(it))
+                    },
+                    options = listOf("Light", "Dark", "System"),
+                    selectedOption = selectedTheme.value ?: "Dark"
+                )
             }
 
             // Trending

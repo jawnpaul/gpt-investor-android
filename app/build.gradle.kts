@@ -176,6 +176,7 @@ dependencies {
     implementation(libs.firebase.config)
     implementation(project(":analytics"))
     implementation(project(":theme"))
+    implementation(libs.datastore.preferences)
 
     // test
     testImplementation(project(":remote:remotetest"))

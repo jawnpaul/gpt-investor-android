@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.theme
 
+import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -9,8 +10,11 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 private val LightColors =
     lightColorScheme(
@@ -83,22 +87,52 @@ val LocalGPTInvestorColors = staticCompositionLocalOf { gptInvestorColorsDark }
 @Composable
 fun GPTInvestorTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    userThemePreference: String? = null,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
+
+    val useDarkTheme = when (userThemePreference) {
+        "Light" -> false
+        "Dark" -> true
+        "System" -> darkTheme
+        else -> true
+    }
+
     val colorScheme =
         when {
             dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
                 val context = LocalContext.current
-                if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+                if (useDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(
+                    context
+                )
             }
 
-            darkTheme -> DarkColors
+            useDarkTheme -> DarkColors
             else -> LightColors
         }
 
-    val gptInvestorColors = if (darkTheme) gptInvestorColorsDark else gptInvestorColorsLight
+    val gptInvestorColors = if (useDarkTheme) gptInvestorColorsDark else gptInvestorColorsLight
+
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val activity = view.context as? Activity
+            activity?.let { act ->
+                val window = act.window
+
+                // Set transparent colors
+                window.statusBarColor = android.graphics.Color.TRANSPARENT
+                window.navigationBarColor = android.graphics.Color.TRANSPARENT
+
+                // Configure appearance
+                val windowInsetsController = WindowCompat.getInsetsController(window, view)
+                windowInsetsController.isAppearanceLightStatusBars = !useDarkTheme
+                windowInsetsController.isAppearanceLightNavigationBars = !useDarkTheme
+            }
+        }
+    }
 
     CompositionLocalProvider(
         LocalGPTInvestorColors provides gptInvestorColors

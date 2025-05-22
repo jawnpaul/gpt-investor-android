@@ -5,12 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
+import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfig
 import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetTrendingCompaniesUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
+import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.*
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetLocalTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
@@ -29,7 +31,8 @@ class HomeViewModel @Inject constructor(
     private val getTopPicksUseCase: GetTopPicksUseCase,
     private val authenticationRepository: AuthenticationRepository,
     private val getLocalTopPicksUseCase: GetLocalTopPicksUseCase,
-    private val remoteConfig: RemoteConfig
+    private val remoteConfig: RemoteConfig,
+    private val preferences: GPTInvestorPreferences
 ) :
     ViewModel() {
 
@@ -50,6 +53,8 @@ class HomeViewModel @Inject constructor(
 
     private val _actions = MutableSharedFlow<HomeAction>()
     val actions get() = _actions
+
+    val theme = preferences.themePreference
 
     init {
         getTrendingCompanies()
@@ -187,8 +192,12 @@ class HomeViewModel @Inject constructor(
                 }
 
                 is HomeEvent.SendClick -> {
-                    _actions.emit(HomeAction.OnSendClick(_homeState.value.chatInput))
+                    _actions.emit(OnSendClick(_homeState.value.chatInput))
                     _homeState.update { it.copy(chatInput = null) }
+                }
+
+                is HomeEvent.ChangeTheme -> {
+                    preferences.setThemePreference(event.theme)
                 }
             }
         }
@@ -202,6 +211,7 @@ data class HomeState(
 sealed interface HomeEvent {
     data class ChatInputChanged(val input: String) : HomeEvent
     data object SendClick : HomeEvent
+    data class ChangeTheme(val theme: String) : HomeEvent
 }
 
 sealed interface HomeAction {

@@ -20,7 +20,8 @@ interface AuthenticationRepository {
     suspend fun signOut()
     fun getAuthState(): Flow<Boolean>
     suspend fun deleteAccount()
-    suspend fun login(email: String, password: String): Flow<Boolean>
+    suspend fun loginWithEmailAndPassword(email: String, password: String): Flow<Boolean>
+    suspend fun signUpWithEmailAndPassword(email: String, password: String): Flow<Boolean>
 }
 
 class AuthenticationRepositoryImpl @Inject constructor(
@@ -77,7 +78,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun login(email: String, password: String): Flow<Boolean> = callbackFlow {
+    override suspend fun loginWithEmailAndPassword(email: String, password: String): Flow<Boolean> = callbackFlow {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 trySend(task.isSuccessful)
@@ -85,13 +86,36 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 if (task.isSuccessful) {
                     analyticsLogger.identifyUser(
                         eventName = "Log in",
-                        params = mapOf("user_id" to auth.currentUser?.uid.toString(), "email" to email)
+                        params = mapOf(
+                            "user_id" to auth.currentUser?.uid.toString(),
+                            "email" to email
+                        )
                     )
                 }
             }
             .addOnFailureListener { e ->
                 Timber.e(e.stackTraceToString())
             }
+        awaitClose()
+    }
+
+    override suspend fun signUpWithEmailAndPassword(email: String, password: String): Flow<Boolean> = callbackFlow {
+        auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+            trySend(task.isSuccessful)
+            if (task.isSuccessful) {
+                analyticsLogger.identifyUser(
+                    eventName = "Sign Up",
+                    params = mapOf(
+                        "user_id" to auth.currentUser?.uid.toString(),
+                        "email" to email,
+                        "name" to auth.currentUser?.displayName.toString(),
+                        "sign_up_method" to auth.currentUser?.providerId.toString()
+                    )
+                )
+            }
+        }.addOnFailureListener {
+            Timber.e(it.stackTraceToString())
+        }
         awaitClose()
     }
 }

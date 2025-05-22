@@ -11,6 +11,7 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -31,6 +32,9 @@ class AuthenticationViewModel @Inject constructor(
 
     private val _newAuthState = MutableStateFlow(NewAuthenticationUIState())
     val newAuthState get() = _newAuthState
+
+    private val _actions = MutableSharedFlow<AuthenticationAction>()
+    val actions get() = _actions
 
     init {
         viewModelScope.launch {
@@ -83,7 +87,7 @@ class AuthenticationViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            authRepository.login(email, password).collect { isSuccessful ->
+            authRepository.loginWithEmailAndPassword(email, password).collect { isSuccessful ->
                 if (isSuccessful) {
                     _authState.update {
                         it.copy(
@@ -134,10 +138,12 @@ class AuthenticationViewModel @Inject constructor(
 
             is AuthenticationEvent.Login -> {
                 // perform login
+                loginWithEmailAndPassword()
             }
 
             is AuthenticationEvent.SignUp -> {
                 // perform sign up
+                signUpWithEmailAndPassword()
             }
 
             is AuthenticationEvent.EmailChanged -> {
@@ -146,6 +152,65 @@ class AuthenticationViewModel @Inject constructor(
 
             is AuthenticationEvent.PasswordChanged -> {
                 _newAuthState.update { it.copy(password = event.password) }
+            }
+        }
+    }
+
+    fun loginWithEmailAndPassword() {
+        val email = _newAuthState.value.email
+        val password = _newAuthState.value.password
+        _newAuthState.update {
+            it.copy(
+                loading = true
+            )
+        }
+        viewModelScope.launch {
+            authRepository.loginWithEmailAndPassword(email, password).collect { isSuccessful ->
+                if (isSuccessful) {
+                    _newAuthState.update {
+                        it.copy(
+                            loading = false,
+                            email = "",
+                            password = ""
+                        )
+                    }
+                    _actions.emit(AuthenticationAction.OnLogin("Login Success"))
+                } else {
+                    _actions.emit(AuthenticationAction.OnLogin("Login failed"))
+                    _newAuthState.update { it.copy(loading = false, errorMessage = "Login failed") }
+                }
+            }
+        }
+    }
+
+    fun signUpWithEmailAndPassword() {
+        val email = _newAuthState.value.email
+        val password = _newAuthState.value.password
+        _newAuthState.update {
+            it.copy(
+                loading = true
+            )
+        }
+        viewModelScope.launch {
+            authRepository.signUpWithEmailAndPassword(email, password).collect { isSuccessful ->
+                if (isSuccessful) {
+                    _newAuthState.update {
+                        it.copy(
+                            loading = false,
+                            email = "",
+                            password = ""
+                        )
+                    }
+                    _actions.emit(AuthenticationAction.OnSignUp("Sign up Success"))
+                } else {
+                    _newAuthState.update {
+                        it.copy(
+                            loading = false,
+                            errorMessage = "Sign up failed"
+                        )
+                    }
+                    _actions.emit(AuthenticationAction.OnSignUp("Sign up failed"))
+                }
             }
         }
     }
@@ -172,9 +237,11 @@ data class AuthenticationUIState(
 data class NewAuthenticationUIState(
     val authenticationScreen: AuthenticationScreen = AuthenticationScreen.Login,
     val email: String = "",
-    val password: String = ""
+    val password: String = "",
+    val loading: Boolean = false,
+    val errorMessage: String? = null
 ) {
-    val enableButton = email.trim().isNotEmpty() && password.trim().isNotEmpty()
+    val enableButton = email.trim().isNotEmpty() && password.trim().isNotEmpty() && !loading
 }
 
 sealed interface AuthenticationScreen {
@@ -185,8 +252,13 @@ sealed interface AuthenticationScreen {
 sealed interface AuthenticationEvent {
     data object GoToLoginScreen : AuthenticationEvent
     data object GoToSignUpScreen : AuthenticationEvent
-    data class Login(val email: String, val password: String) : AuthenticationEvent
-    data class SignUp(val email: String, val password: String) : AuthenticationEvent
+    data object Login : AuthenticationEvent
+    data object SignUp : AuthenticationEvent
     data class EmailChanged(val email: String) : AuthenticationEvent
     data class PasswordChanged(val password: String) : AuthenticationEvent
+}
+
+sealed interface AuthenticationAction {
+    data class OnLogin(val message: String) : AuthenticationAction
+    data class OnSignUp(val message: String) : AuthenticationAction
 }

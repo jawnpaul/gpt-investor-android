@@ -298,14 +298,26 @@ class TopPickViewModel @Inject constructor(
             is TopPickEvent.Authenticate -> {
                 _topPickView.update { it.copy(showAuthenticateDialog = event.showDialog) }
             }
+
+            is TopPickEvent.AuthenticationResponse -> {
+                Timber.e(event.message)
+                viewModelScope.launch {
+                    _actions.emit(TopPickAction.ShowToast(event.message))
+                }
+                if (event.message.contains("success", ignoreCase = true)) {
+                    _topPickView.update { it.copy(showAuthenticateDialog = false, isLoggedIn = true) }
+                }
+            }
         }
     }
 }
 
 sealed interface TopPickAction {
     data class OnShare(val url: String) : TopPickAction
+    data class ShowToast(val message: String) : TopPickAction
 }
 
 sealed interface TopPickEvent {
     data class Authenticate(val showDialog: Boolean) : TopPickEvent
+    data class AuthenticationResponse(val message: String) : TopPickEvent
 }

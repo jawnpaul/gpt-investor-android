@@ -2,11 +2,13 @@ package com.thejawnpaul.gptinvestor.features.authentication.presentation
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +43,7 @@ fun LoginScreen(
     modifier: Modifier,
     email: String,
     password: String,
+    loading: Boolean = false,
     enableButton: Boolean,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
@@ -52,97 +55,103 @@ fun LoginScreen(
     OutlinedCard(
         modifier
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                text = stringResource(R.string.login),
-                style = MaterialTheme.typography.headlineMedium
-            )
+        Box {
+            if (loading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
 
-            // Input
-            OutlinedTextField(
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Next
-                ),
-                value = email,
-                onValueChange = onEmailChange,
-                label = {
-                    Text(text = stringResource(R.string.email_address))
-                },
-                modifier = Modifier.fillMaxWidth(),
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_profile),
-                        contentDescription = null
-                    )
-                }
-            )
-            // Input
-            OutlinedTextField(
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                value = password,
-                onValueChange = onPasswordChange,
-                label = {
-                    Text(text = stringResource(R.string.password))
-                },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                visualTransformation = if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
-                trailingIcon = {
-                    IconButton(onClick = {
-                        passwordHidden = !passwordHidden
-                    }) {
-                        val visibilityIcon =
-                            if (passwordHidden) R.drawable.outline_visibility_24 else R.drawable.baseline_visibility_off_24
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    text = stringResource(R.string.login),
+                    style = MaterialTheme.typography.headlineMedium
+                )
 
+                // Input
+                OutlinedTextField(
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
+                    value = email,
+                    onValueChange = onEmailChange,
+                    label = {
+                        Text(text = stringResource(R.string.email_address))
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    leadingIcon = {
                         Icon(
-                            painter = painterResource(id = visibilityIcon),
+                            painter = painterResource(id = R.drawable.ic_profile),
                             contentDescription = null
                         )
                     }
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_lock),
-                        contentDescription = null
+                )
+                // Input
+                OutlinedTextField(
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    value = password,
+                    onValueChange = onPasswordChange,
+                    label = {
+                        Text(text = stringResource(R.string.password))
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    visualTransformation = if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            passwordHidden = !passwordHidden
+                        }) {
+                            val visibilityIcon =
+                                if (passwordHidden) R.drawable.outline_visibility_24 else R.drawable.baseline_visibility_off_24
+
+                            Icon(
+                                painter = painterResource(id = visibilityIcon),
+                                contentDescription = null
+                            )
+                        }
+                    },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_lock),
+                            contentDescription = null
+                        )
+                    }
+                )
+
+                // Done button
+                GPTInvestorButton(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    text = stringResource(R.string.login),
+                    enabled = enableButton,
+                    onClick = onLoginClick
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        modifier = Modifier.padding(end = 8.dp),
+                        text = stringResource(R.string.don_t_have_an_account),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Text(
+                        modifier = Modifier.clickable(
+                            indication = null,
+                            interactionSource = null,
+                            onClick = onSignUpClick
+                        ),
+                        text = stringResource(R.string.sign_up),
+                        textDecoration = TextDecoration.Underline,
+                        style = MaterialTheme.typography.linkMedium
                     )
                 }
-            )
-
-            // Done button
-            GPTInvestorButton(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                text = stringResource(R.string.login),
-                enabled = enableButton,
-                onClick = onLoginClick
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    modifier = Modifier.padding(end = 8.dp),
-                    text = stringResource(R.string.don_t_have_an_account),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Text(
-                    modifier = Modifier.clickable(
-                        indication = null,
-                        interactionSource = null,
-                        onClick = onSignUpClick
-                    ),
-                    text = stringResource(R.string.sign_up),
-                    textDecoration = TextDecoration.Underline,
-                    style = MaterialTheme.typography.linkMedium
-                )
             }
         }
     }

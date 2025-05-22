@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.toppick.presentation.ui
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -86,6 +87,10 @@ fun TopPickDetailScreen(modifier: Modifier = Modifier, navController: NavControl
                         }
                         context.startActivity(Intent.createChooser(sendIntent, "Share via"))
                     }
+
+                    is TopPickAction.ShowToast -> {
+                        Toast.makeText(context, action.message, Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
@@ -166,7 +171,10 @@ private fun ContentView(modifier: Modifier, state: TopPickDetailView, onEvent: (
         })
     ) {
         if (state.showAuthenticateDialog) {
-            NewAuthenticationScreen(modifier = Modifier.align(Alignment.Center))
+            NewAuthenticationScreen(
+                modifier = Modifier.align(Alignment.Center),
+                onAuthenticationComplete = { onEvent(TopPickEvent.AuthenticationResponse(it)) }
+            )
             Column(modifier = Modifier.blur(radius = 8.dp)) {
                 Column(
                     modifier = Modifier.padding(16.dp),

@@ -244,9 +244,9 @@ class CompanyViewModel @Inject constructor(
 
     private fun handleAllCompaniesSuccess(response: List<Company>) {
         getSectorCompanies(_allSector.value.selected)
-        /*_allCompanies.update { view ->
+        _allCompanies.update { view ->
             view.copy(loading = false, companies = response.map { it.toPresentation() })
-        }*/
+        }
     }
 
     private fun getSectorCompanies(sectorInput: SectorInput) {

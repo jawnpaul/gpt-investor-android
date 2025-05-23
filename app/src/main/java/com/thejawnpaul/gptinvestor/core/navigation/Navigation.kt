@@ -6,9 +6,11 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -26,6 +28,7 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryDetai
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
+import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsScreen
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsViewModel
@@ -33,7 +36,10 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewMode
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.AllTopPicksScreen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SavedTopPicksScreen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPickDetailScreen
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @Composable
 fun SetUpNavGraph(navController: NavHostController) {
@@ -63,16 +69,42 @@ fun SetUpNavGraph(navController: NavHostController) {
             ) {
                 composable(Screen.HomeTabScreen.route) {
                     val homeViewModel = hiltViewModel<HomeViewModel>()
-                    val companyViewModel = hiltViewModel<CompanyViewModel>()
+                    val state = homeViewModel.uiState.collectAsStateWithLifecycle()
+                    val scope = rememberCoroutineScope()
+                    LaunchedEffect(Unit) {
+                        homeViewModel.actions.onEach { action ->
+                            when (action) {
+                                HomeAction.OnGoToAllTopPicks -> {
+                                    navController.navigate(Screen.AllTopPicksScreen.route)
+                                }
+                                is HomeAction.OnGoToCompanyDetail -> {
+                                    navController.navigate(Screen.CompanyDetailScreen.createRoute(action.ticker))
+                                }
+                                is HomeAction.OnGoToTopPickDetail -> {
+                                    navController.navigate(Screen.TopPickDetailScreen.createRoute(action.id))
+                                }
+                                HomeAction.OnMenuClick -> {
+                                    scope.launch {
+                                        drawerState.open()
+                                    }
+                                }
+                                is HomeAction.OnStartConversation -> {
+                                    Timber.e("Starting conversation")
+                                    navController.navigate(
+                                        Screen.ConversationScreen.createRoute(
+                                            chatInput = action.input ?: ""
+                                        )
+                                    )
+                                }
+                            }
+                        }.launchIn(scope)
+                    }
+
                     HomeScreen(
                         modifier = Modifier,
-                        navController = navController,
-                        viewModel = homeViewModel,
-                        onMenuClick = {
-                            scope.launch {
-                                drawerState.open()
-                            }
-                        }
+                        state = state.value,
+                        onEvent = homeViewModel::handleEvent,
+                        onAction = homeViewModel::processAction
                     )
                 }
                 composable(Screen.DiscoverTabScreen.route) {

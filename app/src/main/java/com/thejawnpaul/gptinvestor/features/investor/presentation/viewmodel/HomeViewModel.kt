@@ -51,6 +51,12 @@ class HomeViewModel @Inject constructor(
         remoteConfig.init()
         getTopPicks()
         getCurrentUser()
+
+        viewModelScope.launch {
+            preferences.themePreference.collect { theme ->
+                _uiState.update { it.copy(theme = theme) }
+            }
+        }
     }
 
     fun getTrendingCompanies() {
@@ -231,6 +237,7 @@ class HomeViewModel @Inject constructor(
                 HomeEvent.RetryTopPicks -> {
                     getTopPicks()
                 }
+
                 HomeEvent.RetryTrendingStocks -> {
                     getTrendingCompanies()
                 }

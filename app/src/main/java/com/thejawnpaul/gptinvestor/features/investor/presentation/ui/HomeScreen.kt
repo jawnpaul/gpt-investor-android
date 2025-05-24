@@ -79,7 +79,6 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
                 state = state.trendingCompaniesView,
                 onClick = {
                     onAction(HomeAction.OnGoToCompanyDetail(it))
-                    // navController.navigate(Screen.CompanyDetailScreen.createRoute(it))
                 },
                 onClickRetry = { onEvent(HomeEvent.RetryTrendingStocks) }
             )

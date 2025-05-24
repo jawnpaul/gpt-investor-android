@@ -20,6 +20,7 @@ import com.thejawnpaul.gptinvestor.features.authentication.presentation.Authenti
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.AuthenticationViewModel
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.WebViewScreen
+import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDiscoveryAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ConversationScreen
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationViewModel
@@ -39,7 +40,6 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPickDetai
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @Composable
 fun SetUpNavGraph(navController: NavHostController) {
@@ -77,19 +77,30 @@ fun SetUpNavGraph(navController: NavHostController) {
                                 HomeAction.OnGoToAllTopPicks -> {
                                     navController.navigate(Screen.AllTopPicksScreen.route)
                                 }
+
                                 is HomeAction.OnGoToCompanyDetail -> {
-                                    navController.navigate(Screen.CompanyDetailScreen.createRoute(action.ticker))
+                                    navController.navigate(
+                                        Screen.CompanyDetailScreen.createRoute(
+                                            action.ticker
+                                        )
+                                    )
                                 }
+
                                 is HomeAction.OnGoToTopPickDetail -> {
-                                    navController.navigate(Screen.TopPickDetailScreen.createRoute(action.id))
+                                    navController.navigate(
+                                        Screen.TopPickDetailScreen.createRoute(
+                                            action.id
+                                        )
+                                    )
                                 }
+
                                 HomeAction.OnMenuClick -> {
                                     scope.launch {
                                         drawerState.open()
                                     }
                                 }
+
                                 is HomeAction.OnStartConversation -> {
-                                    Timber.e("Starting conversation")
                                     navController.navigate(
                                         Screen.ConversationScreen.createRoute(
                                             chatInput = action.input ?: ""
@@ -109,10 +120,27 @@ fun SetUpNavGraph(navController: NavHostController) {
                 }
                 composable(Screen.DiscoverTabScreen.route) {
                     val companyViewModel = hiltViewModel<CompanyViewModel>()
+                    val state = companyViewModel.companyDiscoveryState.collectAsStateWithLifecycle()
+                    val scope = rememberCoroutineScope()
+                    LaunchedEffect(Unit) {
+                        companyViewModel.companyDiscoveryAction.onEach { action ->
+                            when (action) {
+                                is CompanyDiscoveryAction.OnNavigateToCompanyDetail -> {
+                                    navController.navigate(
+                                        Screen.CompanyDetailScreen.createRoute(
+                                            action.ticker
+                                        )
+                                    )
+                                }
+                            }
+                        }.launchIn(scope)
+                    }
+
                     DiscoverScreen(
                         modifier = Modifier,
-                        navController = navController,
-                        companyViewModel = companyViewModel
+                        state = state.value,
+                        onEvent = companyViewModel::handleCompanyDiscoveryEvent,
+                        onAction = companyViewModel::processCompanyDiscoveryAction
                     )
                 }
                 composable(Screen.HistoryTabScreen.route) {

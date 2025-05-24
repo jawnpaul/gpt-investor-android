@@ -17,7 +17,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -25,39 +24,38 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.SingleCompanyItem
-import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
+import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDiscoveryAction
+import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDiscoveryEvent
+import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDiscoveryState
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.SectorChoiceQuestion
 
 @Composable
-fun DiscoverScreen(modifier: Modifier, navController: NavHostController, companyViewModel: CompanyViewModel) {
+fun DiscoverScreen(modifier: Modifier, state: CompanyDiscoveryState, onEvent: (CompanyDiscoveryEvent) -> Unit, onAction: (CompanyDiscoveryAction) -> Unit) {
     // Discover Screen
     val keyboardController = LocalSoftwareKeyboardController.current
-
-    val sectorViewState = companyViewModel.allSector.collectAsState()
-    val allCompaniesViewState = companyViewModel.allCompanies.collectAsState()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
             ) {
                 SearchBarCustom(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    query = allCompaniesViewState.value.query,
-                    placeHolder = sectorViewState.value.searchPlaceHolder,
+                    query = state.companyView.query,
+                    placeHolder = state.sectorView.searchPlaceHolder,
                     onQueryChange = { newQuery ->
-                        companyViewModel.updateSearchQuery(newQuery)
+                        onEvent(CompanyDiscoveryEvent.SearchQueryChanged(newQuery))
                     },
                     onSearch = {
                         keyboardController?.hide()
-                        companyViewModel.searchCompany()
+                        onEvent(CompanyDiscoveryEvent.PerformSearch)
                     }
                 )
             }
@@ -77,21 +75,21 @@ fun DiscoverScreen(modifier: Modifier, navController: NavHostController, company
                 item {
                     // row of sectors
                     SectorChoiceQuestion(
-                        possibleAnswers = sectorViewState.value.sectors,
-                        selectedAnswer = sectorViewState.value.selected,
+                        possibleAnswers = state.sectorView.sectors,
+                        selectedAnswer = state.sectorView.selected,
                         onOptionSelected = {
-                            companyViewModel.selectSector(it)
+                            onEvent(CompanyDiscoveryEvent.SelectSector(it))
                         }
                     )
                 }
 
-                if (allCompaniesViewState.value.loading) {
+                if (state.companyView.loading) {
                     item {
                         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                     }
                 }
 
-                if (allCompaniesViewState.value.showError) {
+                if (state.companyView.showError) {
                     item {
                         Box(modifier = Modifier.fillMaxSize()) {
                             Column(modifier = Modifier.align(Alignment.Center)) {
@@ -117,7 +115,7 @@ fun DiscoverScreen(modifier: Modifier, navController: NavHostController, company
 
                                 Spacer(modifier = Modifier.padding(8.dp))
                                 OutlinedButton(onClick = {
-                                    companyViewModel.getAllCompanies()
+                                    onEvent(CompanyDiscoveryEvent.RetryCompanies)
                                 }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
                                     Text(text = stringResource(id = R.string.retry))
                                 }
@@ -126,7 +124,7 @@ fun DiscoverScreen(modifier: Modifier, navController: NavHostController, company
                     }
                 }
 
-                if (allCompaniesViewState.value.showSearchError) {
+                if (state.companyView.showSearchError) {
                     item {
                         Box(modifier = Modifier.fillMaxSize()) {
                             Column(modifier = Modifier.align(Alignment.Center)) {
@@ -155,11 +153,11 @@ fun DiscoverScreen(modifier: Modifier, navController: NavHostController, company
                 }
 
                 items(
-                    items = allCompaniesViewState.value.companies,
+                    items = state.companyView.companies,
                     key = { company -> company.ticker }
                 ) { company ->
                     SingleCompanyItem(modifier = Modifier, company = company, onClick = {
-                        navController.navigate(Screen.CompanyDetailScreen.createRoute(it))
+                        onAction(CompanyDiscoveryAction.OnNavigateToCompanyDetail(company.ticker))
                     })
                 }
             }

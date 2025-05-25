@@ -25,10 +25,10 @@ import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
 
 @Composable
-fun HistoryScreen(modifier: Modifier = Modifier, navController: NavController, viewModel: HistoryViewModel) {
+fun HistoryScreen(modifier: Modifier, navController: NavController, viewModel: HistoryViewModel) {
     val historyViewState = viewModel.historyScreenView.collectAsStateWithLifecycle()
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
         Column(modifier = Modifier) {
             Text(
                 text = stringResource(R.string.your_gpt_investor_history),

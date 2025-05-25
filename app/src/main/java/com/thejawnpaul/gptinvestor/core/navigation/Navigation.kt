@@ -8,6 +8,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -65,7 +66,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                     val homeViewModel = hiltViewModel<HomeViewModel>()
                     val companyViewModel = hiltViewModel<CompanyViewModel>()
                     HomeScreen(
-                        modifier = Modifier,
+                        modifier = Modifier.padding(top = 20.dp),
                         navController = navController,
                         viewModel = homeViewModel,
                         onMenuClick = {
@@ -78,7 +79,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 composable(Screen.DiscoverTabScreen.route) {
                     val companyViewModel = hiltViewModel<CompanyViewModel>()
                     DiscoverScreen(
-                        modifier = Modifier,
+                        modifier = Modifier.padding(top = 20.dp),
                         navController = navController,
                         companyViewModel = companyViewModel
                     )
@@ -86,7 +87,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 composable(Screen.HistoryTabScreen.route) {
                     val viewModel = hiltViewModel<HistoryViewModel>()
                     HistoryScreen(
-                        modifier = Modifier,
+                        modifier = Modifier.padding(top = 20.dp),
                         navController = navController,
                         viewModel = viewModel
                     )
@@ -96,7 +97,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                     val parentViewModel = hiltViewModel<CompanyViewModel>()
                     val ticker = backStackEntry.arguments?.getString("ticker") ?: ""
                     CompanyDetailScreen(
-                        modifier = Modifier,
+                        modifier = Modifier.padding(top = 20.dp),
                         navController = navController,
                         viewModel = parentViewModel,
                         ticker = ticker
@@ -111,7 +112,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                     val chatInput = navBackStackEntry.arguments?.getString("chatInput") ?: ""
 
                     ConversationScreen(
-                        modifier = Modifier,
+                        modifier = Modifier.padding(top = 20.dp),
                         viewModel = viewModel,
                         navController = navController,
                         chatInput = chatInput
@@ -132,7 +133,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                     val id = navBackStackEntry.arguments?.getString("conversationId") ?: ""
 
                     HistoryDetailScreen(
-                        modifier = Modifier,
+                        modifier = Modifier.padding(top = 20.dp),
                         navController = navController,
                         conversationId = id,
                         viewModel = viewModel
@@ -146,7 +147,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                     val viewModel = hiltViewModel<TopPickViewModel>()
                     val id = navBackStackEntry.arguments?.getString("topPickId") ?: ""
                     TopPickDetailScreen(
-                        modifier = Modifier,
+                        modifier = Modifier.padding(top = 20.dp),
                         navController = navController,
                         topPickId = id,
                         viewModel = viewModel
@@ -156,7 +157,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 composable(route = Screen.AllTopPicksScreen.route) {
                     val viewModel = hiltViewModel<TopPickViewModel>()
                     AllTopPicksScreen(
-                        modifier = Modifier,
+                        modifier = Modifier.padding(top = 20.dp),
                         navController = navController,
                         viewModel = viewModel
                     )
@@ -174,7 +175,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 composable(route = Screen.SavedTopPicksScreen.route) {
                     val viewModel = hiltViewModel<TopPickViewModel>()
                     SavedTopPicksScreen(
-                        modifier = Modifier,
+                        modifier = Modifier.padding(top = 20.dp),
                         navController = navController,
                         viewModel = viewModel
                     )
@@ -183,7 +184,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 composable(route = Screen.SettingsScreen.route) {
                     val viewModel = hiltViewModel<SettingsViewModel>()
                     SettingsScreen(
-                        modifier = Modifier,
+                        modifier = Modifier.padding(top = 20.dp),
                         navController = navController,
                         viewModel = viewModel
                     )

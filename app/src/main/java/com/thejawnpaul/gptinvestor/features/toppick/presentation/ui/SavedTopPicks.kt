@@ -33,13 +33,13 @@ import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewModel
 
 @Composable
-fun SavedTopPicksScreen(modifier: Modifier = Modifier, navController: NavController, viewModel: TopPickViewModel) {
+fun SavedTopPicksScreen(modifier: Modifier, navController: NavController, viewModel: TopPickViewModel) {
     LaunchedEffect(Unit) {
         viewModel.getSavedTopPicks()
     }
     val state = viewModel.savedTopPicks.collectAsStateWithLifecycle()
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
         Column(modifier = Modifier) {
             Row(
                 modifier = Modifier

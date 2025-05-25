@@ -27,7 +27,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
 
 @Composable
-fun ConversationScreen(modifier: Modifier = Modifier, viewModel: ConversationViewModel, navController: NavController, chatInput: String? = null) {
+fun ConversationScreen(modifier: Modifier, viewModel: ConversationViewModel, navController: NavController, chatInput: String? = null) {
     val conversation = viewModel.conversation.collectAsStateWithLifecycle()
     val genText = viewModel.genText.collectAsStateWithLifecycle()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -39,7 +39,7 @@ fun ConversationScreen(modifier: Modifier = Modifier, viewModel: ConversationVie
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
         when (conversation.value.conversation) {
             is DefaultConversation -> {
                 val default = conversation.value.conversation as DefaultConversation

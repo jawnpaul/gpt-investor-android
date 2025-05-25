@@ -64,7 +64,7 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {

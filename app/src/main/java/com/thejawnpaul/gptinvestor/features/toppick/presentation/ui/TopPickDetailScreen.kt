@@ -66,7 +66,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopPickDetailScreen(modifier: Modifier = Modifier, navController: NavController, topPickId: String, viewModel: TopPickViewModel) {
+fun TopPickDetailScreen(modifier: Modifier, navController: NavController, topPickId: String, viewModel: TopPickViewModel) {
     LaunchedEffect(topPickId) {
         viewModel.updateTopPickId(topPickId)
     }
@@ -97,6 +97,7 @@ fun TopPickDetailScreen(modifier: Modifier = Modifier, navController: NavControl
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             state.value.companyPresentation?.let { company ->
                 CompanyDetailHeader(

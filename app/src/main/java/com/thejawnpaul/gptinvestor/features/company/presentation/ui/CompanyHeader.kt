@@ -25,11 +25,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
@@ -96,6 +98,7 @@ fun CompanyDetailHeader(modifier: Modifier, onNavigateUp: () -> Unit, companyHea
                 // Text - percentage change
                 if (companyHeader.percentageChange < 0) {
                     Row(
+                        modifier = Modifier.align(Alignment.End),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -112,6 +115,7 @@ fun CompanyDetailHeader(modifier: Modifier, onNavigateUp: () -> Unit, companyHea
                     }
                 } else {
                     Row(
+                        modifier = Modifier.align(Alignment.End),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -131,6 +135,22 @@ fun CompanyDetailHeader(modifier: Modifier, onNavigateUp: () -> Unit, companyHea
                     }
                 }
             }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun CompanyHeaderPreview() {
+    GPTInvestorTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            CompanyDetailHeader(
+                modifier = Modifier,
+                onNavigateUp = {},
+                companyHeader = CompanyHeaderPresentation(percentageChange = -10f, price = 145.05f)
+            )
         }
     }
 }

@@ -24,7 +24,7 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.Histo
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
 
 @Composable
-fun HistoryDetailScreen(modifier: Modifier = Modifier, navController: NavController, conversationId: String, viewModel: HistoryViewModel) {
+fun HistoryDetailScreen(modifier: Modifier, navController: NavController, conversationId: String, viewModel: HistoryViewModel) {
     LaunchedEffect(conversationId) {
         viewModel.updateConversationId(conversationId)
     }
@@ -33,7 +33,7 @@ fun HistoryDetailScreen(modifier: Modifier = Modifier, navController: NavControl
     val conversation = viewModel.conversation.collectAsStateWithLifecycle()
     val genText = viewModel.genText.collectAsStateWithLifecycle()
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
         when (conversation.value.conversation) {
             is DefaultConversation -> {
             }

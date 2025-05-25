@@ -30,10 +30,10 @@ import androidx.navigation.NavController
 import com.thejawnpaul.gptinvestor.R
 
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier, navController: NavController, viewModel: SettingsViewModel) {
+fun SettingsScreen(modifier: Modifier, navController: NavController, viewModel: SettingsViewModel) {
     var showDeleteDialog by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
         Column(modifier = Modifier) {
             Row(
                 modifier = Modifier

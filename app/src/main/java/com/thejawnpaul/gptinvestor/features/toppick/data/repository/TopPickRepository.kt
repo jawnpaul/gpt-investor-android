@@ -42,20 +42,20 @@ class TopPickRepository @Inject constructor(
                         confidenceScore = confidenceScore,
                         isSaved = isSaved,
                         imageUrl = companyDao.getCompany(ticker).logoUrl,
-                        percentageChange = 10.19f,
-                        currentPrice = companyDao.getCompany(ticker).currentPrice ?: 0.0f
+                        percentageChange = change,
+                        currentPrice = price
                     )
                 }
             }.sortedByDescending { it.confidenceScore }
 
             if (local.isNotEmpty()) {
-                Either.Right(local)
+                emit(Either.Right(local))
             }
 
             val response = apiService.getTopPicks(date = today)
             if (response.isSuccessful) {
-                response.body()?.let {
-                    val newPicks = it.map { aa ->
+                response.body()?.let { remotePick ->
+                    val topPickEntities = remotePick.map { aa ->
                         with(aa) {
                             TopPickEntity(
                                 id = id,
@@ -65,19 +65,15 @@ class TopPickRepository @Inject constructor(
                                 metrics = metrics,
                                 risks = risks,
                                 confidenceScore = confidenceScore,
-                                date = date
+                                date = date,
+                                price = price ?: 0.0f,
+                                change = percentageChange ?: 0.0f
                             )
                         }
                     }
-                    topPickDao.replaceUnsavedWithNewPicks(newPicks)
-                } ?: emit(Either.Left(Failure.DataError))
-            }
-
-            // emit local
-            emit(
-                Either.Right(
-                    topPickDao.getAllTopPicks().filter { it.date == today }.map { entity ->
-                        with(entity) {
+                    topPickDao.replaceUnsavedWithNewPicks(topPickEntities)
+                    val topPicks = remotePick.map {
+                        with(it) {
                             TopPick(
                                 id = id,
                                 companyName = companyName,
@@ -86,15 +82,17 @@ class TopPickRepository @Inject constructor(
                                 metrics = metrics,
                                 risks = risks,
                                 confidenceScore = confidenceScore,
-                                isSaved = isSaved,
+                                isSaved = false,
                                 imageUrl = companyDao.getCompany(ticker).logoUrl,
-                                percentageChange = 10.19f,
-                                currentPrice = companyDao.getCompany(ticker).currentPrice ?: 0.0f
+                                percentageChange = percentageChange ?: 0.0f,
+                                currentPrice = price ?: 0.0f
                             )
                         }
                     }.sortedByDescending { it.confidenceScore }
-                )
-            )
+                    // emit remote
+                    emit(Either.Right(topPicks))
+                } ?: emit(Either.Left(Failure.DataError))
+            }
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.ServerError))
@@ -114,8 +112,8 @@ class TopPickRepository @Inject constructor(
                     confidenceScore = confidenceScore,
                     isSaved = isSaved,
                     imageUrl = companyDao.getCompany(ticker).logoUrl,
-                    percentageChange = 10.19f,
-                    currentPrice = companyDao.getCompany(ticker).currentPrice ?: 0.0f
+                    percentageChange = change,
+                    currentPrice = price
                 )
             }
             emit(Either.Right(pick))
@@ -144,8 +142,8 @@ class TopPickRepository @Inject constructor(
                     confidenceScore = confidenceScore,
                     isSaved = isSaved,
                     imageUrl = companyDao.getCompany(ticker).logoUrl,
-                    percentageChange = 10.19f,
-                    currentPrice = companyDao.getCompany(ticker).currentPrice ?: 0.0f
+                    percentageChange = change,
+                    currentPrice = price
                 )
             }
             emit(Either.Right(pick))
@@ -174,8 +172,8 @@ class TopPickRepository @Inject constructor(
                     confidenceScore = confidenceScore,
                     isSaved = isSaved,
                     imageUrl = companyDao.getCompany(ticker).logoUrl,
-                    percentageChange = 10.19f,
-                    currentPrice = companyDao.getCompany(ticker).currentPrice ?: 0.0f
+                    percentageChange = change,
+                    currentPrice = price
                 )
             }
             emit(Either.Right(pick))
@@ -232,8 +230,8 @@ class TopPickRepository @Inject constructor(
                                 confidenceScore = confidenceScore,
                                 isSaved = isSaved,
                                 imageUrl = companyDao.getCompany(ticker).logoUrl,
-                                percentageChange = 10.19f,
-                                currentPrice = companyDao.getCompany(ticker).currentPrice ?: 0.0f
+                                percentageChange = change,
+                                currentPrice = price
 
                             )
                         }
@@ -260,8 +258,8 @@ class TopPickRepository @Inject constructor(
                     confidenceScore = confidenceScore,
                     isSaved = isSaved,
                     imageUrl = companyDao.getCompany(ticker).logoUrl,
-                    percentageChange = 10.19f,
-                    currentPrice = companyDao.getCompany(ticker).currentPrice ?: 0.0f
+                    percentageChange = change,
+                    currentPrice = price
                 )
             }
         }.sortedByDescending { it.confidenceScore }

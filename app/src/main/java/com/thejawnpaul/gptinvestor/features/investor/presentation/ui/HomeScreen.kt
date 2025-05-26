@@ -43,7 +43,7 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
     // Home Screen
 
     val trendingStock = viewModel.trendingCompanies.collectAsStateWithLifecycle()
-    val topPicks = viewModel.topPicks.collectAsState()
+    val topPicks = viewModel.topPicks.collectAsStateWithLifecycle()
     val currentUser = viewModel.currentUser.collectAsStateWithLifecycle()
     val selectedTheme = viewModel.theme.collectAsState(initial = "Dark")
     val homeState = viewModel.homeState.collectAsStateWithLifecycle()

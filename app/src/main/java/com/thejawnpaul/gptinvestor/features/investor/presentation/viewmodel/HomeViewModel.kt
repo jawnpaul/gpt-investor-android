@@ -44,9 +44,6 @@ class HomeViewModel @Inject constructor(
     private val _topPicks = MutableStateFlow(TopPicksView())
     val topPicks get() = _topPicks
 
-    private val _allTopPicks = MutableStateFlow(TopPicksView())
-    val allTopPicks get() = _allTopPicks
-
     private val _currentUser = MutableStateFlow<FirebaseUser?>(null)
     val currentUser get() = _currentUser
 

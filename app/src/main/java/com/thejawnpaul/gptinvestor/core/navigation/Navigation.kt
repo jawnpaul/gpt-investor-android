@@ -28,6 +28,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.
 import com.thejawnpaul.gptinvestor.features.discover.DiscoverScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryDetailScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryScreen
+import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenAction
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
@@ -146,10 +147,26 @@ fun SetUpNavGraph(navController: NavHostController) {
                 }
                 composable(Screen.HistoryTabScreen.route) {
                     val viewModel = hiltViewModel<HistoryViewModel>()
+                    val state = viewModel.historyScreenViewState.collectAsStateWithLifecycle()
+                    val scope = rememberCoroutineScope()
+
+                    LaunchedEffect(Unit) {
+                        viewModel.actions.onEach { action ->
+                            when (action) {
+                                is HistoryScreenAction.OnGoToHistoryDetail -> {
+                                    navController.navigate(
+                                        Screen.HistoryDetailScreen.createRoute(action.conversationId)
+                                    )
+                                }
+                            }
+                        }.launchIn(scope)
+                    }
+
                     HistoryScreen(
                         modifier = Modifier.padding(top = 20.dp),
-                        navController = navController,
-                        viewModel = viewModel
+                        state = state.value,
+                        onEvent = viewModel::handleEvent,
+                        onAction = viewModel::processAction
                     )
                 }
 

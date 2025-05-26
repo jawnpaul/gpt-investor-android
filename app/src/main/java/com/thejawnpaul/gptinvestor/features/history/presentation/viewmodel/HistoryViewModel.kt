@@ -17,6 +17,7 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryCo
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryScreenView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,8 +33,11 @@ class HistoryViewModel @Inject constructor(
 ) :
     ViewModel() {
 
-    private val _historyScreenView = MutableStateFlow(HistoryScreenView())
-    val historyScreenView get() = _historyScreenView
+    private val _historyScreenViewState = MutableStateFlow(HistoryScreenView())
+    val historyScreenViewState get() = _historyScreenViewState
+
+    private val _actions = MutableSharedFlow<HistoryScreenAction>()
+    val actions get() = _actions
 
     private val conversationView = MutableStateFlow(HistoryConversationView())
     val conversation get() = conversationView
@@ -49,7 +53,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun getAllHistory() {
-        _historyScreenView.update { it.copy(loading = true) }
+        _historyScreenViewState.update { it.copy(loading = true) }
         getAllHistoryUseCase(GetAllHistoryUseCase.None()) {
             it.fold(
                 ::handleGetAllHistoryFailure,
@@ -59,13 +63,12 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun handleGetAllHistoryFailure(failure: Failure) {
-        _historyScreenView.update { it.copy(loading = false) }
+        _historyScreenViewState.update { it.copy(loading = false) }
         Timber.e(failure.toString())
     }
 
     private fun handleGetAllHistorySuccess(response: Map<String, List<StructuredConversation>>) {
-        // _historyScreenView.update { it.copy(loading = false, list = response) }
-        _historyScreenView.update {
+        _historyScreenViewState.update {
             it.copy(loading = false, list = response)
         }
     }
@@ -167,20 +170,28 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
-    fun getSuggestedPromptResponse(query: String) {
-        conversationView.update {
-            it.copy(loading = true)
-        }
-        getInputPromptUseCase(
-            ConversationPrompt(
-                conversationId = conversationId ?: -1L,
-                query = query
-            )
-        ) {
-            it.fold(
-                ::handleInputResponseFailure,
-                ::handleInputResponseSuccess
-            )
+    fun handleEvent(event: HistoryScreenEvent) {
+        when (event) {
+            is HistoryScreenEvent.HistoryItemClicked -> {
+                viewModelScope.launch {
+                    _actions.emit(HistoryScreenAction.OnGoToHistoryDetail(event.conversationId))
+                }
+            }
         }
     }
+
+    fun processAction(action: HistoryScreenAction) {
+        when (action) {
+            is HistoryScreenAction.OnGoToHistoryDetail -> {
+            }
+        }
+    }
+}
+
+sealed interface HistoryScreenEvent {
+    data class HistoryItemClicked(val conversationId: Long) : HistoryScreenEvent
+}
+
+sealed interface HistoryScreenAction {
+    data class OnGoToHistoryDetail(val conversationId: Long) : HistoryScreenAction
 }

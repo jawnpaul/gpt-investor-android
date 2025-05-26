@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -20,16 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.core.navigation.Screen
-import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
+import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryScreenView
+import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenAction
+import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenEvent
 
 @Composable
-fun HistoryScreen(modifier: Modifier, navController: NavController, viewModel: HistoryViewModel) {
-    val historyViewState = viewModel.historyScreenView.collectAsStateWithLifecycle()
-
+fun HistoryScreen(modifier: Modifier, state: HistoryScreenView, onEvent: (HistoryScreenEvent) -> Unit, onAction: (HistoryScreenAction) -> Unit) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
         Column(modifier = Modifier) {
             Text(
@@ -46,13 +42,13 @@ fun HistoryScreen(modifier: Modifier, navController: NavController, viewModel: H
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
             ) {
-                if (historyViewState.value.loading) {
+                if (state.loading) {
                     item {
                         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                     }
                 }
 
-                historyViewState.value.list.forEach { title, items ->
+                state.list.forEach { title, items ->
                     item {
                         Text(
                             text = title,
@@ -70,11 +66,7 @@ fun HistoryScreen(modifier: Modifier, navController: NavController, viewModel: H
                                     modifier = Modifier,
                                     conversation = conversation,
                                     onClick = { id ->
-                                        navController.navigate(
-                                            Screen.HistoryDetailScreen.createRoute(
-                                                id
-                                            )
-                                        )
+                                        onEvent(HistoryScreenEvent.HistoryItemClicked(id))
                                     }
                                 )
                                 if (index < items.size - 1) {

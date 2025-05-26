@@ -229,24 +229,29 @@ class TopPickRepository @Inject constructor(
 
     override suspend fun getTopPicksByDate(): Flow<List<TopPick>> {
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        return topPickDao.getTopPicksFlow(today).map { list ->
-            list.map { entity ->
-                with(entity) {
-                    TopPick(
-                        id = id,
-                        companyName = companyName,
-                        ticker = ticker,
-                        rationale = rationale,
-                        metrics = metrics,
-                        risks = risks,
-                        confidenceScore = confidenceScore,
-                        isSaved = isSaved,
-                        imageUrl = companyDao.getCompany(ticker).logoUrl,
-                        percentageChange = change,
-                        currentPrice = price
-                    )
+        return try {
+            topPickDao.getTopPicksFlow(today).map { list ->
+                list.map { entity ->
+                    with(entity) {
+                        TopPick(
+                            id = id,
+                            companyName = companyName,
+                            ticker = ticker,
+                            rationale = rationale,
+                            metrics = metrics,
+                            risks = risks,
+                            confidenceScore = confidenceScore,
+                            isSaved = isSaved,
+                            imageUrl = companyDao.getCompany(ticker).logoUrl,
+                            percentageChange = change,
+                            currentPrice = price
+                        )
+                    }
                 }
             }
+        } catch (e: Exception) {
+            Timber.e(e.stackTraceToString())
+            flow { emit(emptyList()) }
         }
     }
 }

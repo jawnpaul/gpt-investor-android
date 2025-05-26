@@ -371,19 +371,25 @@ class ConversationRepository @Inject constructor(
             val chunk = StringBuilder()
 
             // get conversation
-            val conversation =
+            var conversation =
                 getConversation(ConversationPrompt(prompt.conversationId, prompt.query))
             if (prompt.company != null) {
-                val id = messageDao.insertMessage(
+                val newMessages = ArrayList(conversation.messageList)
+
+                val newId = messageDao.insertMessage(
                     MessageEntity(
                         conversationId = conversation.id,
                         createdAt = System.currentTimeMillis(),
                         companyDetailRemoteResponse = prompt.company
                     )
                 )
-                conversation.messageList.add(
-                    GenAiEntityMessage(id = id, entity = prompt.company)
+
+                newMessages.add(
+                    GenAiEntityMessage(id = newId, entity = prompt.company)
                 )
+
+                conversation = conversation.copy(messageList = newMessages)
+                emit(Either.Right(conversation))
             }
 
             val newIndex = messageDao.insertMessage(
@@ -394,13 +400,17 @@ class ConversationRepository @Inject constructor(
                 )
             )
 
-            conversation.messageList.add(
+            val newMessages = ArrayList(conversation.messageList)
+            newMessages.add(
                 GenAiTextMessage(
                     id = newIndex,
-                    prompt.query,
+                    query = prompt.query,
                     feedbackStatus = 0
                 )
             )
+
+            conversation =
+                conversation.copy(messageList = newMessages)
 
             emit(Either.Right(conversation))
             Timber.e(conversation.toString())
@@ -413,14 +423,18 @@ class ConversationRepository @Inject constructor(
             val response = chat.sendMessageStream(prompt.query)
             response.onCompletion {
                 val suggested = getSuggestedPrompts(conversation.id)
-                emit(Either.Right(conversation.copy(suggestedPrompts = suggested)))
+
+                conversation = conversation.copy(suggestedPrompts = suggested)
+
+                emit(Either.Right(conversation))
 
                 val updatedEntity = messageDao.getSingleMessage(newIndex)
                     .copy(response = conversation.messageList.last().response)
                 messageDao.updateMessage(updatedEntity)
 
                 getConversationTitle(conversation.id)?.let { title ->
-                    emit(Either.Right(conversation.copy(title = title)))
+                    conversation = conversation.copy(title = title)
+                    emit(Either.Right(conversation))
                     val entity = conversationDao.getSingleConversation(conversation.id)
                     entity?.let {
                         conversationDao.updateConversation(it.copy(title = title))

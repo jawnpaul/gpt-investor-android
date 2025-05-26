@@ -15,12 +15,12 @@ import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetSingleTop
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.RemoveTopPickFromSavedUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.SaveTopPickUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.ShareTopPickUseCase
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickAction.*
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPickDetailView
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -302,11 +302,20 @@ class TopPickViewModel @Inject constructor(
             is TopPickEvent.AuthenticationResponse -> {
                 Timber.e(event.message)
                 viewModelScope.launch {
-                    _actions.emit(TopPickAction.ShowToast(event.message))
+                    _actions.emit(ShowToast(event.message))
                 }
                 if (event.message.contains("success", ignoreCase = true)) {
-                    _topPickView.update { it.copy(showAuthenticateDialog = false, isLoggedIn = true) }
+                    _topPickView.update {
+                        it.copy(
+                            showAuthenticateDialog = false,
+                            isLoggedIn = true
+                        )
+                    }
                 }
+            }
+
+            is TopPickEvent.ClickNewsSources -> {
+                _topPickView.update { it.copy(showNewsSourcesBottomSheet = event.show) }
             }
         }
     }
@@ -320,4 +329,5 @@ sealed interface TopPickAction {
 sealed interface TopPickEvent {
     data class Authenticate(val showDialog: Boolean) : TopPickEvent
     data class AuthenticationResponse(val message: String) : TopPickEvent
+    data class ClickNewsSources(val show: Boolean) : TopPickEvent
 }

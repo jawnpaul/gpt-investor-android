@@ -7,16 +7,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -24,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,10 +32,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -49,13 +51,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.NewAuthenticationScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailHeader
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailTab
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.ExpandableText
-import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickAction
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickEvent
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewModel
@@ -125,7 +128,7 @@ fun TopPickDetailScreen(modifier: Modifier, navController: NavController, topPic
             }
         },
         bottomBar = {
-            InputBar(
+            /*InputBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .windowInsetsPadding(
@@ -146,7 +149,7 @@ fun TopPickDetailScreen(modifier: Modifier, navController: NavController, topPic
                     "this top pick"
                 ),
                 shouldRequestFocus = false
-            )
+            )*/
         }
     ) { innerPadding ->
         Box(
@@ -159,6 +162,57 @@ fun TopPickDetailScreen(modifier: Modifier, navController: NavController, topPic
                 state = state.value,
                 onEvent = viewModel::handleEvent
             )
+        }
+
+        if (state.value.showNewsSourcesBottomSheet) {
+            GptInvestorBottomSheet(
+                modifier = Modifier,
+                onDismiss = {
+                    viewModel.handleEvent(TopPickEvent.ClickNewsSources(show = false))
+                }
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.sources),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    state.value.companyPresentation?.news?.map { it.toPresentation() }
+                        ?.let { news ->
+                            news.forEachIndexed { index, item ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(
+                                        8.dp
+                                    )
+                                ) {
+                                    AsyncImage(
+                                        model = item.imageUrl,
+                                        modifier = Modifier
+                                            .size(20.dp)
+                                            .clip(CircleShape),
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Crop
+                                    )
+
+                                    Text(
+                                        text = item.publisher,
+                                        style = MaterialTheme.typography.titleSmall
+                                    )
+                                }
+
+                                if (index != news.lastIndex) {
+                                    HorizontalDivider()
+                                }
+                            }
+                        }
+                }
+            }
         }
     }
 }
@@ -377,6 +431,7 @@ private fun ContentView(modifier: Modifier, state: TopPickDetailView, onEvent: (
                             onClickNews = {
                             },
                             onClickSources = {
+                                onEvent(TopPickEvent.ClickNewsSources(show = true))
                             }
                         )
                     }

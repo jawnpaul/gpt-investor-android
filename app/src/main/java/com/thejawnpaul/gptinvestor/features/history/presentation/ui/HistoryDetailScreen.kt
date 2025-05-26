@@ -51,6 +51,17 @@ fun HistoryDetailScreen(modifier: Modifier, navController: NavController, conver
                         viewModel.sendFeedback(messageId, status, reason)
                     },
                     onCopy = { text ->
+                    },
+                    inputQuery = conversation.value.query,
+                    onInputQueryChanged = { input ->
+                        viewModel.updateInput(input = input)
+                    },
+                    onSendClick = {
+                        keyboardController?.hide()
+                        viewModel.getInputResponse()
+                    },
+                    companyName = "default company name",
+                    onClickSuggestedPrompt = {
                     }
                 )
             }

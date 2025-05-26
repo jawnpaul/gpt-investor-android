@@ -74,6 +74,16 @@ fun ConversationScreen(modifier: Modifier, viewModel: ConversationViewModel, nav
                     },
                     onCopy = { text ->
                         viewModel.handleEvent(ConversationEvent.CopyToClipboard(text))
+                    },
+                    inputQuery = conversation.value.query,
+                    onInputQueryChanged = { input ->
+                        viewModel.updateInput(input = input)
+                    },
+                    onSendClick = {
+                    },
+                    companyName = "default company name",
+                    onClickSuggestedPrompt = {
+                        viewModel.getSuggestedPromptResponse(it)
                     }
                 )
             }

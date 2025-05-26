@@ -7,10 +7,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -40,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -58,6 +63,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntit
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.theme.bodyChatBody
@@ -66,15 +72,21 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StructuredConversationScreen(
-    modifier: Modifier = Modifier,
+    modifier: Modifier,
     conversation: StructuredConversation,
     onNavigateUp: () -> Unit,
     text: String,
     onClickNews: (url: String) -> Unit,
     onClickFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
-    onCopy: (String) -> Unit
+    onCopy: (String) -> Unit,
+    inputQuery: String,
+    onInputQueryChanged: (String) -> Unit,
+    onSendClick: () -> Unit,
+    companyName: String = "",
+    onClickSuggestedPrompt: (String) -> Unit
 ) {
     val company = conversation.messageList.filterIsInstance<GenAiEntityMessage>().firstOrNull()
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -107,6 +119,45 @@ fun StructuredConversationScreen(
                     style = MaterialTheme.typography.titleLarge,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
+                )
+            }
+        },
+        bottomBar = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (conversation.suggestedPrompts.isNotEmpty()) {
+                    FollowUpQuestions(
+                        modifier = Modifier,
+                        entity = null,
+                        list = conversation.suggestedPrompts,
+                        onClick = { prompt ->
+                            onClickSuggestedPrompt(prompt.query)
+                        }
+                    )
+                }
+                InputBar(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .windowInsetsPadding(
+                            WindowInsets.ime
+                        )
+                        .navigationBarsPadding(),
+                    input = inputQuery,
+                    contentPadding = PaddingValues(0.dp),
+                    sendEnabled = true,
+                    onInputChanged = { input ->
+                        onInputQueryChanged(input)
+                    },
+                    onSendClick = {
+                        keyboardController?.hide()
+                        onSendClick()
+                    },
+                    placeholder = stringResource(
+                        R.string.ask_anything_about,
+                        companyName
+                    ),
+                    shouldRequestFocus = false
                 )
             }
         }

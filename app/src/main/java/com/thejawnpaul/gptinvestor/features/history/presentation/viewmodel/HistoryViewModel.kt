@@ -63,8 +63,11 @@ class HistoryViewModel @Inject constructor(
         Timber.e(failure.toString())
     }
 
-    private fun handleGetAllHistorySuccess(response: List<StructuredConversation>) {
-        _historyScreenView.update { it.copy(loading = false, list = response) }
+    private fun handleGetAllHistorySuccess(response: Map<String, List<StructuredConversation>>) {
+        // _historyScreenView.update { it.copy(loading = false, list = response) }
+        _historyScreenView.update {
+            it.copy(loading = false, list = response)
+        }
     }
 
     fun updateConversationId(conversationId: String) {

@@ -12,7 +12,8 @@ data class StructuredConversation(
     override val id: Long,
     val title: String,
     val messageList: MutableList<GenAiMessage> = mutableListOf(),
-    val suggestedPrompts: List<Suggestion> = emptyList()
+    val suggestedPrompts: List<Suggestion> = emptyList(),
+    val lastMessageTime: String? = null
 ) : Conversation
 
 data class UnStructuredConversation(override val id: Long) : Conversation

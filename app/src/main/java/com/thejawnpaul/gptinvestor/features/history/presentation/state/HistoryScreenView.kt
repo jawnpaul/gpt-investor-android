@@ -4,6 +4,6 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Structured
 
 data class HistoryScreenView(
     val loading: Boolean = false,
-    val list: List<StructuredConversation> = emptyList(),
+    val list: Map<String, List<StructuredConversation>> = emptyMap(),
     val error: String? = null
 )

@@ -52,7 +52,9 @@ object Constants {
             "      \"query\": \"Second complete suggestion prompt\"\n" +
             "    }\n" +
             "  ]\n" +
-            "}"
+            "}" +
+            "\n" +
+            "Do not deviate from the above json. Only return the json in the above format. It is very important"
 
     const val TITLE_PROMPT =
         "Based on our conversation history, generate a concise and descriptive title that captures the main topic or theme discussed. " +

@@ -16,6 +16,7 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import timber.log.Timber
 
 class TopPickRepository @Inject constructor(
@@ -26,31 +27,9 @@ class TopPickRepository @Inject constructor(
     private val remoteConfig: RemoteConfig
 ) :
     ITopPickRepository {
-    override suspend fun getTopPicks(): Flow<Either<Failure, List<TopPick>>> = flow {
+    override suspend fun getTopPicks(): Flow<Either<Failure, Unit>> = flow {
         try {
             val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-            // emit local
-            val local = topPickDao.getAllTopPicks().filter { it.date == today }.map { entity ->
-                with(entity) {
-                    TopPick(
-                        id = id,
-                        companyName = companyName,
-                        ticker = ticker,
-                        rationale = rationale,
-                        metrics = metrics,
-                        risks = risks,
-                        confidenceScore = confidenceScore,
-                        isSaved = isSaved,
-                        imageUrl = companyDao.getCompany(ticker).logoUrl,
-                        percentageChange = change,
-                        currentPrice = price
-                    )
-                }
-            }.sortedByDescending { it.confidenceScore }
-
-            if (local.isNotEmpty()) {
-                emit(Either.Right(local))
-            }
 
             val response = apiService.getTopPicks(date = today)
             if (response.isSuccessful) {
@@ -72,25 +51,7 @@ class TopPickRepository @Inject constructor(
                         }
                     }
                     topPickDao.replaceUnsavedWithNewPicks(topPickEntities)
-                    val topPicks = remotePick.map {
-                        with(it) {
-                            TopPick(
-                                id = id,
-                                companyName = companyName,
-                                ticker = ticker,
-                                rationale = rationale,
-                                metrics = metrics,
-                                risks = risks,
-                                confidenceScore = confidenceScore,
-                                isSaved = false,
-                                imageUrl = companyDao.getCompany(ticker).logoUrl,
-                                percentageChange = percentageChange ?: 0.0f,
-                                currentPrice = price ?: 0.0f
-                            )
-                        }
-                    }.sortedByDescending { it.confidenceScore }
-                    // emit remote
-                    emit(Either.Right(topPicks))
+                    emit(Either.Right(Unit))
                 } ?: emit(Either.Left(Failure.DataError))
             }
         } catch (e: Exception) {
@@ -264,5 +225,28 @@ class TopPickRepository @Inject constructor(
             }
         }.sortedByDescending { it.confidenceScore }
         emit(Either.Right(local))
+    }
+
+    override suspend fun getTopPicksByDate(): Flow<List<TopPick>> {
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        return topPickDao.getTopPicksFlow(today).map { list ->
+            list.map { entity ->
+                with(entity) {
+                    TopPick(
+                        id = id,
+                        companyName = companyName,
+                        ticker = ticker,
+                        rationale = rationale,
+                        metrics = metrics,
+                        risks = risks,
+                        confidenceScore = confidenceScore,
+                        isSaved = isSaved,
+                        imageUrl = companyDao.getCompany(ticker).logoUrl,
+                        percentageChange = change,
+                        currentPrice = price
+                    )
+                }
+            }
+        }
     }
 }

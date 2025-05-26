@@ -126,13 +126,15 @@ fun HomeScreen(modifier: Modifier, navController: NavHostController, viewModel: 
             )
 
             // Top Picks
-            TopPicks(modifier = Modifier, state = topPicks.value, onClick = {
-                navController.navigate(Screen.TopPickDetailScreen.createRoute(it))
-            }, onClickRetry = {
-                viewModel.getTopPicks()
-            }, onClickSeeAll = {
-                navController.navigate(Screen.AllTopPicksScreen.route)
-            })
+            if (topPicks.value.topPicks.isNotEmpty()) {
+                TopPicks(modifier = Modifier, state = topPicks.value, onClick = {
+                    navController.navigate(Screen.TopPickDetailScreen.createRoute(it))
+                }, onClickRetry = {
+                    viewModel.getTopPicks()
+                }, onClickSeeAll = {
+                    navController.navigate(Screen.AllTopPicksScreen.route)
+                })
+            }
         }
     }
 }

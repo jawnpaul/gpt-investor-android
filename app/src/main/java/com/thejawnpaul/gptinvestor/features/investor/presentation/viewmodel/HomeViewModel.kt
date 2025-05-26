@@ -14,6 +14,7 @@ import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetTrendingC
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.*
+import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetLocalTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
@@ -34,7 +35,8 @@ class HomeViewModel @Inject constructor(
     private val getLocalTopPicksUseCase: GetLocalTopPicksUseCase,
     private val remoteConfig: RemoteConfig,
     private val preferences: GPTInvestorPreferences,
-    private val analyticsLogger: AnalyticsLogger
+    private val analyticsLogger: AnalyticsLogger,
+    private val topPickRepository: ITopPickRepository
 ) :
     ViewModel() {
 
@@ -97,42 +99,34 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getTopPicks() {
-        _topPicks.update { it.copy(loading = true) }
-
         getTopPicksUseCase(GetTopPicksUseCase.None()) {
             it.onFailure {
-                _topPicks.update { state ->
-                    state.copy(
-                        loading = false,
-                        error = "Something went wrong."
-                    )
-                }
-                getLocalPicks()
             }
+            it.onSuccess {
+            }
+        }
 
-            it.onSuccess { result ->
-                _topPicks.update { state ->
-                    state.copy(
-                        loading = false,
-                        topPicks = result.map { topPick ->
-                            with(topPick) {
-                                TopPickPresentation(
-                                    id = id,
-                                    companyName = companyName,
-                                    ticker = ticker,
-                                    rationale = rationale,
-                                    metrics = metrics,
-                                    risks = risks,
-                                    confidenceScore = confidenceScore,
-                                    isSaved = isSaved,
-                                    imageUrl = imageUrl,
-                                    percentageChange = percentageChange,
-                                    currentPrice = currentPrice
-                                )
-                            }
-                        }
-                    )
+        viewModelScope.launch {
+            topPickRepository.getTopPicksByDate().collect { picks ->
+                val presentation = picks.map { topPick ->
+                    with(topPick) {
+                        TopPickPresentation(
+                            id = id,
+                            companyName = companyName,
+                            ticker = ticker,
+                            rationale = rationale,
+                            metrics = metrics,
+                            risks = risks,
+                            confidenceScore = confidenceScore,
+                            isSaved = isSaved,
+                            imageUrl = imageUrl,
+                            percentageChange = percentageChange,
+                            currentPrice = currentPrice
+                        )
+                    }
                 }
+
+                _topPicks.update { state -> state.copy(topPicks = presentation, loading = false) }
             }
         }
     }

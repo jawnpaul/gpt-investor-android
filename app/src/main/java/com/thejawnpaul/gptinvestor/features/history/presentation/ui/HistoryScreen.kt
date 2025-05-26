@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,10 +27,10 @@ import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
 
 @Composable
-fun HistoryScreen(modifier: Modifier = Modifier, navController: NavController, viewModel: HistoryViewModel) {
+fun HistoryScreen(modifier: Modifier, navController: NavController, viewModel: HistoryViewModel) {
     val historyViewState = viewModel.historyScreenView.collectAsStateWithLifecycle()
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
         Column(modifier = Modifier) {
             Text(
                 text = stringResource(R.string.your_gpt_investor_history),
@@ -42,7 +44,7 @@ fun HistoryScreen(modifier: Modifier = Modifier, navController: NavController, v
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp)
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
             ) {
                 if (historyViewState.value.loading) {
                     item {
@@ -50,17 +52,43 @@ fun HistoryScreen(modifier: Modifier = Modifier, navController: NavController, v
                     }
                 }
 
-                items(
-                    items = historyViewState.value.list,
-                    key = { conversation -> conversation.id }
-                ) { conversation ->
-                    SingleHistoryItem(
-                        modifier = Modifier,
-                        conversation = conversation,
-                        onClick = { id ->
-                            navController.navigate(Screen.HistoryDetailScreen.createRoute(id))
+                historyViewState.value.list.forEach { title, items ->
+                    item {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    }
+
+                    item {
+                        OutlinedCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            items.forEachIndexed { index, conversation ->
+                                SingleHistoryItem(
+                                    modifier = Modifier,
+                                    conversation = conversation,
+                                    onClick = { id ->
+                                        navController.navigate(
+                                            Screen.HistoryDetailScreen.createRoute(
+                                                id
+                                            )
+                                        )
+                                    }
+                                )
+                                if (index < items.size - 1) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(
+                                            start = 16.dp,
+                                            end = 16.dp,
+                                            bottom = 8.dp
+                                        )
+                                    )
+                                }
+                            }
                         }
-                    )
+                    }
                 }
             }
         }

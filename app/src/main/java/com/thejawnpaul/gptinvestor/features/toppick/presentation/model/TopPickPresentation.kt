@@ -9,7 +9,7 @@ data class TopPickPresentation(
     val risks: List<String>,
     val confidenceScore: Int,
     val isSaved: Boolean,
-    val percentageChange: Float = 0.0f,
+    val percentageChange: Float,
     val imageUrl: String = "",
     val currentPrice: Float
 )

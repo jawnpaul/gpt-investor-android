@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -96,12 +97,15 @@ fun SingleTopPickItem(modifier: Modifier, pickPresentation: TopPickPresentation,
                     ) {
                         // Text - company price
                         Text(
+                            modifier = Modifier.align(Alignment.End),
                             text = "$${pickPresentation.currentPrice.toTwoDecimalPlaces()}",
-                            style = MaterialTheme.typography.bodyLarge
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.End
                         )
                         // Text - percentage change
                         if (pickPresentation.percentageChange < 0) {
                             Row(
+                                modifier = Modifier.align(Alignment.End),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
@@ -111,13 +115,14 @@ fun SingleTopPickItem(modifier: Modifier, pickPresentation: TopPickPresentation,
                                     contentDescription = null
                                 )
                                 Text(
-                                    text = "${pickPresentation.percentageChange}%",
+                                    text = "${pickPresentation.percentageChange.toTwoDecimalPlaces()}%",
                                     color = Color(212, 38, 32),
                                     style = MaterialTheme.typography.bodySmall
                                 )
                             }
                         } else {
                             Row(
+                                modifier = Modifier.align(Alignment.End),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
@@ -130,7 +135,7 @@ fun SingleTopPickItem(modifier: Modifier, pickPresentation: TopPickPresentation,
                                     )
                                 )
                                 Text(
-                                    text = "+${pickPresentation.percentageChange}%",
+                                    text = "+${pickPresentation.percentageChange.toTwoDecimalPlaces()}%",
                                     color = gptInvestorColors.greenColors.defaultGreen,
                                     style = MaterialTheme.typography.bodySmall
                                 )
@@ -156,7 +161,6 @@ fun SingleTopPickItem(modifier: Modifier, pickPresentation: TopPickPresentation,
 @Composable
 fun HomeTopPickItem(modifier: Modifier, pickPresentation: TopPickPresentation, onClick: (String) -> Unit) {
     val gptInvestorColors = LocalGPTInvestorColors.current
-
     Column(
         modifier = modifier.clickable(
             interactionSource = null,
@@ -206,12 +210,15 @@ fun HomeTopPickItem(modifier: Modifier, pickPresentation: TopPickPresentation, o
                 ) {
                     // Text - company price
                     Text(
+                        modifier = Modifier.align(Alignment.End),
                         text = "$${pickPresentation.currentPrice.toTwoDecimalPlaces()}",
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.End
                     )
                     // Text - percentage change
                     if (pickPresentation.percentageChange < 0) {
                         Row(
+                            modifier = Modifier.align(Alignment.End),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
@@ -221,13 +228,14 @@ fun HomeTopPickItem(modifier: Modifier, pickPresentation: TopPickPresentation, o
                                 contentDescription = null
                             )
                             Text(
-                                text = "${pickPresentation.percentageChange}%",
+                                text = "${pickPresentation.percentageChange.toTwoDecimalPlaces()}%",
                                 color = Color(212, 38, 32),
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
                     } else {
                         Row(
+                            modifier = Modifier.align(Alignment.End),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
@@ -240,7 +248,7 @@ fun HomeTopPickItem(modifier: Modifier, pickPresentation: TopPickPresentation, o
                                 )
                             )
                             Text(
-                                text = "+${pickPresentation.percentageChange}%",
+                                text = "+${pickPresentation.percentageChange.toTwoDecimalPlaces()}%",
                                 color = gptInvestorColors.greenColors.defaultGreen,
                                 style = MaterialTheme.typography.bodySmall
                             )

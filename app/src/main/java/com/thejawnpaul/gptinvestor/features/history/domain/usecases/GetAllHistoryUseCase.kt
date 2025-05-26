@@ -15,13 +15,13 @@ class GetAllHistoryUseCase @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: IHistoryRepository
-) : BaseUseCase<GetAllHistoryUseCase.None, List<StructuredConversation>>(
+) : BaseUseCase<GetAllHistoryUseCase.None, Map<String, List<StructuredConversation>>>(
     coroutineScope,
     dispatcher
 ) {
     class None
 
-    override suspend fun run(params: None): Flow<Either<Failure, List<StructuredConversation>>> {
+    override suspend fun run(params: None): Flow<Either<Failure, Map<String, List<StructuredConversation>>>> {
         return repository.getAllHistory()
     }
 }

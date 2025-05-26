@@ -3,6 +3,8 @@ package com.thejawnpaul.gptinvestor.features.history.data.repository
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.core.utility.formatAsRelativeDate
+import com.thejawnpaul.gptinvestor.core.utility.getHourAndMinute
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.dao.ConversationDao
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.history.domain.repository.IHistoryRepository
@@ -16,17 +18,23 @@ class HistoryRepository @Inject constructor(
     private val analyticsLogger: AnalyticsLogger
 ) :
     IHistoryRepository {
-    override suspend fun getAllHistory(): Flow<Either<Failure, List<StructuredConversation>>> = flow {
+    override suspend fun getAllHistory(): Flow<Either<Failure, Map<String, List<StructuredConversation>>>> = flow {
         try {
-            val conversations = conversationDao.getConversationsWithMessages().map { entity ->
-                with(entity) {
-                    StructuredConversation(
-                        id = conversation.conversationId,
-                        title = conversation.title
-                    )
+            val separated = conversationDao.getConversationsWithMessages()
+                .groupBy { it.conversation.timestamp.formatAsRelativeDate() }
+
+            val conversations = separated.map { (date, entities) ->
+                date to entities.map { entity ->
+                    with(entity) {
+                        StructuredConversation(
+                            id = conversation.conversationId,
+                            title = conversation.title,
+                            lastMessageTime = conversation.timestamp.getHourAndMinute()
+                        )
+                    }
                 }
             }
-            emit(Either.Right(conversations))
+            emit(Either.Right(conversations.toMap()))
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.DataError))

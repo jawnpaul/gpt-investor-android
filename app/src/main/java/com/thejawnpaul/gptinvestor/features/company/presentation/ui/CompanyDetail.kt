@@ -321,7 +321,7 @@ fun CompanyHistoryGraph(
         shape = RoundedCornerShape(16.dp),
         border = BorderStroke(width = 2.dp, color = DividerDefaults.color)
     ) {
-        var selected by remember { mutableStateOf<TimePeriod>(TimePeriod.OneYear()) }
+        var selected by remember { mutableStateOf<TimePeriod>(TimePeriod.OneWeek()) }
 
         Column(modifier = Modifier.fillMaxWidth()) {
             Box(

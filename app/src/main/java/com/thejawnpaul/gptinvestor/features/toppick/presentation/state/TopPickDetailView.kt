@@ -9,5 +9,6 @@ data class TopPickDetailView(
     val loading: Boolean = false,
     val error: String? = null,
     val companyPresentation: CompanyDetailRemoteResponse? = null,
-    val showAuthenticateDialog: Boolean = false
+    val showAuthenticateDialog: Boolean = false,
+    val showNewsSourcesBottomSheet: Boolean = false
 )

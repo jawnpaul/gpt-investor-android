@@ -96,13 +96,15 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
             )
 
             // Top Picks
-            TopPicks(modifier = Modifier, state = state.topPicksView, onClick = {
-                onAction(HomeAction.OnGoToTopPickDetail(it))
-            }, onClickRetry = {
-                onEvent(HomeEvent.RetryTopPicks)
-            }, onClickSeeAll = {
-                onAction(HomeAction.OnGoToAllTopPicks)
-            })
+            if (topPicks.value.topPicks.isNotEmpty()) {
+                TopPicks(modifier = Modifier, state = state.topPicksView, onClick = {
+                    onAction(HomeAction.OnGoToTopPickDetail(it))
+                }, onClickRetry = {
+                    onEvent(HomeEvent.RetryTopPicks)
+                }, onClickSeeAll = {
+                    onAction(HomeAction.OnGoToAllTopPicks)
+                })
+            }
         }
     }
 }

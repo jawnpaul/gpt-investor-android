@@ -352,12 +352,16 @@ fun SingleStructuredResponse(
                             } else {
                                 Row(
                                     modifier = Modifier.padding(start = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     // copy
-                                    IconButton(onClick = {
-                                        onCopy(modelResponse)
-                                    }) {
+                                    IconButton(
+                                        modifier = Modifier.size(32.dp),
+                                        onClick = {
+                                            onCopy(modelResponse)
+                                        }
+                                    ) {
                                         Icon(
                                             painter = painterResource(id = R.drawable.ic_copy),
                                             contentDescription = stringResource(R.string.copy)
@@ -367,8 +371,11 @@ fun SingleStructuredResponse(
                                     when (feedBackState.value) {
                                         1 -> {
                                             // like chosen
-                                            IconButton(onClick = {
-                                            }) {
+                                            IconButton(
+                                                modifier = Modifier.size(32.dp),
+                                                onClick = {
+                                                }
+                                            ) {
                                                 Icon(
                                                     painter = painterResource(id = R.drawable.ic_like_filled),
                                                     contentDescription = stringResource(R.string.like_chosen)
@@ -378,7 +385,7 @@ fun SingleStructuredResponse(
 
                                         -1 -> {
                                             // dislike chosen
-                                            IconButton(onClick = {
+                                            IconButton(modifier = Modifier.size(32.dp), onClick = {
                                             }) {
                                                 Icon(
                                                     painter = painterResource(id = R.drawable.ic_dislike_filled),
@@ -391,10 +398,13 @@ fun SingleStructuredResponse(
                                             // none chosen
 
                                             // like
-                                            IconButton(onClick = {
-                                                feedBackState.value = 1
-                                                onClickFeedback(genAiMessage.id, 1, null)
-                                            }) {
+                                            IconButton(
+                                                modifier = Modifier.size(32.dp),
+                                                onClick = {
+                                                    feedBackState.value = 1
+                                                    onClickFeedback(genAiMessage.id, 1, null)
+                                                }
+                                            ) {
                                                 Icon(
                                                     painter = painterResource(id = R.drawable.ic_like),
                                                     contentDescription = stringResource(R.string.like)
@@ -402,11 +412,14 @@ fun SingleStructuredResponse(
                                             }
 
                                             // dislike
-                                            IconButton(onClick = {
-                                                showDislikeReasons.value = true
-                                                feedBackState.value = -1
-                                                onClickFeedback(genAiMessage.id, -1, null)
-                                            }) {
+                                            IconButton(
+                                                modifier = Modifier.size(32.dp),
+                                                onClick = {
+                                                    showDislikeReasons.value = true
+                                                    feedBackState.value = -1
+                                                    onClickFeedback(genAiMessage.id, -1, null)
+                                                }
+                                            ) {
                                                 Icon(
                                                     painter = painterResource(id = R.drawable.ic_dislike),
                                                     contentDescription = stringResource(R.string.dislike)

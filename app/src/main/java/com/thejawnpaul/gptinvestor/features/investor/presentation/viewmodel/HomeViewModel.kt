@@ -14,6 +14,7 @@ import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetTrendingC
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.*
+import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetLocalTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
@@ -35,8 +36,10 @@ class HomeViewModel @Inject constructor(
     private val getLocalTopPicksUseCase: GetLocalTopPicksUseCase,
     private val remoteConfig: RemoteConfig,
     private val preferences: GPTInvestorPreferences,
-    private val analyticsLogger: AnalyticsLogger
-) : ViewModel() {
+    private val analyticsLogger: AnalyticsLogger,
+    private val topPickRepository: ITopPickRepository
+) :
+    ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()

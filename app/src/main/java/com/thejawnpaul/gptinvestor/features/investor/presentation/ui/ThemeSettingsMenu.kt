@@ -28,7 +28,8 @@ fun ThemeDropdown(modifier: Modifier, onClick: (String) -> Unit, options: List<S
     var expanded by remember { mutableStateOf(false) }
     Box(
         modifier = modifier
-            .padding(top = 16.dp, end = 16.dp)
+            .padding(end = 16.dp),
+        contentAlignment = Alignment.Center
     ) {
         Row(
             modifier = Modifier

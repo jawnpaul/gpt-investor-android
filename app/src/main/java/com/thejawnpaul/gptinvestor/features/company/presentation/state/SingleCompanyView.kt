@@ -9,7 +9,8 @@ data class SingleCompanyView(
     val error: String? = null,
     val companyName: String = "",
     val inputQuery: String = "",
-    val header: CompanyHeaderPresentation = CompanyHeaderPresentation()
+    val header: CompanyHeaderPresentation = CompanyHeaderPresentation(),
+    val genText: String = ""
 ) {
     val enableSend = inputQuery.trim().isNotEmpty()
 }

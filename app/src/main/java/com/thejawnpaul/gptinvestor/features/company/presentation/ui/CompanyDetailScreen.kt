@@ -36,12 +36,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.core.navigation.Screen
-import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
+import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCompanyView
+import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
+import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailEvent
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyDetailDefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.StructuredConversationScreen
@@ -49,14 +48,11 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewModel: CompanyViewModel, ticker: String) {
+fun CompanyDetailScreen(modifier: Modifier, state: SingleCompanyView, ticker: String, onEvent: (CompanyDetailEvent) -> Unit, onAction: (CompanyDetailAction) -> Unit) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-    val selectedCompany = viewModel.selectedCompany.collectAsStateWithLifecycle()
-    val genText = viewModel.genText.collectAsStateWithLifecycle()
-    val keyboardController = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(ticker) {
-        viewModel.updateTicker(ticker)
+        onEvent(CompanyDetailEvent.UpdateTicker(ticker))
     }
 
     Column(
@@ -68,17 +64,43 @@ fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewMo
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            selectedCompany.value.conversation.let { conversation ->
+            state.conversation.let { conversation ->
                 when (conversation) {
                     is CompanyDetailDefaultConversation -> {
+                        val keyboardController = LocalSoftwareKeyboardController.current
                         Scaffold(
                             topBar = {
                                 CompanyDetailHeader(
                                     modifier = Modifier.fillMaxWidth(),
                                     onNavigateUp = {
-                                        navController.navigateUp()
+                                        onAction(CompanyDetailAction.OnGoBack)
                                     },
-                                    companyHeader = selectedCompany.value.header
+                                    companyHeader = state.header
+                                )
+                            },
+                            bottomBar = {
+                                InputBar(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .windowInsetsPadding(
+                                            WindowInsets.ime
+                                        )
+                                        .navigationBarsPadding(),
+                                    input = state.inputQuery,
+                                    contentPadding = PaddingValues(0.dp),
+                                    sendEnabled = state.enableSend,
+                                    onInputChanged = { input ->
+                                        onEvent(CompanyDetailEvent.QueryInputChanged(input))
+                                    },
+                                    onSendClick = {
+                                        keyboardController?.hide()
+                                        onEvent(CompanyDetailEvent.SendClick)
+                                    },
+                                    placeholder = stringResource(
+                                        R.string.ask_anything_about,
+                                        state.companyName
+                                    ),
+                                    shouldRequestFocus = false
                                 )
                             }
                         ) { innerPadding ->
@@ -142,7 +164,7 @@ fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewMo
                             ) {
                                 HorizontalDivider(modifier = Modifier.fillMaxWidth())
 
-                                if (selectedCompany.value.loading) {
+                                if (state.loading) {
                                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                                 }
 
@@ -154,11 +176,7 @@ fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewMo
                                             .padding(top = 16.dp),
                                         company = company,
                                         onClickNews = {
-                                            navController.navigate(
-                                                Screen.WebViewScreen.createRoute(
-                                                    it
-                                                )
-                                            )
+                                            onAction(CompanyDetailAction.OnNavigateToWebView(url = it))
                                         },
                                         onClickSources = {
                                             showBottomSheet = true
@@ -173,14 +191,27 @@ fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewMo
                         StructuredConversationScreen(
                             modifier = Modifier,
                             conversation = conversation,
-                            onNavigateUp = { navController.navigateUp() },
-                            text = genText.value,
+                            onNavigateUp = {
+                                onAction(CompanyDetailAction.OnGoBack)
+                            },
+                            text = state.genText,
                             onClickNews = {
-                                navController.navigate(Screen.WebViewScreen.createRoute(it))
+                                onAction(CompanyDetailAction.OnNavigateToWebView(url = it))
                             },
                             onClickFeedback = { messageId, status, reason ->
                             },
                             onCopy = {
+                            },
+                            inputQuery = state.inputQuery,
+                            onInputQueryChanged = { input ->
+                                onEvent(CompanyDetailEvent.QueryInputChanged(input))
+                            },
+                            onSendClick = {
+                                onEvent(CompanyDetailEvent.SendClick)
+                            },
+                            companyName = state.companyName,
+                            onClickSuggestedPrompt = {
+                                onEvent(CompanyDetailEvent.SuggestedPromptClicked(it))
                             }
                         )
                     }
@@ -190,28 +221,5 @@ fun CompanyDetailScreen(modifier: Modifier, navController: NavController, viewMo
                 }
             }
         }
-        InputBar(
-            modifier = Modifier
-                .fillMaxWidth()
-                .windowInsetsPadding(
-                    WindowInsets.ime
-                )
-                .navigationBarsPadding(),
-            input = selectedCompany.value.inputQuery,
-            contentPadding = PaddingValues(0.dp),
-            sendEnabled = selectedCompany.value.enableSend,
-            onInputChanged = { input ->
-                viewModel.getQuery(input)
-            },
-            onSendClick = {
-                keyboardController?.hide()
-                viewModel.getInputResponse()
-            },
-            placeholder = stringResource(
-                R.string.ask_anything_about,
-                selectedCompany.value.companyName
-            ),
-            shouldRequestFocus = false
-        )
     }
 }

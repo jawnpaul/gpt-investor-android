@@ -21,6 +21,7 @@ import com.thejawnpaul.gptinvestor.features.authentication.presentation.Authenti
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.AuthenticationViewModel
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.WebViewScreen
+import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDiscoveryAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ConversationScreen
@@ -173,11 +174,29 @@ fun SetUpNavGraph(navController: NavHostController) {
                 composable(route = Screen.CompanyDetailScreen.route) { backStackEntry ->
                     val parentViewModel = hiltViewModel<CompanyViewModel>()
                     val ticker = backStackEntry.arguments?.getString("ticker") ?: ""
+                    val state = parentViewModel.selectedCompany.collectAsStateWithLifecycle()
+                    val scope = rememberCoroutineScope()
+
+                    LaunchedEffect(Unit) {
+                        parentViewModel.companyDetailAction.onEach { action ->
+                            when (action) {
+                                CompanyDetailAction.OnGoBack -> {
+                                    navController.navigateUp()
+                                }
+
+                                is CompanyDetailAction.OnNavigateToWebView -> {
+                                    navController.navigate(Screen.WebViewScreen.createRoute(action.url))
+                                }
+                            }
+                        }.launchIn(scope)
+                    }
+
                     CompanyDetailScreen(
                         modifier = Modifier.padding(top = 20.dp),
-                        navController = navController,
-                        viewModel = parentViewModel,
-                        ticker = ticker
+                        ticker = ticker,
+                        state = state.value,
+                        onEvent = parentViewModel::handleCompanyDetailEvent,
+                        onAction = parentViewModel::processCompanyDetailAction
                     )
                 }
 

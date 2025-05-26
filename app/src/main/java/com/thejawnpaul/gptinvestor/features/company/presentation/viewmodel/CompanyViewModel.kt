@@ -53,14 +53,14 @@ class CompanyViewModel @Inject constructor(
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
     val selectedCompany get() = _selectedCompany
 
+    private val _companyDetailAction = MutableSharedFlow<CompanyDetailAction>()
+    val companyDetailAction get() = _companyDetailAction
+
     private val _companyFinancials = MutableStateFlow(CompanyFinancialsView())
     val companyFinancials get() = _companyFinancials
 
     private val _urlToLoad = MutableStateFlow(String())
     val urlToLoad get() = _urlToLoad
-
-    private val _genText = MutableStateFlow("")
-    val genText get() = _genText
 
     private var companyTicker = ""
 
@@ -186,6 +186,7 @@ class CompanyViewModel @Inject constructor(
 
     private fun handleCompanyInputResponseSuccess(conversation: Conversation) {
         val s = conversation as StructuredConversation
+        Timber.e(s.toString())
         _selectedCompany.update {
             it.copy(
                 conversation = conversation,
@@ -193,7 +194,7 @@ class CompanyViewModel @Inject constructor(
                 inputQuery = ""
             )
         }
-        _genText.update { s.messageList.last().response.toString() }
+        _selectedCompany.update { it.copy(genText = s.messageList.last().response.toString()) }
         selectedConversationId.update { s.id }
     }
 
@@ -380,6 +381,36 @@ class CompanyViewModel @Inject constructor(
             }
         }
     }
+
+    fun handleCompanyDetailEvent(event: CompanyDetailEvent) {
+        when (event) {
+            CompanyDetailEvent.GoBack -> {
+                processCompanyDetailAction(CompanyDetailAction.OnGoBack)
+            }
+
+            is CompanyDetailEvent.QueryInputChanged -> {
+                getQuery(event.query)
+            }
+
+            CompanyDetailEvent.SendClick -> {
+                getInputResponse()
+            }
+
+            is CompanyDetailEvent.UpdateTicker -> {
+                updateTicker(event.ticker)
+            }
+
+            is CompanyDetailEvent.SuggestedPromptClicked -> {
+                getSuggestedPromptResponse(event.query)
+            }
+        }
+    }
+
+    fun processCompanyDetailAction(action: CompanyDetailAction) {
+        viewModelScope.launch {
+            _companyDetailAction.emit(action)
+        }
+    }
 }
 
 data class CompanyDiscoveryState(
@@ -396,4 +427,17 @@ sealed interface CompanyDiscoveryEvent {
 
 sealed interface CompanyDiscoveryAction {
     data class OnNavigateToCompanyDetail(val ticker: String) : CompanyDiscoveryAction
+}
+
+sealed interface CompanyDetailEvent {
+    data class UpdateTicker(val ticker: String) : CompanyDetailEvent
+    data class QueryInputChanged(val query: String) : CompanyDetailEvent
+    data object GoBack : CompanyDetailEvent
+    data object SendClick : CompanyDetailEvent
+    data class SuggestedPromptClicked(val query: String) : CompanyDetailEvent
+}
+
+sealed interface CompanyDetailAction {
+    data object OnGoBack : CompanyDetailAction
+    data class OnNavigateToWebView(val url: String) : CompanyDetailAction
 }

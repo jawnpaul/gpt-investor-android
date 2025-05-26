@@ -108,7 +108,44 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getTopPicks() {
-        _uiState.update { currentState ->
+        getTopPicksUseCase(GetTopPicksUseCase.None()) {
+            it.onFailure {
+            }
+            it.onSuccess {
+            }
+        }
+
+        viewModelScope.launch {
+            topPickRepository.getTopPicksByDate().collect { topPicks ->
+                val topPicksPresentation = topPicks.map { topPick ->
+                    with(topPick) {
+                        TopPickPresentation(
+                            id = id,
+                            companyName = companyName,
+                            ticker = ticker,
+                            rationale = rationale,
+                            metrics = metrics,
+                            risks = risks,
+                            confidenceScore = confidenceScore,
+                            isSaved = isSaved,
+                            imageUrl = imageUrl,
+                            percentageChange = percentageChange,
+                            currentPrice = currentPrice
+                        )
+                    }
+                }
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        topPicksView = currentState.topPicksView.copy(
+                            loading = false,
+                            topPicks = topPicksPresentation
+                        )
+                    )
+                }
+            }
+        }
+
+        /*_uiState.update { currentState ->
             currentState.copy(
                 topPicksView = currentState.topPicksView.copy(loading = true, error = null)
             )
@@ -153,7 +190,7 @@ class HomeViewModel @Inject constructor(
                     )
                 }
             }
-        }
+        }*/
     }
 
     private fun getCurrentUser() {

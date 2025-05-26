@@ -96,7 +96,7 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
             )
 
             // Top Picks
-            if (topPicks.value.topPicks.isNotEmpty()) {
+            if (state.topPicksView.topPicks.isNotEmpty()) {
                 TopPicks(modifier = Modifier, state = state.topPicksView, onClick = {
                     onAction(HomeAction.OnGoToTopPickDetail(it))
                 }, onClickRetry = {

@@ -91,12 +91,14 @@ fun SingleCompanyItem(modifier: Modifier, company: CompanyPresentation, onClick:
                     ) {
                         // Text - company price
                         Text(
+                            modifier = Modifier.align(Alignment.End),
                             text = "$${company.price.toTwoDecimalPlaces()}",
                             style = MaterialTheme.typography.bodyLarge
                         )
                         // Text - percentage change
                         if (company.priceChange.change < 0) {
                             Row(
+                                modifier = Modifier.align(Alignment.End),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
@@ -113,6 +115,7 @@ fun SingleCompanyItem(modifier: Modifier, company: CompanyPresentation, onClick:
                             }
                         } else {
                             Row(
+                                modifier = Modifier.align(Alignment.End),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {

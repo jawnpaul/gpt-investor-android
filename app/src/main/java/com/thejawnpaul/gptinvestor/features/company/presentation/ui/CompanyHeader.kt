@@ -92,6 +92,7 @@ fun CompanyDetailHeader(modifier: Modifier, onNavigateUp: () -> Unit, companyHea
             ) {
                 // Text - company price
                 Text(
+                    modifier = Modifier.align(Alignment.End),
                     text = "$${companyHeader.price.toTwoDecimalPlaces()}",
                     style = MaterialTheme.typography.bodyLarge
                 )

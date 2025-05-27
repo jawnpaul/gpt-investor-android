@@ -25,6 +25,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.Compa
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDiscoveryAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ConversationScreen
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationViewModel
 import com.thejawnpaul.gptinvestor.features.discover.DiscoverScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryDetailScreen
@@ -205,13 +206,29 @@ fun SetUpNavGraph(navController: NavHostController) {
                     arguments = listOf(navArgument("chatInput") { NavType.StringType })
                 ) { navBackStackEntry ->
                     val viewModel = hiltViewModel<ConversationViewModel>()
-                    val chatInput = navBackStackEntry.arguments?.getString("chatInput") ?: ""
+                    val state = viewModel.conversation.collectAsStateWithLifecycle()
+                    val chatInput = navBackStackEntry.arguments?.getString("chatInput")
+                    val scope = rememberCoroutineScope()
+                    LaunchedEffect(Unit) {
+                        viewModel.actions.onEach { action ->
+                            when (action) {
+                                ConversationAction.OnGoBack -> {
+                                    navController.navigateUp()
+                                }
+
+                                is ConversationAction.OnGoToWebView -> {
+                                    navController.navigate(Screen.WebViewScreen.createRoute(action.url))
+                                }
+                            }
+                        }.launchIn(scope)
+                    }
 
                     ConversationScreen(
                         modifier = Modifier.padding(top = 20.dp),
-                        viewModel = viewModel,
-                        navController = navController,
-                        chatInput = chatInput
+                        chatInput = chatInput,
+                        state = state.value,
+                        onEvent = viewModel::handleEvent,
+                        onAction = viewModel::processAction
                     )
                 }
 

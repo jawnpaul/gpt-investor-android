@@ -19,6 +19,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.presentation.state.Conv
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -36,8 +37,8 @@ class ConversationViewModel @Inject constructor(
     private val conversationViewMutableStateFlow = MutableStateFlow(ConversationView())
     val conversation get() = conversationViewMutableStateFlow
 
-    private val _genText = MutableStateFlow("I am default")
-    val genText = _genText
+    private val _actions = MutableSharedFlow<ConversationAction>()
+    val actions get() = _actions
 
     private val _conversationMessages = MutableStateFlow(mutableListOf<GenAiTextMessage>())
     val conversationMessages get() = _conversationMessages
@@ -65,7 +66,7 @@ class ConversationViewModel @Inject constructor(
         }
     }
 
-    fun getDefaultPromptResponse(prompt: DefaultPrompt) {
+    private fun getDefaultPromptResponse(prompt: DefaultPrompt) {
         conversationViewMutableStateFlow.update {
             it.copy(loading = true)
         }
@@ -79,26 +80,27 @@ class ConversationViewModel @Inject constructor(
                     Timber.e(result.id.toString())
                     result.id
                 }
-                _genText.update {
-                    result.messageList.first().response.toString()
-                }
 
                 conversationViewMutableStateFlow.update { state ->
-                    state.copy(loading = result.messageList.last().loading, conversation = result)
+                    state.copy(
+                        loading = result.messageList.last().loading,
+                        conversation = result,
+                        genText = result.messageList.first().response.toString()
+                    )
                 }
             }
         }
     }
 
-    fun getInputResponse() {
-        if (conversation.value.query.trim().isNotEmpty()) {
+    private fun getInputResponse(query: String? = null) {
+        if (query != null && query.trim().isNotBlank()) {
             conversationViewMutableStateFlow.update {
                 it.copy(loading = true)
             }
             getInputPromptUseCase(
                 ConversationPrompt(
                     conversationId = selectedConversationId.value,
-                    query = conversation.value.query
+                    query = query
                 )
             ) {
                 it.fold(
@@ -106,10 +108,27 @@ class ConversationViewModel @Inject constructor(
                     ::handleInputResponseSuccess
                 )
             }
+        } else {
+            if (conversation.value.query.trim().isNotEmpty()) {
+                conversationViewMutableStateFlow.update {
+                    it.copy(loading = true)
+                }
+                getInputPromptUseCase(
+                    ConversationPrompt(
+                        conversationId = selectedConversationId.value,
+                        query = conversation.value.query
+                    )
+                ) {
+                    it.fold(
+                        ::handleInputResponseFailure,
+                        ::handleInputResponseSuccess
+                    )
+                }
+            }
         }
     }
 
-    fun getSuggestedPromptResponse(query: String) {
+    private fun getSuggestedPromptResponse(query: String) {
         conversationViewMutableStateFlow.update {
             it.copy(loading = true)
         }
@@ -146,15 +165,12 @@ class ConversationViewModel @Inject constructor(
             conversation.id
         }
 
-        _genText.update {
-            conversation.messageList.last().response.toString()
-        }
-
         conversationViewMutableStateFlow.update { state ->
             state.copy(
                 query = "",
                 loading = conversation.messageList.last().loading,
-                conversation = conversation
+                conversation = conversation,
+                genText = conversation.messageList.last().response.toString()
             )
         }
     }
@@ -168,6 +184,28 @@ class ConversationViewModel @Inject constructor(
             is ConversationEvent.SendFeedback -> {
                 sendFeedback(event.messageId, event.status, event.reason)
             }
+
+            is ConversationEvent.DefaultPromptClicked -> {
+                getDefaultPromptResponse(event.prompt)
+            }
+
+            is ConversationEvent.SendPrompt -> {
+                getInputResponse(event.query)
+            }
+
+            is ConversationEvent.SuggestedPromptClicked -> {
+                getSuggestedPromptResponse(event.prompt)
+            }
+
+            is ConversationEvent.UpdateInputQuery -> {
+                updateInput(event.query)
+            }
+        }
+    }
+
+    fun processAction(action: ConversationAction) {
+        viewModelScope.launch {
+            _actions.emit(action)
         }
     }
 
@@ -200,4 +238,16 @@ sealed interface ConversationEvent {
 
     data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) :
         ConversationEvent
+
+    data class UpdateInputQuery(val query: String) : ConversationEvent
+
+    data class DefaultPromptClicked(val prompt: DefaultPrompt) : ConversationEvent
+
+    data class SuggestedPromptClicked(val prompt: String) : ConversationEvent
+    data class SendPrompt(val query: String? = null) : ConversationEvent
+}
+
+sealed interface ConversationAction {
+    data object OnGoBack : ConversationAction
+    data class OnGoToWebView(val url: String) : ConversationAction
 }

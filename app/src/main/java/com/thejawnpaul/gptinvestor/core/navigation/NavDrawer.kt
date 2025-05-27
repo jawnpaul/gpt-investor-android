@@ -145,7 +145,7 @@ fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Uni
                                 modifier = Modifier.size(40.dp),
                                 shape = CircleShape
                             ) {
-                                Text(text = state.user.displayName?.first().toString())
+                                Text(text = state.user.displayName?.ifBlank { "A" }?.take(1)?.uppercase() ?: "A")
                             }
                         }
                     } else {

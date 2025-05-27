@@ -22,6 +22,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.AuthenticationViewModel
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.WebViewScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
@@ -55,15 +56,33 @@ import kotlinx.coroutines.launch
 fun SetUpNavGraph(navController: NavHostController) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val authViewModel = hiltViewModel<AuthenticationViewModel>()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             NavDrawerContent(
-                navController = navController,
                 onCloseDrawer = {
                     scope.launch {
                         drawerState.close()
+                    }
+                },
+                onEvent = { event ->
+                    when (event) {
+                        NavDrawerEvent.SignOut -> {
+                            authViewModel.signOut()
+                        }
+                    }
+                },
+                onAction = { action ->
+                    when (action) {
+                        NavDrawerAction.OnGoToSavedPicks -> {
+                            navController.navigate(Screen.SavedTopPicksScreen.route)
+                        }
+
+                        NavDrawerAction.OnGoToSettings -> {
+                            navController.navigate(Screen.SettingsScreen.route)
+                        }
                     }
                 }
             )

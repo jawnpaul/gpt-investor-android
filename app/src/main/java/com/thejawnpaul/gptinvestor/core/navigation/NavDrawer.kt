@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,13 +26,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.features.authentication.presentation.AuthenticationViewModel
 
 @Composable
-fun NavDrawerContent(navController: NavHostController, onCloseDrawer: () -> Unit, authenticationViewModel: AuthenticationViewModel = hiltViewModel()) {
+fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Unit, onAction: (NavDrawerAction) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxHeight()
@@ -57,20 +55,22 @@ fun NavDrawerContent(navController: NavHostController, onCloseDrawer: () -> Unit
 
         // Drawer items
         DrawerItem(
+            modifier = Modifier,
             icon = ImageVector.vectorResource(R.drawable.baseline_bookmarks_24),
             label = stringResource(R.string.saved_picks),
             onClick = {
                 // Navigate to saved picks
-                navController.navigate(Screen.SavedTopPicksScreen.route)
+                onAction(NavDrawerAction.OnGoToSavedPicks)
                 onCloseDrawer()
             }
         )
 
         DrawerItem(
+            modifier = Modifier,
             icon = Icons.Default.Settings,
             label = stringResource(R.string.settings),
             onClick = {
-                navController.navigate(Screen.SettingsScreen.route)
+                onAction(NavDrawerAction.OnGoToSettings)
                 onCloseDrawer()
             }
         )
@@ -79,11 +79,12 @@ fun NavDrawerContent(navController: NavHostController, onCloseDrawer: () -> Unit
 
         // Bottom section
         DrawerItem(
+            modifier = Modifier.navigationBarsPadding(),
             icon = ImageVector.vectorResource(R.drawable.baseline_logout_24),
             label = stringResource(R.string.sign_out),
             onClick = {
                 // Handle sign out
-                authenticationViewModel.signOut()
+                onEvent(NavDrawerEvent.SignOut)
                 onCloseDrawer()
             }
         )
@@ -91,9 +92,9 @@ fun NavDrawerContent(navController: NavHostController, onCloseDrawer: () -> Unit
 }
 
 @Composable
-private fun DrawerItem(icon: ImageVector, label: String, onClick: () -> Unit) {
+private fun DrawerItem(modifier: Modifier, icon: ImageVector, label: String, onClick: () -> Unit) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(vertical = 12.dp),
@@ -110,4 +111,13 @@ private fun DrawerItem(icon: ImageVector, label: String, onClick: () -> Unit) {
             style = MaterialTheme.typography.bodyLarge
         )
     }
+}
+
+sealed interface NavDrawerEvent {
+    data object SignOut : NavDrawerEvent
+}
+
+sealed interface NavDrawerAction {
+    data object OnGoToSettings : NavDrawerAction
+    data object OnGoToSavedPicks : NavDrawerAction
 }

@@ -339,10 +339,16 @@ fun SetUpNavGraph(navController: NavHostController) {
 
                 composable(route = Screen.SavedTopPicksScreen.route) {
                     val viewModel = hiltViewModel<TopPickViewModel>()
+                    val state = viewModel.savedTopPicks.collectAsStateWithLifecycle()
                     SavedTopPicksScreen(
                         modifier = Modifier.padding(top = 20.dp),
-                        navController = navController,
-                        viewModel = viewModel
+                        state = state.value,
+                        onGoBack = {
+                            navController.navigateUp()
+                        },
+                        onGoToDetail = { id ->
+                            navController.navigate(Screen.TopPickDetailScreen.createRoute(id))
+                        }
                     )
                 }
 

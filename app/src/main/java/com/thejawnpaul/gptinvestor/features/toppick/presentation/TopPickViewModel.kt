@@ -126,26 +126,36 @@ class TopPickViewModel @Inject constructor(
             }
 
             it.onSuccess { result ->
+
+                val allTopPicks = result.map { topPick ->
+                    with(topPick) {
+                        TopPickPresentation(
+                            id = id,
+                            companyName = companyName,
+                            ticker = ticker,
+                            rationale = rationale,
+                            metrics = metrics,
+                            risks = risks,
+                            confidenceScore = confidenceScore,
+                            isSaved = isSaved,
+                            imageUrl = imageUrl,
+                            percentageChange = percentageChange,
+                            currentPrice = currentPrice
+                        )
+                    }
+                }
+
                 _allTopPicks.update { state ->
                     state.copy(
                         loading = false,
-                        topPicks = result.map { topPick ->
-                            with(topPick) {
-                                TopPickPresentation(
-                                    id = id,
-                                    companyName = companyName,
-                                    ticker = ticker,
-                                    rationale = rationale,
-                                    metrics = metrics,
-                                    risks = risks,
-                                    confidenceScore = confidenceScore,
-                                    isSaved = isSaved,
-                                    imageUrl = imageUrl,
-                                    percentageChange = percentageChange,
-                                    currentPrice = currentPrice
-                                )
-                            }
-                        }
+                        topPicks = allTopPicks
+                    )
+                }
+
+                _savedTopPicks.update { state ->
+                    state.copy(
+                        loading = false,
+                        topPicks = allTopPicks.filter { pick -> pick.isSaved }
                     )
                 }
             }
@@ -221,44 +231,6 @@ class TopPickViewModel @Inject constructor(
 
                 it.onFailure { failure ->
                     Timber.e(failure.toString())
-                }
-            }
-        }
-    }
-
-    fun getSavedTopPicks() {
-        getSavedTopPicksUseCase(GetSavedTopPicksUseCase.None()) {
-            it.onFailure {
-                _savedTopPicks.update { state ->
-                    state.copy(
-                        loading = false,
-                        error = "Something went wrong."
-                    )
-                }
-            }
-
-            it.onSuccess { result ->
-                _savedTopPicks.update { state ->
-                    state.copy(
-                        loading = false,
-                        topPicks = result.map { topPick ->
-                            with(topPick) {
-                                TopPickPresentation(
-                                    id = id,
-                                    companyName = companyName,
-                                    ticker = ticker,
-                                    rationale = rationale,
-                                    metrics = metrics,
-                                    risks = risks,
-                                    confidenceScore = confidenceScore,
-                                    isSaved = isSaved,
-                                    imageUrl = imageUrl,
-                                    percentageChange = percentageChange,
-                                    currentPrice = currentPrice
-                                )
-                            }
-                        }
-                    )
                 }
             }
         }

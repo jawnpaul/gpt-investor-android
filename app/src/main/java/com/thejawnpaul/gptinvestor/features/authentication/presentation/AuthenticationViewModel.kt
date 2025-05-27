@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.authentication.presentation
 
 import android.app.Activity
+import android.content.Context
 import androidx.activity.result.ActivityResult
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -45,7 +46,6 @@ class AuthenticationViewModel @Inject constructor(
     fun signIn() {
         viewModelScope.launch {
             _authState.update { it.copy(loading = true) }
-            authRepository.signUp()
         }
     }
 
@@ -152,12 +152,12 @@ class AuthenticationViewModel @Inject constructor(
                 _newAuthState.update { it.copy(password = event.password) }
             }
 
-            AuthenticationEvent.LoginWithGoogle -> {
-                loginWithGoogle()
+            is AuthenticationEvent.LoginWithGoogle -> {
+                loginWithGoogle(event.context)
             }
 
-            AuthenticationEvent.SignUpWithGoogle -> {
-                signUpWithGoogle()
+            is AuthenticationEvent.SignUpWithGoogle -> {
+                signUpWithGoogle(event.context)
             }
         }
     }
@@ -221,9 +221,9 @@ class AuthenticationViewModel @Inject constructor(
         }
     }
 
-    private fun signUpWithGoogle() {
+    private fun signUpWithGoogle(context: Context) {
         viewModelScope.launch {
-            authRepository.signUp().collect {
+            authRepository.signUp(context).collect {
                 if (it) {
                     _actions.emit(AuthenticationAction.OnSignUp("Sign up Success"))
                 } else {
@@ -233,9 +233,9 @@ class AuthenticationViewModel @Inject constructor(
         }
     }
 
-    private fun loginWithGoogle() {
+    private fun loginWithGoogle(context: Context) {
         viewModelScope.launch {
-            authRepository.loginWithGoogle().collect {
+            authRepository.loginWithGoogle(context).collect {
                 if (it) {
                     _actions.emit(AuthenticationAction.OnLogin("Login Success"))
                 } else {
@@ -286,8 +286,8 @@ sealed interface AuthenticationEvent {
     data object SignUp : AuthenticationEvent
     data class EmailChanged(val email: String) : AuthenticationEvent
     data class PasswordChanged(val password: String) : AuthenticationEvent
-    data object SignUpWithGoogle : AuthenticationEvent
-    data object LoginWithGoogle : AuthenticationEvent
+    data class SignUpWithGoogle(val context: Context) : AuthenticationEvent
+    data class LoginWithGoogle(val context: Context) : AuthenticationEvent
 }
 
 sealed interface AuthenticationAction {

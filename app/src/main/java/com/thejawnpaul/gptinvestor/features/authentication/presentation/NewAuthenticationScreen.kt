@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.launchIn
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.onEach
 @Composable
 fun NewAuthenticationScreen(modifier: Modifier, authViewModel: AuthenticationViewModel = hiltViewModel(), onAuthenticationComplete: (String) -> Unit) {
     val state = authViewModel.newAuthState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     val scope = rememberCoroutineScope()
 
@@ -55,7 +57,7 @@ fun NewAuthenticationScreen(modifier: Modifier, authViewModel: AuthenticationVie
                         authViewModel.handleEvent(AuthenticationEvent.PasswordChanged(it))
                     },
                     onLoginWithGoogleClick = {
-                        authViewModel.handleEvent(AuthenticationEvent.LoginWithGoogle)
+                        authViewModel.handleEvent(AuthenticationEvent.LoginWithGoogle(context))
                     }
                 )
             }
@@ -80,7 +82,7 @@ fun NewAuthenticationScreen(modifier: Modifier, authViewModel: AuthenticationVie
                         authViewModel.handleEvent(AuthenticationEvent.PasswordChanged(it))
                     },
                     onSignUpWithGoogleClick = {
-                        authViewModel.handleEvent(AuthenticationEvent.SignUpWithGoogle)
+                        authViewModel.handleEvent(AuthenticationEvent.SignUpWithGoogle(context))
                     }
                 )
             }

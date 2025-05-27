@@ -61,6 +61,7 @@ class TopPickViewModel @Inject constructor(
                 _topPickView.update { it.copy(isLoggedIn = isSignedIn) }
             }
         }
+        getAllTopPicks()
     }
 
     fun updateTopPickId(topPickId: String) {

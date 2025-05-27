@@ -20,26 +20,17 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.core.navigation.Screen
-import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewModel
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 
 @Composable
-fun AllTopPicksScreen(modifier: Modifier, navController: NavController, viewModel: TopPickViewModel) {
-    LaunchedEffect(Unit) {
-        viewModel.getAllTopPicks()
-    }
-    val state = viewModel.allTopPicks.collectAsStateWithLifecycle()
-
+fun AllTopPicksScreen(modifier: Modifier, state: TopPicksView, onGoBack: () -> Unit, onGoToDetail: (String) -> Unit) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
         Column(modifier = Modifier) {
             Row(
@@ -48,7 +39,7 @@ fun AllTopPicksScreen(modifier: Modifier, navController: NavController, viewMode
                     .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { navController.navigateUp() }) {
+                IconButton(onClick = onGoBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
                         contentDescription = stringResource(id = R.string.back)
@@ -68,19 +59,23 @@ fun AllTopPicksScreen(modifier: Modifier, navController: NavController, viewMode
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(horizontal = 0.dp)
             ) {
-                if (state.value.loading) {
+                if (state.loading) {
                     item {
                         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                     }
                 }
 
                 items(
-                    items = state.value.topPicks,
+                    items = state.topPicks,
                     key = { topPickPresentation -> topPickPresentation.id }
                 ) { pickPresentation ->
-                    SingleTopPickItem(modifier = Modifier, pickPresentation = pickPresentation, onClick = {
-                        navController.navigate(Screen.TopPickDetailScreen.createRoute(it))
-                    })
+                    SingleTopPickItem(
+                        modifier = Modifier,
+                        pickPresentation = pickPresentation,
+                        onClick = {
+                            onGoToDetail(pickPresentation.id)
+                        }
+                    )
                     Spacer(modifier = Modifier.size(16.dp))
                 }
             }

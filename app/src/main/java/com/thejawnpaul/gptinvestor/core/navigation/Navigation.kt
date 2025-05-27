@@ -326,10 +326,16 @@ fun SetUpNavGraph(navController: NavHostController) {
 
                 composable(route = Screen.AllTopPicksScreen.route) {
                     val viewModel = hiltViewModel<TopPickViewModel>()
+                    val state = viewModel.allTopPicks.collectAsStateWithLifecycle()
                     AllTopPicksScreen(
                         modifier = Modifier.padding(top = 20.dp),
-                        navController = navController,
-                        viewModel = viewModel
+                        state = state.value,
+                        onGoBack = {
+                            navController.navigateUp()
+                        },
+                        onGoToDetail = { id ->
+                            navController.navigate(Screen.TopPickDetailScreen.createRoute(id))
+                        }
                     )
                 }
                 composable(route = Screen.AuthenticationScreen.route) {

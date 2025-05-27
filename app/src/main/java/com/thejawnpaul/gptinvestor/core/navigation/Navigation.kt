@@ -30,6 +30,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.
 import com.thejawnpaul.gptinvestor.features.discover.DiscoverScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryDetailScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryScreen
+import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenAction
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
@@ -245,13 +246,29 @@ fun SetUpNavGraph(navController: NavHostController) {
                     arguments = listOf(navArgument("conversationId") { NavType.StringType })
                 ) { navBackStackEntry ->
                     val viewModel = hiltViewModel<HistoryViewModel>()
+                    val state = viewModel.conversation.collectAsStateWithLifecycle()
                     val id = navBackStackEntry.arguments?.getString("conversationId") ?: ""
+                    val scope = rememberCoroutineScope()
+                    LaunchedEffect(Unit) {
+                        viewModel.historyDetailAction.onEach { action ->
+                            when (action) {
+                                HistoryDetailAction.OnGoBack -> {
+                                    navController.navigateUp()
+                                }
+
+                                is HistoryDetailAction.OnGoToWebView -> {
+                                    navController.navigate(Screen.WebViewScreen.createRoute(action.url))
+                                }
+                            }
+                        }.launchIn(scope)
+                    }
 
                     HistoryDetailScreen(
                         modifier = Modifier.padding(top = 20.dp),
-                        navController = navController,
                         conversationId = id,
-                        viewModel = viewModel
+                        state = state.value,
+                        onEvent = viewModel::handleHistoryDetailEvent,
+                        onAction = viewModel::processHistoryDetailAction
                     )
                 }
 

@@ -6,7 +6,8 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultCon
 data class HistoryConversationView(
     val conversation: Conversation = DefaultConversation(),
     val query: String = "",
-    val loading: Boolean = false
+    val loading: Boolean = false,
+    val genText: String = ""
 ) {
     val enableSend = !loading && query.trim().isNotEmpty()
 }

@@ -42,8 +42,8 @@ class HistoryViewModel @Inject constructor(
     private val conversationView = MutableStateFlow(HistoryConversationView())
     val conversation get() = conversationView
 
-    private val _genText = MutableStateFlow("")
-    val genText = _genText
+    private val _historyDetailAction = MutableSharedFlow<HistoryDetailAction>()
+    val historyDetailAction get() = _historyDetailAction
 
     private val conversationId: Long?
         get() = savedStateHandle.get<Long>("conversationId")
@@ -138,15 +138,12 @@ class HistoryViewModel @Inject constructor(
     private fun handleInputResponseSuccess(conversation: Conversation) {
         conversation as StructuredConversation
 
-        _genText.update {
-            conversation.messageList.last().response.toString()
-        }
-
         conversationView.update { state ->
             state.copy(
                 query = "",
                 loading = conversation.messageList.last().loading,
-                conversation = conversation
+                conversation = conversation,
+                genText = conversation.messageList.last().response.toString()
             )
         }
     }
@@ -186,6 +183,35 @@ class HistoryViewModel @Inject constructor(
             }
         }
     }
+
+    fun handleHistoryDetailEvent(event: HistoryDetailEvent) {
+        when (event) {
+            is HistoryDetailEvent.ClickSuggestedPrompt -> {
+            }
+
+            is HistoryDetailEvent.GetHistory -> {
+                updateConversationId(event.conversationId.toString())
+            }
+
+            HistoryDetailEvent.GetInputResponse -> {
+                getInputResponse()
+            }
+
+            is HistoryDetailEvent.SendFeedback -> {
+                sendFeedback(event.messageId, event.status, event.reason)
+            }
+
+            is HistoryDetailEvent.UpdateInputQuery -> {
+                updateInput(event.input)
+            }
+        }
+    }
+
+    fun processHistoryDetailAction(action: HistoryDetailAction) {
+        viewModelScope.launch {
+            _historyDetailAction.emit(action)
+        }
+    }
 }
 
 sealed interface HistoryScreenEvent {
@@ -194,4 +220,19 @@ sealed interface HistoryScreenEvent {
 
 sealed interface HistoryScreenAction {
     data class OnGoToHistoryDetail(val conversationId: Long) : HistoryScreenAction
+}
+
+sealed interface HistoryDetailEvent {
+    data class GetHistory(val conversationId: Long) : HistoryDetailEvent
+    data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) :
+        HistoryDetailEvent
+
+    data class UpdateInputQuery(val input: String) : HistoryDetailEvent
+    data object GetInputResponse : HistoryDetailEvent
+    data class ClickSuggestedPrompt(val prompt: String) : HistoryDetailEvent
+}
+
+sealed interface HistoryDetailAction {
+    data object OnGoBack : HistoryDetailAction
+    data class OnGoToWebView(val url: String) : HistoryDetailAction
 }

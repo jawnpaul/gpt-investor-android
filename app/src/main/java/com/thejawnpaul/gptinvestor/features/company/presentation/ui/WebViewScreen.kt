@@ -19,13 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.navigation.NavController
 import com.thejawnpaul.gptinvestor.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun WebViewScreen(navController: NavController, url: String) {
+fun WebViewScreen(url: String, onGoBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -41,9 +40,7 @@ fun WebViewScreen(navController: NavController, url: String) {
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        navController.navigateUp()
-                    }) {
+                    IconButton(onClick = onGoBack) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = stringResource(id = R.string.back)

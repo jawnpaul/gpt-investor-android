@@ -235,7 +235,9 @@ fun SetUpNavGraph(navController: NavHostController) {
                 composable(route = Screen.WebViewScreen.route) { navBackStackEntry ->
 
                     val data = navBackStackEntry.arguments?.getString("url") ?: ""
-                    WebViewScreen(navController = navController, url = data)
+                    WebViewScreen(url = data, onGoBack = {
+                        navController.navigateUp()
+                    })
                 }
 
                 composable(

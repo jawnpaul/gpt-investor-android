@@ -57,6 +57,7 @@ fun SetUpNavGraph(navController: NavHostController) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val authViewModel = hiltViewModel<AuthenticationViewModel>()
+    val state = authViewModel.authState.collectAsStateWithLifecycle()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -84,7 +85,8 @@ fun SetUpNavGraph(navController: NavHostController) {
                             navController.navigate(Screen.SettingsScreen.route)
                         }
                     }
-                }
+                },
+                state = state.value
             )
         }
     ) {

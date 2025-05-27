@@ -37,7 +37,7 @@ class AuthenticationViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             authRepository.getAuthState().collect { isSignedIn ->
-                _authState.update { it.copy(isUserSignedIn = isSignedIn) }
+                _authState.update { it.copy(isUserSignedIn = isSignedIn, user = authRepository.currentUser) }
             }
         }
     }

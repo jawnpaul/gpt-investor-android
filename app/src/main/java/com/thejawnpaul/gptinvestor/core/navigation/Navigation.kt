@@ -1,5 +1,7 @@
 package com.thejawnpaul.gptinvestor.core.navigation
 
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
@@ -9,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -38,6 +41,7 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.Home
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsScreen
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsViewModel
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickAction
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewModel
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.AllTopPicksScreen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SavedTopPicksScreen
@@ -277,12 +281,46 @@ fun SetUpNavGraph(navController: NavHostController) {
                     arguments = listOf(navArgument("topPickId") { NavType.StringType })
                 ) { navBackStackEntry ->
                     val viewModel = hiltViewModel<TopPickViewModel>()
+                    val state = viewModel.topPickView.collectAsStateWithLifecycle()
                     val id = navBackStackEntry.arguments?.getString("topPickId") ?: ""
+                    val scope = rememberCoroutineScope()
+                    val context = LocalContext.current
+
+                    LaunchedEffect(Unit) {
+                        viewModel.actions.onEach { action ->
+                            when (action) {
+                                TopPickAction.OnGoBack -> {
+                                    navController.navigateUp()
+                                }
+
+                                is TopPickAction.OnShare -> {
+                                    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_SUBJECT, "Top pick")
+                                        putExtra(Intent.EXTRA_TEXT, action.url)
+                                    }
+                                    context.startActivity(
+                                        Intent.createChooser(
+                                            sendIntent,
+                                            "Share via"
+                                        )
+                                    )
+                                }
+
+                                is TopPickAction.ShowToast -> {
+                                    Toast.makeText(context, action.message, Toast.LENGTH_SHORT)
+                                        .show()
+                                }
+                            }
+                        }.launchIn(scope)
+                    }
+
                     TopPickDetailScreen(
                         modifier = Modifier.padding(top = 20.dp),
-                        navController = navController,
                         topPickId = id,
-                        viewModel = viewModel
+                        state = state.value,
+                        onEvent = viewModel::handleEvent,
+                        onAction = viewModel::processAction
                     )
                 }
 

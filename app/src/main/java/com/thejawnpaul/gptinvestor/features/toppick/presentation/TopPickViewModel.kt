@@ -317,6 +317,16 @@ class TopPickViewModel @Inject constructor(
             is TopPickEvent.ClickNewsSources -> {
                 _topPickView.update { it.copy(showNewsSourcesBottomSheet = event.show) }
             }
+
+            is TopPickEvent.GetTopPick -> {
+                updateTopPickId(event.id)
+            }
+        }
+    }
+
+    fun processAction(action: TopPickAction) {
+        viewModelScope.launch {
+            _actions.emit(action)
         }
     }
 }
@@ -324,10 +334,12 @@ class TopPickViewModel @Inject constructor(
 sealed interface TopPickAction {
     data class OnShare(val url: String) : TopPickAction
     data class ShowToast(val message: String) : TopPickAction
+    data object OnGoBack : TopPickAction
 }
 
 sealed interface TopPickEvent {
     data class Authenticate(val showDialog: Boolean) : TopPickEvent
     data class AuthenticationResponse(val message: String) : TopPickEvent
     data class ClickNewsSources(val show: Boolean) : TopPickEvent
+    data class GetTopPick(val id: String) : TopPickEvent
 }

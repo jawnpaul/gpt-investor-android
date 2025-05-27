@@ -1,7 +1,5 @@
 package com.thejawnpaul.gptinvestor.features.toppick.presentation.ui
 
-import android.content.Intent
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,15 +31,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -49,8 +44,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.NewAuthenticationScreen
@@ -61,48 +54,21 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.ui.ExpandableTe
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickAction
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickEvent
-import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewModel
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPickDetailView
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.theme.linkMedium
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopPickDetailScreen(modifier: Modifier, navController: NavController, topPickId: String, viewModel: TopPickViewModel) {
+fun TopPickDetailScreen(modifier: Modifier, topPickId: String, state: TopPickDetailView, onEvent: (TopPickEvent) -> Unit, onAction: (TopPickAction) -> Unit) {
     LaunchedEffect(topPickId) {
-        viewModel.updateTopPickId(topPickId)
-    }
-
-    val state = viewModel.topPickView.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val keyboardController = LocalSoftwareKeyboardController.current
-    LaunchedEffect(Unit) {
-        scope.launch {
-            viewModel.actions.collect { action ->
-                when (action) {
-                    is TopPickAction.OnShare -> {
-                        val sendIntent = Intent(Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(Intent.EXTRA_SUBJECT, "Top pick")
-                            putExtra(Intent.EXTRA_TEXT, action.url)
-                        }
-                        context.startActivity(Intent.createChooser(sendIntent, "Share via"))
-                    }
-
-                    is TopPickAction.ShowToast -> {
-                        Toast.makeText(context, action.message, Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        }
+        onEvent(TopPickEvent.GetTopPick(topPickId))
     }
 
     Scaffold(
         modifier = modifier,
         topBar = {
-            state.value.companyPresentation?.let { company ->
+            state.companyPresentation?.let { company ->
                 CompanyDetailHeader(
                     modifier = Modifier,
                     companyHeader = CompanyHeaderPresentation(
@@ -112,13 +78,13 @@ fun TopPickDetailScreen(modifier: Modifier, navController: NavController, topPic
                         percentageChange = company.change,
                         companyLogo = company.imageUrl
                     ),
-                    onNavigateUp = { navController.navigateUp() }
+                    onNavigateUp = { onAction(TopPickAction.OnGoBack) }
                 )
             } ?: Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                IconButton(onClick = { navController.navigateUp() }) {
+                IconButton(onClick = { onAction(TopPickAction.OnGoBack) }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
                         contentDescription = stringResource(id = R.string.back)
@@ -159,16 +125,16 @@ fun TopPickDetailScreen(modifier: Modifier, navController: NavController, topPic
         ) {
             ContentView(
                 modifier = Modifier.fillMaxSize(),
-                state = state.value,
-                onEvent = viewModel::handleEvent
+                state = state,
+                onEvent = onEvent
             )
         }
 
-        if (state.value.showNewsSourcesBottomSheet) {
+        if (state.showNewsSourcesBottomSheet) {
             GptInvestorBottomSheet(
                 modifier = Modifier,
                 onDismiss = {
-                    viewModel.handleEvent(TopPickEvent.ClickNewsSources(show = false))
+                    onEvent(TopPickEvent.ClickNewsSources(show = false))
                 }
             ) {
                 Column(
@@ -181,7 +147,7 @@ fun TopPickDetailScreen(modifier: Modifier, navController: NavController, topPic
                         text = stringResource(R.string.sources),
                         style = MaterialTheme.typography.labelMedium
                     )
-                    state.value.companyPresentation?.news?.map { it.toPresentation() }
+                    state.companyPresentation?.news?.map { it.toPresentation() }
                         ?.let { news ->
                             news.forEachIndexed { index, item ->
                                 Row(

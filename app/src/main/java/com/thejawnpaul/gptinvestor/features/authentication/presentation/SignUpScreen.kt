@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,7 +49,8 @@ fun SignUpScreen(
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onSignUpClick: () -> Unit,
-    onLoginClick: () -> Unit
+    onLoginClick: () -> Unit,
+    onSignUpWithGoogleClick: () -> Unit
 ) {
     var passwordHidden by remember { mutableStateOf(true) }
 
@@ -126,9 +128,16 @@ fun SignUpScreen(
                 GPTInvestorButton(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     text = stringResource(R.string.sign_up),
-                    enabled = enableButton,
+                    enabled = false,
                     onClick = onSignUpClick
                 )
+
+                Button(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    onClick = onSignUpWithGoogleClick
+                ) {
+                    Text(text = "Sign up with Google")
+                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -170,7 +179,8 @@ fun SignUpPreview() {
                 onEmailChange = {},
                 onPasswordChange = {},
                 onLoginClick = {},
-                onSignUpClick = {}
+                onSignUpClick = {},
+                onSignUpWithGoogleClick = {}
             )
         }
     }

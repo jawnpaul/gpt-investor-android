@@ -72,7 +72,7 @@ fun AuthenticationScreen(viewModel: AuthenticationViewModel = hiltViewModel(), o
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                    viewModel.signIn(signInLauncher)
+                    viewModel.signIn()
                 }
             ) {
                 Text(stringResource(R.string.retry_sign_in))
@@ -138,7 +138,7 @@ fun AuthenticationScreen(viewModel: AuthenticationViewModel = hiltViewModel(), o
             } else {
                 Button(
                     onClick = {
-                        viewModel.signIn(signInLauncher)
+                        viewModel.signIn()
                     }
                 ) {
                     Text(stringResource(R.string.sign_in))

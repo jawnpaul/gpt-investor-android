@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,7 +49,8 @@ fun LoginScreen(
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onLoginClick: () -> Unit,
-    onSignUpClick: () -> Unit
+    onSignUpClick: () -> Unit,
+    onLoginWithGoogleClick: () -> Unit
 ) {
     var passwordHidden by remember { mutableStateOf(true) }
 
@@ -130,6 +132,13 @@ fun LoginScreen(
                     onClick = onLoginClick
                 )
 
+                Button(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    onClick = onLoginWithGoogleClick
+                ) {
+                    Text(text = "Login with Google")
+                }
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
@@ -170,7 +179,8 @@ fun LoginPreview() {
                 onEmailChange = {},
                 onPasswordChange = {},
                 onLoginClick = {},
-                onSignUpClick = {}
+                onSignUpClick = {},
+                onLoginWithGoogleClick = {}
             )
         }
     }

@@ -53,6 +53,9 @@ fun NewAuthenticationScreen(modifier: Modifier, authViewModel: AuthenticationVie
                     },
                     onPasswordChange = {
                         authViewModel.handleEvent(AuthenticationEvent.PasswordChanged(it))
+                    },
+                    onLoginWithGoogleClick = {
+                        authViewModel.handleEvent(AuthenticationEvent.LoginWithGoogle)
                     }
                 )
             }
@@ -75,6 +78,9 @@ fun NewAuthenticationScreen(modifier: Modifier, authViewModel: AuthenticationVie
                     },
                     onPasswordChange = {
                         authViewModel.handleEvent(AuthenticationEvent.PasswordChanged(it))
+                    },
+                    onSignUpWithGoogleClick = {
+                        authViewModel.handleEvent(AuthenticationEvent.SignUpWithGoogle)
                     }
                 )
             }

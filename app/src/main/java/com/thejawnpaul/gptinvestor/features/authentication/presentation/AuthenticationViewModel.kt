@@ -1,9 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.authentication.presentation
 
 import android.app.Activity
-import android.content.Intent
 import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
@@ -44,10 +42,10 @@ class AuthenticationViewModel @Inject constructor(
         }
     }
 
-    fun signIn(launcher: ActivityResultLauncher<Intent>) {
+    fun signIn() {
         viewModelScope.launch {
             _authState.update { it.copy(loading = true) }
-            authRepository.signUp(launcher)
+            authRepository.signUp()
         }
     }
 
@@ -153,6 +151,14 @@ class AuthenticationViewModel @Inject constructor(
             is AuthenticationEvent.PasswordChanged -> {
                 _newAuthState.update { it.copy(password = event.password) }
             }
+
+            AuthenticationEvent.LoginWithGoogle -> {
+                loginWithGoogle()
+            }
+
+            AuthenticationEvent.SignUpWithGoogle -> {
+                signUpWithGoogle()
+            }
         }
     }
 
@@ -214,6 +220,30 @@ class AuthenticationViewModel @Inject constructor(
             }
         }
     }
+
+    private fun signUpWithGoogle() {
+        viewModelScope.launch {
+            authRepository.signUp().collect {
+                if (it) {
+                    _actions.emit(AuthenticationAction.OnSignUp("Sign up Success"))
+                } else {
+                    _actions.emit(AuthenticationAction.OnSignUp("Sign up failed"))
+                }
+            }
+        }
+    }
+
+    private fun loginWithGoogle() {
+        viewModelScope.launch {
+            authRepository.loginWithGoogle().collect {
+                if (it) {
+                    _actions.emit(AuthenticationAction.OnLogin("Login Success"))
+                } else {
+                    _actions.emit(AuthenticationAction.OnLogin("Login failed"))
+                }
+            }
+        }
+    }
 }
 
 sealed class AuthResult<T> {
@@ -256,6 +286,8 @@ sealed interface AuthenticationEvent {
     data object SignUp : AuthenticationEvent
     data class EmailChanged(val email: String) : AuthenticationEvent
     data class PasswordChanged(val password: String) : AuthenticationEvent
+    data object SignUpWithGoogle : AuthenticationEvent
+    data object LoginWithGoogle : AuthenticationEvent
 }
 
 sealed interface AuthenticationAction {

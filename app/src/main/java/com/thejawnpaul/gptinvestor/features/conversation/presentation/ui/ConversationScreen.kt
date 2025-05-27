@@ -65,7 +65,7 @@ fun ConversationScreen(modifier: Modifier, state: ConversationView, chatInput: S
                     },
                     onSendClick = {
                     },
-                    companyName = "default company name",
+                    companyName = "",
                     onClickSuggestedPrompt = {
                         onEvent(ConversationEvent.SuggestedPromptClicked(it))
                     }

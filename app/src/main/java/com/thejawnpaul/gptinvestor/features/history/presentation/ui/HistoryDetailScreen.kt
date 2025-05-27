@@ -38,6 +38,7 @@ fun HistoryDetailScreen(modifier: Modifier, conversationId: String, state: Histo
                         onEvent(HistoryDetailEvent.SendFeedback(messageId, status, reason))
                     },
                     onCopy = { text ->
+                        onEvent(HistoryDetailEvent.CopyToClipboard(text))
                     },
                     inputQuery = state.query,
                     onInputQueryChanged = { input ->

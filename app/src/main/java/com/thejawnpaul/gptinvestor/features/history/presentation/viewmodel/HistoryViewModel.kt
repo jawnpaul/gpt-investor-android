@@ -204,6 +204,10 @@ class HistoryViewModel @Inject constructor(
             is HistoryDetailEvent.UpdateInputQuery -> {
                 updateInput(event.input)
             }
+
+            is HistoryDetailEvent.CopyToClipboard -> {
+                processHistoryDetailAction(HistoryDetailAction.OnCopy(event.text))
+            }
         }
     }
 
@@ -230,9 +234,11 @@ sealed interface HistoryDetailEvent {
     data class UpdateInputQuery(val input: String) : HistoryDetailEvent
     data object GetInputResponse : HistoryDetailEvent
     data class ClickSuggestedPrompt(val prompt: String) : HistoryDetailEvent
+    data class CopyToClipboard(val text: String) : HistoryDetailEvent
 }
 
 sealed interface HistoryDetailAction {
     data object OnGoBack : HistoryDetailAction
     data class OnGoToWebView(val url: String) : HistoryDetailAction
+    data class OnCopy(val text: String) : HistoryDetailAction
 }

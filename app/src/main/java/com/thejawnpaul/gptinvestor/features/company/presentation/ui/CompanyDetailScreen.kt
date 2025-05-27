@@ -201,6 +201,7 @@ fun CompanyDetailScreen(modifier: Modifier, state: SingleCompanyView, ticker: St
                             onClickFeedback = { messageId, status, reason ->
                             },
                             onCopy = {
+                                onEvent(CompanyDetailEvent.CopyToClipboard(it))
                             },
                             inputQuery = state.inputQuery,
                             onInputQueryChanged = { input ->

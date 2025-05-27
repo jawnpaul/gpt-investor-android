@@ -1,5 +1,7 @@
 package com.thejawnpaul.gptinvestor.core.navigation
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.layout.padding
@@ -180,6 +182,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                     val parentViewModel = hiltViewModel<CompanyViewModel>()
                     val ticker = backStackEntry.arguments?.getString("ticker") ?: ""
                     val state = parentViewModel.selectedCompany.collectAsStateWithLifecycle()
+                    val context = LocalContext.current
                     val scope = rememberCoroutineScope()
 
                     LaunchedEffect(Unit) {
@@ -191,6 +194,17 @@ fun SetUpNavGraph(navController: NavHostController) {
 
                                 is CompanyDetailAction.OnNavigateToWebView -> {
                                     navController.navigate(Screen.WebViewScreen.createRoute(action.url))
+                                }
+
+                                is CompanyDetailAction.OnCopy -> {
+                                    val clipboard =
+                                        context.getSystemService(ClipboardManager::class.java)
+                                    val clipData = ClipData.newPlainText(
+                                        "",
+                                        action.text
+                                    )
+                                    clipboard.setPrimaryClip(clipData)
+                                    Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }.launchIn(scope)
@@ -209,6 +223,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                     route = Screen.ConversationScreen.route,
                     arguments = listOf(navArgument("chatInput") { NavType.StringType })
                 ) { navBackStackEntry ->
+                    val context = LocalContext.current
                     val viewModel = hiltViewModel<ConversationViewModel>()
                     val state = viewModel.conversation.collectAsStateWithLifecycle()
                     val chatInput = navBackStackEntry.arguments?.getString("chatInput")
@@ -222,6 +237,17 @@ fun SetUpNavGraph(navController: NavHostController) {
 
                                 is ConversationAction.OnGoToWebView -> {
                                     navController.navigate(Screen.WebViewScreen.createRoute(action.url))
+                                }
+
+                                is ConversationAction.OnCopy -> {
+                                    val clipboard =
+                                        context.getSystemService(ClipboardManager::class.java)
+                                    val clipData = ClipData.newPlainText(
+                                        "",
+                                        action.text
+                                    )
+                                    clipboard.setPrimaryClip(clipData)
+                                    Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }.launchIn(scope)
@@ -248,6 +274,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                     route = Screen.HistoryDetailScreen.route,
                     arguments = listOf(navArgument("conversationId") { NavType.StringType })
                 ) { navBackStackEntry ->
+                    val context = LocalContext.current
                     val viewModel = hiltViewModel<HistoryViewModel>()
                     val state = viewModel.conversation.collectAsStateWithLifecycle()
                     val id = navBackStackEntry.arguments?.getString("conversationId") ?: ""
@@ -261,6 +288,17 @@ fun SetUpNavGraph(navController: NavHostController) {
 
                                 is HistoryDetailAction.OnGoToWebView -> {
                                     navController.navigate(Screen.WebViewScreen.createRoute(action.url))
+                                }
+
+                                is HistoryDetailAction.OnCopy -> {
+                                    val clipboard =
+                                        context.getSystemService(ClipboardManager::class.java)
+                                    val clipData = ClipData.newPlainText(
+                                        "",
+                                        action.text
+                                    )
+                                    clipboard.setPrimaryClip(clipData)
+                                    Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }.launchIn(scope)

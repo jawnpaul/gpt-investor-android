@@ -178,7 +178,7 @@ class ConversationViewModel @Inject constructor(
     fun handleEvent(event: ConversationEvent) {
         when (event) {
             is ConversationEvent.CopyToClipboard -> {
-                copyToClipboard(event.text)
+                processAction(ConversationAction.OnCopy(event.text))
             }
 
             is ConversationEvent.SendFeedback -> {
@@ -207,9 +207,6 @@ class ConversationViewModel @Inject constructor(
         viewModelScope.launch {
             _actions.emit(action)
         }
-    }
-
-    private fun copyToClipboard(text: String) {
     }
 
     private fun sendFeedback(messageId: Long, status: Int, reason: String?) {
@@ -250,4 +247,5 @@ sealed interface ConversationEvent {
 sealed interface ConversationAction {
     data object OnGoBack : ConversationAction
     data class OnGoToWebView(val url: String) : ConversationAction
+    data class OnCopy(val text: String) : ConversationAction
 }

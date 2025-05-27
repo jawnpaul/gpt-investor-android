@@ -403,6 +403,10 @@ class CompanyViewModel @Inject constructor(
             is CompanyDetailEvent.SuggestedPromptClicked -> {
                 getSuggestedPromptResponse(event.query)
             }
+
+            is CompanyDetailEvent.CopyToClipboard -> {
+                processCompanyDetailAction(CompanyDetailAction.OnCopy(event.text))
+            }
         }
     }
 
@@ -435,9 +439,11 @@ sealed interface CompanyDetailEvent {
     data object GoBack : CompanyDetailEvent
     data object SendClick : CompanyDetailEvent
     data class SuggestedPromptClicked(val query: String) : CompanyDetailEvent
+    data class CopyToClipboard(val text: String) : CompanyDetailEvent
 }
 
 sealed interface CompanyDetailAction {
     data object OnGoBack : CompanyDetailAction
     data class OnNavigateToWebView(val url: String) : CompanyDetailAction
+    data class OnCopy(val text: String) : CompanyDetailAction
 }

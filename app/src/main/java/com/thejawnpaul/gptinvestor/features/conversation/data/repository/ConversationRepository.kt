@@ -8,11 +8,13 @@ import com.google.ai.client.generativeai.type.HarmCategory
 import com.google.ai.client.generativeai.type.SafetySetting
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
+import com.google.firebase.auth.FirebaseAuth
 import com.thejawnpaul.gptinvestor.BuildConfig
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfig
 import com.thejawnpaul.gptinvestor.core.utility.Constants
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
@@ -31,10 +33,17 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntit
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
 
 class ConversationRepository @Inject constructor(
@@ -42,13 +51,17 @@ class ConversationRepository @Inject constructor(
     private val analyticsLogger: AnalyticsLogger,
     private val messageDao: MessageDao,
     private val conversationDao: ConversationDao,
-    private val remoteConfig: RemoteConfig
+    private val remoteConfig: RemoteConfig,
+    private val gptInvestorPreferences: GPTInvestorPreferences,
+    private val auth: FirebaseAuth
 ) :
     IConversationRepository {
 
     private val newModel = "gemini-1.5-pro-latest"
     private val oldModel = "gemini-1.0-pro"
     private val flashModel = "gemini-2.0-flash"
+
+    private val rateLimitMutex = Mutex()
 
     private val generativeModel = GenerativeModel(
         modelName = remoteConfig.fetchAndActivateStringValue(Constants.MODEL_NAME_KEY),
@@ -88,6 +101,11 @@ class ConversationRepository @Inject constructor(
     }
 
     override suspend fun getDefaultPromptResponse(prompt: DefaultPrompt): Flow<Either<Failure, Conversation>> = flow {
+        if (isRateLimitExceeded()) {
+            emit(Either.Left(Failure.RateLimitExceeded))
+            return@flow
+        }
+
         try {
             val chunk = StringBuilder()
 
@@ -164,6 +182,11 @@ class ConversationRepository @Inject constructor(
     }
 
     override suspend fun getInputResponse(prompt: ConversationPrompt): Flow<Either<Failure, Conversation>> = flow {
+        if (isRateLimitExceeded()) {
+            emit(Either.Left(Failure.RateLimitExceeded))
+            return@flow
+        }
+
         try {
             // Use 'var' to allow reassignment of the conversation object
             var currentConversation = getConversation(prompt)
@@ -369,6 +392,11 @@ class ConversationRepository @Inject constructor(
     }
 
     override suspend fun getCompanyInputResponse(prompt: CompanyPrompt): Flow<Either<Failure, Conversation>> = flow {
+        if (isRateLimitExceeded()) {
+            emit(Either.Left(Failure.RateLimitExceeded))
+            return@flow
+        }
+
         try {
             val chunk = StringBuilder()
 
@@ -585,6 +613,81 @@ class ConversationRepository @Inject constructor(
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             null
+        }
+    }
+
+    private suspend fun isRateLimitExceeded(): Boolean = rateLimitMutex.withLock {
+        Timber.e("Checking rate limit")
+
+        // Use UTC timezone to avoid timezone inconsistencies
+        val todayString = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }.format(Date())
+
+        // Capture auth state at the beginning to avoid mid-function changes
+        val isUserSignedIn = auth.currentUser != null
+
+        try {
+            val lastDate = gptInvestorPreferences.queryLastDate.first() ?: todayString
+            val usageCount = (gptInvestorPreferences.queryUsageCount.first() ?: 0).coerceAtLeast(0)
+
+            // Get daily limit with proper error handling
+            val dailyLimit = try {
+                if (isUserSignedIn) {
+                    remoteConfig.fetchAndActivateValue(Constants.PROMPT_COUNT)
+                        .toInt().takeIf { it > 0 }
+                        ?: 5
+                } else {
+                    remoteConfig.fetchAndActivateValue(Constants.FREE_PROMPT_COUNT)
+                        .toInt().takeIf { it > 0 }
+                        ?: 2
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to fetch remote config, using fallback values")
+                if (isUserSignedIn) 5 else 2
+            }
+
+            Timber.e("User signed in: $isUserSignedIn, Daily limit: $dailyLimit, Current usage: $usageCount")
+
+            // Handle date reset - start counting from 1 for the current request
+            if (todayString != lastDate) {
+                try {
+                    gptInvestorPreferences.setQueryLastDate(todayString)
+                    gptInvestorPreferences.setQueryUsageCount(1)
+                    Timber.e("Date reset, usage count set to 1")
+                    return false
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to reset date and usage count")
+                }
+            }
+
+            // Check if limit would be exceeded with this request
+            if (usageCount < dailyLimit) {
+                Timber.e("Rate limit not exceeded")
+                try {
+                    gptInvestorPreferences.setQueryUsageCount(usageCount + 1)
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to save updated usage count")
+                    // Still allow the request even if save fails
+                }
+                return false
+            }
+
+            // Rate limit exceeded
+            Timber.e("Rate limit exceeded: $usageCount >= $dailyLimit")
+            analyticsLogger.logEvent(
+                eventName = "Rate Limit Reached",
+                params = mapOf(
+                    "limit" to dailyLimit,
+                    "current_count" to usageCount,
+                    "user_signed_in" to isUserSignedIn
+                )
+            )
+            return true
+        } catch (e: Exception) {
+            Timber.e(e, "Error checking rate limit, allowing request as fallback")
+            // In case of unexpected errors, allow the request rather than blocking user
+            return false
         }
     }
 }

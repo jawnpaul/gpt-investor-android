@@ -46,7 +46,8 @@ class TopPickRepository @Inject constructor(
                                 confidenceScore = confidenceScore,
                                 date = date,
                                 price = price ?: 0.0f,
-                                change = percentageChange ?: 0.0f
+                                change = percentageChange ?: 0.0f,
+                                imageUrl = imageUrl ?: ""
                             )
                         }
                     }
@@ -72,7 +73,7 @@ class TopPickRepository @Inject constructor(
                     risks = risks,
                     confidenceScore = confidenceScore,
                     isSaved = isSaved,
-                    imageUrl = companyDao.getCompany(ticker).logoUrl,
+                    imageUrl = imageUrl,
                     percentageChange = change,
                     currentPrice = price
                 )
@@ -102,7 +103,7 @@ class TopPickRepository @Inject constructor(
                     risks = risks,
                     confidenceScore = confidenceScore,
                     isSaved = isSaved,
-                    imageUrl = companyDao.getCompany(ticker).logoUrl,
+                    imageUrl = imageUrl,
                     percentageChange = change,
                     currentPrice = price
                 )
@@ -132,7 +133,7 @@ class TopPickRepository @Inject constructor(
                     risks = risks,
                     confidenceScore = confidenceScore,
                     isSaved = isSaved,
-                    imageUrl = companyDao.getCompany(ticker).logoUrl,
+                    imageUrl = imageUrl,
                     percentageChange = change,
                     currentPrice = price
                 )
@@ -190,7 +191,7 @@ class TopPickRepository @Inject constructor(
                                 risks = risks,
                                 confidenceScore = confidenceScore,
                                 isSaved = isSaved,
-                                imageUrl = companyDao.getCompany(ticker).logoUrl,
+                                imageUrl = imageUrl,
                                 percentageChange = change,
                                 currentPrice = price
 
@@ -218,7 +219,7 @@ class TopPickRepository @Inject constructor(
                     risks = risks,
                     confidenceScore = confidenceScore,
                     isSaved = isSaved,
-                    imageUrl = companyDao.getCompany(ticker).logoUrl,
+                    imageUrl = imageUrl,
                     percentageChange = change,
                     currentPrice = price
                 )
@@ -242,7 +243,7 @@ class TopPickRepository @Inject constructor(
                             risks = risks,
                             confidenceScore = confidenceScore,
                             isSaved = isSaved,
-                            imageUrl = companyDao.getCompany(ticker).logoUrl,
+                            imageUrl = imageUrl,
                             percentageChange = change,
                             currentPrice = price
                         )

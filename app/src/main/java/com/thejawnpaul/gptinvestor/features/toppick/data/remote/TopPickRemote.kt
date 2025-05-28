@@ -14,5 +14,6 @@ data class TopPickRemote(
     @field:Json(name = "confidence_score") val confidenceScore: Int,
     @field:Json(name = "date") val date: String,
     @field:Json(name = "price") val price: Float? = null,
-    @field:Json(name = "change") val percentageChange: Float? = null
+    @field:Json(name = "change") val percentageChange: Float? = null,
+    @field:Json(name = "logo_url") val imageUrl: String? = null
 )

@@ -182,7 +182,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
             val credentialManager = getCredentialManager(activityContext)
             val googleIdOption = GetGoogleIdOption.Builder()
                 .setServerClientId(BuildConfig.WEB_CLIENT_ID)
-                .setFilterByAuthorizedAccounts(true)
+                .setFilterByAuthorizedAccounts(false)
                 .build()
 
             // Create the Credential Manager request

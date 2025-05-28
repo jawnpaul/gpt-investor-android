@@ -19,5 +19,7 @@ data class TopPickEntity(
     @ColumnInfo(defaultValue = "0.0")
     val price: Float = 0.0f,
     @ColumnInfo(defaultValue = "0.0")
-    val change: Float = 0.0f
+    val change: Float = 0.0f,
+    @ColumnInfo(defaultValue = "")
+    val imageUrl: String = ""
 )

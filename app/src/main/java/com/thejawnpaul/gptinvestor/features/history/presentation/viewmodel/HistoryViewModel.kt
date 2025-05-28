@@ -128,6 +128,9 @@ class HistoryViewModel @Inject constructor(
             is GenAIException -> {
                 Timber.e("AI exception")
             }
+            is Failure.RateLimitExceeded -> {
+                Timber.e("Rate limit exceeded")
+            }
 
             else -> {
                 Timber.e(failure.toString())

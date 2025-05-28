@@ -63,7 +63,7 @@ fun SingleSectorChoice(input: SectorInput, selected: Boolean, onOptionSelected: 
             onClick = onOptionSelected
         ) {
             Text(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
                 text = text,
                 style = MaterialTheme.typography.labelLarge
             )
@@ -76,7 +76,7 @@ fun SingleSectorChoice(input: SectorInput, selected: Boolean, onOptionSelected: 
             onClick = onOptionSelected
         ) {
             Text(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
                 text = text,
                 style = MaterialTheme.typography.bodyMedium,
                 color = gptInvestorColors.textColors.secondary50

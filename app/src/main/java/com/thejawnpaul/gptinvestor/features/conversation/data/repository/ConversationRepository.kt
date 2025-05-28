@@ -13,6 +13,7 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfig
 import com.thejawnpaul.gptinvestor.core.utility.Constants
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
@@ -40,7 +41,8 @@ class ConversationRepository @Inject constructor(
     private val apiService: ApiService,
     private val analyticsLogger: AnalyticsLogger,
     private val messageDao: MessageDao,
-    private val conversationDao: ConversationDao
+    private val conversationDao: ConversationDao,
+    private val remoteConfig: RemoteConfig
 ) :
     IConversationRepository {
 
@@ -49,7 +51,7 @@ class ConversationRepository @Inject constructor(
     private val flashModel = "gemini-2.0-flash"
 
     private val generativeModel = GenerativeModel(
-        modelName = flashModel,
+        modelName = remoteConfig.fetchAndActivateStringValue(Constants.MODEL_NAME_KEY),
         apiKey = BuildConfig.GEMINI_API_KEY,
         generationConfig = generationConfig {
             temperature = 0.2f

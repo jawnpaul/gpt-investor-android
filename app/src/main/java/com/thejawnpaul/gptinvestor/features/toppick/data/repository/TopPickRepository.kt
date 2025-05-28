@@ -5,6 +5,7 @@ import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfig
+import com.thejawnpaul.gptinvestor.core.utility.Constants
 import com.thejawnpaul.gptinvestor.features.company.data.local.dao.CompanyDao
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.dao.TopPickDao
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.model.TopPickEntity
@@ -148,7 +149,7 @@ class TopPickRepository @Inject constructor(
     override suspend fun shareTopPick(id: String): Flow<Either<Failure, String>> = flow {
         try {
             val pick = topPickDao.getSingleTopPick(id)
-            val domain = remoteConfig.fetchAndActivateStringValue("website_domain")
+            val domain = remoteConfig.fetchAndActivateStringValue(Constants.WEBSITE_DOMAIN_KEY)
 
             val urlToShare = "${domain}single-pick/${pick.id}"
 

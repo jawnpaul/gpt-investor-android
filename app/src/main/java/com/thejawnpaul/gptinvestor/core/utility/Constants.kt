@@ -75,4 +75,8 @@ object Constants {
             "  \"example_response\": {\n" +
             "    \"title\": \"Finance Stop Words Implementation\"\n" +
             "  }"
+
+    const val WEBSITE_DOMAIN_KEY = "website_domain"
+
+    const val MODEL_NAME_KEY = "default_model_name"
 }

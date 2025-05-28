@@ -79,4 +79,7 @@ object Constants {
     const val WEBSITE_DOMAIN_KEY = "website_domain"
 
     const val MODEL_NAME_KEY = "default_model_name"
+
+    const val PROMPT_COUNT = "prompt_count"
+    const val FREE_PROMPT_COUNT = "free_prompt_count"
 }

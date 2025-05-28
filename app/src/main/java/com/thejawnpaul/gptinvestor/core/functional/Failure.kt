@@ -29,6 +29,8 @@ sealed class Failure {
 
     data object AlreadyExists : Failure()
 
+    data object RateLimitExceeded : Failure()
+
     /** * Extend this class for feature specific failures.*/
     abstract class FeatureFailure : Failure()
 }

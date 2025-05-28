@@ -70,7 +70,7 @@ fun DiscoverScreen(modifier: Modifier, state: CompanyDiscoveryState, onEvent: (C
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 0.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 item {
                     // row of sectors

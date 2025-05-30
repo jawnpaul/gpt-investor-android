@@ -14,6 +14,7 @@ import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetTrendingC
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.*
+import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetLocalTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
@@ -24,6 +25,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -37,7 +39,8 @@ class HomeViewModel @Inject constructor(
     private val remoteConfig: RemoteConfig,
     private val preferences: GPTInvestorPreferences,
     private val analyticsLogger: AnalyticsLogger,
-    private val topPickRepository: ITopPickRepository
+    private val topPickRepository: ITopPickRepository,
+    private val notificationRepository: NotificationRepository
 ) :
     ViewModel() {
 
@@ -48,6 +51,7 @@ class HomeViewModel @Inject constructor(
     val actions get() = _actions
 
     val theme = preferences.themePreference
+    val notificationPermission = preferences.notificationPermission
 
     init {
         getTrendingCompanies()
@@ -58,6 +62,9 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             preferences.themePreference.collect { theme ->
                 _uiState.update { it.copy(theme = theme) }
+            }
+            preferences.notificationPermission.collect { permission ->
+                _uiState.update { it.copy(requestForNotificationPermission = permission) }
             }
         }
     }
@@ -281,6 +288,22 @@ class HomeViewModel @Inject constructor(
                 HomeEvent.RetryTrendingStocks -> {
                     getTrendingCompanies()
                 }
+
+                HomeEvent.NotificationPermissionDenied -> {
+                    preferences.setNotificationPermission(false)
+                }
+                HomeEvent.NotificationPermissionGranted -> {
+                    if (notificationPermission.first() == true) {
+                        return@launch
+                    }
+                    preferences.setNotificationPermission(true)
+                    analyticsLogger.logEvent(
+                        eventName = "Notification Permission Granted",
+                        params = mapOf("permission" to true)
+                    )
+                    // firebase token generation
+                    notificationRepository.generateToken()
+                }
             }
         }
     }
@@ -297,7 +320,8 @@ data class HomeUiState(
     val topPicksView: TopPicksView = TopPicksView(),
     val currentUser: FirebaseUser? = null,
     val chatInput: String? = null,
-    val theme: String? = "Dark"
+    val theme: String? = "Dark",
+    val requestForNotificationPermission: Boolean? = null
 )
 
 sealed interface HomeEvent {
@@ -306,6 +330,8 @@ sealed interface HomeEvent {
     data class ChangeTheme(val theme: String) : HomeEvent
     data object RetryTrendingStocks : HomeEvent
     data object RetryTopPicks : HomeEvent
+    data object NotificationPermissionGranted : HomeEvent
+    data object NotificationPermissionDenied : HomeEvent
 }
 
 sealed interface HomeAction {

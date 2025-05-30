@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.core.preferences
 
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -20,6 +21,8 @@ class GPTInvestorPreferences @Inject constructor(@ApplicationContext private val
         private val THEME_KEY = stringPreferencesKey("theme_preference")
         private val QUERY_LAST_DATE_KEY = stringPreferencesKey("query_last_day_preference")
         private val QUERY_USAGE_COUNT_KEY = intPreferencesKey("query_usage_count_preference")
+        private val NOTIFICATION_PERMISSION_KEY =
+            booleanPreferencesKey("notification_permission_preference")
         private val Context.dataStore by preferencesDataStore("gpt_investor_preferences")
     }
 
@@ -62,6 +65,22 @@ class GPTInvestorPreferences @Inject constructor(@ApplicationContext private val
     suspend fun setQueryUsageCount(count: Int) {
         dataStore.edit { preferences ->
             preferences[QUERY_USAGE_COUNT_KEY] = count
+        }
+    }
+
+    val notificationPermission: Flow<Boolean?> = dataStore.data.map { preferences ->
+        preferences[NOTIFICATION_PERMISSION_KEY]
+    }
+
+    suspend fun setNotificationPermission(permission: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[NOTIFICATION_PERMISSION_KEY] = permission
+        }
+    }
+
+    suspend fun clearNotificationPermission() {
+        dataStore.edit { preferences ->
+            preferences.remove(NOTIFICATION_PERMISSION_KEY)
         }
     }
 }

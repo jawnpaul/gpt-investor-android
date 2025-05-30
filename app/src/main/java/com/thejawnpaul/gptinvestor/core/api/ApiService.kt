@@ -19,6 +19,8 @@ import com.thejawnpaul.gptinvestor.features.investor.data.remote.DownloadPdfResp
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.IndustryRatingRequest
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.SaveComparisonRequest
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.SaveSentimentRequest
+import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
+import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenResponse
 import com.thejawnpaul.gptinvestor.features.toppick.data.remote.TopPickRemote
 import retrofit2.Response
 import retrofit2.http.Body
@@ -65,4 +67,7 @@ interface ApiService {
 
     @GET("v1.1/top-picks")
     suspend fun getTopPicks(@Query("date") date: String): Response<List<TopPickRemote>>
+
+    @POST("v1/notifications/register-token")
+    suspend fun registerToken(@Body request: RegisterTokenRequest): Response<RegisterTokenResponse>
 }

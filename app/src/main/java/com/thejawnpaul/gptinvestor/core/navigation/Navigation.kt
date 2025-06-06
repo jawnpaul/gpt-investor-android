@@ -91,9 +91,7 @@ fun SetUpNavGraph(navController: NavHostController) {
             )
         }
     ) {
-        Scaffold(
-            bottomBar = { BottomNavBar(navController) }
-        ) { innerPadding ->
+        Scaffold { innerPadding ->
 
             NavHost(
                 navController = navController,
@@ -139,6 +137,10 @@ fun SetUpNavGraph(navController: NavHostController) {
                                             chatInput = action.input ?: ""
                                         )
                                     )
+                                }
+
+                                HomeAction.OnGoToDiscover -> {
+                                    navController.navigate(Screen.DiscoverTabScreen.route)
                                 }
                             }
                         }.launchIn(scope)

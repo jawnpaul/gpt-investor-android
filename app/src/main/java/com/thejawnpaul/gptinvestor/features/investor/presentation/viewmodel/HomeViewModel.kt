@@ -12,6 +12,9 @@ import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetTrendingCompaniesUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AnotherModel
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultModel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.*
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
@@ -54,7 +57,6 @@ class HomeViewModel @Inject constructor(
     val notificationPermission = preferences.notificationPermission
 
     init {
-        getTrendingCompanies()
         remoteConfig.init()
         getTopPicks()
         getCurrentUser()
@@ -292,6 +294,7 @@ class HomeViewModel @Inject constructor(
                 HomeEvent.NotificationPermissionDenied -> {
                     preferences.setNotificationPermission(false)
                 }
+
                 HomeEvent.NotificationPermissionGranted -> {
                     if (notificationPermission.first() == true) {
                         return@launch
@@ -303,6 +306,10 @@ class HomeViewModel @Inject constructor(
                     )
                     // firebase token generation
                     notificationRepository.generateToken()
+                }
+
+                is HomeEvent.ModelChanged -> {
+                    _uiState.update { it.copy(selectedModel = event.model) }
                 }
             }
         }
@@ -321,7 +328,19 @@ data class HomeUiState(
     val currentUser: FirebaseUser? = null,
     val chatInput: String? = null,
     val theme: String? = "Dark",
-    val requestForNotificationPermission: Boolean? = null
+    val requestForNotificationPermission: Boolean? = null,
+    val availableModels: List<AvailableModel> = listOf(
+        DefaultModel(isDefault = true),
+        AnotherModel(
+            isDefault = false,
+            modelTitle = "Intermediate",
+            modelSubtitle = "For in-depth advance use",
+            canUpgrade = true,
+            isUserOnWaitlist = false,
+            modelId = "gemini-2.5-flash"
+        )
+    ),
+    val selectedModel: AvailableModel = DefaultModel()
 )
 
 sealed interface HomeEvent {
@@ -332,6 +351,7 @@ sealed interface HomeEvent {
     data object RetryTopPicks : HomeEvent
     data object NotificationPermissionGranted : HomeEvent
     data object NotificationPermissionDenied : HomeEvent
+    data class ModelChanged(val model: AvailableModel) : HomeEvent
 }
 
 sealed interface HomeAction {
@@ -340,4 +360,5 @@ sealed interface HomeAction {
     data object OnGoToAllTopPicks : HomeAction
     data class OnGoToTopPickDetail(val id: String) : HomeAction
     data class OnGoToCompanyDetail(val ticker: String) : HomeAction
+    data object OnGoToDiscover : HomeAction
 }

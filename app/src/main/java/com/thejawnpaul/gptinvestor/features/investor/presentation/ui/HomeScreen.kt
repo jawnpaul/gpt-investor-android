@@ -18,6 +18,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -35,7 +37,6 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.Q
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeUiState
-import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPicks
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -112,26 +113,49 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleMedium
                 )
-                ThemeDropdown(
+                /*ThemeDropdown(
                     modifier = Modifier,
                     onClick = {
                         onEvent(HomeEvent.ChangeTheme(it))
                     },
                     options = listOf("Light", "Dark", "System"),
                     selectedOption = state.theme ?: "Dark"
-                )
+                )*/
+
+                IconButton(modifier = Modifier, onClick = {
+                    onAction(HomeAction.OnGoToDiscover)
+                }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_search_status_two),
+                        contentDescription = null
+                    )
+                }
             }
 
-            // Trending
-            TrendingStockList(
-                modifier = Modifier.padding(vertical = 16.dp),
-                state = state.trendingCompaniesView,
-                onClick = {
-                    onAction(HomeAction.OnGoToCompanyDetail(it))
-                },
-                onClickRetry = { onEvent(HomeEvent.RetryTrendingStocks) }
-            )
+            /*// Top Picks
+            if (state.topPicksView.topPicks.isNotEmpty()) {
+                TopPicks(modifier = Modifier, state = state.topPicksView, onClick = {
+                    onAction(HomeAction.OnGoToTopPickDetail(it))
+                }, onClickRetry = {
+                    onEvent(HomeEvent.RetryTopPicks)
+                }, onClickSeeAll = {
+                    onAction(HomeAction.OnGoToAllTopPicks)
+                })
+            }*/
+        }
 
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center)
+        ) {
+        }
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+
+        ) {
             QuestionInput(
                 modifier = Modifier,
                 onSendClicked = {
@@ -141,19 +165,13 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
                 onTextChange = {
                     onEvent(HomeEvent.ChatInputChanged(it))
                 },
-                text = state.chatInput ?: ""
+                text = state.chatInput ?: "",
+                availableModels = state.availableModels,
+                selectedModel = state.selectedModel,
+                onModelChange = {
+                    onEvent(HomeEvent.ModelChanged(it))
+                }
             )
-
-            // Top Picks
-            if (state.topPicksView.topPicks.isNotEmpty()) {
-                TopPicks(modifier = Modifier, state = state.topPicksView, onClick = {
-                    onAction(HomeAction.OnGoToTopPickDetail(it))
-                }, onClickRetry = {
-                    onEvent(HomeEvent.RetryTopPicks)
-                }, onClickSeeAll = {
-                    onAction(HomeAction.OnGoToAllTopPicks)
-                })
-            }
         }
     }
 }

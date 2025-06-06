@@ -35,7 +35,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.features.component.GPTInvestorButton
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.linkMedium
 
@@ -49,8 +48,7 @@ fun LoginScreen(
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onLoginClick: () -> Unit,
-    onSignUpClick: () -> Unit,
-    onLoginWithGoogleClick: () -> Unit
+    onSignUpClick: () -> Unit
 ) {
     var passwordHidden by remember { mutableStateOf(true) }
 
@@ -124,19 +122,12 @@ fun LoginScreen(
                     }
                 )
 
-                // Done button
-                GPTInvestorButton(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    text = stringResource(R.string.login),
-                    enabled = enableButton,
-                    onClick = onLoginClick
-                )
-
                 Button(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    onClick = onLoginWithGoogleClick
+                    modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
+                    onClick = onLoginClick,
+                    enabled = enableButton
                 ) {
-                    Text(text = "Login with Google")
+                    Text(text = stringResource(R.string.login).uppercase())
                 }
 
                 Row(
@@ -179,8 +170,7 @@ fun LoginPreview() {
                 onEmailChange = {},
                 onPasswordChange = {},
                 onLoginClick = {},
-                onSignUpClick = {},
-                onLoginWithGoogleClick = {}
+                onSignUpClick = {}
             )
         }
     }

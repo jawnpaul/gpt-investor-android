@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -17,7 +18,8 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import com.thejawnpaul.gptinvestor.core.navigation.SetUpNavGraph
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
-import com.thejawnpaul.gptinvestor.features.splash.CustomSplashScreen
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.DefaultAuthenticationScreen
+import com.thejawnpaul.gptinvestor.features.splash.AnimatedSplashScreen
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -34,6 +36,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val themePreference by preferences.themePreference.collectAsState(initial = "Dark")
+            val isUserSignedIn by preferences.isUserLoggedIn.collectAsState(initial = false)
 
             var showSplash by remember { mutableStateOf(true) }
 
@@ -41,16 +44,32 @@ class MainActivity : ComponentActivity() {
                 userThemePreference = themePreference
             ) {
                 if (showSplash) {
-                    CustomSplashScreen {
+                    AnimatedSplashScreen {
                         showSplash = false
                     }
                 } else {
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background
-                    ) {
-                        val navController = rememberNavController()
-                        SetUpNavGraph(navController = navController)
+                    if (isUserSignedIn == true) {
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.background
+                        ) {
+                            val navController = rememberNavController()
+                            SetUpNavGraph(navController = navController)
+                        }
+                    } else {
+                        // LOGIN SCREEN
+                        DefaultAuthenticationScreen(
+                            modifier = Modifier,
+                            onAuthSuccess = {
+                                Toast.makeText(this, "Authentication successful", Toast.LENGTH_SHORT)
+                                    .show()
+                                // if user first time login, navigate to onboarding screen else navigate to home screen
+                            },
+                            onAuthFailure = {
+                                Toast.makeText(this, "Authentication failed", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                        )
                     }
                 }
             }

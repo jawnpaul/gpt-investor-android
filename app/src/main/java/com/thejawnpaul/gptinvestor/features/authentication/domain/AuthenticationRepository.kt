@@ -14,17 +14,20 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.thejawnpaul.gptinvestor.BuildConfig
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 interface AuthenticationRepository {
     val currentUser: FirebaseUser?
     suspend fun signUp(activityContext: Context): Flow<Boolean>
-    suspend fun signOut()
+    suspend fun signOut(activityContext: Context)
     fun getAuthState(): Flow<Boolean>
     suspend fun deleteAccount()
     suspend fun loginWithEmailAndPassword(email: String, password: String): Flow<Boolean>
@@ -34,8 +37,8 @@ interface AuthenticationRepository {
 
 class AuthenticationRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth,
-    @ApplicationContext private val context: Context,
-    private val analyticsLogger: AnalyticsLogger
+    private val analyticsLogger: AnalyticsLogger,
+    private val gptInvestorPreferences: GPTInvestorPreferences
 ) :
     AuthenticationRepository {
     override val currentUser: FirebaseUser?
@@ -76,6 +79,10 @@ class AuthenticationRepositoryImpl @Inject constructor(
                     trySend(task.isSuccessful)
                     getAuthState()
                     if (task.isSuccessful) {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            gptInvestorPreferences.setUserId(auth.currentUser?.uid.toString())
+                            gptInvestorPreferences.setIsUserLoggedIn(true)
+                        }
                         analyticsLogger.identifyUser(
                             eventName = "Sign Up",
                             params = mapOf(
@@ -104,13 +111,16 @@ class AuthenticationRepositoryImpl @Inject constructor(
         awaitClose()
     }
 
-    override suspend fun signOut() {
+    override suspend fun signOut(activityContext: Context) {
         try {
             auth.signOut()
-            val clearRequest = ClearCredentialStateRequest()
-            val credentialManager = context.getSystemService(CredentialManager::class.java)
-            credentialManager.clearCredentialState(clearRequest)
+            gptInvestorPreferences.clearUserId()
+            gptInvestorPreferences.clearIsUserLoggedIn()
+            gptInvestorPreferences.clearThemePreference()
             analyticsLogger.resetUser(eventName = "Log Out")
+            val clearRequest = ClearCredentialStateRequest()
+            val credentialManager = activityContext.getSystemService(CredentialManager::class.java)
+            credentialManager.clearCredentialState(clearRequest)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -131,6 +141,9 @@ class AuthenticationRepositoryImpl @Inject constructor(
         try {
             auth.currentUser?.delete()
             analyticsLogger.resetUser(eventName = "Delete Account")
+            gptInvestorPreferences.clearUserId()
+            gptInvestorPreferences.clearIsUserLoggedIn()
+            gptInvestorPreferences.clearThemePreference()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -142,6 +155,10 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 trySend(task.isSuccessful)
                 getAuthState()
                 if (task.isSuccessful) {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        gptInvestorPreferences.setUserId(auth.currentUser?.uid.toString())
+                        gptInvestorPreferences.setIsUserLoggedIn(true)
+                    }
                     analyticsLogger.identifyUser(
                         eventName = "Log in",
                         params = mapOf(

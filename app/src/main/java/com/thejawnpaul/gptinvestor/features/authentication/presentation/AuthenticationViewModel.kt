@@ -49,9 +49,9 @@ class AuthenticationViewModel @Inject constructor(
         }
     }
 
-    fun signOut() {
+    fun signOut(context: Context) {
         viewModelScope.launch {
-            authRepository.signOut()
+            authRepository.signOut(context)
         }
     }
 

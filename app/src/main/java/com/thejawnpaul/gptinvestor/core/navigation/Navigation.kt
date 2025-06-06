@@ -58,6 +58,7 @@ fun SetUpNavGraph(navController: NavHostController) {
     val scope = rememberCoroutineScope()
     val authViewModel = hiltViewModel<AuthenticationViewModel>()
     val state = authViewModel.authState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -71,7 +72,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 onEvent = { event ->
                     when (event) {
                         NavDrawerEvent.SignOut -> {
-                            authViewModel.signOut()
+                            authViewModel.signOut(context)
                         }
                     }
                 },
@@ -93,6 +94,7 @@ fun SetUpNavGraph(navController: NavHostController) {
         Scaffold(
             bottomBar = { BottomNavBar(navController) }
         ) { innerPadding ->
+
             NavHost(
                 navController = navController,
                 startDestination = Screen.HomeTabScreen.route,

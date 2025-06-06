@@ -1,11 +1,13 @@
 package com.thejawnpaul.gptinvestor.features.authentication.presentation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -25,6 +27,7 @@ fun NewAuthenticationScreen(modifier: Modifier, authViewModel: AuthenticationVie
                 is AuthenticationAction.OnLogin -> {
                     onAuthenticationComplete(action.message)
                 }
+
                 is AuthenticationAction.OnSignUp -> {
                     onAuthenticationComplete(action.message)
                 }
@@ -33,7 +36,7 @@ fun NewAuthenticationScreen(modifier: Modifier, authViewModel: AuthenticationVie
     }
 
     Box(
-        modifier,
+        modifier.background(color = Color(0xFF0C0810)),
         contentAlignment = Alignment.Center
     ) {
         when (state.value.authenticationScreen) {
@@ -48,16 +51,13 @@ fun NewAuthenticationScreen(modifier: Modifier, authViewModel: AuthenticationVie
                         authViewModel.handleEvent(AuthenticationEvent.Login)
                     },
                     onSignUpClick = {
-                        authViewModel.handleEvent(AuthenticationEvent.GoToSignUpScreen)
+                        authViewModel.handleEvent(AuthenticationEvent.SignUpWithGoogle(context = context))
                     },
                     onEmailChange = {
                         authViewModel.handleEvent(AuthenticationEvent.EmailChanged(it))
                     },
                     onPasswordChange = {
                         authViewModel.handleEvent(AuthenticationEvent.PasswordChanged(it))
-                    },
-                    onLoginWithGoogleClick = {
-                        authViewModel.handleEvent(AuthenticationEvent.LoginWithGoogle(context))
                     }
                 )
             }

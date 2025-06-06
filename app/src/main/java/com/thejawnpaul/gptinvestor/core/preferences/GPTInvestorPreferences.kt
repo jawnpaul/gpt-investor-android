@@ -23,6 +23,9 @@ class GPTInvestorPreferences @Inject constructor(@ApplicationContext private val
         private val QUERY_USAGE_COUNT_KEY = intPreferencesKey("query_usage_count_preference")
         private val NOTIFICATION_PERMISSION_KEY =
             booleanPreferencesKey("notification_permission_preference")
+        private val USER_ID_KEY = stringPreferencesKey("user_id_preference")
+        private val IS_FIRST_INSTALL_KEY = booleanPreferencesKey("is_first_install_preference")
+        private val IS_USER_LOGGED_IN_KEY = booleanPreferencesKey("is_user_logged_in_preference")
         private val Context.dataStore by preferencesDataStore("gpt_investor_preferences")
     }
 
@@ -81,6 +84,54 @@ class GPTInvestorPreferences @Inject constructor(@ApplicationContext private val
     suspend fun clearNotificationPermission() {
         dataStore.edit { preferences ->
             preferences.remove(NOTIFICATION_PERMISSION_KEY)
+        }
+    }
+
+    val userId: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[USER_ID_KEY]
+    }
+
+    suspend fun setUserId(id: String) {
+        dataStore.edit { preferences ->
+            preferences[USER_ID_KEY] = id
+        }
+    }
+
+    suspend fun clearUserId() {
+        dataStore.edit { preferences ->
+            preferences.remove(USER_ID_KEY)
+        }
+    }
+
+    val isFirstInstall: Flow<Boolean?> = dataStore.data.map { preferences ->
+        preferences[IS_FIRST_INSTALL_KEY]
+    }
+
+    suspend fun setIsFirstInstall(isFirstInstall: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[IS_FIRST_INSTALL_KEY] = isFirstInstall
+        }
+    }
+
+    suspend fun clearIsFirstInstall() {
+        dataStore.edit { preferences ->
+            preferences.remove(IS_FIRST_INSTALL_KEY)
+        }
+    }
+
+    val isUserLoggedIn: Flow<Boolean?> = dataStore.data.map { preferences ->
+        preferences[IS_USER_LOGGED_IN_KEY]
+    }
+
+    suspend fun setIsUserLoggedIn(isLoggedIn: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[IS_USER_LOGGED_IN_KEY] = isLoggedIn
+        }
+    }
+
+    suspend fun clearIsUserLoggedIn() {
+        dataStore.edit { preferences ->
+            preferences.remove(IS_USER_LOGGED_IN_KEY)
         }
     }
 }

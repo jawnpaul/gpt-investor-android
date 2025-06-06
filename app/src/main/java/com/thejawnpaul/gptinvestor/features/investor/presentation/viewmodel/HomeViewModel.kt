@@ -338,6 +338,14 @@ data class HomeUiState(
             canUpgrade = true,
             isUserOnWaitlist = false,
             modelId = "gemini-2.5-flash"
+        ),
+        AnotherModel(
+            isDefault = false,
+            modelTitle = "Intermediate",
+            modelSubtitle = "For in-depth advance use",
+            canUpgrade = false,
+            isUserOnWaitlist = true,
+            modelId = "gemini-2.5-flash"
         )
     ),
     val selectedModel: AvailableModel = DefaultModel()

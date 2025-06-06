@@ -100,4 +100,6 @@
     <string name="skip">Skip</string>
     <string name="stay_ahead_with_top_stock_picks">Stay Ahead with Top \nStock Picks</string>
     <string name="select_model">Select Model</string>
+    <string name="upgrade">Upgrade</string>
+    <string name="waitlisted">Waitlisted</string>
 </resources>

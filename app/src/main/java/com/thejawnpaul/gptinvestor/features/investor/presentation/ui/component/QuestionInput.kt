@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -280,11 +282,46 @@ fun SingleModelItem(modifier: Modifier, model: AvailableModel, onModelChange: (A
                 ) {
                     Text(text = model.modelTitle, style = MaterialTheme.typography.bodyMedium)
                     if (model.canUpgrade) {
-                        Text(text = "Upgrade")
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            border = BorderStroke(
+                                width = 1.dp,
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(
+                                        Color(0xFFF947F6),
+                                        Color(0xFF0095FF)
+                                    )
+                                )
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                text = stringResource(R.string.upgrade),
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    brush = Brush.horizontalGradient(
+                                        colors = listOf(
+                                            Color(0xFFF947F6),
+                                            Color(0xFF0095FF)
+                                        )
+                                    )
+                                )
+                            )
+                        }
                     }
 
                     if (model.isUserOnWaitlist == true) {
-                        Text(text = "Waitlisted")
+                        Text(
+                            text = stringResource(R.string.waitlisted),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(
+                                        Color(0xFFF947F6),
+                                        Color(0xFF0095FF)
+                                    )
+                                )
+                            )
+                        )
                     }
                 }
                 Text(

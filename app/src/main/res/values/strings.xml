@@ -95,4 +95,8 @@
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
     <string name="continue_with_google">Continue with Google</string>
     <string name="continue_with_email">Continue with email</string>
+    <string name="ask_anything_learn_everything">Ask anything. \n Learn everything.</string>
+    <string name="next">Next</string>
+    <string name="skip">Skip</string>
+    <string name="stay_ahead_with_top_stock_picks">Stay Ahead with Top \nStock Picks</string>
 </resources>

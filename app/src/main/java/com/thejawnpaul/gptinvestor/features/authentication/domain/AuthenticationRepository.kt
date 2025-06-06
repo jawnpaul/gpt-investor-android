@@ -144,6 +144,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
             gptInvestorPreferences.clearUserId()
             gptInvestorPreferences.clearIsUserLoggedIn()
             gptInvestorPreferences.clearThemePreference()
+            gptInvestorPreferences.clearIsFirstInstall()
         } catch (e: Exception) {
             e.printStackTrace()
         }

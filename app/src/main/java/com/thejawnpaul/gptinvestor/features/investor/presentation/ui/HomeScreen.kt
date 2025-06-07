@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.HomeDefaultPrompts
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.QuestionInput
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeEvent
@@ -171,17 +172,6 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
                     )
                 }
             }
-
-            /*// Top Picks
-            if (state.topPicksView.topPicks.isNotEmpty()) {
-                TopPicks(modifier = Modifier, state = state.topPicksView, onClick = {
-                    onAction(HomeAction.OnGoToTopPickDetail(it))
-                }, onClickRetry = {
-                    onEvent(HomeEvent.RetryTopPicks)
-                }, onClickSeeAll = {
-                    onAction(HomeAction.OnGoToAllTopPicks)
-                })
-            }*/
         }
 
         Surface(
@@ -196,6 +186,12 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
                 .align(Alignment.BottomCenter)
 
         ) {
+            if (state.defaultPrompts.isNotEmpty()) {
+                HomeDefaultPrompts(modifier = Modifier, prompts = state.defaultPrompts, onClick = {
+                    onEvent(HomeEvent.DefaultPromptClicked(it))
+                })
+            }
+
             QuestionInput(
                 modifier = Modifier,
                 onSendClicked = {

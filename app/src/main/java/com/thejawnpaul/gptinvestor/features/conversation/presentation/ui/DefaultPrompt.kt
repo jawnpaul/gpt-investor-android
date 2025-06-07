@@ -4,10 +4,16 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
@@ -93,6 +100,51 @@ fun DefaultPrompts(modifier: Modifier, prompts: List<DefaultPrompt>, onClick: (p
                     Spacer(modifier = Modifier.padding(vertical = 8.dp))
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun SingleHomeDefaultPrompt(modifier: Modifier = Modifier, prompt: DefaultPrompt, onClick: (prompt: DefaultPrompt) -> Unit) {
+    val gptInvestorColors = LocalGPTInvestorColors.current
+
+    Surface(
+        onClick = { onClick(prompt) },
+        modifier = modifier.width(140.dp),
+        shape = RoundedCornerShape(corner = CornerSize(20.dp)),
+        border = BorderStroke(
+            width = 2.dp,
+            color = gptInvestorColors.utilColors.borderBright10
+        )
+    ) {
+        Text(
+            text = prompt.query,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Start,
+            color = gptInvestorColors.textColors.secondary50,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+fun HomeDefaultPrompts(modifier: Modifier, prompts: List<DefaultPrompt>, onClick: (prompt: DefaultPrompt) -> Unit) {
+    LazyRow(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(count = prompts.size) { index ->
+            SingleHomeDefaultPrompt(
+                prompt = prompts[index],
+                onClick = onClick,
+                modifier = Modifier
+            )
         }
     }
 }

@@ -12,9 +12,9 @@ import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetTrendingCompaniesUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
-import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AnotherModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultModel
+import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.*
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
@@ -43,7 +43,8 @@ class HomeViewModel @Inject constructor(
     private val preferences: GPTInvestorPreferences,
     private val analyticsLogger: AnalyticsLogger,
     private val topPickRepository: ITopPickRepository,
-    private val notificationRepository: NotificationRepository
+    private val notificationRepository: NotificationRepository,
+    private val modelsRepository: ModelsRepository
 ) :
     ViewModel() {
 
@@ -56,10 +57,13 @@ class HomeViewModel @Inject constructor(
     val theme = preferences.themePreference
     val notificationPermission = preferences.notificationPermission
 
+    private var upgradeModelId: String? = null
+
     init {
         remoteConfig.init()
         getTopPicks()
         getCurrentUser()
+        getAvailableModels()
 
         viewModelScope.launch {
             preferences.themePreference.collect { theme ->
@@ -322,6 +326,9 @@ class HomeViewModel @Inject constructor(
 
                 is HomeEvent.UpgradeModel -> {
                     _uiState.update { it.copy(showWaitlistBottomSheet = event.showBottomSheet) }
+                    event.modelId?.let {
+                        upgradeModelId = it
+                    }
                 }
 
                 is HomeEvent.SelectWaitListOption -> {
@@ -329,6 +336,9 @@ class HomeViewModel @Inject constructor(
                 }
 
                 HomeEvent.JoinWaitlist -> {
+                    upgradeModelId?.let { modelId ->
+                        joinModelWaitlist(modelId = modelId)
+                    }
                 }
             }
         }
@@ -343,6 +353,27 @@ class HomeViewModel @Inject constructor(
     private fun selectWaitListOption(option: String) {
         _uiState.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions + option) }
     }
+
+    private fun getAvailableModels() {
+        viewModelScope.launch {
+            modelsRepository.getAvailableModels().onSuccess { models ->
+                _uiState.update { it.copy(availableModels = models) }
+            }
+        }
+    }
+
+    private fun joinModelWaitlist(modelId: String) {
+        viewModelScope.launch {
+            modelsRepository.putUserOnModelWaitlist(
+                modelId = modelId,
+                reasons = _uiState.value.selectedWaitlistOptions
+            ).onSuccess {
+                getAvailableModels()
+            }.onFailure { failure ->
+                Timber.e(failure.stackTraceToString())
+            }
+        }
+    }
 }
 
 data class HomeUiState(
@@ -352,17 +383,7 @@ data class HomeUiState(
     val chatInput: String? = null,
     val theme: String? = "Dark",
     val requestForNotificationPermission: Boolean? = null,
-    val availableModels: List<AvailableModel> = listOf(
-        DefaultModel(isDefault = true),
-        AnotherModel(
-            isDefault = false,
-            modelTitle = "Intermediate",
-            modelSubtitle = "For in-depth advance use",
-            canUpgrade = true,
-            isUserOnWaitlist = false,
-            modelId = "gemini-2.5-flash"
-        )
-    ),
+    val availableModels: List<AvailableModel> = emptyList(),
     val selectedModel: AvailableModel = DefaultModel(),
     val showWaitlistBottomSheet: Boolean = false,
     val waitlistAvailableOptions: List<String> = listOf(
@@ -386,7 +407,7 @@ sealed interface HomeEvent {
     data object NotificationPermissionGranted : HomeEvent
     data object NotificationPermissionDenied : HomeEvent
     data class ModelChanged(val model: AvailableModel) : HomeEvent
-    data class UpgradeModel(val showBottomSheet: Boolean) : HomeEvent
+    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : HomeEvent
     data class SelectWaitListOption(val option: String) : HomeEvent
     data object JoinWaitlist : HomeEvent
 }

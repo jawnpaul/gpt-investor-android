@@ -210,7 +210,12 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
                 selectedModel = state.selectedModel,
                 onModelChange = {
                     if (it.canUpgrade) {
-                        onEvent(HomeEvent.UpgradeModel(true))
+                        onEvent(
+                            HomeEvent.UpgradeModel(
+                                showBottomSheet = true,
+                                modelId = it.modelId
+                            )
+                        )
                         return@QuestionInput
                     }
                     onEvent(HomeEvent.ModelChanged(it))

@@ -26,6 +26,8 @@ class GPTInvestorPreferences @Inject constructor(@ApplicationContext private val
         private val USER_ID_KEY = stringPreferencesKey("user_id_preference")
         private val IS_FIRST_INSTALL_KEY = booleanPreferencesKey("is_first_install_preference")
         private val IS_USER_LOGGED_IN_KEY = booleanPreferencesKey("is_user_logged_in_preference")
+        private val IS_USER_ON_MODEL_WAITLIST_KEY =
+            booleanPreferencesKey("is_user_on_model_waitlist_preference")
         private val Context.dataStore by preferencesDataStore("gpt_investor_preferences")
     }
 
@@ -132,6 +134,22 @@ class GPTInvestorPreferences @Inject constructor(@ApplicationContext private val
     suspend fun clearIsUserLoggedIn() {
         dataStore.edit { preferences ->
             preferences.remove(IS_USER_LOGGED_IN_KEY)
+        }
+    }
+
+    val isUserOnModelWaitlist: Flow<Boolean?> = dataStore.data.map { preferences ->
+        preferences[IS_USER_ON_MODEL_WAITLIST_KEY]
+    }
+
+    suspend fun setIsUserOnModelWaitlist(isOnWaitlist: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[IS_USER_ON_MODEL_WAITLIST_KEY] = isOnWaitlist
+        }
+    }
+
+    suspend fun clearIsUserOnModelWaitlist() {
+        dataStore.edit { preferences ->
+            preferences.remove(IS_USER_ON_MODEL_WAITLIST_KEY)
         }
     }
 }

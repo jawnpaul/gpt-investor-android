@@ -117,6 +117,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
             gptInvestorPreferences.clearUserId()
             gptInvestorPreferences.clearIsUserLoggedIn()
             gptInvestorPreferences.clearThemePreference()
+            gptInvestorPreferences.clearIsUserOnModelWaitlist()
             analyticsLogger.resetUser(eventName = "Log Out")
             val clearRequest = ClearCredentialStateRequest()
             val credentialManager = activityContext.getSystemService(CredentialManager::class.java)
@@ -145,6 +146,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
             gptInvestorPreferences.clearIsUserLoggedIn()
             gptInvestorPreferences.clearThemePreference()
             gptInvestorPreferences.clearIsFirstInstall()
+            gptInvestorPreferences.clearIsUserOnModelWaitlist()
         } catch (e: Exception) {
             e.printStackTrace()
         }

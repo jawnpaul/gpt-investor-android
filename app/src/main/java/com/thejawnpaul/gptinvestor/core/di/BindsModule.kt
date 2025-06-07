@@ -6,6 +6,8 @@ import com.thejawnpaul.gptinvestor.features.company.data.repository.CompanyRepos
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import com.thejawnpaul.gptinvestor.features.conversation.data.repository.ConversationRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
+import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
+import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepositoryImpl
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepositoryImpl
 import com.thejawnpaul.gptinvestor.features.history.data.repository.HistoryRepository
@@ -48,4 +50,7 @@ abstract class BindsModule {
 
     @Binds
     abstract fun providesNotificationRepository(repository: NotificationRepositoryImpl): NotificationRepository
+
+    @Binds
+    abstract fun providesModelsRepository(repository: ModelsRepositoryImpl): ModelsRepository
 }

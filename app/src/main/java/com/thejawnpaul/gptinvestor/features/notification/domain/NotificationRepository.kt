@@ -4,8 +4,10 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
 import com.thejawnpaul.gptinvestor.core.api.ApiService
+import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
 import javax.inject.Inject
+import kotlinx.coroutines.flow.first
 import timber.log.Timber
 
 interface NotificationRepository {
@@ -16,11 +18,13 @@ interface NotificationRepository {
 }
 
 class NotificationRepositoryImpl @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val preferences: GPTInvestorPreferences
 ) : NotificationRepository {
     override suspend fun registerToken(token: String) {
         try {
-            apiService.registerToken(RegisterTokenRequest(token))
+            val userId = preferences.userId.first()
+            apiService.registerToken(RegisterTokenRequest(token = token, userId = userId))
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
         }

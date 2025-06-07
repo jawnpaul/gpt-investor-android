@@ -309,7 +309,26 @@ class HomeViewModel @Inject constructor(
                 }
 
                 is HomeEvent.ModelChanged -> {
+                    if (event.model.isUserOnWaitlist == true) {
+                        return@launch
+                    }
+
                     _uiState.update { it.copy(selectedModel = event.model) }
+                    analyticsLogger.logEvent(
+                        eventName = "Model Changed",
+                        params = mapOf("model" to event.model.modelId)
+                    )
+                }
+
+                is HomeEvent.UpgradeModel -> {
+                    _uiState.update { it.copy(showWaitlistBottomSheet = event.showBottomSheet) }
+                }
+
+                is HomeEvent.SelectWaitListOption -> {
+                    selectWaitListOption(event.option)
+                }
+
+                HomeEvent.JoinWaitlist -> {
                 }
             }
         }
@@ -319,6 +338,10 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _actions.emit(action)
         }
+    }
+
+    private fun selectWaitListOption(option: String) {
+        _uiState.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions + option) }
     }
 }
 
@@ -338,17 +361,20 @@ data class HomeUiState(
             canUpgrade = true,
             isUserOnWaitlist = false,
             modelId = "gemini-2.5-flash"
-        ),
-        AnotherModel(
-            isDefault = false,
-            modelTitle = "Intermediate",
-            modelSubtitle = "For in-depth advance use",
-            canUpgrade = false,
-            isUserOnWaitlist = true,
-            modelId = "gemini-2.5-flash"
         )
     ),
-    val selectedModel: AvailableModel = DefaultModel()
+    val selectedModel: AvailableModel = DefaultModel(),
+    val showWaitlistBottomSheet: Boolean = false,
+    val waitlistAvailableOptions: List<String> = listOf(
+        "More analytical",
+        "Risk warnings",
+        "More personalised",
+        "Human Tone",
+        "More realistic",
+        "Clearer answers",
+        "More informative"
+    ),
+    val selectedWaitlistOptions: List<String> = emptyList()
 )
 
 sealed interface HomeEvent {
@@ -360,6 +386,9 @@ sealed interface HomeEvent {
     data object NotificationPermissionGranted : HomeEvent
     data object NotificationPermissionDenied : HomeEvent
     data class ModelChanged(val model: AvailableModel) : HomeEvent
+    data class UpgradeModel(val showBottomSheet: Boolean) : HomeEvent
+    data class SelectWaitListOption(val option: String) : HomeEvent
+    data object JoinWaitlist : HomeEvent
 }
 
 sealed interface HomeAction {

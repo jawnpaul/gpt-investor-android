@@ -102,4 +102,9 @@
     <string name="select_model">Select Model</string>
     <string name="upgrade">Upgrade</string>
     <string name="waitlisted">Waitlisted</string>
+    <string name="join_list">Join list</string>
+    <string name="join_our_waitlist">Join our waitlist</string>
+    <string name="you_are_a_real_mvp">You\'re a real MVP</string>
+    <string name="thank_you_for_joining_our_waitlist">Thank you for joining our waitlist! \nWe will keep you updated</string>
+    <string name="continue_">Continue</string>
 </resources>

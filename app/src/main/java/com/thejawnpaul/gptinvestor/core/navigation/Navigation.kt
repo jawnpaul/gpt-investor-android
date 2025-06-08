@@ -171,6 +171,14 @@ fun SetUpNavGraph(navController: NavHostController) {
                                 CompanyDiscoveryAction.OnGoBack -> {
                                     navController.navigateUp()
                                 }
+
+                                is CompanyDiscoveryAction.OnGoToPickDetail -> {
+                                    navController.navigate(
+                                        Screen.TopPickDetailScreen.createRoute(
+                                            action.id
+                                        )
+                                    )
+                                }
                             }
                         }.launchIn(scope)
                     }

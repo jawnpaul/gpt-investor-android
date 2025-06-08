@@ -41,6 +41,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.Compa
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDiscoveryEvent
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDiscoveryState
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.SectorChoiceQuestion
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SingleTopPickItem
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
@@ -57,7 +58,9 @@ fun DiscoverScreen(modifier: Modifier, state: CompanyDiscoveryState, onEvent: (C
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(end = 16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -109,7 +112,10 @@ fun DiscoverScreen(modifier: Modifier, state: CompanyDiscoveryState, onEvent: (C
                                 }
                             ) {
                                 Row(
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp),
+                                    modifier = Modifier.padding(
+                                        horizontal = 8.dp,
+                                        vertical = 12.dp
+                                    ),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
@@ -156,82 +162,101 @@ fun DiscoverScreen(modifier: Modifier, state: CompanyDiscoveryState, onEvent: (C
                     )
                 }
 
-                if (state.companyView.loading) {
-                    item {
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                if (state.showTopPicks) {
+                    items(
+                        items = state.topPicks,
+                        key = { topPickPresentation -> topPickPresentation.id }
+                    ) { pickPresentation ->
+                        SingleTopPickItem(
+                            modifier = Modifier,
+                            pickPresentation = pickPresentation,
+                            onClick = { topPickId ->
+                                onAction(
+                                    CompanyDiscoveryAction.OnGoToPickDetail(
+                                        id = topPickId
+                                    )
+                                )
+                            }
+                        )
                     }
-                }
+                } else {
+                    if (state.companyView.loading) {
+                        item {
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                        }
+                    }
 
-                if (state.companyView.showError) {
-                    item {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            Column(modifier = Modifier.align(Alignment.Center)) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.server_down),
-                                    contentDescription = "Server down",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(
-                                            start = 8.dp,
-                                            end = 8.dp,
-                                            bottom = 8.dp,
-                                            top = 8.dp
-                                        )
-                                )
+                    if (state.companyView.showError) {
+                        item {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                Column(modifier = Modifier.align(Alignment.Center)) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.server_down),
+                                        contentDescription = "Server down",
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(
+                                                start = 8.dp,
+                                                end = 8.dp,
+                                                bottom = 8.dp,
+                                                top = 8.dp
+                                            )
+                                    )
 
-                                Text(
-                                    text = stringResource(id = R.string.something_went_wrong),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
+                                    Text(
+                                        text = stringResource(id = R.string.something_went_wrong),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
 
-                                Spacer(modifier = Modifier.padding(8.dp))
-                                OutlinedButton(onClick = {
-                                    onEvent(CompanyDiscoveryEvent.RetryCompanies)
-                                }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                                    Text(text = stringResource(id = R.string.retry))
+                                    Spacer(modifier = Modifier.padding(8.dp))
+                                    OutlinedButton(onClick = {
+                                        onEvent(CompanyDiscoveryEvent.RetryCompanies)
+                                    }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                                        Text(text = stringResource(id = R.string.retry))
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                if (state.companyView.showSearchError) {
-                    item {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            Column(modifier = Modifier.align(Alignment.Center)) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.empty),
-                                    contentDescription = "Empty",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(
-                                            start = 8.dp,
-                                            end = 8.dp,
-                                            bottom = 8.dp,
-                                            top = 8.dp
-                                        )
-                                )
+                    if (state.companyView.showSearchError) {
+                        item {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                Column(modifier = Modifier.align(Alignment.Center)) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.empty),
+                                        contentDescription = "Empty",
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(
+                                                start = 8.dp,
+                                                end = 8.dp,
+                                                bottom = 8.dp,
+                                                top = 8.dp
+                                            )
+                                    )
 
-                                Text(
-                                    text = stringResource(id = R.string.no_search_result),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
+                                    Text(
+                                        text = stringResource(id = R.string.no_search_result),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
                             }
                         }
                     }
-                }
 
-                items(
-                    items = state.companyView.companies,
-                    key = { company -> company.ticker }
-                ) { company ->
-                    SingleCompanyItem(modifier = Modifier, company = company, onClick = {
-                        onAction(CompanyDiscoveryAction.OnNavigateToCompanyDetail(company.ticker))
-                    })
+                    items(
+                        items = state.companyView.companies,
+                        key = { company -> company.ticker }
+                    ) { company ->
+                        SingleCompanyItem(modifier = Modifier, company = company, onClick = {
+                            onAction(CompanyDiscoveryAction.OnNavigateToCompanyDetail(company.ticker))
+                        })
+                    }
                 }
             }
         }

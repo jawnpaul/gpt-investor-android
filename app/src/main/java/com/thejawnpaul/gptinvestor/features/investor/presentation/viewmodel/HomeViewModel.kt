@@ -19,7 +19,6 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.Home
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
-import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -58,7 +57,7 @@ class HomeViewModel @Inject constructor(
 
     init {
         remoteConfig.init()
-        // getTopPicks()
+        getTopPicks()
         getCurrentUser()
         getAvailableModels()
         getDefaultPrompts()
@@ -73,90 +72,13 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun getTopPicks() {
+    private fun getTopPicks() {
         getTopPicksUseCase(GetTopPicksUseCase.None()) {
             it.onFailure {
             }
             it.onSuccess {
             }
         }
-
-        viewModelScope.launch {
-            topPickRepository.getTopPicksByDate().collect { topPicks ->
-                val topPicksPresentation = topPicks.map { topPick ->
-                    with(topPick) {
-                        TopPickPresentation(
-                            id = id,
-                            companyName = companyName,
-                            ticker = ticker,
-                            rationale = rationale,
-                            metrics = metrics,
-                            risks = risks,
-                            confidenceScore = confidenceScore,
-                            isSaved = isSaved,
-                            imageUrl = imageUrl,
-                            percentageChange = percentageChange,
-                            currentPrice = currentPrice
-                        )
-                    }
-                }
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        topPicksView = currentState.topPicksView.copy(
-                            loading = false,
-                            topPicks = topPicksPresentation
-                        )
-                    )
-                }
-            }
-        }
-
-        /*_uiState.update { currentState ->
-            currentState.copy(
-                topPicksView = currentState.topPicksView.copy(loading = true, error = null)
-            )
-        }
-
-        getTopPicksUseCase(GetTopPicksUseCase.None()) { result ->
-            result.onFailure {
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        topPicksView = currentState.topPicksView.copy(
-                            loading = false,
-                            error = "Something went wrong."
-                        )
-                    )
-                }
-                getLocalPicks()
-            }
-
-            result.onSuccess { topPicksResult ->
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        topPicksView = currentState.topPicksView.copy(
-                            loading = false,
-                            topPicks = topPicksResult.map { topPick ->
-                                with(topPick) {
-                                    TopPickPresentation(
-                                        id = id,
-                                        companyName = companyName,
-                                        ticker = ticker,
-                                        rationale = rationale,
-                                        metrics = metrics,
-                                        risks = risks,
-                                        confidenceScore = confidenceScore,
-                                        isSaved = isSaved,
-                                        imageUrl = imageUrl,
-                                        percentageChange = percentageChange,
-                                        currentPrice = currentPrice
-                                    )
-                                }
-                            }
-                        )
-                    )
-                }
-            }
-        }*/
     }
 
     private fun getCurrentUser() {

@@ -1,8 +1,10 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
@@ -17,9 +19,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
@@ -62,11 +67,19 @@ fun SingleSectorChoice(input: SectorInput, selected: Boolean, onOptionSelected: 
             color = gptInvestorColors.utilColors.borderBright10,
             onClick = onOptionSelected
         ) {
-            Text(
+            Row(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                text = text,
-                style = MaterialTheme.typography.labelLarge
-            )
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (input.hasImage) {
+                    Image(painter = painterResource(R.drawable.ic_star), contentDescription = null)
+                }
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
         }
     } else {
         Surface(
@@ -75,12 +88,21 @@ fun SingleSectorChoice(input: SectorInput, selected: Boolean, onOptionSelected: 
             border = BorderStroke(width = 2.dp, color = MaterialTheme.colorScheme.outlineVariant),
             onClick = onOptionSelected
         ) {
-            Text(
+            Row(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                text = text,
-                style = MaterialTheme.typography.bodyMedium,
-                color = gptInvestorColors.textColors.secondary50
-            )
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (input.hasImage) {
+                    Image(painter = painterResource(R.drawable.ic_star), contentDescription = null)
+                }
+
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = gptInvestorColors.textColors.secondary50
+                )
+            }
         }
     }
 }

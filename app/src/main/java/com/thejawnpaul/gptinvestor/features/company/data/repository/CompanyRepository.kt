@@ -68,7 +68,10 @@ class CompanyRepository @Inject constructor(
     }
 
     override suspend fun getAllSector(): Flow<Either<Failure, List<SectorInput>>> = flow {
-        val list = listOf(SectorInput.AllSector)
+        val list = listOf(
+            SectorInput.CustomSector(sectorName = "Top picks", sectorKey = "top-picks", hasImage = true),
+            SectorInput.AllSector
+        )
         val companyList = companyDao.getAllCompanies()
         val default = listOf(
             SectorInput.CustomSector("Technology", sectorKey = "technology"),

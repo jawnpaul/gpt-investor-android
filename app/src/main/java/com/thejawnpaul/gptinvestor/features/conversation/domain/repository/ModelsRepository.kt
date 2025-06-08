@@ -1,6 +1,8 @@
 package com.thejawnpaul.gptinvestor.features.conversation.domain.repository
 
+import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
+import com.thejawnpaul.gptinvestor.features.conversation.data.remote.AddToWaitlistRequest
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AnotherModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultModel
@@ -14,7 +16,8 @@ interface ModelsRepository {
 }
 
 class ModelsRepositoryImpl @Inject constructor(
-    private val gptInvestorPreferences: GPTInvestorPreferences
+    private val gptInvestorPreferences: GPTInvestorPreferences,
+    private val apiService: ApiService
 ) : ModelsRepository {
     override suspend fun getAvailableModels(): Result<List<AvailableModel>> {
         return try {
@@ -41,7 +44,14 @@ class ModelsRepositoryImpl @Inject constructor(
 
     override suspend fun putUserOnModelWaitlist(modelId: String, reasons: List<String>): Result<Unit> {
         return try {
-            // Make api call to waitlist end point
+            val userId = gptInvestorPreferences.userId.first()
+            apiService.addUserToWaitlist(
+                request = AddToWaitlistRequest(
+                    userId = userId ?: "",
+                    modelId = modelId,
+                    reasons = reasons
+                )
+            )
             gptInvestorPreferences.setIsUserOnModelWaitlist(isOnWaitlist = true)
             Result.success(Unit)
         } catch (e: Exception) {

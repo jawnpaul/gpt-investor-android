@@ -8,6 +8,8 @@ import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyPri
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyPriceResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyRemote
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.TrendingRemote
+import com.thejawnpaul.gptinvestor.features.conversation.data.remote.AddToWaitlistRequest
+import com.thejawnpaul.gptinvestor.features.conversation.data.remote.AddToWaitlistResponse
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.DefaultPromptRemote
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityRequest
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityResponse
@@ -70,4 +72,7 @@ interface ApiService {
 
     @POST("v1/notifications/register-token")
     suspend fun registerToken(@Body request: RegisterTokenRequest): Response<RegisterTokenResponse>
+
+    @POST("v1/add-to-waitlist")
+    suspend fun addUserToWaitlist(@Body request: AddToWaitlistRequest): Response<AddToWaitlistResponse>
 }

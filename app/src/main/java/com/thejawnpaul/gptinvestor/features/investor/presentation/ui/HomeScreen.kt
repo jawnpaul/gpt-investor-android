@@ -29,6 +29,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -102,38 +103,51 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
         }
     }
 
-    // Home Screen
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-    ) {
-        if (state.showWaitlistBottomSheet) {
-            GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
-                onEvent(HomeEvent.UpgradeModel(showBottomSheet = false))
-            }) {
-                WaitlistBottomSheetContent(
+    Scaffold(
+        modifier = modifier,
+        bottomBar = {
+            Column(
+                modifier = Modifier
+
+            ) {
+                if (state.defaultPrompts.isNotEmpty()) {
+                    HomeDefaultPrompts(
+                        modifier = Modifier,
+                        prompts = state.defaultPrompts,
+                        onClick = {
+                            onEvent(HomeEvent.DefaultPromptClicked(it))
+                        }
+                    )
+                }
+
+                QuestionInput(
                     modifier = Modifier,
-                    options = state.waitlistAvailableOptions,
-                    selectedOptions = state.selectedWaitlistOptions,
-                    onOptionSelected = {
-                        onEvent(HomeEvent.SelectWaitListOption(it))
+                    onSendClicked = {
+                        onEvent(HomeEvent.SendClick)
                     },
-                    onJoinWaitList = {
-                        onEvent(HomeEvent.JoinWaitlist)
+                    hint = stringResource(R.string.ask_me_a_question),
+                    onTextChange = {
+                        onEvent(HomeEvent.ChatInputChanged(it))
                     },
-                    onDismiss = {
-                        onEvent(HomeEvent.UpgradeModel(showBottomSheet = false))
+                    text = state.chatInput ?: "",
+                    availableModels = state.availableModels,
+                    selectedModel = state.selectedModel,
+                    onModelChange = {
+                        if (it.canUpgrade) {
+                            onEvent(
+                                HomeEvent.UpgradeModel(
+                                    showBottomSheet = true,
+                                    modelId = it.modelId
+                                )
+                            )
+                            return@QuestionInput
+                        }
+                        onEvent(HomeEvent.ModelChanged(it))
                     }
                 )
             }
-        }
-
-        Column(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-        ) {
-            // App bar
+        },
+        topBar = {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -173,50 +187,41 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
                 }
             }
         }
-
-        Surface(
+    ) { innerPadding ->
+        // Home Screen
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.Center)
+                .padding(innerPadding)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
-        }
-
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-
-        ) {
-            if (state.defaultPrompts.isNotEmpty()) {
-                HomeDefaultPrompts(modifier = Modifier, prompts = state.defaultPrompts, onClick = {
-                    onEvent(HomeEvent.DefaultPromptClicked(it))
-                })
+            if (state.showWaitlistBottomSheet) {
+                GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
+                    onEvent(HomeEvent.UpgradeModel(showBottomSheet = false))
+                }) {
+                    WaitlistBottomSheetContent(
+                        modifier = Modifier,
+                        options = state.waitlistAvailableOptions,
+                        selectedOptions = state.selectedWaitlistOptions,
+                        onOptionSelected = {
+                            onEvent(HomeEvent.SelectWaitListOption(it))
+                        },
+                        onJoinWaitList = {
+                            onEvent(HomeEvent.JoinWaitlist)
+                        },
+                        onDismiss = {
+                            onEvent(HomeEvent.UpgradeModel(showBottomSheet = false))
+                        }
+                    )
+                }
             }
 
-            QuestionInput(
-                modifier = Modifier,
-                onSendClicked = {
-                    onEvent(HomeEvent.SendClick)
-                },
-                hint = stringResource(R.string.ask_me_a_question),
-                onTextChange = {
-                    onEvent(HomeEvent.ChatInputChanged(it))
-                },
-                text = state.chatInput ?: "",
-                availableModels = state.availableModels,
-                selectedModel = state.selectedModel,
-                onModelChange = {
-                    if (it.canUpgrade) {
-                        onEvent(
-                            HomeEvent.UpgradeModel(
-                                showBottomSheet = true,
-                                modelId = it.modelId
-                            )
-                        )
-                        return@QuestionInput
-                    }
-                    onEvent(HomeEvent.ModelChanged(it))
-                }
-            )
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center)
+            ) {
+            }
         }
     }
 }

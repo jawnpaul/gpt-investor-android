@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -81,13 +82,11 @@ fun QuestionInput(
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                .fillMaxWidth()
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth()
             ) {
                 TextField(
                     value = text,
@@ -118,9 +117,7 @@ fun QuestionInput(
             }
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -212,16 +209,21 @@ private fun ModelListDropDown(modifier: Modifier, options: List<AvailableModel>,
                         style = MaterialTheme.typography.labelMedium,
                         color = gptInvestorColors.textColors.secondary50
                     )
-                    Box(
+                    Surface(
                         modifier = Modifier
-                            .clip(CircleShape)
+                            .padding(start = 8.dp)
+                            .size(16.dp),
+                        shape = CircleShape,
+                        border = BorderStroke(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        onClick = { expanded = !expanded }
                     ) {
                         Image(
-                            modifier = Modifier
-                                .size(16.dp)
-                                .padding(4.dp),
-                            painter = painterResource(id = R.drawable.ic_logo),
-                            contentDescription = null
+                            painter = painterResource(R.drawable.outline_close_small_24),
+                            contentDescription = null,
+                            colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSurface)
                         )
                     }
                 }

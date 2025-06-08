@@ -1,20 +1,31 @@
 package com.thejawnpaul.gptinvestor.features.discover
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -30,34 +41,95 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.Compa
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDiscoveryEvent
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDiscoveryState
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.SectorChoiceQuestion
+import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
 fun DiscoverScreen(modifier: Modifier, state: CompanyDiscoveryState, onEvent: (CompanyDiscoveryEvent) -> Unit, onAction: (CompanyDiscoveryAction) -> Unit) {
     // Discover Screen
     val keyboardController = LocalSoftwareKeyboardController.current
+    val gptInvestorColors = LocalGPTInvestorColors.current
 
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier,
         topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                SearchBarCustom(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    query = state.companyView.query,
-                    placeHolder = state.sectorView.searchPlaceHolder,
-                    onQueryChange = { newQuery ->
-                        onEvent(CompanyDiscoveryEvent.SearchQueryChanged(newQuery))
-                    },
-                    onSearch = {
-                        keyboardController?.hide()
-                        onEvent(CompanyDiscoveryEvent.PerformSearch)
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(end = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { onEvent(CompanyDiscoveryEvent.GoBack) }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = stringResource(id = R.string.back)
+                        )
                     }
-                )
+
+                    if (state.searchMode) {
+                        SearchBarCustom(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            query = state.companyView.query,
+                            placeHolder = state.sectorView.searchPlaceHolder,
+                            onQueryChange = { newQuery ->
+                                onEvent(CompanyDiscoveryEvent.SearchQueryChanged(newQuery))
+                            },
+                            onSearch = {
+                                keyboardController?.hide()
+                                onEvent(CompanyDiscoveryEvent.PerformSearch)
+                            },
+                            onClose = {
+                                keyboardController?.hide()
+                                onEvent(CompanyDiscoveryEvent.ToggleSearchMode(false))
+                            }
+                        )
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.discover),
+                                style = MaterialTheme.typography.titleLarge
+                            )
+
+                            Surface(
+                                modifier = Modifier,
+                                shape = RoundedCornerShape(corner = CornerSize(20.dp)),
+                                border = BorderStroke(
+                                    2.dp,
+                                    MaterialTheme.colorScheme.outlineVariant
+                                ),
+                                onClick = {
+                                    onEvent(CompanyDiscoveryEvent.ToggleSearchMode(true))
+                                }
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        modifier = Modifier.size(16.dp),
+                                        painter = painterResource(R.drawable.ic_search),
+                                        contentDescription = null
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.search),
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = gptInvestorColors.textColors.secondary50
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                HorizontalDivider()
             }
         }
     ) { innerPadding ->
@@ -68,9 +140,10 @@ fun DiscoverScreen(modifier: Modifier, state: CompanyDiscoveryState, onEvent: (C
         ) {
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .padding(horizontal = 0.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(vertical = 12.dp)
             ) {
                 item {
                     // row of sectors

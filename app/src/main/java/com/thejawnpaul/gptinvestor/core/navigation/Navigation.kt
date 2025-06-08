@@ -147,7 +147,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                     }
 
                     HomeScreen(
-                        modifier = Modifier,
+                        modifier = Modifier.padding(top = 20.dp),
                         state = state.value,
                         onEvent = homeViewModel::handleEvent,
                         onAction = homeViewModel::processAction
@@ -166,6 +166,10 @@ fun SetUpNavGraph(navController: NavHostController) {
                                             action.ticker
                                         )
                                     )
+                                }
+
+                                CompanyDiscoveryAction.OnGoBack -> {
+                                    navController.navigateUp()
                                 }
                             }
                         }.launchIn(scope)

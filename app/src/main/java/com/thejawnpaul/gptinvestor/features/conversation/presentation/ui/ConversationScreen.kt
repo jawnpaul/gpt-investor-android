@@ -38,6 +38,11 @@ fun ConversationScreen(modifier: Modifier, state: ConversationView, chatInput: S
                     },
                     onSendClick = {
                         onEvent(ConversationEvent.SendPrompt())
+                    },
+                    availableModels = state.availableModels,
+                    selectedModel = state.selectedModel,
+                    onModelChange = {
+                        onEvent(ConversationEvent.ModelChanged(model = it))
                     }
                 )
             }
@@ -68,7 +73,13 @@ fun ConversationScreen(modifier: Modifier, state: ConversationView, chatInput: S
                     companyName = "",
                     onClickSuggestedPrompt = {
                         onEvent(ConversationEvent.SuggestedPromptClicked(it))
-                    }
+                    },
+                    availableModels = state.availableModels,
+                    selectedModel = state.selectedModel,
+                    onModelChange = {
+                        onEvent(ConversationEvent.ModelChanged(model = it))
+                    },
+                    onUpgradeModel = {}
                 )
             }
 

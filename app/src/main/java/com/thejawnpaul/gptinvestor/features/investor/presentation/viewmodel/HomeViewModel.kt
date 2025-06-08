@@ -258,7 +258,11 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun selectWaitListOption(option: String) {
-        _uiState.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions + option) }
+        if (_uiState.value.selectedWaitlistOptions.contains(option)) {
+            _uiState.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions - option) }
+        } else {
+            _uiState.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions + option) }
+        }
     }
 
     private fun getAvailableModels() {

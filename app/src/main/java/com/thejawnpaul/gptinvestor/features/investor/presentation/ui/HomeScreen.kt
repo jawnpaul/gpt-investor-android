@@ -14,11 +14,14 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -121,7 +124,11 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
                 }
 
                 QuestionInput(
-                    modifier = Modifier,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .windowInsetsPadding(
+                            insets = WindowInsets.ime
+                        ),
                     onSendClicked = {
                         onEvent(HomeEvent.SendClick)
                     },
@@ -381,7 +388,7 @@ fun SingleWaitlistOption(modifier: Modifier, isSelected: Boolean, onOptionSelect
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
                 text = text,
                 style = MaterialTheme.typography.bodyMedium,
-                color = gptInvestorColors.textColors.secondary50
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     } else {

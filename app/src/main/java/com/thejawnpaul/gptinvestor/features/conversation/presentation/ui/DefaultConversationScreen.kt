@@ -1,14 +1,12 @@
 package com.thejawnpaul.gptinvestor.features.conversation.presentation.ui
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -26,9 +24,10 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.R
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
-import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.QuestionInput
 
 @Composable
 fun DefaultConversationScreen(
@@ -38,7 +37,10 @@ fun DefaultConversationScreen(
     onNavigateUp: () -> Unit,
     inputQuery: String,
     onInputQueryChanged: (String) -> Unit,
-    onSendClick: () -> Unit
+    onSendClick: () -> Unit,
+    availableModels: List<AvailableModel>,
+    selectedModel: AvailableModel,
+    onModelChange: (AvailableModel) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -60,27 +62,37 @@ fun DefaultConversationScreen(
             }
         },
         bottomBar = {
-            InputBar(
+            QuestionInput(
                 modifier = Modifier
                     .fillMaxWidth()
                     .windowInsetsPadding(
-                        WindowInsets.ime
-                    )
-                    .navigationBarsPadding(),
-                input = inputQuery,
-                contentPadding = PaddingValues(0.dp),
-                sendEnabled = true,
-                onInputChanged = { input ->
-                    onInputQueryChanged(input)
-                },
-                onSendClick = {
+                        insets = WindowInsets.ime
+                    ),
+                onSendClicked = {
                     keyboardController?.hide()
                     onSendClick()
                 },
-                placeholder = stringResource(
+                hint = stringResource(
                     R.string.ask_anything_about_stocks
                 ),
-                shouldRequestFocus = false
+                onTextChange = { input ->
+                    onInputQueryChanged(input)
+                },
+                text = inputQuery,
+                availableModels = availableModels,
+                selectedModel = selectedModel,
+                onModelChange = {
+                    if (it.canUpgrade) {
+                        /*onEvent(
+                            HomeEvent.UpgradeModel(
+                                showBottomSheet = true,
+                                modelId = it.modelId
+                            )
+                        )
+                        return@QuestionInput*/
+                    }
+                    onModelChange(it)
+                }
             )
         }
     ) { innerPadding ->

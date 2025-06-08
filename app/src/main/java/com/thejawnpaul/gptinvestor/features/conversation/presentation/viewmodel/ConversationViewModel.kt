@@ -6,19 +6,23 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.ConversationPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefaultPromptResponseUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefaultPromptsUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.state.ConversationView
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction.*
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlin.onSuccess
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -30,7 +34,8 @@ class ConversationViewModel @Inject constructor(
     private val getDefaultPromptsUseCase: GetDefaultPromptsUseCase,
     private val getDefaultPromptResponseUseCase: GetDefaultPromptResponseUseCase,
     private val getInputPromptUseCase: GetInputPromptUseCase,
-    private val fedBackRepository: FeedbackRepository
+    private val fedBackRepository: FeedbackRepository,
+    private val modelsRepository: ModelsRepository
 ) :
     ViewModel() {
 
@@ -47,6 +52,7 @@ class ConversationViewModel @Inject constructor(
 
     init {
         getDefaultPrompts()
+        getAvailableModels()
     }
 
     fun updateInput(input: String) {
@@ -178,7 +184,7 @@ class ConversationViewModel @Inject constructor(
     fun handleEvent(event: ConversationEvent) {
         when (event) {
             is ConversationEvent.CopyToClipboard -> {
-                processAction(ConversationAction.OnCopy(event.text))
+                processAction(OnCopy(event.text))
             }
 
             is ConversationEvent.SendFeedback -> {
@@ -199,6 +205,12 @@ class ConversationViewModel @Inject constructor(
 
             is ConversationEvent.UpdateInputQuery -> {
                 updateInput(event.query)
+            }
+
+            is ConversationEvent.ModelChanged -> {
+                conversationViewMutableStateFlow.update {
+                    it.copy(selectedModel = event.model)
+                }
             }
         }
     }
@@ -227,6 +239,18 @@ class ConversationViewModel @Inject constructor(
             fedBackRepository.giveFeedback(messageId, status, reason)
         }
     }
+
+    private fun getAvailableModels() {
+        viewModelScope.launch {
+            modelsRepository.getAvailableModels().onSuccess { models ->
+                conversationViewMutableStateFlow.update {
+                    it.copy(availableModels = models)
+                }
+            }.onFailure {
+                Timber.e(it.toString())
+            }
+        }
+    }
 }
 
 sealed interface ConversationEvent {
@@ -242,6 +266,7 @@ sealed interface ConversationEvent {
 
     data class SuggestedPromptClicked(val prompt: String) : ConversationEvent
     data class SendPrompt(val query: String? = null) : ConversationEvent
+    data class ModelChanged(val model: AvailableModel) : ConversationEvent
 }
 
 sealed interface ConversationAction {

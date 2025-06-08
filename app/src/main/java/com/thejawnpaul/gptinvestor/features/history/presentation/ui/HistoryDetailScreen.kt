@@ -50,6 +50,12 @@ fun HistoryDetailScreen(modifier: Modifier, conversationId: String, state: Histo
                     companyName = "",
                     onClickSuggestedPrompt = {
                         onEvent(HistoryDetailEvent.ClickSuggestedPrompt(it))
+                    },
+                    availableModels = state.availableModels,
+                    selectedModel = state.selectedModel,
+                    onModelChange = {
+                    },
+                    onUpgradeModel = {
                     }
                 )
             }
@@ -57,27 +63,5 @@ fun HistoryDetailScreen(modifier: Modifier, conversationId: String, state: Histo
             else -> {
             }
         }
-
-        /*InputBar(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomStart)
-                .windowInsetsPadding(
-                    WindowInsets.ime
-                )
-                .navigationBarsPadding(),
-            input = conversation.value.query,
-            contentPadding = PaddingValues(0.dp),
-            sendEnabled = conversation.value.enableSend,
-            onInputChanged = { input ->
-                viewModel.updateInput(input = input)
-            },
-            onSendClick = {
-                keyboardController?.hide()
-                viewModel.getInputResponse()
-            },
-            placeholder = "Ask anything about stocks",
-            shouldRequestFocus = false
-        )*/
     }
 }

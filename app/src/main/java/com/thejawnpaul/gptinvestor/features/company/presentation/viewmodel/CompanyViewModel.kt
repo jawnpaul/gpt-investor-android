@@ -19,13 +19,17 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.state.AllCompan
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyFinancialsView
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCompanyView
+import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction.*
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyDetailDefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.AllSectorView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlin.onSuccess
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -40,7 +44,8 @@ class CompanyViewModel @Inject constructor(
     private val getCompanyUseCase: GetCompanyUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val companyDetailInputResponseUseCase: GetCompanyDetailInputResponseUseCase,
-    private val searchCompaniesUseCase: SearchCompaniesUseCase
+    private val searchCompaniesUseCase: SearchCompaniesUseCase,
+    private val modelsRepository: ModelsRepository
 
 ) : ViewModel() {
 
@@ -72,6 +77,7 @@ class CompanyViewModel @Inject constructor(
     init {
         getAllSector()
         getAllCompanies()
+        getAvailableModels()
     }
 
     fun updateTicker(ticker: String) {
@@ -379,6 +385,16 @@ class CompanyViewModel @Inject constructor(
             is CompanyDiscoveryEvent.SelectSector -> {
                 selectSector(event.sector)
             }
+
+            CompanyDiscoveryEvent.GoBack -> {
+                processCompanyDiscoveryAction(CompanyDiscoveryAction.OnGoBack)
+            }
+
+            is CompanyDiscoveryEvent.ToggleSearchMode -> {
+                _companyDiscoveryState.update {
+                    it.copy(searchMode = event.searchMode)
+                }
+            }
         }
     }
 
@@ -405,7 +421,13 @@ class CompanyViewModel @Inject constructor(
             }
 
             is CompanyDetailEvent.CopyToClipboard -> {
-                processCompanyDetailAction(CompanyDetailAction.OnCopy(event.text))
+                processCompanyDetailAction(OnCopy(event.text))
+            }
+
+            is CompanyDetailEvent.ModelChange -> {
+                _selectedCompany.update {
+                    it.copy(selectedModel = event.model)
+                }
             }
         }
     }
@@ -415,11 +437,20 @@ class CompanyViewModel @Inject constructor(
             _companyDetailAction.emit(action)
         }
     }
+
+    private fun getAvailableModels() {
+        viewModelScope.launch {
+            modelsRepository.getAvailableModels().onSuccess { models ->
+                _selectedCompany.update { it.copy(availableModels = models) }
+            }
+        }
+    }
 }
 
 data class CompanyDiscoveryState(
     val sectorView: AllSectorView = AllSectorView(),
-    val companyView: AllCompanyView = AllCompanyView()
+    val companyView: AllCompanyView = AllCompanyView(),
+    val searchMode: Boolean = false
 )
 
 sealed interface CompanyDiscoveryEvent {
@@ -427,10 +458,13 @@ sealed interface CompanyDiscoveryEvent {
     data object PerformSearch : CompanyDiscoveryEvent
     data class SelectSector(val sector: SectorInput) : CompanyDiscoveryEvent
     data object RetryCompanies : CompanyDiscoveryEvent
+    data object GoBack : CompanyDiscoveryEvent
+    data class ToggleSearchMode(val searchMode: Boolean) : CompanyDiscoveryEvent
 }
 
 sealed interface CompanyDiscoveryAction {
     data class OnNavigateToCompanyDetail(val ticker: String) : CompanyDiscoveryAction
+    data object OnGoBack : CompanyDiscoveryAction
 }
 
 sealed interface CompanyDetailEvent {
@@ -440,6 +474,7 @@ sealed interface CompanyDetailEvent {
     data object SendClick : CompanyDetailEvent
     data class SuggestedPromptClicked(val query: String) : CompanyDetailEvent
     data class CopyToClipboard(val text: String) : CompanyDetailEvent
+    data class ModelChange(val model: AvailableModel) : CompanyDetailEvent
 }
 
 sealed interface CompanyDetailAction {

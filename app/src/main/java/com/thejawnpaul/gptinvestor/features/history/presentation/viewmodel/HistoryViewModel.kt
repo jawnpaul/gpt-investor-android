@@ -5,16 +5,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.ConversationPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
 import com.thejawnpaul.gptinvestor.features.history.domain.usecases.GetAllHistoryUseCase
 import com.thejawnpaul.gptinvestor.features.history.domain.usecases.GetSingleHistoryUseCase
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryConversationView
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryScreenView
+import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -29,7 +32,8 @@ class HistoryViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getSingleHistoryUseCase: GetSingleHistoryUseCase,
     private val getInputPromptUseCase: GetInputPromptUseCase,
-    private val fedBackRepository: FeedbackRepository
+    private val fedBackRepository: FeedbackRepository,
+    private val modelsRepository: ModelsRepository
 ) :
     ViewModel() {
 
@@ -50,6 +54,7 @@ class HistoryViewModel @Inject constructor(
 
     init {
         getAllHistory()
+        getAvailableModels()
     }
 
     private fun getAllHistory() {
@@ -128,6 +133,7 @@ class HistoryViewModel @Inject constructor(
             is GenAIException -> {
                 Timber.e("AI exception")
             }
+
             is Failure.RateLimitExceeded -> {
                 Timber.e("Rate limit exceeded")
             }
@@ -209,7 +215,11 @@ class HistoryViewModel @Inject constructor(
             }
 
             is HistoryDetailEvent.CopyToClipboard -> {
-                processHistoryDetailAction(HistoryDetailAction.OnCopy(event.text))
+                processHistoryDetailAction(OnCopy(event.text))
+            }
+
+            is HistoryDetailEvent.ModelChange -> {
+                conversationView.update { it.copy(selectedModel = event.model) }
             }
         }
     }
@@ -217,6 +227,16 @@ class HistoryViewModel @Inject constructor(
     fun processHistoryDetailAction(action: HistoryDetailAction) {
         viewModelScope.launch {
             _historyDetailAction.emit(action)
+        }
+    }
+
+    private fun getAvailableModels() {
+        viewModelScope.launch {
+            modelsRepository.getAvailableModels().onSuccess { models ->
+                conversationView.update { it.copy(availableModels = models) }
+            }.onFailure {
+                Timber.e(it.toString())
+            }
         }
     }
 }
@@ -238,6 +258,7 @@ sealed interface HistoryDetailEvent {
     data object GetInputResponse : HistoryDetailEvent
     data class ClickSuggestedPrompt(val prompt: String) : HistoryDetailEvent
     data class CopyToClipboard(val text: String) : HistoryDetailEvent
+    data class ModelChange(val model: AvailableModel) : HistoryDetailEvent
 }
 
 sealed interface HistoryDetailAction {

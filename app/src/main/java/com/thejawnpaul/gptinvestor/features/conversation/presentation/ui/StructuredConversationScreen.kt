@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -59,11 +58,12 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetai
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.ExpandableRichText
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
 import com.thejawnpaul.gptinvestor.features.conversation.data.repository.Suggestion
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntityMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
-import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.QuestionInput
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.theme.bodyChatBody
@@ -83,7 +83,11 @@ fun StructuredConversationScreen(
     onInputQueryChanged: (String) -> Unit,
     onSendClick: () -> Unit,
     companyName: String = "",
-    onClickSuggestedPrompt: (String) -> Unit
+    onClickSuggestedPrompt: (String) -> Unit,
+    availableModels: List<AvailableModel>,
+    selectedModel: AvailableModel,
+    onUpgradeModel: () -> Unit,
+    onModelChange: (AvailableModel) -> Unit
 ) {
     val company = conversation.messageList.filterIsInstance<GenAiEntityMessage>().firstOrNull()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -124,7 +128,7 @@ fun StructuredConversationScreen(
         },
         bottomBar = {
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 if (conversation.suggestedPrompts.isNotEmpty()) {
                     FollowUpQuestions(
@@ -136,28 +140,39 @@ fun StructuredConversationScreen(
                         }
                     )
                 }
-                InputBar(
+
+                QuestionInput(
                     modifier = Modifier
                         .fillMaxWidth()
                         .windowInsetsPadding(
-                            WindowInsets.ime
-                        )
-                        .navigationBarsPadding(),
-                    input = inputQuery,
-                    contentPadding = PaddingValues(0.dp),
-                    sendEnabled = true,
-                    onInputChanged = { input ->
-                        onInputQueryChanged(input)
-                    },
-                    onSendClick = {
+                            insets = WindowInsets.ime
+                        ),
+                    onSendClicked = {
                         keyboardController?.hide()
                         onSendClick()
                     },
-                    placeholder = stringResource(
+                    hint = stringResource(
                         R.string.ask_anything_about,
                         companyName
                     ),
-                    shouldRequestFocus = false
+                    onTextChange = { input ->
+                        onInputQueryChanged(input)
+                    },
+                    text = inputQuery,
+                    availableModels = availableModels,
+                    selectedModel = selectedModel,
+                    onModelChange = {
+                        if (it.canUpgrade) {
+                            /*onEvent(
+                                HomeEvent.UpgradeModel(
+                                    showBottomSheet = true,
+                                    modelId = it.modelId
+                                )
+                            )
+                            return@QuestionInput*/
+                        }
+                        onModelChange(it)
+                    }
                 )
             }
         }

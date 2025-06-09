@@ -231,13 +231,12 @@ data class HomeUiState(
     val selectedModel: AvailableModel = DefaultModel(),
     val showWaitlistBottomSheet: Boolean = false,
     val waitlistAvailableOptions: List<String> = listOf(
-        "More analytical",
-        "Risk warnings",
-        "More personalised",
-        "Human Tone",
-        "More realistic",
-        "Clearer answers",
-        "More informative"
+        "Advanced analysis",
+        "Personalized insights",
+        "Risk awareness",
+        "Actionable guidance",
+        "Transparent data sources",
+        "Unlimited queries"
     ),
     val selectedWaitlistOptions: List<String> = emptyList(),
     val defaultPrompts: List<DefaultPrompt> = emptyList()

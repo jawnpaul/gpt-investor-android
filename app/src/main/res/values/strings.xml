@@ -70,7 +70,7 @@
     <string name="email_address">Email address</string>
     <string name="password">Password</string>
     <string name="done">Done</string>
-    <string name="gpt_investor">Gpt Investor</string>
+    <string name="gpt_investor">GPT Investor</string>
     <string name="what_do_you_want_to_know">What do you want to know?</string>
     <string name="ask_me_a_question">Ask me a question</string>
     <string name="type_something_like">Type something like:</string>
@@ -109,4 +109,11 @@
     <string name="continue_">Continue</string>
     <string name="discover">Discover</string>
     <string name="search">Search</string>
+    <string name="financial_clarity_powered_by_ai">Financial Clarity \nPowered by AI</string>
+    <string name="your_personal_financial_guru">Your Personal Financial Guru. \nJust Chat.</string>
+    <string name="get_actionable_stock_picks_everyday">Get Actionable Stock Picks. \nEvery Day.</string>
+    <string name="join_the_waitlist">Join the waitlist</string>
+    <string name="choose_the_capabilities_you_d_love_in_the_advanced_ai_model">Choose the capabilities you\'d love in the advanced AI model</string>
+    <string name="you_re_on_the_list">You\'re on the list!</string>
+    <string name="you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge">You\'re one step closer to unlocking the power of Quantum Edge. We\'ll notify you as soon as it\'s ready.</string>
 </resources>

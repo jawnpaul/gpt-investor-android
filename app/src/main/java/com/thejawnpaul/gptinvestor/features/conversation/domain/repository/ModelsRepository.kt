@@ -27,8 +27,8 @@ class ModelsRepositoryImpl @Inject constructor(
                 add(
                     AnotherModel(
                         isDefault = false,
-                        modelTitle = "Intermediate",
-                        modelSubtitle = "For in-depth advance use",
+                        modelTitle = "Quantum Edge",
+                        modelSubtitle = "Access next-level financial intelligence",
                         canUpgrade = isUserOnWaitlist != true,
                         isUserOnWaitlist = isUserOnWaitlist,
                         modelId = "gemini-2.5-flash"

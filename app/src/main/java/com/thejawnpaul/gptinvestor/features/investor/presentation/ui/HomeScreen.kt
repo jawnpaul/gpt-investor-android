@@ -255,7 +255,7 @@ fun WaitlistBottomSheetContent(
                 // Text
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(R.string.join_our_waitlist).uppercase(),
+                    text = stringResource(R.string.join_the_waitlist).uppercase(),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleLarge
                 )
@@ -263,7 +263,7 @@ fun WaitlistBottomSheetContent(
                 // Text
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "We are working on giving you the best financial assistant",
+                    text = stringResource(R.string.choose_the_capabilities_you_d_love_in_the_advanced_ai_model),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -341,13 +341,13 @@ fun WaitlistBottomSheetContent(
                 Image(painter = painterResource(R.drawable.copy_success), contentDescription = null)
 
                 Text(
-                    text = stringResource(R.string.you_are_a_real_mvp),
+                    text = stringResource(R.string.you_re_on_the_list),
                     style = MaterialTheme.typography.titleLarge
                 )
 
                 // Text
                 Text(
-                    text = stringResource(R.string.thank_you_for_joining_our_waitlist),
+                    text = stringResource(R.string.you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )

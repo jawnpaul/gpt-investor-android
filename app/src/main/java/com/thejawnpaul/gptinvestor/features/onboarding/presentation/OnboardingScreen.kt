@@ -92,9 +92,9 @@ fun OnboardingScreen(modifier: Modifier, onFinishOnboarding: () -> Unit) {
                     verticalArrangement = Arrangement.spacedBy(32.dp)
                 ) {
                     val text = when (currentScreen) {
-                        0 -> stringResource(R.string.ask_anything_learn_everything)
+                        0 -> stringResource(R.string.your_personal_financial_guru)
                         1 -> stringResource(R.string.stay_ahead_with_top_stock_picks)
-                        else -> stringResource(R.string.ask_anything_learn_everything)
+                        else -> stringResource(R.string.your_personal_financial_guru)
                     }
 
                     Text(

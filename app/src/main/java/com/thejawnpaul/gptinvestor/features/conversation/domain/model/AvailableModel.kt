@@ -14,7 +14,7 @@ data class DefaultModel(
     override val modelId: String = "gemini-2.0-flash"
 ) : AvailableModel {
     override val modelTitle: String
-        get() = "Quant Basic"
+        get() = "Quantum Basic"
     override val modelSubtitle: String
         get() = "Good for everyday use"
     override val canUpgrade: Boolean

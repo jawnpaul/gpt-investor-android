@@ -22,4 +22,6 @@ interface ITopPickRepository {
     suspend fun getLocalTopPicks(): Flow<Either<Failure, List<TopPick>>>
 
     suspend fun getTopPicksByDate(): Flow<List<TopPick>>
+
+    suspend fun searchTopPicks(query: String): Flow<List<TopPick>>
 }

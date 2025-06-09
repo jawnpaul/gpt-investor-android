@@ -70,7 +70,6 @@ class TopPickViewModel @Inject constructor(
     }
 
     private fun getTopPick() {
-        Timber.e(topPickId.toString())
         _topPickView.update { it.copy(loading = true) }
         topPickId?.let { id ->
             getSingleTopPickUseCase(id) {

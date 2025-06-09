@@ -256,4 +256,31 @@ class TopPickRepository @Inject constructor(
             flow { emit(emptyList()) }
         }
     }
+
+    override suspend fun searchTopPicks(query: String): Flow<List<TopPick>> {
+        return try {
+            topPickDao.searchTopPicks(query).map { list ->
+                list.map { entity ->
+                    with(entity) {
+                        TopPick(
+                            id = id,
+                            companyName = companyName,
+                            ticker = ticker,
+                            rationale = rationale,
+                            metrics = metrics,
+                            risks = risks,
+                            confidenceScore = confidenceScore,
+                            isSaved = isSaved,
+                            imageUrl = imageUrl,
+                            percentageChange = change,
+                            currentPrice = price
+                        )
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Timber.e(e.stackTraceToString())
+            flow { emit(emptyList()) }
+        }
+    }
 }

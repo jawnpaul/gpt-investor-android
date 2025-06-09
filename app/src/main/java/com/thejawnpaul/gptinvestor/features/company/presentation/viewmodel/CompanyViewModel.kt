@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.util.query
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
@@ -286,25 +287,26 @@ class CompanyViewModel @Inject constructor(
             _companyDiscoveryState.update { it.copy(showTopPicks = true) }
         } else {
             _companyDiscoveryState.update { it.copy(showTopPicks = false) }
-            if (_companyDiscoveryState.value.companyView.query.isNotBlank()) {
-                performSearch(_companyDiscoveryState.value.companyView.query)
-            } else {
-                getSectorCompaniesUseCase(sectorKey) {
-                    it.onSuccess { result ->
-                        _companyDiscoveryState.update { state ->
-                            state.copy(
-                                companyView = state.companyView.copy(
-                                    loading = false,
-                                    companies = result.map { company -> company.toPresentation() }
-                                )
+            getSectorCompaniesUseCase(sectorKey) {
+                it.onSuccess { result ->
+                    _companyDiscoveryState.update { state ->
+                        state.copy(
+                            companyView = state.companyView.copy(
+                                loading = false,
+                                companies = result.map { company -> company.toPresentation() }
                             )
-                        }
-                    }
-                    it.onFailure { failure ->
-                        Timber.e(failure.toString())
+                        )
                     }
                 }
+                it.onFailure { failure ->
+                    Timber.e(failure.toString())
+                }
             }
+            /*if (_companyDiscoveryState.value.companyView.query.isNotBlank()) {
+                //performSearch(_companyDiscoveryState.value.companyView.query)
+            } else {
+
+            }*/
         }
     }
 
@@ -321,12 +323,17 @@ class CompanyViewModel @Inject constructor(
 
     fun searchCompany() {
         val query = _companyDiscoveryState.value.companyView.query
-        if (query.trim().isNotBlank()) {
-            // perform search
-            performSearch(query.trim())
+
+        if (_companyDiscoveryState.value.showTopPicks) {
+            searchTopPicks(query)
         } else {
-            // get local companies
-            getSectorCompanies(_companyDiscoveryState.value.sectorView.selected)
+            if (query.trim().isNotBlank()) {
+                // perform search
+                performSearch(query.trim())
+            } else {
+                // get local companies
+                getSectorCompanies(_companyDiscoveryState.value.sectorView.selected)
+            }
         }
     }
 
@@ -343,32 +350,36 @@ class CompanyViewModel @Inject constructor(
             }
         }
         val companyQuery = SearchCompanyQuery(query = query, sector = sectorKey)
-        searchCompaniesUseCase(companyQuery) {
-            it.onSuccess { result ->
-                if (result.isNotEmpty()) {
-                    _companyDiscoveryState.update { state ->
-                        state.copy(
-                            companyView = state.companyView.copy(
-                                loading = false,
-                                companies = result.map { company -> company.toPresentation() }
+        if (_companyDiscoveryState.value.showTopPicks) {
+            searchTopPicks(query)
+        } else {
+            searchCompaniesUseCase(companyQuery) {
+                it.onSuccess { result ->
+                    if (result.isNotEmpty()) {
+                        _companyDiscoveryState.update { state ->
+                            state.copy(
+                                companyView = state.companyView.copy(
+                                    loading = false,
+                                    companies = result.map { company -> company.toPresentation() }
+                                )
                             )
-                        )
-                    }
-                } else {
-                    // No result found
-                    _companyDiscoveryState.update { state ->
-                        state.copy(
-                            companyView = state.companyView.copy(
-                                loading = false,
-                                companies = emptyList()
+                        }
+                    } else {
+                        // No result found
+                        _companyDiscoveryState.update { state ->
+                            state.copy(
+                                companyView = state.companyView.copy(
+                                    loading = false,
+                                    companies = emptyList()
+                                )
                             )
-                        )
+                        }
+                        Timber.e("No result found")
                     }
-                    Timber.e("No result found")
                 }
-            }
-            it.onFailure { failure ->
-                Timber.e(failure.toString())
+                it.onFailure { failure ->
+                    Timber.e(failure.toString())
+                }
             }
         }
     }
@@ -403,8 +414,12 @@ class CompanyViewModel @Inject constructor(
 
             is CompanyDiscoveryEvent.ToggleSearchMode -> {
                 _companyDiscoveryState.update {
-                    it.copy(searchMode = event.searchMode)
+                    it.copy(
+                        searchMode = event.searchMode,
+                        companyView = it.companyView.copy(query = "")
+                    )
                 }
+                searchTopPicks(query = "")
             }
         }
     }
@@ -479,6 +494,36 @@ class CompanyViewModel @Inject constructor(
                 }
                 _companyDiscoveryState.update { currentState -> currentState.copy(topPicks = topPicksPresentation) }
             }
+        }
+    }
+
+    private fun searchTopPicks(query: String) {
+        if (query.isNotBlank()) {
+            viewModelScope.launch {
+                topPickRepository.searchTopPicks(query = query.trim()).collect { topPicks ->
+                    val topPicksPresentation = topPicks.map { topPick ->
+                        with(topPick) {
+                            TopPickPresentation(
+                                id = id,
+                                companyName = companyName,
+                                ticker = ticker,
+                                rationale = rationale,
+                                metrics = metrics,
+                                risks = risks,
+                                confidenceScore = confidenceScore,
+                                isSaved = isSaved,
+                                imageUrl = imageUrl,
+                                percentageChange = percentageChange,
+                                currentPrice = currentPrice
+                            )
+                        }
+                    }
+                    _companyDiscoveryState.update { currentState -> currentState.copy(topPicks = topPicksPresentation) }
+                }
+            }
+        } else {
+            Timber.e("No query")
+            getTopPicks()
         }
     }
 }

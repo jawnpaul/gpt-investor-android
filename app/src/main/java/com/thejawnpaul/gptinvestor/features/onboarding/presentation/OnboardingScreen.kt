@@ -93,7 +93,7 @@ fun OnboardingScreen(modifier: Modifier, onFinishOnboarding: () -> Unit) {
                 ) {
                     val text = when (currentScreen) {
                         0 -> stringResource(R.string.your_personal_financial_guru)
-                        1 -> stringResource(R.string.stay_ahead_with_top_stock_picks)
+                        1 -> stringResource(R.string.get_actionable_stock_picks_everyday)
                         else -> stringResource(R.string.your_personal_financial_guru)
                     }
 

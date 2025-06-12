@@ -18,6 +18,7 @@ import com.thejawnpaul.gptinvestor.features.history.domain.usecases.GetSingleHis
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryConversationView
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryScreenView
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction.*
+import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenAction.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -180,7 +181,13 @@ class HistoryViewModel @Inject constructor(
         when (event) {
             is HistoryScreenEvent.HistoryItemClicked -> {
                 viewModelScope.launch {
-                    _actions.emit(HistoryScreenAction.OnGoToHistoryDetail(event.conversationId))
+                    _actions.emit(OnGoToHistoryDetail(event.conversationId))
+                }
+            }
+
+            HistoryScreenEvent.GoBack -> {
+                viewModelScope.launch {
+                    _actions.emit(HistoryScreenAction.OnGoBack)
                 }
             }
         }
@@ -188,7 +195,10 @@ class HistoryViewModel @Inject constructor(
 
     fun processAction(action: HistoryScreenAction) {
         when (action) {
-            is HistoryScreenAction.OnGoToHistoryDetail -> {
+            is OnGoToHistoryDetail -> {
+            }
+
+            HistoryScreenAction.OnGoBack -> {
             }
         }
     }
@@ -243,10 +253,12 @@ class HistoryViewModel @Inject constructor(
 
 sealed interface HistoryScreenEvent {
     data class HistoryItemClicked(val conversationId: Long) : HistoryScreenEvent
+    data object GoBack : HistoryScreenEvent
 }
 
 sealed interface HistoryScreenAction {
     data class OnGoToHistoryDetail(val conversationId: Long) : HistoryScreenAction
+    data object OnGoBack : HistoryScreenAction
 }
 
 sealed interface HistoryDetailEvent {

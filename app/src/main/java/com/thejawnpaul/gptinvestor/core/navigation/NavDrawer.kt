@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.AuthenticationUIState
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.ThemeDropdown
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.theme.bodyChatBody
 
@@ -63,10 +65,11 @@ fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Uni
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 24.dp),
+                .statusBarsPadding(),
             contentAlignment = Alignment.Center
         ) {
             Text(
+
                 text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineSmall
             )
@@ -76,6 +79,18 @@ fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Uni
         Spacer(modifier = Modifier.height(16.dp))
 
         // Drawer items
+        // History
+        DrawerItem(
+            modifier = Modifier,
+            icon = ImageVector.vectorResource(R.drawable.ic_timer),
+            label = stringResource(R.string.history),
+            onClick = {
+                // Navigate to history
+                onAction(NavDrawerAction.OnGoToHistory)
+                onCloseDrawer()
+            }
+        )
+        // Saved picks
         DrawerItem(
             modifier = Modifier,
             icon = ImageVector.vectorResource(R.drawable.baseline_bookmarks_24),
@@ -87,6 +102,7 @@ fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Uni
             }
         )
 
+        // Settings
         DrawerItem(
             modifier = Modifier,
             icon = Icons.Default.Settings,
@@ -145,7 +161,10 @@ fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Uni
                                 modifier = Modifier.size(40.dp),
                                 shape = CircleShape
                             ) {
-                                Text(text = state.user.displayName?.ifBlank { "A" }?.take(1)?.uppercase() ?: "A")
+                                Text(
+                                    text = state.user.displayName?.ifBlank { "A" }?.take(1)
+                                        ?.uppercase() ?: "A"
+                                )
                             }
                         }
                     } else {
@@ -167,7 +186,7 @@ fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Uni
                     )
                 }
 
-                IconButton(modifier = Modifier.size(24.dp), onClick = {
+                IconButton(modifier = Modifier.padding(end = 16.dp).size(24.dp), onClick = {
                     expanded = !expanded
                 }) {
                     Icon(
@@ -191,6 +210,28 @@ fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Uni
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable(indication = null, interactionSource = null, onClick = {
+                                }),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = stringResource(R.string.theme),
+                                style = MaterialTheme.typography.labelLarge
+                            )
+
+                            ThemeDropdown(
+                                modifier = Modifier,
+                                onClick = {
+                                    onEvent(NavDrawerEvent.ChangeTheme(it))
+                                },
+                                options = listOf("Light", "Dark", "System"),
+                                selectedOption = state.theme ?: "Dark"
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(indication = null, interactionSource = null, onClick = {
                                     onEvent(NavDrawerEvent.SignOut)
                                     onCloseDrawer()
                                 }),
@@ -209,7 +250,7 @@ fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Uni
 
                         HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
 
-                        Row(
+                        /*Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable(
@@ -229,7 +270,7 @@ fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Uni
                                 contentDescription = null,
                                 tint = gptInvestorColors.redColors.allRed
                             )
-                        }
+                        }*/
                     }
                 }
             }
@@ -261,9 +302,11 @@ private fun DrawerItem(modifier: Modifier, icon: ImageVector, label: String, onC
 
 sealed interface NavDrawerEvent {
     data object SignOut : NavDrawerEvent
+    data class ChangeTheme(val theme: String) : NavDrawerEvent
 }
 
 sealed interface NavDrawerAction {
     data object OnGoToSettings : NavDrawerAction
     data object OnGoToSavedPicks : NavDrawerAction
+    data object OnGoToHistory : NavDrawerAction
 }

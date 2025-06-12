@@ -74,6 +74,11 @@ fun SetUpNavGraph(navController: NavHostController) {
                         NavDrawerEvent.SignOut -> {
                             authViewModel.signOut(context)
                         }
+
+                        is NavDrawerEvent.ChangeTheme -> {
+                            // Change theme
+                            authViewModel.changeTheme(event.theme)
+                        }
                     }
                 },
                 onAction = { action ->
@@ -84,6 +89,10 @@ fun SetUpNavGraph(navController: NavHostController) {
 
                         NavDrawerAction.OnGoToSettings -> {
                             navController.navigate(Screen.SettingsScreen.route)
+                        }
+
+                        NavDrawerAction.OnGoToHistory -> {
+                            navController.navigate(Screen.HistoryTabScreen.route)
                         }
                     }
                 },
@@ -203,6 +212,10 @@ fun SetUpNavGraph(navController: NavHostController) {
                                     navController.navigate(
                                         Screen.HistoryDetailScreen.createRoute(action.conversationId)
                                     )
+                                }
+
+                                HistoryScreenAction.OnGoBack -> {
+                                    navController.navigateUp()
                                 }
                             }
                         }.launchIn(scope)

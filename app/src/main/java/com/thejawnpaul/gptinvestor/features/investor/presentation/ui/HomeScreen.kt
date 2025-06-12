@@ -175,14 +175,6 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleMedium
                 )
-                /*ThemeDropdown(
-                    modifier = Modifier,
-                    onClick = {
-                        onEvent(HomeEvent.ChangeTheme(it))
-                    },
-                    options = listOf("Light", "Dark", "System"),
-                    selectedOption = state.theme ?: "Dark"
-                )*/
 
                 IconButton(modifier = Modifier, onClick = {
                     onAction(HomeAction.OnGoToDiscover)

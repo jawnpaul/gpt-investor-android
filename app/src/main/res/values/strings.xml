@@ -116,4 +116,6 @@
     <string name="choose_the_capabilities_you_d_love_in_the_advanced_ai_model">Choose the capabilities you\'d love in the advanced AI model</string>
     <string name="you_re_on_the_list">You\'re on the list!</string>
     <string name="you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge">You\'re one step closer to unlocking the power of Quantum Edge. We\'ll notify you as soon as it\'s ready.</string>
+    <string name="theme">Theme</string>
+    <string name="history">History</string>
 </resources>

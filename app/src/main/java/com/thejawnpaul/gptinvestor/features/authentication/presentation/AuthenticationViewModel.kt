@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -19,7 +20,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class AuthenticationViewModel @Inject constructor(
     private val authRepository: AuthenticationRepository,
-    private val analyticsLogger: AnalyticsLogger
+    private val analyticsLogger: AnalyticsLogger,
+    private val gptInvestorPreferences: GPTInvestorPreferences
 ) :
     ViewModel() {
 
@@ -38,7 +40,18 @@ class AuthenticationViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             authRepository.getAuthState().collect { isSignedIn ->
-                _authState.update { it.copy(isUserSignedIn = isSignedIn, user = authRepository.currentUser) }
+                _authState.update {
+                    it.copy(
+                        isUserSignedIn = isSignedIn,
+                        user = authRepository.currentUser
+                    )
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            gptInvestorPreferences.themePreference.collect { theme ->
+                _authState.update { it.copy(theme = theme) }
             }
         }
     }
@@ -244,6 +257,12 @@ class AuthenticationViewModel @Inject constructor(
             }
         }
     }
+
+    fun changeTheme(theme: String) {
+        viewModelScope.launch {
+            gptInvestorPreferences.setThemePreference(theme)
+        }
+    }
 }
 
 sealed class AuthResult<T> {
@@ -259,7 +278,8 @@ data class AuthenticationUIState(
     val errorMessage: String? = null,
     val showLoginInput: Boolean = false,
     val email: String = "",
-    val password: String = ""
+    val password: String = "",
+    val theme: String? = "Dark"
 ) {
     val enableLoginButton = email.trim().isNotEmpty() && password.trim().isNotEmpty()
 }

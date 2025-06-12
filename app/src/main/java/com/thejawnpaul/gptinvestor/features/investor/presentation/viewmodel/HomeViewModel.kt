@@ -111,10 +111,6 @@ class HomeViewModel @Inject constructor(
                     )
                 }
 
-                HomeEvent.RetryTopPicks -> {
-                    getTopPicks()
-                }
-
                 HomeEvent.NotificationPermissionDenied -> {
                     preferences.setNotificationPermission(false)
                 }
@@ -168,6 +164,7 @@ class HomeViewModel @Inject constructor(
                             title = event.prompt.title
                         )
                     )
+                    _uiState.update { it.copy(chatInput = null) }
                 }
             }
         }
@@ -246,7 +243,6 @@ sealed interface HomeEvent {
     data class ChatInputChanged(val input: String) : HomeEvent
     data object SendClick : HomeEvent
     data class ChangeTheme(val theme: String) : HomeEvent
-    data object RetryTopPicks : HomeEvent
     data object NotificationPermissionGranted : HomeEvent
     data object NotificationPermissionDenied : HomeEvent
     data class ModelChanged(val model: AvailableModel) : HomeEvent

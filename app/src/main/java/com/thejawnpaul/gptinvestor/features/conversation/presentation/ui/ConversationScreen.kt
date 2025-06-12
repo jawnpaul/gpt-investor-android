@@ -6,16 +6,40 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultConversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.state.ConversationView
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationEvent
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 @Composable
-fun ConversationScreen(modifier: Modifier, state: ConversationView, chatInput: String? = null, onEvent: (ConversationEvent) -> Unit, onAction: (ConversationAction) -> Unit) {
+fun ConversationScreen(
+    modifier: Modifier,
+    state: ConversationView,
+    chatInput: String? = null,
+    title: String? = null,
+    onEvent: (ConversationEvent) -> Unit,
+    onAction: (ConversationAction) -> Unit
+) {
     LaunchedEffect(key1 = chatInput) {
         if (chatInput != null) {
-            onEvent(ConversationEvent.SendPrompt(chatInput))
+            val decodedChatInput = URLDecoder.decode(chatInput, StandardCharsets.UTF_8.toString())
+            if (title != null) {
+                val decodedTitle =
+                    title.let { URLDecoder.decode(it, StandardCharsets.UTF_8.toString()) }
+                onEvent(
+                    ConversationEvent.DefaultPromptClicked(
+                        prompt = DefaultPrompt(
+                            title = decodedTitle,
+                            query = decodedChatInput
+                        )
+                    )
+                )
+            } else {
+                onEvent(ConversationEvent.SendPrompt(query = decodedChatInput))
+            }
         }
     }
 

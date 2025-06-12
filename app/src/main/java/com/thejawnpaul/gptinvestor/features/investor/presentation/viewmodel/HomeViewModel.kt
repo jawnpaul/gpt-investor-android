@@ -165,7 +165,7 @@ class HomeViewModel @Inject constructor(
                     _actions.emit(
                         OnStartConversation(
                             input = event.prompt.query,
-                            isDefaultPrompt = true
+                            title = event.prompt.title
                         )
                     )
                 }
@@ -259,7 +259,7 @@ sealed interface HomeEvent {
 sealed interface HomeAction {
     data class OnStartConversation(
         val input: String? = null,
-        val isDefaultPrompt: Boolean = false
+        val title: String? = null
     ) : HomeAction
 
     data object OnMenuClick : HomeAction

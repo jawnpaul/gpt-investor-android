@@ -134,7 +134,8 @@ fun SetUpNavGraph(navController: NavHostController) {
                                 is HomeAction.OnStartConversation -> {
                                     navController.navigate(
                                         Screen.ConversationScreen.createRoute(
-                                            chatInput = action.input ?: ""
+                                            chatInput = action.input ?: "",
+                                            title = action.title
                                         )
                                     )
                                 }
@@ -258,12 +259,22 @@ fun SetUpNavGraph(navController: NavHostController) {
 
                 composable(
                     route = Screen.ConversationScreen.route,
-                    arguments = listOf(navArgument("chatInput") { NavType.StringType })
+                    arguments = listOf(
+                        navArgument("chatInput") {
+                            type = NavType.StringType
+                            nullable = true
+                        },
+                        navArgument("title") {
+                            type = NavType.StringType
+                            nullable = true
+                        }
+                    )
                 ) { navBackStackEntry ->
                     val context = LocalContext.current
                     val viewModel = hiltViewModel<ConversationViewModel>()
                     val state = viewModel.conversation.collectAsStateWithLifecycle()
                     val chatInput = navBackStackEntry.arguments?.getString("chatInput")
+                    val title = navBackStackEntry.arguments?.getString("title")
                     val scope = rememberCoroutineScope()
                     LaunchedEffect(Unit) {
                         viewModel.actions.onEach { action ->
@@ -293,6 +304,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                     ConversationScreen(
                         modifier = Modifier.padding(top = 20.dp),
                         chatInput = chatInput,
+                        title = title,
                         state = state.value,
                         onEvent = viewModel::handleEvent,
                         onAction = viewModel::processAction

@@ -1,5 +1,8 @@
 package com.thejawnpaul.gptinvestor.core.navigation
 
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+
 sealed class Screen(val route: String, val isTopLevel: Boolean) {
     data object HomeScreen : Screen("home_screen", false)
     data object CompanyDetailScreen : Screen("company_detail_screen/{ticker}", false) {
@@ -28,8 +31,26 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
 
     data object AuthenticationScreen : Screen("authentication_screen", false)
 
-    data object ConversationScreen : Screen("conversation_screen/{chatInput}", false) {
-        fun createRoute(chatInput: String) = "conversation_screen/$chatInput"
+    data object ConversationScreen :
+        Screen("conversation_screen?chatInput={chatInput}&title={title}", false) {
+
+        fun createRoute(chatInput: String, title: String? = null): String {
+            val params = mutableListOf<String>()
+
+            if (chatInput.isNotEmpty()) {
+                params.add("chatInput=${URLEncoder.encode(chatInput, StandardCharsets.UTF_8.toString())}")
+            }
+
+            if (title != null) {
+                params.add("title=${URLEncoder.encode(title, StandardCharsets.UTF_8.toString())}")
+            }
+
+            return if (params.isEmpty()) {
+                "conversation_screen"
+            } else {
+                "conversation_screen?${params.joinToString("&")}"
+            }
+        }
     }
 
     data object HomeTabScreen : Screen("home_tab_screen", true)

@@ -66,7 +66,11 @@ class ConversationViewModel @Inject constructor(
 
             it.onSuccess { result ->
                 conversationViewMutableStateFlow.update { state ->
-                    state.copy(conversation = DefaultConversation(prompts = result))
+                    if (state.conversation is DefaultConversation) {
+                        state.copy(conversation = DefaultConversation(prompts = result))
+                    } else {
+                        state
+                    }
                 }
             }
         }

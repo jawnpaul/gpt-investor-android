@@ -26,14 +26,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.thejawnpaul.gptinvestor.R
+import com.thejawnpaul.gptinvestor.features.settings.presentation.state.SettingsView
 
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier, navController: NavController, viewModel: SettingsViewModel) {
+fun SettingsScreen(modifier: Modifier, state: SettingsView, onEvent: (SettingsEvent) -> Unit, onAction: (SettingsAction) -> Unit) {
     var showDeleteDialog by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
         Column(modifier = Modifier) {
             Row(
                 modifier = Modifier
@@ -41,7 +41,7 @@ fun SettingsScreen(modifier: Modifier = Modifier, navController: NavController, 
                     .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { navController.navigateUp() }) {
+                IconButton(onClick = { onAction(SettingsAction.OnGoBack) }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
                         contentDescription = stringResource(id = R.string.back)
@@ -62,7 +62,9 @@ fun SettingsScreen(modifier: Modifier = Modifier, navController: NavController, 
                 colors = ButtonDefaults.elevatedButtonColors(
                     containerColor = MaterialTheme.colorScheme.error
                 ),
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
                 Text(
                     text = stringResource(R.string.delete_account),
@@ -87,7 +89,7 @@ fun SettingsScreen(modifier: Modifier = Modifier, navController: NavController, 
                         TextButton(
                             onClick = {
                                 // Handle account deletion here
-                                viewModel.deleteAccount()
+                                onEvent(SettingsEvent.DeleteAccount)
                                 showDeleteDialog = false
                             },
                             colors = ButtonDefaults.textButtonColors(

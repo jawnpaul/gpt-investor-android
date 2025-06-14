@@ -8,6 +8,8 @@ import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyPri
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyPriceResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyRemote
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.TrendingRemote
+import com.thejawnpaul.gptinvestor.features.conversation.data.remote.AddToWaitlistRequest
+import com.thejawnpaul.gptinvestor.features.conversation.data.remote.AddToWaitlistResponse
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.DefaultPromptRemote
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityRequest
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityResponse
@@ -19,6 +21,8 @@ import com.thejawnpaul.gptinvestor.features.investor.data.remote.DownloadPdfResp
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.IndustryRatingRequest
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.SaveComparisonRequest
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.SaveSentimentRequest
+import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
+import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenResponse
 import com.thejawnpaul.gptinvestor.features.toppick.data.remote.TopPickRemote
 import retrofit2.Response
 import retrofit2.http.Body
@@ -27,42 +31,48 @@ import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface ApiService {
-    @GET("companies")
+    @GET("v1/companies")
     suspend fun getCompanies(): Response<List<CompanyRemote>>
 
-    @POST("company")
+    @POST("v1/company")
     suspend fun getCompanyFinancials(@Body request: CompanyFinancialsRequest): Response<CompanyFinancialsRemote>
 
-    @POST("save-comparison")
+    @POST("v1/save-comparison")
     suspend fun saveComparison(@Body request: SaveComparisonRequest): Response<DefaultSaveResponse>
 
-    @POST("save-sentiment")
+    @POST("v1/save-sentiment")
     suspend fun saveSentiment(@Body request: SaveSentimentRequest): Response<DefaultSaveResponse>
 
-    @POST("get-analyst-rating")
+    @POST("v1/get-analyst-rating")
     suspend fun getAnalystRating(@Body request: AnalystRatingRequest): Response<AnalystRatingResponse>
 
-    @POST("save-industry-rating")
+    @POST("v1/save-industry-rating")
     suspend fun saveIndustryRating(@Body request: IndustryRatingRequest): Response<DefaultSaveResponse>
 
-    @POST("create-pdf")
+    @POST("v1/create-pdf")
     suspend fun createPdf(@Body request: DownloadPdfRequest): Response<DownloadPdfResponse>
 
-    @GET("trending-tickers")
+    @GET("v1/trending-tickers")
     suspend fun getTrendingTickers(): Response<List<TrendingRemote>>
 
-    @GET("default-prompts")
+    @GET("v1/default-prompts")
     suspend fun getDefaultPrompts(): Response<List<DefaultPromptRemote>>
 
-    @POST("get-entity")
+    @POST("v1/get-entity")
     suspend fun getEntity(@Body request: GetEntityRequest): Response<GetEntityResponse>
 
-    @POST("company-info")
+    @POST("v1/company-info")
     suspend fun getCompanyInfo(@Body request: CompanyDetailRemoteRequest): Response<CompanyDetailRemoteResponse>
 
-    @POST("company-price")
+    @POST("v1/company-price")
     suspend fun getCompanyPrice(@Body request: CompanyPriceRequest): Response<List<CompanyPriceResponse>>
 
-    @GET("top-picks")
+    @GET("v1.1/top-picks")
     suspend fun getTopPicks(@Query("date") date: String): Response<List<TopPickRemote>>
+
+    @POST("v1/notifications/register-token")
+    suspend fun registerToken(@Body request: RegisterTokenRequest): Response<RegisterTokenResponse>
+
+    @POST("v1/add-to-waitlist")
+    suspend fun addUserToWaitlist(@Body request: AddToWaitlistRequest): Response<AddToWaitlistResponse>
 }

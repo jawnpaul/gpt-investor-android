@@ -21,7 +21,7 @@ android {
     localProperties.load(project.rootProject.file("local.properties").reader())
 
     namespace = "com.thejawnpaul.gptinvestor"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.thejawnpaul.gptinvestor"
@@ -70,6 +70,9 @@ android {
             val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
             buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
 
+            val webClientId: String = localProperties.getProperty("WEB_CLIENT_ID_PROD") ?: ""
+            buildConfigField("String", "WEB_CLIENT_ID", "\"$webClientId\"")
+
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -86,6 +89,9 @@ android {
 
             val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
             buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
+
+            val webClientId: String = localProperties.getProperty("WEB_CLIENT_ID_DEV") ?: ""
+            buildConfigField("String", "WEB_CLIENT_ID", "\"$webClientId\"")
 
             applicationIdSuffix = ".dev"
             isShrinkResources = false
@@ -172,9 +178,15 @@ dependencies {
     implementation(libs.richtext.commonmark)
     implementation(platform(libs.firebase.compose.bom))
     implementation(libs.firebase.crashlytics)
-    implementation(libs.firebase.ui.auth)
+    implementation(libs.firebase.auth)
     implementation(libs.firebase.config)
     implementation(project(":analytics"))
+    implementation(project(":theme"))
+    implementation(libs.datastore.preferences)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.play.services.auth)
+    implementation(libs.google.identity)
+    implementation(libs.firebase.messaging)
 
     // test
     testImplementation(project(":remote:remotetest"))

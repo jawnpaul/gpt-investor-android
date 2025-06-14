@@ -1,80 +1,67 @@
 package com.thejawnpaul.gptinvestor.features.history.presentation.ui
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
-import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.StructuredConversationScreen
-import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
-import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.InputBar
+import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryConversationView
+import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction
+import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailEvent
 
 @Composable
-fun HistoryDetailScreen(modifier: Modifier = Modifier, navController: NavController, conversationId: String, viewModel: HistoryViewModel) {
+fun HistoryDetailScreen(modifier: Modifier, conversationId: String, state: HistoryConversationView, onEvent: (HistoryDetailEvent) -> Unit, onAction: (HistoryDetailAction) -> Unit) {
     LaunchedEffect(conversationId) {
-        viewModel.updateConversationId(conversationId)
+        onEvent(HistoryDetailEvent.GetHistory(conversationId.toLong()))
     }
-    val keyboardController = LocalSoftwareKeyboardController.current
 
-    val conversation = viewModel.conversation.collectAsStateWithLifecycle()
-    val genText = viewModel.genText.collectAsStateWithLifecycle()
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        when (conversation.value.conversation) {
+    Box(modifier = modifier.fillMaxSize()) {
+        when (state.conversation) {
             is DefaultConversation -> {
             }
 
             is StructuredConversation -> {
                 StructuredConversationScreen(
                     modifier = Modifier,
-                    conversation = conversation.value.conversation as StructuredConversation,
-                    onNavigateUp = { navController.navigateUp() },
-                    text = genText.value,
-                    onClickNews = {
-                        navController.navigate(Screen.WebViewScreen.createRoute(it))
+                    conversation = state.conversation,
+                    onNavigateUp = {
+                        onAction(HistoryDetailAction.OnGoBack)
                     },
-                    onClickSuggestion = { viewModel.getSuggestedPromptResponse(it.query) }
+                    text = state.genText,
+                    onClickNews = {
+                        onAction(HistoryDetailAction.OnGoToWebView(it))
+                    },
+                    onClickFeedback = { messageId, status, reason ->
+                        onEvent(HistoryDetailEvent.SendFeedback(messageId, status, reason))
+                    },
+                    onCopy = { text ->
+                        onEvent(HistoryDetailEvent.CopyToClipboard(text))
+                    },
+                    inputQuery = state.query,
+                    onInputQueryChanged = { input ->
+                        onEvent(HistoryDetailEvent.UpdateInputQuery(input))
+                    },
+                    onSendClick = {
+                        onEvent(HistoryDetailEvent.GetInputResponse)
+                    },
+                    companyName = "",
+                    onClickSuggestedPrompt = {
+                        onEvent(HistoryDetailEvent.ClickSuggestedPrompt(it))
+                    },
+                    availableModels = state.availableModels,
+                    selectedModel = state.selectedModel,
+                    onModelChange = {
+                    },
+                    onUpgradeModel = {
+                    }
                 )
             }
 
             else -> {
             }
         }
-
-        InputBar(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomStart)
-                .windowInsetsPadding(
-                    WindowInsets.ime
-                )
-                .navigationBarsPadding(),
-            input = conversation.value.query,
-            contentPadding = PaddingValues(0.dp),
-            sendEnabled = conversation.value.enableSend,
-            onInputChanged = { input ->
-                viewModel.updateInput(input = input)
-            },
-            onSendClick = {
-                keyboardController?.hide()
-                viewModel.getInputResponse()
-            },
-            placeholder = "Ask anything about stocks",
-            shouldRequestFocus = false
-        )
     }
 }

@@ -7,6 +7,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
+import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetLocalTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetSavedTopPicksUseCase
@@ -14,6 +15,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetSingleTop
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.RemoveTopPickFromSavedUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.SaveTopPickUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.ShareTopPickUseCase
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickAction.*
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPickDetailView
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
@@ -34,7 +36,8 @@ class TopPickViewModel @Inject constructor(
     private val saveTopPickUseCase: SaveTopPickUseCase,
     private val removeTopPickFromSavedUseCase: RemoveTopPickFromSavedUseCase,
     private val getSavedTopPicksUseCase: GetSavedTopPicksUseCase,
-    private val shareTopPickUseCase: ShareTopPickUseCase
+    private val shareTopPickUseCase: ShareTopPickUseCase,
+    private val getCompanyUseCase: GetCompanyUseCase
 ) : ViewModel() {
 
     private val topPickId: String?
@@ -58,6 +61,7 @@ class TopPickViewModel @Inject constructor(
                 _topPickView.update { it.copy(isLoggedIn = isSignedIn) }
             }
         }
+        getAllTopPicks()
     }
 
     fun updateTopPickId(topPickId: String) {
@@ -66,7 +70,6 @@ class TopPickViewModel @Inject constructor(
     }
 
     private fun getTopPick() {
-        Timber.e(topPickId.toString())
         _topPickView.update { it.copy(loading = true) }
         topPickId?.let { id ->
             getSingleTopPickUseCase(id) {
@@ -96,11 +99,15 @@ class TopPickViewModel @Inject constructor(
                         metrics = metrics,
                         risks = risks,
                         confidenceScore = confidenceScore,
-                        isSaved = isSaved
+                        isSaved = isSaved,
+                        imageUrl = imageUrl,
+                        percentageChange = percentageChange,
+                        currentPrice = currentPrice
                     )
                 }
             )
         }
+        getCompanyFinancials(ticker = topPick.ticker)
         Timber.e(topPick.toString())
     }
 
@@ -118,23 +125,36 @@ class TopPickViewModel @Inject constructor(
             }
 
             it.onSuccess { result ->
+
+                val allTopPicks = result.map { topPick ->
+                    with(topPick) {
+                        TopPickPresentation(
+                            id = id,
+                            companyName = companyName,
+                            ticker = ticker,
+                            rationale = rationale,
+                            metrics = metrics,
+                            risks = risks,
+                            confidenceScore = confidenceScore,
+                            isSaved = isSaved,
+                            imageUrl = imageUrl,
+                            percentageChange = percentageChange,
+                            currentPrice = currentPrice
+                        )
+                    }
+                }
+
                 _allTopPicks.update { state ->
                     state.copy(
                         loading = false,
-                        topPicks = result.map { topPick ->
-                            with(topPick) {
-                                TopPickPresentation(
-                                    id,
-                                    companyName,
-                                    ticker,
-                                    rationale,
-                                    metrics,
-                                    risks,
-                                    confidenceScore,
-                                    isSaved
-                                )
-                            }
-                        }
+                        topPicks = allTopPicks
+                    )
+                }
+
+                _savedTopPicks.update { state ->
+                    state.copy(
+                        loading = false,
+                        topPicks = allTopPicks.filter { pick -> pick.isSaved }
                     )
                 }
             }
@@ -165,7 +185,10 @@ class TopPickViewModel @Inject constructor(
                                     metrics = metrics,
                                     risks = risks,
                                     confidenceScore = confidenceScore,
-                                    isSaved = isSaved
+                                    isSaved = isSaved,
+                                    imageUrl = imageUrl,
+                                    percentageChange = percentageChange,
+                                    currentPrice = currentPrice
                                 )
                             }
                         )
@@ -195,7 +218,10 @@ class TopPickViewModel @Inject constructor(
                                     metrics = metrics,
                                     risks = risks,
                                     confidenceScore = confidenceScore,
-                                    isSaved = isSaved
+                                    isSaved = isSaved,
+                                    imageUrl = imageUrl,
+                                    percentageChange = percentageChange,
+                                    currentPrice = currentPrice
                                 )
                             }
                         )
@@ -204,41 +230,6 @@ class TopPickViewModel @Inject constructor(
 
                 it.onFailure { failure ->
                     Timber.e(failure.toString())
-                }
-            }
-        }
-    }
-
-    fun getSavedTopPicks() {
-        getSavedTopPicksUseCase(GetSavedTopPicksUseCase.None()) {
-            it.onFailure {
-                _savedTopPicks.update { state ->
-                    state.copy(
-                        loading = false,
-                        error = "Something went wrong."
-                    )
-                }
-            }
-
-            it.onSuccess { result ->
-                _savedTopPicks.update { state ->
-                    state.copy(
-                        loading = false,
-                        topPicks = result.map { topPick ->
-                            with(topPick) {
-                                TopPickPresentation(
-                                    id,
-                                    companyName,
-                                    ticker,
-                                    rationale,
-                                    metrics,
-                                    risks,
-                                    confidenceScore,
-                                    isSaved
-                                )
-                            }
-                        }
-                    )
                 }
             }
         }
@@ -258,8 +249,69 @@ class TopPickViewModel @Inject constructor(
             }
         }
     }
+
+    fun getCompanyFinancials(ticker: String) {
+        getCompanyUseCase(ticker) {
+            it.onSuccess { result ->
+                _topPickView.update { state ->
+                    state.copy(
+                        companyPresentation = result
+                    )
+                }
+            }
+            it.onFailure {
+                Timber.e(it.toString())
+            }
+        }
+    }
+
+    fun handleEvent(event: TopPickEvent) {
+        when (event) {
+            is TopPickEvent.Authenticate -> {
+                _topPickView.update { it.copy(showAuthenticateDialog = event.showDialog) }
+            }
+
+            is TopPickEvent.AuthenticationResponse -> {
+                Timber.e(event.message)
+                viewModelScope.launch {
+                    _actions.emit(ShowToast(event.message))
+                }
+                if (event.message.contains("success", ignoreCase = true)) {
+                    _topPickView.update {
+                        it.copy(
+                            showAuthenticateDialog = false,
+                            isLoggedIn = true
+                        )
+                    }
+                }
+            }
+
+            is TopPickEvent.ClickNewsSources -> {
+                _topPickView.update { it.copy(showNewsSourcesBottomSheet = event.show) }
+            }
+
+            is TopPickEvent.GetTopPick -> {
+                updateTopPickId(event.id)
+            }
+        }
+    }
+
+    fun processAction(action: TopPickAction) {
+        viewModelScope.launch {
+            _actions.emit(action)
+        }
+    }
 }
 
 sealed interface TopPickAction {
     data class OnShare(val url: String) : TopPickAction
+    data class ShowToast(val message: String) : TopPickAction
+    data object OnGoBack : TopPickAction
+}
+
+sealed interface TopPickEvent {
+    data class Authenticate(val showDialog: Boolean) : TopPickEvent
+    data class AuthenticationResponse(val message: String) : TopPickEvent
+    data class ClickNewsSources(val show: Boolean) : TopPickEvent
+    data class GetTopPick(val id: String) : TopPickEvent
 }

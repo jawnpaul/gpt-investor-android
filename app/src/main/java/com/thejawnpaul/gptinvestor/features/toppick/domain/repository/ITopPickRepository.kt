@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface ITopPickRepository {
 
-    suspend fun getTopPicks(): Flow<Either<Failure, List<TopPick>>>
+    suspend fun getTopPicks(): Flow<Either<Failure, Unit>>
 
     suspend fun getSingleTopPick(pickId: String): Flow<Either<Failure, TopPick>>
 
@@ -20,4 +20,8 @@ interface ITopPickRepository {
     suspend fun getSavedTopPicks(): Flow<Either<Failure, List<TopPick>>>
 
     suspend fun getLocalTopPicks(): Flow<Either<Failure, List<TopPick>>>
+
+    suspend fun getTopPicksByDate(): Flow<List<TopPick>>
+
+    suspend fun searchTopPicks(query: String): Flow<List<TopPick>>
 }

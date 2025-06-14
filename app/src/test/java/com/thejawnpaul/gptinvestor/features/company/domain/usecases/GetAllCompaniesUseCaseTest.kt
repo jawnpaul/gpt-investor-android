@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.features.company.domain.usecases
 import com.google.common.truth.Truth
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.features.company.data.local.model.PriceChange
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import io.mockk.MockKAnnotations
@@ -48,7 +49,7 @@ class GetAllCompaniesUseCaseTest {
     @Test
     fun `should return companyList when successful`() = runTest {
         coEvery { repository.getAllCompanies() } returns flow {
-            emit(Either.Right(listOf(Company("", "", "", ""))))
+            emit(Either.Right(listOf(Company("", "", "", "", 0f, PriceChange(0f, 1L)))))
         }
 
         repository.getAllCompanies().collect {

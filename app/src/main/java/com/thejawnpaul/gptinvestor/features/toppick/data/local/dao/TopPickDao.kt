@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.model.TopPickEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TopPickDao {
@@ -29,9 +30,15 @@ interface TopPickDao {
     @Query("SELECT * FROM top_picks_table WHERE isSaved = 1")
     suspend fun getSavedTopPicks(): List<TopPickEntity>
 
+    @Query("SELECT * FROM top_picks_table WHERE date =:date ORDER BY confidenceScore DESC")
+    fun getTopPicksFlow(date: String): Flow<List<TopPickEntity>>
+
     @Transaction
     suspend fun replaceUnsavedWithNewPicks(newPicks: List<TopPickEntity>) {
         deleteUnsavedTopPicks()
         insertTopPicks(newPicks)
     }
+
+    @Query("SELECT * FROM top_picks_table WHERE companyName LIKE '%' || :query || '%' OR ticker LIKE '%' || :query || '%' ORDER BY confidenceScore DESC")
+    fun searchTopPicks(query: String): Flow<List<TopPickEntity>>
 }

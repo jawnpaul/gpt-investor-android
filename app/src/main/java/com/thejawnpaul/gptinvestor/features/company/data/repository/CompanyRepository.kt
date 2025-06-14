@@ -5,11 +5,9 @@ import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.company.data.local.dao.CompanyDao
-import com.thejawnpaul.gptinvestor.features.company.data.local.model.PriceChange
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
-import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyPriceRequest
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyFinancials
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SearchCompanyQuery
@@ -70,7 +68,10 @@ class CompanyRepository @Inject constructor(
     }
 
     override suspend fun getAllSector(): Flow<Either<Failure, List<SectorInput>>> = flow {
-        val list = listOf(SectorInput.AllSector)
+        val list = listOf(
+            SectorInput.CustomSector(sectorName = "Top picks", sectorKey = "top-picks", hasImage = true),
+            SectorInput.AllSector
+        )
         val companyList = companyDao.getAllCompanies()
         val default = listOf(
             SectorInput.CustomSector("Technology", sectorKey = "technology"),
@@ -158,6 +159,8 @@ class CompanyRepository @Inject constructor(
 
                     emit(Either.Right(trendingCompanies))
                 }
+            } else {
+                emit(Either.Left(Failure.ServerError))
             }
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
@@ -195,7 +198,7 @@ class CompanyRepository @Inject constructor(
             val batches = tickers.chunked(100)
             val start = System.currentTimeMillis()
             batches.forEach { batch ->
-                val request = CompanyPriceRequest(tickers = batch)
+                /*val request = CompanyPriceRequest(tickers = batch)
                 val response = apiService.getCompanyPrice(request)
                 if (response.isSuccessful) {
                     response.body()?.let { responseList ->
@@ -211,7 +214,7 @@ class CompanyRepository @Inject constructor(
                         }
                         companyDao.updateCompanies(entities)
                     }
-                }
+                }*/
             }
             val end = System.currentTimeMillis()
             // This takes about 30 seconds to complete

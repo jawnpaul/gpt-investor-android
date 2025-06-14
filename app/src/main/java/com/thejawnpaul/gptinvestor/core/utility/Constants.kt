@@ -52,7 +52,9 @@ object Constants {
             "      \"query\": \"Second complete suggestion prompt\"\n" +
             "    }\n" +
             "  ]\n" +
-            "}"
+            "}" +
+            "\n" +
+            "Do not deviate from the above json. Only return the json in the above format. It is very important"
 
     const val TITLE_PROMPT =
         "Based on our conversation history, generate a concise and descriptive title that captures the main topic or theme discussed. " +
@@ -73,4 +75,11 @@ object Constants {
             "  \"example_response\": {\n" +
             "    \"title\": \"Finance Stop Words Implementation\"\n" +
             "  }"
+
+    const val WEBSITE_DOMAIN_KEY = "website_domain"
+
+    const val MODEL_NAME_KEY = "default_model_name"
+
+    const val PROMPT_COUNT = "prompt_count"
+    const val FREE_PROMPT_COUNT = "free_prompt_count"
 }

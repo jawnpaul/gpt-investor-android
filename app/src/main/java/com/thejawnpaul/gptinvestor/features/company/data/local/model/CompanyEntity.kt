@@ -29,7 +29,7 @@ data class CompanyEntity(
         summary = summary,
         logo = logoUrl,
         price = currentPrice,
-        change = priceChange
+        change = priceChange ?: PriceChange(change = 0f, date = 1L)
     )
 
     fun toSector() = SectorInput.CustomSector(sectorName = sector, sectorKey = sectorKey)

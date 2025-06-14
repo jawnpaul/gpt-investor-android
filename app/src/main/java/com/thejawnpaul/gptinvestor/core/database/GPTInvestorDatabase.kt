@@ -17,12 +17,14 @@ import com.thejawnpaul.gptinvestor.features.toppick.data.local.model.TopPickEnti
 @Database(
     entities = [CompanyEntity::class, ConversationEntity::class, MessageEntity::class, TopPickEntity::class],
     autoMigrations = [
-        AutoMigration(from = 1, to = 2), AutoMigration(
-            from = 2,
-            to = 3
-        ), AutoMigration(from = 3, to = 4)
+        AutoMigration(from = 1, to = 2),
+        AutoMigration(from = 2, to = 3),
+        AutoMigration(from = 3, to = 4),
+        AutoMigration(from = 4, to = 5),
+        AutoMigration(from = 5, to = 6),
+        AutoMigration(from = 6, to = 7)
     ],
-    version = 4,
+    version = 7,
     exportSchema = true,
     views = [ConversationWithLastMessage::class]
 )

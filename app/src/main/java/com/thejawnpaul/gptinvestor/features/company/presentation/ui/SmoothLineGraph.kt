@@ -43,11 +43,13 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toIntRect
 import androidx.compose.ui.unit.toSize
+import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
 @Composable
 fun SmoothLineGraph(data: List<GraphPoint>) {
+    val gptInvestorColors = LocalGPTInvestorColors.current
     Box(
         modifier = Modifier
             .background(Color.Transparent)
@@ -109,40 +111,34 @@ fun SmoothLineGraph(data: List<GraphPoint>) {
 
                     onDrawBehind {
                         val barWidthPx = 1.dp.toPx()
-                        drawRect(BarColor, style = Stroke(barWidthPx))
 
-                        val verticalLines = 4
-                        val verticalSize = size.width / (verticalLines + 1)
-                        repeat(verticalLines) { i ->
-                            val startX = verticalSize * (i + 1)
-                            drawLine(
-                                BarColor,
-                                start = Offset(startX, 0f),
-                                end = Offset(startX, size.height),
-                                strokeWidth = barWidthPx
-                            )
-                        }
                         val horizontalLines = 3
+                        val pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
                         val sectionSize = size.height / (horizontalLines + 1)
                         repeat(horizontalLines) { i ->
                             val startY = sectionSize * (i + 1)
                             drawLine(
-                                BarColor,
+                                color = gptInvestorColors.utilColors.borderBright10,
                                 start = Offset(0f, startY),
                                 end = Offset(size.width, startY),
-                                strokeWidth = barWidthPx
+                                strokeWidth = barWidthPx,
+                                pathEffect = pathEffect
                             )
                         }
 
                         // draw line
                         clipRect(right = size.width * animationProgress.value) {
-                            drawPath(path, Color.Green, style = Stroke(2.dp.toPx()))
+                            drawPath(
+                                path,
+                                gptInvestorColors.greenColors.allGreen,
+                                style = Stroke(2.dp.toPx())
+                            )
 
                             drawPath(
                                 filledPath,
                                 brush = Brush.verticalGradient(
                                     listOf(
-                                        Color.Green.copy(alpha = 0.4f),
+                                        gptInvestorColors.greenColors.allGreen.copy(alpha = 0.4f),
                                         Color.Transparent
                                     )
                                 ),
@@ -226,14 +222,14 @@ fun DrawScope.drawHighlight(highlightedWeek: Int, graphData: List<GraphPoint>, t
 
     // draw hit circle on graph
     drawCircle(
-        Color.Green,
+        Color(0xFF02A400),
         radius = 4.dp.toPx(),
         center = Offset(x, pointY)
     )
 
     // draw info box
     val textLayoutResult = textMeasurer.measure(
-        buildString {
+        text = buildString {
             append("$$amount")
             append("\n")
             append(date)
@@ -258,8 +254,6 @@ fun DrawScope.drawHighlight(highlightedWeek: Int, graphData: List<GraphPoint>, t
 
 data class GraphPoint(val date: String, val amount: Float)
 
-val PurpleBackgroundColor = Color(0xff322049)
-val BarColor = Color(0xffEEF3FA)
 val HighlightColor = Color.White.copy(alpha = 0.7f)
 
 /** Many thanks to

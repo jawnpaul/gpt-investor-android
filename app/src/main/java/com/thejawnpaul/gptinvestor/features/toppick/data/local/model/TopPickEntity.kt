@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.toppick.data.local.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -14,5 +15,11 @@ data class TopPickEntity(
     val risks: List<String>,
     val confidenceScore: Int,
     val isSaved: Boolean = false,
-    val date: String
+    val date: String,
+    @ColumnInfo(defaultValue = "0.0")
+    val price: Float = 0.0f,
+    @ColumnInfo(defaultValue = "0.0")
+    val change: Float = 0.0f,
+    @ColumnInfo(defaultValue = "")
+    val imageUrl: String = ""
 )

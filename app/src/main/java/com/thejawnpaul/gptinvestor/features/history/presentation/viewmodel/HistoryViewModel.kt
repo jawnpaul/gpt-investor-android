@@ -2,20 +2,29 @@ package com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.ConversationPrompt
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
+import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
 import com.thejawnpaul.gptinvestor.features.history.domain.usecases.GetAllHistoryUseCase
 import com.thejawnpaul.gptinvestor.features.history.domain.usecases.GetSingleHistoryUseCase
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryConversationView
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryScreenView
+import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction.*
+import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenAction.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @HiltViewModel
@@ -23,28 +32,34 @@ class HistoryViewModel @Inject constructor(
     private val getAllHistoryUseCase: GetAllHistoryUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val getSingleHistoryUseCase: GetSingleHistoryUseCase,
-    private val getInputPromptUseCase: GetInputPromptUseCase
+    private val getInputPromptUseCase: GetInputPromptUseCase,
+    private val fedBackRepository: FeedbackRepository,
+    private val modelsRepository: ModelsRepository
 ) :
     ViewModel() {
 
-    private val _historyScreenView = MutableStateFlow(HistoryScreenView())
-    val historyScreenView get() = _historyScreenView
+    private val _historyScreenViewState = MutableStateFlow(HistoryScreenView())
+    val historyScreenViewState get() = _historyScreenViewState
+
+    private val _actions = MutableSharedFlow<HistoryScreenAction>()
+    val actions get() = _actions
 
     private val conversationView = MutableStateFlow(HistoryConversationView())
     val conversation get() = conversationView
 
-    private val _genText = MutableStateFlow("")
-    val genText = _genText
+    private val _historyDetailAction = MutableSharedFlow<HistoryDetailAction>()
+    val historyDetailAction get() = _historyDetailAction
 
     private val conversationId: Long?
         get() = savedStateHandle.get<Long>("conversationId")
 
     init {
         getAllHistory()
+        getAvailableModels()
     }
 
     private fun getAllHistory() {
-        _historyScreenView.update { it.copy(loading = true) }
+        _historyScreenViewState.update { it.copy(loading = true) }
         getAllHistoryUseCase(GetAllHistoryUseCase.None()) {
             it.fold(
                 ::handleGetAllHistoryFailure,
@@ -54,12 +69,14 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun handleGetAllHistoryFailure(failure: Failure) {
-        _historyScreenView.update { it.copy(loading = false) }
+        _historyScreenViewState.update { it.copy(loading = false) }
         Timber.e(failure.toString())
     }
 
-    private fun handleGetAllHistorySuccess(response: List<StructuredConversation>) {
-        _historyScreenView.update { it.copy(loading = false, list = response) }
+    private fun handleGetAllHistorySuccess(response: Map<String, List<StructuredConversation>>) {
+        _historyScreenViewState.update {
+            it.copy(loading = false, list = response)
+        }
     }
 
     fun updateConversationId(conversationId: String) {
@@ -118,6 +135,10 @@ class HistoryViewModel @Inject constructor(
                 Timber.e("AI exception")
             }
 
+            is Failure.RateLimitExceeded -> {
+                Timber.e("Rate limit exceeded")
+            }
+
             else -> {
                 Timber.e(failure.toString())
             }
@@ -127,33 +148,133 @@ class HistoryViewModel @Inject constructor(
     private fun handleInputResponseSuccess(conversation: Conversation) {
         conversation as StructuredConversation
 
-        _genText.update {
-            conversation.messageList.last().response.toString()
-        }
-
         conversationView.update { state ->
             state.copy(
                 query = "",
                 loading = conversation.messageList.last().loading,
-                conversation = conversation
+                conversation = conversation,
+                genText = conversation.messageList.last().response.toString()
             )
         }
     }
 
-    fun getSuggestedPromptResponse(query: String) {
+    fun sendFeedback(messageId: Long, status: Int, reason: String?) {
         conversationView.update {
-            it.copy(loading = true)
+            (it.conversation as? StructuredConversation)?.let { conversation ->
+                val updatedMessages = conversation.messageList.map { message ->
+                    if (message.id == messageId) {
+                        (message as? GenAiTextMessage)?.copy(feedbackStatus = status)
+                            ?: message
+                    } else {
+                        message
+                    }
+                }
+                it.copy(conversation = conversation.copy(messageList = updatedMessages.toMutableList()))
+            } ?: it
         }
-        getInputPromptUseCase(
-            ConversationPrompt(
-                conversationId = conversationId ?: -1L,
-                query = query
-            )
-        ) {
-            it.fold(
-                ::handleInputResponseFailure,
-                ::handleInputResponseSuccess
-            )
+        viewModelScope.launch {
+            fedBackRepository.giveFeedback(messageId, status, reason)
         }
     }
+
+    fun handleEvent(event: HistoryScreenEvent) {
+        when (event) {
+            is HistoryScreenEvent.HistoryItemClicked -> {
+                viewModelScope.launch {
+                    _actions.emit(OnGoToHistoryDetail(event.conversationId))
+                }
+            }
+
+            HistoryScreenEvent.GoBack -> {
+                viewModelScope.launch {
+                    _actions.emit(HistoryScreenAction.OnGoBack)
+                }
+            }
+        }
+    }
+
+    fun processAction(action: HistoryScreenAction) {
+        when (action) {
+            is OnGoToHistoryDetail -> {
+            }
+
+            HistoryScreenAction.OnGoBack -> {
+            }
+        }
+    }
+
+    fun handleHistoryDetailEvent(event: HistoryDetailEvent) {
+        when (event) {
+            is HistoryDetailEvent.ClickSuggestedPrompt -> {
+            }
+
+            is HistoryDetailEvent.GetHistory -> {
+                updateConversationId(event.conversationId.toString())
+            }
+
+            HistoryDetailEvent.GetInputResponse -> {
+                getInputResponse()
+            }
+
+            is HistoryDetailEvent.SendFeedback -> {
+                sendFeedback(event.messageId, event.status, event.reason)
+            }
+
+            is HistoryDetailEvent.UpdateInputQuery -> {
+                updateInput(event.input)
+            }
+
+            is HistoryDetailEvent.CopyToClipboard -> {
+                processHistoryDetailAction(OnCopy(event.text))
+            }
+
+            is HistoryDetailEvent.ModelChange -> {
+                conversationView.update { it.copy(selectedModel = event.model) }
+            }
+        }
+    }
+
+    fun processHistoryDetailAction(action: HistoryDetailAction) {
+        viewModelScope.launch {
+            _historyDetailAction.emit(action)
+        }
+    }
+
+    private fun getAvailableModels() {
+        viewModelScope.launch {
+            modelsRepository.getAvailableModels().onSuccess { models ->
+                conversationView.update { it.copy(availableModels = models) }
+            }.onFailure {
+                Timber.e(it.toString())
+            }
+        }
+    }
+}
+
+sealed interface HistoryScreenEvent {
+    data class HistoryItemClicked(val conversationId: Long) : HistoryScreenEvent
+    data object GoBack : HistoryScreenEvent
+}
+
+sealed interface HistoryScreenAction {
+    data class OnGoToHistoryDetail(val conversationId: Long) : HistoryScreenAction
+    data object OnGoBack : HistoryScreenAction
+}
+
+sealed interface HistoryDetailEvent {
+    data class GetHistory(val conversationId: Long) : HistoryDetailEvent
+    data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) :
+        HistoryDetailEvent
+
+    data class UpdateInputQuery(val input: String) : HistoryDetailEvent
+    data object GetInputResponse : HistoryDetailEvent
+    data class ClickSuggestedPrompt(val prompt: String) : HistoryDetailEvent
+    data class CopyToClipboard(val text: String) : HistoryDetailEvent
+    data class ModelChange(val model: AvailableModel) : HistoryDetailEvent
+}
+
+sealed interface HistoryDetailAction {
+    data object OnGoBack : HistoryDetailAction
+    data class OnGoToWebView(val url: String) : HistoryDetailAction
+    data class OnCopy(val text: String) : HistoryDetailAction
 }

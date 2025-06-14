@@ -50,7 +50,7 @@ fun Long.toReadable(): String {
     }
 }
 
-fun Long.toReadableString(): String {
+fun Long.formatAsRelativeDate(): String {
     val currentDate = Date(this)
     val cal = Calendar.getInstance()
     cal.apply {
@@ -62,7 +62,7 @@ fun Long.toReadableString(): String {
 
     // If timestamp is of today, return hh:mm format
     if (currentDate.after(cal.time)) {
-        return "today"
+        return "Today"
     }
 
     cal.add(Calendar.DATE, -1)
@@ -73,4 +73,10 @@ fun Long.toReadableString(): String {
         // If timestamp is older return the date, for eg. "Jul 05"
         SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(currentDate)
     }
+}
+
+fun Long.getHourAndMinute(): String {
+    val date = Date(this)
+    val format = SimpleDateFormat("hh:mm a", Locale.getDefault())
+    return format.format(date)
 }

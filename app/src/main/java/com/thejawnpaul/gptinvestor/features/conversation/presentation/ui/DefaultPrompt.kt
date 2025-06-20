@@ -124,7 +124,6 @@ fun SingleHomeDefaultPrompt(modifier: Modifier = Modifier, prompt: DefaultPrompt
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Start,
-            color = gptInvestorColors.textColors.secondary50,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )

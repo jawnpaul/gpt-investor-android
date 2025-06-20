@@ -99,7 +99,7 @@ fun DefaultAuthenticationScreen(modifier: Modifier, onAuthSuccess: () -> Unit, o
                 Box(modifier = Modifier.fillMaxSize()) {
                     // Wavy Background Image (Bottom)
                     Image(
-                        painter = painterResource(id = R.drawable.wavy_background),
+                        painter = painterResource(id = R.drawable.mesh_background),
                         contentDescription = null,
                         contentScale = ContentScale.Fit,
                         modifier = Modifier
@@ -107,7 +107,7 @@ fun DefaultAuthenticationScreen(modifier: Modifier, onAuthSuccess: () -> Unit, o
                             .padding(bottom = 160.dp)
                             .fillMaxHeight(0.4f)
                             .align(Alignment.BottomCenter)
-                            .alpha(0.5f)
+                            .alpha(0.4f)
 
                     )
 
@@ -197,7 +197,7 @@ fun DefaultAuthenticationScreen(modifier: Modifier, onAuthSuccess: () -> Unit, o
                 Box(modifier = Modifier.fillMaxSize()) {
                     // Wavy Background Image (Bottom)
                     Image(
-                        painter = painterResource(id = R.drawable.wavy_background),
+                        painter = painterResource(id = R.drawable.mesh_background),
                         contentDescription = null,
                         contentScale = ContentScale.Fit,
                         modifier = Modifier

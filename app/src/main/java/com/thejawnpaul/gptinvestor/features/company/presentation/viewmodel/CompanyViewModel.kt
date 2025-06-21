@@ -71,6 +71,8 @@ class CompanyViewModel @Inject constructor(
     private val _urlToLoad = MutableStateFlow(String())
     val urlToLoad get() = _urlToLoad
 
+    private var upgradeModelId: String? = null
+
     private var companyTicker = ""
 
     private val selectedConversationId = MutableStateFlow(-1L)
@@ -427,7 +429,7 @@ class CompanyViewModel @Inject constructor(
     fun handleCompanyDetailEvent(event: CompanyDetailEvent) {
         when (event) {
             CompanyDetailEvent.GoBack -> {
-                processCompanyDetailAction(CompanyDetailAction.OnGoBack)
+                processCompanyDetailAction(OnGoBack)
             }
 
             is CompanyDetailEvent.QueryInputChanged -> {
@@ -453,6 +455,25 @@ class CompanyViewModel @Inject constructor(
             is CompanyDetailEvent.ModelChange -> {
                 _selectedCompany.update {
                     it.copy(selectedModel = event.model)
+                }
+            }
+
+            CompanyDetailEvent.JoinWaitList -> {
+                upgradeModelId?.let { modelId ->
+                    joinModelWaitlist(modelId = modelId)
+                }
+            }
+
+            is CompanyDetailEvent.SelectWaitlistOption -> {
+                selectWaitListOption(option = event.option)
+            }
+
+            is CompanyDetailEvent.UpgradeModel -> {
+                _selectedCompany.update {
+                    it.copy(showWaitListBottomSheet = event.showBottomSheet)
+                }
+                event.modelId?.let {
+                    upgradeModelId = it
                 }
             }
         }
@@ -526,6 +547,27 @@ class CompanyViewModel @Inject constructor(
             getTopPicks()
         }
     }
+
+    private fun selectWaitListOption(option: String) {
+        if (_selectedCompany.value.selectedWaitlistOptions.contains(option)) {
+            _selectedCompany.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions - option) }
+        } else {
+            _selectedCompany.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions + option) }
+        }
+    }
+
+    private fun joinModelWaitlist(modelId: String) {
+        viewModelScope.launch {
+            modelsRepository.putUserOnModelWaitlist(
+                modelId = modelId,
+                reasons = _selectedCompany.value.selectedWaitlistOptions
+            ).onSuccess {
+                getAvailableModels()
+            }.onFailure { failure ->
+                Timber.e(failure.stackTraceToString())
+            }
+        }
+    }
 }
 
 data class CompanyDiscoveryState(
@@ -559,6 +601,10 @@ sealed interface CompanyDetailEvent {
     data class SuggestedPromptClicked(val query: String) : CompanyDetailEvent
     data class CopyToClipboard(val text: String) : CompanyDetailEvent
     data class ModelChange(val model: AvailableModel) : CompanyDetailEvent
+    data class SelectWaitlistOption(val option: String) : CompanyDetailEvent
+    data object JoinWaitList : CompanyDetailEvent
+    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) :
+        CompanyDetailEvent
 }
 
 sealed interface CompanyDetailAction {

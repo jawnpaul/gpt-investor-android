@@ -50,6 +50,8 @@ class HistoryViewModel @Inject constructor(
     private val _historyDetailAction = MutableSharedFlow<HistoryDetailAction>()
     val historyDetailAction get() = _historyDetailAction
 
+    private var upgradeModelId: String? = null
+
     private val conversationId: Long?
         get() = savedStateHandle.get<Long>("conversationId")
 
@@ -231,6 +233,23 @@ class HistoryViewModel @Inject constructor(
             is HistoryDetailEvent.ModelChange -> {
                 conversationView.update { it.copy(selectedModel = event.model) }
             }
+
+            HistoryDetailEvent.JoinWaitlist -> {
+                upgradeModelId?.let {
+                    joinModelWaitlist(it)
+                }
+            }
+
+            is HistoryDetailEvent.SelectWaitlistOption -> {
+                selectWaitListOption(event.option)
+            }
+
+            is HistoryDetailEvent.UpgradeModel -> {
+                conversationView.update { it.copy(showWaitListBottomSheet = event.showBottomSheet) }
+                event.modelId?.let {
+                    upgradeModelId = it
+                }
+            }
         }
     }
 
@@ -246,6 +265,27 @@ class HistoryViewModel @Inject constructor(
                 conversationView.update { it.copy(availableModels = models) }
             }.onFailure {
                 Timber.e(it.toString())
+            }
+        }
+    }
+
+    private fun selectWaitListOption(option: String) {
+        if (conversationView.value.selectedWaitlistOptions.contains(option)) {
+            conversationView.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions - option) }
+        } else {
+            conversationView.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions + option) }
+        }
+    }
+
+    private fun joinModelWaitlist(modelId: String) {
+        viewModelScope.launch {
+            modelsRepository.putUserOnModelWaitlist(
+                modelId = modelId,
+                reasons = conversationView.value.selectedWaitlistOptions
+            ).onSuccess {
+                getAvailableModels()
+            }.onFailure { failure ->
+                Timber.e(failure.stackTraceToString())
             }
         }
     }
@@ -271,6 +311,11 @@ sealed interface HistoryDetailEvent {
     data class ClickSuggestedPrompt(val prompt: String) : HistoryDetailEvent
     data class CopyToClipboard(val text: String) : HistoryDetailEvent
     data class ModelChange(val model: AvailableModel) : HistoryDetailEvent
+    data object JoinWaitlist : HistoryDetailEvent
+    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) :
+        HistoryDetailEvent
+
+    data class SelectWaitlistOption(val option: String) : HistoryDetailEvent
 }
 
 sealed interface HistoryDetailAction {

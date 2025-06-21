@@ -50,6 +50,8 @@ class ConversationViewModel @Inject constructor(
 
     private val selectedConversationId = MutableStateFlow(-1L)
 
+    private var upgradeModelId: String? = null
+
     init {
         getDefaultPrompts()
         getAvailableModels()
@@ -216,6 +218,21 @@ class ConversationViewModel @Inject constructor(
                     it.copy(selectedModel = event.model)
                 }
             }
+
+            ConversationEvent.JoinWaitlist -> {
+                upgradeModelId?.let {
+                    joinModelWaitlist(it)
+                }
+            }
+            is ConversationEvent.SelectWaitlistOption -> {
+                selectWaitListOption(event.option)
+            }
+            is ConversationEvent.UpgradeModel -> {
+                conversationViewMutableStateFlow.update { it.copy(showWaitListBottomSheet = event.showBottomSheet) }
+                event.modelId?.let {
+                    upgradeModelId = it
+                }
+            }
         }
     }
 
@@ -255,6 +272,27 @@ class ConversationViewModel @Inject constructor(
             }
         }
     }
+
+    private fun selectWaitListOption(option: String) {
+        if (conversationViewMutableStateFlow.value.selectedWaitlistOptions.contains(option)) {
+            conversationViewMutableStateFlow.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions - option) }
+        } else {
+            conversationViewMutableStateFlow.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions + option) }
+        }
+    }
+
+    private fun joinModelWaitlist(modelId: String) {
+        viewModelScope.launch {
+            modelsRepository.putUserOnModelWaitlist(
+                modelId = modelId,
+                reasons = conversationViewMutableStateFlow.value.selectedWaitlistOptions
+            ).onSuccess {
+                getAvailableModels()
+            }.onFailure { failure ->
+                Timber.e(failure.stackTraceToString())
+            }
+        }
+    }
 }
 
 sealed interface ConversationEvent {
@@ -271,6 +309,9 @@ sealed interface ConversationEvent {
     data class SuggestedPromptClicked(val prompt: String) : ConversationEvent
     data class SendPrompt(val query: String? = null) : ConversationEvent
     data class ModelChanged(val model: AvailableModel) : ConversationEvent
+    data class SelectWaitlistOption(val option: String) : ConversationEvent
+    data object JoinWaitlist : ConversationEvent
+    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : ConversationEvent
 }
 
 sealed interface ConversationAction {

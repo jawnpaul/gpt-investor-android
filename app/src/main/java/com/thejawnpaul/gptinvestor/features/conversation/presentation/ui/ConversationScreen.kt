@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.state.ConversationView
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationEvent
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.WaitlistBottomSheetContent
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
@@ -43,6 +45,27 @@ fun ConversationScreen(
         }
     }
 
+    if (state.showWaitListBottomSheet) {
+        GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
+            onEvent(ConversationEvent.UpgradeModel(showBottomSheet = false))
+        }) {
+            WaitlistBottomSheetContent(
+                modifier = Modifier,
+                options = state.waitlistAvailableOptions,
+                selectedOptions = state.selectedWaitlistOptions,
+                onOptionSelected = {
+                    onEvent(ConversationEvent.SelectWaitlistOption(it))
+                },
+                onJoinWaitList = {
+                    onEvent(ConversationEvent.JoinWaitlist)
+                },
+                onDismiss = {
+                    onEvent(ConversationEvent.UpgradeModel(showBottomSheet = false))
+                }
+            )
+        }
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
         when (state.conversation) {
             is DefaultConversation -> {
@@ -67,6 +90,9 @@ fun ConversationScreen(
                     selectedModel = state.selectedModel,
                     onModelChange = {
                         onEvent(ConversationEvent.ModelChanged(model = it))
+                    },
+                    onUpgradeModel = { showBottomSheet, modelId ->
+                        onEvent(ConversationEvent.UpgradeModel(showBottomSheet, modelId))
                     }
                 )
             }
@@ -103,7 +129,9 @@ fun ConversationScreen(
                     onModelChange = {
                         onEvent(ConversationEvent.ModelChanged(model = it))
                     },
-                    onUpgradeModel = {}
+                    onUpgradeModel = { showBottomSheet, modelId ->
+                        onEvent(ConversationEvent.UpgradeModel(showBottomSheet, modelId))
+                    }
                 )
             }
 

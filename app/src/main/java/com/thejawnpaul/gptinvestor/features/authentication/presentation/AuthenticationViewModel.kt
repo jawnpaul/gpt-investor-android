@@ -284,6 +284,11 @@ data class AuthenticationUIState(
     val enableLoginButton = email.trim().isNotEmpty() && password.trim().isNotEmpty()
 }
 
+data class DrawerState(
+    val user: FirebaseUser? = null,
+    val theme: String? = "Dark"
+)
+
 data class NewAuthenticationUIState(
     val authenticationScreen: AuthenticationScreen = AuthenticationScreen.Login,
     val email: String = "",

@@ -28,18 +28,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +58,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.thejawnpaul.gptinvestor.R
+import com.thejawnpaul.gptinvestor.core.navigation.NavDrawerAction
+import com.thejawnpaul.gptinvestor.core.navigation.NavDrawerContent
+import com.thejawnpaul.gptinvestor.core.navigation.NavDrawerEvent
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.HomeDefaultPrompts
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.QuestionInput
@@ -61,11 +68,14 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.Home
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeUiState
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) -> Unit, onEvent: (HomeEvent) -> Unit) {
     val context = LocalContext.current
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
     // Permission launcher for notifications
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
@@ -106,120 +116,168 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
         }
     }
 
-    Scaffold(
-        modifier = modifier,
-        bottomBar = {
-            Column(
-                modifier = Modifier
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            NavDrawerContent(
+                onCloseDrawer = {
+                    scope.launch {
+                        drawerState.close()
+                    }
+                },
+                onEvent = { event ->
+                    when (event) {
+                        NavDrawerEvent.SignOut -> {
+                            onEvent(HomeEvent.SignOut(context))
+                        }
 
-            ) {
-                if (state.defaultPrompts.isNotEmpty()) {
-                    HomeDefaultPrompts(
-                        modifier = Modifier,
-                        prompts = state.defaultPrompts,
-                        onClick = {
-                            onEvent(HomeEvent.DefaultPromptClicked(it))
+                        is NavDrawerEvent.ChangeTheme -> {
+                            // Change theme
+                            onEvent(HomeEvent.ChangeTheme(event.theme))
+                        }
+                    }
+                },
+                onAction = { action ->
+                    when (action) {
+                        NavDrawerAction.OnGoToSavedPicks -> {
+                            // navController.navigate(Screen.SavedTopPicksScreen.route)
+                            onAction(HomeAction.OnGoToSavedPicks)
+                        }
+
+                        NavDrawerAction.OnGoToSettings -> {
+                            // navController.navigate(Screen.SettingsScreen.route)
+                            onAction(HomeAction.OnGoToSettings)
+                        }
+
+                        NavDrawerAction.OnGoToHistory -> {
+                            // navController.navigate(Screen.HistoryTabScreen.route)
+                            onAction(HomeAction.OnGoToHistory)
+                        }
+                    }
+                },
+                state = state.drawerState
+            )
+        }
+    ) {
+        Scaffold(
+            modifier = modifier,
+            bottomBar = {
+                Column(
+                    modifier = Modifier
+
+                ) {
+                    if (state.defaultPrompts.isNotEmpty()) {
+                        HomeDefaultPrompts(
+                            modifier = Modifier,
+                            prompts = state.defaultPrompts,
+                            onClick = {
+                                onEvent(HomeEvent.DefaultPromptClicked(it))
+                            }
+                        )
+                    }
+
+                    QuestionInput(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .windowInsetsPadding(
+                                insets = WindowInsets.ime
+                            ),
+                        onSendClicked = {
+                            onEvent(HomeEvent.SendClick)
+                        },
+                        hint = stringResource(R.string.ask_me_a_question),
+                        onTextChange = {
+                            onEvent(HomeEvent.ChatInputChanged(it))
+                        },
+                        text = state.chatInput ?: "",
+                        availableModels = state.availableModels,
+                        selectedModel = state.selectedModel,
+                        onModelChange = {
+                            if (it.canUpgrade) {
+                                onEvent(
+                                    HomeEvent.UpgradeModel(
+                                        showBottomSheet = true,
+                                        modelId = it.modelId
+                                    )
+                                )
+                                return@QuestionInput
+                            }
+                            onEvent(HomeEvent.ModelChanged(it))
                         }
                     )
                 }
-
-                QuestionInput(
+            },
+            topBar = {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .windowInsetsPadding(
-                            insets = WindowInsets.ime
-                        ),
-                    onSendClicked = {
-                        onEvent(HomeEvent.SendClick)
-                    },
-                    hint = stringResource(R.string.ask_me_a_question),
-                    onTextChange = {
-                        onEvent(HomeEvent.ChatInputChanged(it))
-                    },
-                    text = state.chatInput ?: "",
-                    availableModels = state.availableModels,
-                    selectedModel = state.selectedModel,
-                    onModelChange = {
-                        if (it.canUpgrade) {
-                            onEvent(
-                                HomeEvent.UpgradeModel(
-                                    showBottomSheet = true,
-                                    modelId = it.modelId
-                                )
-                            )
-                            return@QuestionInput
+                        .padding(horizontal = 0.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = {
+                        scope.launch {
+                            drawerState.open()
                         }
-                        onEvent(HomeEvent.ModelChanged(it))
+                    }) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_menu),
+                            contentDescription = null
+                        )
                     }
-                )
-            }
-        },
-        topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 0.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { onAction(HomeAction.OnMenuClick) }) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_menu),
-                        contentDescription = null
-                    )
-                }
 
-                Text(
-                    text = stringResource(R.string.gpt_investor),
-                    modifier = Modifier,
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                IconButton(modifier = Modifier, onClick = {
-                    onAction(HomeAction.OnGoToDiscover)
-                }) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_search_status_two),
-                        contentDescription = null
-                    )
-                }
-            }
-        }
-    ) { innerPadding ->
-        // Home Screen
-        Box(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
-            if (state.showWaitlistBottomSheet) {
-                GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
-                    onEvent(HomeEvent.UpgradeModel(showBottomSheet = false))
-                }) {
-                    WaitlistBottomSheetContent(
+                    Text(
+                        text = stringResource(R.string.gpt_investor),
                         modifier = Modifier,
-                        options = state.waitlistAvailableOptions,
-                        selectedOptions = state.selectedWaitlistOptions,
-                        onOptionSelected = {
-                            onEvent(HomeEvent.SelectWaitListOption(it))
-                        },
-                        onJoinWaitList = {
-                            onEvent(HomeEvent.JoinWaitlist)
-                        },
-                        onDismiss = {
-                            onEvent(HomeEvent.UpgradeModel(showBottomSheet = false))
-                        }
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.titleMedium
                     )
+
+                    IconButton(modifier = Modifier, onClick = {
+                        onAction(HomeAction.OnGoToDiscover)
+                    }) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_search_status_two),
+                            contentDescription = null
+                        )
+                    }
                 }
             }
-
-            Surface(
+        ) { innerPadding ->
+            // Home Screen
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.Center)
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
             ) {
+                if (state.showWaitlistBottomSheet) {
+                    GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
+                        onEvent(HomeEvent.UpgradeModel(showBottomSheet = false))
+                    }) {
+                        WaitlistBottomSheetContent(
+                            modifier = Modifier,
+                            options = state.waitlistAvailableOptions,
+                            selectedOptions = state.selectedWaitlistOptions,
+                            onOptionSelected = {
+                                onEvent(HomeEvent.SelectWaitListOption(it))
+                            },
+                            onJoinWaitList = {
+                                onEvent(HomeEvent.JoinWaitlist)
+                            },
+                            onDismiss = {
+                                onEvent(HomeEvent.UpgradeModel(showBottomSheet = false))
+                            }
+                        )
+                    }
+                }
+
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center)
+                ) {
+                }
             }
         }
     }

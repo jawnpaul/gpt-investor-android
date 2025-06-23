@@ -15,11 +15,11 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -36,16 +36,19 @@ import com.thejawnpaul.gptinvestor.theme.linkMedium
 
 @Composable
 fun OnboardingScreen(modifier: Modifier, onFinishOnboarding: () -> Unit) {
-    Surface(
-        modifier = modifier.fillMaxSize()
-    ) {
-        var currentScreen by remember { mutableStateOf(0) }
+    Scaffold(
+        modifier = modifier
+    ) { innerPadding ->
+
+        var currentScreen by remember { mutableIntStateOf(0) }
 
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
         ) {
             Image(
-                painter = painterResource(id = R.drawable.wavy_background),
+                painter = painterResource(id = R.drawable.mesh_background),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
@@ -53,7 +56,7 @@ fun OnboardingScreen(modifier: Modifier, onFinishOnboarding: () -> Unit) {
                     .padding(bottom = 160.dp)
                     .fillMaxHeight(0.4f)
                     .align(Alignment.BottomCenter)
-                    .alpha(0.5f)
+                    .alpha(0.4f)
 
             )
 

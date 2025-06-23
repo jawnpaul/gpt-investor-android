@@ -86,8 +86,8 @@ fun StructuredConversationScreen(
     onClickSuggestedPrompt: (String) -> Unit,
     availableModels: List<AvailableModel>,
     selectedModel: AvailableModel,
-    onUpgradeModel: () -> Unit,
-    onModelChange: (AvailableModel) -> Unit
+    onModelChange: (AvailableModel) -> Unit,
+    onUpgradeModel: (showBottomSheet: Boolean, modelId: String) -> Unit
 ) {
     val company = conversation.messageList.filterIsInstance<GenAiEntityMessage>().firstOrNull()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -163,13 +163,8 @@ fun StructuredConversationScreen(
                     selectedModel = selectedModel,
                     onModelChange = {
                         if (it.canUpgrade) {
-                            /*onEvent(
-                                HomeEvent.UpgradeModel(
-                                    showBottomSheet = true,
-                                    modelId = it.modelId
-                                )
-                            )
-                            return@QuestionInput*/
+                            onUpgradeModel.invoke(true, it.modelId)
+                            return@QuestionInput
                         }
                         onModelChange(it)
                     }

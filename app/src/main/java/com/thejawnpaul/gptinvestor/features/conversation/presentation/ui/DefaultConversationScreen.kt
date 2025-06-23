@@ -40,7 +40,8 @@ fun DefaultConversationScreen(
     onSendClick: () -> Unit,
     availableModels: List<AvailableModel>,
     selectedModel: AvailableModel,
-    onModelChange: (AvailableModel) -> Unit
+    onModelChange: (AvailableModel) -> Unit,
+    onUpgradeModel: (showBottomSheet: Boolean, modelId: String) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -83,13 +84,8 @@ fun DefaultConversationScreen(
                 selectedModel = selectedModel,
                 onModelChange = {
                     if (it.canUpgrade) {
-                        /*onEvent(
-                            HomeEvent.UpgradeModel(
-                                showBottomSheet = true,
-                                modelId = it.modelId
-                            )
-                        )
-                        return@QuestionInput*/
+                        onUpgradeModel.invoke(true, it.modelId)
+                        return@QuestionInput
                     }
                     onModelChange(it)
                 }

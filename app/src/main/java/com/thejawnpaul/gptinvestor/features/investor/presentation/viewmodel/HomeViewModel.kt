@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
@@ -9,6 +10,7 @@ import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfig
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.DrawerState
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
@@ -64,10 +66,25 @@ class HomeViewModel @Inject constructor(
 
         viewModelScope.launch {
             preferences.themePreference.collect { theme ->
-                _uiState.update { it.copy(theme = theme) }
+                _uiState.update {
+                    it.copy(
+                        theme = theme,
+                        drawerState = it.drawerState.copy(theme = theme)
+                    )
+                }
             }
             preferences.notificationPermission.collect { permission ->
                 _uiState.update { it.copy(requestForNotificationPermission = permission) }
+            }
+
+            authenticationRepository.getAuthState().collect { isSignedIn ->
+                _uiState.update {
+                    it.copy(
+                        drawerState = it.drawerState.copy(
+                            user = authenticationRepository.currentUser
+                        )
+                    )
+                }
             }
         }
     }
@@ -166,6 +183,12 @@ class HomeViewModel @Inject constructor(
                     )
                     _uiState.update { it.copy(chatInput = null) }
                 }
+
+                is HomeEvent.SignOut -> {
+                    viewModelScope.launch {
+                        authenticationRepository.signOut(event.context)
+                    }
+                }
             }
         }
     }
@@ -236,7 +259,8 @@ data class HomeUiState(
         "Unlimited queries"
     ),
     val selectedWaitlistOptions: List<String> = emptyList(),
-    val defaultPrompts: List<DefaultPrompt> = emptyList()
+    val defaultPrompts: List<DefaultPrompt> = emptyList(),
+    val drawerState: DrawerState = DrawerState()
 )
 
 sealed interface HomeEvent {
@@ -250,6 +274,7 @@ sealed interface HomeEvent {
     data class SelectWaitListOption(val option: String) : HomeEvent
     data object JoinWaitlist : HomeEvent
     data class DefaultPromptClicked(val prompt: DefaultPrompt) : HomeEvent
+    data class SignOut(val context: Context) : HomeEvent
 }
 
 sealed interface HomeAction {
@@ -258,9 +283,11 @@ sealed interface HomeAction {
         val title: String? = null
     ) : HomeAction
 
-    data object OnMenuClick : HomeAction
     data object OnGoToAllTopPicks : HomeAction
     data class OnGoToTopPickDetail(val id: String) : HomeAction
     data class OnGoToCompanyDetail(val ticker: String) : HomeAction
     data object OnGoToDiscover : HomeAction
+    data object OnGoToSettings : HomeAction
+    data object OnGoToHistory : HomeAction
+    data object OnGoToSavedPicks : HomeAction
 }

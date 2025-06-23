@@ -169,7 +169,8 @@ private fun ModelListDropDown(modifier: Modifier, options: List<AvailableModel>,
             // Image
             Image(
                 modifier = Modifier.size(16.dp),
-                painter = painterResource(id = R.drawable.ic_logo),
+                painter = painterResource(id = R.drawable.input_logo),
+                colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSurface),
                 contentDescription = null
             )
 
@@ -181,7 +182,8 @@ private fun ModelListDropDown(modifier: Modifier, options: List<AvailableModel>,
 
             Image(
                 painter = painterResource(id = R.drawable.ic_arrow_down),
-                contentDescription = null
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSurface)
             )
         }
 

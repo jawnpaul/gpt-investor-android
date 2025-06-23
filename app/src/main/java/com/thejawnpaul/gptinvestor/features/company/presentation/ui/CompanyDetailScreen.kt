@@ -42,12 +42,14 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.Compa
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyDetailDefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.StructuredConversationScreen
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.WaitlistBottomSheetContent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.QuestionInput
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CompanyDetailScreen(modifier: Modifier, state: SingleCompanyView, ticker: String, onEvent: (CompanyDetailEvent) -> Unit, onAction: (CompanyDetailAction) -> Unit) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+    var showBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(ticker) {
         onEvent(CompanyDetailEvent.UpdateTicker(ticker))
@@ -99,21 +101,19 @@ fun CompanyDetailScreen(modifier: Modifier, state: SingleCompanyView, ticker: St
                                     selectedModel = state.selectedModel,
                                     onModelChange = {
                                         if (it.canUpgrade) {
-                                            /*onEvent(
-                                                HomeEvent.UpgradeModel(
+                                            onEvent(
+                                                CompanyDetailEvent.UpgradeModel(
                                                     showBottomSheet = true,
                                                     modelId = it.modelId
                                                 )
                                             )
-                                            return@QuestionInput*/
+                                            return@QuestionInput
                                         }
                                         onEvent(CompanyDetailEvent.ModelChange(model = it))
                                     }
                                 )
                             }
                         ) { innerPadding ->
-
-                            var showBottomSheet by remember { mutableStateOf(false) }
 
                             if (showBottomSheet) {
                                 GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
@@ -161,6 +161,27 @@ fun CompanyDetailScreen(modifier: Modifier, state: SingleCompanyView, ticker: St
                                                 }
                                             }
                                     }
+                                }
+                            }
+
+                            if (state.showWaitListBottomSheet) {
+                                GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
+                                    onEvent(CompanyDetailEvent.UpgradeModel(showBottomSheet = false))
+                                }) {
+                                    WaitlistBottomSheetContent(
+                                        modifier = Modifier,
+                                        options = state.waitlistAvailableOptions,
+                                        selectedOptions = state.selectedWaitlistOptions,
+                                        onOptionSelected = {
+                                            onEvent(CompanyDetailEvent.SelectWaitlistOption(it))
+                                        },
+                                        onJoinWaitList = {
+                                            onEvent(CompanyDetailEvent.JoinWaitList)
+                                        },
+                                        onDismiss = {
+                                            onEvent(CompanyDetailEvent.UpgradeModel(showBottomSheet = false))
+                                        }
+                                    )
                                 }
                             }
 
@@ -225,7 +246,9 @@ fun CompanyDetailScreen(modifier: Modifier, state: SingleCompanyView, ticker: St
                             availableModels = state.availableModels,
                             selectedModel = state.selectedModel,
                             onModelChange = { onEvent(CompanyDetailEvent.ModelChange(it)) },
-                            onUpgradeModel = {}
+                            onUpgradeModel = { showBottomSheet, modelId ->
+                                onEvent(CompanyDetailEvent.UpgradeModel(showBottomSheet, modelId))
+                            }
                         )
                     }
 

@@ -14,7 +14,17 @@ data class SingleCompanyView(
     val header: CompanyHeaderPresentation = CompanyHeaderPresentation(),
     val genText: String = "",
     val availableModels: List<AvailableModel> = emptyList(),
-    val selectedModel: AvailableModel = DefaultModel()
+    val selectedModel: AvailableModel = DefaultModel(),
+    val waitlistAvailableOptions: List<String> = listOf(
+        "Advanced analysis",
+        "Personalized insights",
+        "Risk awareness",
+        "Actionable guidance",
+        "Transparent data sources",
+        "Unlimited queries"
+    ),
+    val selectedWaitlistOptions: List<String> = emptyList(),
+    val showWaitListBottomSheet: Boolean = false
 ) {
     val enableSend = inputQuery.trim().isNotEmpty()
 }

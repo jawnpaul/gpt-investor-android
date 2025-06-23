@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -45,13 +44,13 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.features.authentication.presentation.AuthenticationUIState
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.DrawerState
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.ThemeDropdown
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.theme.bodyChatBody
 
 @Composable
-fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Unit, onAction: (NavDrawerAction) -> Unit, state: AuthenticationUIState) {
+fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Unit, onAction: (NavDrawerAction) -> Unit, state: DrawerState) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     Column(
@@ -64,12 +63,10 @@ fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Uni
         // Header
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding(),
+                .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
             Text(
-
                 text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineSmall
             )

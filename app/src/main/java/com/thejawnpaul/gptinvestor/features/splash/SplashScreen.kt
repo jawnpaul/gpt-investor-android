@@ -96,7 +96,7 @@ fun AnimatedSplashScreen(onSplashFinished: () -> Unit) {
         Box(modifier = Modifier.fillMaxSize()) {
             // Wavy Background Image (Bottom)
             Image(
-                painter = painterResource(id = R.drawable.wavy_background),
+                painter = painterResource(id = R.drawable.mesh_background),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
@@ -104,7 +104,7 @@ fun AnimatedSplashScreen(onSplashFinished: () -> Unit) {
                     .padding(bottom = 160.dp)
                     .fillMaxHeight(0.4f) // Adjust height as needed
                     .align(Alignment.BottomCenter)
-                    .alpha(0.5f) // Make it subtle
+                    .alpha(0.4f) // Make it subtle
 
             )
 

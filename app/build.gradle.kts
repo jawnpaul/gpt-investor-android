@@ -188,6 +188,9 @@ dependencies {
     implementation(libs.google.identity)
     implementation(libs.firebase.messaging)
 
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+
     // test
     testImplementation(project(":remote:remotetest"))
     kspTest(libs.dagger.hilt.compiler)

@@ -35,6 +35,8 @@ ksp = "2.2.0-2.0.2"
 spalshScreen = "1.0.1"
 mixpanel = "8.2.0"
 datastore = "1.1.7"
+koin = "4.0.4"
+koin-annotation = "2.0.0"
 credentials = "1.5.0"
 googleId = "1.1.1"
 
@@ -88,6 +90,10 @@ coroutine-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-t
 google-truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
 androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
+koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
+koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin-annotation" }
 mixpanel-android = {group = "com.mixpanel.android", name= "mixpanel-android", version.ref="mixpanel"}
 androidx-credentials = {group = "androidx.credentials", name = "credentials", version.ref = "credentials"}
 androidx-play-services-auth = {group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials"}

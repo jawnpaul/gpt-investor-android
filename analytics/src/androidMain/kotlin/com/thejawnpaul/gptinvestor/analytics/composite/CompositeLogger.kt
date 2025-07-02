@@ -1,17 +1,11 @@
 package com.thejawnpaul.gptinvestor.analytics.composite
 
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
-import com.thejawnpaul.gptinvestor.analytics.di.FirebaseAnalytics
-import com.thejawnpaul.gptinvestor.analytics.di.MixpanelAnalytics
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class CompositeLogger @Inject constructor(
-    @FirebaseAnalytics private val firebaseLogger: AnalyticsLogger,
-    @MixpanelAnalytics private val mixpanelLogger: AnalyticsLogger
-) :
-    AnalyticsLogger {
+class CompositeLogger (
+    private val firebaseLogger: AnalyticsLogger,
+    private val mixpanelLogger: AnalyticsLogger
+) : AnalyticsLogger {
 
     override fun logEvent(
         eventName: String,

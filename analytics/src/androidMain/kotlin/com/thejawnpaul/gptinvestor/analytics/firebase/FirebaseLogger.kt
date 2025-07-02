@@ -3,11 +3,8 @@ package com.thejawnpaul.gptinvestor.analytics.firebase
 import android.os.Bundle
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class FirebaseLogger @Inject constructor(private val firebaseAnalytics: FirebaseAnalytics) :
+class FirebaseLogger(private val firebaseAnalytics: FirebaseAnalytics) :
     AnalyticsLogger {
 
     override fun logEvent(

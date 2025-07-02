@@ -49,7 +49,7 @@ data class FirestoreMessage(
         response = entity.response,
         companyDetailRemoteResponse = entity.companyDetailRemoteResponse?.let {
             // Convert your CompanyDetailRemoteResponse to Map
-            //convertToMap(it)
+            // convertToMap(it)
             it.toMap()
         },
         createdAt = entity.createdAt,
@@ -64,7 +64,7 @@ data class FirestoreMessage(
             response = response,
             companyDetailRemoteResponse = companyDetailRemoteResponse?.let {
                 // Convert Map back to CompanyDetailRemoteResponse
-                //convertFromMap(it)
+                // convertFromMap(it)
                 CompanyDetailRemoteResponse(
                     ticker = it.getOrDefault("ticker", "") as String,
                     about = it.getOrDefault("summary", "") as String,

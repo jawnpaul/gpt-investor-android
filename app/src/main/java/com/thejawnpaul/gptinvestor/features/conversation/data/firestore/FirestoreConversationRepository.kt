@@ -5,8 +5,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.ConversationEntity
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.MessageEntity
-import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import kotlinx.coroutines.tasks.await
 
 class FirestoreConversationRepository @Inject constructor(
     private val firestore: FirebaseFirestore,

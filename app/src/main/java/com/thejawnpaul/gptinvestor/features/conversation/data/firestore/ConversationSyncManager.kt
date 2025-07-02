@@ -4,8 +4,8 @@ import com.thejawnpaul.gptinvestor.features.conversation.data.local.dao.Conversa
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.dao.MessageDao
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.ConversationEntity
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.MessageEntity
-import timber.log.Timber
 import javax.inject.Inject
+import timber.log.Timber
 
 class ConversationSyncManager @Inject constructor(
     private val conversationDao: ConversationDao,

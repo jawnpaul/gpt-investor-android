@@ -187,6 +187,7 @@ dependencies {
     implementation(libs.androidx.play.services.auth)
     implementation(libs.google.identity)
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.firestore)
 
     // test
     testImplementation(project(":remote:remotetest"))

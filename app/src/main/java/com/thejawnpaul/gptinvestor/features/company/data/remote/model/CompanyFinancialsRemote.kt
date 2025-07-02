@@ -55,6 +55,19 @@ data class CompanyNews(
         imageUrl = thumbNail?.resolutions?.first()?.url ?: "",
         link = link
     )
+
+    fun toMap(): Map<String, Any?> {
+        return mapOf(
+            "link" to link,
+            "providerPublishTime" to providerPublishTime,
+            "publisher" to publisher,
+            "relatedTickers" to relatedTickers,
+            "thumbnail" to null,
+            "title" to title,
+            "type" to type,
+            "uuid" to id
+        )
+    }
 }
 
 @JsonClass(generateAdapter = true)

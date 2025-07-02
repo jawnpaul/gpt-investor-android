@@ -56,6 +56,22 @@ data class CompanyDetailRemoteResponse(
         appendLine("- [Yahoo finance](https://finance.yahoo.com/quote/$ticker)")
         news.forEach { appendLine("- [${it.publisher}](${it.link})") }
     }
+
+    fun toMap(): Map<String, Any> {
+        return mapOf(
+            "ticker" to ticker,
+            "summary" to about,
+            "market_cap" to marketCap,
+            "news" to news.map { it },
+            "pe_ratio" to peRatio,
+            "percentage_change" to change,
+            "revenue" to revenue,
+            "current_price" to price,
+            "historical_data" to historicalData.map { it.toMap() },
+            "company_name" to name,
+            "logo_url" to imageUrl
+        )
+    }
 }
 
 @JsonClass(generateAdapter = true)
@@ -66,7 +82,18 @@ data class HistoricalData(
     @field:Json(name = "Low") val low: Float,
     @field:Json(name = "Open") val open: Float,
     @field:Json(name = "Volume") val volume: Long
-)
+) {
+    fun toMap(): Map<String, Any> {
+        return mapOf(
+            "Close" to close,
+            "Date" to date,
+            "High" to high,
+            "Low" to low,
+            "Open" to open,
+            "Volume" to volume
+        )
+    }
+}
 
 @JsonClass(generateAdapter = true)
 data class CompanyPriceRequest(@field:Json(name = "tickers") val tickers: List<String>)

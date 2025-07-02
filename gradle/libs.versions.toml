@@ -1,39 +1,39 @@
 [versions]
-agp = "8.3.2"
-kotlin = "2.0.0"
-coreKtx = "1.13.1"
+agp = "8.11.0"
+kotlin = "2.2.0"
+coreKtx = "1.16.0"
 junit = "4.13.2"
-junitVersion = "1.1.5"
-espressoCore = "3.5.1"
-lifecycleRuntimeKtx = "2.8.6"
-activityCompose = "1.9.2"
-composeBom = "2024.09.02"
-hilt = "2.51.1"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+lifecycleRuntimeKtx = "2.9.1"
+activityCompose = "1.10.1"
+composeBom = "2025.06.01"
+compose-multiplatform = "1.8.2"
+hilt = "2.56.2"
 timber = "5.0.1"
-navVersion = "2.8.1"
+navVersion = "2.9.0"
 hiltNavigation = "1.2.0"
-ktLint = "12.1.0"
-retrofit = "2.11.0"
+ktLint = "12.3.0"
+retrofit = "3.0.0"
 okhttp = "4.12.0"
-coil = "2.5.0"
-room = "2.6.1"
-timeAgo = "4.0.3"
-jsoup = "1.17.2"
+coil = "2.7.0"
+room = "2.7.2"
+timeAgo = "4.1.0"
+jsoup = "1.21.1"
 gemini = "0.9.0"
 richText = "1.0.0-alpha02"
-googleServices = "4.4.2"
-firebaseBom = "33.3.0"
-crashlytics = "3.0.2"
-truth = "1.4.2"
-mockk = "1.13.9"
-coroutineTest = "1.8.0-RC2"
+googleServices = "4.4.3"
+firebaseBom = "33.16.0"
+crashlytics = "3.0.4"
+truth = "1.4.4"
+mockk = "1.14.4"
+coroutine = "1.10.2"
 coreKtxVersion = "1.6.1"
 junitKtx = "1.2.1"
-moshi = "1.15.1"
-ksp = "2.0.0-1.0.23"
+moshi = "1.15.2"
+ksp = "2.2.0-2.0.2"
 spalshScreen = "1.0.1"
-firebaseUI = "8.0.2"
-mixpanel = "8.0.2"
+mixpanel = "8.2.0"
 datastore = "1.1.7"
 credentials = "1.5.0"
 googleId = "1.1.1"
@@ -84,7 +84,7 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
-coroutine-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutineTest" }
+coroutine-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutine" }
 google-truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
 androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
@@ -95,8 +95,9 @@ google-identity = {group = "com.google.android.libraries.identity.googleid", nam
 
 
 [plugins]
-androidApplication = { id = "com.android.application", version.ref = "agp" }
+android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hiltAndroid = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ktLint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktLint" }
@@ -105,4 +106,6 @@ crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlyti
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 

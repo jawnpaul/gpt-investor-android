@@ -1,23 +1,32 @@
 package com.thejawnpaul.gptinvestor.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import gpt_investor.theme.generated.resources.Res
+import gpt_investor.theme.generated.resources.space_grotesk_bold
+import gpt_investor.theme.generated.resources.space_grotesk_light
+import gpt_investor.theme.generated.resources.space_grotesk_medium
+import gpt_investor.theme.generated.resources.space_grotesk_regular
+import gpt_investor.theme.generated.resources.space_grotesk_semi_bold
+import org.jetbrains.compose.resources.Font
 
 // Set of Material typography styles to start with
 
-val gptInvestorFont = FontFamily(
-    Font(R.font.space_grotesk_bold, FontWeight.Bold),
-    Font(R.font.space_grotesk_semi_bold, FontWeight.SemiBold),
-    Font(R.font.space_grotesk_medium, FontWeight.Medium),
-    Font(R.font.space_grotesk_regular, FontWeight.Normal),
-    Font(R.font.space_grotesk_light, FontWeight.Light),
+val gptInvestorFont
+    @Composable get() =  FontFamily(
+    Font(Res.font.space_grotesk_bold, FontWeight.Bold),
+    Font(Res.font.space_grotesk_semi_bold, FontWeight.SemiBold),
+    Font(Res.font.space_grotesk_medium, FontWeight.Medium),
+    Font(Res.font.space_grotesk_regular, FontWeight.Normal),
+    Font(Res.font.space_grotesk_light, FontWeight.Light),
 )
 
-val Typography =
+val Typography
+    @Composable get() =
     Typography(
         headlineLarge = TextStyle(
             fontFamily = gptInvestorFont,
@@ -128,7 +137,7 @@ val Typography =
 
 
 val Typography.bodyChatBody: TextStyle
-    get() = TextStyle(
+    @Composable get() = TextStyle(
         fontFamily = gptInvestorFont,
         fontWeight = FontWeight.Light,
         fontSize = 16.sp,
@@ -137,7 +146,7 @@ val Typography.bodyChatBody: TextStyle
     )
 
 val Typography.linkLarge: TextStyle
-    get() = TextStyle(
+    @Composable get() = TextStyle(
         fontFamily = gptInvestorFont,
         fontWeight = FontWeight.Medium,
         fontSize = 16.sp,
@@ -146,7 +155,7 @@ val Typography.linkLarge: TextStyle
     )
 
 val Typography.linkMedium: TextStyle
-    get() = TextStyle(
+    @Composable get() = TextStyle(
         fontFamily = gptInvestorFont,
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
@@ -155,7 +164,7 @@ val Typography.linkMedium: TextStyle
     )
 
 val Typography.linkSmall: TextStyle
-    get() = TextStyle(
+    @Composable get() = TextStyle(
         fontFamily = gptInvestorFont,
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp,

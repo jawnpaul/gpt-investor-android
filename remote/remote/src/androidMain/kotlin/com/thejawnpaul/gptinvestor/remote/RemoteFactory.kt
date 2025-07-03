@@ -30,7 +30,7 @@ internal actual val client: HttpClient = HttpClient(Android) {
                 Log.e("KtorHttp Call", message)
             }
         }
-        level = LogLevel.ALL
+        level = if (BuildConfig.DEBUG) LogLevel.ALL else LogLevel.NONE
     }
 
     install(Auth) {

@@ -31,7 +31,9 @@ import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import javax.inject.Inject
 import kotlinx.serialization.json.Json
 import okhttp3.ResponseBody.Companion.toResponseBody
@@ -122,6 +124,7 @@ private suspend inline fun <reified T> HttpResponse.response(): Response<T> {
                     successBody = json.decodeFromString<T>(responseText)
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
                 errorString = "Error parsing response body: ${e.message}"
                 return Response.error(code, errorString.toResponseBody())
             }
@@ -138,6 +141,7 @@ private suspend inline fun <reified T> HttpResponse.response(): Response<T> {
             e.printStackTrace()
             "Error reading error body: ${e.message}"
         }
+        println("Error code: $code; Error response: $errorString")
         return Response.error(code, errorString.toResponseBody())
     }
 }
@@ -156,6 +160,7 @@ private suspend inline fun <reified T> HttpClient.getAsType(urlString: String, q
 
 private suspend inline fun <reified T> HttpClient.postAsType(url: String, body: Any? = null): Response<T> {
     val response = this.post {
+        contentType(ContentType.Application.Json.withParameter("charset", "UTF-8"))
         url(url)
         setBody(body)
     }

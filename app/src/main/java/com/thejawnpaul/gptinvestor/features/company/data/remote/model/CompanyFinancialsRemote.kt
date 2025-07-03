@@ -41,7 +41,7 @@ data class CompanyNews(
     val providerPublishTime: Long,
     val publisher: String,
     val relatedTickers: List<String>,
-    val thumbNail: NewsThumbNail?,
+    @SerialName("thumbnail") val thumbNail: NewsThumbNail?,
     val title: String,
     val type: String,
     @SerialName("uuid") val id: String
@@ -59,7 +59,7 @@ data class CompanyNews(
 
 @Serializable
 data class NewsThumbNail(
-    val resolutions: List<NewsResolution> = emptyList()
+    val resolutions: List<NewsResolution?> = emptyList()
 )
 
 @Serializable

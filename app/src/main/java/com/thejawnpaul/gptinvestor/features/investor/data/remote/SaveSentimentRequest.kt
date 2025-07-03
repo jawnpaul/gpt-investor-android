@@ -1,10 +1,9 @@
 package com.thejawnpaul.gptinvestor.features.investor.data.remote
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+import kotlinx.serialization.Serializable
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class SaveSentimentRequest(
-    @field:Json(name = "ticker") val ticker: String,
-    @field:Json(name = "sentiment") val sentiment: String
+    val ticker: String,
+    val sentiment: String
 )

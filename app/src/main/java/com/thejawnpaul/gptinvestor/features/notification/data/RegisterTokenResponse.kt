@@ -1,16 +1,16 @@
 package com.thejawnpaul.gptinvestor.features.notification.data
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class RegisterTokenResponse(
-    @field:Json(name = "message")val message: String? = null,
-    @field:Json(name = "error")val error: String? = null
+    val message: String? = null,
+    val error: String? = null
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class RegisterTokenRequest(
-    @field:Json(name = "token")val token: String? = null,
-    @field:Json(name = "user_id")val userId: String? = null
+    val token: String? = null,
+    @SerialName("user_id") val userId: String? = null
 )

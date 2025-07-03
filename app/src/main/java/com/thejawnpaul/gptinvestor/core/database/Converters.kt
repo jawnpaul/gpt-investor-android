@@ -1,9 +1,7 @@
 package com.thejawnpaul.gptinvestor.core.database
 
 import androidx.room.TypeConverter
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
+import com.thejawnpaul.gptinvestor.core.utility.json
 import com.thejawnpaul.gptinvestor.features.company.data.local.model.PriceChange
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyNews
@@ -13,106 +11,91 @@ import com.thejawnpaul.gptinvestor.features.company.data.remote.model.NewsThumbN
 
 class Converters {
 
-    private val moshi =
-        Moshi.Builder().addLast(com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory())
-            .build()
-
-    private val priceChangeAdapter: JsonAdapter<PriceChange> =
-        moshi.adapter(PriceChange::class.java)
-
     @TypeConverter
     fun stringToPriceChange(string: String): PriceChange? {
-        return priceChangeAdapter.fromJson(string)
+        return json.decodeFromString<PriceChange>(string)
     }
 
     @TypeConverter
     fun priceChangeToString(priceChange: PriceChange): String {
-        return priceChangeAdapter.toJson(priceChange)
+        return json.encodeToString(priceChange)
     }
 
     // CompanyDetailRemoteResponse converters
     @TypeConverter
     fun fromCompanyDetail(value: CompanyDetailRemoteResponse?): String? {
         if (value == null) return null
-        return moshi.adapter(CompanyDetailRemoteResponse::class.java).toJson(value)
+        return json.encodeToString(value)
     }
 
     @TypeConverter
     fun toCompanyDetail(value: String?): CompanyDetailRemoteResponse? {
         if (value == null) return null
-        return moshi.adapter(CompanyDetailRemoteResponse::class.java).fromJson(value)
+        return json.decodeFromString<CompanyDetailRemoteResponse>(value)
     }
 
     // List<CompanyNews> converters
     @TypeConverter
     fun fromNewsList(news: List<CompanyNews>?): String? {
         if (news == null) return null
-        val type = Types.newParameterizedType(List::class.java, CompanyNews::class.java)
-        return moshi.adapter<List<CompanyNews>>(type).toJson(news)
+        return json.encodeToString(news)
     }
 
     @TypeConverter
     fun toNewsList(value: String?): List<CompanyNews>? {
         if (value == null) return null
-        val type = Types.newParameterizedType(List::class.java, CompanyNews::class.java)
-        return moshi.adapter<List<CompanyNews>>(type).fromJson(value)
+        return json.decodeFromString<List<CompanyNews>>(value)
     }
 
     // List<HistoricalData> converters
     @TypeConverter
     fun fromHistoricalDataList(data: List<HistoricalData>?): String? {
         if (data == null) return null
-        val type = Types.newParameterizedType(List::class.java, HistoricalData::class.java)
-        return moshi.adapter<List<HistoricalData>>(type).toJson(data)
+        return json.encodeToString(data)
     }
 
     @TypeConverter
     fun toHistoricalDataList(value: String?): List<HistoricalData>? {
         if (value == null) return null
-        val type = Types.newParameterizedType(List::class.java, HistoricalData::class.java)
-        return moshi.adapter<List<HistoricalData>>(type).fromJson(value)
+        return json.decodeFromString<List<HistoricalData>>(value)
     }
 
     // NewsThumbNail converters
     @TypeConverter
     fun fromNewsThumbNail(thumbnail: NewsThumbNail?): String? {
         if (thumbnail == null) return null
-        return moshi.adapter(NewsThumbNail::class.java).toJson(thumbnail)
+        return json.encodeToString(thumbnail)
     }
 
     @TypeConverter
     fun toNewsThumbNail(value: String?): NewsThumbNail? {
         if (value == null) return null
-        return moshi.adapter(NewsThumbNail::class.java).fromJson(value)
+        return json.decodeFromString<NewsThumbNail>(value)
     }
 
     // List<NewsResolution> converters
     @TypeConverter
     fun fromResolutionList(resolutions: List<NewsResolution>?): String? {
         if (resolutions == null) return null
-        val type = Types.newParameterizedType(List::class.java, NewsResolution::class.java)
-        return moshi.adapter<List<NewsResolution>>(type).toJson(resolutions)
+        return json.encodeToString(resolutions)
     }
 
     @TypeConverter
     fun toResolutionList(value: String?): List<NewsResolution>? {
         if (value == null) return null
-        val type = Types.newParameterizedType(List::class.java, NewsResolution::class.java)
-        return moshi.adapter<List<NewsResolution>>(type).fromJson(value)
+        return json.decodeFromString<List<NewsResolution>>(value)
     }
 
     // List<String> converters
     @TypeConverter
     fun fromStringList(strings: List<String>?): String? {
         if (strings == null) return null
-        val type = Types.newParameterizedType(List::class.java, String::class.java)
-        return moshi.adapter<List<String>>(type).toJson(strings)
+        return json.encodeToString(strings)
     }
 
     @TypeConverter
     fun toStringList(value: String?): List<String>? {
         if (value == null) return null
-        val type = Types.newParameterizedType(List::class.java, String::class.java)
-        return moshi.adapter<List<String>>(type).fromJson(value)
+        return json.decodeFromString<List<String>>(value)
     }
 }

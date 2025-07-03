@@ -1,11 +1,16 @@
 package com.thejawnpaul.gptinvestor.core.utility
 
+import kotlinx.serialization.json.Json
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+val json = Json {
+    isLenient = true
+    ignoreUnknownKeys = true
+}
 fun Float.toCurrency(currencySymbol: String): String {
     val formatter = DecimalFormat("###,###,##0.00")
     val res = formatter.format(this.toDouble())

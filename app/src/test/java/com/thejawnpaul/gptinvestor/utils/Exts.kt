@@ -7,7 +7,6 @@ import java.net.URL
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockWebServer
 import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
 
 private val okHttpClient: OkHttpClient
     get() = OkHttpClient.Builder()
@@ -22,6 +21,5 @@ internal fun getJson(path: String): String {
 internal fun makeTestApiService(mockWebServer: MockWebServer): ApiService = Retrofit.Builder()
     .baseUrl(mockWebServer.url("/"))
     .client(okHttpClient)
-    .addConverterFactory(MoshiConverterFactory.create())
     .build()
     .create(ApiService::class.java)

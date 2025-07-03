@@ -1,10 +1,43 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
 plugins {
-    id("com.android.library")
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.hiltAndroid)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.ksp)
+}
+
+kotlin {
+    androidTarget {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
+
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach {
+        it.binaries.framework {
+            baseName = "GPT-Investor-Remote"
+            isStatic = true
+        }
+    }
+
+    sourceSets {
+        androidMain.dependencies {
+            implementation(libs.koin.android)
+            implementation(libs.ktor.client.android)
+        }
+        commonMain.dependencies {
+            implementation(libs.koin.core)
+            implementation(libs.bundles.ktor.common)
+        }
+        nativeMain.dependencies {
+            implementation(libs.ktor.client.darwin)
+        }
+    }
 }
 
 android {
@@ -12,33 +45,18 @@ android {
     localProperties.load(project.rootProject.file("local.properties").reader())
     namespace = "com.thejawnpaul.gptinvestor.remote"
     compileSdk = 34
-    defaultConfig.minSdk = 24
-    buildTypes {
-        release {
-            val baseUrl: String = localProperties.getProperty("BASE_URL") ?: ""
-            buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
-            val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
-            buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
-        }
-        debug {
-            val baseUrl: String = localProperties.getProperty("BASE_URL") ?: ""
-            buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
-            val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
-            buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
-        }
+
+    defaultConfig {
+        minSdk = 24
+        val baseUrl: String = localProperties.getProperty("BASE_URL") ?: ""
+        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+        val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
+        buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
     buildFeatures { buildConfig = true }
-}
-
-dependencies {
-    implementation(libs.dagger.hilt)
-    implementation(libs.retrofit)
-    implementation(libs.moshi.converter)
-    implementation(libs.okhttp.logger)
-    ksp(libs.dagger.hilt.compiler)
 }

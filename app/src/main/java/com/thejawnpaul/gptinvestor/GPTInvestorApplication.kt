@@ -2,6 +2,7 @@ package com.thejawnpaul.gptinvestor
 
 import android.app.Application
 import com.thejawnpaul.gptinvestor.analytics.di.providesAnalyticsModule
+import com.thejawnpaul.gptinvestor.remote.networkModule
 import dagger.hilt.android.HiltAndroidApp
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -18,7 +19,7 @@ class GPTInvestorApplication : Application() {
         startKoin {
             androidLogger()
             androidContext(this@GPTInvestorApplication)
-            modules(listOf(providesAnalyticsModule))
+            modules(listOf(providesAnalyticsModule, networkModule))
         }
     }
 }

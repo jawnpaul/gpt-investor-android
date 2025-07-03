@@ -2,10 +2,9 @@ package com.thejawnpaul.gptinvestor.features.company.data.local.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
+import kotlinx.serialization.Serializable
 
 @Entity(tableName = "company_table")
 data class CompanyEntity(
@@ -35,8 +34,8 @@ data class CompanyEntity(
     fun toSector() = SectorInput.CustomSector(sectorName = sector, sectorKey = sectorKey)
 }
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class PriceChange(
-    @field:Json(name = "change") val change: Float,
-    @field:Json(name = "date") val date: Long
+    val change: Float,
+    val date: Long
 )

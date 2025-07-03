@@ -1,5 +1,7 @@
 package com.thejawnpaul.gptinvestor.core.di
 
+import com.thejawnpaul.gptinvestor.core.api.ApiService
+import com.thejawnpaul.gptinvestor.core.api.ApiServiceImpl
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepositoryImpl
 import com.thejawnpaul.gptinvestor.features.company.data.repository.CompanyRepository
@@ -26,6 +28,9 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class BindsModule {
+
+    @Binds
+    abstract fun providesApiService(apiService: ApiServiceImpl): ApiService
 
     @Binds
     abstract fun providesCompanyRepository(repository: CompanyRepository): ICompanyRepository

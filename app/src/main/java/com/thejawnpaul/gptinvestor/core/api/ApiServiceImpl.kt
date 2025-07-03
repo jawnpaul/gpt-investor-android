@@ -1,6 +1,5 @@
 package com.thejawnpaul.gptinvestor.core.api
 
-import com.thejawnpaul.gptinvestor.BuildConfig
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRemote
@@ -26,9 +25,6 @@ import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenReque
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenResponse
 import com.thejawnpaul.gptinvestor.features.toppick.data.remote.TopPickRemote
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.ClientRequestException
-import io.ktor.client.plugins.RedirectResponseException
-import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -36,33 +32,43 @@ import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
-import javax.inject.Inject
 import kotlinx.serialization.json.Json
 import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.Response
+import javax.inject.Inject
 
 class ApiServiceImpl @Inject constructor(private val client: HttpClient) : ApiService {
     override suspend fun getCompanies(): Response<List<CompanyRemote>> {
         return client.getAsType<List<CompanyRemote>>("v1/companies")
     }
 
-    override suspend fun getCompanyFinancials(request: CompanyFinancialsRequest): Response<CompanyFinancialsRemote> {
+    override suspend fun getCompanyFinancials(
+        request: CompanyFinancialsRequest
+    ): Response<CompanyFinancialsRemote> {
         return client.postAsType<CompanyFinancialsRemote>("v1/company", request)
     }
 
-    override suspend fun saveComparison(request: SaveComparisonRequest): Response<DefaultSaveResponse> {
+    override suspend fun saveComparison(
+        request: SaveComparisonRequest
+    ): Response<DefaultSaveResponse> {
         return client.postAsType<DefaultSaveResponse>("v1/save-comparison", request)
     }
 
-    override suspend fun saveSentiment(request: SaveSentimentRequest): Response<DefaultSaveResponse> {
+    override suspend fun saveSentiment(
+        request: SaveSentimentRequest
+    ): Response<DefaultSaveResponse> {
         return client.postAsType<DefaultSaveResponse>("v1/save-sentiment", request)
     }
 
-    override suspend fun getAnalystRating(request: AnalystRatingRequest): Response<AnalystRatingResponse> {
+    override suspend fun getAnalystRating(
+        request: AnalystRatingRequest
+    ): Response<AnalystRatingResponse> {
         return client.postAsType<AnalystRatingResponse>("v1/get-analyst-rating", request)
     }
 
-    override suspend fun saveIndustryRating(request: IndustryRatingRequest): Response<DefaultSaveResponse> {
+    override suspend fun saveIndustryRating(
+        request: IndustryRatingRequest
+    ): Response<DefaultSaveResponse> {
         return client.postAsType<DefaultSaveResponse>("v1/save-industry-rating", request)
     }
 
@@ -82,35 +88,40 @@ class ApiServiceImpl @Inject constructor(private val client: HttpClient) : ApiSe
         return client.postAsType<GetEntityResponse>("v1/get-entity", request)
     }
 
-    override suspend fun getCompanyInfo(request: CompanyDetailRemoteRequest): Response<CompanyDetailRemoteResponse> {
+    override suspend fun getCompanyInfo(
+        request: CompanyDetailRemoteRequest
+    ): Response<CompanyDetailRemoteResponse> {
         return client.postAsType<CompanyDetailRemoteResponse>("v1/company-info", request)
     }
 
-    override suspend fun getCompanyPrice(request: CompanyPriceRequest): Response<List<CompanyPriceResponse>> {
+    override suspend fun getCompanyPrice(
+        request: CompanyPriceRequest
+    ): Response<List<CompanyPriceResponse>> {
         return client.postAsType<List<CompanyPriceResponse>>("v1/company-price", request)
     }
 
     override suspend fun getTopPicks(date: String): Response<List<TopPickRemote>> {
         return client.getAsType<List<TopPickRemote>>(
-            "v1.1/top-picks",
-            mapOf("date" to date)
+            "v1.1/top-picks", mapOf("date" to date)
         )
     }
 
-    override suspend fun registerToken(request: RegisterTokenRequest): Response<RegisterTokenResponse> {
-        return client.postAsType<RegisterTokenResponse>("v1/notifications/register-token", request)
+    override suspend fun registerToken(
+        request: RegisterTokenRequest
+    ): Response<RegisterTokenResponse> {
+        return client.postAsType<RegisterTokenResponse>(
+            "v1/notifications/register-token", request
+        )
     }
 
-    override suspend fun addUserToWaitlist(request: AddToWaitlistRequest): Response<AddToWaitlistResponse> {
+    override suspend fun addUserToWaitlist(
+        request: AddToWaitlistRequest
+    ): Response<AddToWaitlistResponse> {
         return client.postAsType<AddToWaitlistResponse>("v1/add-to-waitlist", request)
     }
 }
 
 private suspend inline fun <reified T> HttpResponse.response(): Response<T> {
-    println("Processing response for type: ${T::class.simpleName}")
-    println("Response status: ${status.value} - ${status.description}")
-    println("Response headers: $headers")
-    println("Response body: ${bodyAsText()}")
     val code = status.value
     val isSuccess = status in HttpStatusCode.OK..HttpStatusCode.PartialContent // 200-299
     val json = Json { ignoreUnknownKeys = true }
@@ -140,86 +151,33 @@ private suspend inline fun <reified T> HttpResponse.response(): Response<T> {
         errorString = try {
             bodyAsText()
         } catch (e: Exception) {
+            e.printStackTrace()
             "Error reading error body: ${e.message}"
         }
         return Response.error(code, errorString.toResponseBody())
     }
 }
 
-private suspend inline fun <reified T> HttpClient.getAsType(urlString: String, query: Map<String, String?> = emptyMap()): Response<T> {
-    println("GET request to: ${BuildConfig.BASE_URL}$urlString")
-    return try {
-        val response = this.get {
-            url(urlString)
-            query.forEach { (key, value) ->
-                if (value != null) {
-                    url.parameters.append(key, value)
-                }
+private suspend inline fun <reified T> HttpClient.getAsType(
+    urlString: String, query: Map<String, String?> = emptyMap()
+): Response<T> {
+    val response = this.get {
+        url(urlString)
+        query.forEach { (key, value) ->
+            if (value != null) {
+                url.parameters.append(key, value)
             }
         }
-        response.response<T>().also {
-            println("Response: ${response.status.value} - ${response.bodyAsText()}")
-        }
-    } catch (e: RedirectResponseException) {
-        println(
-            "RedirectResponseException: ${e.response.status.value} - ${e.response.bodyAsText()}"
-        )
-        return Response.error(
-            e.response.status.value,
-            e.response.status.description.toResponseBody()
-        )
-    } catch (e: ClientRequestException) {
-        println(
-            "ClientRequestException: ${e.response.status.value} - ${e.response.bodyAsText()}"
-        )
-        return Response.error(
-            e.response.status.value,
-            e.response.status.description.toResponseBody()
-        )
-    } catch (e: ServerResponseException) {
-        println(
-            "ServerResponseException: ${e.response.status.value} - ${e.response.bodyAsText()}"
-        )
-        return Response.error(
-            e.response.status.value,
-            e.response.status.description.toResponseBody()
-        )
-    } catch (e: Exception) {
-        e.printStackTrace()
-        return Response.error(599, "Unknown error: ${e.message}".toResponseBody())
     }
+    return response.response<T>()
 }
 
-private suspend inline fun <reified T> HttpClient.postAsType(url: String, body: Any? = null): Response<T> {
-    println("POST request to: ${BuildConfig.BASE_URL}$url")
-    return try {
-        val response = this.post {
-            url(url)
-            setBody(body)
-        }
-        response.response<T>().also {
-            println("Response: ${response.status.value} - ${response.bodyAsText()}")
-        }
-    } catch (e: RedirectResponseException) {
-        println("RedirectResponseException: ${e.message}")
-        return Response.error(
-            e.response.status.value,
-            e.response.status.description.toResponseBody()
-        )
-    } catch (e: ClientRequestException) {
-        println("ClientRequestException: ${e.message}")
-        return Response.error(
-            e.response.status.value,
-            e.response.status.description.toResponseBody()
-        )
-    } catch (e: ServerResponseException) {
-        println("ServerResponseException: ${e.message}")
-        return Response.error(
-            e.response.status.value,
-            e.response.status.description.toResponseBody()
-        )
-    } catch (e: Exception) {
-        e.printStackTrace()
-        return Response.error(599, "Unknown error: ${e.message}".toResponseBody())
+private suspend inline fun <reified T> HttpClient.postAsType(
+    url: String, body: Any? = null
+): Response<T> {
+    val response = this.post {
+        url(url)
+        setBody(body)
     }
+    return response.response<T>()
 }

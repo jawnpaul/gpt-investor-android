@@ -36,8 +36,8 @@ import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
-import kotlinx.serialization.json.Json
 import javax.inject.Inject
+import kotlinx.serialization.json.Json
 import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.Response
 
@@ -46,34 +46,23 @@ class ApiServiceImpl @Inject constructor(private val client: HttpClient) : ApiSe
         return client.getAsType<List<CompanyRemote>>("v1/companies")
     }
 
-
-    override suspend fun getCompanyFinancials(
-        request: CompanyFinancialsRequest
-    ): Response<CompanyFinancialsRemote> {
+    override suspend fun getCompanyFinancials(request: CompanyFinancialsRequest): Response<CompanyFinancialsRemote> {
         return client.postAsType<CompanyFinancialsRemote>("v1/company", request)
     }
 
-    override suspend fun saveComparison(
-        request: SaveComparisonRequest
-    ): Response<DefaultSaveResponse> {
+    override suspend fun saveComparison(request: SaveComparisonRequest): Response<DefaultSaveResponse> {
         return client.postAsType<DefaultSaveResponse>("v1/save-comparison", request)
     }
 
-    override suspend fun saveSentiment(
-        request: SaveSentimentRequest
-    ): Response<DefaultSaveResponse> {
+    override suspend fun saveSentiment(request: SaveSentimentRequest): Response<DefaultSaveResponse> {
         return client.postAsType<DefaultSaveResponse>("v1/save-sentiment", request)
     }
 
-    override suspend fun getAnalystRating(
-        request: AnalystRatingRequest
-    ): Response<AnalystRatingResponse> {
+    override suspend fun getAnalystRating(request: AnalystRatingRequest): Response<AnalystRatingResponse> {
         return client.postAsType<AnalystRatingResponse>("v1/get-analyst-rating", request)
     }
 
-    override suspend fun saveIndustryRating(
-        request: IndustryRatingRequest
-    ): Response<DefaultSaveResponse> {
+    override suspend fun saveIndustryRating(request: IndustryRatingRequest): Response<DefaultSaveResponse> {
         return client.postAsType<DefaultSaveResponse>("v1/save-industry-rating", request)
     }
 
@@ -93,33 +82,26 @@ class ApiServiceImpl @Inject constructor(private val client: HttpClient) : ApiSe
         return client.postAsType<GetEntityResponse>("v1/get-entity", request)
     }
 
-    override suspend fun getCompanyInfo(
-        request: CompanyDetailRemoteRequest
-    ): Response<CompanyDetailRemoteResponse> {
+    override suspend fun getCompanyInfo(request: CompanyDetailRemoteRequest): Response<CompanyDetailRemoteResponse> {
         return client.postAsType<CompanyDetailRemoteResponse>("v1/company-info", request)
     }
 
-    override suspend fun getCompanyPrice(
-        request: CompanyPriceRequest
-    ): Response<List<CompanyPriceResponse>> {
+    override suspend fun getCompanyPrice(request: CompanyPriceRequest): Response<List<CompanyPriceResponse>> {
         return client.postAsType<List<CompanyPriceResponse>>("v1/company-price", request)
     }
 
     override suspend fun getTopPicks(date: String): Response<List<TopPickRemote>> {
         return client.getAsType<List<TopPickRemote>>(
-            "v1.1/top-picks", mapOf("date" to date)
+            "v1.1/top-picks",
+            mapOf("date" to date)
         )
     }
 
-    override suspend fun registerToken(
-        request: RegisterTokenRequest
-    ): Response<RegisterTokenResponse> {
+    override suspend fun registerToken(request: RegisterTokenRequest): Response<RegisterTokenResponse> {
         return client.postAsType<RegisterTokenResponse>("v1/notifications/register-token", request)
     }
 
-    override suspend fun addUserToWaitlist(
-        request: AddToWaitlistRequest
-    ): Response<AddToWaitlistResponse> {
+    override suspend fun addUserToWaitlist(request: AddToWaitlistRequest): Response<AddToWaitlistResponse> {
         return client.postAsType<AddToWaitlistResponse>("v1/add-to-waitlist", request)
     }
 }
@@ -164,11 +146,8 @@ private suspend inline fun <reified T> HttpResponse.response(): Response<T> {
     }
 }
 
-private suspend inline fun <reified T> HttpClient.getAsType(
-    urlString: String,
-    query: Map<String, String?> = emptyMap(),
-): Response<T> {
-    println("GET request to: ${BuildConfig.BASE_URL}${urlString}")
+private suspend inline fun <reified T> HttpClient.getAsType(urlString: String, query: Map<String, String?> = emptyMap()): Response<T> {
+    println("GET request to: ${BuildConfig.BASE_URL}$urlString")
     return try {
         val response = this.get {
             url(urlString)
@@ -211,11 +190,8 @@ private suspend inline fun <reified T> HttpClient.getAsType(
     }
 }
 
-private suspend inline fun <reified T> HttpClient.postAsType(
-    url: String,
-    body: Any? = null,
-): Response<T> {
-    println("POST request to: ${BuildConfig.BASE_URL}${url}")
+private suspend inline fun <reified T> HttpClient.postAsType(url: String, body: Any? = null): Response<T> {
+    println("POST request to: ${BuildConfig.BASE_URL}$url")
     return try {
         val response = this.post {
             url(url)

@@ -1,11 +1,11 @@
 package com.thejawnpaul.gptinvestor.core.utility
 
-import kotlinx.serialization.json.Json
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlinx.serialization.json.Json
 
 val json = Json {
     isLenient = true

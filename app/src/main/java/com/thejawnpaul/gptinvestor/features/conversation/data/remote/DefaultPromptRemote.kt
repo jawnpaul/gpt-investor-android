@@ -4,5 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class DefaultPromptRemote(
-    val id: String, val label: String, val query: String
+    val id: String,
+    val label: String,
+    val query: String
 )

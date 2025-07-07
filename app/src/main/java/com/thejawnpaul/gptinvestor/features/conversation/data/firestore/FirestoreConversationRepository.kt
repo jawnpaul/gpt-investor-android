@@ -119,4 +119,21 @@ class FirestoreConversationRepository @Inject constructor(
     } catch (e: Exception) {
         Result.failure(e)
     }
+
+    suspend fun updateMessageFeedback(conversationId: String, messageId: String, feedbackStatus: Int): Result<Unit> = try {
+        val userId = this.userId ?: return Result.failure(Exception("User not authenticated"))
+
+        firestore.collection("users")
+            .document(userId)
+            .collection("conversations")
+            .document(conversationId)
+            .collection("messages")
+            .document(messageId)
+            .update("feedbackStatus", feedbackStatus)
+            .await()
+
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
 }

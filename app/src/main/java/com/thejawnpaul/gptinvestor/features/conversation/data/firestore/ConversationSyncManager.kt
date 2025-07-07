@@ -27,6 +27,13 @@ class ConversationSyncManager @Inject constructor(
             }
     }
 
+    suspend fun syncMessageFeedbackToCloud(conversationId: Long, messageId: Long, feedbackStatus: Int) {
+        firestoreConversationRepository.updateMessageFeedback(conversationId.toString(), messageId.toString(), feedbackStatus)
+            .onFailure { error ->
+                Timber.e("DataSync Failed to sync message feedback: ${error.message}")
+            }
+    }
+
     suspend fun syncFromCloud(): Result<Unit> = try {
         // Sync conversations
         firestoreConversationRepository.getAllConversations()

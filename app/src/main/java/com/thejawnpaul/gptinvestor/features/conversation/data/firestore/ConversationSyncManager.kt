@@ -38,6 +38,8 @@ class ConversationSyncManager @Inject constructor(
         // Sync conversations
         firestoreConversationRepository.getAllConversations()
             .onSuccess { cloudConversations ->
+                // Iterate over conversations. If any step inside fails and throws,
+                // the whole sync operation will be caught by the outer try-catch.
                 cloudConversations.forEach { cloudConv ->
                     val roomConv = cloudConv.toRoomEntity()
                     conversationDao.insertConversation(roomConv)
@@ -49,10 +51,20 @@ class ConversationSyncManager @Inject constructor(
                                 messageDao.insertMessage(cloudMsg.toRoomEntity())
                             }
                         }
+                        .onFailure { messagesError ->
+                            Timber.e(messagesError, "DataSync: Failed to sync messages for conversation ${cloudConv.conversationId}")
+                            throw messagesError // Propagate error to fail the entire sync
+                        }
                 }
             }
+            .onFailure { conversationsError ->
+                Timber.e(conversationsError, "DataSync: Failed to sync conversations")
+                throw conversationsError // Propagate error to fail the entire sync
+            }
+        // If all operations were successful and no exceptions were thrown, return success.
         Result.success(Unit)
     } catch (e: Exception) {
+        Timber.e(e, "DataSync: Exception during syncFromCloud")
         Result.failure(e)
     }
 }

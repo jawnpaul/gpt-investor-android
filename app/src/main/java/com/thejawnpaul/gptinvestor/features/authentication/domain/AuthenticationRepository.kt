@@ -15,6 +15,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.thejawnpaul.gptinvestor.BuildConfig
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
+import com.thejawnpaul.gptinvestor.features.conversation.data.firestore.ConversationSyncManager
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +39,8 @@ interface AuthenticationRepository {
 class AuthenticationRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth,
     private val analyticsLogger: AnalyticsLogger,
-    private val gptInvestorPreferences: GPTInvestorPreferences
+    private val gptInvestorPreferences: GPTInvestorPreferences,
+    private val conversationSyncManager: ConversationSyncManager
 ) :
     AuthenticationRepository {
     override val currentUser: FirebaseUser?
@@ -82,6 +84,11 @@ class AuthenticationRepositoryImpl @Inject constructor(
                         CoroutineScope(Dispatchers.IO).launch {
                             gptInvestorPreferences.setUserId(auth.currentUser?.uid.toString())
                             gptInvestorPreferences.setIsUserLoggedIn(true)
+                            conversationSyncManager.syncFromCloud().onSuccess {
+                                Timber.d("Data sync successful after Google sign up")
+                            }.onFailure { e ->
+                                Timber.e(e, "Data sync failed after Google sign up")
+                            }
                         }
                         analyticsLogger.identifyUser(
                             eventName = "Sign Up",
@@ -161,6 +168,11 @@ class AuthenticationRepositoryImpl @Inject constructor(
                     CoroutineScope(Dispatchers.IO).launch {
                         gptInvestorPreferences.setUserId(auth.currentUser?.uid.toString())
                         gptInvestorPreferences.setIsUserLoggedIn(true)
+                        conversationSyncManager.syncFromCloud().onSuccess {
+                            Timber.d("Data sync successful after email/password login")
+                        }.onFailure { e ->
+                            Timber.e(e, "Data sync failed after email/password login")
+                        }
                     }
                     analyticsLogger.identifyUser(
                         eventName = "Log in",
@@ -181,6 +193,15 @@ class AuthenticationRepositoryImpl @Inject constructor(
         auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
             trySend(task.isSuccessful)
             if (task.isSuccessful) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    gptInvestorPreferences.setUserId(auth.currentUser?.uid.toString())
+                    gptInvestorPreferences.setIsUserLoggedIn(true)
+                    conversationSyncManager.syncFromCloud().onSuccess {
+                        Timber.d("Data sync successful after email/password sign up")
+                    }.onFailure { e ->
+                        Timber.e(e, "Data sync failed after email/password sign up")
+                    }
+                }
                 analyticsLogger.identifyUser(
                     eventName = "Sign Up",
                     params = mapOf(
@@ -227,8 +248,17 @@ class AuthenticationRepositoryImpl @Inject constructor(
                     trySend(task.isSuccessful)
                     getAuthState()
                     if (task.isSuccessful) {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            gptInvestorPreferences.setUserId(auth.currentUser?.uid.toString())
+                            gptInvestorPreferences.setIsUserLoggedIn(true)
+                            conversationSyncManager.syncFromCloud().onSuccess {
+                                Timber.d("Data sync successful after Google login")
+                            }.onFailure { e ->
+                                Timber.e(e, "Data sync failed after Google login")
+                            }
+                        }
                         analyticsLogger.identifyUser(
-                            eventName = "Sign Up",
+                            eventName = "Sign Up", // Should this be "Log in" for loginWithGoogle?
                             params = mapOf(
                                 "user_id" to auth.currentUser?.uid.toString(),
                                 "email" to auth.currentUser?.email.toString(),

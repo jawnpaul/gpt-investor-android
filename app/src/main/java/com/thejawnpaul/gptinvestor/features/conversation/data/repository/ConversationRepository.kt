@@ -188,6 +188,7 @@ class ConversationRepository @Inject constructor(
             // Use 'var' to allow reassignment of the conversation object
             var currentConversation = getConversation(prompt)
             Timber.e(currentConversation.id.toString())
+            var company: CompanyDetailRemoteResponse? = null
 
             // TODO: Emit default loading state from here
 
@@ -195,7 +196,7 @@ class ConversationRepository @Inject constructor(
             val entityList = containsEntity(prompt.query)
             if (entityList.isNotEmpty()) {
                 val ticker = entityList.first()
-                val company = getCompanyDetail(ticker)
+                company = getCompanyDetail(ticker)
 
                 // Ensure we are modifying a mutable list or creating new lists when copying
                 val newMessages = ArrayList(currentConversation.messageList)
@@ -299,7 +300,7 @@ class ConversationRepository @Inject constructor(
                 val updatedMessageEntity = messageDao.getSingleMessage(newMessageId)
                     .copy(response = finalResponseText) // Use the response from the conversation state
                 messageDao.updateMessage(updatedMessageEntity)
-                conversationSyncManager.syncMessageToCloud(updatedMessageEntity)
+                conversationSyncManager.syncMessageToCloud(updatedMessageEntity.copy(companyDetailRemoteResponse = company))
 
                 getConversationTitle(currentConversation.id)?.let { title ->
                     // NOW, currentConversation already has suggestedPrompts.
@@ -451,7 +452,7 @@ class ConversationRepository @Inject constructor(
                 val updatedEntity = messageDao.getSingleMessage(newIndex)
                     .copy(response = conversation.messageList.last().response)
                 messageDao.updateMessage(updatedEntity)
-                conversationSyncManager.syncMessageToCloud(updatedEntity)
+                conversationSyncManager.syncMessageToCloud(updatedEntity.copy(companyDetailRemoteResponse = prompt.company))
 
                 getConversationTitle(conversation.id)?.let { title ->
                     conversation = conversation.copy(title = title)

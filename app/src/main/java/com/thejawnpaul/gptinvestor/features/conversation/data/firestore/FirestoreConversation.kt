@@ -2,6 +2,7 @@ package com.thejawnpaul.gptinvestor.features.conversation.data.firestore
 
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyNews
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.HistoricalData
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.ConversationEntity
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.MessageEntity
 
@@ -47,11 +48,7 @@ data class FirestoreMessage(
         conversationId = entity.conversationId.toString(),
         query = entity.query,
         response = entity.response,
-        companyDetailRemoteResponse = entity.companyDetailRemoteResponse?.let {
-            // Convert your CompanyDetailRemoteResponse to Map
-            // convertToMap(it)
-            it.toMap()
-        },
+        companyDetailRemoteResponse = entity.companyDetailRemoteResponse?.toMap(),
         createdAt = entity.createdAt,
         feedbackStatus = entity.feedbackStatus
     )
@@ -74,7 +71,7 @@ data class FirestoreMessage(
                     change = it.getOrDefault("percentage_change", 0f) as Float,
                     revenue = it.getOrDefault("revenue", 0L) as Long,
                     price = it.getOrDefault("current_price", 0f) as Float,
-                    historicalData = emptyList(),
+                    historicalData = it.getOrDefault("historical_data", emptyList<HistoricalData>()) as List<HistoricalData>,
                     name = it.getOrDefault("company_name", "") as String,
                     imageUrl = it.getOrDefault("logo_url", "") as String
 

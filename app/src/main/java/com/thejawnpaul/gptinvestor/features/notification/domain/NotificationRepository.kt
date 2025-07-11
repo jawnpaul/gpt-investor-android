@@ -1,10 +1,14 @@
 package com.thejawnpaul.gptinvestor.features.notification.domain
 
+import com.google.firebase.messaging.FirebaseMessaging
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 interface NotificationRepository {
@@ -32,7 +36,19 @@ class NotificationRepositoryImpl @Inject constructor(
             Timber.e("Attempting to sync token for user: $userId")
             registerToken(token, userId)
         } else {
-            Timber.e("Token sync not needed or not possible. UserID: $userId, Token: ${token != null}, Synced: $isTokenSynced")
+            if (token == null) {
+                Timber.e("FCM token is null")
+                FirebaseMessaging.getInstance().token.addOnSuccessListener { newToken ->
+                    CoroutineScope(Dispatchers.IO).launch {
+                        userId?.let {
+                            preferences.setFcmToken(newToken)
+                            registerToken(newToken, userId)
+                        }
+                    }
+                }
+            } else {
+                Timber.e("Token sync not needed. UserID: $userId, Synced: $isTokenSynced")
+            }
         }
     }
 

@@ -44,7 +44,7 @@ class MyFirebaseMessagingService :
 
     override fun onNewToken(token: String) {
         scope.launch {
-            notificationRepository.registerToken(token)
+            notificationRepository.saveToken(token)
         }
     }
 

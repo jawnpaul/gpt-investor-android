@@ -1,8 +1,5 @@
 package com.thejawnpaul.gptinvestor.features.notification.domain
 
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.ktx.messaging
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
@@ -11,41 +8,42 @@ import kotlinx.coroutines.flow.first
 import timber.log.Timber
 
 interface NotificationRepository {
-
-    suspend fun registerToken(token: String)
-
-    suspend fun generateToken()
+    suspend fun saveToken(token: String)
+    suspend fun syncTokenIfNeeded()
 }
 
 class NotificationRepositoryImpl @Inject constructor(
     private val apiService: ApiService,
     private val preferences: GPTInvestorPreferences
 ) : NotificationRepository {
-    override suspend fun registerToken(token: String) {
-        try {
-            val userId = preferences.userId.first()
-            apiService.registerToken(RegisterTokenRequest(token = token, userId = userId))
-        } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+
+    override suspend fun saveToken(token: String) {
+        preferences.setFcmToken(token)
+        preferences.setIsTokenSynced(false)
+        Timber.e("FCM token saved to preferences.")
+    }
+
+    override suspend fun syncTokenIfNeeded() {
+        val userId = preferences.userId.first()
+        val token = preferences.fcmToken.first()
+        val isTokenSynced = preferences.isTokenSynced.first()
+
+        if (userId != null && token != null && !isTokenSynced) {
+            Timber.e("Attempting to sync token for user: $userId")
+            registerToken(token, userId)
+        } else {
+            Timber.e("Token sync not needed or not possible. UserID: $userId, Token: ${token != null}, Synced: $isTokenSynced")
         }
     }
 
-    override suspend fun generateToken() {
+    private suspend fun registerToken(token: String, userId: String) {
         try {
-            Firebase.messaging.token.addOnCompleteListener(
-                OnCompleteListener { task ->
-                    if (!task.isSuccessful) {
-                        Timber.e(task.exception)
-                        return@OnCompleteListener
-                    }
-                    // Get new FCM registration token
-                    val token = task.result
-
-                    Timber.e("Token: $token")
-                }
-            )
+            apiService.registerToken(RegisterTokenRequest(token = token, userId = userId))
+            preferences.setIsTokenSynced(true)
+            Timber.e("FCM token successfully registered for user: $userId")
         } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+            Timber.e(e, "Failed to register FCM token for user: $userId")
+            // The token remains unsynced, will be retried on next trigger.
         }
     }
 }

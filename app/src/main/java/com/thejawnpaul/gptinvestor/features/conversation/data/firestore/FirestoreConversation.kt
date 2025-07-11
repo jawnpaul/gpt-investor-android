@@ -67,10 +67,10 @@ data class FirestoreMessage(
                     about = it.getOrDefault("summary", "") as String,
                     marketCap = it.getOrDefault("market_cap", 0L) as Long,
                     news = it.getOrDefault("news", emptyList<CompanyNews>()) as List<CompanyNews>,
-                    peRatio = it.getOrDefault("pe_ratio", 0f) as Float,
-                    change = it.getOrDefault("percentage_change", 0f) as Float,
+                    peRatio = (it.getOrDefault("pe_ratio", 0f) as Double).toFloat(),
+                    change = (it.getOrDefault("percentage_change", 0f) as Double).toFloat(),
                     revenue = it.getOrDefault("revenue", 0L) as Long,
-                    price = it.getOrDefault("current_price", 0f) as Float,
+                    price = (it.getOrDefault("current_price", 0f) as Double).toFloat(),
                     historicalData = it.getOrDefault("historical_data", emptyList<HistoricalData>()) as List<HistoricalData>,
                     name = it.getOrDefault("company_name", "") as String,
                     imageUrl = it.getOrDefault("logo_url", "") as String

@@ -20,7 +20,7 @@ kotlin {
         iosSimulatorArm64()
     ).forEach {
         it.binaries.framework {
-            baseName = "GPT-Investor-Remote"
+            baseName = "Remote"
             isStatic = true
         }
     }

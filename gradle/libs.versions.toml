@@ -13,12 +13,12 @@ hilt = "2.56.2"
 timber = "5.0.1"
 navVersion = "2.9.1"
 hiltNavigation = "1.2.0"
-ktLint = "12.3.0"
+ktLint = "13.0.0"
 retrofit = "3.0.0"
 okhttp = "4.12.0"
 coil = "2.7.0"
 room = "2.7.2"
-timeAgo = "4.1.0"
+timeAgo = "1.12.0"
 jsoup = "1.21.1"
 gemini = "0.9.0"
 richText = "1.0.0-alpha02"
@@ -39,6 +39,8 @@ koin-annotation = "2.0.0"
 credentials = "1.5.0"
 googleId = "1.1.1"
 ktor-client = "2.3.2"
+kotlinx-datetime = "0.7.1"
+sqlite = "2.5.2"
 
 
 [libraries]
@@ -67,10 +69,10 @@ retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = 
 moshi-converter = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
 okhttp-logger = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
-androidx-room = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
-androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
-androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
-timeAgo = { group = "com.github.marlonlom", name = "timeago", version.ref = "timeAgo" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
+timeAgo = { group = "nl.jacobras", name = "Human-Readable", version.ref = "timeAgo" }
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 gemini = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "gemini" }
 richtext-compose = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "richText" }
@@ -88,6 +90,7 @@ google-truth = { group = "com.google.truth", name = "truth", version.ref = "trut
 core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
 androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
+koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
 koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin-annotation" }
@@ -106,6 +109,9 @@ ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negoti
 ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor-client" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor-client" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor-client" }
+
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
+big-decimal = "com.ionspin.kotlin:bignum:0.3.10"
 
 [bundles]
 ktor-common = [
@@ -128,6 +134,7 @@ ktLint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktLint" }
 googleServices = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+room = { id = "androidx.room", version.ref = "room" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

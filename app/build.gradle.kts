@@ -1,19 +1,108 @@
-import java.util.Properties
+@file:OptIn(ExperimentalKotlinGradlePluginApi::class)
+
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+import java.util.Properties
 
 plugins {
+    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.hiltAndroid)
+    alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktLint)
-    alias(libs.plugins.googleServices)
     alias(libs.plugins.crashlytics)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.room)
+}
+
+kotlin {
+    androidTarget {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+        instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
+    }
+
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach {
+        it.binaries.framework {
+            baseName = "GPT_Investor"
+            isStatic = true
+            export(project(":analytics"))
+        }
+    }
+
+    sourceSets {
+        androidMain.dependencies {
+            implementation(libs.androidx.core.ktx)
+            implementation(libs.androidx.lifecycle.runtime.ktx)
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.koin.android)
+            implementation(libs.koin.androidx.compose)
+            implementation(libs.ktor.client.android)
+            implementation(libs.androidx.core.splashscreen)
+            implementation(libs.dagger.hilt)
+            implementation(libs.timber)
+            implementation(libs.androidx.navigation.compose)
+            implementation(libs.androidx.hilt.navigation)
+            implementation(libs.retrofit)
+            implementation(libs.firebase.crashlytics)
+            implementation(libs.firebase.auth)
+            implementation(libs.firebase.config)
+            implementation(libs.firebase.messaging)
+        }
+
+        androidUnitTest.dependencies {
+            implementation(project(":remote:remotetest"))
+        }
+
+        commonMain.dependencies {
+            implementation(compose.runtime)
+            implementation(compose.ui)
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(project(":remote:remote"))
+            api(project(":analytics"))
+            implementation(project(":theme"))
+            implementation(libs.datastore.preferences)
+            implementation(libs.koin.core)
+            implementation(libs.ktor.client.core)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.big.decimal)
+            implementation(libs.room.runtime)
+            implementation(libs.room.compiler)
+            implementation(libs.sqlite.bundled)
+            implementation(libs.timeAgo)
+        }
+
+        commonTest.dependencies {
+
+        }
+
+        nativeMain.dependencies {
+
+        }
+        all {
+            languageSettings.enableLanguageFeature("PropertyParamAnnotationDefaultTargetMode")
+        }
+    }
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 val keystoreProperties = Properties()
+
 keystoreProperties.load(project.rootProject.file("keystore.properties").reader())
 
 android {
@@ -34,18 +123,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
-        }
-
-        ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
-
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments += mapOf(
-                    "room.schemaLocation" to "$projectDir/schemas"
-                )
-            }
         }
     }
 
@@ -102,12 +179,10 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -145,68 +220,38 @@ tasks.register<Copy>("installGitHook") {
 }
 
 tasks.getByPath(":app:preBuild").dependsOn("installGitHook")
-
 dependencies {
-    implementation(project(":remote:remote"))
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.core.splashscreen)
-    implementation(libs.dagger.hilt)
-    implementation(libs.timber)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.hilt.navigation)
-    implementation(libs.retrofit)
+    implementation(platform(libs.firebase.compose.bom))
     implementation(libs.coil.compose)
     implementation(libs.core.ktx)
     implementation(libs.androidx.junit.ktx)
     ksp(libs.dagger.hilt.compiler)
-    implementation(libs.androidx.room)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
-    implementation(libs.timeAgo)
     implementation(libs.jsoup)
     implementation(libs.gemini)
     implementation(libs.richtext.compose)
     implementation(libs.richtext.commonmark)
-    implementation(platform(libs.firebase.compose.bom))
-    implementation(libs.firebase.crashlytics)
-    implementation(libs.firebase.auth)
-    implementation(libs.firebase.config)
-    implementation(project(":analytics"))
-    implementation(project(":theme"))
-    implementation(libs.datastore.preferences)
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.play.services.auth)
     implementation(libs.google.identity)
-    implementation(libs.firebase.messaging)
 
-    implementation(libs.koin.core)
-    implementation(libs.koin.android)
 
-    implementation(libs.kotlinx.serialization.json)
-
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.android)
 
     // test
-    testImplementation(project(":remote:remotetest"))
     kspTest(libs.dagger.hilt.compiler)
     testImplementation(libs.junit)
     testImplementation(libs.google.truth)
     testImplementation(libs.okhttp.mockwebserver)
     testImplementation(libs.mockk)
     testImplementation(libs.coroutine.test)
-
+    add("kspAndroid", libs.room.compiler)
+    add("kspIosSimulatorArm64", libs.room.compiler)
+    add("kspIosX64", libs.room.compiler)
+    add("kspIosArm64", libs.room.compiler)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.tooling.preview)
     debugImplementation(libs.androidx.ui.test.manifest)
 }

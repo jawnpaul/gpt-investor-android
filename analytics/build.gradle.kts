@@ -33,7 +33,7 @@ kotlin {
         iosSimulatorArm64()
     ).forEach {
         it.binaries.framework {
-            baseName = "GPT-Investor-Analytics"
+            baseName = "Analytics"
             isStatic = true
         }
     }

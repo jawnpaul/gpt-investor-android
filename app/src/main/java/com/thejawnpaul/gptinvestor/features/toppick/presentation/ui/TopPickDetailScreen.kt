@@ -31,6 +31,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -94,28 +96,78 @@ fun TopPickDetailScreen(modifier: Modifier, topPickId: String, state: TopPickDet
             }
         },
         bottomBar = {
-            /*InputBar(
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .windowInsetsPadding(
-                        WindowInsets.ime
+                    .fillMaxWidth().padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val isLiked = remember { mutableStateOf(false) }
+                    val likeIcon = if (isLiked.value) {
+                        R.drawable.ic_like_filled
+                    } else {
+                        R.drawable.ic_like
+                    }
+
+                    val bookmarkIcon = if (state.topPick?.isSaved == true) {
+                        R.drawable.ic_bookmark_filled
+                    } else {
+                        R.drawable.ic_bookmark
+                    }
+
+                    // Like
+                    IconButton(
+                        modifier = Modifier.size(32.dp),
+                        onClick = {
+                            if (isLiked.value) {
+                                onEvent(TopPickEvent.RemoveLikeTopPick)
+                            } else {
+                                onEvent(TopPickEvent.LikeTopPick)
+                            }
+                            isLiked.value = !isLiked.value
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = likeIcon),
+                            contentDescription = null
+                        )
+                    }
+
+                    // Bookmark
+                    IconButton(
+                        modifier = Modifier.size(32.dp),
+                        onClick = {
+                            if (state.topPick?.isSaved == true) {
+                                onEvent(TopPickEvent.RemoveBookmarkTopPick)
+                            } else {
+                                onEvent(TopPickEvent.BookmarkTopPick)
+                            }
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = bookmarkIcon),
+                            contentDescription = stringResource(R.string.like_chosen)
+                        )
+                    }
+                }
+
+                // Share
+                IconButton(
+                    modifier = Modifier.size(32.dp),
+                    onClick = {
+                        onEvent(TopPickEvent.ShareTopPick)
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_top_pick_send),
+                        contentDescription = null
                     )
-                    .navigationBarsPadding(),
-                input = "",
-                contentPadding = PaddingValues(0.dp),
-                sendEnabled = false,
-                onInputChanged = { input ->
-                },
-                onSendClick = {
-                    keyboardController?.hide()
-                    // send query
-                },
-                placeholder = stringResource(
-                    R.string.ask_anything_about,
-                    "this top pick"
-                ),
-                shouldRequestFocus = false
-            )*/
+                }
+            }
         }
     ) { innerPadding ->
         Box(

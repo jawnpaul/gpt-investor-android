@@ -110,7 +110,7 @@ fun SingleHomeDefaultPrompt(modifier: Modifier = Modifier, prompt: DefaultPrompt
 
     Surface(
         onClick = { onClick(prompt) },
-        modifier = modifier.width(140.dp),
+        modifier = modifier.width(160.dp),
         shape = RoundedCornerShape(corner = CornerSize(20.dp)),
         border = BorderStroke(
             width = 2.dp,
@@ -118,7 +118,7 @@ fun SingleHomeDefaultPrompt(modifier: Modifier = Modifier, prompt: DefaultPrompt
         )
     ) {
         Text(
-            text = prompt.query,
+            text = prompt.title,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 12.dp),

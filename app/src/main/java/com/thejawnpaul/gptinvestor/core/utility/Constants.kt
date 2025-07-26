@@ -82,4 +82,5 @@ object Constants {
 
     const val PROMPT_COUNT = "prompt_count"
     const val FREE_PROMPT_COUNT = "free_prompt_count"
+    const val DEFAULT_PROMPTS_VERSION = "default_prompts_version"
 }

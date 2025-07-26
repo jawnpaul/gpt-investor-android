@@ -18,7 +18,7 @@ class FirebaseLogger @Inject constructor(private val firebaseAnalytics: Firebase
         params.forEach { (key, value) ->
             bundle.putString(key, value.toString())
         }
-        firebaseAnalytics.logEvent(eventName, bundle)
+        firebaseAnalytics.logEvent(eventName.lowercase().replace(" ", "_"), bundle)
     }
 
     override fun logViewEvent(screenName: String) {

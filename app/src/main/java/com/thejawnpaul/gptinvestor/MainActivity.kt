@@ -67,7 +67,7 @@ class MainActivity : ComponentActivity() {
                     isUserSignedIn == true && isFirstInstall == false
                 ) {
                     try {
-                        navController.navigate(Screen.DiscoverTabScreen.route) {
+                        navController.navigate(route = getScreenNameFromRoute(route = deepLinkRoute).route) {
                             // Optional: Clear back stack
                             popUpTo(navController.graph.startDestinationId) { inclusive = false }
                         }
@@ -169,6 +169,17 @@ class MainActivity : ComponentActivity() {
                 // Process notification data as needed
                 println("Notification data: $data")
             }
+        }
+    }
+
+    private fun getScreenNameFromRoute(route: String?): Screen {
+        if (route == null) {
+            return Screen.HomeScreen
+        }
+        return if (route.contains("discover")) {
+            Screen.DiscoverTabScreen
+        } else {
+            Screen.HomeScreen
         }
     }
 }

@@ -19,6 +19,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.WebViewScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
@@ -99,9 +100,11 @@ fun SetUpNavGraph(navController: NavHostController) {
                             HomeAction.OnGoToHistory -> {
                                 navController.navigate(Screen.HistoryTabScreen.route)
                             }
+
                             HomeAction.OnGoToSavedPicks -> {
                                 navController.navigate(Screen.SavedTopPicksScreen.route)
                             }
+
                             HomeAction.OnGoToSettings -> {
                                 navController.navigate(Screen.SettingsScreen.route)
                             }
@@ -116,7 +119,10 @@ fun SetUpNavGraph(navController: NavHostController) {
                     onAction = homeViewModel::processAction
                 )
             }
-            composable(Screen.DiscoverTabScreen.route) {
+            composable(
+                route = Screen.DiscoverTabScreen.route,
+                deepLinks = listOf(navDeepLink { uriPattern = Screen.DiscoverTabScreen.deepLink })
+            ) {
                 val companyViewModel = hiltViewModel<CompanyViewModel>()
                 val state = companyViewModel.companyDiscoveryState.collectAsStateWithLifecycle()
                 val scope = rememberCoroutineScope()

@@ -15,6 +15,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.thejawnpaul.gptinvestor.BuildConfig
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
+import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +39,8 @@ interface AuthenticationRepository {
 class AuthenticationRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth,
     private val analyticsLogger: AnalyticsLogger,
-    private val gptInvestorPreferences: GPTInvestorPreferences
+    private val gptInvestorPreferences: GPTInvestorPreferences,
+    private val tokenSyncManager: TokenSyncManager
 ) :
     AuthenticationRepository {
     override val currentUser: FirebaseUser?
@@ -82,6 +84,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
                         CoroutineScope(Dispatchers.IO).launch {
                             gptInvestorPreferences.setUserId(auth.currentUser?.uid.toString())
                             gptInvestorPreferences.setIsUserLoggedIn(true)
+                            tokenSyncManager.syncToken()
                         }
                         analyticsLogger.identifyUser(
                             eventName = "Sign Up",
@@ -161,6 +164,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
                     CoroutineScope(Dispatchers.IO).launch {
                         gptInvestorPreferences.setUserId(auth.currentUser?.uid.toString())
                         gptInvestorPreferences.setIsUserLoggedIn(true)
+                        tokenSyncManager.syncToken()
                     }
                     analyticsLogger.identifyUser(
                         eventName = "Log in",
@@ -181,6 +185,9 @@ class AuthenticationRepositoryImpl @Inject constructor(
         auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
             trySend(task.isSuccessful)
             if (task.isSuccessful) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    tokenSyncManager.syncToken()
+                }
                 analyticsLogger.identifyUser(
                     eventName = "Sign Up",
                     params = mapOf(
@@ -227,6 +234,9 @@ class AuthenticationRepositoryImpl @Inject constructor(
                     trySend(task.isSuccessful)
                     getAuthState()
                     if (task.isSuccessful) {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            tokenSyncManager.syncToken()
+                        }
                         analyticsLogger.identifyUser(
                             eventName = "Sign Up",
                             params = mapOf(

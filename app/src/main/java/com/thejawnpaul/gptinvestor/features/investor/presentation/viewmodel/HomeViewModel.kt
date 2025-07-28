@@ -142,7 +142,7 @@ class HomeViewModel @Inject constructor(
                         params = mapOf("permission" to true)
                     )
                     // firebase token generation
-                    notificationRepository.generateToken()
+                    notificationRepository.syncTokenIfNeeded()
                 }
 
                 is HomeEvent.ModelChanged -> {

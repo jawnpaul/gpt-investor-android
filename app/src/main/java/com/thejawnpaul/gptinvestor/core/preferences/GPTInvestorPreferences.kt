@@ -28,6 +28,8 @@ class GPTInvestorPreferences @Inject constructor(@ApplicationContext private val
         private val IS_USER_LOGGED_IN_KEY = booleanPreferencesKey("is_user_logged_in_preference")
         private val IS_USER_ON_MODEL_WAITLIST_KEY =
             booleanPreferencesKey("is_user_on_model_waitlist_preference")
+        private val FCM_TOKEN_KEY = stringPreferencesKey("fcm_token_preference")
+        private val IS_TOKEN_SYNCED_KEY = booleanPreferencesKey("is_token_synced_preference")
         private val Context.dataStore by preferencesDataStore("gpt_investor_preferences")
     }
 
@@ -150,6 +152,26 @@ class GPTInvestorPreferences @Inject constructor(@ApplicationContext private val
     suspend fun clearIsUserOnModelWaitlist() {
         dataStore.edit { preferences ->
             preferences.remove(IS_USER_ON_MODEL_WAITLIST_KEY)
+        }
+    }
+
+    val fcmToken: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[FCM_TOKEN_KEY]
+    }
+
+    suspend fun setFcmToken(token: String) {
+        dataStore.edit { preferences ->
+            preferences[FCM_TOKEN_KEY] = token
+        }
+    }
+
+    val isTokenSynced: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[IS_TOKEN_SYNCED_KEY] ?: false
+    }
+
+    suspend fun setIsTokenSynced(isSynced: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[IS_TOKEN_SYNCED_KEY] = isSynced
         }
     }
 }

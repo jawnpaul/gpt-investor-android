@@ -3,9 +3,7 @@ package com.thejawnpaul.gptinvestor.features.notification.service
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
-import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -19,7 +17,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @AndroidEntryPoint
 class MyFirebaseMessagingService :
@@ -31,20 +28,34 @@ class MyFirebaseMessagingService :
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)
 
-    override fun onMessageReceived(message: RemoteMessage) {
-        Timber.e("From: ${message.from}")
-        if (message.data.isNotEmpty()) {
-            Timber.e("Message data payload: ${message.data}")
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        super.onMessageReceived(remoteMessage)
+
+        // Handle FCM message
+        remoteMessage.data.let { data ->
+            val deepLinkRoute = data["deep_link"]
+            val title = data["title"] ?: "Notification"
+            val body = data["body"] ?: "You have a new notification"
+            val notificationData = data["notification_data"]
+
+            // Show notification with deep link
+            showNotification(title, body, deepLinkRoute, notificationData)
         }
-        message.notification?.let {
-            Timber.e("Message Notification Body: ${it.body}")
-            sendNotification(title = it.title, messageBody = it.body)
+
+        // Handle notification payload (if sent from Firebase Console)
+        remoteMessage.notification?.let { notification ->
+            val title = notification.title ?: "Notification"
+            val body = notification.body ?: "You have a new notification"
+            val deepLinkRoute = remoteMessage.data["deep_link"]
+            val notificationData = remoteMessage.data["notification_data"]
+
+            showNotification(title, body, deepLinkRoute, notificationData)
         }
     }
 
     override fun onNewToken(token: String) {
         scope.launch {
-            notificationRepository.registerToken(token)
+            notificationRepository.saveToken(token)
         }
     }
 
@@ -53,33 +64,52 @@ class MyFirebaseMessagingService :
         job.cancel()
     }
 
-    private fun sendNotification(title: String?, messageBody: String?) {
-        val intent = Intent(this, MainActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-        val channelId = getString(R.string.default_notification_channel_id)
-        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        val notificationBuilder = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.drawable.ic_stat_ic_notification)
-            .setContentTitle(title)
-            .setContentText(messageBody)
-            .setAutoCancel(true)
-            .setSound(defaultSoundUri)
-            .setContentIntent(pendingIntent)
-
-        val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private fun showNotification(title: String, body: String, deepLinkRoute: String?, notificationData: String?) {
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                channelId,
-                "GPT Investor Default Channel",
+                CHANNEL_ID,
+                "Default Channel",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
             notificationManager.createNotificationChannel(channel)
         }
 
-        val notificationId = 0
-        notificationManager.notify(notificationId, notificationBuilder.build())
+        // Create intent for when notification is clicked
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            deepLinkRoute?.let { route ->
+                putExtra("deep_link", route)
+            }
+            notificationData?.let { data ->
+                putExtra("notification_data", data)
+            }
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Build notification
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setSmallIcon(R.drawable.ic_stat_ic_notification)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+
+        // Show notification
+        notificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
+    companion object {
+        private const val CHANNEL_ID = "fcm_default_channel"
+        private const val NOTIFICATION_ID = 1001
     }
 }

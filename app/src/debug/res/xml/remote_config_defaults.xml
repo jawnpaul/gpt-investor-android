@@ -1,22 +1,68 @@
-<?xml version="1.0" encoding="UTF-8"?><defaults>
-  <entry>
-    <key>default_prompts_version</key>
-    <value>[{"_id":{"$oid":"66d9c11ce9cd98760600f48c"},"label":"AI Stocks","query":"Analyze the potential of AI and machine learning stocks for long-term growth."},{"_id":{"$oid":"66d9c11ce9cd98760600f481"},"label":"Tech Trends","query":"Analyze the current market trends for tech stocks."},{"_id":{"$oid":"66d9c11ce9cd98760600f485"},"label":"Crypto Investing","query":"What are the key factors to consider when investing in cryptocurrency?"},{"_id":{"$oid":"66d9c11ce9cd98760600f488"},"label":"Dividend Stocks","query":"What are the best dividend-paying stocks to consider for income-focused investors?"},{"_id":{"$oid":"66d9c11ce9cd98760600f494"},"label":"Cap Size","query":"What are the key things to consider when investing in small-cap vs. large-cap stocks?"},{"_id":{"$oid":"66d9c11ce9cd98760600f482"},"label":"Renewable Energy","query":"What are the potential risks and opportunities in the renewable energy sector?"},{"_id":{"$oid":"66d9c11ce9cd98760600f484"},"label":"Fed Impact","query":"Explain the impact of recent Federal Reserve decisions on the bond market."},{"_id":{"$oid":"66d9c11ce9cd98760600f487"},"label":"Value vs Growth","query":"Analyze the performance of value stocks vs. growth stocks in the current economic climate."},{"_id":{"$oid":"66d9c11ce9cd98760600f48d"},"label":"Dollar-Cost Averaging","query":"Explain the concept of dollar-cost averaging and its benefits for new investors."},{"_id":{"$oid":"66d9c11ce9cd98760600f48f"},"label":"Supply Chain","query":"Provide an overview of the current state of the global supply chain and its impact on various industries."},{"_id":{"$oid":"66d9c11ce9cd98760600f490"},"label":"Healthcare Stocks","query":"Analyze the performance of healthcare stocks in light of recent medical advancements."},{"_id":{"$oid":"66d9c11ce9cd98760600f491"},"label":"Demographic Trends","query":"What are the potential effects of changing demographics on long-term investment strategies?"},{"_id":{"$oid":"66d9c11ce9cd98760600f492"},"label":"Asset Allocation","query":"Explain the concept of asset allocation and its importance in portfolio management."},{"_id":{"$oid":"66d9c11ce9cd98760600f483"},"label":"Top S&amp;P 500","query":"Compare the performance of top 5 S&amp;P 500 companies over the last quarter."},{"_id":{"$oid":"66d9c11ce9cd98760600f486"},"label":"Emerging Markets","query":"Provide an overview of emerging markets and their growth potential."},{"_id":{"$oid":"66d9c11ce9cd98760600f489"},"label":"ESG Explained","query":"Explain the concept of ESG investing and its growing importance."},{"_id":{"$oid":"66d9c11ce9cd98760600f48a"},"label":"Oil &amp; Gas","query":"How might geopolitical events affect oil and gas investments in the near future?"},{"_id":{"$oid":"66d9c11ce9cd98760600f48b"},"label":"REITs Overview","query":"What are the pros and cons of investing in REITs (Real Estate Investment Trusts)?"},{"_id":{"$oid":"66d9c11ce9cd98760600f48e"},"label":"Financial Metrics","query":"What are the key metrics to look at when evaluating a company's financial health?"},{"_id":{"$oid":"66d9c11ce9cd98760600f493"},"label":"EV Market","query":"Analyze the opportunities and risks in the electric vehicle (EV) market."}]</value>
-  </entry>
-  <entry>
-    <key>prompt_count</key>
-    <value>100</value>
-  </entry>
-  <entry>
-    <key>default_model_name</key>
-    <value>gemini-2.0-flash</value>
-  </entry>
-  <entry>
-    <key>free_prompt_count</key>
-    <value>2</value>
-  </entry>
-  <entry>
-    <key>website_domain</key>
-    <value>https://m7mxrc35hp.us-west-2.awsapprunner.com/</value>
-  </entry>
+<?xml version="1.0" encoding="UTF-8"?>
+<defaults>
+    <entry>
+        <key>default_prompts_version</key>
+        <value>[{"_id":{"$oid":"66d9c11ce9cd98760600f481"},"label":"Trends shaping tech
+            stocks","query":"Analyze the current market trends for tech
+            stocks."},{"_id":{"$oid":"66d9c11ce9cd98760600f482"},"label":"Risks and gains in green
+            energy","query":"What are the potential risks and opportunities in the renewable energy
+            sector?"},{"_id":{"$oid":"66d9c11ce9cd98760600f483"},"label":"Top 5 S&amp;P 500 stocks
+            this quarter","query":"Compare the performance of top 5 S&amp;P 500 companies over the
+            last quarter."},{"_id":{"$oid":"66d9c11ce9cd98760600f484"},"label":"How Fed moves affect
+            the market","query":"Explain the impact of recent Federal Reserve decisions on the bond
+            market."},{"_id":{"$oid":"66d9c11ce9cd98760600f485"},"label":"How to invest smart in
+            crypto","query":"What are the key factors to consider when investing in
+            cryptocurrency?"},{"_id":{"$oid":"66d9c11ce9cd98760600f486"},"label":"Opportunities in
+            emerging markets","query":"Provide an overview of emerging markets and their growth
+            potential."},{"_id":{"$oid":"66d9c11ce9cd98760600f487"},"label":"Value stocks vs growth
+            stocks","query":"Analyze the performance of value stocks vs. growth stocks in the
+            current economic climate."},{"_id":{"$oid":"66d9c11ce9cd98760600f488"},"label":"Best
+            dividend stocks to explore","query":"What are the best dividend-paying stocks to
+            consider for income-focused
+            investors?"},{"_id":{"$oid":"66d9c11ce9cd98760600f489"},"label":"Making sense of ESG
+            investing","query":"Explain the concept of ESG investing and its growing
+            importance."},{"_id":{"$oid":"66d9c11ce9cd98760600f48a"},"label":"How global events move
+            oil &amp; gas?","query":"How might geopolitical events affect oil and gas investments in
+            the near future?"},{"_id":{"$oid":"66d9c11ce9cd98760600f48b"},"label":"REITs and how to
+            invest in them","query":"What are the pros and cons of investing in REITs (Real Estate
+            Investment Trusts)?"},{"_id":{"$oid":"66d9c11ce9cd98760600f48c"},"label":"Long term
+            outlook for AI stocks","query":"Analyze the potential of AI and machine learning stocks
+            for long-term growth."},{"_id":{"$oid":"66d9c11ce9cd98760600f48d"},"label":"Why
+            dollar-cost averaging works?","query":"Explain the concept of dollar-cost averaging and
+            its benefits for new
+            investors."},{"_id":{"$oid":"66d9c11ce9cd98760600f48e"},"label":"Key numbers to assess
+            companies","query":"What are the key metrics to look at when evaluating a company's
+            financial health?"},{"_id":{"$oid":"66d9c11ce9cd98760600f48f"},"label":"Supply chain
+            issues and effects","query":"Provide an overview of the current state of the global
+            supply chain and its impact on various
+            industries."},{"_id":{"$oid":"66d9c11ce9cd98760600f490"},"label":"What’s moving
+            healthcare stocks?","query":"Analyze the performance of healthcare stocks in light of
+            recent medical advancements."},{"_id":{"$oid":"66d9c11ce9cd98760600f491"},"label":"How
+            shifting populations affect markets?","query":"What are the potential effects of
+            changing demographics on long-term investment
+            strategies?"},{"_id":{"$oid":"66d9c11ce9cd98760600f492"},"label":"How to balance your
+            portfolio?","query":"Explain the concept of asset allocation and its importance in
+            portfolio management."},{"_id":{"$oid":"66d9c11ce9cd98760600f493"},"label":"Risks and
+            growth in EV stocks","query":"Analyze the opportunities and risks in the electric
+            vehicle (EV) market."},{"_id":{"$oid":"66d9c11ce9cd98760600f494"},"label":"Small cap vs
+            large cap explained","query":"What are the key things to consider when investing in
+            small-cap vs. large-cap stocks?"}]
+        </value>
+    </entry>
+    <entry>
+        <key>prompt_count</key>
+        <value>100</value>
+    </entry>
+    <entry>
+        <key>default_model_name</key>
+        <value>gemini-2.0-flash</value>
+    </entry>
+    <entry>
+        <key>free_prompt_count</key>
+        <value>2</value>
+    </entry>
+    <entry>
+        <key>website_domain</key>
+        <value>https://m7mxrc35hp.us-west-2.awsapprunner.com/</value>
+    </entry>
 </defaults>

@@ -293,6 +293,23 @@ class TopPickViewModel @Inject constructor(
             is TopPickEvent.GetTopPick -> {
                 updateTopPickId(event.id)
             }
+
+            TopPickEvent.BookmarkTopPick -> {
+                saveTopPick()
+            }
+            TopPickEvent.LikeTopPick -> {
+                // Like top pick
+            }
+            TopPickEvent.RemoveBookmarkTopPick -> {
+                removeTopPickFromSaved()
+            }
+            TopPickEvent.ShareTopPick -> {
+                shareTopPick()
+            }
+
+            TopPickEvent.RemoveLikeTopPick -> {
+                // Remove like top pick
+            }
         }
     }
 
@@ -314,4 +331,9 @@ sealed interface TopPickEvent {
     data class AuthenticationResponse(val message: String) : TopPickEvent
     data class ClickNewsSources(val show: Boolean) : TopPickEvent
     data class GetTopPick(val id: String) : TopPickEvent
+    data object ShareTopPick : TopPickEvent
+    data object BookmarkTopPick : TopPickEvent
+    data object RemoveBookmarkTopPick : TopPickEvent
+    data object LikeTopPick : TopPickEvent
+    data object RemoveLikeTopPick : TopPickEvent
 }

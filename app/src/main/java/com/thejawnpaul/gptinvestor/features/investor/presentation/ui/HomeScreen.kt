@@ -7,6 +7,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -233,13 +234,28 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
                         style = MaterialTheme.typography.titleMedium
                     )
 
-                    IconButton(modifier = Modifier, onClick = {
-                        onAction(HomeAction.OnGoToDiscover)
-                    }) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_search_status_two),
-                            contentDescription = null
+                    Row(
+                        modifier = Modifier.clickable(
+                            indication = null,
+                            interactionSource = null,
+                            onClick = { onAction(HomeAction.OnGoToDiscover) }
+                        ),
+                        horizontalArrangement = Arrangement.spacedBy(0.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.discover),
+                            style = MaterialTheme.typography.titleMedium
                         )
+
+                        IconButton(modifier = Modifier, onClick = {
+                            onAction(HomeAction.OnGoToDiscover)
+                        }) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_search_status_two),
+                                contentDescription = null
+                            )
+                        }
                     }
                 }
             }

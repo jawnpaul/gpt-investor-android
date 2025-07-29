@@ -30,6 +30,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyPro
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.ConversationPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPromptParser
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntityMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
@@ -85,7 +86,7 @@ class ConversationRepository @Inject constructor(
 
     override suspend fun getDefaultPrompts(): Flow<Either<Failure, List<DefaultPrompt>>> = flow {
         try {
-            val response = apiService.getDefaultPrompts()
+            /*val response = apiService.getDefaultPrompts()
             if (response.isSuccessful) {
                 response.body()?.let { prompts ->
                     val defaultPrompts = prompts.map { prompt ->
@@ -95,7 +96,19 @@ class ConversationRepository @Inject constructor(
                     }.take(8)
                     emit(Either.Right(defaultPrompts))
                 }
-            }
+            }*/
+            val defaultPromptsString =
+                remoteConfig.fetchAndActivateStringValue(Constants.DEFAULT_PROMPTS_VERSION)
+            val parser = DefaultPromptParser()
+            val remoteConfigDefaultPrompt =
+                parser.parseDefaultPrompts(defaultPromptsString)?.shuffled()?.take(8)
+            val defaultPrompt = remoteConfigDefaultPrompt?.map { prompt ->
+                with(prompt) {
+                    DefaultPrompt(title = label ?: "", query = query ?: "")
+                }
+            } ?: emptyList()
+
+            emit(Either.Right(defaultPrompt))
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.ServerError))

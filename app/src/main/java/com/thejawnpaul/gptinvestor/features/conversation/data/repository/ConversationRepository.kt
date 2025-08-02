@@ -86,17 +86,6 @@ class ConversationRepository @Inject constructor(
 
     override suspend fun getDefaultPrompts(): Flow<Either<Failure, List<DefaultPrompt>>> = flow {
         try {
-            /*val response = apiService.getDefaultPrompts()
-            if (response.isSuccessful) {
-                response.body()?.let { prompts ->
-                    val defaultPrompts = prompts.map { prompt ->
-                        with(prompt) {
-                            DefaultPrompt(title = label, query = query)
-                        }
-                    }.take(8)
-                    emit(Either.Right(defaultPrompts))
-                }
-            }*/
             val defaultPromptsString =
                 remoteConfig.fetchAndActivateStringValue(Constants.DEFAULT_PROMPTS_VERSION)
             val parser = DefaultPromptParser()
@@ -130,7 +119,12 @@ class ConversationRepository @Inject constructor(
             )
 
             // Always create a new conversation entity
-            val conversationId = insertConversation(title = prompt.title)
+            val conversationId = conversationDao.insertConversation(
+                ConversationEntity(
+                    title = prompt.title,
+                    createdAt = System.currentTimeMillis()
+                )
+            )
 
             val structuredConversation = StructuredConversation(
                 id = conversationId,
@@ -140,6 +134,14 @@ class ConversationRepository @Inject constructor(
                 )
             )
             emit(Either.Right(structuredConversation))
+
+            conversationSyncManager.syncConversationToCloud(
+                conversation = ConversationEntity(
+                    conversationId,
+                    title = prompt.title,
+                    createdAt = System.currentTimeMillis()
+                )
+            )
 
             val chat =
                 generativeModel.startChat(history = getHistory(structuredConversation.id))
@@ -157,7 +159,8 @@ class ConversationRepository @Inject constructor(
                     response = structuredConversation.messageList.last().response,
                     createdAt = System.currentTimeMillis()
                 )
-                messageDao.insertMessage(message)
+                val id = messageDao.insertMessage(message)
+                conversationSyncManager.syncMessageToCloud(message = message.copy(messageId = id))
             }.collect { result ->
                 result.text?.let { responseText ->
 
@@ -313,7 +316,11 @@ class ConversationRepository @Inject constructor(
                 val updatedMessageEntity = messageDao.getSingleMessage(newMessageId)
                     .copy(response = finalResponseText) // Use the response from the conversation state
                 messageDao.updateMessage(updatedMessageEntity)
-                conversationSyncManager.syncMessageToCloud(updatedMessageEntity.copy(companyDetailRemoteResponse = company))
+                conversationSyncManager.syncMessageToCloud(
+                    updatedMessageEntity.copy(
+                        companyDetailRemoteResponse = company
+                    )
+                )
 
                 getConversationTitle(currentConversation.id)?.let { title ->
                     // NOW, currentConversation already has suggestedPrompts.
@@ -465,7 +472,11 @@ class ConversationRepository @Inject constructor(
                 val updatedEntity = messageDao.getSingleMessage(newIndex)
                     .copy(response = conversation.messageList.last().response)
                 messageDao.updateMessage(updatedEntity)
-                conversationSyncManager.syncMessageToCloud(updatedEntity.copy(companyDetailRemoteResponse = prompt.company))
+                conversationSyncManager.syncMessageToCloud(
+                    updatedEntity.copy(
+                        companyDetailRemoteResponse = prompt.company
+                    )
+                )
 
                 getConversationTitle(conversation.id)?.let { title ->
                     conversation = conversation.copy(title = title)

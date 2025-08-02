@@ -17,6 +17,8 @@ class ConversationSyncManager @Inject constructor(
         firestoreConversationRepository.saveConversation(conversation)
             .onFailure { error ->
                 Timber.e("DataSync Failed to sync conversation: ${error.message}")
+            }.onSuccess {
+                Timber.e("DataSync Successfully synced conversation: ${conversation.conversationId}")
             }
     }
 
@@ -24,6 +26,8 @@ class ConversationSyncManager @Inject constructor(
         firestoreConversationRepository.saveMessage(message)
             .onFailure { error ->
                 Timber.e("DataSync Failed to sync message: ${error.message}")
+            }.onSuccess {
+                Timber.e("DataSync Successfully synced message: ${message.messageId}")
             }
     }
 
@@ -31,6 +35,8 @@ class ConversationSyncManager @Inject constructor(
         firestoreConversationRepository.updateMessageFeedback(conversationId.toString(), messageId.toString(), feedbackStatus)
             .onFailure { error ->
                 Timber.e("DataSync Failed to sync message feedback: ${error.message}")
+            }.onSuccess {
+                Timber.e("DataSync Successfully synced message feedback: $messageId")
             }
     }
 

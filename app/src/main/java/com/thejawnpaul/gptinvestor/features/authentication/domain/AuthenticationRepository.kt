@@ -15,8 +15,8 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.thejawnpaul.gptinvestor.BuildConfig
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
-import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
 import com.thejawnpaul.gptinvestor.features.conversation.data.firestore.ConversationSyncManager
+import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

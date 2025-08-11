@@ -23,6 +23,7 @@ import com.thejawnpaul.gptinvestor.features.investor.data.remote.SaveComparisonR
 import com.thejawnpaul.gptinvestor.features.investor.data.remote.SaveSentimentRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenResponse
+import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitRemote
 import com.thejawnpaul.gptinvestor.features.toppick.data.remote.TopPickRemote
 import retrofit2.Response
 import retrofit2.http.Body
@@ -75,4 +76,13 @@ interface ApiService {
 
     @POST("v1/add-to-waitlist")
     suspend fun addUserToWaitlist(@Body request: AddToWaitlistRequest): Response<AddToWaitlistResponse>
+
+    @GET("v1/tidbit/all-tidbit")
+    suspend fun getAllTidbit(): Response<List<TidbitRemote>>
+
+    @GET("v1/tidbit/today-tidbit")
+    suspend fun getTodayTidbit(): Response<TidbitRemote>
+
+    @GET("v1/tidbit/single-tidbit")
+    suspend fun getSingleTidbit(@Query("id") id: String): Response<TidbitRemote>
 }

@@ -19,6 +19,8 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefa
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.*
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
+import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
@@ -42,7 +44,8 @@ class HomeViewModel @Inject constructor(
     private val analyticsLogger: AnalyticsLogger,
     private val topPickRepository: ITopPickRepository,
     private val notificationRepository: NotificationRepository,
-    private val modelsRepository: ModelsRepository
+    private val modelsRepository: ModelsRepository,
+    private val tidbitRepository: TidbitRepository
 ) :
     ViewModel() {
 
@@ -63,6 +66,7 @@ class HomeViewModel @Inject constructor(
         getCurrentUser()
         getAvailableModels()
         getDefaultPrompts()
+        getTodayTidbit()
 
         viewModelScope.launch {
             preferences.themePreference.collect { theme ->
@@ -189,6 +193,14 @@ class HomeViewModel @Inject constructor(
                         authenticationRepository.signOut(event.context)
                     }
                 }
+
+                is HomeEvent.ClickTidbit -> {
+                    _actions.emit(OnGoToTidbitDetail(event.id))
+                }
+
+                HomeEvent.GoToAllTidbits -> {
+                    _actions.emit(OnGoToAllTidbits)
+                }
             }
         }
     }
@@ -238,6 +250,25 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+    private fun getTodayTidbit() {
+        viewModelScope.launch {
+            tidbitRepository.getTodayTidbit().onSuccess { tidbit ->
+                _uiState.update {
+                    it.copy(
+                        homeTidbitView = with(tidbit) {
+                            HomeTidbitView(
+                                id = id,
+                                previewUrl = previewUrl,
+                                title = title,
+                                description = description
+                            )
+                        }
+                    )
+                }
+            }
+        }
+    }
 }
 
 data class HomeUiState(
@@ -260,7 +291,8 @@ data class HomeUiState(
     ),
     val selectedWaitlistOptions: List<String> = emptyList(),
     val defaultPrompts: List<DefaultPrompt> = emptyList(),
-    val drawerState: DrawerState = DrawerState()
+    val drawerState: DrawerState = DrawerState(),
+    val homeTidbitView: HomeTidbitView? = null
 )
 
 sealed interface HomeEvent {
@@ -275,6 +307,8 @@ sealed interface HomeEvent {
     data object JoinWaitlist : HomeEvent
     data class DefaultPromptClicked(val prompt: DefaultPrompt) : HomeEvent
     data class SignOut(val context: Context) : HomeEvent
+    data class ClickTidbit(val id: String) : HomeEvent
+    data object GoToAllTidbits : HomeEvent
 }
 
 sealed interface HomeAction {
@@ -290,4 +324,6 @@ sealed interface HomeAction {
     data object OnGoToSettings : HomeAction
     data object OnGoToHistory : HomeAction
     data object OnGoToSavedPicks : HomeAction
+    data class OnGoToTidbitDetail(val id: String) : HomeAction
+    data object OnGoToAllTidbits : HomeAction
 }

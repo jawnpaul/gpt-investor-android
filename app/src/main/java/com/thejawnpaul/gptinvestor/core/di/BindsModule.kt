@@ -16,6 +16,8 @@ import com.thejawnpaul.gptinvestor.features.investor.data.repository.InvestorRep
 import com.thejawnpaul.gptinvestor.features.investor.domain.repository.IInvestorRepository
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepositoryImpl
+import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
+import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepositoryImpl
 import com.thejawnpaul.gptinvestor.features.toppick.data.repository.TopPickRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
 import dagger.Binds
@@ -53,4 +55,7 @@ abstract class BindsModule {
 
     @Binds
     abstract fun providesModelsRepository(repository: ModelsRepositoryImpl): ModelsRepository
+
+    @Binds
+    abstract fun providesTidbitRepository(repository: TidbitRepositoryImpl): TidbitRepository
 }

@@ -108,6 +108,11 @@ fun SetUpNavGraph(navController: NavHostController) {
                             HomeAction.OnGoToSettings -> {
                                 navController.navigate(Screen.SettingsScreen.route)
                             }
+
+                            HomeAction.OnGoToAllTidbits -> {
+                            }
+                            is HomeAction.OnGoToTidbitDetail -> {
+                            }
                         }
                     }.launchIn(scope)
                 }

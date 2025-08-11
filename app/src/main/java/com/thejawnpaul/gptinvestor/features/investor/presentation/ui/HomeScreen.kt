@@ -68,6 +68,7 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.Q
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeUiState
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.HomeTidbitItem
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import kotlinx.coroutines.launch
 
@@ -288,11 +289,13 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
                     }
                 }
 
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.Center)
-                ) {
+                state.homeTidbitView?.let { item ->
+                    HomeTidbitItem(
+                        modifier = Modifier.align(Alignment.Center),
+                        imageUrl = item.previewUrl,
+                        title = item.title,
+                        description = item.description
+                    )
                 }
             }
         }

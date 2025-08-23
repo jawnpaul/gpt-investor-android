@@ -8,7 +8,6 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
-import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfigImpl
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DrawerState
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
@@ -19,28 +18,24 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefa
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.OnStartConversation
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
-import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.android.annotation.KoinViewModel
 import timber.log.Timber
-import javax.inject.Inject
 
-@HiltViewModel
-class HomeViewModel @Inject constructor(
+@KoinViewModel
+class HomeViewModel(
     private val getTopPicksUseCase: GetTopPicksUseCase,
     private val authenticationRepository: AuthenticationRepository,
     private val getDefaultPromptsUseCase: GetDefaultPromptsUseCase,
-    private val remoteConfig: RemoteConfigImpl,
     private val preferences: GPTInvestorPreferences,
     private val analyticsLogger: AnalyticsLogger,
-    private val topPickRepository: ITopPickRepository,
     private val notificationRepository: NotificationRepository,
     private val modelsRepository: ModelsRepository
 ) :
@@ -58,7 +53,6 @@ class HomeViewModel @Inject constructor(
     private var upgradeModelId: String? = null
 
     init {
-        remoteConfig.init()
         getTopPicks()
         getCurrentUser()
         getAvailableModels()
@@ -81,7 +75,7 @@ class HomeViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         drawerState = it.drawerState.copy(
-                            user = authenticationRepository.currentUser
+//                            user = authenticationRepository.currentUser
                         )
                     )
                 }
@@ -102,7 +96,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             authenticationRepository.getAuthState().collect { isSignedIn ->
                 _uiState.update {
-                    it.copy(currentUser = if (isSignedIn) authenticationRepository.currentUser else null)
+                    it.copy(currentUser = /*if (isSignedIn) authenticationRepository.currentUser else*/ null)
                 }
             }
         }
@@ -186,7 +180,7 @@ class HomeViewModel @Inject constructor(
 
                 is HomeEvent.SignOut -> {
                     viewModelScope.launch {
-                        authenticationRepository.signOut(event.context)
+//                        authenticationRepository.signOut(event.context)
                     }
                 }
             }

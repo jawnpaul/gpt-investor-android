@@ -80,6 +80,11 @@ object Constants {
 
     const val MODEL_NAME_KEY = "default_model_name"
 
+    const val TOP_P_VALUE = 1f
+    const val TOP_K_VALUE = 1
+    const val TEMPERATURE_VALUE = 0.2f
+    const val MAX_OUTPUT_TOKENS = 1024
+
     const val PROMPT_COUNT = "prompt_count"
     const val FREE_PROMPT_COUNT = "free_prompt_count"
 }

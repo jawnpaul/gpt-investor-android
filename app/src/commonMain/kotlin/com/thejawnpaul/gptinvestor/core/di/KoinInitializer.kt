@@ -13,6 +13,7 @@ fun initKoin(
         modules(
             platformModules + providesDataStore()
                 + provideDatabaseModule
+                + providesCoroutinesModule
         )
     }
 }

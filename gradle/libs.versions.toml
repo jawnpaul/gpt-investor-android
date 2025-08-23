@@ -1,85 +1,84 @@
+
 [versions]
 agp = "8.11.0"
 kotlin = "2.2.0"
-coreKtx = "1.16.0"
+coreKtx = "1.17.0"
 junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.9.1"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+lifecycleRuntimeKtx = "2.9.2"
 activityCompose = "1.10.1"
-composeBom = "2025.06.01"
+composeBom = "2025.08.00"
 compose-multiplatform = "1.8.2"
-hilt = "2.56.2"
+hilt = "2.57.1"
 timber = "5.0.1"
-navVersion = "2.9.1"
+navVersion = "2.9.3"
 hiltNavigation = "1.2.0"
-ktLint = "13.0.0"
+ktLint = "13.1.0"
 retrofit = "3.0.0"
-okhttp = "4.12.0"
+okhttp = "5.1.0"
 coil = "2.7.0"
 room = "2.7.2"
 timeAgo = "1.12.0"
-jsoup = "1.21.1"
-gemini = "0.9.0"
-richText = "1.0.0-alpha02"
+ksoup = "0.2.5"
+richText = "1.0.0-alpha03"
 googleServices = "4.4.3"
-firebaseBom = "33.16.0"
-crashlytics = "3.0.4"
+firebaseBom = "34.1.0"
+crashlytics = "3.0.6"
 truth = "1.4.4"
-mockk = "1.14.4"
+mockk = "1.14.5"
 coroutine = "1.10.2"
-coreKtxVersion = "1.6.1"
-junitKtx = "1.2.1"
+coreKtxVersion = "1.7.0"
+junitKtx = "1.3.0"
 ksp = "2.2.0-2.0.2"
 spalshScreen = "1.0.1"
-mixpanel = "8.2.0"
+mixpanel = "8.2.2"
 datastore = "1.1.7"
-koin = "4.0.4"
-koin-annotation = "2.0.0"
+koin = "4.1.0"
+koin-annotation = "2.1.0"
 credentials = "1.5.0"
 googleId = "1.1.1"
 ktor-client = "2.3.2"
 kotlinx-datetime = "0.7.1"
 sqlite = "2.5.2"
+kermit = "2.0.8"
 
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
+#Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+#Lifecycle
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
-androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+#Compose
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-androidx-ui = { group = "androidx.compose.ui", name = "ui" }
-androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
-androidx-core-splashscreen = {group = "androidx.core", name = "core-splashscreen", version.ref = "spalshScreen"}
-datastore-preferences = {group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore"}
-dagger-hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
-dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
-timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navVersion" }
 androidx-hilt-navigation = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigation" }
+#Splash screen
+androidx-core-splashscreen = {group = "androidx.core", name = "core-splashscreen", version.ref = "spalshScreen"}
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 moshi-converter = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
-okhttp-logger = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+#Image Loading
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+#Database and Persistence
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
-timeAgo = { group = "nl.jacobras", name = "Human-Readable", version.ref = "timeAgo" }
-jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
-gemini = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "gemini" }
+datastore-preferences = {group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore"}
+#Gemini AI
+firebase-ai = { group = "com.google.firebase", name = "firebase-ai" }
 richtext-compose = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "richText" }
 richtext-commonmark = {group = "com.halilibo.compose-richtext", name = "richtext-commonmark", version.ref = "richText"}
+#Firebase
 firebase-compose-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
-firebase-analaytics = { group = "com.google.firebase", name = "firebase-analytics" }
-firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 firebase-config = { group = "com.google.firebase", name = "firebase-config" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
@@ -87,20 +86,29 @@ okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver",
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 coroutine-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutine" }
 google-truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
-core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
 androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
+#Dependency Injection
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
 koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin-annotation" }
+dagger-hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+#Asynchronous Programming
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutine" }
+#Serialization
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.9.0" }
+#Analytics
 mixpanel-android = {group = "com.mixpanel.android", name= "mixpanel-android", version.ref="mixpanel"}
+firebase-analaytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
+#Credentials
 androidx-credentials = {group = "androidx.credentials", name = "credentials", version.ref = "credentials"}
 androidx-play-services-auth = {group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials"}
+#Google Identity
 google-identity = {group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleId"}
-
+#Networking
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor-client" }
 ktor-client-encoding = { module = "io.ktor:ktor-client-encoding", version.ref = "ktor-client" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor-client" }
@@ -109,9 +117,19 @@ ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negoti
 ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor-client" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor-client" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor-client" }
-
+#HTML Parsing
+ksoup = { group = "com.fleeksoft.ksoup", name = "ksoup", version.ref = "ksoup" }
+ksoup-kotlinx-io = { group = "com.fleeksoft.ksoup", name = "ksoup-kotlinx", version.ref = "ksoup" }
+ksoup-ktor2 = { group = "com.fleeksoft.ksoup", name = "ksoup-network-ktor2", version.ref = "ksoup" }
+#Date and Time
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
+timeAgo = { group = "nl.jacobras", name = "Human-Readable", version.ref = "timeAgo" }
+#Decimal formatting
 big-decimal = "com.ionspin.kotlin:bignum:0.3.10"
+#Logging
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+okhttp-logger = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 
 [bundles]
 ktor-common = [
@@ -121,6 +139,11 @@ ktor-common = [
   "ktor-client-content-negotiation",
   "ktor-client-auth",
   "ktor-serialization-kotlinx-json"
+]
+ksoup = [
+  "ksoup",
+  "ksoup-kotlinx-io",
+  "ksoup-ktor2"
 ]
 
 

@@ -25,13 +25,12 @@ import com.thejawnpaul.gptinvestor.features.splash.AnimatedSplashScreen
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import org.koin.android.ext.android.inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    @Inject
-    lateinit var preferences: GPTInvestorPreferences
+    private val preferences: GPTInvestorPreferences by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()

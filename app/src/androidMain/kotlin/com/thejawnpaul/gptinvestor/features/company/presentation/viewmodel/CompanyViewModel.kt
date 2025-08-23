@@ -31,16 +31,15 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.Model
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.AllSectorView
 import com.thejawnpaul.gptinvestor.features.toppick.data.repository.TopPickRepository
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.android.annotation.KoinViewModel
 import timber.log.Timber
-import javax.inject.Inject
 
-@HiltViewModel
-class CompanyViewModel @Inject constructor(
+@KoinViewModel
+class CompanyViewModel(
     private val getAllSectorUseCase: GetAllSectorUseCase,
     private val getAllCompaniesUseCase: GetAllCompaniesUseCase,
     private val getSectorCompaniesUseCase: GetSectorCompaniesUseCase,

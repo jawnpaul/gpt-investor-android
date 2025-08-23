@@ -1,28 +1,23 @@
 package com.thejawnpaul.gptinvestor.features.conversation.data.repository
 
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.BlockThreshold
-import com.google.ai.client.generativeai.type.Content
-import com.google.ai.client.generativeai.type.GoogleGenerativeAIException
-import com.google.ai.client.generativeai.type.HarmCategory
-import com.google.ai.client.generativeai.type.SafetySetting
-import com.google.ai.client.generativeai.type.content
-import com.google.ai.client.generativeai.type.generationConfig
-import com.google.firebase.auth.FirebaseAuth
-import com.thejawnpaul.gptinvestor.BuildConfig
+import co.touchlab.kermit.Logger
+//import com.google.firebase.auth.FirebaseAuth
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
-import com.thejawnpaul.gptinvestor.core.RemoteConfig
+import com.thejawnpaul.gptinvestor.core.IRemoteConfig
 import com.thejawnpaul.gptinvestor.core.api.ApiService
+import com.thejawnpaul.gptinvestor.core.api.GeminiApi
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.core.utility.Constants
+import com.thejawnpaul.gptinvestor.core.utility.getTodayDateAsString
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.dao.ConversationDao
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.dao.MessageDao
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.ConversationEntity
+import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.History
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.MessageEntity
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityRequest
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyPrompt
@@ -39,21 +34,19 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import timber.log.Timber
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
+import org.koin.core.annotation.Single
 import kotlin.time.ExperimentalTime
 
+@Single
 class ConversationRepository(
     private val apiService: ApiService,
     private val analyticsLogger: AnalyticsLogger,
     private val messageDao: MessageDao,
     private val conversationDao: ConversationDao,
-    private val remoteConfig: RemoteConfig,
+    private val remoteConfig: IRemoteConfig,
     private val gptInvestorPreferences: GPTInvestorPreferences,
-    private val auth: FirebaseAuth
+//    private val auth: FirebaseAuth,
+    private val gemini: GeminiApi,
 ) :
     IConversationRepository {
 
@@ -62,24 +55,6 @@ class ConversationRepository(
     private val flashModel = "gemini-2.0-flash"
 
     private val rateLimitMutex = Mutex()
-
-    private val generativeModel = GenerativeModel(
-        modelName = remoteConfig.fetchAndActivateStringValue(Constants.MODEL_NAME_KEY),
-        apiKey = BuildConfig.GEMINI_API_KEY,
-        generationConfig = generationConfig {
-            temperature = 0.2f
-            topK = 1
-            topP = 1f
-            maxOutputTokens = 1024
-        },
-        safetySettings = listOf(
-            SafetySetting(HarmCategory.HARASSMENT, BlockThreshold.MEDIUM_AND_ABOVE),
-            SafetySetting(HarmCategory.HATE_SPEECH, BlockThreshold.MEDIUM_AND_ABOVE),
-            SafetySetting(HarmCategory.SEXUALLY_EXPLICIT, BlockThreshold.MEDIUM_AND_ABOVE),
-            SafetySetting(HarmCategory.DANGEROUS_CONTENT, BlockThreshold.MEDIUM_AND_ABOVE)
-        ),
-        systemInstruction = content { text(Constants.SYSTEM_INSTRUCTIONS) }
-    )
 
     override suspend fun getDefaultPrompts(): Flow<Either<Failure, List<DefaultPrompt>>> = flow {
         try {
@@ -127,10 +102,8 @@ class ConversationRepository(
             )
             emit(Either.Right(structuredConversation))
 
-            val chat =
-                generativeModel.startChat(history = getHistory(structuredConversation.id))
 
-            val response = chat.sendMessageStream(prompt.query)
+            val response = gemini.sendMessageStream(prompt = prompt.query, history = getHistory(structuredConversation.id))
 
             response.onCompletion {
                 val suggested = getSuggestedPrompts(conversationId)
@@ -144,7 +117,7 @@ class ConversationRepository(
                 )
                 messageDao.insertMessage(message)
             }.collect { result ->
-                result.text?.let { responseText ->
+                result?.let { responseText ->
 
                     chunk.append(responseText)
 
@@ -163,13 +136,13 @@ class ConversationRepository(
             }
         } catch (e: Exception) {
             when (e) {
-                is GoogleGenerativeAIException -> {
+                is Exception -> {
                     emit(Either.Left(GenAIException()))
-                    Timber.e(e.stackTraceToString())
+                    Logger.e(e.stackTraceToString())
                 }
 
                 else -> {
-                    Timber.e(e.stackTraceToString())
+                    Logger.e(e.stackTraceToString())
                     emit(Either.Left(Failure.ServerError))
                 }
             }
@@ -185,7 +158,7 @@ class ConversationRepository(
         try {
             // Use 'var' to allow reassignment of the conversation object
             var currentConversation = getConversation(prompt)
-            Timber.e(currentConversation.id.toString())
+            Logger.e(currentConversation.id.toString())
 
             // TODO: Emit default loading state from here
 
@@ -270,9 +243,7 @@ class ConversationRepository(
             currentConversation = currentConversation.copy(messageList = messagesWithNewQuery)
             emit(Either.Right(currentConversation))
 
-            val chat = generativeModel.startChat(history = getHistory(currentConversation.id))
-
-            val response = chat.sendMessageStream(prompt.query)
+            val response = gemini.sendMessageStream(prompt = prompt.query, history = getHistory(currentConversation.id))
             response.onCompletion {
                 val suggested = getSuggestedPrompts(currentConversation.id)
 
@@ -280,7 +251,7 @@ class ConversationRepository(
 
                 emit(Either.Right(currentConversation))
 
-                Timber.e("Completed")
+                Logger.e("Completed")
 
                 // update message with complete response in DB
                 // It's safer to find the message by ID and update its response
@@ -316,7 +287,7 @@ class ConversationRepository(
                     }
                 }
             }.collect { result ->
-                result.text?.let { responseText ->
+                result?.let { responseText ->
                     chunk.append(responseText)
 
                     // Create a new list for modification to maintain immutability
@@ -340,7 +311,7 @@ class ConversationRepository(
                             }
 
                             is GenAiEntityMessage -> {
-                                Timber.e("Last message is Gen AI entity message, not updating with streaming text.")
+                                Logger.e("Last message is Gen AI entity message, not updating with streaming text.")
                                 // If an entity message was the last one, and a text response is streaming,
                                 // you might need to decide how to handle this.
                                 // Potentially, the new GenAiTextMessage for the query (added before starting chat)
@@ -370,13 +341,13 @@ class ConversationRepository(
             analyticsLogger.logEvent(eventName = "Query Submitted", params = mapOf())
         } catch (e: Exception) {
             when (e) {
-                is GoogleGenerativeAIException -> {
-                    Timber.e(e.stackTraceToString())
+                is Exception -> {
+                    Logger.e(e.stackTraceToString())
                     emit(Either.Left(GenAIException()))
                 }
 
                 else -> {
-                    Timber.e(e.stackTraceToString())
+                    Logger.e(e.stackTraceToString())
                     emit(Either.Left(Failure.ServerError))
                 }
             }
@@ -416,7 +387,6 @@ class ConversationRepository(
             val newIndex = messageDao.insertMessage(
                 MessageEntity(
                     conversationId = conversation.id,
-                    createdAt = System.currentTimeMillis(),
                     query = prompt.query
                 )
             )
@@ -434,14 +404,13 @@ class ConversationRepository(
                 conversation.copy(messageList = newMessages)
 
             emit(Either.Right(conversation))
-            Timber.e(conversation.toString())
+            Logger.e(conversation.toString())
             // add query
-            val chat = generativeModel.startChat(history = getHistory(conversation.id))
 
             // add text response
             val lastIndex = conversation.messageList.lastIndex
 
-            val response = chat.sendMessageStream(prompt.query)
+            val response = gemini.sendMessageStream(prompt = prompt.query, history = getHistory(conversation.id))
             response.onCompletion {
                 val suggested = getSuggestedPrompts(conversation.id)
 
@@ -462,7 +431,7 @@ class ConversationRepository(
                     }
                 }
             }.collect { result ->
-                result.text?.let { responseText ->
+                result?.let { responseText ->
                     chunk.append(responseText)
 
                     val lastMessage =
@@ -481,20 +450,20 @@ class ConversationRepository(
                         }
 
                         is GenAiEntityMessage -> {
-                            Timber.e("Last message is Gen AI entity message")
+                            Logger.e("Last message is Gen AI entity message")
                         }
                     }
                 }
             }
         } catch (e: Exception) {
             when (e) {
-                is GoogleGenerativeAIException -> {
-                    Timber.e(e.stackTraceToString())
+                is Exception -> {
+                    Logger.e(e.stackTraceToString())
                     emit(Either.Left(GenAIException()))
                 }
 
                 else -> {
-                    Timber.e(e.stackTraceToString())
+                    Logger.e(e.stackTraceToString())
                     emit(Either.Left(Failure.ServerError))
                 }
             }
@@ -508,9 +477,8 @@ class ConversationRepository(
 
             val conversation =
                 getConversation(ConversationPrompt(conversationId = conversationId, query = ""))
-            val chat = generativeModel.startChat(history = getHistory(conversation.id))
-            val response = chat.sendMessage(prompt = Constants.SUGGESTION_PROMPT)
-            response.text?.let {
+            val response = gemini.sendMessage(prompt = Constants.SUGGESTION_PROMPT, getHistory(conversation.id))
+            response?.let {
                 val text = it.trimIndent().removeSurrounding("```").removePrefix("json")
                 val suggestions = parser.parseSuggestions(text)
                 suggestions?.let { suggestionsResponse ->
@@ -519,7 +487,7 @@ class ConversationRepository(
             }
             result
         } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+            Logger.e(e.stackTraceToString())
             emptyList()
         }
     }
@@ -557,22 +525,22 @@ class ConversationRepository(
         }
     }
 
-    private suspend fun getHistory(conversationId: Long): List<Content> {
-        val history = mutableListOf<Content>()
+    private suspend fun getHistory(conversationId: Long): List<History> {
+        val history = mutableListOf<History>()
         val messageEntities = messageDao.getMessagesForConversation(conversationId)
         messageEntities.map { it.toGenAiMessage() }.forEach { message ->
             when (message) {
                 is GenAiTextMessage -> {
                     history.addAll(
                         listOf(
-                            content(role = "user") { text(message.query) },
-                            content(role = "model") { text(message.response.toString()) }
+                            History(role = "user", text = message.query),
+                            History(role = "model", text = message.response.toString())
                         )
                     )
                 }
 
                 is GenAiEntityMessage -> {
-                    history.add(content(role = "user") { text(message.entity.toString()) })
+                    history.add(History(role = "user", text =message.entity.toString()))
                 }
             }
         }
@@ -592,9 +560,8 @@ class ConversationRepository(
                 if (conversation.title == "Default title" || conversation.title.isEmpty()) {
                     val history = getHistory(conversationId)
 
-                    val chat = generativeModel.startChat(history = history)
-                    val response = chat.sendMessage(prompt = Constants.TITLE_PROMPT)
-                    response.text?.let {
+                    val response = gemini.sendMessage(prompt = Constants.TITLE_PROMPT, history = history)
+                    response?.let {
                         val text = it.trimIndent().removeSurrounding("```").removePrefix("json")
                         parser.parseTitle(text)?.title
                     }
@@ -603,21 +570,19 @@ class ConversationRepository(
                 }
             }
         } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+            Logger.e(e.stackTraceToString())
             null
         }
     }
 
     private suspend fun isRateLimitExceeded(): Boolean = rateLimitMutex.withLock {
-        Timber.e("Checking rate limit")
+        Logger.e("Checking rate limit")
 
         // Use UTC timezone to avoid timezone inconsistencies
-        val todayString = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).apply {
-            timeZone = TimeZone.getTimeZone("UTC")
-        }.format(Date())
+        val todayString = getTodayDateAsString(isUtc = true)
 
         // Capture auth state at the beginning to avoid mid-function changes
-        val isUserSignedIn = auth.currentUser != null
+        val isUserSignedIn = true //auth.currentUser != null
 
         try {
             val lastDate = gptInvestorPreferences.queryLastDate.first() ?: todayString
@@ -635,38 +600,38 @@ class ConversationRepository(
                         ?: 2
                 }
             } catch (e: Exception) {
-                Timber.e(e, "Failed to fetch remote config, using fallback values")
+                Logger.e("Failed to fetch remote config, using fallback values", e)
                 if (isUserSignedIn) 5 else 2
             }
 
-            Timber.e("User signed in: $isUserSignedIn, Daily limit: $dailyLimit, Current usage: $usageCount")
+            Logger.e("User signed in: $isUserSignedIn, Daily limit: $dailyLimit, Current usage: $usageCount")
 
             // Handle date reset - start counting from 1 for the current request
             if (todayString != lastDate) {
                 try {
                     gptInvestorPreferences.setQueryLastDate(todayString)
                     gptInvestorPreferences.setQueryUsageCount(1)
-                    Timber.e("Date reset, usage count set to 1")
+                    Logger.e("Date reset, usage count set to 1")
                     return false
                 } catch (e: Exception) {
-                    Timber.e(e, "Failed to reset date and usage count")
+                    Logger.e("Failed to reset date and usage count", e)
                 }
             }
 
             // Check if limit would be exceeded with this request
             if (usageCount < dailyLimit) {
-                Timber.e("Rate limit not exceeded")
+                Logger.e("Rate limit not exceeded")
                 try {
                     gptInvestorPreferences.setQueryUsageCount(usageCount + 1)
                 } catch (e: Exception) {
-                    Timber.e(e, "Failed to save updated usage count")
+                    Logger.e("Failed to save updated usage count", e)
                     // Still allow the request even if save fails
                 }
                 return false
             }
 
             // Rate limit exceeded
-            Timber.e("Rate limit exceeded: $usageCount >= $dailyLimit")
+            Logger.e("Rate limit exceeded: $usageCount >= $dailyLimit")
             analyticsLogger.logEvent(
                 eventName = "Rate Limit Reached",
                 params = mapOf(
@@ -677,7 +642,7 @@ class ConversationRepository(
             )
             return true
         } catch (e: Exception) {
-            Timber.e(e, "Error checking rate limit, allowing request as fallback")
+            Logger.e("Error checking rate limit, allowing request as fallback", e)
             // In case of unexpected errors, allow the request rather than blocking user
             return false
         }

@@ -38,8 +38,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     private func startKoin() {
         let mixPanelLogger = MixpanelLogger() as AnalyticsLogger
         let firebaseLogger = FirebaseLogger() as AnalyticsLogger
+        let firebaseRemoteConfig = RemoteConfigImpl() as IRemoteConfig
         let mixPanelModule = AnalyticsProvider_iosKt.providesMixpanelLogger(mixpanel: mixPanelLogger)
         let firebaseModule = AnalyticsProvider_iosKt.providesFirebaseLogger(firebase: firebaseLogger)
-        KoinInitializerKt.doInitKoin(config: nil, platformModules: [mixPanelModule, firebaseModule])
+        let remoteConfigModule = RemoteConfigProvider_iosKt.providesRemoteConfig(config: firebaseRemoteConfig)
+        KoinInitializerKt.doInitKoin(config: nil, platformModules: [mixPanelModule, firebaseModule, remoteConfigModule])
     }
 }

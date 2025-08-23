@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.company.data.repository
 
+import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
@@ -17,10 +18,12 @@ import com.thejawnpaul.gptinvestor.features.company.domain.model.toDomainObject
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import timber.log.Timber
-import javax.inject.Inject
+import org.koin.core.annotation.Single
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
-class CompanyRepository @Inject constructor(
+@Single
+class CompanyRepository(
     private val apiService: ApiService,
     private val companyDao: CompanyDao,
     private val analyticsLogger: AnalyticsLogger
@@ -64,7 +67,7 @@ class CompanyRepository @Inject constructor(
                 emit(Either.Right(it))
             }
         } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+            Logger.e(e.stackTraceToString())
             emit(Either.Left(Failure.ServerError))
         }
     }
@@ -111,7 +114,7 @@ class CompanyRepository @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                Timber.e(e.stackTraceToString())
+                Logger.e(e.stackTraceToString())
                 emit(Either.Left(Failure.ServerError))
             }
         }
@@ -126,7 +129,7 @@ class CompanyRepository @Inject constructor(
                     emit(Either.Right(domainObject))
                 }
             } catch (e: Exception) {
-                Timber.e(e.stackTraceToString())
+                Logger.e(e.stackTraceToString())
                 emit(Either.Left(Failure.ServerError))
             }
         }
@@ -167,7 +170,7 @@ class CompanyRepository @Inject constructor(
                     emit(Either.Left(Failure.ServerError))
                 }
             } catch (e: Exception) {
-                Timber.e(e.stackTraceToString())
+                Logger.e(e.stackTraceToString())
                 emit(Either.Left(Failure.ServerError))
             }
         }
@@ -192,16 +195,17 @@ class CompanyRepository @Inject constructor(
                     emit(Either.Right(companies))
                 }
             } catch (e: Exception) {
-                Timber.e(e.stackTraceToString())
+                Logger.e(e.stackTraceToString())
                 emit(Either.Left(Failure.DataError))
             }
         }
 
+    @OptIn(ExperimentalTime::class)
     private suspend fun updateCompanyList(): List<Company>? {
         try {
             val tickers = companyDao.getAllCompanies().map { it.ticker }
             val batches = tickers.chunked(100)
-            val start = System.currentTimeMillis()
+            val start = Clock.System.now().toEpochMilliseconds()
             batches.forEach { batch ->
                 /*val request = CompanyPriceRequest(tickers = batch)
                 val response = apiService.getCompanyPrice(request)
@@ -221,12 +225,12 @@ class CompanyRepository @Inject constructor(
                     }
                 }*/
             }
-            val end = System.currentTimeMillis()
+            val end = Clock.System.now().toEpochMilliseconds()
             // This takes about 30 seconds to complete
-            Timber.e("Elapsed: ${end - start}")
+            Logger.e("Elapsed: ${end - start}")
             return companyDao.getAllCompanies().map { it.toDomainObject() }
         } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+            Logger.e(e.stackTraceToString())
             return null
         }
     }

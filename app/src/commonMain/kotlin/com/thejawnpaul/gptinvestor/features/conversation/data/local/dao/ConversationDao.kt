@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.ConversationEntity
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.ConversationWithMessages
@@ -27,9 +28,11 @@ interface ConversationDao {
     @Update
     suspend fun updateConversation(conversation: ConversationEntity)
 
+    @Transaction
     @Query("SELECT * FROM ConversationWithLastMessage ORDER BY timestamp DESC")
     suspend fun getConversationsWithMessages(): List<ConversationWithMessages>
 
+    @Transaction
     @Query("SELECT * FROM ConversationWithLastMessage WHERE conversationId =:id ORDER BY timestamp ASC")
     suspend fun getSingleConversationWithMessages(id: Long): ConversationWithMessages
 }

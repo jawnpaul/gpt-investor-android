@@ -11,6 +11,9 @@
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		16A85131B0E5C1D3A7A3E21E /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A85226C2189C1A6E44A280 /* Config.swift */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
+		51151BE52E302ACE00D3D18A /* GeminiApiImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51151BE42E302ABE00D3D18A /* GeminiApiImpl.swift */; };
+		51151BE82E303AE200D3D18A /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = 51151BE72E303AE200D3D18A /* FirebaseAI */; };
+		51151BEB2E35577B00D3D18A /* KMPNativeCoroutinesCore in Frameworks */ = {isa = PBXBuildFile; productRef = 51151BEA2E35577B00D3D18A /* KMPNativeCoroutinesCore */; };
 		511814AD2E19718500F40015 /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = 511814AC2E19718500F40015 /* Mixpanel */; };
 		511814B72E20648C00F40015 /* GoogleService-Info-Debug.plist in Resources */ = {isa = PBXBuildFile; fileRef = 511814B62E20648C00F40015 /* GoogleService-Info-Debug.plist */; };
 		512009372E05F80F00817A9B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 512009362E05F80F00817A9B /* GoogleService-Info.plist */; };
@@ -18,6 +21,10 @@
 		5120093C2E05FED000817A9B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 5120093B2E05FED000817A9B /* FirebaseAuth */; };
 		5120093E2E05FED000817A9B /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 5120093D2E05FED000817A9B /* FirebaseRemoteConfig */; };
 		514DB49B2E259D6100652E45 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 514DB49A2E259D6100652E45 /* SplashScreen.storyboard */; };
+		514DB49E2E2C221E00652E45 /* RemoteConfigImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514DB49D2E2C221800652E45 /* RemoteConfigImpl.swift */; };
+		5193D9112E2C343A003D1DF1 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 5193D9102E2C343A003D1DF1 /* FirebaseCrashlytics */; };
+		5193D9132E2C343A003D1DF1 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 5193D9122E2C343A003D1DF1 /* FirebaseMessaging */; };
+		5193D9152E2C3849003D1DF1 /* RemoteConfigDefaults.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5193D9142E2C3849003D1DF1 /* RemoteConfigDefaults.plist */; };
 		51CC35032E23E630004D8700 /* FirebaseLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CC35022E23E630004D8700 /* FirebaseLogger.swift */; };
 		51CC35082E23EA72004D8700 /* MixpanelLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CC35072E23EA72004D8700 /* MixpanelLogger.swift */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
@@ -28,11 +35,14 @@
 		058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		16A85226C2189C1A6E44A280 /* Config.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		2152FB032600AC8F00CF470E /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
+		51151BE42E302ABE00D3D18A /* GeminiApiImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiApiImpl.swift; sourceTree = "<group>"; };
 		511814B42E1DBFCE00F40015 /* DebugSetting.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = DebugSetting.xcconfig; sourceTree = "<group>"; };
 		511814B52E1DBFE800F40015 /* ReleaseSettings.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ReleaseSettings.xcconfig; sourceTree = "<group>"; };
 		511814B62E20648C00F40015 /* GoogleService-Info-Debug.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GoogleService-Info-Debug.plist"; sourceTree = "<group>"; };
 		512009362E05F80F00817A9B /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		514DB49A2E259D6100652E45 /* SplashScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = SplashScreen.storyboard; sourceTree = "<group>"; };
+		514DB49D2E2C221800652E45 /* RemoteConfigImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteConfigImpl.swift; sourceTree = "<group>"; };
+		5193D9142E2C3849003D1DF1 /* RemoteConfigDefaults.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = RemoteConfigDefaults.plist; sourceTree = "<group>"; };
 		51CC35022E23E630004D8700 /* FirebaseLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseLogger.swift; sourceTree = "<group>"; };
 		51CC35072E23EA72004D8700 /* MixpanelLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelLogger.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* GPT-Investor-Dev.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "GPT-Investor-Dev.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -46,8 +56,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				51151BE82E303AE200D3D18A /* FirebaseAI in Frameworks */,
+				5193D9132E2C343A003D1DF1 /* FirebaseMessaging in Frameworks */,
+				51151BEB2E35577B00D3D18A /* KMPNativeCoroutinesCore in Frameworks */,
 				5120093E2E05FED000817A9B /* FirebaseRemoteConfig in Frameworks */,
 				5120093A2E05FED000817A9B /* FirebaseAnalytics in Frameworks */,
+				5193D9112E2C343A003D1DF1 /* FirebaseCrashlytics in Frameworks */,
 				511814AD2E19718500F40015 /* Mixpanel in Frameworks */,
 				5120093C2E05FED000817A9B /* FirebaseAuth in Frameworks */,
 			);
@@ -64,6 +78,22 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		51151BE62E303AE200D3D18A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		514DB49C2E2C219400652E45 /* Firebase */ = {
+			isa = PBXGroup;
+			children = (
+				51151BE42E302ABE00D3D18A /* GeminiApiImpl.swift */,
+				514DB49D2E2C221800652E45 /* RemoteConfigImpl.swift */,
+			);
+			path = Firebase;
+			sourceTree = "<group>";
+		};
 		51CC34F92E23E0B9004D8700 /* Logger */ = {
 			isa = PBXGroup;
 			children = (
@@ -78,6 +108,7 @@
 			children = (
 				AB1DB47929225F7C00F7AF9C /* Configuration */,
 				7555FF7D242A565900829871 /* iosApp */,
+				51151BE62E303AE200D3D18A /* Frameworks */,
 				7555FF7C242A565900829871 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -93,6 +124,8 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				5193D9142E2C3849003D1DF1 /* RemoteConfigDefaults.plist */,
+				514DB49C2E2C219400652E45 /* Firebase */,
 				51CC34F92E23E0B9004D8700 /* Logger */,
 				511814B62E20648C00F40015 /* GoogleService-Info-Debug.plist */,
 				512009362E05F80F00817A9B /* GoogleService-Info.plist */,
@@ -140,6 +173,10 @@
 				5120093B2E05FED000817A9B /* FirebaseAuth */,
 				5120093D2E05FED000817A9B /* FirebaseRemoteConfig */,
 				511814AC2E19718500F40015 /* Mixpanel */,
+				5193D9102E2C343A003D1DF1 /* FirebaseCrashlytics */,
+				5193D9122E2C343A003D1DF1 /* FirebaseMessaging */,
+				51151BE72E303AE200D3D18A /* FirebaseAI */,
+				51151BEA2E35577B00D3D18A /* KMPNativeCoroutinesCore */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* GPT-Investor-Dev.app */;
@@ -173,6 +210,7 @@
 			packageReferences = (
 				512009382E05FED000817A9B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				511814AB2E19718500F40015 /* XCRemoteSwiftPackageReference "mixpanel-swift" */,
+				51151BE92E35577B00D3D18A /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -188,6 +226,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5193D9152E2C3849003D1DF1 /* RemoteConfigDefaults.plist in Resources */,
 				058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */,
 				058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */,
 				512009372E05F80F00817A9B /* GoogleService-Info.plist in Resources */,
@@ -239,8 +278,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				51CC35032E23E630004D8700 /* FirebaseLogger.swift in Sources */,
+				514DB49E2E2C221E00652E45 /* RemoteConfigImpl.swift in Sources */,
 				51CC35082E23EA72004D8700 /* MixpanelLogger.swift in Sources */,
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
+				51151BE52E302ACE00D3D18A /* GeminiApiImpl.swift in Sources */,
 				7555FF83242A565900829871 /* ContentView.swift in Sources */,
 				16A85131B0E5C1D3A7A3E21E /* Config.swift in Sources */,
 			);
@@ -463,6 +504,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		51151BE92E35577B00D3D18A /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/rickclephas/KMP-NativeCoroutines.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = "1.0.0-ALPHA-45";
+			};
+		};
 		511814AB2E19718500F40015 /* XCRemoteSwiftPackageReference "mixpanel-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/mixpanel/mixpanel-swift";
@@ -482,6 +531,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		51151BE72E303AE200D3D18A /* FirebaseAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 512009382E05FED000817A9B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAI;
+		};
+		51151BEA2E35577B00D3D18A /* KMPNativeCoroutinesCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 51151BE92E35577B00D3D18A /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */;
+			productName = KMPNativeCoroutinesCore;
+		};
 		511814AC2E19718500F40015 /* Mixpanel */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 511814AB2E19718500F40015 /* XCRemoteSwiftPackageReference "mixpanel-swift" */;
@@ -501,6 +560,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 512009382E05FED000817A9B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseRemoteConfig;
+		};
+		5193D9102E2C343A003D1DF1 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 512009382E05FED000817A9B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		5193D9122E2C343A003D1DF1 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 512009382E05FED000817A9B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

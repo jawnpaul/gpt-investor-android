@@ -1,14 +1,14 @@
 package com.thejawnpaul.gptinvestor.features.notification.domain
 
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.ktx.messaging
+//import com.google.android.gms.tasks.OnCompleteListener
+//import com.google.firebase.ktx.Firebase
+//import com.google.firebase.messaging.ktx.messaging
+import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
 import kotlinx.coroutines.flow.first
-import timber.log.Timber
-import javax.inject.Inject
+import org.koin.core.annotation.Single
 
 interface NotificationRepository {
 
@@ -17,7 +17,8 @@ interface NotificationRepository {
     suspend fun generateToken()
 }
 
-class NotificationRepositoryImpl @Inject constructor(
+@Single
+class NotificationRepositoryImpl(
     private val apiService: ApiService,
     private val preferences: GPTInvestorPreferences
 ) : NotificationRepository {
@@ -26,26 +27,26 @@ class NotificationRepositoryImpl @Inject constructor(
             val userId = preferences.userId.first()
             apiService.registerToken(RegisterTokenRequest(token = token, userId = userId))
         } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+            Logger.e(e.stackTraceToString())
         }
     }
 
     override suspend fun generateToken() {
         try {
-            Firebase.messaging.token.addOnCompleteListener(
-                OnCompleteListener { task ->
-                    if (!task.isSuccessful) {
-                        Timber.e(task.exception)
-                        return@OnCompleteListener
-                    }
-                    // Get new FCM registration token
-                    val token = task.result
-
-                    Timber.e("Token: $token")
-                }
-            )
+//            Firebase.messaging.token.addOnCompleteListener(
+//                OnCompleteListener { task ->
+//                    if (!task.isSuccessful) {
+//                        Logger.e(throwable = task.exception)
+//                        return@OnCompleteListener
+//                    }
+//                    // Get new FCM registration token
+//                    val token = task.result
+//
+//                    Logger.e("Token: $token")
+//                }
+//            )
         } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+            Logger.e(e.stackTraceToString())
         }
     }
 }

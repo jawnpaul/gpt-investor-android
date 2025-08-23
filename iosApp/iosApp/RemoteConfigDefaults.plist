@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>default_model_name</key>
+  <string>gemini-2.0-flash</string>
+  <key>prompt_count</key>
+  <string>100</string>
+  <key>free_prompt_count</key>
+  <string>2</string>
+  <key>website_domain</key>
+  <string>https://m7mxrc35hp.us-west-2.awsapprunner.com/</string>
+</dict>
+</plist>

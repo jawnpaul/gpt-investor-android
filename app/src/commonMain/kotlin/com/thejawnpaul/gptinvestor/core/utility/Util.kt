@@ -6,7 +6,9 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
+import kotlinx.datetime.format.FormatStringsInDatetimeFormats
 import kotlinx.datetime.format.MonthNames
+import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
@@ -82,6 +84,20 @@ fun Long.formatAsRelativeDate(): String {
             localDate.format(dateFormatter)
         }
     }
+}
+
+@OptIn(ExperimentalTime::class, FormatStringsInDatetimeFormats::class)
+fun getTodayDateAsString(pattern: String = "yyyy-MM-dd", isUtc: Boolean = false): String {
+    val timeZone = if (isUtc) {
+        TimeZone.UTC
+    } else {
+        TimeZone.currentSystemDefault()
+    }
+    val localDate = Clock.System.now().toLocalDateTime(timeZone).date
+    val dateFormatter = LocalDate.Format {
+        byUnicodePattern(pattern)
+    }
+    return localDate.format(dateFormatter)
 }
 
 @OptIn(ExperimentalTime::class)

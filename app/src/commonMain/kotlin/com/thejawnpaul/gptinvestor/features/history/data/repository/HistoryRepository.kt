@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.history.data.repository
 
+import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
@@ -10,10 +11,10 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Structured
 import com.thejawnpaul.gptinvestor.features.history.domain.repository.IHistoryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import timber.log.Timber
-import javax.inject.Inject
+import org.koin.core.annotation.Single
 
-class HistoryRepository @Inject constructor(
+@Single
+class HistoryRepository(
     private val conversationDao: ConversationDao,
     private val analyticsLogger: AnalyticsLogger
 ) :
@@ -36,7 +37,7 @@ class HistoryRepository @Inject constructor(
             }
             emit(Either.Right(conversations.toMap()))
         } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+            Logger.e(e.stackTraceToString())
             emit(Either.Left(Failure.DataError))
         }
     }
@@ -56,7 +57,7 @@ class HistoryRepository @Inject constructor(
                 params = mapOf("chat_title" to conversation.title)
             )
         } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+            Logger.e(e.stackTraceToString())
             emit(Either.Left(Failure.DataError))
         }
     }

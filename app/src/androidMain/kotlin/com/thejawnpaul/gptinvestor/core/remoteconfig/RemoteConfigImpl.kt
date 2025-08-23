@@ -1,19 +1,32 @@
 package com.thejawnpaul.gptinvestor.core.remoteconfig
 
+import com.google.firebase.Firebase
 import com.google.firebase.remoteconfig.ConfigUpdate
 import com.google.firebase.remoteconfig.ConfigUpdateListener
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigException
+import com.google.firebase.remoteconfig.remoteConfig
+import com.google.firebase.remoteconfig.remoteConfigSettings
+import com.thejawnpaul.gptinvestor.BuildConfig
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.core.RemoteConfig
+import com.thejawnpaul.gptinvestor.core.IRemoteConfig
+import org.koin.core.annotation.Single
 import timber.log.Timber
-import javax.inject.Inject
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig as RemoteConfig
 
-class RemoteConfigImpl @Inject constructor(
-    private val remoteConfig: FirebaseRemoteConfig
-) : RemoteConfig {
+@Single
+class RemoteConfigImpl : IRemoteConfig {
 
-    override fun init() {
+    var remoteConfig: RemoteConfig = Firebase.remoteConfig
+
+    init {
+        val configSettings = if (BuildConfig.DEBUG) {
+            remoteConfigSettings {
+                minimumFetchIntervalInSeconds = 3600
+            }
+        } else {
+            remoteConfigSettings { }
+        }
+        remoteConfig.setConfigSettingsAsync(configSettings)
         remoteConfig.setDefaultsAsync(R.xml.remote_config_defaults)
 
         remoteConfig.addOnConfigUpdateListener(object : ConfigUpdateListener {
@@ -27,7 +40,7 @@ class RemoteConfigImpl @Inject constructor(
         })
     }
 
-    override fun fetchAndActivateStringValue(configKey: String): String {
+    override suspend fun fetchAndActivateStringValue(configKey: String): String {
         var result = remoteConfig.getString(configKey)
 
         remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
@@ -38,7 +51,7 @@ class RemoteConfigImpl @Inject constructor(
         return result
     }
 
-    override fun fetchAndActivateValue(configKey: String): Float {
+    override suspend fun fetchAndActivateValue(configKey: String): Float {
         var result = remoteConfig.getDouble(configKey)
 
         remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
@@ -49,7 +62,7 @@ class RemoteConfigImpl @Inject constructor(
         return result.toFloat()
     }
 
-    override fun fetchAndActivateBooleanValue(configKey: String): Boolean {
+    override suspend fun fetchAndActivateBooleanValue(configKey: String): Boolean {
         var result = remoteConfig.getBoolean(configKey)
 
         remoteConfig.fetchAndActivate().addOnCompleteListener { task ->

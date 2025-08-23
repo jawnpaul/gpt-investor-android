@@ -18,15 +18,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import timber.log.Timber
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MyFirebaseMessagingService :
     FirebaseMessagingService() {
-
-    @Inject
-    lateinit var notificationRepository: NotificationRepository
+        
+    private val notificationRepository: NotificationRepository by inject()
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)

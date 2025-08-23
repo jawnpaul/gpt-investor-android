@@ -1,8 +1,8 @@
 package com.thejawnpaul.gptinvestor.features.conversation.data.repository
 
+import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.core.utility.json
 import kotlinx.serialization.Serializable
-import timber.log.Timber
 
 @Serializable
 data class SuggestionsResponse(
@@ -21,7 +21,7 @@ class SuggestionParser {
         return try {
             json.decodeFromString<SuggestionsResponse>(jsonString)
         } catch (e: Exception) {
-            Timber.e("Error parsing JSON: ${e.message}")
+            Logger.e("Error parsing JSON: ${e.message}")
             null
         }
     }

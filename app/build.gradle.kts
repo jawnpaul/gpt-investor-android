@@ -43,21 +43,21 @@ kotlin {
     sourceSets {
         androidMain.dependencies {
             implementation(libs.androidx.core.ktx)
-            implementation(libs.androidx.lifecycle.runtime.ktx)
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose)
             implementation(libs.ktor.client.android)
             implementation(libs.androidx.core.splashscreen)
             implementation(libs.dagger.hilt)
-            implementation(libs.timber)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.androidx.hilt.navigation)
             implementation(libs.retrofit)
+            implementation(project.dependencies.platform(libs.firebase.compose.bom))
             implementation(libs.firebase.crashlytics)
             implementation(libs.firebase.auth)
             implementation(libs.firebase.config)
             implementation(libs.firebase.messaging)
+            implementation(libs.firebase.ai)
         }
 
         androidUnitTest.dependencies {
@@ -72,6 +72,7 @@ kotlin {
             implementation(project(":remote:remote"))
             api(project(":analytics"))
             implementation(project(":theme"))
+            implementation(libs.bundles.ksoup)
             implementation(libs.datastore.preferences)
             implementation(libs.koin.core)
             implementation(libs.ktor.client.core)
@@ -79,20 +80,19 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.big.decimal)
             implementation(libs.room.runtime)
-            implementation(libs.room.compiler)
             implementation(libs.sqlite.bundled)
             implementation(libs.timeAgo)
+            implementation(libs.kermit)
         }
 
         commonTest.dependencies {
-
         }
 
         nativeMain.dependencies {
-
         }
         all {
             languageSettings.enableLanguageFeature("PropertyParamAnnotationDefaultTargetMode")
+            languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
         }
     }
 }
@@ -221,20 +221,17 @@ tasks.register<Copy>("installGitHook") {
 
 tasks.getByPath(":app:preBuild").dependsOn("installGitHook")
 dependencies {
-    implementation(platform(libs.firebase.compose.bom))
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.timber)
     implementation(libs.coil.compose)
     implementation(libs.core.ktx)
     implementation(libs.androidx.junit.ktx)
     ksp(libs.dagger.hilt.compiler)
-    implementation(libs.jsoup)
-    implementation(libs.gemini)
     implementation(libs.richtext.compose)
     implementation(libs.richtext.commonmark)
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.play.services.auth)
     implementation(libs.google.identity)
-
-
 
     // test
     kspTest(libs.dagger.hilt.compiler)
@@ -250,6 +247,13 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
+    // Force the version
+    configurations.all {
+        resolutionStrategy {
+            force("org.jetbrains:annotations:23.0.0")
+            exclude(group = "com.intellij", module = "annotations")
+        }
+    }
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.tooling.preview)

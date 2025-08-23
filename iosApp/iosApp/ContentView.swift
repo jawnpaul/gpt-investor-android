@@ -18,16 +18,17 @@ struct ContentView: View {
                 ComposeView()
                     .ignoresSafeArea(.keyboard) // Compose has own keyboard handler
             } else {
-                ZStack(alignment: .center) {
-                    Rectangle()
-                        .foregroundColor(.splashBackground)
-                        .frame(width: 172, height: 172)
-                        .clipShape(Circle())
+                ZStack {
+                    Circle()
+                        .fill(.splashBackground)
+                        .frame(width: 150, height: 150)
+                        .shadow(radius: 2)
+
                     Image("SplashImage")
                         .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 150, height: 150, alignment: .center)
-                }.frame(width: 200, height: 200)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 100, height: 100, alignment: .center)
+                }
             }
         }
         .onAppear {

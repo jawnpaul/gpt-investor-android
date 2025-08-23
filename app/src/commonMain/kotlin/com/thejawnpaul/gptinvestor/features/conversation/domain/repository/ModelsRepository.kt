@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.conversation.domain.repository
 
+import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.AddToWaitlistRequest
@@ -7,15 +8,15 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AnotherMod
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultModel
 import kotlinx.coroutines.flow.first
-import timber.log.Timber
-import javax.inject.Inject
+import org.koin.core.annotation.Single
 
 interface ModelsRepository {
     suspend fun getAvailableModels(): Result<List<AvailableModel>>
     suspend fun putUserOnModelWaitlist(modelId: String, reasons: List<String> = emptyList()): Result<Unit>
 }
 
-class ModelsRepositoryImpl @Inject constructor(
+@Single
+class ModelsRepositoryImpl(
     private val gptInvestorPreferences: GPTInvestorPreferences,
     private val apiService: ApiService
 ) : ModelsRepository {
@@ -37,7 +38,7 @@ class ModelsRepositoryImpl @Inject constructor(
             }
             Result.success(models)
         } catch (e: Exception) {
-            Timber.e(e.stackTrace.toString())
+            Logger.e(e.toString())
             Result.failure(e)
         }
     }
@@ -55,7 +56,7 @@ class ModelsRepositoryImpl @Inject constructor(
             gptInvestorPreferences.setIsUserOnModelWaitlist(isOnWaitlist = true)
             Result.success(Unit)
         } catch (e: Exception) {
-            Timber.e(e.stackTrace.toString())
+            Logger.e(e.toString())
             Result.failure(e)
         }
     }

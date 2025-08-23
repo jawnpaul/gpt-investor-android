@@ -34,7 +34,7 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.bundles.ktor.common)
         }
-        nativeMain.dependencies {
+        iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
     }

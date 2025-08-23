@@ -1,11 +1,13 @@
 package com.thejawnpaul.gptinvestor.features.toppick.data.repository
 
+import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
-import com.thejawnpaul.gptinvestor.core.RemoteConfig
+import com.thejawnpaul.gptinvestor.core.IRemoteConfig
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.utility.Constants
+import com.thejawnpaul.gptinvestor.core.utility.getTodayDateAsString
 import com.thejawnpaul.gptinvestor.features.company.data.local.dao.CompanyDao
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.dao.TopPickDao
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.model.TopPickEntity
@@ -14,18 +16,20 @@ import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRe
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import org.koin.core.annotation.Single
 
+@Single
 class TopPickRepository(
     private val apiService: ApiService,
     private val topPickDao: TopPickDao,
     private val companyDao: CompanyDao,
     private val analyticsLogger: AnalyticsLogger,
-    private val remoteConfig: RemoteConfig
+    private val remoteConfig: IRemoteConfig
 ) :
     ITopPickRepository {
     override suspend fun getTopPicks(): Flow<Either<Failure, Unit>> = flow {
         try {
-            val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+            val today = getTodayDateAsString()
 
             val response = apiService.getTopPicks(date = today)
             response.onSuccess { remotePick ->
@@ -52,7 +56,7 @@ class TopPickRepository(
                 emit(Either.Left(Failure.DataError))
             }
         } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+            Logger.e(e.stackTraceToString())
             emit(Either.Left(Failure.ServerError))
         }
     }
@@ -80,7 +84,7 @@ class TopPickRepository(
                 params = mapOf("company_ticker" to pick.ticker, "company_name" to pick.companyName)
             )
         } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+            Logger.e(e.stackTraceToString())
             emit(Either.Left(Failure.UnAvailableError))
         }
     }
@@ -110,7 +114,7 @@ class TopPickRepository(
                 params = mapOf("content_type" to "top_pick", "company_ticker" to pick.ticker)
             )
         } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+            Logger.e(e.stackTraceToString())
             emit(Either.Left(Failure.DataError))
         }
     }
@@ -136,7 +140,7 @@ class TopPickRepository(
             }
             emit(Either.Right(pick))
         } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+            Logger.e(e.stackTraceToString())
             emit(Either.Left(Failure.DataError))
         }
     }
@@ -167,7 +171,7 @@ class TopPickRepository(
                 )
             )
         } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+            Logger.e(e.stackTraceToString())
             emit(Either.Left(Failure.DataError))
         }
     }
@@ -197,13 +201,12 @@ class TopPickRepository(
                 )
             )
         } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+            Logger.e(e.stackTraceToString())
             emit(Either.Left(Failure.DataError))
         }
     }
 
     override suspend fun getLocalTopPicks(): Flow<Either<Failure, List<TopPick>>> = flow {
-        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val local = topPickDao.getAllTopPicks().map { entity ->
             with(entity) {
                 TopPick(
@@ -225,7 +228,7 @@ class TopPickRepository(
     }
 
     override suspend fun getTopPicksByDate(): Flow<List<TopPick>> {
-        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val today = getTodayDateAsString()
         return try {
             topPickDao.getTopPicksFlow(today).map { list ->
                 list.map { entity ->
@@ -247,7 +250,7 @@ class TopPickRepository(
                 }
             }
         } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+            Logger.e(e.stackTraceToString())
             flow { emit(emptyList()) }
         }
     }
@@ -274,7 +277,7 @@ class TopPickRepository(
                 }
             }
         } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
+            Logger.e(e.stackTraceToString())
             flow { emit(emptyList()) }
         }
     }

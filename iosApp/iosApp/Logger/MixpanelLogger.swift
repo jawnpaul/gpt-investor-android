@@ -11,15 +11,16 @@ import GPT_Investor
 import Mixpanel
 
 class MixpanelLogger: AnalyticsLogger {
+    var api: MixpanelInstance!
     init() {
         guard let value = Config.getConfigValue(for: "MixpanelKey") else {
             print("Mixpanel token not found in Info.plist")
             return
         }
         Mixpanel.initialize(token: value, flushInterval: 60, optOutTrackingByDefault: true)
+        api = Mixpanel.mainInstance()
     }
     func identifyUser(eventName: String, params: [String: Any]) {
-        let api = Mixpanel.mainInstance()
         var props: [String: MixpanelType] = [:]
         params.forEach{(key, value) in
             if key != "user_id" {
@@ -35,7 +36,6 @@ class MixpanelLogger: AnalyticsLogger {
     }
 
     func logEvent(eventName: String, params: [String: Any]) {
-        let api = Mixpanel.mainInstance()
         // compactMapValues will iterate through the dictionary's values.
         // For each value, it attempts the cast to MixpanelType.
         // If the cast succeeds, the key-value pair is kept with the casted value.
@@ -55,7 +55,6 @@ class MixpanelLogger: AnalyticsLogger {
     }
 
     func resetUser(eventName: String) {
-        let api = Mixpanel.mainInstance()
         api.track(event: eventName)
         api.reset()
     }

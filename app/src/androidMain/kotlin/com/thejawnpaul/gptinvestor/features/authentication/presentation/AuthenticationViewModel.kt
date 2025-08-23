@@ -9,16 +9,15 @@ import com.google.firebase.auth.FirebaseUser
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import org.koin.android.annotation.KoinViewModel
 
-@HiltViewModel
-class AuthenticationViewModel @Inject constructor(
+@KoinViewModel
+class AuthenticationViewModel(
     private val authRepository: AuthenticationRepository,
     private val analyticsLogger: AnalyticsLogger,
     private val gptInvestorPreferences: GPTInvestorPreferences
@@ -43,7 +42,7 @@ class AuthenticationViewModel @Inject constructor(
                 _authState.update {
                     it.copy(
                         isUserSignedIn = isSignedIn,
-                        user = authRepository.currentUser
+//                        user = authRepository.currentUser
                     )
                 }
             }
@@ -64,21 +63,21 @@ class AuthenticationViewModel @Inject constructor(
 
     fun signOut(context: Context) {
         viewModelScope.launch {
-            authRepository.signOut(context)
+//            authRepository.signOut(context)
         }
     }
 
     fun handleSignInResult(result: ActivityResult) {
         when (result.resultCode) {
             Activity.RESULT_OK -> {
-                _authState.update { it.copy(loading = false, user = authRepository.currentUser) }
+                _authState.update { it.copy(loading = false, /*user = authRepository.currentUser*/) }
                 analyticsLogger.identifyUser(
                     eventName = "Sign Up",
                     params = mapOf(
-                        "user_id" to authRepository.currentUser?.uid.toString(),
-                        "email" to authRepository.currentUser?.email.toString(),
-                        "name" to authRepository.currentUser?.displayName.toString(),
-                        "sign_up_method" to authRepository.currentUser?.providerId.toString()
+//                        "user_id" to authRepository.currentUser?.uid.toString(),
+//                        "email" to authRepository.currentUser?.email.toString(),
+//                        "name" to authRepository.currentUser?.displayName.toString(),
+//                        "sign_up_method" to authRepository.currentUser?.providerId.toString()
                     )
                 )
             }
@@ -103,7 +102,7 @@ class AuthenticationViewModel @Inject constructor(
                     _authState.update {
                         it.copy(
                             loading = false,
-                            user = authRepository.currentUser
+                            /*user = authRepository.currentUser*/
                         )
                     }
                 } else {
@@ -236,25 +235,25 @@ class AuthenticationViewModel @Inject constructor(
 
     private fun signUpWithGoogle(context: Context) {
         viewModelScope.launch {
-            authRepository.signUp(context).collect {
-                if (it) {
-                    _actions.emit(AuthenticationAction.OnSignUp("Sign up Success"))
-                } else {
-                    _actions.emit(AuthenticationAction.OnSignUp("Sign up failed"))
-                }
-            }
+//            authRepository.signUp(context).collect {
+//                if (it) {
+//                    _actions.emit(AuthenticationAction.OnSignUp("Sign up Success"))
+//                } else {
+//                    _actions.emit(AuthenticationAction.OnSignUp("Sign up failed"))
+//                }
+//            }
         }
     }
 
     private fun loginWithGoogle(context: Context) {
         viewModelScope.launch {
-            authRepository.loginWithGoogle(context).collect {
-                if (it) {
-                    _actions.emit(AuthenticationAction.OnLogin("Login Success"))
-                } else {
-                    _actions.emit(AuthenticationAction.OnLogin("Login failed"))
-                }
-            }
+//            authRepository.loginWithGoogle(context).collect {
+//                if (it) {
+//                    _actions.emit(AuthenticationAction.OnLogin("Login Success"))
+//                } else {
+//                    _actions.emit(AuthenticationAction.OnLogin("Login failed"))
+//                }
+//            }
         }
     }
 

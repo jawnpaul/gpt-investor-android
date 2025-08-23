@@ -35,7 +35,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import kotlinx.serialization.json.Json
+import org.koin.core.annotation.Singleton
 
+@Singleton
 class ApiServiceImpl (private val client: HttpClient) : ApiService {
     override suspend fun getCompanies(): Result<List<CompanyRemote>> {
         return client.getAsType<List<CompanyRemote>>("v1/companies")

@@ -23,7 +23,7 @@ import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
-fun HomeTidbitItem(modifier: Modifier = Modifier, imageUrl: String, title: String, description: String) {
+fun HomeTidbitItem(modifier: Modifier = Modifier, tidbitId: String, imageUrl: String, title: String, description: String, onTidbitClick: (String) -> Unit) {
     Column(
         modifier = modifier.padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -47,7 +47,8 @@ fun HomeTidbitItem(modifier: Modifier = Modifier, imageUrl: String, title: Strin
         }*/
 
         OutlinedCard(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { onTidbitClick(tidbitId) }
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
@@ -89,8 +90,10 @@ fun HomeTidbitItem(modifier: Modifier = Modifier, imageUrl: String, title: Strin
 @Composable
 fun HomeTidbitItemPreview() {
     HomeTidbitItem(
+        tidbitId = "1",
         imageUrl = "https://www.example.com/image.jpg",
         title = "Understanding Compound Interest",
-        description = "Compound interest is the interest on a loan or deposit calculated based on both the initial principal and the accumulated interest from previous periods."
+        description = "Compound interest is the interest on a loan or deposit calculated based on both the initial principal and the accumulated interest from previous periods.",
+        onTidbitClick = {}
     )
 }

@@ -119,4 +119,5 @@
     <string name="theme">Theme</string>
     <string name="history">History</string>
     <string name="tidbit">Tidbit</string>
+    <string name="source">Source</string>
 </resources>

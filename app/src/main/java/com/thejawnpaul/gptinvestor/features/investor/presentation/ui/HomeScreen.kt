@@ -294,7 +294,11 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
                         modifier = Modifier.align(Alignment.Center),
                         imageUrl = item.previewUrl,
                         title = item.title,
-                        description = item.description
+                        description = item.description,
+                        tidbitId = item.id,
+                        onTidbitClick = {
+                            onEvent(HomeEvent.ClickTidbit(it))
+                        }
                     )
                 }
             }

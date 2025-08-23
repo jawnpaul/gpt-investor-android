@@ -83,7 +83,8 @@ data class TextColors(
 @Immutable
 data class GreenColors(
     val defaultGreen: Color,
-    val allGreen: Color
+    val allGreen: Color,
+    val allGreen10: Color
 )
 
 @Immutable
@@ -94,7 +95,8 @@ data class UtilColors(
 
 @Immutable
 data class AccentColors(
-    val allAccent: Color
+    val allAccent: Color,
+    val allAccent20: Color
 )
 
 @Immutable
@@ -109,7 +111,8 @@ val gptInvestorColorsDark = GPTInvestorColors(
     ),
     greenColors = GreenColors(
         defaultGreen = Color(0xFF05C702),
-        allGreen = Color(0xFF02A400)
+        allGreen = Color(0xFF02A400),
+        allGreen10 = Color(0xFFE6F6E5)
     ),
     utilColors = UtilColors(
         allDark2 = Color(0xFF180C25),
@@ -117,7 +120,8 @@ val gptInvestorColorsDark = GPTInvestorColors(
 
     ),
     accentColors = AccentColors(
-        allAccent = Color(0xFF3F008B)
+        allAccent = Color(0xFF3F008B),
+        allAccent20 = Color(0xFFD9CCE8)
     ),
     redColors = RedColors(
         allRed = Color(0xFFDF3F3F)
@@ -130,7 +134,8 @@ val gptInvestorColorsLight = GPTInvestorColors(
     ),
     greenColors = GreenColors(
         defaultGreen = Color(0xFF05C702),
-        allGreen = Color(0xFF02A400)
+        allGreen = Color(0xFF02A400),
+        allGreen10 = Color(0xFFE6F6E5)
     ),
     utilColors = UtilColors(
         allDark2 = Color(0xFFFBFAFD),
@@ -139,7 +144,8 @@ val gptInvestorColorsLight = GPTInvestorColors(
     accentColors = AccentColors(
         allAccent = Color(
             0xFF3F008B
-        )
+        ),
+        allAccent20 = Color(0xFFD9CCE8)
     ),
     redColors = RedColors(
         allRed = Color(0xFFDF3F3F)

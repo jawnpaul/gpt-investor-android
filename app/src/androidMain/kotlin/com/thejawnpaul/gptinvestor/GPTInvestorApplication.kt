@@ -5,6 +5,7 @@ import com.thejawnpaul.gptinvestor.analytics.di.providesCompositeLogger
 import com.thejawnpaul.gptinvestor.analytics.di.providesFirebaseLogger
 import com.thejawnpaul.gptinvestor.analytics.di.providesMixpanelLogger
 import com.thejawnpaul.gptinvestor.core.di.initKoin
+import com.thejawnpaul.gptinvestor.core.di.providesGeminiApi
 import com.thejawnpaul.gptinvestor.core.di.providesRemoteConfig
 import com.thejawnpaul.gptinvestor.remote.networkModule
 import dagger.hilt.android.HiltAndroidApp
@@ -21,8 +22,10 @@ class GPTInvestorApplication : Application() {
         }
         val platformModules = listOf(
             networkModule, providesMixpanelLogger(null),
-            providesFirebaseLogger(null), providesCompositeLogger(),
-            providesRemoteConfig(null)
+            providesFirebaseLogger(null),
+            providesCompositeLogger(),
+            providesRemoteConfig(null),
+            providesGeminiApi(null)
         )
         initKoin(
             config = {

@@ -1,11 +1,11 @@
 package com.thejawnpaul.gptinvestor.features.conversation.data.repository
 
-import co.touchlab.kermit.Logger
 //import com.google.firebase.auth.FirebaseAuth
+import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
-import com.thejawnpaul.gptinvestor.core.IRemoteConfig
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.api.GeminiApi
+import com.thejawnpaul.gptinvestor.core.firebase.IRemoteConfig
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences

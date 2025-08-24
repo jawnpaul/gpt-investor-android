@@ -1,4 +1,4 @@
-package com.thejawnpaul.gptinvestor.core
+package com.thejawnpaul.gptinvestor.core.firebase
 
 interface IRemoteConfig {
 

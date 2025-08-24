@@ -8,7 +8,7 @@ import com.google.firebase.remoteconfig.remoteConfig
 import com.google.firebase.remoteconfig.remoteConfigSettings
 import com.thejawnpaul.gptinvestor.BuildConfig
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.core.IRemoteConfig
+import com.thejawnpaul.gptinvestor.core.firebase.IRemoteConfig
 import org.koin.core.annotation.Single
 import timber.log.Timber
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig as RemoteConfig

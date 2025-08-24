@@ -17,7 +17,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         print("AppDelegate: didFinishLaunchingWithOptions")
         startFirebase()
-        startKoin()
+        Task{
+            await startKoin()
+        }
         return true
     }
     
@@ -35,13 +37,15 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         }
     }
     
-    private func startKoin() {
+    private func startKoin() async {
         let mixPanelLogger = MixpanelLogger() as AnalyticsLogger
         let firebaseLogger = FirebaseLogger() as AnalyticsLogger
         let firebaseRemoteConfig = RemoteConfigImpl() as IRemoteConfig
+        let geminiApi = (await GeminiApiImpl(remoteConfig: firebaseRemoteConfig)) as GeminiApi
         let mixPanelModule = AnalyticsProvider_iosKt.providesMixpanelLogger(mixpanel: mixPanelLogger)
         let firebaseModule = AnalyticsProvider_iosKt.providesFirebaseLogger(firebase: firebaseLogger)
         let remoteConfigModule = RemoteConfigProvider_iosKt.providesRemoteConfig(config: firebaseRemoteConfig)
-        KoinInitializerKt.doInitKoin(config: nil, platformModules: [mixPanelModule, firebaseModule, remoteConfigModule])
+        let geminiApiModule = GeminiApiProvider_iosKt.providesGeminiApi(api: geminiApi)
+        KoinInitializerKt.doInitKoin(config: nil, platformModules: [mixPanelModule, firebaseModule, remoteConfigModule, geminiApiModule])
     }
 }

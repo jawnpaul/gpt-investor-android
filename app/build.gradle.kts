@@ -187,6 +187,11 @@ dependencies {
     implementation(libs.androidx.play.services.auth)
     implementation(libs.google.identity)
     implementation(libs.firebase.messaging)
+    implementation(libs.exoplayer)
+    implementation(libs.exoplayer.dash)
+    implementation(libs.exoplayer.ui)
+    implementation(libs.exoplayer.compose)
+    implementation(libs.youtube.player)
 
     // test
     testImplementation(project(":remote:remotetest"))

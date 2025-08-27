@@ -37,6 +37,8 @@ mixpanel = "8.0.2"
 datastore = "1.1.7"
 credentials = "1.5.0"
 googleId = "1.1.1"
+exoplayer = "1.8.0"
+youtubeplayer = "12.1.2"
 
 
 [libraries]
@@ -92,6 +94,12 @@ mixpanel-android = {group = "com.mixpanel.android", name= "mixpanel-android", ve
 androidx-credentials = {group = "androidx.credentials", name = "credentials", version.ref = "credentials"}
 androidx-play-services-auth = {group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials"}
 google-identity = {group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleId"}
+exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "exoplayer"}
+exoplayer-dash = { group = "androidx.media3", name = "media3-exoplayer-dash", version.ref = "exoplayer"}
+exoplayer-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "exoplayer"}
+exoplayer-compose = { group = "androidx.media3", name = "media3-ui-compose", version.ref = "exoplayer"}
+youtube-player = { group = "com.pierfrancescosoffritti.androidyoutubeplayer", name = "core", version.ref = "youtubeplayer"}
+
 
 
 [plugins]

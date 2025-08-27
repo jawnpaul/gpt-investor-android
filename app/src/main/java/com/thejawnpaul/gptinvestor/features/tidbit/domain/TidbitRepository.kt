@@ -35,7 +35,8 @@ class TidbitRepositoryImpl @Inject constructor(
                             originalAuthor = originalAuthor,
                             category = category,
                             mediaUrl = mediaUrl,
-                            sourceUrl = source
+                            sourceUrl = source,
+                            type = type
                         )
                     }
                     Result.success(res)
@@ -62,7 +63,8 @@ class TidbitRepositoryImpl @Inject constructor(
                             content = content,
                             originalAuthor = originalAuthor,
                             category = category,
-                            sourceUrl = source
+                            sourceUrl = source,
+                            type = type
                         )
                     }
                     Result.success(res)
@@ -90,7 +92,8 @@ class TidbitRepositoryImpl @Inject constructor(
                                 originalAuthor = originalAuthor,
                                 category = category,
                                 mediaUrl = mediaUrl,
-                                sourceUrl = source
+                                sourceUrl = source,
+                                type = type
                             )
                         }
                     }

@@ -8,7 +8,8 @@ data class Tidbit(
     val content: String,
     val originalAuthor: String,
     val category: String,
-    val sourceUrl: String
+    val sourceUrl: String,
+    val type: String
 ) {
     val description = content.take(400)
 }

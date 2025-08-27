@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
+import com.thejawnpaul.gptinvestor.features.tidbit.domain.model.Tidbit
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.model.TidbitPresentation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -34,14 +36,8 @@ class TidbitViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             id = tidbit.id,
-                            previewUrl = tidbit.previewUrl,
-                            title = tidbit.title,
-                            content = tidbit.content,
-                            originalAuthor = tidbit.originalAuthor,
-                            category = tidbit.category,
-                            mediaUrl = tidbit.mediaUrl,
-                            sourceUrl = tidbit.sourceUrl,
-                            isLoading = false
+                            isLoading = false,
+                            presentation = mapTidbitToPresentation(tidbit)
                         )
                     }
                 }.onFailure {
@@ -73,7 +69,7 @@ class TidbitViewModel @Inject constructor(
             }
 
             is TidbitEvent.OnClickSource -> {
-                handleAction(action = TidbitAction.OnOpenSource(url = _uiState.value.sourceUrl))
+                // handleAction(action = TidbitAction.OnOpenSource(url = _uiState.value.sourceUrl))
             }
         }
     }
@@ -88,18 +84,68 @@ class TidbitViewModel @Inject constructor(
             _actions.emit(action)
         }
     }
+
+    private fun mapTidbitToPresentation(tidbit: Tidbit): TidbitPresentation {
+        return when (tidbit.type) {
+            "text" -> TidbitPresentation.ArticlePresentation(
+                id = tidbit.id,
+                name = tidbit.title,
+                previewUrl = tidbit.previewUrl,
+                mediaUrl = tidbit.mediaUrl,
+                title = tidbit.title,
+                content = tidbit.content,
+                originalAuthor = tidbit.originalAuthor,
+                category = tidbit.category,
+                sourceUrl = tidbit.sourceUrl
+            )
+
+            "video" -> TidbitPresentation.VideoPresentation(
+                id = tidbit.id,
+                name = tidbit.title,
+                previewUrl = tidbit.previewUrl,
+                mediaUrl = tidbit.mediaUrl,
+                title = tidbit.title,
+                content = tidbit.content,
+                originalAuthor = tidbit.originalAuthor,
+                category = tidbit.category,
+                sourceUrl = tidbit.sourceUrl
+
+            )
+
+            "audio" -> TidbitPresentation.AudioPresentation(
+                id = tidbit.id,
+                name = tidbit.title,
+                previewUrl = tidbit.previewUrl,
+                mediaUrl = tidbit.mediaUrl,
+                title = tidbit.title,
+                content = tidbit.content,
+                originalAuthor = tidbit.originalAuthor,
+                category = tidbit.category,
+                sourceUrl = tidbit.sourceUrl
+
+            )
+
+            else -> {
+                TidbitPresentation.ArticlePresentation(
+                    id = tidbit.id,
+                    name = tidbit.title,
+                    previewUrl = tidbit.previewUrl,
+                    mediaUrl = tidbit.mediaUrl,
+                    title = tidbit.title,
+                    content = tidbit.content,
+                    originalAuthor = tidbit.originalAuthor,
+                    category = tidbit.category,
+                    sourceUrl = tidbit.sourceUrl
+                )
+            }
+        }
+    }
 }
 
 data class TidbitDetailState(
     val id: String = "",
     val isLoading: Boolean = false,
-    val previewUrl: String = "",
-    val mediaUrl: String = "",
-    val title: String = "",
-    val content: String = "",
-    val originalAuthor: String = "",
-    val category: String = "",
-    val sourceUrl: String = ""
+    val presentation: TidbitPresentation? = null
 )
 
 sealed interface TidbitEvent {

@@ -120,4 +120,6 @@
     <string name="history">History</string>
     <string name="tidbit">Tidbit</string>
     <string name="source">Source</string>
+    <string name="bookmark">Bookmark</string>
+    <string name="share">Share</string>
 </resources>

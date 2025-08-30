@@ -269,7 +269,7 @@ private fun TidbitArticleDetail(modifier: Modifier = Modifier, presentation: Tid
 
                 Text(text = presentation.title, style = MaterialTheme.typography.titleLarge)
                 CustomRichText(
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                    modifier = Modifier.padding(horizontal = 4.dp),
                     text = presentation.content
                 )
                 Spacer(modifier = Modifier)
@@ -329,7 +329,7 @@ private fun TidbitVideoDetail(modifier: Modifier = Modifier, presentation: Tidbi
             )
 
             CustomRichText(
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier.padding(horizontal = 4.dp),
                 text = presentation.content
             )
 
@@ -391,7 +391,7 @@ private fun TidbitAudioDetail(modifier: Modifier = Modifier, presentation: Tidbi
             )
 
             CustomRichText(
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier.padding(horizontal = 4.dp),
                 text = presentation.content
             )
 

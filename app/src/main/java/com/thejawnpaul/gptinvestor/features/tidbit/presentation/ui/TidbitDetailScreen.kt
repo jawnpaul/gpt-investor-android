@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CustomRichText
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.model.TidbitPresentation
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitAction
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailState
@@ -76,8 +78,11 @@ fun TidbitDetailScreen(
             }
 
             is TidbitPresentation.AudioPresentation -> {
-                // TODO: Implement Audio Presentation UI
-                // Potentially pass onAction here if Audio needs it
+                TidbitAudioDetail(
+                    modifier = modifier,
+                    presentation = presentation,
+                    onEvent = onEvent
+                )
             }
 
             is TidbitPresentation.VideoPresentation -> {
@@ -162,18 +167,30 @@ private fun TidbitActionRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(modifier = Modifier.size(32.dp), onClick = onLikeClick) {
-                Icon(painter = painterResource(id = likeIcon), contentDescription = stringResource(R.string.like))
+                Icon(
+                    painter = painterResource(id = likeIcon),
+                    contentDescription = stringResource(R.string.like)
+                )
             }
             IconButton(modifier = Modifier.size(32.dp), onClick = onBookmarkClick) {
-                Icon(painter = painterResource(id = bookmarkIcon), contentDescription = stringResource(R.string.bookmark))
+                Icon(
+                    painter = painterResource(id = bookmarkIcon),
+                    contentDescription = stringResource(R.string.bookmark)
+                )
             }
             IconButton(modifier = Modifier.size(32.dp), onClick = onShareClick) {
-                Icon(painter = painterResource(id = R.drawable.ic_top_pick_send), contentDescription = stringResource(R.string.share))
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_top_pick_send),
+                    contentDescription = stringResource(R.string.share)
+                )
             }
         }
         Surface(
             shape = RoundedCornerShape(corner = CornerSize(20.dp)),
-            border = BorderStroke(width = 2.dp, color = gptInvestorColors.utilColors.borderBright10),
+            border = BorderStroke(
+                width = 2.dp,
+                color = gptInvestorColors.utilColors.borderBright10
+            ),
             onClick = onSourceClick
         ) {
             Row(
@@ -182,7 +199,10 @@ private fun TidbitActionRow(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = stringResource(R.string.source))
-                Icon(painter = painterResource(id = R.drawable.ic_global), contentDescription = null)
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_global),
+                    contentDescription = null
+                )
             }
         }
     }
@@ -200,7 +220,9 @@ private fun TidbitArticleDetail(modifier: Modifier = Modifier, presentation: Tid
         },
         bottomBar = {
             TidbitActionRow(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 isLiked = isLiked.value,
                 isBookmarked = isBookmarked.value,
                 onLikeClick = {
@@ -216,7 +238,7 @@ private fun TidbitArticleDetail(modifier: Modifier = Modifier, presentation: Tid
             )
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) { // Use modifier, not modifier.padding
+        Box(modifier = Modifier.padding(paddingValues)) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -224,7 +246,7 @@ private fun TidbitArticleDetail(modifier: Modifier = Modifier, presentation: Tid
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                Spacer(modifier = Modifier) // Keep Spacer if it serves a purpose for scroll start
+                Spacer(modifier = Modifier)
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -246,8 +268,11 @@ private fun TidbitArticleDetail(modifier: Modifier = Modifier, presentation: Tid
                 )
 
                 Text(text = presentation.title, style = MaterialTheme.typography.titleLarge)
-                Text(text = presentation.content, style = MaterialTheme.typography.bodyMedium)
-                Spacer(modifier = Modifier) // Spacer at the bottom if needed for padding from bottom bar
+                CustomRichText(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    text = presentation.content
+                )
+                Spacer(modifier = Modifier)
             }
         }
     }
@@ -276,16 +301,16 @@ private fun TidbitVideoDetail(modifier: Modifier = Modifier, presentation: Tidbi
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(273.dp)
-                    .padding(horizontal = 16.dp), // Specific padding for video player
+                    .defaultMinSize(minHeight = 200.dp)
+                    .padding(horizontal = 16.dp),
                 shape = RoundedCornerShape(corner = CornerSize(20.dp))
             ) {
                 GptInvestorVideo( // Assuming this is a custom composable
-                    modifier = Modifier.fillMaxSize()
-                    /*youtubeVideoId = presentation.videoId,
+                    modifier = Modifier.fillMaxSize(),
+                    youtubeVideoId = presentation.videoId,
                     videoUrl = presentation.mediaUrl,
                     autoplay = true,
-                    showControls = false*/
+                    showControls = false
                 )
             }
 
@@ -303,10 +328,71 @@ private fun TidbitVideoDetail(modifier: Modifier = Modifier, presentation: Tidbi
                 style = MaterialTheme.typography.titleLarge // Video title, if exists
             )
 
+            CustomRichText(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = presentation.content
+            )
+
+            TidbitActionRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp), // Consistent padding for the action row
+                isLiked = isLiked.value,
+                isBookmarked = isBookmarked.value,
+                onLikeClick = { isLiked.value = !isLiked.value },
+                onBookmarkClick = { isBookmarked.value = !isBookmarked.value },
+                onShareClick = { onEvent(TidbitEvent.OnClickShare) },
+                onSourceClick = { onEvent(TidbitEvent.OnClickSource) }
+            )
+            Spacer(modifier = Modifier.height(16.dp)) // Final spacer at the bottom
+        }
+    }
+}
+
+@Composable
+private fun TidbitAudioDetail(modifier: Modifier = Modifier, presentation: TidbitPresentation.AudioPresentation, onEvent: (TidbitEvent) -> Unit) {
+    val isLiked = remember { mutableStateOf(false) } // State managed here
+    val isBookmarked = remember { mutableStateOf(false) } // State managed here
+
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            DetailTopAppBar(onBackClicked = { onEvent(TidbitEvent.GoBack) })
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding) // Apply scaffold padding
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp) // Consistent spacing for children
+        ) {
+            Spacer(modifier = Modifier.height(16.dp)) // Initial spacer from top bar
+
+            GptInvestorAudioCompact(
+                modifier = Modifier.fillMaxSize(),
+                artworkUrl = presentation.previewUrl,
+                audioUrl = presentation.mediaUrl,
+                autoplay = true
+            )
+
+            AuthorCategoryInfo(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp), // Consistent padding
+                author = presentation.originalAuthor,
+                category = presentation.category
+            )
+
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp), // Consistent padding
-                text = presentation.content,
-                style = MaterialTheme.typography.bodyMedium
+                text = presentation.title, // Assuming AudioPresentation also has a title
+                style = MaterialTheme.typography.titleLarge // Audio title, if exists
+            )
+
+            CustomRichText(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = presentation.content
             )
 
             TidbitActionRow(
@@ -335,11 +421,11 @@ fun TidbitDetailScreenPreview() {
             onAction = {},
             state = TidbitDetailState(
                 id = "1",
-                presentation = TidbitPresentation.VideoPresentation(
+                presentation = TidbitPresentation.AudioPresentation(
                     id = "1",
                     name = "GPT Investor",
-                    previewUrl = "",
-                    mediaUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ", // Example YouTube URL
+                    previewUrl = "https://example.com/image.jpg", // Example preview URL
+                    mediaUrl = "https://example.com/audio.mp3", // Example audio URL
                     title = "Title",
                     content = "Content",
                     originalAuthor = "Original Author",

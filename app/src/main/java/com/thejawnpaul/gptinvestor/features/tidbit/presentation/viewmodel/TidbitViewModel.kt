@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.model.Tidbit
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.model.TidbitPresentation
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitAction.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -69,7 +70,21 @@ class TidbitViewModel @Inject constructor(
             }
 
             is TidbitEvent.OnClickSource -> {
-                // handleAction(action = TidbitAction.OnOpenSource(url = _uiState.value.sourceUrl))
+                _uiState.value.presentation?.let { presentation ->
+                    when (presentation) {
+                        is TidbitPresentation.ArticlePresentation -> {
+                            handleAction(action = OnOpenSource(url = presentation.sourceUrl))
+                        }
+
+                        is TidbitPresentation.VideoPresentation -> {
+                            handleAction(action = OnOpenSource(url = presentation.sourceUrl))
+                        }
+
+                        is TidbitPresentation.AudioPresentation -> {
+                            handleAction(action = OnOpenSource(url = presentation.sourceUrl))
+                        }
+                    }
+                }
             }
         }
     }

@@ -310,7 +310,7 @@ private fun TidbitVideoDetail(modifier: Modifier = Modifier, presentation: Tidbi
                     youtubeVideoId = presentation.videoId,
                     videoUrl = presentation.mediaUrl,
                     autoplay = true,
-                    showControls = false
+                    showControls = true
                 )
             }
 

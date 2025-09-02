@@ -116,18 +116,20 @@ fun TidbitScreen(modifier: Modifier = Modifier, state: TidbitScreenState, onEven
                             SingleTidbitItem(
                                 modifier = Modifier.padding(horizontal = 16.dp),
                                 tidbit = tidbit,
-                                onItemClick = { onEvent(TidbitScreenEvent.OnTidbitClick(tidbit.id)) },
-                                onLikeClick = {
+                                onItemClick = { onEvent(TidbitScreenEvent.OnTidbitClick(tidbitId = tidbit.id)) },
+                                onLikeClick = {id, newValue ->
                                     onEvent(
                                         TidbitScreenEvent.OnTidbitLikeClick(
-                                            tidbitId = tidbit.id
+                                            tidbitId = tidbit.id,
+                                            newValue = newValue
                                         )
                                     )
                                 },
-                                onSaveClick = {
+                                onSaveClick = {id, newValue ->
                                     onEvent(
                                         TidbitScreenEvent.OnTidbitSaveClick(
-                                            tidbitId = tidbit.id
+                                            tidbitId = tidbit.id,
+                                            newValue = newValue
                                         )
                                     )
                                 },

@@ -50,8 +50,8 @@ fun SingleTidbitItem(
     modifier: Modifier = Modifier,
     tidbit: TidbitPresentation,
     onItemClick: (String) -> Unit,
-    onLikeClick: (String) -> Unit = {},
-    onSaveClick: (String) -> Unit = {},
+    onLikeClick: (String, Boolean) -> Unit = {_, _ ->},
+    onSaveClick: (String, Boolean) -> Unit = {_, _ ->},
     onShareClick: (String) -> Unit = {}
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
@@ -130,7 +130,7 @@ fun SingleTidbitItem(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(
                         onClick = {
-                            onLikeClick(tidbit.id)
+                            onLikeClick(tidbit.id, !isLiked.value)
                             isLiked.value = !isLiked.value
                         },
                         modifier = Modifier.size(20.dp)
@@ -143,7 +143,7 @@ fun SingleTidbitItem(
                     Spacer(modifier = Modifier.width(12.dp))
                     IconButton(
                         onClick = {
-                            onSaveClick(tidbit.id)
+                            onSaveClick(tidbit.id, !isBookmarked.value)
                             isBookmarked.value = !isBookmarked.value
                         },
                         modifier = Modifier.size(20.dp)
@@ -301,8 +301,8 @@ fun SingleTidbitItemPreview(@PreviewParameter(TidbitPreviewParameterProvider::cl
                 modifier = Modifier.padding(16.dp),
                 tidbit = tidbit,
                 onItemClick = {},
-                onLikeClick = {},
-                onSaveClick = {},
+                onLikeClick = {_,_->},
+                onSaveClick = {_,_->},
                 onShareClick = {}
             )
         }

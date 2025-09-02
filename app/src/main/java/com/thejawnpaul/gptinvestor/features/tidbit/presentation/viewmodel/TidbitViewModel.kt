@@ -62,16 +62,13 @@ class TidbitViewModel @Inject constructor(
             }
 
             TidbitDetailEvent.GoBack -> {
-                handleDetailAction(action = TidbitDetailAction.OnGoBack)
-            }
-
-            is TidbitDetailEvent.OnClickLike -> {
+                handleDetailAction(action = OnGoBack)
             }
 
             is TidbitDetailEvent.OnClickShare -> {
                 viewModelScope.launch {
                     repository.getShareableLink(_tidbitDetailState.value.id).onSuccess {
-                        handleDetailAction(action = TidbitDetailAction.OnShare(shareText = it))
+                        handleDetailAction(action = OnShare(shareText = it))
                     }
                 }
             }
@@ -90,6 +87,26 @@ class TidbitViewModel @Inject constructor(
                         is TidbitPresentation.AudioPresentation -> {
                             handleDetailAction(action = OnOpenSource(url = presentation.sourceUrl))
                         }
+                    }
+                }
+            }
+
+            is TidbitDetailEvent.OnClickBookmark -> {
+                viewModelScope.launch {
+                    if (event.newValue) {
+                        repository.bookmarkTidbit(tidbitId = event.id)
+                    } else {
+                        repository.removeBookmark(tidbitId = event.id)
+                    }
+                }
+            }
+
+            is TidbitDetailEvent.OnClickLike -> {
+                viewModelScope.launch {
+                    if (event.newValue) {
+                        repository.likeTidbit(tidbitId = event.id)
+                    } else {
+                        repository.unlikeTidbit(tidbitId = event.id)
                     }
                 }
             }
@@ -166,12 +183,17 @@ class TidbitViewModel @Inject constructor(
     fun handleMainScreenEvent(event: TidbitScreenEvent) {
         when (event) {
             TidbitScreenEvent.GetAllTidbits -> {
-                getAllTidbits()
+                if (_tidbitMainScreenState.value.selectedOption == null) {
+                    getAllTidbits()
+                } else{
+                    handleFilter(_tidbitMainScreenState.value.selectedOption!!)
+                }
             }
 
             TidbitScreenEvent.OnBackClick -> {
                 handleAction(action = TidbitAction.OnGoBack)
             }
+
             is TidbitScreenEvent.OnFilterSelected -> {
                 _tidbitMainScreenState.update {
                     it.copy(selectedOption = event.filter)
@@ -183,8 +205,25 @@ class TidbitViewModel @Inject constructor(
             is TidbitScreenEvent.OnTidbitClick -> {
                 handleAction(action = TidbitAction.OnGoToTidbitDetail(tidbitId = event.tidbitId))
             }
-            is TidbitScreenEvent.OnTidbitLikeClick -> {}
+
+            is TidbitScreenEvent.OnTidbitLikeClick -> {
+                viewModelScope.launch {
+                    if (event.newValue) {
+                        repository.likeTidbit(tidbitId = event.tidbitId)
+                    } else {
+                        repository.unlikeTidbit(tidbitId = event.tidbitId)
+                    }
+                }
+            }
+
             is TidbitScreenEvent.OnTidbitSaveClick -> {
+                viewModelScope.launch {
+                    if (event.newValue) {
+                        repository.bookmarkTidbit(tidbitId = event.tidbitId)
+                    } else {
+                        repository.removeBookmark(tidbitId = event.tidbitId)
+                    }
+                }
             }
 
             is TidbitScreenEvent.OnTidbitShareClick -> {
@@ -336,9 +375,9 @@ sealed interface TidbitScreenEvent {
 
     data class OnTidbitClick(val tidbitId: String) : TidbitScreenEvent
 
-    data class OnTidbitLikeClick(val tidbitId: String) : TidbitScreenEvent
+    data class OnTidbitLikeClick(val tidbitId: String, val newValue: Boolean) : TidbitScreenEvent
 
-    data class OnTidbitSaveClick(val tidbitId: String) : TidbitScreenEvent
+    data class OnTidbitSaveClick(val tidbitId: String, val newValue: Boolean) : TidbitScreenEvent
 
     data class OnTidbitShareClick(val tidbitId: String) : TidbitScreenEvent
 }
@@ -352,7 +391,8 @@ sealed interface TidbitAction {
 sealed interface TidbitDetailEvent {
     data class GetTidbit(val id: String) : TidbitDetailEvent
     data object GoBack : TidbitDetailEvent
-    data class OnClickLike(val id: String) : TidbitDetailEvent
+    data class OnClickLike(val id: String, val newValue: Boolean) : TidbitDetailEvent
+    data class OnClickBookmark(val id: String, val newValue: Boolean) : TidbitDetailEvent
     data object OnClickSource : TidbitDetailEvent
     data object OnClickShare : TidbitDetailEvent
 }

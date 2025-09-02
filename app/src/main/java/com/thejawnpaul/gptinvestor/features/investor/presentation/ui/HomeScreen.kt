@@ -298,6 +298,9 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
                         tidbitId = item.id,
                         onTidbitClick = {
                             onEvent(HomeEvent.ClickTidbit(it))
+                        },
+                        onClickSeeAll = {
+                            onEvent(HomeEvent.GoToAllTidbits)
                         }
                     )
                 }

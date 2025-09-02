@@ -20,3 +20,33 @@ data class TidbitRemote(
     @field:Json(name = "title") val title: String,
     @field:Json(name = "updated_at") val updatedAt: String
 )
+
+@JsonClass(generateAdapter = true)
+data class AllTidbitResponse(
+    @field:Json(name = "page") val page: Int,
+    @field:Json(name = "page_size") val pageSize: Int,
+    @field:Json(name = "total_tidbits") val totalTidbit: Int,
+    @field:Json(name = "tidbits") val data: List<TidbitRemote>
+)
+
+@JsonClass(generateAdapter = true)
+data class TidbitLikeRequest(
+    @field:Json(name = "user_id") val userId: String,
+    @field:Json(name = "tidbit_id") val tidbitId: String
+)
+
+@JsonClass(generateAdapter = true)
+data class TidbitLikeResponse(
+    @field:Json(name = "message") val message: String
+)
+
+@JsonClass(generateAdapter = true)
+data class TidbitBookmarkResponse(
+    @field:Json(name = "message") val message: String
+)
+
+@JsonClass(generateAdapter = true)
+data class TidbitBookmarkRequest(
+    @field:Json(name = "user_id") val userId: String,
+    @field:Json(name = "tidbit_id") val tidbitId: String
+)

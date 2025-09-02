@@ -2,28 +2,33 @@ package com.thejawnpaul.gptinvestor.features.tidbit.presentation.model
 
 sealed interface TidbitPresentation {
     val id: String
+    val title: String
+    val content: String
+    val originalAuthor: String
+    val category: String
+    val previewUrl: String
 
     data class ArticlePresentation(
         override val id: String,
+        override val title: String = "",
+        override val content: String = "",
+        override val originalAuthor: String = "",
+        override val category: String = "",
+        override val previewUrl: String = "",
         val name: String,
-        val previewUrl: String = "",
         val mediaUrl: String = "",
-        val title: String = "",
-        val content: String = "",
-        val originalAuthor: String = "",
-        val category: String = "",
         val sourceUrl: String = ""
     ) : TidbitPresentation
 
     data class VideoPresentation(
+        override val title: String = "",
         override val id: String,
+        override val content: String = "",
+        override val originalAuthor: String = "",
+        override val category: String = "",
+        override val previewUrl: String = "",
         val name: String,
-        val previewUrl: String = "",
         val mediaUrl: String = "",
-        val title: String = "",
-        val content: String = "",
-        val originalAuthor: String = "",
-        val category: String = "",
         val sourceUrl: String = ""
     ) : TidbitPresentation {
 
@@ -45,13 +50,13 @@ sealed interface TidbitPresentation {
 
     data class AudioPresentation(
         override val id: String,
+        override val title: String = "",
+        override val content: String = "",
+        override val originalAuthor: String = "",
+        override val category: String = "",
+        override val previewUrl: String = "",
         val name: String,
-        val previewUrl: String = "",
         val mediaUrl: String = "",
-        val title: String = "",
-        val content: String = "",
-        val originalAuthor: String = "",
-        val category: String = "",
         val sourceUrl: String = ""
     ) : TidbitPresentation
 }

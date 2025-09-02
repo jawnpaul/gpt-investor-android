@@ -43,9 +43,9 @@ import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CustomRichText
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.model.TidbitPresentation
-import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitAction
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailAction
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailEvent
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailState
-import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitEvent
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.theme.bodyChatBody
@@ -56,11 +56,11 @@ fun TidbitDetailScreen(
     modifier: Modifier = Modifier,
     tidbitId: String,
     state: TidbitDetailState,
-    onEvent: (TidbitEvent) -> Unit,
-    onAction: (TidbitAction) -> Unit // This onAction is for TidbitDetailScreen, might be used by other presentation types
+    onEvent: (TidbitDetailEvent) -> Unit,
+    onAction: (TidbitDetailAction) -> Unit // This onAction is for TidbitDetailScreen, might be used by other presentation types
 ) {
     LaunchedEffect(tidbitId) {
-        onEvent(TidbitEvent.GetTidbit(tidbitId))
+        onEvent(TidbitDetailEvent.GetTidbit(tidbitId))
     }
     if (state.isLoading) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -209,14 +209,14 @@ private fun TidbitActionRow(
 }
 
 @Composable
-private fun TidbitArticleDetail(modifier: Modifier = Modifier, presentation: TidbitPresentation.ArticlePresentation, onEvent: (TidbitEvent) -> Unit) {
+private fun TidbitArticleDetail(modifier: Modifier = Modifier, presentation: TidbitPresentation.ArticlePresentation, onEvent: (TidbitDetailEvent) -> Unit) {
     val isLiked = remember { mutableStateOf(false) } // State managed here
     val isBookmarked = remember { mutableStateOf(false) } // State managed here
 
     Scaffold(
         modifier = modifier,
         topBar = {
-            DetailTopAppBar(onBackClicked = { onEvent(TidbitEvent.GoBack) })
+            DetailTopAppBar(onBackClicked = { onEvent(TidbitDetailEvent.GoBack) })
         },
         bottomBar = {
             TidbitActionRow(
@@ -233,8 +233,8 @@ private fun TidbitArticleDetail(modifier: Modifier = Modifier, presentation: Tid
                     // onEvent(TidbitEvent.Bookmark(!isBookmarked.value)) // Example event
                     isBookmarked.value = !isBookmarked.value
                 },
-                onShareClick = { onEvent(TidbitEvent.OnClickShare) },
-                onSourceClick = { onEvent(TidbitEvent.OnClickSource) }
+                onShareClick = { onEvent(TidbitDetailEvent.OnClickShare) },
+                onSourceClick = { onEvent(TidbitDetailEvent.OnClickSource) }
             )
         }
     ) { paddingValues ->
@@ -279,14 +279,14 @@ private fun TidbitArticleDetail(modifier: Modifier = Modifier, presentation: Tid
 }
 
 @Composable
-private fun TidbitVideoDetail(modifier: Modifier = Modifier, presentation: TidbitPresentation.VideoPresentation, onEvent: (TidbitEvent) -> Unit) {
+private fun TidbitVideoDetail(modifier: Modifier = Modifier, presentation: TidbitPresentation.VideoPresentation, onEvent: (TidbitDetailEvent) -> Unit) {
     val isLiked = remember { mutableStateOf(false) } // State managed here
     val isBookmarked = remember { mutableStateOf(false) } // State managed here
 
     Scaffold(
         modifier = modifier,
         topBar = {
-            DetailTopAppBar(onBackClicked = { onEvent(TidbitEvent.GoBack) })
+            DetailTopAppBar(onBackClicked = { onEvent(TidbitDetailEvent.GoBack) })
         }
     ) { innerPadding ->
         Column(
@@ -341,8 +341,8 @@ private fun TidbitVideoDetail(modifier: Modifier = Modifier, presentation: Tidbi
                 isBookmarked = isBookmarked.value,
                 onLikeClick = { isLiked.value = !isLiked.value },
                 onBookmarkClick = { isBookmarked.value = !isBookmarked.value },
-                onShareClick = { onEvent(TidbitEvent.OnClickShare) },
-                onSourceClick = { onEvent(TidbitEvent.OnClickSource) }
+                onShareClick = { onEvent(TidbitDetailEvent.OnClickShare) },
+                onSourceClick = { onEvent(TidbitDetailEvent.OnClickSource) }
             )
             Spacer(modifier = Modifier.height(16.dp)) // Final spacer at the bottom
         }
@@ -350,14 +350,14 @@ private fun TidbitVideoDetail(modifier: Modifier = Modifier, presentation: Tidbi
 }
 
 @Composable
-private fun TidbitAudioDetail(modifier: Modifier = Modifier, presentation: TidbitPresentation.AudioPresentation, onEvent: (TidbitEvent) -> Unit) {
+private fun TidbitAudioDetail(modifier: Modifier = Modifier, presentation: TidbitPresentation.AudioPresentation, onEvent: (TidbitDetailEvent) -> Unit) {
     val isLiked = remember { mutableStateOf(false) } // State managed here
     val isBookmarked = remember { mutableStateOf(false) } // State managed here
 
     Scaffold(
         modifier = modifier,
         topBar = {
-            DetailTopAppBar(onBackClicked = { onEvent(TidbitEvent.GoBack) })
+            DetailTopAppBar(onBackClicked = { onEvent(TidbitDetailEvent.GoBack) })
         }
     ) { innerPadding ->
         Column(
@@ -369,11 +369,11 @@ private fun TidbitAudioDetail(modifier: Modifier = Modifier, presentation: Tidbi
         ) {
             Spacer(modifier = Modifier.height(16.dp)) // Initial spacer from top bar
 
-            GptInvestorAudioCompact(
-                modifier = Modifier.fillMaxSize(),
-                artworkUrl = presentation.previewUrl,
-                audioUrl = presentation.mediaUrl,
-                autoplay = true
+            GptInvestorVideo(
+                modifier = Modifier.fillMaxWidth().height(200.dp),
+                videoUrl = presentation.mediaUrl,
+                autoplay = true,
+                showControls = true
             )
 
             AuthorCategoryInfo(
@@ -403,8 +403,8 @@ private fun TidbitAudioDetail(modifier: Modifier = Modifier, presentation: Tidbi
                 isBookmarked = isBookmarked.value,
                 onLikeClick = { isLiked.value = !isLiked.value },
                 onBookmarkClick = { isBookmarked.value = !isBookmarked.value },
-                onShareClick = { onEvent(TidbitEvent.OnClickShare) },
-                onSourceClick = { onEvent(TidbitEvent.OnClickSource) }
+                onShareClick = { onEvent(TidbitDetailEvent.OnClickShare) },
+                onSourceClick = { onEvent(TidbitDetailEvent.OnClickSource) }
             )
             Spacer(modifier = Modifier.height(16.dp)) // Final spacer at the bottom
         }

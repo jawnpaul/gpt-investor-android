@@ -42,7 +42,9 @@ import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsAction
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsScreen
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsViewModel
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.TidbitDetailScreen
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.TidbitScreen
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitAction
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailAction
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitViewModel
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickAction
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewModel
@@ -114,6 +116,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                             }
 
                             HomeAction.OnGoToAllTidbits -> {
+                                navController.navigate(route = Screen.TidbitScreen.route)
                             }
 
                             is HomeAction.OnGoToTidbitDetail -> {
@@ -455,17 +458,17 @@ fun SetUpNavGraph(navController: NavHostController) {
             ) { navBackStackEntry ->
                 val tidbitId = navBackStackEntry.arguments?.getString("tidbitId") ?: ""
                 val viewModel = hiltViewModel<TidbitViewModel>()
-                val state = viewModel.uiState.collectAsStateWithLifecycle()
+                val state = viewModel.tidbitDetailState.collectAsStateWithLifecycle()
                 val scope = rememberCoroutineScope()
                 val context = LocalContext.current
                 LaunchedEffect(Unit) {
-                    viewModel.actions.onEach { action ->
+                    viewModel.tidbitDetailActions.onEach { action ->
                         when (action) {
-                            TidbitAction.OnGoBack -> {
+                            TidbitDetailAction.OnGoBack -> {
                                 navController.navigateUp()
                             }
 
-                            is TidbitAction.OnOpenSource -> {
+                            is TidbitDetailAction.OnOpenSource -> {
                                 try {
                                     val intent = Intent(Intent.ACTION_VIEW, action.url.toUri())
                                     context.startActivity(intent)
@@ -474,7 +477,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                                 }
                             }
 
-                            is TidbitAction.OnShare -> {
+                            is TidbitDetailAction.OnShare -> {
                                 val sendIntent = Intent(Intent.ACTION_SEND).apply {
                                     type = "text/plain"
                                     putExtra(Intent.EXTRA_SUBJECT, "Tidbit")
@@ -494,9 +497,49 @@ fun SetUpNavGraph(navController: NavHostController) {
                 TidbitDetailScreen(
                     modifier = Modifier,
                     tidbitId = tidbitId,
-                    onEvent = viewModel::handleEvent,
+                    onEvent = viewModel::handleDetailEvent,
                     state = state.value,
-                    onAction = viewModel::handleAction
+                    onAction = viewModel::handleDetailAction
+                )
+            }
+
+            composable(route = Screen.TidbitScreen.route) {
+                val viewModel = hiltViewModel<TidbitViewModel>()
+                val state = viewModel.tidbitMainScreenState.collectAsStateWithLifecycle()
+                val scope = rememberCoroutineScope()
+                val context = LocalContext.current
+                LaunchedEffect(Unit) {
+                    viewModel.actions.onEach { action ->
+                        when (action) {
+                            TidbitAction.OnGoBack -> {
+                                navController.navigateUp()
+                            }
+
+                            is TidbitAction.OnShare -> {
+                                val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_SUBJECT, "Tidbit")
+                                    putExtra(Intent.EXTRA_TEXT, action.shareText)
+                                }
+                                context.startActivity(
+                                    Intent.createChooser(
+                                        sendIntent,
+                                        "Share via"
+                                    )
+                                )
+                            }
+
+                            is TidbitAction.OnGoToTidbitDetail -> {
+                                navController.navigate(Screen.TidbitDetailScreen.createRoute(tidbitId = action.tidbitId))
+                            }
+                        }
+                    }.launchIn(scope)
+                }
+
+                TidbitScreen(
+                    modifier = Modifier,
+                    state = state.value,
+                    onEvent = viewModel::handleMainScreenEvent
                 )
             }
         }

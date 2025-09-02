@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,21 +17,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
-fun HomeTidbitItem(modifier: Modifier = Modifier, tidbitId: String, imageUrl: String, title: String, description: String, onTidbitClick: (String) -> Unit) {
+fun HomeTidbitItem(modifier: Modifier = Modifier, tidbitId: String, imageUrl: String, title: String, description: String, onTidbitClick: (String) -> Unit, onClickSeeAll: () -> Unit) {
     Column(
         modifier = modifier.padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         val gptInvestorColors = LocalGPTInvestorColors.current
 
-        /*Row(
+        Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -41,10 +44,14 @@ fun HomeTidbitItem(modifier: Modifier = Modifier, tidbitId: String, imageUrl: St
             )
 
             Text(
-                modifier = Modifier,
+                modifier = Modifier.clickable(
+                    onClick = onClickSeeAll,
+                    indication = null,
+                    interactionSource = null
+                ),
                 text = stringResource(R.string.see_all)
             )
-        }*/
+        }
 
         OutlinedCard(
             modifier = Modifier.fillMaxWidth(),
@@ -94,6 +101,7 @@ fun HomeTidbitItemPreview() {
         imageUrl = "https://www.example.com/image.jpg",
         title = "Understanding Compound Interest",
         description = "Compound interest is the interest on a loan or deposit calculated based on both the initial principal and the accumulated interest from previous periods.",
-        onTidbitClick = {}
+        onTidbitClick = {},
+        onClickSeeAll = {}
     )
 }

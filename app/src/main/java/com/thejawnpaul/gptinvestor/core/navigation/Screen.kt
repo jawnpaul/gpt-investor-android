@@ -62,4 +62,6 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
     data object TidbitDetailScreen : Screen("tidbit_detail_screen/{tidbitId}", false) {
         fun createRoute(tidbitId: String) = "tidbit_detail_screen/$tidbitId"
     }
+
+    data object TidbitScreen : Screen("tidbit_screen", false)
 }

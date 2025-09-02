@@ -3,10 +3,11 @@ package com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.model.Tidbit
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.model.TidbitPresentation
-import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitAction.*
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailAction.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,18 +24,24 @@ class TidbitViewModel @Inject constructor(
     private val tidbitId: String?
         get() = savedStateHandle.get<String>("tidbitId")
 
-    private val _uiState = MutableStateFlow(TidbitDetailState())
-    val uiState get() = _uiState
+    private val _tidbitDetailState = MutableStateFlow(TidbitDetailState())
+    val tidbitDetailState get() = _tidbitDetailState
+
+    private val _tidbitMainScreenState = MutableStateFlow(TidbitScreenState())
+    val tidbitMainScreenState get() = _tidbitMainScreenState
+
+    private val _tidbitDetailActions = MutableSharedFlow<TidbitDetailAction>()
+    val tidbitDetailActions get() = _tidbitDetailActions
 
     private val _actions = MutableSharedFlow<TidbitAction>()
     val actions get() = _actions
 
     private fun getTidbit() {
-        _uiState.update { it.copy(isLoading = true) }
+        _tidbitDetailState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             tidbitId?.let { id ->
                 repository.getTidbit(id).onSuccess { tidbit ->
-                    _uiState.update {
+                    _tidbitDetailState.update {
                         it.copy(
                             id = tidbit.id,
                             isLoading = false,
@@ -42,46 +49,46 @@ class TidbitViewModel @Inject constructor(
                         )
                     }
                 }.onFailure {
-                    _uiState.update { it.copy(isLoading = false) }
+                    _tidbitDetailState.update { it.copy(isLoading = false) }
                 }
             }
         }
     }
 
-    fun handleEvent(event: TidbitEvent) {
+    fun handleDetailEvent(event: TidbitDetailEvent) {
         when (event) {
-            is TidbitEvent.GetTidbit -> {
+            is TidbitDetailEvent.GetTidbit -> {
                 updateTidbitId(tidbitId = event.id)
             }
 
-            TidbitEvent.GoBack -> {
-                handleAction(action = TidbitAction.OnGoBack)
+            TidbitDetailEvent.GoBack -> {
+                handleDetailAction(action = TidbitDetailAction.OnGoBack)
             }
 
-            is TidbitEvent.OnClickLike -> {
+            is TidbitDetailEvent.OnClickLike -> {
             }
 
-            is TidbitEvent.OnClickShare -> {
+            is TidbitDetailEvent.OnClickShare -> {
                 viewModelScope.launch {
-                    repository.getShareableLink(_uiState.value.id).onSuccess {
-                        handleAction(action = TidbitAction.OnShare(shareText = it))
+                    repository.getShareableLink(_tidbitDetailState.value.id).onSuccess {
+                        handleDetailAction(action = TidbitDetailAction.OnShare(shareText = it))
                     }
                 }
             }
 
-            is TidbitEvent.OnClickSource -> {
-                _uiState.value.presentation?.let { presentation ->
+            is TidbitDetailEvent.OnClickSource -> {
+                _tidbitDetailState.value.presentation?.let { presentation ->
                     when (presentation) {
                         is TidbitPresentation.ArticlePresentation -> {
-                            handleAction(action = OnOpenSource(url = presentation.sourceUrl))
+                            handleDetailAction(action = OnOpenSource(url = presentation.sourceUrl))
                         }
 
                         is TidbitPresentation.VideoPresentation -> {
-                            handleAction(action = OnOpenSource(url = presentation.sourceUrl))
+                            handleDetailAction(action = OnOpenSource(url = presentation.sourceUrl))
                         }
 
                         is TidbitPresentation.AudioPresentation -> {
-                            handleAction(action = OnOpenSource(url = presentation.sourceUrl))
+                            handleDetailAction(action = OnOpenSource(url = presentation.sourceUrl))
                         }
                     }
                 }
@@ -94,9 +101,9 @@ class TidbitViewModel @Inject constructor(
         getTidbit()
     }
 
-    fun handleAction(action: TidbitAction) {
+    fun handleDetailAction(action: TidbitDetailAction) {
         viewModelScope.launch {
-            _actions.emit(action)
+            _tidbitDetailActions.emit(action)
         }
     }
 
@@ -155,6 +162,140 @@ class TidbitViewModel @Inject constructor(
             }
         }
     }
+
+    fun handleMainScreenEvent(event: TidbitScreenEvent) {
+        when (event) {
+            TidbitScreenEvent.GetAllTidbits -> {
+                getAllTidbits()
+            }
+
+            TidbitScreenEvent.OnBackClick -> {
+                handleAction(action = TidbitAction.OnGoBack)
+            }
+            is TidbitScreenEvent.OnFilterSelected -> {
+                _tidbitMainScreenState.update {
+                    it.copy(selectedOption = event.filter)
+                }
+                handleFilter(event.filter)
+            }
+
+            TidbitScreenEvent.OnSearchClick -> {}
+            is TidbitScreenEvent.OnTidbitClick -> {
+                handleAction(action = TidbitAction.OnGoToTidbitDetail(tidbitId = event.tidbitId))
+            }
+            is TidbitScreenEvent.OnTidbitLikeClick -> {}
+            is TidbitScreenEvent.OnTidbitSaveClick -> {
+            }
+
+            is TidbitScreenEvent.OnTidbitShareClick -> {
+                viewModelScope.launch {
+                    repository.getShareableLink(event.tidbitId).onSuccess {
+                        handleAction(action = TidbitAction.OnShare(shareText = it))
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getAllTidbits() {
+        _tidbitMainScreenState.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            repository.getAllTidbits().onSuccess { tidbits ->
+                _tidbitMainScreenState.update {
+                    it.copy(
+                        isLoading = false,
+                        tidbits = tidbits.map { tidbit ->
+                            mapTidbitToPresentation(tidbit)
+                        }
+                    )
+                }
+            }.onFailure {
+            }
+        }
+    }
+
+    private fun handleFilter(filter: SectorInput) {
+        when (filter) {
+            SectorInput.AllSector -> {
+                getAllTidbits()
+            }
+
+            is SectorInput.CustomSector -> {
+                when (filter.sectorKey) {
+                    "new" -> {
+                        getNewTidbits()
+                    }
+
+                    "trending" -> {
+                        getTrendingTidbits()
+                    }
+
+                    "saved" -> {
+                        getSavedTidbits()
+                    }
+
+                    else -> {
+                        getAllTidbits()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getTrendingTidbits() {
+        _tidbitMainScreenState.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            repository.getTrendingTidbits().onSuccess { tidbits ->
+                _tidbitMainScreenState.update {
+                    it.copy(
+                        isLoading = false,
+                        tidbits = tidbits.map { tidbit ->
+                            mapTidbitToPresentation(tidbit)
+                        }
+                    )
+                }
+            }.onFailure {
+            }
+        }
+    }
+
+    private fun getSavedTidbits() {
+        _tidbitMainScreenState.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            repository.getSavedTidbits().onSuccess { tidbits ->
+                _tidbitMainScreenState.update {
+                    it.copy(
+                        isLoading = false,
+                        tidbits = tidbits.map { tidbit ->
+                            mapTidbitToPresentation(tidbit)
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    private fun getNewTidbits() {
+        _tidbitMainScreenState.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            repository.getNewTidbits().onSuccess { tidbits ->
+                _tidbitMainScreenState.update {
+                    it.copy(
+                        isLoading = false,
+                        tidbits = tidbits.map { tidbit ->
+                            mapTidbitToPresentation(tidbit)
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    fun handleAction(action: TidbitAction) {
+        viewModelScope.launch {
+            _actions.emit(action)
+        }
+    }
 }
 
 data class TidbitDetailState(
@@ -163,16 +304,61 @@ data class TidbitDetailState(
     val presentation: TidbitPresentation? = null
 )
 
-sealed interface TidbitEvent {
-    data class GetTidbit(val id: String) : TidbitEvent
-    data object GoBack : TidbitEvent
-    data class OnClickLike(val id: String) : TidbitEvent
-    data object OnClickSource : TidbitEvent
-    data object OnClickShare : TidbitEvent
+data class TidbitScreenState(
+    val options: List<SectorInput> = listOf(
+        SectorInput.AllSector,
+        SectorInput.CustomSector(
+            sectorName = "New",
+            sectorKey = "new"
+        ),
+        SectorInput.CustomSector(
+            sectorName = "Saved",
+            sectorKey = "saved"
+        ),
+        SectorInput.CustomSector(
+            sectorName = "Trending",
+            sectorKey = "trending"
+        )
+    ),
+    val selectedOption: SectorInput? = SectorInput.AllSector,
+    val isLoading: Boolean = false,
+    val tidbits: List<TidbitPresentation> = emptyList()
+)
+
+sealed interface TidbitScreenEvent {
+
+    data object GetAllTidbits : TidbitScreenEvent
+    data object OnBackClick : TidbitScreenEvent
+
+    data object OnSearchClick : TidbitScreenEvent
+
+    data class OnFilterSelected(val filter: SectorInput) : TidbitScreenEvent
+
+    data class OnTidbitClick(val tidbitId: String) : TidbitScreenEvent
+
+    data class OnTidbitLikeClick(val tidbitId: String) : TidbitScreenEvent
+
+    data class OnTidbitSaveClick(val tidbitId: String) : TidbitScreenEvent
+
+    data class OnTidbitShareClick(val tidbitId: String) : TidbitScreenEvent
 }
 
 sealed interface TidbitAction {
     data object OnGoBack : TidbitAction
-    data class OnOpenSource(val url: String) : TidbitAction
     data class OnShare(val shareText: String) : TidbitAction
+    data class OnGoToTidbitDetail(val tidbitId: String) : TidbitAction
+}
+
+sealed interface TidbitDetailEvent {
+    data class GetTidbit(val id: String) : TidbitDetailEvent
+    data object GoBack : TidbitDetailEvent
+    data class OnClickLike(val id: String) : TidbitDetailEvent
+    data object OnClickSource : TidbitDetailEvent
+    data object OnClickShare : TidbitDetailEvent
+}
+
+sealed interface TidbitDetailAction {
+    data object OnGoBack : TidbitDetailAction
+    data class OnOpenSource(val url: String) : TidbitDetailAction
+    data class OnShare(val shareText: String) : TidbitDetailAction
 }

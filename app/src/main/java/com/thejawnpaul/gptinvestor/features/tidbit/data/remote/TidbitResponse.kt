@@ -18,6 +18,8 @@ data class TidbitRemote(
     @field:Json(name = "source") val source: String,
     @field:Json(name = "tidbit_type") val type: String,
     @field:Json(name = "title") val title: String,
+    @field:Json(name = "is_liked") val isLiked: Boolean? = false,
+    @field:Json(name = "is_bookmarked") val isBookmarked: Boolean? = false,
     @field:Json(name = "updated_at") val updatedAt: String
 )
 

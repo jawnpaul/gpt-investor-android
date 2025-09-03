@@ -9,6 +9,8 @@ data class Tidbit(
     val originalAuthor: String,
     val category: String,
     val sourceUrl: String,
+    val isLiked: Boolean,
+    val isBookmarked: Boolean,
     val type: String
 ) {
     val description = content.take(400)

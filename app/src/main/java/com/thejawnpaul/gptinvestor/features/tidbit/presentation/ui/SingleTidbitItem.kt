@@ -55,8 +55,8 @@ fun SingleTidbitItem(
     onShareClick: (String) -> Unit = {}
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
-    val isLiked = remember { mutableStateOf(false) }
-    val isBookmarked = remember { mutableStateOf(false) }
+    val isLiked = remember { mutableStateOf(tidbit.isLiked) }
+    val isBookmarked = remember { mutableStateOf(tidbit.isBookmarked) }
 
     Surface(
         modifier = modifier

@@ -210,8 +210,8 @@ private fun TidbitActionRow(
 
 @Composable
 private fun TidbitArticleDetail(modifier: Modifier = Modifier, presentation: TidbitPresentation.ArticlePresentation, onEvent: (TidbitDetailEvent) -> Unit) {
-    val isLiked = remember { mutableStateOf(false) } // State managed here
-    val isBookmarked = remember { mutableStateOf(false) } // State managed here
+    val isLiked = remember { mutableStateOf(presentation.isLiked) }
+    val isBookmarked = remember { mutableStateOf(presentation.isBookmarked) } // State managed here
 
     Scaffold(
         modifier = modifier,
@@ -226,11 +226,21 @@ private fun TidbitArticleDetail(modifier: Modifier = Modifier, presentation: Tid
                 isLiked = isLiked.value,
                 isBookmarked = isBookmarked.value,
                 onLikeClick = {
-                    // onEvent(TidbitEvent.Like(!isLiked.value)) // Example event
+                    onEvent(
+                        TidbitDetailEvent.OnClickLike(
+                            id = presentation.id,
+                            newValue = !isLiked.value
+                        )
+                    )
                     isLiked.value = !isLiked.value
                 },
                 onBookmarkClick = {
-                    // onEvent(TidbitEvent.Bookmark(!isBookmarked.value)) // Example event
+                    onEvent(
+                        TidbitDetailEvent.OnClickBookmark(
+                            id = presentation.id,
+                            newValue = !isBookmarked.value
+                        )
+                    )
                     isBookmarked.value = !isBookmarked.value
                 },
                 onShareClick = { onEvent(TidbitDetailEvent.OnClickShare) },
@@ -336,23 +346,39 @@ private fun TidbitVideoDetail(modifier: Modifier = Modifier, presentation: Tidbi
             TidbitActionRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp), // Consistent padding for the action row
+                    .padding(16.dp),
                 isLiked = isLiked.value,
                 isBookmarked = isBookmarked.value,
-                onLikeClick = { isLiked.value = !isLiked.value },
-                onBookmarkClick = { isBookmarked.value = !isBookmarked.value },
+                onLikeClick = {
+                    onEvent(
+                        TidbitDetailEvent.OnClickLike(
+                            id = presentation.id,
+                            newValue = !isLiked.value
+                        )
+                    )
+                    isLiked.value = !isLiked.value
+                },
+                onBookmarkClick = {
+                    onEvent(
+                        TidbitDetailEvent.OnClickBookmark(
+                            id = presentation.id,
+                            newValue = !isBookmarked.value
+                        )
+                    )
+                    isBookmarked.value = !isBookmarked.value
+                },
                 onShareClick = { onEvent(TidbitDetailEvent.OnClickShare) },
                 onSourceClick = { onEvent(TidbitDetailEvent.OnClickSource) }
             )
-            Spacer(modifier = Modifier.height(16.dp)) // Final spacer at the bottom
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
 private fun TidbitAudioDetail(modifier: Modifier = Modifier, presentation: TidbitPresentation.AudioPresentation, onEvent: (TidbitDetailEvent) -> Unit) {
-    val isLiked = remember { mutableStateOf(false) } // State managed here
-    val isBookmarked = remember { mutableStateOf(false) } // State managed here
+    val isLiked = remember { mutableStateOf(presentation.isLiked) }
+    val isBookmarked = remember { mutableStateOf(presentation.isBookmarked) }
 
     Scaffold(
         modifier = modifier,
@@ -370,7 +396,9 @@ private fun TidbitAudioDetail(modifier: Modifier = Modifier, presentation: Tidbi
             Spacer(modifier = Modifier.height(16.dp)) // Initial spacer from top bar
 
             GptInvestorVideo(
-                modifier = Modifier.fillMaxWidth().height(200.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
                 videoUrl = presentation.mediaUrl,
                 autoplay = true,
                 showControls = true
@@ -379,7 +407,7 @@ private fun TidbitAudioDetail(modifier: Modifier = Modifier, presentation: Tidbi
             AuthorCategoryInfo(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp), // Consistent padding
+                    .padding(horizontal = 16.dp),
                 author = presentation.originalAuthor,
                 category = presentation.category
             )
@@ -398,15 +426,31 @@ private fun TidbitAudioDetail(modifier: Modifier = Modifier, presentation: Tidbi
             TidbitActionRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp), // Consistent padding for the action row
+                    .padding(16.dp),
                 isLiked = isLiked.value,
                 isBookmarked = isBookmarked.value,
-                onLikeClick = { isLiked.value = !isLiked.value },
-                onBookmarkClick = { isBookmarked.value = !isBookmarked.value },
+                onLikeClick = {
+                    onEvent(
+                        TidbitDetailEvent.OnClickLike(
+                            id = presentation.id,
+                            newValue = !isLiked.value
+                        )
+                    )
+                    isLiked.value = !isLiked.value
+                },
+                onBookmarkClick = {
+                    onEvent(
+                        TidbitDetailEvent.OnClickBookmark(
+                            id = presentation.id,
+                            newValue = !isBookmarked.value
+                        )
+                    )
+                    isBookmarked.value = !isBookmarked.value
+                },
                 onShareClick = { onEvent(TidbitDetailEvent.OnClickShare) },
                 onSourceClick = { onEvent(TidbitDetailEvent.OnClickSource) }
             )
-            Spacer(modifier = Modifier.height(16.dp)) // Final spacer at the bottom
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

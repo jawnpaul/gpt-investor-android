@@ -83,22 +83,22 @@ interface ApiService {
     suspend fun addUserToWaitlist(@Body request: AddToWaitlistRequest): Response<AddToWaitlistResponse>
 
     @GET("v1/tidbit/all-tidbit")
-    suspend fun getAllTidbit(@Query("page") page: Int = 1, @Query("page_size") pageSize: Int = 10): Response<AllTidbitResponse>
+    suspend fun getAllTidbit(@Query("page") page: Int = 1, @Query("page_size") pageSize: Int = 10, @Query("user_id") userId: String): Response<AllTidbitResponse>
 
     @GET("v1/tidbit/latest-tidbits")
-    suspend fun getLatestTidbits(@Query("page") page: Int = 1, @Query("page_size") pageSize: Int = 10): Response<AllTidbitResponse>
+    suspend fun getLatestTidbits(@Query("page") page: Int = 1, @Query("page_size") pageSize: Int = 10, @Query("user_id") userId: String): Response<AllTidbitResponse>
 
     @GET("v1/tidbit/trending-tidbits")
-    suspend fun getTrendingTidbit(@Query("page") page: Int = 1, @Query("page_size") pageSize: Int = 10): Response<AllTidbitResponse>
+    suspend fun getTrendingTidbit(@Query("page") page: Int = 1, @Query("page_size") pageSize: Int = 10, @Query("user_id") userId: String): Response<AllTidbitResponse>
 
     @GET("v1/tidbit/bookmarked-tidbits")
     suspend fun getSavedTidbits(@Query("user_id") userId: String): Response<List<TidbitRemote>>
 
     @GET("v1/tidbit/today-tidbit")
-    suspend fun getTodayTidbit(): Response<TidbitRemote>
+    suspend fun getTodayTidbit(@Query("user_id") userId: String): Response<TidbitRemote>
 
     @GET("v1/tidbit/single-tidbit")
-    suspend fun getSingleTidbit(@Query("id") id: String): Response<TidbitRemote>
+    suspend fun getSingleTidbit(@Query("id") id: String, @Query("user_id") userId: String): Response<TidbitRemote>
 
     @POST("v1/tidbit/like-tidbit")
     suspend fun likeTidbit(@Body request: TidbitLikeRequest): Response<TidbitLikeResponse>

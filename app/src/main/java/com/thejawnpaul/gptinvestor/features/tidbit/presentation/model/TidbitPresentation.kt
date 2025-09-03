@@ -7,6 +7,8 @@ sealed interface TidbitPresentation {
     val originalAuthor: String
     val category: String
     val previewUrl: String
+    val isBookmarked: Boolean
+    val isLiked: Boolean
 
     data class ArticlePresentation(
         override val id: String,
@@ -15,6 +17,8 @@ sealed interface TidbitPresentation {
         override val originalAuthor: String = "",
         override val category: String = "",
         override val previewUrl: String = "",
+        override val isBookmarked: Boolean = false,
+        override val isLiked: Boolean = false,
         val name: String,
         val mediaUrl: String = "",
         val sourceUrl: String = ""
@@ -27,6 +31,8 @@ sealed interface TidbitPresentation {
         override val originalAuthor: String = "",
         override val category: String = "",
         override val previewUrl: String = "",
+        override val isBookmarked: Boolean = false,
+        override val isLiked: Boolean = false,
         val name: String,
         val mediaUrl: String = "",
         val sourceUrl: String = ""
@@ -55,6 +61,8 @@ sealed interface TidbitPresentation {
         override val originalAuthor: String = "",
         override val category: String = "",
         override val previewUrl: String = "",
+        override val isBookmarked: Boolean = false,
+        override val isLiked: Boolean = false,
         val name: String,
         val mediaUrl: String = "",
         val sourceUrl: String = ""

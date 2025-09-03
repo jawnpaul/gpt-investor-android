@@ -135,7 +135,9 @@ class TidbitViewModel @Inject constructor(
                 content = tidbit.content,
                 originalAuthor = tidbit.originalAuthor,
                 category = tidbit.category,
-                sourceUrl = tidbit.sourceUrl
+                sourceUrl = tidbit.sourceUrl,
+                isBookmarked = tidbit.isBookmarked,
+                isLiked = tidbit.isLiked
             )
 
             "video" -> TidbitPresentation.VideoPresentation(
@@ -147,7 +149,9 @@ class TidbitViewModel @Inject constructor(
                 content = tidbit.content,
                 originalAuthor = tidbit.originalAuthor,
                 category = tidbit.category,
-                sourceUrl = tidbit.sourceUrl
+                sourceUrl = tidbit.sourceUrl,
+                isBookmarked = tidbit.isBookmarked,
+                isLiked = tidbit.isLiked
 
             )
 
@@ -160,7 +164,9 @@ class TidbitViewModel @Inject constructor(
                 content = tidbit.content,
                 originalAuthor = tidbit.originalAuthor,
                 category = tidbit.category,
-                sourceUrl = tidbit.sourceUrl
+                sourceUrl = tidbit.sourceUrl,
+                isBookmarked = tidbit.isBookmarked,
+                isLiked = tidbit.isLiked
 
             )
 
@@ -174,7 +180,9 @@ class TidbitViewModel @Inject constructor(
                     content = tidbit.content,
                     originalAuthor = tidbit.originalAuthor,
                     category = tidbit.category,
-                    sourceUrl = tidbit.sourceUrl
+                    sourceUrl = tidbit.sourceUrl,
+                    isBookmarked = tidbit.isBookmarked,
+                    isLiked = tidbit.isLiked
                 )
             }
         }

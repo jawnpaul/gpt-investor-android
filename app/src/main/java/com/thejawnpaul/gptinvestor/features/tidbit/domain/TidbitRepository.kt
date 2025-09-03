@@ -38,7 +38,8 @@ class TidbitRepositoryImpl @Inject constructor(
     TidbitRepository {
     override suspend fun getTodayTidbit(): Result<Tidbit> {
         return try {
-            val response = apiService.getTodayTidbit()
+            val userId = preferences.userId.first() ?: ""
+            val response = apiService.getTodayTidbit(userId = userId)
             if (response.isSuccessful) {
                 response.body()?.let { data ->
                     val res = with(data) {
@@ -51,7 +52,9 @@ class TidbitRepositoryImpl @Inject constructor(
                             category = category,
                             mediaUrl = mediaUrl,
                             sourceUrl = source,
-                            type = type
+                            type = type,
+                            isLiked = isLiked ?: false,
+                            isBookmarked = isBookmarked ?: false
                         )
                     }
                     Result.success(res)
@@ -66,7 +69,8 @@ class TidbitRepositoryImpl @Inject constructor(
 
     override suspend fun getTidbit(id: String): Result<Tidbit> {
         return try {
-            val response = apiService.getSingleTidbit(id)
+            val userId = preferences.userId.first() ?: ""
+            val response = apiService.getSingleTidbit(id = id, userId = userId)
             if (response.isSuccessful) {
                 response.body()?.let { data ->
                     val res = with(data) {
@@ -79,7 +83,9 @@ class TidbitRepositoryImpl @Inject constructor(
                             originalAuthor = originalAuthor,
                             category = category,
                             sourceUrl = source,
-                            type = type
+                            type = type,
+                            isLiked = isLiked ?: false,
+                            isBookmarked = isBookmarked ?: false
                         )
                     }
                     Result.success(res)
@@ -94,7 +100,8 @@ class TidbitRepositoryImpl @Inject constructor(
 
     override suspend fun getAllTidbits(): Result<List<Tidbit>> {
         return try {
-            val response = apiService.getAllTidbit()
+            val userId = preferences.userId.first() ?: ""
+            val response = apiService.getAllTidbit(userId = userId)
             if (response.isSuccessful) {
                 response.body()?.let { data ->
                     val res = data.data.map {
@@ -108,7 +115,9 @@ class TidbitRepositoryImpl @Inject constructor(
                                 category = category,
                                 mediaUrl = mediaUrl,
                                 sourceUrl = source,
-                                type = type
+                                type = type,
+                                isLiked = isLiked ?: false,
+                                isBookmarked = isBookmarked ?: false
                             )
                         }
                     }
@@ -145,7 +154,8 @@ class TidbitRepositoryImpl @Inject constructor(
 
     override suspend fun getTrendingTidbits(): Result<List<Tidbit>> {
         return try {
-            val response = apiService.getTrendingTidbit()
+            val userId = preferences.userId.first() ?: ""
+            val response = apiService.getTrendingTidbit(userId = userId)
             if (response.isSuccessful) {
                 response.body()?.let { data ->
                     val res = data.data.map {
@@ -159,7 +169,9 @@ class TidbitRepositoryImpl @Inject constructor(
                                 category = category,
                                 mediaUrl = mediaUrl,
                                 sourceUrl = source,
-                                type = type
+                                type = type,
+                                isLiked = isLiked ?: false,
+                                isBookmarked = isBookmarked ?: false
                             )
                         }
                     }
@@ -191,7 +203,9 @@ class TidbitRepositoryImpl @Inject constructor(
                                 category = category,
                                 mediaUrl = mediaUrl,
                                 sourceUrl = source,
-                                type = type
+                                type = type,
+                                isLiked = isLiked ?: false,
+                                isBookmarked = isBookmarked ?: false
                             )
                         }
                     }
@@ -208,7 +222,8 @@ class TidbitRepositoryImpl @Inject constructor(
 
     override suspend fun getNewTidbits(): Result<List<Tidbit>> {
         return try {
-            val response = apiService.getLatestTidbits()
+            val userId = preferences.userId.first() ?: ""
+            val response = apiService.getLatestTidbits(userId = userId)
             if (response.isSuccessful) {
                 response.body()?.let { data ->
                     val res = data.data.map {
@@ -222,7 +237,9 @@ class TidbitRepositoryImpl @Inject constructor(
                                 category = category,
                                 mediaUrl = mediaUrl,
                                 sourceUrl = source,
-                                type = type
+                                type = type,
+                                isLiked = isLiked ?: false,
+                                isBookmarked = isBookmarked ?: false
                             )
                         }
                     }

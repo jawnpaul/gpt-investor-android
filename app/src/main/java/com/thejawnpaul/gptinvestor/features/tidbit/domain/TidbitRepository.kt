@@ -1,14 +1,20 @@
 package com.thejawnpaul.gptinvestor.features.tidbit.domain
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfig
 import com.thejawnpaul.gptinvestor.core.utility.Constants
+import com.thejawnpaul.gptinvestor.features.tidbit.data.paging.TidbitPagingSource
+import com.thejawnpaul.gptinvestor.features.tidbit.data.paging.TidbitType
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitBookmarkRequest
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitLikeRequest
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.model.Tidbit
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
 
@@ -27,6 +33,8 @@ interface TidbitRepository {
     suspend fun unlikeTidbit(tidbitId: String): Result<Unit>
     suspend fun bookmarkTidbit(tidbitId: String): Result<Unit>
     suspend fun removeBookmark(tidbitId: String): Result<Unit>
+
+    fun getAllTidbitsPaged(): Flow<PagingData<Tidbit>>
 }
 
 class TidbitRepositoryImpl @Inject constructor(
@@ -332,5 +340,18 @@ class TidbitRepositoryImpl @Inject constructor(
             Timber.e(e.stackTraceToString())
             Result.failure(e)
         }
+    }
+
+    override fun getAllTidbitsPaged(): Flow<PagingData<Tidbit>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 10,
+                enablePlaceholders = false,
+                initialLoadSize = 20
+            ),
+            pagingSourceFactory = {
+                TidbitPagingSource(apiService, preferences, TidbitType.ALL)
+            }
+        ).flow
     }
 }

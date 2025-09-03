@@ -192,6 +192,8 @@ dependencies {
     implementation(libs.exoplayer.ui)
     implementation(libs.exoplayer.compose)
     implementation(libs.youtube.player)
+    implementation(libs.androidx.paging.runtime.ktx)
+    implementation(libs.androidx.paging.compose)
 
     // test
     testImplementation(project(":remote:remotetest"))

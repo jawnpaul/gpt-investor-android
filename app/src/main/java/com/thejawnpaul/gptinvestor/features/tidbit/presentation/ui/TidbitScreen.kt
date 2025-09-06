@@ -159,7 +159,7 @@ fun TidbitScreen(modifier: Modifier = Modifier, state: TidbitScreenState, tidbit
                                 contentAlignment = Alignment.Center
                             ) {
                                 Button(onClick = { lazyPagingItems.retry() }) {
-                                    Text("Load More")
+                                    Text(text = stringResource(R.string.load_more))
                                 }
                             }
                         }
@@ -186,23 +186,25 @@ fun TidbitScreen(modifier: Modifier = Modifier, state: TidbitScreenState, tidbit
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                "Error loading tidbits",
+                                text = stringResource(R.string.error_loading_tidbits),
                                 style = MaterialTheme.typography.bodyLarge
                             )
                             Button(onClick = { lazyPagingItems.retry() }) {
-                                Text("Retry")
+                                Text(text = stringResource(R.string.retry))
                             }
                         }
                     }
                 }
 
-                // 👇 Empty state full screen
                 if (lazyPagingItems.loadState.refresh is LoadState.NotLoading && lazyPagingItems.itemCount == 0) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No tidbits found.", style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            text = stringResource(R.string.no_tidbits_found),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
                 }
             }

@@ -326,4 +326,5 @@ sealed interface HomeAction {
     data object OnGoToSavedPicks : HomeAction
     data class OnGoToTidbitDetail(val id: String) : HomeAction
     data object OnGoToAllTidbits : HomeAction
+    data object OnGoToSavedTidbits : HomeAction
 }

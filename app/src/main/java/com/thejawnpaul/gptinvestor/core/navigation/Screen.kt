@@ -64,4 +64,5 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
     }
 
     data object TidbitScreen : Screen("tidbit_screen", false)
+    data object SavedTidbitScreen : Screen("saved_tidbits_screen", false)
 }

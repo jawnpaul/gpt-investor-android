@@ -155,6 +155,11 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
                             // navController.navigate(Screen.HistoryTabScreen.route)
                             onAction(HomeAction.OnGoToHistory)
                         }
+
+                        NavDrawerAction.OnGoToSavedTidbits -> {
+                            // navController.navigate(Screen.SavedTidbitsScreen.route)
+                            onAction(HomeAction.OnGoToSavedTidbits)
+                        }
                     }
                 },
                 state = state.drawerState

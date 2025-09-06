@@ -41,6 +41,7 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.Home
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsAction
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsScreen
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsViewModel
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.SavedTidbitScreen
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.TidbitDetailScreen
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.TidbitScreen
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitAction
@@ -121,10 +122,14 @@ fun SetUpNavGraph(navController: NavHostController) {
 
                             is HomeAction.OnGoToTidbitDetail -> {
                                 navController.navigate(
-                                    Screen.TidbitDetailScreen.createRoute(
+                                    route = Screen.TidbitDetailScreen.createRoute(
                                         tidbitId = action.id
                                     )
                                 )
+                            }
+
+                            HomeAction.OnGoToSavedTidbits -> {
+                                navController.navigate(route = Screen.SavedTidbitScreen.route)
                             }
                         }
                     }.launchIn(scope)
@@ -530,7 +535,11 @@ fun SetUpNavGraph(navController: NavHostController) {
                             }
 
                             is TidbitAction.OnGoToTidbitDetail -> {
-                                navController.navigate(Screen.TidbitDetailScreen.createRoute(tidbitId = action.tidbitId))
+                                navController.navigate(
+                                    Screen.TidbitDetailScreen.createRoute(
+                                        tidbitId = action.tidbitId
+                                    )
+                                )
                             }
                         }
                     }.launchIn(scope)
@@ -541,6 +550,50 @@ fun SetUpNavGraph(navController: NavHostController) {
                     state = state.value,
                     onEvent = viewModel::handleMainScreenEvent,
                     tidbitsPagingData = viewModel.tidbitsPagingData
+                )
+            }
+
+            composable(route = Screen.SavedTidbitScreen.route) {
+                val viewModel = hiltViewModel<TidbitViewModel>()
+                val scope = rememberCoroutineScope()
+                val context = LocalContext.current
+
+                LaunchedEffect(Unit) {
+                    viewModel.actions.onEach { action ->
+                        when (action) {
+                            TidbitAction.OnGoBack -> {
+                                navController.navigateUp()
+                            }
+
+                            is TidbitAction.OnGoToTidbitDetail -> {
+                                navController.navigate(
+                                    route = Screen.TidbitDetailScreen.createRoute(
+                                        tidbitId = action.tidbitId
+                                    )
+                                )
+                            }
+
+                            is TidbitAction.OnShare -> {
+                                val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_SUBJECT, "Tidbit")
+                                    putExtra(Intent.EXTRA_TEXT, action.shareText)
+                                }
+                                context.startActivity(
+                                    Intent.createChooser(
+                                        sendIntent,
+                                        "Share via"
+                                    )
+                                )
+                            }
+                        }
+                    }.launchIn(scope)
+                }
+
+                SavedTidbitScreen(
+                    modifier = Modifier,
+                    tidbitsPagingData = viewModel.tidbitsPagingData,
+                    onEvent = viewModel::handleMainScreenEvent
                 )
             }
         }

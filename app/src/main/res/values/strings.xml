@@ -122,4 +122,8 @@
     <string name="source">Source</string>
     <string name="bookmark">Bookmark</string>
     <string name="share">Share</string>
+    <string name="no_tidbits_found">No tidbits found.</string>
+    <string name="error_loading_tidbits">Error loading tidbits</string>
+    <string name="load_more">Load more</string>
+    <string name="saved_tidbits">Saved tidbits</string>
 </resources>

@@ -21,13 +21,8 @@ import timber.log.Timber
 interface TidbitRepository {
     suspend fun getTodayTidbit(): Result<Tidbit>
     suspend fun getTidbit(id: String): Result<Tidbit>
-    suspend fun getAllTidbits(): Result<List<Tidbit>>
 
     suspend fun getShareableLink(id: String): Result<String>
-
-    suspend fun getTrendingTidbits(): Result<List<Tidbit>>
-    suspend fun getSavedTidbits(): Result<List<Tidbit>>
-    suspend fun getNewTidbits(): Result<List<Tidbit>>
 
     suspend fun likeTidbit(tidbitId: String): Result<Unit>
     suspend fun unlikeTidbit(tidbitId: String): Result<Unit>
@@ -35,6 +30,12 @@ interface TidbitRepository {
     suspend fun removeBookmark(tidbitId: String): Result<Unit>
 
     fun getAllTidbitsPaged(): Flow<PagingData<Tidbit>>
+
+    fun getTrendingTidbitsPaged(): Flow<PagingData<Tidbit>>
+
+    fun getNewTidbitsPaged(): Flow<PagingData<Tidbit>>
+
+    fun getBookmarkedTidbitsPaged(): Flow<PagingData<Tidbit>>
 }
 
 class TidbitRepositoryImpl @Inject constructor(
@@ -106,40 +107,6 @@ class TidbitRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAllTidbits(): Result<List<Tidbit>> {
-        return try {
-            val userId = preferences.userId.first() ?: ""
-            val response = apiService.getAllTidbit(userId = userId)
-            if (response.isSuccessful) {
-                response.body()?.let { data ->
-                    val res = data.data.map {
-                        with(it) {
-                            Tidbit(
-                                id = id,
-                                previewUrl = previewUrl,
-                                title = title,
-                                content = content,
-                                originalAuthor = originalAuthor,
-                                category = category,
-                                mediaUrl = mediaUrl,
-                                sourceUrl = source,
-                                type = type,
-                                isLiked = isLiked ?: false,
-                                isBookmarked = isBookmarked ?: false
-                            )
-                        }
-                    }
-                    Result.success(res)
-                } ?: Result.failure(Exception("Empty response body"))
-            } else {
-                Result.failure(Exception("Failed to fetch today's tidbit"))
-            }
-        } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
-            Result.failure(e)
-        }
-    }
-
     override suspend fun getShareableLink(id: String): Result<String> {
         return try {
             val domain = remoteConfig.fetchAndActivateStringValue(Constants.WEBSITE_DOMAIN_KEY)
@@ -156,108 +123,6 @@ class TidbitRepositoryImpl @Inject constructor(
 
             Result.success(data)
         } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun getTrendingTidbits(): Result<List<Tidbit>> {
-        return try {
-            val userId = preferences.userId.first() ?: ""
-            val response = apiService.getTrendingTidbit(userId = userId)
-            if (response.isSuccessful) {
-                response.body()?.let { data ->
-                    val res = data.data.map {
-                        with(it) {
-                            Tidbit(
-                                id = id,
-                                previewUrl = previewUrl,
-                                title = title,
-                                content = content,
-                                originalAuthor = originalAuthor,
-                                category = category,
-                                mediaUrl = mediaUrl,
-                                sourceUrl = source,
-                                type = type,
-                                isLiked = isLiked ?: false,
-                                isBookmarked = isBookmarked ?: false
-                            )
-                        }
-                    }
-                    Result.success(res)
-                } ?: Result.failure(Exception("Empty response body"))
-            } else {
-                Result.failure(Exception("Failed to fetch today's tidbit"))
-            }
-        } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun getSavedTidbits(): Result<List<Tidbit>> {
-        return try {
-            val userId = preferences.userId.first()
-            val response = apiService.getSavedTidbits(userId = userId ?: "")
-            if (response.isSuccessful) {
-                response.body()?.let { data ->
-                    val res = data.map {
-                        with(it) {
-                            Tidbit(
-                                id = id,
-                                previewUrl = previewUrl,
-                                title = title,
-                                content = content,
-                                originalAuthor = originalAuthor,
-                                category = category,
-                                mediaUrl = mediaUrl,
-                                sourceUrl = source,
-                                type = type,
-                                isLiked = isLiked ?: false,
-                                isBookmarked = isBookmarked ?: false
-                            )
-                        }
-                    }
-                    Result.success(res)
-                } ?: Result.failure(Exception("Empty response body"))
-            } else {
-                Result.failure(Exception("Failed to fetch today's tidbit"))
-            }
-        } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun getNewTidbits(): Result<List<Tidbit>> {
-        return try {
-            val userId = preferences.userId.first() ?: ""
-            val response = apiService.getLatestTidbits(userId = userId)
-            if (response.isSuccessful) {
-                response.body()?.let { data ->
-                    val res = data.data.map {
-                        with(it) {
-                            Tidbit(
-                                id = id,
-                                previewUrl = previewUrl,
-                                title = title,
-                                content = content,
-                                originalAuthor = originalAuthor,
-                                category = category,
-                                mediaUrl = mediaUrl,
-                                sourceUrl = source,
-                                type = type,
-                                isLiked = isLiked ?: false,
-                                isBookmarked = isBookmarked ?: false
-                            )
-                        }
-                    }
-                    Result.success(res)
-                } ?: Result.failure(Exception("Empty response body"))
-            } else {
-                Result.failure(Exception("Failed to fetch today's tidbit"))
-            }
-        } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
             Result.failure(e)
         }
     }
@@ -351,6 +216,45 @@ class TidbitRepositoryImpl @Inject constructor(
             ),
             pagingSourceFactory = {
                 TidbitPagingSource(apiService, preferences, TidbitType.ALL)
+            }
+        ).flow
+    }
+
+    override fun getTrendingTidbitsPaged(): Flow<PagingData<Tidbit>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 10,
+                enablePlaceholders = false,
+                initialLoadSize = 20
+            ),
+            pagingSourceFactory = {
+                TidbitPagingSource(apiService, preferences, TidbitType.TRENDING)
+            }
+        ).flow
+    }
+
+    override fun getNewTidbitsPaged(): Flow<PagingData<Tidbit>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 10,
+                enablePlaceholders = false,
+                initialLoadSize = 20
+            ),
+            pagingSourceFactory = {
+                TidbitPagingSource(apiService, preferences, TidbitType.LATEST)
+            }
+        ).flow
+    }
+
+    override fun getBookmarkedTidbitsPaged(): Flow<PagingData<Tidbit>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 10,
+                enablePlaceholders = false,
+                initialLoadSize = 20
+            ),
+            pagingSourceFactory = {
+                TidbitPagingSource(apiService, preferences, TidbitType.SAVED)
             }
         ).flow
     }

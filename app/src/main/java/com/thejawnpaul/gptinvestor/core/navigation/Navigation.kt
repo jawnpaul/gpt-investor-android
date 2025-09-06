@@ -539,7 +539,8 @@ fun SetUpNavGraph(navController: NavHostController) {
                 TidbitScreen(
                     modifier = Modifier,
                     state = state.value,
-                    onEvent = viewModel::handleMainScreenEvent
+                    onEvent = viewModel::handleMainScreenEvent,
+                    tidbitsPagingData = viewModel.tidbitsPagingData
                 )
             }
         }

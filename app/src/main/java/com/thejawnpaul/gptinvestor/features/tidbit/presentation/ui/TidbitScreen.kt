@@ -9,9 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -26,6 +26,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
+import androidx.paging.PagingData
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.SectorChoiceQuestion
@@ -33,13 +37,17 @@ import com.thejawnpaul.gptinvestor.features.tidbit.presentation.model.TidbitPres
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitScreenEvent
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitScreenState
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TidbitScreen(modifier: Modifier = Modifier, state: TidbitScreenState, onEvent: (TidbitScreenEvent) -> Unit) {
+fun TidbitScreen(modifier: Modifier = Modifier, state: TidbitScreenState, tidbitsPagingData: Flow<PagingData<TidbitPresentation>>, onEvent: (TidbitScreenEvent) -> Unit) {
     LaunchedEffect(Unit) {
         onEvent(TidbitScreenEvent.GetAllTidbits)
     }
+
+    val lazyPagingItems = tidbitsPagingData.collectAsLazyPagingItems()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -62,86 +70,139 @@ fun TidbitScreen(modifier: Modifier = Modifier, state: TidbitScreenState, onEven
             }
         }
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
-                .padding(innerPadding) // Apply padding from Scaffold
+                .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    vertical = 16.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+            Box(
+                modifier = Modifier.fillMaxSize()
             ) {
-                item {
-                    // row of sectors
-                    SectorChoiceQuestion(
-                        possibleAnswers = state.options,
-                        selectedAnswer = state.selectedOption,
-                        onOptionSelected = {
-                            onEvent(TidbitScreenEvent.OnFilterSelected(filter = it))
-                        }
-                    )
-                }
-
-                if (state.isLoading) {
+                // Main content (LazyColumn with tidbits)
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
                     item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                } else {
-                    if (state.tidbits.isEmpty()) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    "No tidbits found.",
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
+                        // row of sectors
+                        SectorChoiceQuestion(
+                            possibleAnswers = state.options,
+                            selectedAnswer = state.selectedOption,
+                            onOptionSelected = {
+                                onEvent(TidbitScreenEvent.OnFilterSelected(filter = it))
                             }
-                        }
-                    } else {
-                        items(state.tidbits, key = { it.id }) { tidbit ->
+                        )
+                    }
+
+                    // Paged items
+                    items(
+                        count = lazyPagingItems.itemCount,
+                        key = lazyPagingItems.itemKey { it.id }
+                    ) { index ->
+                        val tidbit = lazyPagingItems[index]
+                        tidbit?.let {
                             SingleTidbitItem(
                                 modifier = Modifier.padding(horizontal = 16.dp),
-                                tidbit = tidbit,
-                                onItemClick = { onEvent(TidbitScreenEvent.OnTidbitClick(tidbitId = tidbit.id)) },
-                                onLikeClick = { id, newValue ->
+                                tidbit = it,
+                                onItemClick = { tidbitId ->
+                                    onEvent(TidbitScreenEvent.OnTidbitClick(tidbitId = tidbitId))
+                                },
+                                onLikeClick = { _, newValue ->
                                     onEvent(
                                         TidbitScreenEvent.OnTidbitLikeClick(
-                                            tidbitId = tidbit.id,
+                                            tidbitId = it.id,
                                             newValue = newValue
                                         )
                                     )
                                 },
-                                onSaveClick = { id, newValue ->
+                                onSaveClick = { _, newValue ->
                                     onEvent(
                                         TidbitScreenEvent.OnTidbitSaveClick(
-                                            tidbitId = tidbit.id,
+                                            tidbitId = it.id,
                                             newValue = newValue
                                         )
                                     )
                                 },
-                                onShareClick = {
+                                onShareClick = { selectedTidbitId ->
                                     onEvent(
                                         TidbitScreenEvent.OnTidbitShareClick(
-                                            tidbitId = tidbit.id
+                                            tidbitId = selectedTidbitId
                                         )
                                     )
                                 }
                             )
                         }
+                    }
+
+                    // Handle pagination load more
+                    if (lazyPagingItems.loadState.append is LoadState.Loading) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
+
+                    // Handle pagination error
+                    if (lazyPagingItems.loadState.append is LoadState.Error) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Button(onClick = { lazyPagingItems.retry() }) {
+                                    Text("Load More")
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (lazyPagingItems.loadState.refresh is LoadState.Loading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                if (lazyPagingItems.loadState.refresh is LoadState.Error && lazyPagingItems.itemCount == 0) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                "Error loading tidbits",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Button(onClick = { lazyPagingItems.retry() }) {
+                                Text("Retry")
+                            }
+                        }
+                    }
+                }
+
+                // 👇 Empty state full screen
+                if (lazyPagingItems.loadState.refresh is LoadState.NotLoading && lazyPagingItems.itemCount == 0) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No tidbits found.", style = MaterialTheme.typography.bodyLarge)
                     }
                 }
             }
@@ -198,6 +259,7 @@ fun TidbitScreenPreview() {
                     SectorInput.CustomSector(sectorName = "New", sectorKey = "new")
                 )
             ),
+            tidbitsPagingData = flowOf(PagingData.from(sampleTidbits)),
             onEvent = {}
         )
     }

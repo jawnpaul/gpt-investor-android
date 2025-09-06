@@ -92,7 +92,7 @@ interface ApiService {
     suspend fun getTrendingTidbit(@Query("page") page: Int = 1, @Query("page_size") pageSize: Int = 10, @Query("user_id") userId: String): Response<AllTidbitResponse>
 
     @GET("v1/tidbit/bookmarked-tidbits")
-    suspend fun getSavedTidbits(@Query("user_id") userId: String): Response<List<TidbitRemote>>
+    suspend fun getSavedTidbits(@Query("page") page: Int = 1, @Query("page_size") pageSize: Int = 10, @Query("user_id") userId: String): Response<AllTidbitResponse>
 
     @GET("v1/tidbit/today-tidbit")
     suspend fun getTodayTidbit(@Query("user_id") userId: String): Response<TidbitRemote>

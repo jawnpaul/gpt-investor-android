@@ -31,6 +31,7 @@ class TidbitPagingSource @Inject constructor(
                 TidbitType.ALL -> apiService.getAllTidbit(page, pageSize, userId)
                 TidbitType.TRENDING -> apiService.getTrendingTidbit(page, pageSize, userId)
                 TidbitType.LATEST -> apiService.getLatestTidbits(page, pageSize, userId)
+                TidbitType.SAVED -> apiService.getSavedTidbits(page, pageSize, userId)
             }
 
             if (response.isSuccessful) {

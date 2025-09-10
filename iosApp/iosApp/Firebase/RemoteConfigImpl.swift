@@ -38,7 +38,7 @@ class RemoteConfigImpl: IRemoteConfig {
         Task {
             do {
                 try await remoteConfig.fetchAndActivate()
-                let result = remoteConfig[configKey].stringValue ?? ""
+                let result = remoteConfig[configKey].stringValue
                 completionHandler(result, nil)
             } catch {
                 completionHandler(nil, error)

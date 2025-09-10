@@ -7,6 +7,7 @@ import com.thejawnpaul.gptinvestor.analytics.di.providesMixpanelLogger
 import com.thejawnpaul.gptinvestor.core.di.initKoin
 import com.thejawnpaul.gptinvestor.core.di.providesGeminiApi
 import com.thejawnpaul.gptinvestor.core.di.providesRemoteConfig
+import com.thejawnpaul.gptinvestor.core.utility.AppContext
 import com.thejawnpaul.gptinvestor.remote.networkModule
 import dagger.hilt.android.HiltAndroidApp
 import org.koin.android.ext.koin.androidContext
@@ -17,6 +18,7 @@ import timber.log.Timber
 class GPTInvestorApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        AppContext.set(applicationContext)
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }

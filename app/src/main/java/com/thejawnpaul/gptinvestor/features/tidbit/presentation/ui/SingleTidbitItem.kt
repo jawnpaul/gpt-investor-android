@@ -73,7 +73,7 @@ fun SingleTidbitItem(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = tidbit.content,
+                text = tidbit.summary,
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,

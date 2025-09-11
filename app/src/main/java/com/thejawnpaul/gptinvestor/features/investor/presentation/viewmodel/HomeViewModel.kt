@@ -261,7 +261,7 @@ class HomeViewModel @Inject constructor(
                                 id = id,
                                 previewUrl = previewUrl,
                                 title = title,
-                                description = description
+                                description = summary
                             )
                         }
                     )

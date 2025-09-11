@@ -63,7 +63,8 @@ class TidbitRepositoryImpl @Inject constructor(
                             sourceUrl = source,
                             type = type,
                             isLiked = isLiked ?: false,
-                            isBookmarked = isBookmarked ?: false
+                            isBookmarked = isBookmarked ?: false,
+                            summary = summary
                         )
                     }
                     Result.success(res)
@@ -94,7 +95,8 @@ class TidbitRepositoryImpl @Inject constructor(
                             sourceUrl = source,
                             type = type,
                             isLiked = isLiked ?: false,
-                            isBookmarked = isBookmarked ?: false
+                            isBookmarked = isBookmarked ?: false,
+                            summary = summary
                         )
                     }
                     Result.success(res)

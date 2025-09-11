@@ -11,7 +11,8 @@ data class Tidbit(
     val sourceUrl: String,
     val isLiked: Boolean,
     val isBookmarked: Boolean,
-    val type: String
+    val type: String,
+    val summary: String
 ) {
     val description = content.take(400)
 }

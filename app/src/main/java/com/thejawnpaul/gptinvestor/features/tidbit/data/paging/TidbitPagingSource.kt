@@ -49,7 +49,8 @@ class TidbitPagingSource @Inject constructor(
                                 sourceUrl = source,
                                 type = type,
                                 isLiked = isLiked ?: false,
-                                isBookmarked = isBookmarked ?: false
+                                isBookmarked = isBookmarked ?: false,
+                                summary = summary
                             )
                         }
                     }

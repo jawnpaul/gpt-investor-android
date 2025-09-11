@@ -45,7 +45,6 @@ kermit = "2.0.8"
 iosDeploymentTarget = "15.0"
 firebaseCocoaPods = "12.2.0"
 googleSignInCocoaPods = "9.0.0"
-gitliveFirebase = "2.1.0"
 
 
 [libraries]
@@ -84,7 +83,7 @@ richtext-commonmark = {group = "com.halilibo.compose-richtext", name = "richtext
 #Firebase
 firebase-compose-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-config = { group = "com.google.firebase", name = "firebase-config" }
-firebase-auth = { group = "dev.gitlive", name = "firebase-auth", version.ref = "gitliveFirebase" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }

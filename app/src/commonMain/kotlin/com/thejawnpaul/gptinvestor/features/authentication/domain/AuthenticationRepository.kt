@@ -2,21 +2,20 @@ package com.thejawnpaul.gptinvestor.features.authentication.domain
 
 import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.core.firebase.IFirebaseAuth
+import com.thejawnpaul.gptinvestor.core.firebase.IUser
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
-import dev.gitlive.firebase.auth.FirebaseAuth
-import dev.gitlive.firebase.auth.FirebaseUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 
 interface AuthenticationRepository {
-    val currentUser: FirebaseUser?
+    val currentUser: IUser?
     suspend fun signUp(): Flow<Boolean>
     suspend fun signOut()
     fun getAuthState(): Flow<Boolean>
@@ -28,17 +27,17 @@ interface AuthenticationRepository {
 
 @Single
 class AuthenticationRepositoryImpl(
-    private val auth: FirebaseAuth,
+    private val auth: IFirebaseAuth,
     private val analyticsLogger: AnalyticsLogger,
     private val gptInvestorPreferences: GPTInvestorPreferences
 ) :
     AuthenticationRepository {
-    override val currentUser: FirebaseUser?
+    override val currentUser: IUser?
         get() = auth.currentUser
 
     override suspend fun signUp(): Flow<Boolean> = callbackFlow {
         try {
-            auth.signInWithCredential().onSuccess { task ->
+            auth.signInWithCredentials().onSuccess { task ->
                 trySend(task != null)
                 getAuthState()
                 if (task != null) {
@@ -77,9 +76,7 @@ class AuthenticationRepositoryImpl(
         }
     }
 
-    override fun getAuthState(): Flow<Boolean> = auth.authStateChanged.map {
-        it != null
-    }
+    override fun getAuthState(): Flow<Boolean> = auth.getAuthenticationState()
 
     override suspend fun deleteAccount() {
         try {
@@ -147,7 +144,7 @@ class AuthenticationRepositoryImpl(
 
     override suspend fun loginWithGoogle(): Flow<Boolean> = callbackFlow {
         try {
-            auth.signInWithCredential().onSuccess { task ->
+            auth.signInWithCredentials().onSuccess { task ->
                 trySend(task != null)
                 getAuthState()
                 if (task != null) {

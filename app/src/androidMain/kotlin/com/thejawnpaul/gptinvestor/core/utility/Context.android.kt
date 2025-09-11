@@ -3,7 +3,6 @@ package com.thejawnpaul.gptinvestor.core.utility
 import android.content.Context
 import java.lang.ref.WeakReference
 
-
 actual object ActivityContext {
     private var contextRef: WeakReference<Context?>? = null
 

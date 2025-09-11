@@ -21,8 +21,7 @@ class AuthenticationViewModel(
     private val authRepository: AuthenticationRepository,
     private val analyticsLogger: AnalyticsLogger,
     private val gptInvestorPreferences: GPTInvestorPreferences
-) :
-    ViewModel() {
+) : ViewModel() {
 
     private val _authState = MutableStateFlow(AuthenticationUIState())
     val authState = _authState.asStateFlow()
@@ -40,10 +39,9 @@ class AuthenticationViewModel(
         viewModelScope.launch {
             authRepository.getAuthState().collect { isSignedIn ->
                 _authState.update {
-                    it.copy(
-                        isUserSignedIn = isSignedIn,
+                    it.copy(isUserSignedIn = isSignedIn)
 //                        user = authRepository.currentUser
-                    )
+//                    )
                 }
             }
         }
@@ -70,16 +68,14 @@ class AuthenticationViewModel(
     fun handleSignInResult(result: ActivityResult) {
         when (result.resultCode) {
             Activity.RESULT_OK -> {
-                _authState.update { it.copy(loading = false, /*user = authRepository.currentUser*/) }
-                analyticsLogger.identifyUser(
-                    eventName = "Sign Up",
-                    params = mapOf(
+                _authState.update { it.copy(loading = false /*, user = authRepository.currentUser*/) }
+                analyticsLogger.identifyUser(eventName = "Sign Up", params = mapOf())
 //                        "user_id" to authRepository.currentUser?.uid.toString(),
 //                        "email" to authRepository.currentUser?.email.toString(),
 //                        "name" to authRepository.currentUser?.displayName.toString(),
 //                        "sign_up_method" to authRepository.currentUser?.providerId.toString()
-                    )
-                )
+//                    )
+//                )
             }
 
             else -> {

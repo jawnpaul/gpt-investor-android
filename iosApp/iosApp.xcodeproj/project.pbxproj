@@ -27,6 +27,8 @@
 		5193D9152E2C3849003D1DF1 /* RemoteConfigDefaults.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5193D9142E2C3849003D1DF1 /* RemoteConfigDefaults.plist */; };
 		51CC35032E23E630004D8700 /* FirebaseLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CC35022E23E630004D8700 /* FirebaseLogger.swift */; };
 		51CC35082E23EA72004D8700 /* MixpanelLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CC35072E23EA72004D8700 /* MixpanelLogger.swift */; };
+		51D64C562E73720400299C47 /* AuthImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D64C552E7371F900299C47 /* AuthImpl.swift */; };
+		51D64C582E737BA300299C47 /* UserImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D64C572E737BA000299C47 /* UserImpl.swift */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
@@ -45,6 +47,8 @@
 		5193D9142E2C3849003D1DF1 /* RemoteConfigDefaults.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = RemoteConfigDefaults.plist; sourceTree = "<group>"; };
 		51CC35022E23E630004D8700 /* FirebaseLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseLogger.swift; sourceTree = "<group>"; };
 		51CC35072E23EA72004D8700 /* MixpanelLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelLogger.swift; sourceTree = "<group>"; };
+		51D64C552E7371F900299C47 /* AuthImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthImpl.swift; sourceTree = "<group>"; };
+		51D64C572E737BA000299C47 /* UserImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserImpl.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* GPT-Investor-Dev.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "GPT-Investor-Dev.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF82242A565900829871 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -88,6 +92,8 @@
 		514DB49C2E2C219400652E45 /* Firebase */ = {
 			isa = PBXGroup;
 			children = (
+				51D64C572E737BA000299C47 /* UserImpl.swift */,
+				51D64C552E7371F900299C47 /* AuthImpl.swift */,
 				51151BE42E302ABE00D3D18A /* GeminiApiImpl.swift */,
 				514DB49D2E2C221800652E45 /* RemoteConfigImpl.swift */,
 			);
@@ -281,8 +287,10 @@
 				514DB49E2E2C221E00652E45 /* RemoteConfigImpl.swift in Sources */,
 				51CC35082E23EA72004D8700 /* MixpanelLogger.swift in Sources */,
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
+				51D64C562E73720400299C47 /* AuthImpl.swift in Sources */,
 				51151BE52E302ACE00D3D18A /* GeminiApiImpl.swift in Sources */,
 				7555FF83242A565900829871 /* ContentView.swift in Sources */,
+				51D64C582E737BA300299C47 /* UserImpl.swift in Sources */,
 				16A85131B0E5C1D3A7A3E21E /* Config.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

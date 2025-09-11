@@ -9,11 +9,12 @@ class SwiftFlow<T> {
     private var onCompletion: (() -> Unit)? = null
     private var onError: ((Throwable) -> Unit)? = null
 
-    fun asFlow(): Flow<T> = callbackFlow {
+    fun asFlow(callback: (() -> Unit)? = null): Flow<T> = callbackFlow {
         emitter = { value -> trySend(value).isSuccess }
         onCompletion = { close() }
         onError = {  close(it) }
         awaitClose {
+            callback?.invoke()
             emitter = null
             onCompletion = null
             onError = null

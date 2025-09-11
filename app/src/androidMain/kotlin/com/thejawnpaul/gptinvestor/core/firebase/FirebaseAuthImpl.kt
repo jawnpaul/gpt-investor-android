@@ -15,8 +15,9 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
-actual class FirebaseAuthentication(private val auth: FirebaseAuth) {
-    actual suspend fun signOut() {
+class FirebaseAuthImpl : IFirebaseAuth {
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    override suspend fun signOut() {
         val derivedContext = ActivityContext.get()
             ?: throw IllegalArgumentException("Context must be an instance of android.content.Context")
         auth.signOut()
@@ -25,7 +26,7 @@ actual class FirebaseAuthentication(private val auth: FirebaseAuth) {
         credentialManager.clearCredentialState(clearRequest)
     }
 
-    actual fun getAuthenticationState(): Flow<Boolean> = callbackFlow {
+    override fun getAuthenticationState(): Flow<Boolean> = callbackFlow {
         val authStateListener = FirebaseAuth.AuthStateListener { auth ->
             trySend(auth.currentUser != null)
         }
@@ -36,11 +37,11 @@ actual class FirebaseAuthentication(private val auth: FirebaseAuth) {
         }
     }
 
-    actual val currentUser: User?
+    override val currentUser: IUser?
         get() = auth.currentUser?.toUser()
 
-    actual suspend fun createUserWithEmailAndPassword(email: String, password: String): Result<User?> {
-        var result: Result<User?> = Result.failure(Exception("User not found"))
+    override suspend fun createUserWithEmailAndPassword(email: String, password: String): Result<IUser?> {
+        var result: Result<IUser?> = Result.failure(Exception("User not found"))
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -52,8 +53,8 @@ actual class FirebaseAuthentication(private val auth: FirebaseAuth) {
         return result
     }
 
-    actual suspend fun signInWithCredentials(): Result<User?> {
-        var result: Result<User?> = Result.failure(Exception("User not found"))
+    override suspend fun signInWithCredentials(): Result<IUser?> {
+        var result: Result<IUser?> = Result.failure(Exception("User not found"))
         val context = ActivityContext.get() ?: return Result.failure(Exception("Invalid context"))
         val credentialManager = CredentialManager.create(context)
         val googleIdOption = GetGoogleIdOption.Builder()
@@ -90,8 +91,8 @@ actual class FirebaseAuthentication(private val auth: FirebaseAuth) {
         return result
     }
 
-    actual suspend fun signInWithEmailAndPassword(email: String, password: String): Result<User?> {
-        var result: Result<User?> = Result.failure(Exception("User not found"))
+    override suspend fun signInWithEmailAndPassword(email: String, password: String): Result<IUser?> {
+        var result: Result<IUser?> = Result.failure(Exception("User not found"))
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {

@@ -16,9 +16,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.Histor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-class GeminiApiImpl(
-    private val remoteConfig: IRemoteConfig,
-) : GeminiApi {
+class GeminiApiImpl(private val remoteConfig: IRemoteConfig) : GeminiApi {
 
     /**
      * To be moved later to call site
@@ -29,10 +27,7 @@ class GeminiApiImpl(
      */
     private lateinit var model: GenerativeModel
 
-    override suspend fun sendMessage(
-        prompt: String,
-        history: List<History>
-    ): String? {
+    override suspend fun sendMessage(prompt: String, history: List<History>): String? {
         val chat = startChat(history)
         return chat.sendMessage(prompt = prompt).text
     }
@@ -44,9 +39,7 @@ class GeminiApiImpl(
         }
     }
 
-    private suspend fun startChat(
-        history: List<History>
-    ): Chat {
+    private suspend fun startChat(history: List<History>): Chat {
         initializeApi()
         return model.startChat(history = history.map { it.toContent() })
     }

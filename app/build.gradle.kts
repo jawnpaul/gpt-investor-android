@@ -18,7 +18,6 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.googleServices)
     alias(libs.plugins.room)
-    kotlin("native.cocoapods")
 }
 
 kotlin {
@@ -41,27 +40,6 @@ kotlin {
         }
     }
 
-    cocoapods {
-        ios.deploymentTarget = libs.versions.iosDeploymentTarget.get()
-        noPodspec()
-        pod("FirebaseCore") {
-            version = libs.versions.firebaseCocoaPods.get()
-            extraOpts += listOf("-compiler-option", "-fmodules")
-        }
-        pod("FirebaseAuth") {
-            version = libs.versions.firebaseCocoaPods.get()
-            extraOpts += listOf("-compiler-option", "-fmodules")
-        }
-        pod("FirebaseRemoteConfig") {
-            version = libs.versions.firebaseCocoaPods.get()
-            extraOpts += listOf("-compiler-option", "-fmodules")
-        }
-        pod("FirebaseAI") {
-            version = libs.versions.firebaseCocoaPods.get()
-            extraOpts += listOf("-compiler-option", "-fmodules")
-        }
-    }
-
     sourceSets {
         androidMain.dependencies {
             implementation(libs.androidx.core.ktx)
@@ -75,10 +53,11 @@ kotlin {
             implementation(libs.androidx.hilt.navigation)
             implementation(libs.retrofit)
             implementation(project.dependencies.platform(libs.firebase.compose.bom))
-            implementation(libs.firebase.crashlytics)
-            implementation(libs.firebase.config)
-            implementation(libs.firebase.messaging)
             implementation(libs.firebase.ai)
+            implementation(libs.firebase.auth)
+            implementation(libs.firebase.config)
+            implementation(libs.firebase.crashlytics)
+            implementation(libs.firebase.messaging)
         }
 
         androidUnitTest.dependencies {
@@ -104,7 +83,6 @@ kotlin {
             implementation(libs.sqlite.bundled)
             implementation(libs.timeAgo)
             implementation(libs.kermit)
-            implementation(libs.firebase.auth)
         }
 
         commonTest.dependencies {
@@ -208,9 +186,6 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
         resources {

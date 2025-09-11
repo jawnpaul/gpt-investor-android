@@ -23,7 +23,8 @@ class GPTInvestorApplication : Application() {
             Timber.plant(Timber.DebugTree())
         }
         val platformModules = listOf(
-            networkModule, providesMixpanelLogger(null),
+            networkModule,
+            providesMixpanelLogger(null),
             providesFirebaseLogger(null),
             providesCompositeLogger(),
             providesRemoteConfig(null),
@@ -33,7 +34,8 @@ class GPTInvestorApplication : Application() {
             config = {
                 androidLogger()
                 androidContext(androidContext = this@GPTInvestorApplication)
-            }, platformModules = platformModules
+            },
+            platformModules = platformModules
         )
     }
 }

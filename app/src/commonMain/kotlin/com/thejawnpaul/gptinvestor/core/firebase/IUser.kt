@@ -1,6 +1,6 @@
 package com.thejawnpaul.gptinvestor.core.firebase
 
-expect class User {
+interface IUser {
     val uid: String
     val email: String?
     val displayName: String?

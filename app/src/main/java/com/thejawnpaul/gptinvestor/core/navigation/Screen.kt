@@ -58,4 +58,11 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
         const val deepLink = "app://gpt-investor/discover_tab_screen"
     }
     data object HistoryTabScreen : Screen("history_tab_screen", true)
+
+    data object TidbitDetailScreen : Screen("tidbit_detail_screen/{tidbitId}", false) {
+        fun createRoute(tidbitId: String) = "tidbit_detail_screen/$tidbitId"
+    }
+
+    data object TidbitScreen : Screen("tidbit_screen", false)
+    data object SavedTidbitScreen : Screen("saved_tidbits_screen", false)
 }

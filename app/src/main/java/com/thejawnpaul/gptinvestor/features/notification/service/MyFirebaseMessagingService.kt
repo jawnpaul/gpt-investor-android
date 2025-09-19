@@ -4,8 +4,13 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import coil.ImageLoader
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.thejawnpaul.gptinvestor.MainActivity
@@ -25,6 +30,9 @@ class MyFirebaseMessagingService :
     @Inject
     lateinit var notificationRepository: NotificationRepository
 
+    @Inject
+    lateinit var imageLoader: ImageLoader
+
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)
 
@@ -37,9 +45,9 @@ class MyFirebaseMessagingService :
             val title = data["title"] ?: "Notification"
             val body = data["body"] ?: "You have a new notification"
             val notificationData = data["notification_data"]
+            val imageUrl = data["image_url"]
 
-            // Show notification with deep link
-            showNotification(title, body, deepLinkRoute, notificationData)
+            showNotification(title, body, deepLinkRoute, notificationData, imageUrl)
         }
 
         // Handle notification payload (if sent from Firebase Console)
@@ -48,8 +56,9 @@ class MyFirebaseMessagingService :
             val body = notification.body ?: "You have a new notification"
             val deepLinkRoute = remoteMessage.data["deep_link"]
             val notificationData = remoteMessage.data["notification_data"]
+            val imageUrl = notification.imageUrl?.toString()
 
-            showNotification(title, body, deepLinkRoute, notificationData)
+            showNotification(title, body, deepLinkRoute, notificationData, imageUrl)
         }
     }
 
@@ -64,7 +73,7 @@ class MyFirebaseMessagingService :
         job.cancel()
     }
 
-    private fun showNotification(title: String, body: String, deepLinkRoute: String?, notificationData: String?) {
+    private fun showNotification(title: String, body: String, deepLinkRoute: String?, notificationData: String?, imageUrl: String?) {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -94,18 +103,63 @@ class MyFirebaseMessagingService :
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Build notification
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+        val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(title)
             .setContentText(body)
             .setSmallIcon(R.drawable.ic_stat_ic_notification)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .build()
 
-        // Show notification
-        notificationManager.notify(NOTIFICATION_ID, notification)
+        if (imageUrl.isNullOrEmpty()) {
+            // Show notification without image
+            notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+        } else {
+            // Load image with injected Coil ImageLoader
+            scope.launch {
+                loadImageAndShowNotification(
+                    imageUrl,
+                    notificationBuilder,
+                    notificationManager
+                )
+            }
+        }
+    }
+
+    private suspend fun loadImageAndShowNotification(imageUrl: String, notificationBuilder: NotificationCompat.Builder, notificationManager: NotificationManager) {
+        try {
+            val request = ImageRequest.Builder(this)
+                .data(imageUrl)
+                .allowHardware(false) // Disable hardware bitmaps for notifications
+                .build()
+
+            when (val result = imageLoader.execute(request)) {
+                is SuccessResult -> {
+                    val bitmap = (result.drawable as? BitmapDrawable)?.bitmap
+
+                    bitmap?.let { picture ->
+                        val notification = notificationBuilder
+                            .setLargeIcon(picture)
+                            .setStyle(
+                                NotificationCompat.BigPictureStyle()
+                                    .bigPicture(picture)
+                                    .bigLargeIcon(null as Bitmap?)
+                            )
+                            .build()
+
+                        notificationManager.notify(NOTIFICATION_ID, notification)
+                    } ?: showFallbackNotification(notificationBuilder, notificationManager)
+                }
+
+                else -> showFallbackNotification(notificationBuilder, notificationManager)
+            }
+        } catch (e: Exception) {
+            showFallbackNotification(notificationBuilder, notificationManager)
+        }
+    }
+
+    private fun showFallbackNotification(notificationBuilder: NotificationCompat.Builder, notificationManager: NotificationManager) {
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 
     companion object {

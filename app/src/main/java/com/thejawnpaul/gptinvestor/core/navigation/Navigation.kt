@@ -12,6 +12,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -40,6 +41,12 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.Home
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsAction
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsScreen
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsViewModel
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.SavedTidbitScreen
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.TidbitDetailScreen
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.TidbitScreen
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitAction
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailAction
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitViewModel
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickAction
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewModel
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.AllTopPicksScreen
@@ -107,6 +114,22 @@ fun SetUpNavGraph(navController: NavHostController) {
 
                             HomeAction.OnGoToSettings -> {
                                 navController.navigate(Screen.SettingsScreen.route)
+                            }
+
+                            HomeAction.OnGoToAllTidbits -> {
+                                navController.navigate(route = Screen.TidbitScreen.route)
+                            }
+
+                            is HomeAction.OnGoToTidbitDetail -> {
+                                navController.navigate(
+                                    route = Screen.TidbitDetailScreen.createRoute(
+                                        tidbitId = action.id
+                                    )
+                                )
+                            }
+
+                            HomeAction.OnGoToSavedTidbits -> {
+                                navController.navigate(route = Screen.SavedTidbitScreen.route)
                             }
                         }
                     }.launchIn(scope)
@@ -431,6 +454,146 @@ fun SetUpNavGraph(navController: NavHostController) {
                     state = state.value,
                     onEvent = viewModel::handleEvent,
                     onAction = viewModel::processAction
+                )
+            }
+
+            composable(
+                route = Screen.TidbitDetailScreen.route,
+                arguments = listOf(navArgument("tidbitId") { NavType.StringType })
+            ) { navBackStackEntry ->
+                val tidbitId = navBackStackEntry.arguments?.getString("tidbitId") ?: ""
+                val viewModel = hiltViewModel<TidbitViewModel>()
+                val state = viewModel.tidbitDetailState.collectAsStateWithLifecycle()
+                val scope = rememberCoroutineScope()
+                val context = LocalContext.current
+                LaunchedEffect(Unit) {
+                    viewModel.tidbitDetailActions.onEach { action ->
+                        when (action) {
+                            TidbitDetailAction.OnGoBack -> {
+                                navController.navigateUp()
+                            }
+
+                            is TidbitDetailAction.OnOpenSource -> {
+                                try {
+                                    val intent = Intent(Intent.ACTION_VIEW, action.url.toUri())
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    // Toast.makeText(context, "Something went wrong.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+
+                            is TidbitDetailAction.OnShare -> {
+                                val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_SUBJECT, "Tidbit")
+                                    putExtra(Intent.EXTRA_TEXT, action.shareText)
+                                }
+                                context.startActivity(
+                                    Intent.createChooser(
+                                        sendIntent,
+                                        "Share via"
+                                    )
+                                )
+                            }
+                        }
+                    }.launchIn(scope)
+                }
+
+                TidbitDetailScreen(
+                    modifier = Modifier,
+                    tidbitId = tidbitId,
+                    onEvent = viewModel::handleDetailEvent,
+                    state = state.value,
+                    onAction = viewModel::handleDetailAction
+                )
+            }
+
+            composable(route = Screen.TidbitScreen.route) {
+                val viewModel = hiltViewModel<TidbitViewModel>()
+                val state = viewModel.tidbitMainScreenState.collectAsStateWithLifecycle()
+                val scope = rememberCoroutineScope()
+                val context = LocalContext.current
+                LaunchedEffect(Unit) {
+                    viewModel.actions.onEach { action ->
+                        when (action) {
+                            TidbitAction.OnGoBack -> {
+                                navController.navigateUp()
+                            }
+
+                            is TidbitAction.OnShare -> {
+                                val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_SUBJECT, "Tidbit")
+                                    putExtra(Intent.EXTRA_TEXT, action.shareText)
+                                }
+                                context.startActivity(
+                                    Intent.createChooser(
+                                        sendIntent,
+                                        "Share via"
+                                    )
+                                )
+                            }
+
+                            is TidbitAction.OnGoToTidbitDetail -> {
+                                navController.navigate(
+                                    Screen.TidbitDetailScreen.createRoute(
+                                        tidbitId = action.tidbitId
+                                    )
+                                )
+                            }
+                        }
+                    }.launchIn(scope)
+                }
+
+                TidbitScreen(
+                    modifier = Modifier,
+                    state = state.value,
+                    onEvent = viewModel::handleMainScreenEvent,
+                    tidbitsPagingData = viewModel.tidbitsPagingData
+                )
+            }
+
+            composable(route = Screen.SavedTidbitScreen.route) {
+                val viewModel = hiltViewModel<TidbitViewModel>()
+                val scope = rememberCoroutineScope()
+                val context = LocalContext.current
+
+                LaunchedEffect(Unit) {
+                    viewModel.actions.onEach { action ->
+                        when (action) {
+                            TidbitAction.OnGoBack -> {
+                                navController.navigateUp()
+                            }
+
+                            is TidbitAction.OnGoToTidbitDetail -> {
+                                navController.navigate(
+                                    route = Screen.TidbitDetailScreen.createRoute(
+                                        tidbitId = action.tidbitId
+                                    )
+                                )
+                            }
+
+                            is TidbitAction.OnShare -> {
+                                val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_SUBJECT, "Tidbit")
+                                    putExtra(Intent.EXTRA_TEXT, action.shareText)
+                                }
+                                context.startActivity(
+                                    Intent.createChooser(
+                                        sendIntent,
+                                        "Share via"
+                                    )
+                                )
+                            }
+                        }
+                    }.launchIn(scope)
+                }
+
+                SavedTidbitScreen(
+                    modifier = Modifier,
+                    tidbitsPagingData = viewModel.tidbitsPagingData,
+                    onEvent = viewModel::handleMainScreenEvent
                 )
             }
         }

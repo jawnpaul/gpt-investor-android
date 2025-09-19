@@ -99,6 +99,18 @@ fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Uni
             }
         )
 
+        // Saved Tidbits
+        DrawerItem(
+            modifier = Modifier,
+            icon = ImageVector.vectorResource(R.drawable.ic_saved_tidbit),
+            label = stringResource(R.string.saved_tidbits),
+            onClick = {
+                // Navigate to saved picks
+                onAction(NavDrawerAction.OnGoToSavedTidbits)
+                onCloseDrawer()
+            }
+        )
+
         // Settings
         DrawerItem(
             modifier = Modifier,
@@ -306,4 +318,5 @@ sealed interface NavDrawerAction {
     data object OnGoToSettings : NavDrawerAction
     data object OnGoToSavedPicks : NavDrawerAction
     data object OnGoToHistory : NavDrawerAction
+    data object OnGoToSavedTidbits : NavDrawerAction
 }

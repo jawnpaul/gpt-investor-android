@@ -84,3 +84,18 @@ fun ExpandableRichText(modifier: Modifier = Modifier, textModifier: Modifier = M
         }
     }
 }
+
+@Composable
+fun CustomRichText(modifier: Modifier = Modifier, text: String, bodyTextStyle: TextStyle = MaterialTheme.typography.bodyMedium) {
+    RichTextThemeProvider(
+        textStyleProvider = {
+            bodyTextStyle.copy(color = MaterialTheme.colorScheme.onBackground)
+        }
+    ) {
+        BasicRichText(
+            modifier = modifier
+        ) {
+            Markdown(content = text)
+        }
+    }
+}

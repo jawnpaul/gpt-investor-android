@@ -67,7 +67,8 @@ class MainActivity : ComponentActivity() {
                     isUserSignedIn == true && isFirstInstall == false
                 ) {
                     try {
-                        navController.navigate(route = getScreenNameFromRoute(route = deepLinkRoute).route) {
+                        val navigationRoute = getNavigationRouteFromDeepLink(deepLinkRoute!!)
+                        navController.navigate(route = navigationRoute) {
                             // Optional: Clear back stack
                             popUpTo(navController.graph.startDestinationId) { inclusive = false }
                         }
@@ -172,14 +173,35 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun getScreenNameFromRoute(route: String?): Screen {
-        if (route == null) {
-            return Screen.HomeScreen
+    private fun getNavigationRouteFromDeepLink(deepLink: String): String {
+        return when {
+            deepLink.contains("tidbit_detail_screen") -> {
+                val tidbitId = extractTidbitIdFromDeepLink(deepLink)
+                tidbitId?.let {
+                    Screen.TidbitDetailScreen.createRoute(tidbitId = it)
+                } ?: Screen.TidbitScreen.route
+            }
+            deepLink.contains("discover") -> {
+                Screen.DiscoverTabScreen.route
+            }
+            else -> {
+                Screen.HomeScreen.route
+            }
         }
-        return if (route.contains("discover")) {
-            Screen.DiscoverTabScreen
-        } else {
-            Screen.HomeScreen
+    }
+
+    private fun extractTidbitIdFromDeepLink(deepLink: String): String? {
+        // Extract tidbit ID from "app://gpt-investor/tidbit_detail_screen/abcde"
+        return try {
+            val parts = deepLink.split("/")
+            if (parts.size >= 4 && parts[3] == "tidbit_detail_screen") {
+                parts[4] // Returns "abcde"
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            println("Error extracting tidbit ID: ${e.message}")
+            null
         }
     }
 }

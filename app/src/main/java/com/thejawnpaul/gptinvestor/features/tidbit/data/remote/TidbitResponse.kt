@@ -1,0 +1,56 @@
+package com.thejawnpaul.gptinvestor.features.tidbit.data.remote
+
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
+
+@JsonClass(generateAdapter = true)
+data class TidbitRemote(
+    @field:Json(name = "_id") val id: String,
+    @field:Json(name = "category") val category: String,
+    @field:Json(name = "content") val content: String,
+    @field:Json(name = "created_at") val createdAt: String,
+    @field:Json(name = "created_by") val createdBy: String,
+    @field:Json(name = "for_date") val forDate: String,
+    @field:Json(name = "impressions") val impressions: Int? = 0,
+    @field:Json(name = "media_url") val mediaUrl: String,
+    @field:Json(name = "original_author") val originalAuthor: String,
+    @field:Json(name = "preview_url") val previewUrl: String,
+    @field:Json(name = "source") val source: String,
+    @field:Json(name = "tidbit_type") val type: String,
+    @field:Json(name = "title") val title: String,
+    @field:Json(name = "is_liked") val isLiked: Boolean? = false,
+    @field:Json(name = "is_bookmarked") val isBookmarked: Boolean? = false,
+    @field:Json(name = "updated_at") val updatedAt: String,
+    @field:Json(name = "summary") val summary: String = ""
+
+)
+
+@JsonClass(generateAdapter = true)
+data class AllTidbitResponse(
+    @field:Json(name = "page") val page: Int,
+    @field:Json(name = "page_size") val pageSize: Int,
+    @field:Json(name = "total_tidbits") val totalTidbit: Int,
+    @field:Json(name = "tidbits") val data: List<TidbitRemote>
+)
+
+@JsonClass(generateAdapter = true)
+data class TidbitLikeRequest(
+    @field:Json(name = "user_id") val userId: String,
+    @field:Json(name = "tidbit_id") val tidbitId: String
+)
+
+@JsonClass(generateAdapter = true)
+data class TidbitLikeResponse(
+    @field:Json(name = "message") val message: String
+)
+
+@JsonClass(generateAdapter = true)
+data class TidbitBookmarkResponse(
+    @field:Json(name = "message") val message: String
+)
+
+@JsonClass(generateAdapter = true)
+data class TidbitBookmarkRequest(
+    @field:Json(name = "user_id") val userId: String,
+    @field:Json(name = "tidbit_id") val tidbitId: String
+)

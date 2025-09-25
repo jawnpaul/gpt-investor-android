@@ -38,7 +38,7 @@ fun GptInvestorVideo(
             factory = {
                 YouTubePlayerView(context).apply {
                     enableAutomaticInitialization = false
-                    val iFramePlayerOptionsBuilder = IFramePlayerOptions.Builder()
+                    val iFramePlayerOptionsBuilder = IFramePlayerOptions.Builder(context)
                         .controls(if (showControls) 1 else 0)
 
                     val iFramePlayerOptions = iFramePlayerOptionsBuilder.build()

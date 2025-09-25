@@ -1,5 +1,7 @@
-import java.util.Properties
+@file:Suppress("UnstableApiUsage")
+
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -35,9 +37,6 @@ android {
             useSupportLibrary = true
         }
 
-        ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -121,6 +120,10 @@ android {
     }
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 ktlint {
     android = true
     ignoreFailures = false
@@ -154,6 +157,7 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.icons.extended)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.dagger.hilt)

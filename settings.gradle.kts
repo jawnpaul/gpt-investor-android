@@ -19,7 +19,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "GPT Investor"
+rootProject.name = "GPTInvestor"
 include(":app")
 include(":remote:remote")
 include(":remote:remotetest")

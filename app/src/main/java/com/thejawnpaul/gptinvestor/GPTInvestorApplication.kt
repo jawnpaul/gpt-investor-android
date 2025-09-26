@@ -6,14 +6,14 @@ import com.thejawnpaul.gptinvestor.remote.RemoteModule
 import dagger.hilt.android.HiltAndroidApp
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androix.startup.KoinStartup
-import org.koin.core.component.KoinComponent
-import org.koin.core.context.startKoin
+import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.dsl.KoinConfiguration
 import org.koin.dsl.koinConfiguration
 import org.koin.ksp.generated.module
-import javax.inject.Inject
 import timber.log.Timber
+import javax.inject.Inject
 
+@OptIn(KoinExperimentalAPI::class)
 @HiltAndroidApp
 class GPTInvestorApplication : Application(), KoinStartup {
 

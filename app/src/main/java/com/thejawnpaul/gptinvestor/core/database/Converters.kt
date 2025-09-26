@@ -11,7 +11,7 @@ import kotlinx.serialization.json.Json
 
 class Converters {
 
-    private val json = Json{
+    private val json = Json {
         isLenient = true
         ignoreUnknownKeys = true
         explicitNulls = false

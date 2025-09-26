@@ -1,28 +1,26 @@
 package com.thejawnpaul.gptinvestor.features.conversation.data.repository
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonClass
-import com.squareup.moshi.Moshi
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import timber.log.Timber
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class ConversationTitle(
-    @field:Json(name = "title") val title: String
+    val title: String
 )
 
 class ConversationTitleParser {
 
-    private val moshi = Moshi.Builder()
-        .addLast(com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory())
-        .build()
-
-    private val jsonAdapter: JsonAdapter<ConversationTitle> =
-        moshi.adapter(ConversationTitle::class.java)
+    private val json = Json{
+        isLenient = true
+        ignoreUnknownKeys = true
+        explicitNulls = false
+        prettyPrint = true
+    }
 
     fun parseTitle(jsonString: String): ConversationTitle? {
         return try {
-            jsonAdapter.fromJson(jsonString)
+            json.decodeFromString(jsonString)
         } catch (e: Exception) {
             Timber.e("Error parsing JSON: ${e.message}")
             null

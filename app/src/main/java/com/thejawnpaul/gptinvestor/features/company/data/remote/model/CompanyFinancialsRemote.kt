@@ -1,24 +1,24 @@
 package com.thejawnpaul.gptinvestor.features.company.data.remote.model
 
 import com.github.marlonlom.utilities.timeago.TimeAgo
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyFinancials
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.NewsPresentation
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class CompanyFinancialsRemote(
-    @field:Json(name = "balance_sheet") val balanceSheet: String,
-    @field:Json(name = "close") val close: Float,
-    @field:Json(name = "open") val open: Float,
-    @field:Json(name = "volume") val volume: Long,
-    @field:Json(name = "currency") val currency: String,
-    @field:Json(name = "financials") val financials: String,
-    @field:Json(name = "high") val high: Float,
-    @field:Json(name = "historical_data") val historicalData: String,
-    @field:Json(name = "low") val low: Float,
-    @field:Json(name = "market_cap") val marketCap: Long,
-    @field:Json(name = "news") val news: List<CompanyNews>
+    @SerialName("balance_sheet") val balanceSheet: String,
+    val close: Float,
+    val open: Float,
+    val volume: Long,
+    val currency: String,
+    val financials: String,
+    val high: Float,
+    @SerialName("historical_data") val historicalData: String,
+    val low: Float,
+    @SerialName("market_cap") val marketCap: Long,
+    val news: List<CompanyNews>
 ) {
     fun toDomainObject() = CompanyFinancials(
         open = open,
@@ -35,16 +35,16 @@ data class CompanyFinancialsRemote(
     )
 }
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class CompanyNews(
-    @field:Json(name = "link") val link: String,
-    @field:Json(name = "providerPublishTime") val providerPublishTime: Long,
-    @field:Json(name = "publisher") val publisher: String,
-    @field:Json(name = "relatedTickers") val relatedTickers: List<String>,
-    @field:Json(name = "thumbnail") val thumbNail: NewsThumbNail?,
-    @field:Json(name = "title") val title: String,
-    @field:Json(name = "type") val type: String,
-    @field:Json(name = "uuid") val id: String
+    val link: String,
+    val providerPublishTime: Long,
+    val publisher: String,
+    val relatedTickers: List<String>,
+    @SerialName("thumbnail") val thumbNail: NewsThumbNail?,
+    val title: String,
+    val type: String,
+    @SerialName("uuid") val id: String
 ) {
     fun toPresentation() = NewsPresentation(
         title = title,
@@ -57,21 +57,21 @@ data class CompanyNews(
     )
 }
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class NewsThumbNail(
-    @field:Json(name = "resolutions") val resolutions: List<NewsResolution> = emptyList()
+    val resolutions: List<NewsResolution?> = emptyList()
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class NewsResolution(
-    @field:Json(name = "height") val height: Int,
-    @field:Json(name = "tag") val tag: String,
-    @field:Json(name = "url") val url: String,
-    @field:Json(name = "width") val width: Int
+    val height: Int,
+    val tag: String,
+    val url: String,
+    val width: Int
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class CompanyFinancialsRequest(
-    @field:Json(name = "ticker") val ticker: String,
-    @field:Json(name = "years") val years: Int
+    val ticker: String,
+    val years: Int
 )

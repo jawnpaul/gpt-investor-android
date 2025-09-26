@@ -76,27 +76,27 @@ class InvestorRepository @Inject constructor(
         }
     }
 
-    override suspend fun compareCompany(request: CompareCompaniesRequest): Flow<Either<Failure, String>> = flow {
-        try {
-            val otherCompany = apiService.getCompanyFinancials(
-                CompanyFinancialsRequest(
-                    ticker = request.otherCompanyTicker,
-                    years = 1
+    override suspend fun compareCompany(request: CompareCompaniesRequest): Flow<Either<Failure, String>> =
+        flow {
+            try {
+                val otherCompany = apiService.getCompanyFinancials(
+                    CompanyFinancialsRequest(
+                        ticker = request.otherCompanyTicker,
+                        years = 1
+                    )
                 )
-            )
-            if (otherCompany.isSuccessful) {
-                otherCompany.body()?.let {
-                    val domainObject = it.toDomainObject()
-                    // make call to gemini
-                    val systemPrompt =
-                        "You are a financial analyst assistant. Compare the data of ${request.currentCompanyTicker} " +
+
+                val domainObject = otherCompany.toDomainObject()
+                // make call to gemini
+                val systemPrompt =
+                    "You are a financial analyst assistant. Compare the data of ${request.currentCompanyTicker} " +
                             "against ${request.currentCompanyTicker} " +
                             "and provide a detailed comparison, like a world-class analyst would. Be measured and discerning. " +
                             "Truly think about the positives and negatives of each company. Be sure of your analysis. " +
                             "You are a skeptical investor."
 
-                    val additional =
-                        "Data for ${request.currentCompanyTicker}:\n\nHistorical price data:\n" +
+                val additional =
+                    "Data for ${request.currentCompanyTicker}:\n\nHistorical price data:\n" +
                             "${request.currentCompany.historicalData}\n\n" +
                             "Balance Sheet:\n${request.currentCompany.balanceSheet}\n\nFinancial Statements:" +
                             "\n${request.currentCompany.financials}\n\n----\n\n" +
@@ -105,10 +105,10 @@ class InvestorRepository @Inject constructor(
                             "\n\n----\n\nNow, provide a detailed comparison of ${request.currentCompanyTicker} " +
                             "against ${request.otherCompanyTicker}. " +
                             "Explain your thinking very clearly."
-                    val prompt = systemPrompt + additional
-                    val response = model.generateContent(prompt = prompt)
-                    response.text?.let { geminiText ->
-                        emit(Either.Right(geminiText))
+                val prompt = systemPrompt + additional
+                val response = model.generateContent(prompt = prompt)
+                response.text?.let { geminiText ->
+                    emit(Either.Right(geminiText))
 
                         val saveRequest = SaveComparisonRequest(
                             mainTicker = request.currentCompanyTicker,
@@ -126,34 +126,46 @@ class InvestorRepository @Inject constructor(
                 is GoogleGenerativeAIException -> {
                     // call api for saved
                 }
+                    val saveRequest = SaveComparisonRequest(
+                        mainTicker = request.currentCompanyTicker,
+                        otherTicker = request.otherCompanyTicker,
+                        geminiText = geminiText
+                    )
+                    apiService.saveComparison(saveRequest)
+                }
+            } catch (e: Exception) {
+                when (e) {
+                        // call api for saved
+                    }
 
-                else -> {
-                    Timber.e(e.stackTraceToString())
+                    else -> {
+                        Timber.e(e.stackTraceToString())
+                    }
                 }
             }
         }
-    }
 
-    override suspend fun getSentimentAnalysis(request: SentimentAnalysisRequest): Flow<Either<Failure, String>> = flow {
-        try {
-            var newsString = ""
-            request.news.forEach {
-                val text = getArticleText(it.link)?.trim()
-                newsString += "\n\n---\n\nDate: ${it.relativeDate}\nTitle: ${it.title}\nText: $text"
-            }
-            val systemPrompt =
-                "You are a sentiment analysis assistant. Analyze the sentiment of the given news articles for ${request.ticker} " +
-                    "and provide a summary of the overall sentiment and any notable changes " +
-                    "over time. Be measured and discerning. You are a skeptical investor."
+    override suspend fun getSentimentAnalysis(request: SentimentAnalysisRequest): Flow<Either<Failure, String>> =
+        flow {
+            try {
+                var newsString = ""
+                request.news.forEach {
+                    val text = getArticleText(it.link)?.trim()
+                    newsString += "\n\n---\n\nDate: ${it.relativeDate}\nTitle: ${it.title}\nText: $text"
+                }
+                val systemPrompt =
+                    "You are a sentiment analysis assistant. Analyze the sentiment of the given news articles for ${request.ticker} " +
+                            "and provide a summary of the overall sentiment and any notable changes " +
+                            "over time. Be measured and discerning. You are a skeptical investor."
 
-            val additionalPrompt =
-                "News articles for ${request.ticker}:\n${newsString}\n\n----\n\nProvide a summary of the overall sentiment " +
-                    "and any notable changes over time."
+                val additionalPrompt =
+                    "News articles for ${request.ticker}:\n${newsString}\n\n----\n\nProvide a summary of the overall sentiment " +
+                            "and any notable changes over time."
 
-            val prompt = systemPrompt + additionalPrompt
-            val response = model.generateContent(prompt = prompt)
-            response.text?.let {
-                emit(Either.Right(it))
+                val prompt = systemPrompt + additionalPrompt
+                val response = model.generateContent(prompt = prompt)
+                response.text?.let {
+                    emit(Either.Right(it))
 
                 val saveRequest = SaveSentimentRequest(ticker = request.ticker, sentiment = it)
                 apiService.saveSentiment(saveRequest)
@@ -163,23 +175,26 @@ class InvestorRepository @Inject constructor(
                 is GoogleGenerativeAIException -> {
                     // call api for saved
                 }
+                    val saveRequest = SaveSentimentRequest(ticker = request.ticker, sentiment = it)
+                    apiService.saveSentiment(saveRequest)
+                }
+            } catch (e: Exception) {
+                when (e) {
+                        // call api for saved
+                    }
 
-                else -> {
-                    Timber.e(e.stackTraceToString())
+                    else -> {
+                        Timber.e(e.stackTraceToString())
+                    }
                 }
             }
         }
-    }
 
     override suspend fun getAnalystRating(ticker: String): Flow<Either<Failure, String>> = flow {
         try {
             val request = AnalystRatingRequest(ticker = ticker)
             val response = apiService.getAnalystRating(request)
-            if (response.isSuccessful) {
-                response.body()?.let {
-                    emit(Either.Right(it.rating))
-                } ?: emit(Either.Left(Failure.DataError))
-            }
+            emit(Either.Right(response.rating))
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.ServerError))
@@ -191,9 +206,9 @@ class InvestorRepository @Inject constructor(
             val company = companyDao.getCompany(ticker)
             val systemPrompt =
                 "You are an industry analysis assistant. Provide an analysis of the ${company.industry} industry and " +
-                    "${company.sector} sector, including trends, growth prospects, regulatory changes, and competitive landscape. " +
-                    "Be measured and discerning. Truly think about the positives and negatives of the stock. Be sure of your analysis. " +
-                    "You are a skeptical investor."
+                        "${company.sector} sector, including trends, growth prospects, regulatory changes, and competitive landscape. " +
+                        "Be measured and discerning. Truly think about the positives and negatives of the stock. Be sure of your analysis. " +
+                        "You are a skeptical investor."
             val additionalPrompt =
                 "Provide an analysis of the ${company.industry} industry and ${company.sector} sector."
             val prompt = systemPrompt + additionalPrompt
@@ -221,25 +236,26 @@ class InvestorRepository @Inject constructor(
         }
     }
 
-    override suspend fun getFinalAnalysis(request: FinalAnalysisRequest): Flow<Either<Failure, String>> = flow {
-        try {
-            val systemPrompt =
-                "You are a financial analyst providing a final investment recommendation for ${request.ticker} based on the given " +
-                    "data and analyses. Be measured and discerning. Truly think about the positives and " +
-                    "negatives of the stock. Be sure of your analysis. You are a skeptical investor."
+    override suspend fun getFinalAnalysis(request: FinalAnalysisRequest): Flow<Either<Failure, String>> =
+        flow {
+            try {
+                val systemPrompt =
+                    "You are a financial analyst providing a final investment recommendation for ${request.ticker} based on the given " +
+                            "data and analyses. Be measured and discerning. Truly think about the positives and " +
+                            "negatives of the stock. Be sure of your analysis. You are a skeptical investor."
 
-            val additionalPrompt =
-                "Ticker: ${request.ticker}\n\nComparative Analysis:\n${request.comparison}\n\n" +
-                    "Sentiment Analysis:\n${request.sentiment}\n\nAnalyst Ratings:\n${request.analystRating}\n\n" +
-                    "Industry Analysis:\n${request.industryRating}\n\nBased on the provided data and analyses, " +
-                    "please provide a comprehensive investment analysis and recommendation for ${request.ticker}. " +
-                    "Consider the company's financial strength, growth prospects, competitive position, and potential risks. " +
-                    "Provide a clear and concise recommendation on whether to buy, hold, or sell the stock, along with " +
-                    "supporting rationale."
+                val additionalPrompt =
+                    "Ticker: ${request.ticker}\n\nComparative Analysis:\n${request.comparison}\n\n" +
+                            "Sentiment Analysis:\n${request.sentiment}\n\nAnalyst Ratings:\n${request.analystRating}\n\n" +
+                            "Industry Analysis:\n${request.industryRating}\n\nBased on the provided data and analyses, " +
+                            "please provide a comprehensive investment analysis and recommendation for ${request.ticker}. " +
+                            "Consider the company's financial strength, growth prospects, competitive position, and potential risks. " +
+                            "Provide a clear and concise recommendation on whether to buy, hold, or sell the stock, along with " +
+                            "supporting rationale."
 
-            val prompt = systemPrompt + additionalPrompt
+                val prompt = systemPrompt + additionalPrompt
 
-            val response = model.generateContent(prompt = prompt)
+                val response = model.generateContent(prompt = prompt)
 
             response.text?.let {
                 emit(Either.Right(it))
@@ -248,44 +264,47 @@ class InvestorRepository @Inject constructor(
             when (e) {
                 is GoogleGenerativeAIException -> {
                 }
+                response.text?.let {
+                    emit(Either.Right(it))
+                }
+            } catch (e: Exception) {
+                when (e) {
+                    }
 
-                else -> {
-                    Timber.e(e.stackTraceToString())
+                    else -> {
+                        Timber.e(e.stackTraceToString())
+                    }
                 }
             }
         }
-    }
 
-    override suspend fun downloadAnalysisPdf(request: GetPdfRequest): Flow<Either<Failure, String>> = flow {
-        try {
-            val company = companyDao.getCompany(request.ticker)
-            val apiRequest = DownloadPdfRequest(
-                name = company.name,
-                about = company.summary,
-                similarCompanies = request.similarCompanies,
-                comparison = request.comparison,
-                sentiment = request.sentiment,
-                analystRating = request.analystRating,
-                industryRating = request.industryRating,
-                finalRating = request.finalRating,
-                open = request.open,
-                high = request.high,
-                low = request.low,
-                close = request.close,
-                volume = request.volume,
-                marketCap = request.marketCap
-            )
-            val response = apiService.createPdf(apiRequest)
-            if (response.isSuccessful) {
-                response.body()?.let {
-                    emit(Either.Right(it.url))
-                } ?: emit(Either.Left(Failure.DataError))
+    override suspend fun downloadAnalysisPdf(request: GetPdfRequest): Flow<Either<Failure, String>> =
+        flow {
+            try {
+                val company = companyDao.getCompany(request.ticker)
+                val apiRequest = DownloadPdfRequest(
+                    name = company.name,
+                    about = company.summary,
+                    similarCompanies = request.similarCompanies,
+                    comparison = request.comparison,
+                    sentiment = request.sentiment,
+                    analystRating = request.analystRating,
+                    industryRating = request.industryRating,
+                    finalRating = request.finalRating,
+                    open = request.open,
+                    high = request.high,
+                    low = request.low,
+                    close = request.close,
+                    volume = request.volume,
+                    marketCap = request.marketCap
+                )
+                val response = apiService.createPdf(apiRequest)
+                emit(Either.Right(response.url))
+            } catch (e: Exception) {
+                Timber.e(e.stackTraceToString())
+                emit(Either.Left(Failure.ServerError))
             }
-        } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
-            emit(Either.Left(Failure.ServerError))
         }
-    }
 
     private fun getArticleText(link: String): String? {
         return try {

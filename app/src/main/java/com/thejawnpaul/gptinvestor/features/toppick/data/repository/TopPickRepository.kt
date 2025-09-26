@@ -11,14 +11,14 @@ import com.thejawnpaul.gptinvestor.features.toppick.data.local.dao.TopPickDao
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.model.TopPickEntity
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import javax.inject.Inject
 
 class TopPickRepository @Inject constructor(
     private val apiService: ApiService,
@@ -33,29 +33,25 @@ class TopPickRepository @Inject constructor(
             val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
             val response = apiService.getTopPicks(date = today)
-            if (response.isSuccessful) {
-                response.body()?.let { remotePick ->
-                    val topPickEntities = remotePick.map { aa ->
-                        with(aa) {
-                            TopPickEntity(
-                                id = id,
-                                companyName = companyName,
-                                ticker = ticker,
-                                rationale = rationale,
-                                metrics = metrics,
-                                risks = risks,
-                                confidenceScore = confidenceScore,
-                                date = date,
-                                price = price ?: 0.0f,
-                                change = percentageChange ?: 0.0f,
-                                imageUrl = imageUrl ?: ""
-                            )
-                        }
-                    }
-                    topPickDao.replaceUnsavedWithNewPicks(topPickEntities)
-                    emit(Either.Right(Unit))
-                } ?: emit(Either.Left(Failure.DataError))
+            val topPickEntities = response.map { aa ->
+                with(aa) {
+                    TopPickEntity(
+                        id = id,
+                        companyName = companyName,
+                        ticker = ticker,
+                        rationale = rationale,
+                        metrics = metrics,
+                        risks = risks,
+                        confidenceScore = confidenceScore,
+                        date = date,
+                        price = price ?: 0.0f,
+                        change = percentageChange ?: 0.0f,
+                        imageUrl = imageUrl ?: ""
+                    )
+                }
             }
+            topPickDao.replaceUnsavedWithNewPicks(topPickEntities)
+            emit(Either.Right(Unit))
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.ServerError))
@@ -154,12 +150,12 @@ class TopPickRepository @Inject constructor(
             val urlToShare = "${domain}single-pick/${pick.id}"
 
             val data = "\uD83D\uDCC8 Stock Pick Alert: ${pick.companyName}\n" +
-                "\n" +
-                "I just uncovered a high-potential opportunity using GPT Investor and had to share it with you.\n" +
-                "\n" +
-                "\uD83D\uDD0D See the full analysis here: ${urlToShare}\n" +
-                "\n" +
-                "Check it out and let me know what you think!"
+                    "\n" +
+                    "I just uncovered a high-potential opportunity using GPT Investor and had to share it with you.\n" +
+                    "\n" +
+                    "\uD83D\uDD0D See the full analysis here: ${urlToShare}\n" +
+                    "\n" +
+                    "Check it out and let me know what you think!"
 
             emit(Either.Right(data))
 
@@ -208,7 +204,6 @@ class TopPickRepository @Inject constructor(
     }
 
     override suspend fun getLocalTopPicks(): Flow<Either<Failure, List<TopPick>>> = flow {
-        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val local = topPickDao.getAllTopPicks().map { entity ->
             with(entity) {
                 TopPick(

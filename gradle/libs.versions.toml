@@ -1,6 +1,6 @@
 [versions]
 agp = "8.13.0"
-kotlin = "2.2.20"
+kotlin = "2.1.21"
 compose-multiplatform = "1.9.0"
 coreKtx = "1.17.0"
 junit = "4.13.2"
@@ -9,7 +9,7 @@ espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.9.4"
 activityCompose = "1.11.0"
 composeBom = "2025.09.01"
-hilt = "2.57.1"
+hilt = "2.57.2"
 timber = "5.0.1"
 navVersion = "2.9.5"
 hiltNavigation = "1.3.0"
@@ -31,16 +31,22 @@ coroutineTest = "1.10.2"
 coreKtxVersion = "1.7.0"
 junitKtx = "1.3.0"
 moshi = "1.15.2"
-ksp = "2.2.20-2.0.3"
+ksp = "2.1.21-2.0.2"
 spalshScreen = "1.0.1"
 firebaseUI = "8.0.2"
-mixpanel = "8.2.3"
+mixpanel = "8.2.4"
 datastore = "1.1.7"
 credentials = "1.5.0"
 googleId = "1.1.1"
 exoplayer = "1.8.0"
 youtubeplayer = "13.0.0"
 paging = "3.3.6"
+koin = "4.1.0"
+koin-annotations = "2.1.0"
+ktorfit = "2.6.4"
+ktor = "3.3.0"
+serialization = "1.9.0"
+buildconfig = "5.6.0"
 
 
 [libraries]
@@ -86,6 +92,7 @@ firebase-analaytics = { group = "com.google.firebase", name = "firebase-analytic
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 firebase-config = { group = "com.google.firebase", name = "firebase-config" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+firebase-ai = { group = "com.google.firebase", name = "firebase-ai" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
@@ -104,12 +111,33 @@ exoplayer-compose = { group = "androidx.media3", name = "media3-ui-compose", ver
 youtube-player = { group = "com.pierfrancescosoffritti.androidyoutubeplayer", name = "core", version.ref = "youtubeplayer"}
 androidx-paging-runtime-ktx = { group = "androidx.paging", name = "paging-runtime-ktx", version.ref = "paging" }
 androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
+koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
+koin-core = { group = "io.insert-koin", name = "koin-core" }
+koin-android = { group = "io.insert-koin", name = "koin-android" }
+koin-compose = { group = "io.insert-koin", name = "koin-compose" }
+koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel" }
+koin-start-up = { group = "io.insert-koin", name = "koin-androidx-startup" }
+koin-annotations = { group = "io.insert-koin", name = "koin-annotations", version.ref = "koin-annotations" }
+koin-compiler = { group = "io.insert-koin", name = "koin-ksp-compiler", version.ref = "koin-annotations" }
+ktorfit = { module = "de.jensklingenberg.ktorfit:ktorfit-lib", version.ref = "ktorfit" }
+ktorfit-compiler = { module = "de.jensklingenberg.ktorfit:ktorfit-ksp", version.ref = "ktorfit" }
+ktor-logging = { module ="io.ktor:ktor-client-logging", version.ref = "ktor" }
+ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
+ktor-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
+ktor-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+ktor-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-encoding = { module = "io.ktor:ktor-client-encoding", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 
 
 
 [plugins]
-androidApplication = { id = "com.android.application", version.ref = "agp" }
+android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+buildkonfig = { id = "com.codingfeline.buildkonfig", version = "0.17.1" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
@@ -121,4 +149,5 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 ktLint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktLint" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
 

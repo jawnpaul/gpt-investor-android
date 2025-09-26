@@ -13,10 +13,10 @@ import com.thejawnpaul.gptinvestor.features.tidbit.data.paging.TidbitType
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitBookmarkRequest
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitLikeRequest
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.model.Tidbit
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
+import javax.inject.Inject
 
 interface TidbitRepository {
     suspend fun getTodayTidbit(): Result<Tidbit>
@@ -49,29 +49,23 @@ class TidbitRepositoryImpl @Inject constructor(
         return try {
             val userId = preferences.userId.first() ?: ""
             val response = apiService.getTodayTidbit(userId = userId)
-            if (response.isSuccessful) {
-                response.body()?.let { data ->
-                    val res = with(data) {
-                        Tidbit(
-                            id = id,
-                            previewUrl = previewUrl,
-                            title = title,
-                            content = content,
-                            originalAuthor = originalAuthor,
-                            category = category,
-                            mediaUrl = mediaUrl,
-                            sourceUrl = source,
-                            type = type,
-                            isLiked = isLiked ?: false,
-                            isBookmarked = isBookmarked ?: false,
-                            summary = summary
-                        )
-                    }
-                    Result.success(res)
-                } ?: Result.failure(Exception("Empty response body"))
-            } else {
-                Result.failure(Exception("Failed to fetch today's tidbit"))
+            val res = with(response) {
+                Tidbit(
+                    id = id,
+                    previewUrl = previewUrl,
+                    title = title,
+                    content = content,
+                    originalAuthor = originalAuthor,
+                    category = category,
+                    mediaUrl = mediaUrl,
+                    sourceUrl = source,
+                    type = type,
+                    isLiked = isLiked ?: false,
+                    isBookmarked = isBookmarked ?: false,
+                    summary = summary
+                )
             }
+            Result.success(res)
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -81,29 +75,23 @@ class TidbitRepositoryImpl @Inject constructor(
         return try {
             val userId = preferences.userId.first() ?: ""
             val response = apiService.getSingleTidbit(id = id, userId = userId)
-            if (response.isSuccessful) {
-                response.body()?.let { data ->
-                    val res = with(data) {
-                        Tidbit(
-                            id = id,
-                            previewUrl = previewUrl,
-                            title = title,
-                            mediaUrl = mediaUrl,
-                            content = content,
-                            originalAuthor = originalAuthor,
-                            category = category,
-                            sourceUrl = source,
-                            type = type,
-                            isLiked = isLiked ?: false,
-                            isBookmarked = isBookmarked ?: false,
-                            summary = summary
-                        )
-                    }
-                    Result.success(res)
-                } ?: Result.failure(Exception("Empty response body"))
-            } else {
-                Result.failure(Exception("Failed to fetch today's tidbit"))
+            val res = with(response) {
+                Tidbit(
+                    id = id,
+                    previewUrl = previewUrl,
+                    title = title,
+                    mediaUrl = mediaUrl,
+                    content = content,
+                    originalAuthor = originalAuthor,
+                    category = category,
+                    sourceUrl = source,
+                    type = type,
+                    isLiked = isLiked ?: false,
+                    isBookmarked = isBookmarked ?: false,
+                    summary = summary
+                )
             }
+            Result.success(res)
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -132,17 +120,13 @@ class TidbitRepositoryImpl @Inject constructor(
     override suspend fun likeTidbit(tidbitId: String): Result<Unit> {
         return try {
             val userId = preferences.userId.first() ?: ""
-            val response = apiService.likeTidbit(
+            apiService.likeTidbit(
                 request = TidbitLikeRequest(
                     userId = userId,
                     tidbitId = tidbitId
                 )
             )
-            if (response.isSuccessful) {
-                Result.success(Unit)
-            } else {
-                Result.failure(Exception("Failed to like tidbit"))
-            }
+            Result.success(Unit)
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             Result.failure(e)
@@ -152,17 +136,13 @@ class TidbitRepositoryImpl @Inject constructor(
     override suspend fun unlikeTidbit(tidbitId: String): Result<Unit> {
         return try {
             val userId = preferences.userId.first() ?: ""
-            val response = apiService.unlikeTidbit(
+            apiService.unlikeTidbit(
                 request = TidbitLikeRequest(
                     userId = userId,
                     tidbitId = tidbitId
                 )
             )
-            if (response.isSuccessful) {
-                Result.success(Unit)
-            } else {
-                Result.failure(Exception("Failed to like tidbit"))
-            }
+            Result.success(Unit)
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             Result.failure(e)
@@ -172,17 +152,14 @@ class TidbitRepositoryImpl @Inject constructor(
     override suspend fun bookmarkTidbit(tidbitId: String): Result<Unit> {
         return try {
             val userId = preferences.userId.first() ?: ""
-            val response = apiService.bookmarkTidbit(
+            apiService.bookmarkTidbit(
                 request = TidbitBookmarkRequest(
                     userId = userId,
                     tidbitId = tidbitId
                 )
             )
-            if (response.isSuccessful) {
-                Result.success(Unit)
-            } else {
-                Result.failure(Exception("Failed to like tidbit"))
-            }
+
+            Result.success(Unit)
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             Result.failure(e)
@@ -192,17 +169,13 @@ class TidbitRepositoryImpl @Inject constructor(
     override suspend fun removeBookmark(tidbitId: String): Result<Unit> {
         return try {
             val userId = preferences.userId.first() ?: ""
-            val response = apiService.removeBookmark(
+            apiService.removeBookmark(
                 request = TidbitBookmarkRequest(
                     userId = userId,
                     tidbitId = tidbitId
                 )
             )
-            if (response.isSuccessful) {
-                Result.success(Unit)
-            } else {
-                Result.failure(Exception("Failed to like tidbit"))
-            }
+            Result.success(Unit)
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             Result.failure(e)

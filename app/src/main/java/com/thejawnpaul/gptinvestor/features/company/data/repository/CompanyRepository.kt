@@ -14,10 +14,10 @@ import com.thejawnpaul.gptinvestor.features.company.domain.model.SearchCompanyQu
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.company.domain.model.TrendingCompany
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
+import javax.inject.Inject
 
 class CompanyRepository @Inject constructor(
     private val apiService: ApiService,
@@ -36,28 +36,24 @@ class CompanyRepository @Inject constructor(
             }
 
             val response = apiService.getCompanies()
-            if (response.isSuccessful) {
-                response.body()?.let {
-                    val remoteEntities = it.map { companyRemote -> companyRemote.toEntity() }
+            val remoteEntities = response.map { companyRemote -> companyRemote.toEntity() }
 
-                    if (local.isEmpty()) {
-                        companyDao.insertAll(remoteEntities)
-                    } else {
-                        // update with new data coming from remote
-                        val updatedEntities = remoteEntities.map { entity ->
-                            companyDao.getCompany(entity.ticker)
-                                .copy(
-                                    summary = entity.summary
-                                )
-                        }
-                        companyDao.updateCompanies(updatedEntities)
-                    }
-
-                    val updatedList = companyDao.getAllCompanies()
-                        .map { companyEntity -> companyEntity.toDomainObject() }
-                    emit(Either.Right(updatedList))
-                } ?: emit(Either.Left(Failure.DataError))
+            if (local.isEmpty()) {
+                companyDao.insertAll(remoteEntities)
+            } else {
+                // update with new data coming from remote
+                val updatedEntities = remoteEntities.map { entity ->
+                    companyDao.getCompany(entity.ticker)
+                        .copy(
+                            summary = entity.summary
+                        )
+                }
+                companyDao.updateCompanies(updatedEntities)
             }
+
+            val updatedList = companyDao.getAllCompanies()
+                .map { companyEntity -> companyEntity.toDomainObject() }
+            emit(Either.Right(updatedList))
             updateCompanyList()?.let {
                 emit(Either.Right(it))
             }
@@ -69,7 +65,11 @@ class CompanyRepository @Inject constructor(
 
     override suspend fun getAllSector(): Flow<Either<Failure, List<SectorInput>>> = flow {
         val list = listOf(
-            SectorInput.CustomSector(sectorName = "Top picks", sectorKey = "top-picks", hasImage = true),
+            SectorInput.CustomSector(
+                sectorName = "Top picks",
+                sectorKey = "top-picks",
+                hasImage = true
+            ),
             SectorInput.AllSector
         )
         val companyList = companyDao.getAllCompanies()
@@ -92,112 +92,103 @@ class CompanyRepository @Inject constructor(
         }
     }
 
-    override suspend fun getCompany(ticker: String): Flow<Either<Failure, CompanyDetailRemoteResponse>> = flow {
-        try {
-            val response =
-                apiService.getCompanyInfo(request = CompanyDetailRemoteRequest(ticker = ticker))
-            if (response.isSuccessful) {
-                response.body()?.let {
-                    emit(Either.Right(it))
-                    analyticsLogger.logEvent(
-                        eventName = "Company Selected",
-                        params = mapOf("company_ticker" to ticker, "company_name" to it.name)
-                    )
-                }
-            }
-        } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
-            emit(Either.Left(Failure.ServerError))
-        }
-    }
-
-    override suspend fun getCompanyFinancials(ticker: String): Flow<Either<Failure, CompanyFinancials>> = flow {
-        try {
-            val request = CompanyFinancialsRequest(ticker = ticker, years = 1)
-            val response = apiService.getCompanyFinancials(request)
-            if (response.isSuccessful) {
-                response.body()?.let {
-                    val domainObject = it.toDomainObject()
-                    emit(Either.Right(domainObject))
-                }
-            }
-        } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
-            emit(Either.Left(Failure.ServerError))
-        }
-    }
-
-    override suspend fun getCompaniesInSector(sector: String?): Flow<Either<Failure, List<Company>>> = flow {
-        if (sector == null) {
-            val companies = companyDao.getAllCompanies().map { it.toDomainObject() }
-            emit(Either.Right(companies))
-        } else {
-            val companies = companyDao.getCompaniesInSector(sector).map { it.toDomainObject() }
-            emit(Either.Right(companies))
-            analyticsLogger.logEvent(
-                eventName = "Industry Category Selected",
-                params = mapOf("industry_name" to sector)
-            )
-        }
-    }
-
-    override suspend fun getTrendingCompanies(): Flow<Either<Failure, List<TrendingCompany>>> = flow {
-        try {
-            val response = apiService.getTrendingTickers()
-            if (response.isSuccessful) {
-                response.body()?.let { trendingRemoteList ->
-                    val trendingCompanies = trendingRemoteList.map { remote ->
-                        with(remote) {
-                            TrendingCompany(
-                                tickerSymbol = tickerSymbol,
-                                companyName = name,
-                                percentageChange = percentageChange,
-                                imageUrl = logo
-                            )
-                        }
-                    }.sortedByDescending { it.change }.take(20)
-
-                    emit(Either.Right(trendingCompanies))
-                }
-            } else {
+    override suspend fun getCompany(ticker: String): Flow<Either<Failure, CompanyDetailRemoteResponse>> =
+        flow {
+            try {
+                val response =
+                    apiService.getCompanyInfo(request = CompanyDetailRemoteRequest(ticker = ticker))
+                emit(Either.Right(response))
+                analyticsLogger.logEvent(
+                    eventName = "Company Selected",
+                    params = mapOf("company_ticker" to ticker, "company_name" to response.name)
+                )
+            } catch (e: Exception) {
+                Timber.e(e.stackTraceToString())
                 emit(Either.Left(Failure.ServerError))
             }
-        } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
-            emit(Either.Left(Failure.ServerError))
         }
-    }
 
-    override suspend fun searchCompany(query: SearchCompanyQuery): Flow<Either<Failure, List<Company>>> = flow {
-        try {
-            if (query.sector == null) {
-                // search entire table
-                val companies =
-                    companyDao.searchAllCompanies(query = query.query)
-                        .map { it.toDomainObject() }
+    override suspend fun getCompanyFinancials(ticker: String): Flow<Either<Failure, CompanyFinancials>> =
+        flow {
+            try {
+                val request = CompanyFinancialsRequest(ticker = ticker, years = 1)
+                val response = apiService.getCompanyFinancials(request)
+                val domainObject = response.toDomainObject()
+                emit(Either.Right(domainObject))
+            } catch (e: Exception) {
+                Timber.e(e.stackTraceToString())
+                emit(Either.Left(Failure.ServerError))
+            }
+        }
+
+    override suspend fun getCompaniesInSector(sector: String?): Flow<Either<Failure, List<Company>>> =
+        flow {
+            if (sector == null) {
+                val companies = companyDao.getAllCompanies().map { it.toDomainObject() }
                 emit(Either.Right(companies))
             } else {
-                // filter by column name
-                val companies =
-                    companyDao.searchCompaniesInSector(
-                        query = query.query.trim(),
-                        sectorKey = query.sector
-                    )
-                        .map { it.toDomainObject() }
+                val companies = companyDao.getCompaniesInSector(sector).map { it.toDomainObject() }
                 emit(Either.Right(companies))
+                analyticsLogger.logEvent(
+                    eventName = "Industry Category Selected",
+                    params = mapOf("industry_name" to sector)
+                )
             }
-        } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
-            emit(Either.Left(Failure.DataError))
         }
-    }
+
+    override suspend fun getTrendingCompanies(): Flow<Either<Failure, List<TrendingCompany>>> =
+        flow {
+            try {
+                val response = apiService.getTrendingTickers()
+                val trendingCompanies = response.map { remote ->
+                    with(remote) {
+                        TrendingCompany(
+                            tickerSymbol = tickerSymbol,
+                            companyName = name,
+                            percentageChange = percentageChange,
+                            imageUrl = logo
+                        )
+                    }
+                }.sortedByDescending { it.change }.take(20)
+
+                emit(Either.Right(trendingCompanies))
+            } catch (e: Exception) {
+                Timber.e(e.stackTraceToString())
+                emit(Either.Left(Failure.ServerError))
+            }
+        }
+
+    override suspend fun searchCompany(query: SearchCompanyQuery): Flow<Either<Failure, List<Company>>> =
+        flow {
+            try {
+                if (query.sector == null) {
+                    // search entire table
+                    val companies =
+                        companyDao.searchAllCompanies(query = query.query)
+                            .map { it.toDomainObject() }
+                    emit(Either.Right(companies))
+                } else {
+                    // filter by column name
+                    val companies =
+                        companyDao.searchCompaniesInSector(
+                            query = query.query.trim(),
+                            sectorKey = query.sector
+                        )
+                            .map { it.toDomainObject() }
+                    emit(Either.Right(companies))
+                }
+            } catch (e: Exception) {
+                Timber.e(e.stackTraceToString())
+                emit(Either.Left(Failure.DataError))
+            }
+        }
 
     private suspend fun updateCompanyList(): List<Company>? {
         try {
             val tickers = companyDao.getAllCompanies().map { it.ticker }
             val batches = tickers.chunked(100)
             val start = System.currentTimeMillis()
-            batches.forEach { batch ->
+            batches.forEach { _ ->
                 /*val request = CompanyPriceRequest(tickers = batch)
                 val response = apiService.getCompanyPrice(request)
                 if (response.isSuccessful) {

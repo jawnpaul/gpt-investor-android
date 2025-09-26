@@ -30,85 +30,119 @@ import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitLikeRequest
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitLikeResponse
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitRemote
 import com.thejawnpaul.gptinvestor.features.toppick.data.remote.TopPickRemote
-import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Query
+import de.jensklingenberg.ktorfit.http.Body
+import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.Headers
+import de.jensklingenberg.ktorfit.http.POST
+import de.jensklingenberg.ktorfit.http.Query
 
 interface ApiService {
     @GET("v1/companies")
-    suspend fun getCompanies(): Response<List<CompanyRemote>>
+    suspend fun getCompanies(): List<CompanyRemote>
 
+    @Headers("Content-Type: application/json")
     @POST("v1/company")
-    suspend fun getCompanyFinancials(@Body request: CompanyFinancialsRequest): Response<CompanyFinancialsRemote>
+    suspend fun getCompanyFinancials(@Body request: CompanyFinancialsRequest): CompanyFinancialsRemote
 
+    @Headers("Content-Type: application/json")
     @POST("v1/save-comparison")
-    suspend fun saveComparison(@Body request: SaveComparisonRequest): Response<DefaultSaveResponse>
+    suspend fun saveComparison(@Body request: SaveComparisonRequest): DefaultSaveResponse
 
+    @Headers("Content-Type: application/json")
     @POST("v1/save-sentiment")
-    suspend fun saveSentiment(@Body request: SaveSentimentRequest): Response<DefaultSaveResponse>
+    suspend fun saveSentiment(@Body request: SaveSentimentRequest): DefaultSaveResponse
 
+    @Headers("Content-Type: application/json")
     @POST("v1/get-analyst-rating")
-    suspend fun getAnalystRating(@Body request: AnalystRatingRequest): Response<AnalystRatingResponse>
+    suspend fun getAnalystRating(@Body request: AnalystRatingRequest): AnalystRatingResponse
 
+    @Headers("Content-Type: application/json")
     @POST("v1/save-industry-rating")
-    suspend fun saveIndustryRating(@Body request: IndustryRatingRequest): Response<DefaultSaveResponse>
+    suspend fun saveIndustryRating(@Body request: IndustryRatingRequest): DefaultSaveResponse
 
+    @Headers("Content-Type: application/json")
     @POST("v1/create-pdf")
-    suspend fun createPdf(@Body request: DownloadPdfRequest): Response<DownloadPdfResponse>
+    suspend fun createPdf(@Body request: DownloadPdfRequest): DownloadPdfResponse
 
     @GET("v1/trending-tickers")
-    suspend fun getTrendingTickers(): Response<List<TrendingRemote>>
+    suspend fun getTrendingTickers(): List<TrendingRemote>
 
     @GET("v1/default-prompts")
-    suspend fun getDefaultPrompts(): Response<List<DefaultPromptRemote>>
+    suspend fun getDefaultPrompts(): List<DefaultPromptRemote>
 
+    @Headers("Content-Type: application/json")
     @POST("v1/get-entity")
-    suspend fun getEntity(@Body request: GetEntityRequest): Response<GetEntityResponse>
+    suspend fun getEntity(@Body request: GetEntityRequest): GetEntityResponse
 
+    @Headers("Content-Type: application/json")
     @POST("v1/company-info")
-    suspend fun getCompanyInfo(@Body request: CompanyDetailRemoteRequest): Response<CompanyDetailRemoteResponse>
+    suspend fun getCompanyInfo(@Body request: CompanyDetailRemoteRequest): CompanyDetailRemoteResponse
 
+    @Headers("Content-Type: application/json")
     @POST("v1/company-price")
-    suspend fun getCompanyPrice(@Body request: CompanyPriceRequest): Response<List<CompanyPriceResponse>>
+    suspend fun getCompanyPrice(@Body request: CompanyPriceRequest): List<CompanyPriceResponse>
 
     @GET("v1.1/top-picks")
-    suspend fun getTopPicks(@Query("date") date: String): Response<List<TopPickRemote>>
+    suspend fun getTopPicks(@Query("date") date: String): List<TopPickRemote>
 
+    @Headers("Content-Type: application/json")
     @POST("v1/notifications/register-token")
-    suspend fun registerToken(@Body request: RegisterTokenRequest): Response<RegisterTokenResponse>
+    suspend fun registerToken(@Body request: RegisterTokenRequest): RegisterTokenResponse
 
+    @Headers("Content-Type: application/json")
     @POST("v1/add-to-waitlist")
-    suspend fun addUserToWaitlist(@Body request: AddToWaitlistRequest): Response<AddToWaitlistResponse>
+    suspend fun addUserToWaitlist(@Body request: AddToWaitlistRequest): AddToWaitlistResponse
 
     @GET("v1/tidbit/all-tidbit")
-    suspend fun getAllTidbit(@Query("page") page: Int = 1, @Query("page_size") pageSize: Int = 10, @Query("user_id") userId: String): Response<AllTidbitResponse>
+    suspend fun getAllTidbit(
+        @Query("page") page: Int = 1,
+        @Query("page_size") pageSize: Int = 10,
+        @Query("user_id") userId: String
+    ): AllTidbitResponse
 
     @GET("v1/tidbit/latest-tidbits")
-    suspend fun getLatestTidbits(@Query("page") page: Int = 1, @Query("page_size") pageSize: Int = 10, @Query("user_id") userId: String): Response<AllTidbitResponse>
+    suspend fun getLatestTidbits(
+        @Query("page") page: Int = 1,
+        @Query("page_size") pageSize: Int = 10,
+        @Query("user_id") userId: String
+    ): AllTidbitResponse
 
     @GET("v1/tidbit/trending-tidbits")
-    suspend fun getTrendingTidbit(@Query("page") page: Int = 1, @Query("page_size") pageSize: Int = 10, @Query("user_id") userId: String): Response<AllTidbitResponse>
+    suspend fun getTrendingTidbit(
+        @Query("page") page: Int = 1,
+        @Query("page_size") pageSize: Int = 10,
+        @Query("user_id") userId: String
+    ): AllTidbitResponse
 
     @GET("v1/tidbit/bookmarked-tidbits")
-    suspend fun getSavedTidbits(@Query("page") page: Int = 1, @Query("page_size") pageSize: Int = 10, @Query("user_id") userId: String): Response<AllTidbitResponse>
+    suspend fun getSavedTidbits(
+        @Query("page") page: Int = 1,
+        @Query("page_size") pageSize: Int = 10,
+        @Query("user_id") userId: String
+    ): AllTidbitResponse
 
     @GET("v1/tidbit/today-tidbit")
-    suspend fun getTodayTidbit(@Query("user_id") userId: String): Response<TidbitRemote>
+    suspend fun getTodayTidbit(@Query("user_id") userId: String): TidbitRemote
 
     @GET("v1/tidbit/single-tidbit")
-    suspend fun getSingleTidbit(@Query("id") id: String, @Query("user_id") userId: String): Response<TidbitRemote>
+    suspend fun getSingleTidbit(
+        @Query("id") id: String,
+        @Query("user_id") userId: String
+    ): TidbitRemote
 
+    @Headers("Content-Type: application/json")
     @POST("v1/tidbit/like-tidbit")
-    suspend fun likeTidbit(@Body request: TidbitLikeRequest): Response<TidbitLikeResponse>
+    suspend fun likeTidbit(@Body request: TidbitLikeRequest): TidbitLikeResponse
 
+    @Headers("Content-Type: application/json")
     @POST("v1/tidbit/unlike-tidbit")
-    suspend fun unlikeTidbit(@Body request: TidbitLikeRequest): Response<TidbitLikeResponse>
+    suspend fun unlikeTidbit(@Body request: TidbitLikeRequest): TidbitLikeResponse
 
+    @Headers("Content-Type: application/json")
     @POST("v1/tidbit/bookmark-tidbit")
-    suspend fun bookmarkTidbit(@Body request: TidbitBookmarkRequest): Response<TidbitBookmarkResponse>
+    suspend fun bookmarkTidbit(@Body request: TidbitBookmarkRequest): TidbitBookmarkResponse
 
+    @Headers("Content-Type: application/json")
     @POST("v1/tidbit/unbookmark-tidbit")
-    suspend fun removeBookmark(@Body request: TidbitBookmarkRequest): Response<TidbitBookmarkResponse>
+    suspend fun removeBookmark(@Body request: TidbitBookmarkRequest): TidbitBookmarkResponse
 }

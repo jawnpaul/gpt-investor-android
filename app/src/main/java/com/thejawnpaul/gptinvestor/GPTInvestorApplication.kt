@@ -2,12 +2,25 @@ package com.thejawnpaul.gptinvestor
 
 import android.app.Application
 import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
+import com.thejawnpaul.gptinvestor.remote.RemoteModule
 import dagger.hilt.android.HiltAndroidApp
+import org.koin.android.ext.koin.androidLogger
+import org.koin.androix.startup.KoinStartup
+import org.koin.core.component.KoinComponent
+import org.koin.core.context.startKoin
+import org.koin.dsl.KoinConfiguration
+import org.koin.dsl.koinConfiguration
+import org.koin.ksp.generated.module
 import javax.inject.Inject
 import timber.log.Timber
 
 @HiltAndroidApp
-class GPTInvestorApplication : Application() {
+class GPTInvestorApplication : Application(), KoinStartup {
+
+    override fun onKoinStartup(): KoinConfiguration = koinConfiguration {
+        androidLogger()
+        modules(RemoteModule.module)
+    }
 
     @Inject
     lateinit var tokenSyncManager: TokenSyncManager

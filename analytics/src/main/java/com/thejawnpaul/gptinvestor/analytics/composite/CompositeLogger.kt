@@ -8,8 +8,8 @@ import javax.inject.Singleton
 
 @Singleton
 class CompositeLogger @Inject constructor(
-    @FirebaseAnalytics private val firebaseLogger: AnalyticsLogger,
-    @MixpanelAnalytics private val mixpanelLogger: AnalyticsLogger
+    @param:FirebaseAnalytics private val firebaseLogger: AnalyticsLogger,
+    @param:MixpanelAnalytics private val mixpanelLogger: AnalyticsLogger
 ) :
     AnalyticsLogger {
 

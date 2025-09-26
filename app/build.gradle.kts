@@ -4,12 +4,14 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 import java.util.Properties
 
 plugins {
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hiltAndroid)
+    alias(libs.plugins.ktorfit)
     alias(libs.plugins.ktLint)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.googleServices)
     alias(libs.plugins.crashlytics)
 }
@@ -100,11 +102,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -164,8 +166,6 @@ dependencies {
     implementation(libs.timber)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation)
-    implementation(libs.moshi.converter)
-    implementation(libs.moshi.kotlin)
     implementation(libs.coil.compose)
     implementation(libs.core.ktx)
     implementation(libs.androidx.junit.ktx)
@@ -173,8 +173,6 @@ dependencies {
     implementation(libs.androidx.room)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
-    implementation(libs.moshi)
-    ksp(libs.moshi.codeGen)
     implementation(libs.timeAgo)
     implementation(libs.jsoup)
     implementation(libs.gemini)
@@ -198,6 +196,14 @@ dependencies {
     implementation(libs.youtube.player)
     implementation(libs.androidx.paging.runtime.ktx)
     implementation(libs.androidx.paging.compose)
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.core)
+    implementation(libs.koin.start.up)
+    implementation(libs.koin.android)
+    ksp(libs.koin.compiler)
+    implementation(libs.ktorfit)
+    ksp(libs.ktorfit.compiler)
+    implementation(libs.kotlinx.serialization)
 
     // test
     testImplementation(project(":remote:remotetest"))

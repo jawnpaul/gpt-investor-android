@@ -1,11 +1,10 @@
 package com.thejawnpaul.gptinvestor.features.conversation.data.remote
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+import kotlinx.serialization.Serializable
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class DefaultPromptRemote(
-    @field:Json(name = "id") val id: String,
-    @field:Json(name = "label")val label: String,
-    @field:Json(name = "query") val query: String
+    val id: String,
+    val label: String,
+    val query: String
 )

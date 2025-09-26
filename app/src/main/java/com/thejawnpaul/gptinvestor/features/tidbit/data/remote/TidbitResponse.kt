@@ -1,56 +1,56 @@
 package com.thejawnpaul.gptinvestor.features.tidbit.data.remote
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class TidbitRemote(
-    @field:Json(name = "_id") val id: String,
-    @field:Json(name = "category") val category: String,
-    @field:Json(name = "content") val content: String,
-    @field:Json(name = "created_at") val createdAt: String,
-    @field:Json(name = "created_by") val createdBy: String,
-    @field:Json(name = "for_date") val forDate: String,
-    @field:Json(name = "impressions") val impressions: Int? = 0,
-    @field:Json(name = "media_url") val mediaUrl: String,
-    @field:Json(name = "original_author") val originalAuthor: String,
-    @field:Json(name = "preview_url") val previewUrl: String,
-    @field:Json(name = "source") val source: String,
-    @field:Json(name = "tidbit_type") val type: String,
-    @field:Json(name = "title") val title: String,
-    @field:Json(name = "is_liked") val isLiked: Boolean? = false,
-    @field:Json(name = "is_bookmarked") val isBookmarked: Boolean? = false,
-    @field:Json(name = "updated_at") val updatedAt: String,
-    @field:Json(name = "summary") val summary: String = ""
+    @SerialName("_id") val id: String,
+    val category: String,
+    val content: String,
+    @SerialName("created_at") val createdAt: String,
+    @SerialName("created_by") val createdBy: String,
+    @SerialName("for_date") val forDate: String,
+    val impressions: Int? = 0,
+    @SerialName("media_url") val mediaUrl: String,
+    @SerialName("original_author") val originalAuthor: String,
+    @SerialName("preview_url") val previewUrl: String,
+    val source: String,
+    @SerialName("tidbit_type") val type: String,
+    val title: String,
+    @SerialName("is_liked") val isLiked: Boolean? = false,
+    @SerialName("is_bookmarked") val isBookmarked: Boolean? = false,
+    @SerialName("updated_at") val updatedAt: String,
+    val summary: String = ""
 
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class AllTidbitResponse(
-    @field:Json(name = "page") val page: Int,
-    @field:Json(name = "page_size") val pageSize: Int,
-    @field:Json(name = "total_tidbits") val totalTidbit: Int,
-    @field:Json(name = "tidbits") val data: List<TidbitRemote>
+    val page: Int,
+    @SerialName("page_size") val pageSize: Int,
+    @SerialName("total_tidbits") val totalTidbit: Int,
+    @SerialName("tidbits") val data: List<TidbitRemote>
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class TidbitLikeRequest(
-    @field:Json(name = "user_id") val userId: String,
-    @field:Json(name = "tidbit_id") val tidbitId: String
+    @SerialName("user_id") val userId: String,
+    @SerialName("tidbit_id") val tidbitId: String
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class TidbitLikeResponse(
-    @field:Json(name = "message") val message: String
+    val message: String
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class TidbitBookmarkResponse(
-    @field:Json(name = "message") val message: String
+    val message: String
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class TidbitBookmarkRequest(
-    @field:Json(name = "user_id") val userId: String,
-    @field:Json(name = "tidbit_id") val tidbitId: String
+    @SerialName("user_id") val userId: String,
+    @SerialName("tidbit_id") val tidbitId: String
 )

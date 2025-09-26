@@ -240,7 +240,7 @@ class ConversationRepository @Inject constructor(
                         newMessages.filterIsInstance<GenAiEntityMessage>()
                             .find { it.entity?.ticker == ticker }
                     if (existingEntity == null) {
-                        company?.let {
+                        company.let {
                             val newId = messageDao.insertMessage(
                                 MessageEntity(
                                     conversationId = currentConversation.id,
@@ -547,8 +547,7 @@ class ConversationRepository @Inject constructor(
     }
 
     private suspend fun containsEntity(input: String): List<String> {
-        return apiService.getEntity(GetEntityRequest(query = input)).body()?.entityList
-            ?: emptyList()
+        return apiService.getEntity(GetEntityRequest(query = input)).entityList
     }
 
     private suspend fun getConversation(conversation: ConversationPrompt): StructuredConversation {
@@ -601,8 +600,8 @@ class ConversationRepository @Inject constructor(
         return history
     }
 
-    private suspend fun getCompanyDetail(ticker: String): CompanyDetailRemoteResponse? {
-        return apiService.getCompanyInfo(CompanyDetailRemoteRequest(ticker = ticker)).body()
+    private suspend fun getCompanyDetail(ticker: String): CompanyDetailRemoteResponse {
+        return apiService.getCompanyInfo(CompanyDetailRemoteRequest(ticker = ticker))
     }
 
     private suspend fun getConversationTitle(conversationId: Long): String? {

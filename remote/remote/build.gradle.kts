@@ -1,44 +1,103 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import java.util.Properties
 
 plugins {
-    id("com.android.library")
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.hiltAndroid)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.buildkonfig)
+    alias(libs.plugins.ktorfit)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 }
 
-android {
-    val localProperties = Properties()
-    localProperties.load(project.rootProject.file("local.properties").reader())
-    namespace = "com.thejawnpaul.gptinvestor.remote"
-    compileSdk = 34
-    defaultConfig.minSdk = 24
-    buildTypes {
-        release {
-            val baseUrl: String = localProperties.getProperty("BASE_URL") ?: ""
-            buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
-            val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
-            buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
+kotlin {
+    androidTarget {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
         }
-        debug {
-            val baseUrl: String = localProperties.getProperty("BASE_URL") ?: ""
-            buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
-            val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
-            buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
+    }
+
+    sourceSets.commonMain {
+        kotlin.srcDir("build/generated/ksp/metadata/remote")
+    }
+
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
+    sourceSets {
+
+        commonMain.dependencies {
+            implementation(project.dependencies.platform(libs.koin.bom))
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
+            implementation(libs.koin.annotations)
+            implementation(libs.ktorfit)
+            implementation(libs.kotlinx.serialization)
+            implementation(libs.ktor.auth)
+            implementation(libs.ktor.logging)
+            implementation(libs.ktor.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+        }
+    }
+
+}
+
+buildkonfig {
+    packageName = "com.thejawnpaul.gptinvestor.remote"
+//    objectName = "BuildConfig"
+    defaultConfigs {
+        val localProperties = Properties()
+        localProperties.load(project.rootProject.file("local.properties").reader())
+        val baseUrl: String = localProperties.getProperty("BASE_URL") ?: ""
+        val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
+        buildConfigField(STRING, "BASE_URL", baseUrl)
+        buildConfigField(STRING, "ACCESS_TOKEN", accessToken)
+    }
+}
+
+android {
+    namespace = "com.thejawnpaul.gptinvestor.remote"
+    compileSdk = 36
+    defaultConfig.minSdk = 24
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
     buildFeatures { buildConfig = true }
 }
 
 dependencies {
-    implementation(libs.dagger.hilt)
-    implementation(libs.retrofit)
-    implementation(libs.moshi.converter)
-    implementation(libs.okhttp.logger)
-    ksp(libs.dagger.hilt.compiler)
+//    implementation(libs.dagger.hilt)
+//    implementation(libs.retrofit)
+//    implementation(libs.moshi.converter)
+//    ksp(libs.dagger.hilt.compiler)
+    add("kspCommonMainMetadata", libs.koin.compiler)
+    add("kspAndroid", libs.koin.compiler)
+    add("kspIosSimulatorArm64", libs.koin.compiler)
+    add("kspIosX64", libs.koin.compiler)
+    add("kspIosArm64", libs.koin.compiler)
+
+    add("kspCommonMainMetadata", libs.ktorfit.compiler)
+    add("kspAndroid", libs.ktorfit.compiler)
+    add("kspIosSimulatorArm64", libs.ktorfit.compiler)
+    add("kspIosX64", libs.ktorfit.compiler)
+    add("kspIosArm64", libs.ktorfit.compiler)
 }
+
+ksp {
+    arg("KOIN_CONFIG_CHECK", "true")
+}
+
+/*project.tasks.withType(KotlinCompilationTask::class.java).configureEach {
+    if(name != "kspCommonMainKotlinMetadata") {
+        dependsOn("kspCommonMainKotlinMetadata")
+    }
+}*/

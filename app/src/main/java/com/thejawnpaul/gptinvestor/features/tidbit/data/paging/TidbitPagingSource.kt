@@ -34,44 +34,38 @@ class TidbitPagingSource @Inject constructor(
                 TidbitType.SAVED -> apiService.getSavedTidbits(page, pageSize, userId)
             }
 
-            if (response.isSuccessful) {
-                response.body()?.let { data ->
-                    val tidbits = data.data.map { remote ->
-                        with(remote) {
-                            Tidbit(
-                                id = id,
-                                previewUrl = previewUrl,
-                                title = title,
-                                content = content,
-                                originalAuthor = originalAuthor,
-                                category = category,
-                                mediaUrl = mediaUrl,
-                                sourceUrl = source,
-                                type = type,
-                                isLiked = isLiked ?: false,
-                                isBookmarked = isBookmarked ?: false,
-                                summary = summary
-                            )
-                        }
-                    }
-
-                    val nextKey = if (tidbits.isEmpty() || tidbits.size < pageSize) {
-                        null
-                    } else {
-                        page + 1
-                    }
-
-                    val prevKey = if (page == 1) null else page - 1
-
-                    LoadResult.Page(
-                        data = tidbits,
-                        prevKey = prevKey,
-                        nextKey = nextKey
+            val tidbits = response.data.map { remote ->
+                with(remote) {
+                    Tidbit(
+                        id = id,
+                        previewUrl = previewUrl,
+                        title = title,
+                        content = content,
+                        originalAuthor = originalAuthor,
+                        category = category,
+                        mediaUrl = mediaUrl,
+                        sourceUrl = source,
+                        type = type,
+                        isLiked = isLiked ?: false,
+                        isBookmarked = isBookmarked ?: false,
+                        summary = summary
                     )
-                } ?: LoadResult.Error(Exception("Empty response body"))
-            } else {
-                LoadResult.Error(Exception("Failed to fetch tidbits: ${response.code()}"))
+                }
             }
+
+            val nextKey = if (tidbits.isEmpty() || tidbits.size < pageSize) {
+                null
+            } else {
+                page + 1
+            }
+
+            val prevKey = if (page == 1) null else page - 1
+
+            LoadResult.Page(
+                data = tidbits,
+                prevKey = prevKey,
+                nextKey = nextKey
+            )
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             LoadResult.Error(e)

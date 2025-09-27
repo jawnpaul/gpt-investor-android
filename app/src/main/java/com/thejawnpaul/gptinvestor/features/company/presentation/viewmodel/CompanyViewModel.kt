@@ -3,7 +3,6 @@ package com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.util.query
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
@@ -20,7 +19,8 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.state.AllCompan
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyFinancialsView
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCompanyView
-import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction.*
+import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction.OnCopy
+import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction.OnGoBack
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyDetailDefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyPrompt
@@ -31,13 +31,12 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.state.AllSecto
 import com.thejawnpaul.gptinvestor.features.toppick.data.repository.TopPickRepository
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import kotlin.onSuccess
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltViewModel
 class CompanyViewModel @Inject constructor(
@@ -603,8 +602,7 @@ sealed interface CompanyDetailEvent {
     data class ModelChange(val model: AvailableModel) : CompanyDetailEvent
     data class SelectWaitlistOption(val option: String) : CompanyDetailEvent
     data object JoinWaitList : CompanyDetailEvent
-    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) :
-        CompanyDetailEvent
+    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : CompanyDetailEvent
 }
 
 sealed interface CompanyDetailAction {

@@ -12,12 +12,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
-class SearchCompaniesUseCase @Inject constructor(
-    @IoDispatcher private val dispatcher: CoroutineDispatcher,
-    coroutineScope: CoroutineScope,
-    private val repository: ICompanyRepository
-) : BaseUseCase<SearchCompanyQuery, List<Company>>(coroutineScope, dispatcher) {
-    override suspend fun run(params: SearchCompanyQuery): Flow<Either<Failure, List<Company>>> {
-        return repository.searchCompany(params)
-    }
+class SearchCompaniesUseCase @Inject constructor(@IoDispatcher private val dispatcher: CoroutineDispatcher, coroutineScope: CoroutineScope, private val repository: ICompanyRepository) :
+    BaseUseCase<SearchCompanyQuery, List<Company>>(coroutineScope, dispatcher) {
+    override suspend fun run(params: SearchCompanyQuery): Flow<Either<Failure, List<Company>>> = repository.searchCompany(params)
 }

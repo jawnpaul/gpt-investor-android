@@ -8,16 +8,12 @@ import com.thejawnpaul.gptinvestor.core.utility.getHourAndMinute
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.dao.ConversationDao
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.history.domain.repository.IHistoryRepository
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
+import javax.inject.Inject
 
-class HistoryRepository @Inject constructor(
-    private val conversationDao: ConversationDao,
-    private val analyticsLogger: AnalyticsLogger
-) :
-    IHistoryRepository {
+class HistoryRepository @Inject constructor(private val conversationDao: ConversationDao, private val analyticsLogger: AnalyticsLogger) : IHistoryRepository {
     override suspend fun getAllHistory(): Flow<Either<Failure, Map<String, List<StructuredConversation>>>> = flow {
         try {
             val separated = conversationDao.getConversationsWithMessages()

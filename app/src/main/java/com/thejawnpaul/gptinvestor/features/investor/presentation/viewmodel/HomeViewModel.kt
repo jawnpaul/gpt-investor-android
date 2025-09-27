@@ -17,7 +17,9 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPro
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefaultPromptsUseCase
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
-import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.*
+import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.OnGoToAllTidbits
+import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.OnGoToTidbitDetail
+import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.OnStartConversation
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
@@ -25,7 +27,6 @@ import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRe
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,6 +34,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -46,8 +48,7 @@ class HomeViewModel @Inject constructor(
     private val notificationRepository: NotificationRepository,
     private val modelsRepository: ModelsRepository,
     private val tidbitRepository: TidbitRepository
-) :
-    ViewModel() {
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()
@@ -312,10 +313,7 @@ sealed interface HomeEvent {
 }
 
 sealed interface HomeAction {
-    data class OnStartConversation(
-        val input: String? = null,
-        val title: String? = null
-    ) : HomeAction
+    data class OnStartConversation(val input: String? = null, val title: String? = null) : HomeAction
 
     data object OnGoToAllTopPicks : HomeAction
     data class OnGoToTopPickDetail(val id: String) : HomeAction

@@ -17,14 +17,12 @@ abstract class DatabaseModule {
     companion object {
         @Singleton
         @Provides
-        fun provideDataBase(@ApplicationContext context: Context): GPTInvestorDatabase {
-            return Room.databaseBuilder(
-                context.applicationContext,
-                GPTInvestorDatabase::class.java,
-                GPTInvestorDatabase.DB_NAME
-            ).fallbackToDestructiveMigration()
-                .build()
-        }
+        fun provideDataBase(@ApplicationContext context: Context): GPTInvestorDatabase = Room.databaseBuilder(
+            context.applicationContext,
+            GPTInvestorDatabase::class.java,
+            GPTInvestorDatabase.DB_NAME
+        ).fallbackToDestructiveMigration()
+            .build()
 
         // TODO:Remove fallback to destructive migration
 

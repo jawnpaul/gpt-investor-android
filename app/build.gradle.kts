@@ -39,7 +39,6 @@ android {
             useSupportLibrary = true
         }
 
-
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments += mapOf(

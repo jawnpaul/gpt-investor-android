@@ -6,10 +6,10 @@ import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
 class GetDefaultPromptsUseCase @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
@@ -18,7 +18,5 @@ class GetDefaultPromptsUseCase @Inject constructor(
 ) : BaseUseCase<GetDefaultPromptsUseCase.None, List<DefaultPrompt>>(coroutineScope, dispatcher) {
     class None
 
-    override suspend fun run(params: None): Flow<Either<Failure, List<DefaultPrompt>>> {
-        return repository.getDefaultPrompts()
-    }
+    override suspend fun run(params: None): Flow<Either<Failure, List<DefaultPrompt>>> = repository.getDefaultPrompts()
 }

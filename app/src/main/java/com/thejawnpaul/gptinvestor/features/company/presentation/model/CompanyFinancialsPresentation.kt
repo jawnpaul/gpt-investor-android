@@ -13,12 +13,4 @@ data class CompanyFinancialsPresentation(
     val financials: String
 )
 
-data class NewsPresentation(
-    val title: String,
-    val id: String,
-    val type: String,
-    val relativeDate: String,
-    val publisher: String,
-    val imageUrl: String,
-    val link: String
-)
+data class NewsPresentation(val title: String, val id: String, val type: String, val relativeDate: String, val publisher: String, val imageUrl: String, val link: String)

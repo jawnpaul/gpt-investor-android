@@ -10,20 +10,19 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class AuthenticationViewModel @Inject constructor(
     private val authRepository: AuthenticationRepository,
     private val analyticsLogger: AnalyticsLogger,
     private val gptInvestorPreferences: GPTInvestorPreferences
-) :
-    ViewModel() {
+) : ViewModel() {
 
     private val _authState = MutableStateFlow(AuthenticationUIState())
     val authState = _authState.asStateFlow()
@@ -284,10 +283,7 @@ data class AuthenticationUIState(
     val enableLoginButton = email.trim().isNotEmpty() && password.trim().isNotEmpty()
 }
 
-data class DrawerState(
-    val user: FirebaseUser? = null,
-    val theme: String? = "Dark"
-)
+data class DrawerState(val user: FirebaseUser? = null, val theme: String? = "Dark")
 
 data class NewAuthenticationUIState(
     val authenticationScreen: AuthenticationScreen = AuthenticationScreen.Login,

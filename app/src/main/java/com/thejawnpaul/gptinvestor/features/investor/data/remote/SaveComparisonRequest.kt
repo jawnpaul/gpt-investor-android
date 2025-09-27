@@ -4,13 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SaveComparisonRequest(
-    @SerialName("main") val mainTicker: String,
-    @SerialName("other") val otherTicker: String,
-    @SerialName("gemini_text") val geminiText: String
-)
+data class SaveComparisonRequest(@SerialName("main") val mainTicker: String, @SerialName("other") val otherTicker: String, @SerialName("gemini_text") val geminiText: String)
 
 @Serializable
-data class DefaultSaveResponse(
-    @SerialName("_id") val id: String
-)
+data class DefaultSaveResponse(@SerialName("_id") val id: String)

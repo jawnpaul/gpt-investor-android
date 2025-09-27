@@ -28,8 +28,8 @@ import com.thejawnpaul.gptinvestor.features.onboarding.presentation.OnboardingSc
 import com.thejawnpaul.gptinvestor.features.splash.AnimatedSplashScreen
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -63,8 +63,10 @@ class MainActivity : ComponentActivity() {
 
             // Navigate when deep link is available AND nav graph is ready
             LaunchedEffect(deepLinkRoute, isNavGraphReady) {
-                if (deepLinkRoute != null && isNavGraphReady &&
-                    isUserSignedIn == true && isFirstInstall == false
+                if (deepLinkRoute != null &&
+                    isNavGraphReady &&
+                    isUserSignedIn == true &&
+                    isFirstInstall == false
                 ) {
                     try {
                         val navigationRoute = getNavigationRouteFromDeepLink(deepLinkRoute!!)
@@ -173,20 +175,18 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun getNavigationRouteFromDeepLink(deepLink: String): String {
-        return when {
-            deepLink.contains("tidbit_detail_screen") -> {
-                val tidbitId = extractTidbitIdFromDeepLink(deepLink)
-                tidbitId?.let {
-                    Screen.TidbitDetailScreen.createRoute(tidbitId = it)
-                } ?: Screen.TidbitScreen.route
-            }
-            deepLink.contains("discover") -> {
-                Screen.DiscoverTabScreen.route
-            }
-            else -> {
-                Screen.HomeScreen.route
-            }
+    private fun getNavigationRouteFromDeepLink(deepLink: String): String = when {
+        deepLink.contains("tidbit_detail_screen") -> {
+            val tidbitId = extractTidbitIdFromDeepLink(deepLink)
+            tidbitId?.let {
+                Screen.TidbitDetailScreen.createRoute(tidbitId = it)
+            } ?: Screen.TidbitScreen.route
+        }
+        deepLink.contains("discover") -> {
+            Screen.DiscoverTabScreen.route
+        }
+        else -> {
+            Screen.HomeScreen.route
         }
     }
 

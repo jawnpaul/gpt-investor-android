@@ -11,8 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(private val authenticationRepository: AuthenticationRepository) :
-    ViewModel() {
+class SettingsViewModel @Inject constructor(private val authenticationRepository: AuthenticationRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsView())
     val uiState get() = _uiState

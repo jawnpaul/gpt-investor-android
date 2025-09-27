@@ -17,15 +17,14 @@ import com.thejawnpaul.gptinvestor.MainActivity
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class MyFirebaseMessagingService :
-    FirebaseMessagingService() {
+class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     @Inject
     lateinit var notificationRepository: NotificationRepository

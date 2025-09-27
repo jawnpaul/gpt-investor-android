@@ -35,7 +35,4 @@ data class CompanyEntity(
 }
 
 @Serializable
-data class PriceChange(
-    val change: Float,
-    val date: Long
-)
+data class PriceChange(val change: Float, val date: Long)

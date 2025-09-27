@@ -17,15 +17,15 @@ import com.thejawnpaul.gptinvestor.features.history.domain.usecases.GetAllHistor
 import com.thejawnpaul.gptinvestor.features.history.domain.usecases.GetSingleHistoryUseCase
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryConversationView
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryScreenView
-import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction.*
-import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenAction.*
+import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction.OnCopy
+import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenAction.OnGoToHistoryDetail
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
@@ -35,8 +35,7 @@ class HistoryViewModel @Inject constructor(
     private val getInputPromptUseCase: GetInputPromptUseCase,
     private val fedBackRepository: FeedbackRepository,
     private val modelsRepository: ModelsRepository
-) :
-    ViewModel() {
+) : ViewModel() {
 
     private val _historyScreenViewState = MutableStateFlow(HistoryScreenView())
     val historyScreenViewState get() = _historyScreenViewState
@@ -303,8 +302,7 @@ sealed interface HistoryScreenAction {
 
 sealed interface HistoryDetailEvent {
     data class GetHistory(val conversationId: Long) : HistoryDetailEvent
-    data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) :
-        HistoryDetailEvent
+    data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) : HistoryDetailEvent
 
     data class UpdateInputQuery(val input: String) : HistoryDetailEvent
     data object GetInputResponse : HistoryDetailEvent
@@ -312,8 +310,7 @@ sealed interface HistoryDetailEvent {
     data class CopyToClipboard(val text: String) : HistoryDetailEvent
     data class ModelChange(val model: AvailableModel) : HistoryDetailEvent
     data object JoinWaitlist : HistoryDetailEvent
-    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) :
-        HistoryDetailEvent
+    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : HistoryDetailEvent
 
     data class SelectWaitlistOption(val option: String) : HistoryDetailEvent
 }

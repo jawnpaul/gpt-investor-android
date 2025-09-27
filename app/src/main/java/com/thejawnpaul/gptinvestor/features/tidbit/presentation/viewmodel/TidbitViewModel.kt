@@ -10,7 +10,9 @@ import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.model.Tidbit
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.model.TidbitPresentation
-import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailAction.*
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailAction.OnGoBack
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailAction.OnOpenSource
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailAction.OnShare
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,10 +26,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class TidbitViewModel @Inject constructor(
-    private val repository: TidbitRepository,
-    private val savedStateHandle: SavedStateHandle
-) : ViewModel() {
+class TidbitViewModel @Inject constructor(private val repository: TidbitRepository, private val savedStateHandle: SavedStateHandle) : ViewModel() {
 
     private val tidbitId: String?
         get() = savedStateHandle.get<String>("tidbitId")
@@ -151,9 +150,54 @@ class TidbitViewModel @Inject constructor(
         }
     }
 
-    private fun mapTidbitToPresentation(tidbit: Tidbit): TidbitPresentation {
-        return when (tidbit.type) {
-            "text" -> TidbitPresentation.ArticlePresentation(
+    private fun mapTidbitToPresentation(tidbit: Tidbit): TidbitPresentation = when (tidbit.type) {
+        "text" -> TidbitPresentation.ArticlePresentation(
+            id = tidbit.id,
+            name = tidbit.title,
+            previewUrl = tidbit.previewUrl,
+            mediaUrl = tidbit.mediaUrl,
+            title = tidbit.title,
+            content = tidbit.content,
+            originalAuthor = tidbit.originalAuthor,
+            category = tidbit.category,
+            sourceUrl = tidbit.sourceUrl,
+            isBookmarked = tidbit.isBookmarked,
+            isLiked = tidbit.isLiked,
+            summary = tidbit.summary
+        )
+
+        "video" -> TidbitPresentation.VideoPresentation(
+            id = tidbit.id,
+            name = tidbit.title,
+            previewUrl = tidbit.previewUrl,
+            mediaUrl = tidbit.mediaUrl,
+            title = tidbit.title,
+            content = tidbit.content,
+            originalAuthor = tidbit.originalAuthor,
+            category = tidbit.category,
+            sourceUrl = tidbit.sourceUrl,
+            isBookmarked = tidbit.isBookmarked,
+            isLiked = tidbit.isLiked,
+            summary = tidbit.summary
+        )
+
+        "audio" -> TidbitPresentation.AudioPresentation(
+            id = tidbit.id,
+            name = tidbit.title,
+            previewUrl = tidbit.previewUrl,
+            mediaUrl = tidbit.mediaUrl,
+            title = tidbit.title,
+            content = tidbit.content,
+            originalAuthor = tidbit.originalAuthor,
+            category = tidbit.category,
+            sourceUrl = tidbit.sourceUrl,
+            isBookmarked = tidbit.isBookmarked,
+            isLiked = tidbit.isLiked,
+            summary = tidbit.summary
+        )
+
+        else -> {
+            TidbitPresentation.ArticlePresentation(
                 id = tidbit.id,
                 name = tidbit.title,
                 previewUrl = tidbit.previewUrl,
@@ -164,55 +208,8 @@ class TidbitViewModel @Inject constructor(
                 category = tidbit.category,
                 sourceUrl = tidbit.sourceUrl,
                 isBookmarked = tidbit.isBookmarked,
-                isLiked = tidbit.isLiked,
-                summary = tidbit.summary
+                isLiked = tidbit.isLiked
             )
-
-            "video" -> TidbitPresentation.VideoPresentation(
-                id = tidbit.id,
-                name = tidbit.title,
-                previewUrl = tidbit.previewUrl,
-                mediaUrl = tidbit.mediaUrl,
-                title = tidbit.title,
-                content = tidbit.content,
-                originalAuthor = tidbit.originalAuthor,
-                category = tidbit.category,
-                sourceUrl = tidbit.sourceUrl,
-                isBookmarked = tidbit.isBookmarked,
-                isLiked = tidbit.isLiked,
-                summary = tidbit.summary
-            )
-
-            "audio" -> TidbitPresentation.AudioPresentation(
-                id = tidbit.id,
-                name = tidbit.title,
-                previewUrl = tidbit.previewUrl,
-                mediaUrl = tidbit.mediaUrl,
-                title = tidbit.title,
-                content = tidbit.content,
-                originalAuthor = tidbit.originalAuthor,
-                category = tidbit.category,
-                sourceUrl = tidbit.sourceUrl,
-                isBookmarked = tidbit.isBookmarked,
-                isLiked = tidbit.isLiked,
-                summary = tidbit.summary
-            )
-
-            else -> {
-                TidbitPresentation.ArticlePresentation(
-                    id = tidbit.id,
-                    name = tidbit.title,
-                    previewUrl = tidbit.previewUrl,
-                    mediaUrl = tidbit.mediaUrl,
-                    title = tidbit.title,
-                    content = tidbit.content,
-                    originalAuthor = tidbit.originalAuthor,
-                    category = tidbit.category,
-                    sourceUrl = tidbit.sourceUrl,
-                    isBookmarked = tidbit.isBookmarked,
-                    isLiked = tidbit.isLiked
-                )
-            }
         }
     }
 
@@ -339,11 +336,7 @@ class TidbitViewModel @Inject constructor(
     }
 }
 
-data class TidbitDetailState(
-    val id: String = "",
-    val isLoading: Boolean = false,
-    val presentation: TidbitPresentation? = null
-)
+data class TidbitDetailState(val id: String = "", val isLoading: Boolean = false, val presentation: TidbitPresentation? = null)
 
 data class TidbitScreenState(
     val options: List<SectorInput> = listOf(

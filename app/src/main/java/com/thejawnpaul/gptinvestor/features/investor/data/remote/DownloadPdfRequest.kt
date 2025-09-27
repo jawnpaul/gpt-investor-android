@@ -22,6 +22,4 @@ data class DownloadPdfRequest(
 )
 
 @Serializable
-data class DownloadPdfResponse(
-    val url: String
-)
+data class DownloadPdfResponse(val url: String)

@@ -15,7 +15,9 @@ import javax.inject.Inject
 
 @OptIn(KoinExperimentalAPI::class)
 @HiltAndroidApp
-class GPTInvestorApplication : Application(), KoinStartup {
+class GPTInvestorApplication :
+    Application(),
+    KoinStartup {
 
     override fun onKoinStartup(): KoinConfiguration = koinConfiguration {
         androidLogger()

@@ -9,16 +9,11 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
 
-class TidbitPagingSource @Inject constructor(
-    private val apiService: ApiService,
-    private val preferences: GPTInvestorPreferences,
-    private val tidbitType: TidbitType
-) : PagingSource<Int, Tidbit>() {
-    override fun getRefreshKey(state: PagingState<Int, Tidbit>): Int? {
-        return state.anchorPosition?.let { anchorPosition ->
-            state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
-                ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
-        }
+class TidbitPagingSource @Inject constructor(private val apiService: ApiService, private val preferences: GPTInvestorPreferences, private val tidbitType: TidbitType) :
+    PagingSource<Int, Tidbit>() {
+    override fun getRefreshKey(state: PagingState<Int, Tidbit>): Int? = state.anchorPosition?.let { anchorPosition ->
+        state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
+            ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
     }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Tidbit> {
@@ -27,49 +22,48 @@ class TidbitPagingSource @Inject constructor(
             val pageSize = PAGE_SIZE
             val userId = preferences.userId.first() ?: ""
 
-            val response = when (tidbitType) {
-                TidbitType.ALL -> apiService.getAllTidbit(page, pageSize, userId)
-                TidbitType.TRENDING -> apiService.getTrendingTidbit(page, pageSize, userId)
-                TidbitType.LATEST -> apiService.getLatestTidbits(page, pageSize, userId)
-                TidbitType.SAVED -> apiService.getSavedTidbits(page, pageSize, userId)
-            }
-
-            val tidbits = response.data.map { remote ->
-                with(remote) {
-                    Tidbit(
-                        id = id,
-                        previewUrl = previewUrl,
-                        title = title,
-                        content = content,
-                        originalAuthor = originalAuthor,
-                        category = category,
-                        mediaUrl = mediaUrl,
-                        sourceUrl = source,
-                        type = type,
-                        isLiked = isLiked ?: false,
-                        isBookmarked = isBookmarked ?: false,
-                        summary = summary
-                    )
-                }
-            }
-
-            val nextKey = if (tidbits.isEmpty() || tidbits.size < pageSize) {
-                null
-            } else {
-                page + 1
-            }
-
-            val prevKey = if (page == 1) null else page - 1
-
-            LoadResult.Page(
-                data = tidbits,
-                prevKey = prevKey,
-                nextKey = nextKey
-            )
-        } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
-            LoadResult.Error(e)
+        val response = when (tidbitType) {
+            TidbitType.ALL -> apiService.getAllTidbit(page, pageSize, userId)
+            TidbitType.TRENDING -> apiService.getTrendingTidbit(page, pageSize, userId)
+            TidbitType.LATEST -> apiService.getLatestTidbits(page, pageSize, userId)
+            TidbitType.SAVED -> apiService.getSavedTidbits(page, pageSize, userId)
         }
+
+        val tidbits = response.data.map { remote ->
+            with(remote) {
+                Tidbit(
+                    id = id,
+                    previewUrl = previewUrl,
+                    title = title,
+                    content = content,
+                    originalAuthor = originalAuthor,
+                    category = category,
+                    mediaUrl = mediaUrl,
+                    sourceUrl = source,
+                    type = type,
+                    isLiked = isLiked ?: false,
+                    isBookmarked = isBookmarked ?: false,
+                    summary = summary
+                )
+            }
+        }
+
+        val nextKey = if (tidbits.isEmpty() || tidbits.size < pageSize) {
+            null
+        } else {
+            page + 1
+        }
+
+        val prevKey = if (page == 1) null else page - 1
+
+        LoadResult.Page(
+            data = tidbits,
+            prevKey = prevKey,
+            nextKey = nextKey
+        )
+    } catch (e: Exception) {
+        Timber.e(e.stackTraceToString())
+        LoadResult.Error(e)
     }
 
     companion object {

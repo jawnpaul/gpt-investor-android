@@ -4,13 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RegisterTokenResponse(
-    val message: String? = null,
-    val error: String? = null
-)
+data class RegisterTokenResponse(val message: String? = null, val error: String? = null)
 
 @Serializable
-data class RegisterTokenRequest(
-    val token: String? = null,
-    @SerialName("user_id") val userId: String? = null
-)
+data class RegisterTokenRequest(val token: String? = null, @SerialName("user_id") val userId: String? = null)

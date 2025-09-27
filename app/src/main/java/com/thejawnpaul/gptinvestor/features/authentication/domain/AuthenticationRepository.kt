@@ -16,7 +16,6 @@ import com.thejawnpaul.gptinvestor.BuildConfig
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -24,6 +23,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
 interface AuthenticationRepository {
     val currentUser: FirebaseUser?
@@ -41,14 +41,11 @@ class AuthenticationRepositoryImpl @Inject constructor(
     private val analyticsLogger: AnalyticsLogger,
     private val gptInvestorPreferences: GPTInvestorPreferences,
     private val tokenSyncManager: TokenSyncManager
-) :
-    AuthenticationRepository {
+) : AuthenticationRepository {
     override val currentUser: FirebaseUser?
         get() = auth.currentUser
 
-    private fun getCredentialManager(activityContext: Context): CredentialManager {
-        return CredentialManager.create(activityContext)
-    }
+    private fun getCredentialManager(activityContext: Context): CredentialManager = CredentialManager.create(activityContext)
 
     override suspend fun signUp(activityContext: Context): Flow<Boolean> = callbackFlow {
         try {

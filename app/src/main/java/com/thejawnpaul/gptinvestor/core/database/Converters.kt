@@ -17,15 +17,12 @@ class Converters {
         explicitNulls = false
         prettyPrint = true
     }
-    @TypeConverter
-    fun stringToPriceChange(string: String): PriceChange? {
-        return json.decodeFromString(string)
-    }
 
     @TypeConverter
-    fun priceChangeToString(priceChange: PriceChange): String {
-        return json.encodeToString(priceChange)
-    }
+    fun stringToPriceChange(string: String): PriceChange? = json.decodeFromString(string)
+
+    @TypeConverter
+    fun priceChangeToString(priceChange: PriceChange): String = json.encodeToString(priceChange)
 
     // CompanyDetailRemoteResponse converters
     @TypeConverter

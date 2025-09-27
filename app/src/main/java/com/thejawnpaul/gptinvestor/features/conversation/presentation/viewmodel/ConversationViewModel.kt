@@ -18,16 +18,15 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefa
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefaultPromptsUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.state.ConversationView
-import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction.*
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction.OnCopy
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import kotlin.onSuccess
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltViewModel
 class ConversationViewModel @Inject constructor(
@@ -36,8 +35,7 @@ class ConversationViewModel @Inject constructor(
     private val getInputPromptUseCase: GetInputPromptUseCase,
     private val fedBackRepository: FeedbackRepository,
     private val modelsRepository: ModelsRepository
-) :
-    ViewModel() {
+) : ViewModel() {
 
     private val conversationViewMutableStateFlow = MutableStateFlow(ConversationView())
     val conversation get() = conversationViewMutableStateFlow
@@ -299,8 +297,7 @@ sealed interface ConversationEvent {
 
     data class CopyToClipboard(val text: String) : ConversationEvent
 
-    data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) :
-        ConversationEvent
+    data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) : ConversationEvent
 
     data class UpdateInputQuery(val query: String) : ConversationEvent
 

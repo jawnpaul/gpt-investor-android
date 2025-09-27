@@ -10,13 +10,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
-class ShareTopPickUseCase @Inject constructor(
-    @IoDispatcher private val dispatcher: CoroutineDispatcher,
-    coroutineScope: CoroutineScope,
-    private val repository: ITopPickRepository
-) : BaseUseCase<String, String>(coroutineScope, dispatcher) {
+class ShareTopPickUseCase @Inject constructor(@IoDispatcher private val dispatcher: CoroutineDispatcher, coroutineScope: CoroutineScope, private val repository: ITopPickRepository) :
+    BaseUseCase<String, String>(coroutineScope, dispatcher) {
 
-    override suspend fun run(params: String): Flow<Either<Failure, String>> {
-        return repository.shareTopPick(params)
-    }
+    override suspend fun run(params: String): Flow<Either<Failure, String>> = repository.shareTopPick(params)
 }

@@ -21,7 +21,6 @@ object ApiModule {
     fun provideApi(ktorfit: Ktorfit): ApiService = ktorfit.createApiService()
 }
 
-
 @Module
 @InstallIn(SingletonComponent::class)
 object KoinHiltBridgeModule : KoinComponent {

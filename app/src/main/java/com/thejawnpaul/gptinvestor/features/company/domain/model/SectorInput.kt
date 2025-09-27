@@ -8,9 +8,5 @@ sealed interface SectorInput {
             get() = false
     }
 
-    data class CustomSector(
-        val sectorName: String,
-        val sectorKey: String,
-        override val hasImage: Boolean = false
-    ) : SectorInput
+    data class CustomSector(val sectorName: String, val sectorKey: String, override val hasImage: Boolean = false) : SectorInput
 }

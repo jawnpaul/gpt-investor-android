@@ -4,11 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GetEntityRequest(
-    val query: String
-)
+data class GetEntityRequest(val query: String)
 
 @Serializable
-data class GetEntityResponse(
-    @SerialName("entity") val entityList: List<String> = emptyList()
-)
+data class GetEntityResponse(@SerialName("entity") val entityList: List<String> = emptyList())

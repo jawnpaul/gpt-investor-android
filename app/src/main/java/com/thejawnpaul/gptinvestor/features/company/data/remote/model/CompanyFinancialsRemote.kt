@@ -58,20 +58,10 @@ data class CompanyNews(
 }
 
 @Serializable
-data class NewsThumbNail(
-    val resolutions: List<NewsResolution?> = emptyList()
-)
+data class NewsThumbNail(val resolutions: List<NewsResolution?> = emptyList())
 
 @Serializable
-data class NewsResolution(
-    val height: Int,
-    val tag: String,
-    val url: String,
-    val width: Int
-)
+data class NewsResolution(val height: Int, val tag: String, val url: String, val width: Int)
 
 @Serializable
-data class CompanyFinancialsRequest(
-    val ticker: String,
-    val years: Int
-)
+data class CompanyFinancialsRequest(val ticker: String, val years: Int)

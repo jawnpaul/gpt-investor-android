@@ -10,10 +10,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-abstract class BaseUseCase<in Params, out Type>(
-    private val coroutineScope: CoroutineScope,
-    private val dispatcher: CoroutineDispatcher
-)
+abstract class BaseUseCase<in Params, out Type>(private val coroutineScope: CoroutineScope, private val dispatcher: CoroutineDispatcher)
     where Type : Any {
 
     abstract suspend fun run(params: Params): Flow<Either<Failure, Type>>

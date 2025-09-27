@@ -15,9 +15,7 @@ object ImageModule {
 
     @Provides
     @Singleton
-    fun provideImageLoader(@ApplicationContext context: Context): ImageLoader {
-        return ImageLoader.Builder(context)
-            .crossfade(true)
-            .build()
-    }
+    fun provideImageLoader(@ApplicationContext context: Context): ImageLoader = ImageLoader.Builder(context)
+        .crossfade(true)
+        .build()
 }

@@ -33,16 +33,14 @@ data class MessageEntity(
     @ColumnInfo(defaultValue = "0")
     val feedbackStatus: Int = 0
 ) {
-    fun toGenAiMessage(): GenAiMessage {
-        return if (companyDetailRemoteResponse != null) {
-            GenAiEntityMessage(id = messageId, entity = companyDetailRemoteResponse)
-        } else {
-            GenAiTextMessage(
-                id = messageId,
-                query = query.toString(),
-                response = response.toString(),
-                feedbackStatus = feedbackStatus
-            )
-        }
+    fun toGenAiMessage(): GenAiMessage = if (companyDetailRemoteResponse != null) {
+        GenAiEntityMessage(id = messageId, entity = companyDetailRemoteResponse)
+    } else {
+        GenAiTextMessage(
+            id = messageId,
+            query = query.toString(),
+            response = response.toString(),
+            feedbackStatus = feedbackStatus
+        )
     }
 }

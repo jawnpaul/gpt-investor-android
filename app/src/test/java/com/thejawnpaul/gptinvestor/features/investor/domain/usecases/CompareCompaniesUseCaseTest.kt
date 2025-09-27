@@ -46,7 +46,8 @@ class CompareCompaniesUseCaseTest {
                 "",
                 ""
             ),
-            "", ""
+            "",
+            ""
         )
         useCase = CompareCompaniesUseCase(dispatcher, scope, repository)
     }

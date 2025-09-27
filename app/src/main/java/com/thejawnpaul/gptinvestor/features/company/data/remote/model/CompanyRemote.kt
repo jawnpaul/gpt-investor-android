@@ -34,9 +34,7 @@ data class CompanyRemote(
 }
 
 @Serializable
-data class CompanyDetailRemoteRequest(
-    val ticker: String
-)
+data class CompanyDetailRemoteRequest(val ticker: String)
 
 @Serializable
 data class CompanyDetailRemoteResponse(
@@ -72,8 +70,4 @@ data class HistoricalData(
 data class CompanyPriceRequest(val tickers: List<String>)
 
 @Serializable
-data class CompanyPriceResponse(
-    val change: Float,
-    val price: Float,
-    val ticker: String
-)
+data class CompanyPriceResponse(val change: Float, val price: Float, val ticker: String)

@@ -9,10 +9,7 @@ sealed interface AvailableModel {
     val isUserOnWaitlist: Boolean?
 }
 
-data class DefaultModel(
-    override val isDefault: Boolean = true,
-    override val modelId: String = "gemini-2.0-flash"
-) : AvailableModel {
+data class DefaultModel(override val isDefault: Boolean = true, override val modelId: String = "gemini-2.0-flash") : AvailableModel {
     override val modelTitle: String
         get() = "Quantum Basic"
     override val modelSubtitle: String

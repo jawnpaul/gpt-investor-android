@@ -520,59 +520,53 @@ class ConversationRepository @Inject constructor(
         }
     }
 
-    private suspend fun getSuggestedPrompts(conversationId: Long): List<Suggestion> {
-        return try {
-            val result = mutableListOf<Suggestion>()
-            val parser = SuggestionParser()
+    private suspend fun getSuggestedPrompts(conversationId: Long): List<Suggestion> = try {
+        val result = mutableListOf<Suggestion>()
+        val parser = SuggestionParser()
 
-            val conversation =
-                getConversation(ConversationPrompt(conversationId = conversationId, query = ""))
-            val chat = generativeModel.startChat(history = getHistory(conversation.id))
-            val response = chat.sendMessage(prompt = Constants.SUGGESTION_PROMPT)
-            response.text?.let {
-                val text = it.trimIndent().removeSurrounding("```").removePrefix("json")
-                val suggestions = parser.parseSuggestions(text)
-                suggestions?.let { suggestionsResponse ->
-                    result.addAll(suggestionsResponse.suggestions)
-                }
+        val conversation =
+            getConversation(ConversationPrompt(conversationId = conversationId, query = ""))
+        val chat = generativeModel.startChat(history = getHistory(conversation.id))
+        val response = chat.sendMessage(prompt = Constants.SUGGESTION_PROMPT)
+        response.text?.let {
+            val text = it.trimIndent().removeSurrounding("```").removePrefix("json")
+            val suggestions = parser.parseSuggestions(text)
+            suggestions?.let { suggestionsResponse ->
+                result.addAll(suggestionsResponse.suggestions)
             }
-            result
-        } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
-            emptyList()
         }
+        result
+    } catch (e: Exception) {
+        Timber.e(e.stackTraceToString())
+        emptyList()
     }
 
-    private suspend fun containsEntity(input: String): List<String> {
-        return apiService.getEntity(GetEntityRequest(query = input)).entityList
-    }
+    private suspend fun containsEntity(input: String): List<String> = apiService.getEntity(GetEntityRequest(query = input)).entityList
 
-    private suspend fun getConversation(conversation: ConversationPrompt): StructuredConversation {
-        return if (conversationDao.getSingleConversation(conversation.conversationId) != null) {
-            val existingConversation =
-                conversationDao.getSingleConversation(conversation.conversationId)!!
-            val messages = messageDao.getMessagesForConversation(conversation.conversationId)
-                .map { it.toGenAiMessage() }.toMutableList()
-            StructuredConversation(
-                id = existingConversation.conversationId,
-                title = existingConversation.title,
-                messageList = messages
-            )
-        } else {
-            // create new conversation
-            val id = conversationDao.insertConversation(
-                ConversationEntity(
-                    title = "Default title",
-                    createdAt = System.currentTimeMillis()
-                )
-            )
-
-            StructuredConversation(
-                id = id,
+    private suspend fun getConversation(conversation: ConversationPrompt): StructuredConversation = if (conversationDao.getSingleConversation(conversation.conversationId) != null) {
+        val existingConversation =
+            conversationDao.getSingleConversation(conversation.conversationId)!!
+        val messages = messageDao.getMessagesForConversation(conversation.conversationId)
+            .map { it.toGenAiMessage() }.toMutableList()
+        StructuredConversation(
+            id = existingConversation.conversationId,
+            title = existingConversation.title,
+            messageList = messages
+        )
+    } else {
+        // create new conversation
+        val id = conversationDao.insertConversation(
+            ConversationEntity(
                 title = "Default title",
-                messageList = mutableListOf()
+                createdAt = System.currentTimeMillis()
             )
-        }
+        )
+
+        StructuredConversation(
+            id = id,
+            title = "Default title",
+            messageList = mutableListOf()
+        )
     }
 
     private suspend fun getHistory(conversationId: Long): List<Content> {
@@ -597,32 +591,28 @@ class ConversationRepository @Inject constructor(
         return history
     }
 
-    private suspend fun getCompanyDetail(ticker: String): CompanyDetailRemoteResponse {
-        return apiService.getCompanyInfo(CompanyDetailRemoteRequest(ticker = ticker))
-    }
+    private suspend fun getCompanyDetail(ticker: String): CompanyDetailRemoteResponse = apiService.getCompanyInfo(CompanyDetailRemoteRequest(ticker = ticker))
 
-    private suspend fun getConversationTitle(conversationId: Long): String? {
-        return try {
-            val parser = ConversationTitleParser()
-            val conversationEntity = conversationDao.getSingleConversation(conversationId)
-            conversationEntity?.let { conversation ->
-                if (conversation.title == "Default title" || conversation.title.isEmpty()) {
-                    val history = getHistory(conversationId)
+    private suspend fun getConversationTitle(conversationId: Long): String? = try {
+        val parser = ConversationTitleParser()
+        val conversationEntity = conversationDao.getSingleConversation(conversationId)
+        conversationEntity?.let { conversation ->
+            if (conversation.title == "Default title" || conversation.title.isEmpty()) {
+                val history = getHistory(conversationId)
 
-                    val chat = generativeModel.startChat(history = history)
-                    val response = chat.sendMessage(prompt = Constants.TITLE_PROMPT)
-                    response.text?.let {
-                        val text = it.trimIndent().removeSurrounding("```").removePrefix("json")
-                        parser.parseTitle(text)?.title
-                    }
-                } else {
-                    null
+                val chat = generativeModel.startChat(history = history)
+                val response = chat.sendMessage(prompt = Constants.TITLE_PROMPT)
+                response.text?.let {
+                    val text = it.trimIndent().removeSurrounding("```").removePrefix("json")
+                    parser.parseTitle(text)?.title
                 }
+            } else {
+                null
             }
-        } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
-            null
         }
+    } catch (e: Exception) {
+        Timber.e(e.stackTraceToString())
+        null
     }
 
     private suspend fun isRateLimitExceeded(): Boolean = rateLimitMutex.withLock {

@@ -33,8 +33,4 @@ data class ConversationWithMessages(
     GROUP BY c.conversationId
 """
 )
-data class ConversationWithLastMessage(
-    val conversationId: Long,
-    val title: String = "",
-    val timestamp: Long = -1
-)
+data class ConversationWithLastMessage(val conversationId: Long, val title: String = "", val timestamp: Long = -1)

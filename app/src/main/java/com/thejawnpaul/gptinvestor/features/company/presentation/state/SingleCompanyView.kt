@@ -29,10 +29,4 @@ data class SingleCompanyView(
     val enableSend = inputQuery.trim().isNotEmpty()
 }
 
-data class CompanyHeaderPresentation(
-    val companyTicker: String = "",
-    val companyLogo: String = "",
-    val price: Float = 0f,
-    val percentageChange: Float = 0f,
-    val companyName: String = ""
-)
+data class CompanyHeaderPresentation(val companyTicker: String = "", val companyLogo: String = "", val price: Float = 0f, val percentageChange: Float = 0f, val companyName: String = "")

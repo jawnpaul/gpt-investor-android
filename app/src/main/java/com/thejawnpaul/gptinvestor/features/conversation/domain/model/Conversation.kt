@@ -18,23 +18,12 @@ data class StructuredConversation(
 
 data class UnStructuredConversation(override val id: Long) : Conversation
 
-data class DefaultConversation(
-    override val id: Long = 0,
-    val prompts: List<DefaultPrompt> = emptyList()
-) : Conversation
+data class DefaultConversation(override val id: Long = 0, val prompts: List<DefaultPrompt> = emptyList()) : Conversation
 
-data class CompanyDetailDefaultConversation(
-    override val id: Long,
-    val response: CompanyDetailRemoteResponse? = null
-) : Conversation
+data class CompanyDetailDefaultConversation(override val id: Long, val response: CompanyDetailRemoteResponse? = null) : Conversation
 
-data class GenAiTextMessage(
-    override val id: Long = 0,
-    val query: String,
-    val feedbackStatus: Int,
-    override val response: String? = null,
-    override val loading: Boolean = false
-) : GenAiMessage
+data class GenAiTextMessage(override val id: Long = 0, val query: String, val feedbackStatus: Int, override val response: String? = null, override val loading: Boolean = false) :
+    GenAiMessage
 
 sealed interface GenAiMessage {
     val id: Long
@@ -42,11 +31,7 @@ sealed interface GenAiMessage {
     val loading: Boolean
 }
 
-data class GenAiEntityMessage(
-    override val id: Long = 1,
-    val entity: CompanyDetailRemoteResponse? = null
-) :
-    GenAiMessage {
+data class GenAiEntityMessage(override val id: Long = 1, val entity: CompanyDetailRemoteResponse? = null) : GenAiMessage {
     override val response: String
         get() = ""
     override val loading: Boolean

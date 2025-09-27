@@ -94,41 +94,22 @@ interface ApiService {
     suspend fun addUserToWaitlist(@Body request: AddToWaitlistRequest): AddToWaitlistResponse
 
     @GET("v1/tidbit/all-tidbit")
-    suspend fun getAllTidbit(
-        @Query("page") page: Int = 1,
-        @Query("page_size") pageSize: Int = 10,
-        @Query("user_id") userId: String
-    ): AllTidbitResponse
+    suspend fun getAllTidbit(@Query("page") page: Int = 1, @Query("page_size") pageSize: Int = 10, @Query("user_id") userId: String): AllTidbitResponse
 
     @GET("v1/tidbit/latest-tidbits")
-    suspend fun getLatestTidbits(
-        @Query("page") page: Int = 1,
-        @Query("page_size") pageSize: Int = 10,
-        @Query("user_id") userId: String
-    ): AllTidbitResponse
+    suspend fun getLatestTidbits(@Query("page") page: Int = 1, @Query("page_size") pageSize: Int = 10, @Query("user_id") userId: String): AllTidbitResponse
 
     @GET("v1/tidbit/trending-tidbits")
-    suspend fun getTrendingTidbit(
-        @Query("page") page: Int = 1,
-        @Query("page_size") pageSize: Int = 10,
-        @Query("user_id") userId: String
-    ): AllTidbitResponse
+    suspend fun getTrendingTidbit(@Query("page") page: Int = 1, @Query("page_size") pageSize: Int = 10, @Query("user_id") userId: String): AllTidbitResponse
 
     @GET("v1/tidbit/bookmarked-tidbits")
-    suspend fun getSavedTidbits(
-        @Query("page") page: Int = 1,
-        @Query("page_size") pageSize: Int = 10,
-        @Query("user_id") userId: String
-    ): AllTidbitResponse
+    suspend fun getSavedTidbits(@Query("page") page: Int = 1, @Query("page_size") pageSize: Int = 10, @Query("user_id") userId: String): AllTidbitResponse
 
     @GET("v1/tidbit/today-tidbit")
     suspend fun getTodayTidbit(@Query("user_id") userId: String): TidbitRemote
 
     @GET("v1/tidbit/single-tidbit")
-    suspend fun getSingleTidbit(
-        @Query("id") id: String,
-        @Query("user_id") userId: String
-    ): TidbitRemote
+    suspend fun getSingleTidbit(@Query("id") id: String, @Query("user_id") userId: String): TidbitRemote
 
     @Headers("Content-Type: application/json")
     @POST("v1/tidbit/like-tidbit")

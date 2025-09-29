@@ -2,16 +2,17 @@ package com.thejawnpaul.gptinvestor.utils
 
 import com.google.common.io.Resources
 import com.thejawnpaul.gptinvestor.core.api.ApiService
+import com.thejawnpaul.gptinvestor.core.api.createApiService
+import de.jensklingenberg.ktorfit.Ktorfit
+import io.ktor.client.HttpClient
 import java.io.File
 import java.net.URL
-import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockWebServer
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
 
-private val okHttpClient: OkHttpClient
-    get() = OkHttpClient.Builder()
-        .build()
+private val okHttpClient: HttpClient
+    get() = HttpClient {
+
+    }
 
 internal fun getJson(path: String): String {
     val uri: URL = Resources.getResource(path)
@@ -19,9 +20,8 @@ internal fun getJson(path: String): String {
     return String(file.readBytes())
 }
 
-internal fun makeTestApiService(mockWebServer: MockWebServer): ApiService = Retrofit.Builder()
-    .baseUrl(mockWebServer.url("/"))
-    .client(okHttpClient)
-    .addConverterFactory(MoshiConverterFactory.create())
+internal fun makeTestApiService(mockWebServer: MockWebServer): ApiService = Ktorfit.Builder()
+    .baseUrl(mockWebServer.url("/").toString())
+    .httpClient(okHttpClient)
     .build()
-    .create(ApiService::class.java)
+    .createApiService()

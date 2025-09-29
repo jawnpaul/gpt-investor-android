@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.ktorfit)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.native.cocoapods)
     alias(libs.plugins.ksp)
 }
 
@@ -22,6 +23,17 @@ kotlin {
     iosX64()
     iosArm64()
     iosSimulatorArm64()
+
+    cocoapods {
+        version = "1.0.0"
+        summary = "Remote module for GPT Investor"
+        homepage = "https://gptinvestorapp.com"
+        ios.deploymentTarget = libs.versions.ios.deployment.target.get()
+        framework {
+            baseName = "RemoteTest"
+            isStatic = true
+        }
+    }
 
     sourceSets {
 
@@ -49,7 +61,6 @@ android {
 
 ksp {
     arg("KOIN_CONFIG_CHECK", "true")
-    arg("KOIN_DEFAULT_MODULE","true")
 }
 
 dependencies {

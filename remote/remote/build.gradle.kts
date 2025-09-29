@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.buildkonfig)
     alias(libs.plugins.ktorfit)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.native.cocoapods)
     alias(libs.plugins.ksp)
 }
 
@@ -25,6 +26,17 @@ kotlin {
     iosX64()
     iosArm64()
     iosSimulatorArm64()
+
+    cocoapods {
+        version = "1.0.0"
+        summary = "Remote module for GPT Investor"
+        homepage = "https://gptinvestorapp.com"
+        ios.deploymentTarget = libs.versions.ios.deployment.target.get()
+        framework {
+            baseName = "Remote"
+            isStatic = true
+        }
+    }
 
     sourceSets {
 
@@ -47,7 +59,6 @@ kotlin {
 
 buildkonfig {
     packageName = "com.thejawnpaul.gptinvestor.remote"
-//    objectName = "BuildConfig"
     defaultConfigs {
         val localProperties = Properties()
         localProperties.load(project.rootProject.file("local.properties").reader())
@@ -75,10 +86,6 @@ android {
 }
 
 dependencies {
-//    implementation(libs.dagger.hilt)
-//    implementation(libs.retrofit)
-//    implementation(libs.moshi.converter)
-//    ksp(libs.dagger.hilt.compiler)
     add("kspCommonMainMetadata", libs.koin.compiler)
     add("kspAndroid", libs.koin.compiler)
     add("kspIosSimulatorArm64", libs.koin.compiler)
@@ -95,9 +102,3 @@ dependencies {
 ksp {
     arg("KOIN_CONFIG_CHECK", "true")
 }
-
-/*project.tasks.withType(KotlinCompilationTask::class.java).configureEach {
-    if(name != "kspCommonMainKotlinMetadata") {
-        dependsOn("kspCommonMainKotlinMetadata")
-    }
-}*/

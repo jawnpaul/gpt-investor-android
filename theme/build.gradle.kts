@@ -1,22 +1,25 @@
 @file:OptIn(ExperimentalKotlinGradlePluginApi::class)
+@file:Suppress("UnstableApiUsage")
 
+import com.android.build.api.dsl.androidLibrary
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.kotlin.multiplatform)
 }
 
 kotlin {
-    androidTarget {
+    androidLibrary {
+        namespace = "com.thejawnpaul.gptinvestor.theme"
+        compileSdk = 36
+        minSdk = 24
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
-        instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
     }
 
 
@@ -39,19 +42,4 @@ kotlin {
 
         iosMain.dependencies {}
     }
-}
-android {
-    namespace = "com.thejawnpaul.gptinvestor.theme"
-    compileSdk = 36
-    defaultConfig {
-        minSdk = 24
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-}
-
-dependencies {
-    debugImplementation(compose.uiTooling)
 }

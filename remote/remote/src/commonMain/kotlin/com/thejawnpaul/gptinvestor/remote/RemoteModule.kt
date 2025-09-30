@@ -34,7 +34,7 @@ object RemoteModule {
             }
             install(Logging) {
                 logger = Logger.DEFAULT
-                level = if (isDebug) LogLevel.ALL else LogLevel.NONE
+                level = if (BuildKonfig.DEBUG) LogLevel.ALL else LogLevel.NONE
             }
             install(Auth) {
                 bearer {

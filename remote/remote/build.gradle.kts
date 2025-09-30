@@ -1,9 +1,13 @@
+@file:Suppress("UnstableApiUsage")
+
+import com.android.build.api.dsl.androidLibrary
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN
 import java.util.Properties
 
 plugins {
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.buildkonfig)
     alias(libs.plugins.ktorfit)
@@ -13,7 +17,18 @@ plugins {
 }
 
 kotlin {
-    androidTarget {
+    androidLibrary {
+        namespace = "com.thejawnpaul.gptinvestor.remote"
+        compileSdk = 36
+        minSdk = 24
+        localDependencySelection {
+            selectBuildTypeFrom.set(listOf("debug", "release"))
+        }
+        packaging {
+            resources {
+                excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            }
+        }
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
@@ -59,30 +74,19 @@ kotlin {
 
 buildkonfig {
     packageName = "com.thejawnpaul.gptinvestor.remote"
+    val localProperties = Properties()
+    localProperties.load(project.rootProject.file("local.properties").reader())
     defaultConfigs {
-        val localProperties = Properties()
-        localProperties.load(project.rootProject.file("local.properties").reader())
         val baseUrl: String = localProperties.getProperty("BASE_URL") ?: ""
         val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
+        buildConfigField(BOOLEAN, "DEBUG", "true")
         buildConfigField(STRING, "BASE_URL", baseUrl)
         buildConfigField(STRING, "ACCESS_TOKEN", accessToken)
     }
-}
 
-android {
-    namespace = "com.thejawnpaul.gptinvestor.remote"
-    compileSdk = 36
-    defaultConfig.minSdk = 24
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
+    defaultConfigs("release") {
+        buildConfigField(BOOLEAN, "DEBUG", "false")
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    buildFeatures { buildConfig = true }
 }
 
 dependencies {

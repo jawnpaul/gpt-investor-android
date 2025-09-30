@@ -1,7 +1,8 @@
+@file:Suppress("UnstableApiUsage")
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.ktorfit)
     alias(libs.plugins.kotlin.serialization)
@@ -10,7 +11,10 @@ plugins {
 }
 
 kotlin {
-    androidTarget {
+    androidLibrary {
+        namespace = "com.thejawnpaul.gptinvestor"
+        compileSdk = 36
+        minSdk = 24
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
@@ -46,16 +50,6 @@ kotlin {
             implementation(libs.ktor.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
         }
-    }
-}
-
-android {
-    namespace = "com.thejawnpaul.gptinvestor"
-    compileSdk = 36
-    defaultConfig.minSdk = 24
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 

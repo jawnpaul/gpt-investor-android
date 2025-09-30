@@ -23,5 +23,6 @@ rootProject.name = "GPTInvestor"
 include(":app")
 include(":remote:remote")
 include(":remote:remotetest")
-include(":analytics")
+//include(":analytics")
 include(":theme")
+include(":analytics")

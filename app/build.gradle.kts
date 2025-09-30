@@ -181,7 +181,7 @@ dependencies {
     implementation(libs.firebase.ai)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.config)
-    implementation(project(":analytics"))
+//    implementation(project(":analytics"))
     implementation(project(":theme"))
     implementation(libs.datastore.preferences)
     implementation(libs.androidx.credentials)

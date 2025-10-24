@@ -78,7 +78,7 @@ class TidbitPagingSource @Inject constructor(
         }
     }
 
-    companion object{
+    companion object {
         const val PAGE_SIZE = 10
     }
 }

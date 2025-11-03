@@ -24,7 +24,7 @@ class TidbitPagingSource @Inject constructor(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Tidbit> {
         return try {
             val page = params.key ?: 1
-            val pageSize = params.loadSize
+            val pageSize = PAGE_SIZE
             val userId = preferences.userId.first() ?: ""
 
             val response = when (tidbitType) {
@@ -76,5 +76,9 @@ class TidbitPagingSource @Inject constructor(
             Timber.e(e.stackTraceToString())
             LoadResult.Error(e)
         }
+    }
+
+    companion object {
+        const val PAGE_SIZE = 20
     }
 }

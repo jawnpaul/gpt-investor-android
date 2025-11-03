@@ -641,66 +641,59 @@ class ConversationRepository @Inject constructor(
         val isUserSignedIn = auth.currentUser != null
 
         try {
-            val lastDate = gptInvestorPreferences.queryLastDate.first() ?: todayString
-            val usageCount = (gptInvestorPreferences.queryUsageCount.first() ?: 0).coerceAtLeast(0)
+            val lastDate = gptInvestorPreferences.queryLastDate.first()
+            val usageCount = gptInvestorPreferences.queryUsageCount.first() ?: 0
 
-            // Get daily limit with proper error handling
             val dailyLimit = try {
                 if (isUserSignedIn) {
                     remoteConfig.fetchAndActivateValue(Constants.PROMPT_COUNT)
-                        .toInt().takeIf { it > 0 }
-                        ?: 5
+                        .toInt().takeIf { it > 0 } ?: 5
                 } else {
                     remoteConfig.fetchAndActivateValue(Constants.FREE_PROMPT_COUNT)
-                        .toInt().takeIf { it > 0 }
-                        ?: 2
+                        .toInt().takeIf { it > 0 } ?: 2
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Failed to fetch remote config, using fallback values")
                 if (isUserSignedIn) 5 else 2
             }
 
-            Timber.e("User signed in: $isUserSignedIn, Daily limit: $dailyLimit, Current usage: $usageCount")
+            // Determine usage count *before* this request. Reset if it's a new day.
+            val isNewDay = todayString != lastDate
+            val usageBeforeThisRequest = if (isNewDay) 0 else usageCount
 
-            // Handle date reset - start counting from 1 for the current request
-            if (todayString != lastDate) {
-                try {
-                    gptInvestorPreferences.setQueryLastDate(todayString)
-                    gptInvestorPreferences.setQueryUsageCount(1)
-                    Timber.e("Date reset, usage count set to 1")
-                    return false
-                } catch (e: Exception) {
-                    Timber.e(e, "Failed to reset date and usage count")
-                }
-            }
+            Timber.e("User signed in: $isUserSignedIn, Daily limit: $dailyLimit, Current usage: $usageBeforeThisRequest")
 
-            // Check if limit would be exceeded with this request
-            if (usageCount < dailyLimit) {
-                Timber.e("Rate limit not exceeded")
-                try {
-                    gptInvestorPreferences.setQueryUsageCount(usageCount + 1)
-                } catch (e: Exception) {
-                    Timber.e(e, "Failed to save updated usage count")
-                    // Still allow the request even if save fails
-                }
-                return false
-            }
-
-            // Rate limit exceeded
-            Timber.e("Rate limit exceeded: $usageCount >= $dailyLimit")
-            analyticsLogger.logEvent(
-                eventName = "Rate Limit Reached",
-                params = mapOf(
-                    "limit" to dailyLimit,
-                    "current_count" to usageCount,
-                    "user_signed_in" to isUserSignedIn
+            // Check if limit has already been reached
+            if (usageBeforeThisRequest >= dailyLimit) {
+                Timber.e("Rate limit exceeded: $usageBeforeThisRequest >= $dailyLimit")
+                analyticsLogger.logEvent(
+                    eventName = "Rate Limit Reached",
+                    params = mapOf(
+                        "limit" to dailyLimit,
+                        "current_count" to usageBeforeThisRequest,
+                        "user_signed_in" to isUserSignedIn
+                    )
                 )
-            )
-            return true
+                return@withLock true
+            }
+
+            // If not exceeded, allow the request and update the count.
+            Timber.e("Rate limit not exceeded. Incrementing count.")
+            try {
+                if (isNewDay) {
+                    gptInvestorPreferences.setQueryLastDate(todayString)
+                    Timber.e("New day, resetting date.")
+                }
+                gptInvestorPreferences.setQueryUsageCount(usageBeforeThisRequest + 1)
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to save updated usage count")
+                // Still allow the request even if save fails
+            }
+            return@withLock false
         } catch (e: Exception) {
             Timber.e(e, "Error checking rate limit, allowing request as fallback")
             // In case of unexpected errors, allow the request rather than blocking user
-            return false
+            return@withLock false
         }
     }
 }

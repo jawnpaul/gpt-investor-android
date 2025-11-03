@@ -119,6 +119,7 @@ fun ConversationScreen(
                         onEvent(ConversationEvent.UpdateInputQuery(input))
                     },
                     onSendClick = {
+                        onEvent(ConversationEvent.SendPrompt(query = state.query))
                     },
                     companyName = "",
                     onClickSuggestedPrompt = {

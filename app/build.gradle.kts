@@ -1,7 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
-import java.util.Properties
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -181,7 +181,7 @@ dependencies {
     implementation(libs.firebase.ai)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.config)
-//    implementation(project(":analytics"))
+    implementation(project(":analytics"))
     implementation(project(":theme"))
     implementation(libs.datastore.preferences)
     implementation(libs.androidx.credentials)

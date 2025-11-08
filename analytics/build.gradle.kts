@@ -1,6 +1,6 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
 plugins {
@@ -13,6 +13,16 @@ plugins {
 
 kotlin {
 
+    targets.configureEach {
+        compilations.configureEach {
+            compileTaskProvider.configure {
+                compilerOptions {
+                    freeCompilerArgs.add("-Xexpect-actual-classes")
+                }
+            }
+        }
+    }
+
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
         namespace = "com.thejawnpaul.gptinvestor.analytics"
@@ -24,10 +34,6 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
-    }
-
-    sourceSets.commonMain {
-        kotlin.srcDir("build/generated/ksp/metadata/analytics")
     }
 
     // For iOS targets, this is also where you should
@@ -66,34 +72,36 @@ kotlin {
             baseName = "Analytics"
             isStatic = true
         }
+        pod("FirebaseCore") {
+            extraOpts += listOf("-compiler-option", "-fmodules")
+        }
+        pod("FirebaseAnalytics") {
+            extraOpts += listOf("-compiler-option", "-fmodules")
+        }
+        pod ("Mixpanel") {
+            extraOpts += listOf("-compiler-option", "-fmodules")
+        }
     }
 
     // Source set declarations.
     // See: https://kotlinlang.org/docs/multiplatform-hierarchy.html
     sourceSets {
-        commonMain {
-            dependencies {
+        commonMain.dependencies {
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
                 implementation(libs.koin.compose)
                 implementation(libs.koin.annotations)
             }
-        }
 
-        androidMain {
-            dependencies {
+        androidMain.dependencies {
                 implementation(libs.koin.android)
                 implementation(libs.mixpanel.android)
                 implementation(project.dependencies.platform(libs.firebase.compose.bom))
                 implementation(libs.firebase.analaytics)
             }
-        }
 
 
-        iosMain {
-            dependencies {
-            }
-        }
+        iosMain.dependencies {}
     }
 }
 
@@ -115,7 +123,7 @@ buildkonfig {
 }
 
 dependencies {
-    add("kspCommonMainMetadata", libs.koin.compiler)
+//    add("kspCommonMainMetadata", libs.koin.compiler)
     add("kspAndroid", libs.koin.compiler)
     add("kspIosSimulatorArm64", libs.koin.compiler)
     add("kspIosX64", libs.koin.compiler)

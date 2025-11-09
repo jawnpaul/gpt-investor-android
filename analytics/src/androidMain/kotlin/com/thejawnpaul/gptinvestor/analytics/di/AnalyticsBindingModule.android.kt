@@ -11,5 +11,5 @@ actual val analyticsModule: Module
     get() = module {
         single<AnalyticsLogger>(firebaseAnalytics) { FirebaseLogger() }
         single<AnalyticsLogger>(mixpanelAnalytics) { MixpanelLogger(get()) }
-        single { CompositeLogger(get(firebaseAnalytics), get(mixpanelAnalytics)) }
+        single<AnalyticsLogger> { CompositeLogger(get(firebaseAnalytics), get(mixpanelAnalytics)) }
     }

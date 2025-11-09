@@ -123,7 +123,7 @@ buildkonfig {
 }
 
 dependencies {
-//    add("kspCommonMainMetadata", libs.koin.compiler)
+    add("kspCommonMainMetadata", libs.koin.compiler)
     add("kspAndroid", libs.koin.compiler)
     add("kspIosSimulatorArm64", libs.koin.compiler)
     add("kspIosX64", libs.koin.compiler)

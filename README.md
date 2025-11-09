@@ -65,8 +65,8 @@ and default parameters.
 - [JUnit](https://junit.org/junit4/) - This was used for unit testing the repository, the use cases and the ViewModels.
 - [Mockk](https://mockk.io/) This is a mocking library for Kotlin. I used it to provide test doubles during testing.
 - [Truth](https://truth.dev/) - Assertions Library, provides readability as far as assertions are concerned.
-- [Hilt](https://github.com/InsertKoinIO/koin) - Dependency injection plays a central role in the architectural pattern used.
-For this reason I have chosen Hilt which is built on top of the battle tested DI framework - Dagger 2.
+- [Koin](https://github.com/InsertKoinIO/koin) - Dependency injection plays a central role in the architectural pattern used.
+For this reason I have chosen Koin which is the most recommended for [CMP](https://www.jetbrains.com/compose-multiplatform/) projects
 
 ## Process
 

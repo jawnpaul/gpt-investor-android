@@ -1,15 +1,9 @@
 package com.thejawnpaul.gptinvestor.core.di
 
-import javax.inject.Qualifier
+import org.koin.core.qualifier.named
 
-@Retention(AnnotationRetention.BINARY)
-@Qualifier
-annotation class IoDispatcher
+val IosDispatcher = named("IoDispatcher")
 
-@Retention(AnnotationRetention.BINARY)
-@Qualifier
-annotation class MainDispatcher
+val MainDispatcher = named("MainDispatcher")
 
-@Retention(AnnotationRetention.BINARY)
-@Qualifier
-annotation class DefaultDispatcher
+val DefaultDispatcher = named("DefaultDispatcher")

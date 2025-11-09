@@ -1,14 +1,13 @@
 @file:Suppress("UnstableApiUsage")
 
-import java.util.Properties
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.hiltAndroid)
     alias(libs.plugins.ktorfit)
     alias(libs.plugins.ktLint)
     alias(libs.plugins.kotlin.serialization)
@@ -161,14 +160,11 @@ dependencies {
     implementation(libs.androidx.icons.extended)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.core.splashscreen)
-    implementation(libs.dagger.hilt)
     implementation(libs.timber)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.hilt.navigation)
     implementation(libs.coil.compose)
     implementation(libs.core.ktx)
     implementation(libs.androidx.junit.ktx)
-    ksp(libs.dagger.hilt.compiler)
     implementation(libs.androidx.room)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
@@ -199,6 +195,8 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.koin.start.up)
     implementation(libs.koin.android)
+    implementation(libs.koin.compose)
+    implementation(libs.koin.compose.viewmodel)
     ksp(libs.koin.compiler)
     implementation(libs.ktorfit)
     ksp(libs.ktorfit.compiler)
@@ -206,7 +204,6 @@ dependencies {
 
     // test
     testImplementation(project(":remote:remotetest"))
-    kspTest(libs.dagger.hilt.compiler)
     testImplementation(libs.junit)
     testImplementation(libs.google.truth)
     testImplementation(libs.okhttp.mockwebserver)

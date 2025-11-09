@@ -6,9 +6,8 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigException
 import com.thejawnpaul.gptinvestor.R
 import timber.log.Timber
-import javax.inject.Inject
 
-class RemoteConfig @Inject constructor(private val remoteConfig: FirebaseRemoteConfig) {
+class RemoteConfig(private val remoteConfig: FirebaseRemoteConfig) {
 
     fun init() {
         remoteConfig.setDefaultsAsync(R.xml.remote_config_defaults)

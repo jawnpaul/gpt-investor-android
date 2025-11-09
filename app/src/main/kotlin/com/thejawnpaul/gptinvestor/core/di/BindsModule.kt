@@ -20,42 +20,30 @@ import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepositoryImpl
 import com.thejawnpaul.gptinvestor.features.toppick.data.repository.TopPickRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import org.koin.core.module.dsl.factoryOf
+import org.koin.dsl.bind
+import org.koin.dsl.module
 
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class BindsModule {
 
-    @Binds
-    abstract fun providesCompanyRepository(repository: CompanyRepository): ICompanyRepository
+val bindingModule = module {
 
-    @Binds
-    abstract fun providesInvestorRepository(repository: InvestorRepository): IInvestorRepository
+    factoryOf(::CompanyRepository) bind  ICompanyRepository::class
 
-    @Binds
-    abstract fun providesConversationRepository(repository: ConversationRepository): IConversationRepository
+    factoryOf(::InvestorRepository) bind IInvestorRepository::class
 
-    @Binds
-    abstract fun providesHistoryRepository(repository: HistoryRepository): IHistoryRepository
+    factoryOf(::ConversationRepository) bind IConversationRepository::class
 
-    @Binds
-    abstract fun providesTopPicksRepository(repository: TopPickRepository): ITopPickRepository
+    factoryOf(::HistoryRepository) bind IHistoryRepository::class
 
-    @Binds
-    abstract fun providesAuthRepository(repository: AuthenticationRepositoryImpl): AuthenticationRepository
+    factoryOf(::TopPickRepository) bind ITopPickRepository::class
 
-    @Binds
-    abstract fun providesFeedbackRepository(repository: FeedbackRepositoryImpl): FeedbackRepository
+    factoryOf(::AuthenticationRepositoryImpl) bind AuthenticationRepository::class
 
-    @Binds
-    abstract fun providesNotificationRepository(repository: NotificationRepositoryImpl): NotificationRepository
+    factoryOf(::FeedbackRepositoryImpl) bind FeedbackRepository::class
 
-    @Binds
-    abstract fun providesModelsRepository(repository: ModelsRepositoryImpl): ModelsRepository
+    factoryOf(::NotificationRepositoryImpl) bind NotificationRepository::class
 
-    @Binds
-    abstract fun providesTidbitRepository(repository: TidbitRepositoryImpl): TidbitRepository
+    factoryOf(::ModelsRepositoryImpl) bind ModelsRepository::class
+
+    factoryOf(::TidbitRepositoryImpl) bind TidbitRepository::class
 }

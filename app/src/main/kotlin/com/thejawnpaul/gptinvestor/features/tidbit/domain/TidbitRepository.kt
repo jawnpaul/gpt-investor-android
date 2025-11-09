@@ -16,7 +16,6 @@ import com.thejawnpaul.gptinvestor.features.tidbit.domain.model.Tidbit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
-import javax.inject.Inject
 
 interface TidbitRepository {
     suspend fun getTodayTidbit(): Result<Tidbit>
@@ -38,7 +37,7 @@ interface TidbitRepository {
     fun getBookmarkedTidbitsPaged(): Flow<PagingData<Tidbit>>
 }
 
-class TidbitRepositoryImpl @Inject constructor(
+class TidbitRepositoryImpl(
     private val apiService: ApiService,
     private val remoteConfig: RemoteConfig,
     private val analyticsLogger: AnalyticsLogger,

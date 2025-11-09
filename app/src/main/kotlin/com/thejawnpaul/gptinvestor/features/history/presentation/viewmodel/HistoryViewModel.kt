@@ -19,16 +19,12 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryCo
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryScreenView
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction.OnCopy
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenAction.OnGoToHistoryDetail
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
-
-@HiltViewModel
-class HistoryViewModel @Inject constructor(
+class HistoryViewModel(
     private val getAllHistoryUseCase: GetAllHistoryUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val getSingleHistoryUseCase: GetSingleHistoryUseCase,

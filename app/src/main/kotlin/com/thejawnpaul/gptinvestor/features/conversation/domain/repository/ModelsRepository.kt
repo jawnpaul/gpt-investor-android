@@ -8,14 +8,16 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableM
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultModel
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
-import javax.inject.Inject
 
 interface ModelsRepository {
     suspend fun getAvailableModels(): Result<List<AvailableModel>>
     suspend fun putUserOnModelWaitlist(modelId: String, reasons: List<String> = emptyList()): Result<Unit>
 }
 
-class ModelsRepositoryImpl @Inject constructor(private val gptInvestorPreferences: GPTInvestorPreferences, private val apiService: ApiService) : ModelsRepository {
+class ModelsRepositoryImpl(
+    private val gptInvestorPreferences: GPTInvestorPreferences,
+    private val apiService: ApiService
+) : ModelsRepository {
     override suspend fun getAvailableModels(): Result<List<AvailableModel>> = try {
         val isUserOnWaitlist = gptInvestorPreferences.isUserOnModelWaitlist.first()
         val models = buildList {

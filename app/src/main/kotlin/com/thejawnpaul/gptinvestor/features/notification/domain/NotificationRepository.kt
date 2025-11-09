@@ -9,14 +9,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
 
 interface NotificationRepository {
     suspend fun saveToken(token: String)
     suspend fun syncTokenIfNeeded()
 }
 
-class NotificationRepositoryImpl @Inject constructor(private val apiService: ApiService, private val preferences: GPTInvestorPreferences) : NotificationRepository {
+class NotificationRepositoryImpl(
+    private val apiService: ApiService,
+    private val preferences: GPTInvestorPreferences
+) : NotificationRepository {
 
     override suspend fun saveToken(token: String) {
         preferences.setFcmToken(token)

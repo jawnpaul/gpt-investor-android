@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -54,6 +53,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SavedTopPick
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPickDetailScreen
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun SetUpNavGraph(navController: NavHostController) {
@@ -65,7 +65,7 @@ fun SetUpNavGraph(navController: NavHostController) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.HomeTabScreen.route) {
-                val homeViewModel = hiltViewModel<HomeViewModel>()
+                val homeViewModel = koinViewModel<HomeViewModel>()
                 val state = homeViewModel.uiState.collectAsStateWithLifecycle()
                 val scope = rememberCoroutineScope()
                 LaunchedEffect(Unit) {
@@ -146,7 +146,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 route = Screen.DiscoverTabScreen.route,
                 deepLinks = listOf(navDeepLink { uriPattern = Screen.DiscoverTabScreen.deepLink })
             ) {
-                val companyViewModel = hiltViewModel<CompanyViewModel>()
+                val companyViewModel = koinViewModel<CompanyViewModel>()
                 val state = companyViewModel.companyDiscoveryState.collectAsStateWithLifecycle()
                 val scope = rememberCoroutineScope()
                 LaunchedEffect(Unit) {
@@ -183,7 +183,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 )
             }
             composable(Screen.HistoryTabScreen.route) {
-                val viewModel = hiltViewModel<HistoryViewModel>()
+                val viewModel = koinViewModel<HistoryViewModel>()
                 val state = viewModel.historyScreenViewState.collectAsStateWithLifecycle()
                 val scope = rememberCoroutineScope()
 
@@ -212,7 +212,7 @@ fun SetUpNavGraph(navController: NavHostController) {
             }
 
             composable(route = Screen.CompanyDetailScreen.route) { backStackEntry ->
-                val parentViewModel = hiltViewModel<CompanyViewModel>()
+                val parentViewModel = koinViewModel<CompanyViewModel>()
                 val ticker = backStackEntry.arguments?.getString("ticker") ?: ""
                 val state = parentViewModel.selectedCompany.collectAsStateWithLifecycle()
                 val context = LocalContext.current
@@ -266,7 +266,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 )
             ) { navBackStackEntry ->
                 val context = LocalContext.current
-                val viewModel = hiltViewModel<ConversationViewModel>()
+                val viewModel = koinViewModel<ConversationViewModel>()
                 val state = viewModel.conversation.collectAsStateWithLifecycle()
                 val chatInput = navBackStackEntry.arguments?.getString("chatInput")
                 val title = navBackStackEntry.arguments?.getString("title")
@@ -319,7 +319,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 arguments = listOf(navArgument("conversationId") { NavType.StringType })
             ) { navBackStackEntry ->
                 val context = LocalContext.current
-                val viewModel = hiltViewModel<HistoryViewModel>()
+                val viewModel = koinViewModel<HistoryViewModel>()
                 val state = viewModel.conversation.collectAsStateWithLifecycle()
                 val id = navBackStackEntry.arguments?.getString("conversationId") ?: ""
                 val scope = rememberCoroutineScope()
@@ -361,7 +361,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 route = Screen.TopPickDetailScreen.route,
                 arguments = listOf(navArgument("topPickId") { NavType.StringType })
             ) { navBackStackEntry ->
-                val viewModel = hiltViewModel<TopPickViewModel>()
+                val viewModel = koinViewModel<TopPickViewModel>()
                 val state = viewModel.topPickView.collectAsStateWithLifecycle()
                 val id = navBackStackEntry.arguments?.getString("topPickId") ?: ""
                 val scope = rememberCoroutineScope()
@@ -406,7 +406,7 @@ fun SetUpNavGraph(navController: NavHostController) {
             }
 
             composable(route = Screen.AllTopPicksScreen.route) {
-                val viewModel = hiltViewModel<TopPickViewModel>()
+                val viewModel = koinViewModel<TopPickViewModel>()
                 val state = viewModel.allTopPicks.collectAsStateWithLifecycle()
                 AllTopPicksScreen(
                     modifier = Modifier.padding(top = 20.dp),
@@ -421,7 +421,7 @@ fun SetUpNavGraph(navController: NavHostController) {
             }
 
             composable(route = Screen.SavedTopPicksScreen.route) {
-                val viewModel = hiltViewModel<TopPickViewModel>()
+                val viewModel = koinViewModel<TopPickViewModel>()
                 val state = viewModel.savedTopPicks.collectAsStateWithLifecycle()
                 SavedTopPicksScreen(
                     modifier = Modifier.padding(top = 20.dp),
@@ -436,7 +436,7 @@ fun SetUpNavGraph(navController: NavHostController) {
             }
 
             composable(route = Screen.SettingsScreen.route) {
-                val viewModel = hiltViewModel<SettingsViewModel>()
+                val viewModel = koinViewModel<SettingsViewModel>()
                 val state = viewModel.uiState.collectAsStateWithLifecycle()
                 val scope = rememberCoroutineScope()
                 LaunchedEffect(Unit) {
@@ -462,7 +462,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 arguments = listOf(navArgument("tidbitId") { NavType.StringType })
             ) { navBackStackEntry ->
                 val tidbitId = navBackStackEntry.arguments?.getString("tidbitId") ?: ""
-                val viewModel = hiltViewModel<TidbitViewModel>()
+                val viewModel = koinViewModel<TidbitViewModel>()
                 val state = viewModel.tidbitDetailState.collectAsStateWithLifecycle()
                 val scope = rememberCoroutineScope()
                 val context = LocalContext.current
@@ -509,7 +509,7 @@ fun SetUpNavGraph(navController: NavHostController) {
             }
 
             composable(route = Screen.TidbitScreen.route) {
-                val viewModel = hiltViewModel<TidbitViewModel>()
+                val viewModel = koinViewModel<TidbitViewModel>()
                 val state = viewModel.tidbitMainScreenState.collectAsStateWithLifecycle()
                 val scope = rememberCoroutineScope()
                 val context = LocalContext.current
@@ -554,7 +554,7 @@ fun SetUpNavGraph(navController: NavHostController) {
             }
 
             composable(route = Screen.SavedTidbitScreen.route) {
-                val viewModel = hiltViewModel<TidbitViewModel>()
+                val viewModel = koinViewModel<TidbitViewModel>()
                 val scope = rememberCoroutineScope()
                 val context = LocalContext.current
 

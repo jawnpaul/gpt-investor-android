@@ -1,21 +1,13 @@
 package com.thejawnpaul.gptinvestor.core.di
 
-import android.content.Context
 import coil.ImageLoader
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import org.koin.android.ext.koin.androidContext
+import org.koin.dsl.module
 
-@Module
-@InstallIn(SingletonComponent::class)
-object ImageModule {
-
-    @Provides
-    @Singleton
-    fun provideImageLoader(@ApplicationContext context: Context): ImageLoader = ImageLoader.Builder(context)
-        .crossfade(true)
-        .build()
+val imageModule = module {
+    single<ImageLoader> {
+        ImageLoader.Builder(androidContext())
+            .crossfade(true)
+            .build()
+    }
 }

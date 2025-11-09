@@ -4,9 +4,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
 
-class TokenSyncManager @Inject constructor(private val notificationRepository: NotificationRepository) {
+class TokenSyncManager(private val notificationRepository: NotificationRepository) {
     private val scope = CoroutineScope(Dispatchers.IO)
 
     fun syncToken() {

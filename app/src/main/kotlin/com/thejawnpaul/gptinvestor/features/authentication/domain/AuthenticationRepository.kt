@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
 
 interface AuthenticationRepository {
     val currentUser: FirebaseUser?
@@ -36,7 +35,7 @@ interface AuthenticationRepository {
     suspend fun loginWithGoogle(activityContext: Context): Flow<Boolean>
 }
 
-class AuthenticationRepositoryImpl @Inject constructor(
+class AuthenticationRepositoryImpl(
     private val auth: FirebaseAuth,
     private val analyticsLogger: AnalyticsLogger,
     private val gptInvestorPreferences: GPTInvestorPreferences,

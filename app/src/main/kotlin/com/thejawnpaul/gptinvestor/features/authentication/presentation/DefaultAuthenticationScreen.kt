@@ -37,14 +37,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.theme.linkMedium
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun DefaultAuthenticationScreen(modifier: Modifier, onAuthSuccess: () -> Unit, onAuthFailure: () -> Unit, authViewModel: AuthenticationViewModel = hiltViewModel()) {
+fun DefaultAuthenticationScreen(modifier: Modifier, onAuthSuccess: () -> Unit, onAuthFailure: () -> Unit, authViewModel: AuthenticationViewModel = koinViewModel()) {
     var showDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 

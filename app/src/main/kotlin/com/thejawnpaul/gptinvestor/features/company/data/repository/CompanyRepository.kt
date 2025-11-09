@@ -17,9 +17,12 @@ import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRe
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
-import javax.inject.Inject
 
-class CompanyRepository @Inject constructor(private val apiService: ApiService, private val companyDao: CompanyDao, private val analyticsLogger: AnalyticsLogger) : ICompanyRepository {
+class CompanyRepository (
+    private val apiService: ApiService,
+    private val companyDao: CompanyDao,
+    private val analyticsLogger: AnalyticsLogger
+) : ICompanyRepository {
 
     override suspend fun getAllCompanies(): Flow<Either<Failure, List<Company>>> = flow {
         try {

@@ -13,7 +13,6 @@ import com.thejawnpaul.gptinvestor.features.tidbit.presentation.model.TidbitPres
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailAction.OnGoBack
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailAction.OnOpenSource
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailAction.OnShare
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,10 +22,11 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class TidbitViewModel @Inject constructor(private val repository: TidbitRepository, private val savedStateHandle: SavedStateHandle) : ViewModel() {
+class TidbitViewModel(
+    private val repository: TidbitRepository,
+    private val savedStateHandle: SavedStateHandle
+) : ViewModel() {
 
     private val tidbitId: String?
         get() = savedStateHandle.get<String>("tidbitId")

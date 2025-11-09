@@ -18,9 +18,8 @@ import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import javax.inject.Inject
 
-class TopPickRepository @Inject constructor(
+class TopPickRepository(
     private val apiService: ApiService,
     private val topPickDao: TopPickDao,
     private val companyDao: CompanyDao,

@@ -5,28 +5,23 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.remoteConfig
 import com.google.firebase.remoteconfig.remoteConfigSettings
 import com.thejawnpaul.gptinvestor.BuildConfig
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import org.koin.dsl.module
 
-@Module
-@InstallIn(SingletonComponent::class)
-object RemoteConfigModule {
+val remoteConfigModule = module {
 
-    @Provides
-    @Singleton
-    fun providesRemoteConfig(): FirebaseRemoteConfig {
-        val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
-        val configSettings = if (BuildConfig.DEBUG) {
-            remoteConfigSettings {
-                minimumFetchIntervalInSeconds = 3600
-            }
-        } else {
-            remoteConfigSettings { }
+    single<FirebaseRemoteConfig> {
+        Firebase.remoteConfig.apply {
+            setConfigSettingsAsync(
+                remoteConfigSettings {
+                    if (BuildConfig.DEBUG) {
+                        minimumFetchIntervalInSeconds = 3600
+                    }
+                }
+            )
         }
-        remoteConfig.setConfigSettingsAsync(configSettings)
-        return remoteConfig
+    }
+
+    single<RemoteConfig> {
+        RemoteConfig(get())
     }
 }

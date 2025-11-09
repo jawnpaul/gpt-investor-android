@@ -16,21 +16,17 @@ import com.google.firebase.messaging.RemoteMessage
 import com.thejawnpaul.gptinvestor.MainActivity
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import org.koin.android.ext.android.inject
 
-@AndroidEntryPoint
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
-    @Inject
-    lateinit var notificationRepository: NotificationRepository
+    private val notificationRepository: NotificationRepository by inject()
 
-    @Inject
-    lateinit var imageLoader: ImageLoader
+    private val imageLoader: ImageLoader by inject()
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)

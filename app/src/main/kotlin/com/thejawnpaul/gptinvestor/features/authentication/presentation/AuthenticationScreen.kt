@@ -33,12 +33,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.thejawnpaul.gptinvestor.R
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun AuthenticationScreen(viewModel: AuthenticationViewModel = hiltViewModel(), onSignInSuccess: () -> Unit) {
+fun AuthenticationScreen(viewModel: AuthenticationViewModel = koinViewModel(), onSignInSuccess: () -> Unit) {
     val authState by viewModel.authState.collectAsStateWithLifecycle()
     val isUserSignedIn = authState.isUserSignedIn
     var passwordHidden by remember { mutableStateOf(true) }

@@ -29,9 +29,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.jsoup.Jsoup
 import timber.log.Timber
-import javax.inject.Inject
 
-class InvestorRepository @Inject constructor(private val apiService: ApiService, private val companyDao: CompanyDao) : IInvestorRepository {
+class InvestorRepository (
+    private val apiService: ApiService,
+    private val companyDao: CompanyDao
+) : IInvestorRepository {
     val model = Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
         modelName = "gemini-1.0-pro",
         // Retrieve API key as an environmental variable defined in a Build Configuration

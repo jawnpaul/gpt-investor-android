@@ -7,9 +7,8 @@ import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.model.Tidbit
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
-import javax.inject.Inject
 
-class TidbitPagingSource @Inject constructor(private val apiService: ApiService, private val preferences: GPTInvestorPreferences, private val tidbitType: TidbitType) :
+class TidbitPagingSource(private val apiService: ApiService, private val preferences: GPTInvestorPreferences, private val tidbitType: TidbitType) :
     PagingSource<Int, Tidbit>() {
     override fun getRefreshKey(state: PagingState<Int, Tidbit>): Int? = state.anchorPosition?.let { anchorPosition ->
         state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)

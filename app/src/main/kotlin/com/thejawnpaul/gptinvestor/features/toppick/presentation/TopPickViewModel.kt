@@ -19,16 +19,13 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickAction.S
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPickDetailView
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
 
-@HiltViewModel
-class TopPickViewModel @Inject constructor(
+class TopPickViewModel(
     private val getSingleTopPickUseCase: GetSingleTopPickUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val getLocalTopPicksUseCase: GetLocalTopPicksUseCase,

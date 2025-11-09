@@ -9,13 +9,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun NewAuthenticationScreen(modifier: Modifier, authViewModel: AuthenticationViewModel = hiltViewModel(), onAuthenticationComplete: (String) -> Unit) {
+fun NewAuthenticationScreen(modifier: Modifier, authViewModel: AuthenticationViewModel = koinViewModel(), onAuthenticationComplete: (String) -> Unit) {
     val state = authViewModel.newAuthState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 

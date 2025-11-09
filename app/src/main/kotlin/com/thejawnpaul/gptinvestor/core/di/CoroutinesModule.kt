@@ -1,24 +1,12 @@
 package com.thejawnpaul.gptinvestor.core.di
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import org.koin.dsl.module
 
-@InstallIn(SingletonComponent::class)
-@Module
-object CoroutinesModule {
-    @IoDispatcher
-    @Provides
-    fun providesIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
+val coroutinesModule = module {
+    single(IosDispatcher) { Dispatchers.IO }
 
-    @MainDispatcher
-    @Provides
-    fun providesMainDispatcher(): CoroutineDispatcher = Dispatchers.Main
+    single(MainDispatcher) { Dispatchers.Main }
 
-    @DefaultDispatcher
-    @Provides
-    fun providesDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
+    single(DefaultDispatcher) { Dispatchers.Default }
 }

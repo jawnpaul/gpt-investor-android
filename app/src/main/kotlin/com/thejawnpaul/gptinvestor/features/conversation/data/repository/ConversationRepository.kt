@@ -46,9 +46,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
-import javax.inject.Inject
 
-class ConversationRepository @Inject constructor(
+class ConversationRepository(
     private val apiService: ApiService,
     private val analyticsLogger: AnalyticsLogger,
     private val messageDao: MessageDao,

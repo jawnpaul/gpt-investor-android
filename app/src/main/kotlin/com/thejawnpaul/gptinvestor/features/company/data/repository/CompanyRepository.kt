@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 
-class CompanyRepository (
+class CompanyRepository(
     private val apiService: ApiService,
     private val companyDao: CompanyDao,
     private val analyticsLogger: AnalyticsLogger

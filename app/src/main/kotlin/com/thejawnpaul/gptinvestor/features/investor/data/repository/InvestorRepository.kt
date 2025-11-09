@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.flow
 import org.jsoup.Jsoup
 import timber.log.Timber
 
-class InvestorRepository (
+class InvestorRepository(
     private val apiService: ApiService,
     private val companyDao: CompanyDao
 ) : IInvestorRepository {

@@ -21,7 +21,7 @@ class CompanyRepositoryTest {
 
         gptInvestorDatabase = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
-            GPTInvestorDatabase::class.kotlin
+            GPTInvestorDatabase::class.java
         ).allowMainThreadQueries().build()
         companyRepository = CompanyRepository(
             makeTestApiService(mockWebServer),

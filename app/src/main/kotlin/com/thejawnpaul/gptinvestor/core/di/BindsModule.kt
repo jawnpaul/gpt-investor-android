@@ -27,7 +27,7 @@ import org.koin.dsl.module
 
 val bindingModule = module {
 
-    factoryOf(::CompanyRepository) bind  ICompanyRepository::class
+    factoryOf(::CompanyRepository) bind ICompanyRepository::class
 
     factoryOf(::InvestorRepository) bind IInvestorRepository::class
 

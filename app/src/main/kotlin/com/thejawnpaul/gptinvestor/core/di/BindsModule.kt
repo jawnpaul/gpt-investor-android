@@ -5,7 +5,9 @@ import com.thejawnpaul.gptinvestor.features.authentication.domain.Authentication
 import com.thejawnpaul.gptinvestor.features.company.data.repository.CompanyRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import com.thejawnpaul.gptinvestor.features.conversation.data.repository.ConversationRepository
+import com.thejawnpaul.gptinvestor.features.conversation.data.repository.FirebaseAiApi
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
+import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IFirebaseAiApi
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepositoryImpl
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
@@ -21,6 +23,7 @@ import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepositoryImpl
 import com.thejawnpaul.gptinvestor.features.toppick.data.repository.TopPickRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
 import org.koin.core.module.dsl.factoryOf
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
@@ -30,6 +33,8 @@ val bindingModule = module {
     factoryOf(::CompanyRepository) bind ICompanyRepository::class
 
     factoryOf(::InvestorRepository) bind IInvestorRepository::class
+
+    singleOf(::FirebaseAiApi) bind IFirebaseAiApi::class
 
     factoryOf(::ConversationRepository) bind IConversationRepository::class
 

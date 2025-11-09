@@ -43,3 +43,9 @@ kotlin {
         iosMain.dependencies {}
     }
 }
+
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "gptinvestor.theme.generated.resources"
+    generateResClass = always
+}

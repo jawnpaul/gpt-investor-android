@@ -1,3 +1,6 @@
+@file:Suppress("UnstableApiUsage")
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 pluginManagement {
     repositories {
         google {
@@ -23,6 +26,5 @@ rootProject.name = "GPTInvestor"
 include(":app")
 include(":remote:remote")
 include(":remote:remotetest")
-//include(":analytics")
 include(":theme")
 include(":analytics")

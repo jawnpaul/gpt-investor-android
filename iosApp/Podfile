@@ -1,0 +1,6 @@
+target 'iosApp' do
+    use_frameworks!
+    platform :ios, '16.0'
+    pod 'GPTInvestorApp', :path => '../app'
+    pod 'analytics', :path => '../analytics'
+end

@@ -51,17 +51,17 @@ Libraries used in the application are:
   - [Compose](https://developer.android.com/jetpack/androidx/releases/compose) - Define your UI programmatically with composable functions that describe its shape and data dependencies.
   - [Navigation](https://developer.android.com/jetpack/androidx/releases/navigation) - Build and structure your in-app UI, handle deep links, and navigate between screens.
   - [Room](https://developer.android.com/jetpack/androidx/releases/room) - Create, store, and manage persistent data backed by a SQLite database.
-- [Retrofit](https://square.github.io/retrofit/) - Type safe http client and supports coroutines out of the box.
-- [Moshi](https://github.com/square/moshi) - JSON Parser, used to parse requests on the data layer for Entities and understands Kotlin non-nullable
+- [Ktor](https://github.com/ktorio/ktor) - Type safe http client and supports coroutines out of the box.
+- [Kotlinx Serialization](https://github.com/Kotlin/kotlinx.serialization) - JSON Parser, used to parse requests on the data layer for Entities and understands Kotlin non-nullable
 and default parameters.
 - [okhttp-logging-interceptor](https://github.com/square/okhttp/blob/master/okhttp-logging-interceptor/README.md) - Logs HTTP request and response data.
 - [StateFlow](https://developer.android.com/kotlin/flow/stateflow-and-sharedflow#stateflow) - A state-holder observable flow that emits the current and new state updates to its collectors.
 - [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines) - Library Support for coroutines. I used this for asynchronous programming in order to obtain data from the network as well as the database.
 - [Coil](https://coil-kt.github.io/coil/) - This was used for loading images in the application.
 - [Gemini](https://github.com/google-gemini/generative-ai-android) - Google AI client SDK for Android enables developers to use Google's generative AI models (like Gemini) to build AI-powered features and applications.
-- [Timber](https://github.com/JakeWharton/timber) - A logger with a small, extensible API which provides utility on top of Android's normal Log class.
+- [Kermit](https://github.com/touchlab/kermit) - A logger with a small, extensible API which provides utility for KMP.
 - [Compose-richtext](https://github.com/halilozercan/compose-richtext) - A collection of Compose libraries for advanced text formatting and alternative display types.
-- [TimeAgo](https://github.com/marlonlom/timeago) - Simple java library for displaying dates as relative time ago language.
+- [Human-Readable](https://github.com/jacobras/Human-Readable) - Simple java library for displaying dates as relative time ago language.
 - [JUnit](https://junit.org/junit4/) - This was used for unit testing the repository, the use cases and the ViewModels.
 - [Mockk](https://mockk.io/) This is a mocking library for Kotlin. I used it to provide test doubles during testing.
 - [Truth](https://truth.dev/) - Assertions Library, provides readability as far as assertions are concerned.

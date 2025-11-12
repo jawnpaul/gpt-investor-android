@@ -314,6 +314,5 @@ dependencies {
     add("kspIosX64", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
 
-
     debugImplementation(libs.androidx.ui.test.manifest)
 }

@@ -12,3 +12,5 @@ keystore.properties
 google-services.json
 /fastlane
 /.kotlin/metadata
+*/Pods
+*/Podfile.lock

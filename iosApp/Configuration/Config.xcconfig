@@ -1,0 +1,9 @@
+TEAM_ID=
+
+PRODUCT_NAME=GPTInvestor
+PRODUCT_BUNDLE_IDENTIFIER=com.thejawnpaul.gptinvestor.GPTInvestor$(TEAM_ID)
+
+GOOGLE_SERVICE=$(SRCROOT)/Firebase/GoogleService-Info.plist
+
+CURRENT_PROJECT_VERSION=1
+MARKETING_VERSION=1.0

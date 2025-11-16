@@ -6,8 +6,8 @@ import androidx.paging.PagingData
 import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
+import com.thejawnpaul.gptinvestor.core.firebase.remoteconfig.RemoteConfig
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
-import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfig
 import com.thejawnpaul.gptinvestor.core.utility.Constants
 import com.thejawnpaul.gptinvestor.features.tidbit.data.paging.TidbitPagingSource
 import com.thejawnpaul.gptinvestor.features.tidbit.data.paging.TidbitType

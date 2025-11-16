@@ -1,12 +1,15 @@
 package com.thejawnpaul.gptinvestor.features.conversation.domain.repository
 
-import com.google.firebase.ai.type.Content
-import com.google.firebase.ai.type.GenerateContentResponse
 import kotlinx.coroutines.flow.Flow
 
 interface IFirebaseAiApi {
 
-    suspend fun sendMessage(history: List<Content>, prompt: String): GenerateContentResponse
+    suspend fun sendMessage(history: List<HistoryContent>, prompt: String): String?
 
-    fun sendMessageStream(history: List<Content>, prompt: String): Flow<GenerateContentResponse>
+    fun sendMessageStream(history: List<HistoryContent>, prompt: String): Flow<String?>
 }
+
+data class HistoryContent(
+    val role: String,
+    val message: String
+)

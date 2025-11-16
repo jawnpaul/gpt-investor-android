@@ -11,21 +11,22 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.thejawnpaul.gptinvestor.BuildConfig
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.core.firebase.auth.User
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 
 interface AuthenticationRepository {
-    val currentUser: FirebaseUser?
+    val currentUser: User?
     suspend fun signUp(activityContext: Context): Flow<Boolean>
     suspend fun signOut(activityContext: Context)
     fun getAuthState(): Flow<Boolean>
@@ -40,7 +41,7 @@ class AuthenticationRepositoryImpl(
     private val gptInvestorPreferences: GPTInvestorPreferences,
     private val tokenSyncManager: TokenSyncManager
 ) : AuthenticationRepository {
-    override val currentUser: FirebaseUser?
+    override val currentUser: User?
         get() = auth.currentUser
 
     private fun getCredentialManager(activityContext: Context): CredentialManager = CredentialManager.create(activityContext)
@@ -77,17 +78,17 @@ class AuthenticationRepositoryImpl(
                     getAuthState()
                     if (task.isSuccessful) {
                         CoroutineScope(Dispatchers.IO).launch {
-                            gptInvestorPreferences.setUserId(auth.currentUser?.uid.toString())
+                            gptInvestorPreferences.setUserId(currentUser?.uid.toString())
                             gptInvestorPreferences.setIsUserLoggedIn(true)
                             tokenSyncManager.syncToken()
                         }
                         analyticsLogger.identifyUser(
                             eventName = "Sign Up",
                             params = mapOf(
-                                "user_id" to auth.currentUser?.uid.toString(),
-                                "email" to auth.currentUser?.email.toString(),
-                                "name" to auth.currentUser?.displayName.toString(),
-                                "sign_up_method" to auth.currentUser?.providerId.toString()
+                                "user_id" to currentUser?.uid.toString(),
+                                "email" to currentUser?.email.toString(),
+                                "name" to currentUser?.displayName.toString(),
+                                "sign_up_method" to currentUser?.providerId.toString()
                             )
                         )
                     }
@@ -127,7 +128,7 @@ class AuthenticationRepositoryImpl(
 
     override fun getAuthState(): Flow<Boolean> = callbackFlow {
         val authStateListener = FirebaseAuth.AuthStateListener { auth ->
-            trySend(auth.currentUser != null)
+            trySend(currentUser != null)
         }
         auth.addAuthStateListener(authStateListener)
 
@@ -138,7 +139,7 @@ class AuthenticationRepositoryImpl(
 
     override suspend fun deleteAccount() {
         try {
-            auth.currentUser?.delete()
+            currentUser?.delete()
             analyticsLogger.resetUser(eventName = "Delete Account")
             gptInvestorPreferences.clearUserId()
             gptInvestorPreferences.clearIsUserLoggedIn()
@@ -157,14 +158,14 @@ class AuthenticationRepositoryImpl(
                 getAuthState()
                 if (task.isSuccessful) {
                     CoroutineScope(Dispatchers.IO).launch {
-                        gptInvestorPreferences.setUserId(auth.currentUser?.uid.toString())
+                        gptInvestorPreferences.setUserId(currentUser?.uid.toString())
                         gptInvestorPreferences.setIsUserLoggedIn(true)
                         tokenSyncManager.syncToken()
                     }
                     analyticsLogger.identifyUser(
                         eventName = "Log in",
                         params = mapOf(
-                            "user_id" to auth.currentUser?.uid.toString(),
+                            "user_id" to currentUser?.uid.toString(),
                             "email" to email
                         )
                     )
@@ -186,10 +187,10 @@ class AuthenticationRepositoryImpl(
                 analyticsLogger.identifyUser(
                     eventName = "Sign Up",
                     params = mapOf(
-                        "user_id" to auth.currentUser?.uid.toString(),
+                        "user_id" to currentUser?.uid.toString(),
                         "email" to email,
-                        "name" to auth.currentUser?.displayName.toString(),
-                        "sign_up_method" to auth.currentUser?.providerId.toString()
+                        "name" to currentUser?.displayName.toString(),
+                        "sign_up_method" to currentUser?.providerId.toString()
                     )
                 )
             }
@@ -235,10 +236,10 @@ class AuthenticationRepositoryImpl(
                         analyticsLogger.identifyUser(
                             eventName = "Sign Up",
                             params = mapOf(
-                                "user_id" to auth.currentUser?.uid.toString(),
-                                "email" to auth.currentUser?.email.toString(),
-                                "name" to auth.currentUser?.displayName.toString(),
-                                "sign_up_method" to auth.currentUser?.providerId.toString()
+                                "user_id" to currentUser?.uid.toString(),
+                                "email" to currentUser?.email.toString(),
+                                "name" to currentUser?.displayName.toString(),
+                                "sign_up_method" to currentUser?.providerId.toString()
                             )
                         )
                     }

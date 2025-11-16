@@ -1,15 +1,12 @@
 package com.thejawnpaul.gptinvestor.features.conversation.data.repository
 
 import co.touchlab.kermit.Logger
-import com.google.firebase.ai.type.Content
-import com.google.firebase.ai.type.FirebaseAIException
-import com.google.firebase.ai.type.content
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
+import com.thejawnpaul.gptinvestor.core.firebase.remoteconfig.RemoteConfig
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
-import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfig
 import com.thejawnpaul.gptinvestor.core.utility.Constants
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
@@ -27,17 +24,20 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPro
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntityMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.HistoryContent
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
+import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IFirebaseAiApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
+import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -48,7 +48,7 @@ class ConversationRepository(
     private val messageDao: MessageDao,
     private val conversationDao: ConversationDao,
     private val remoteConfig: RemoteConfig,
-    private val firebaseAiApi: FirebaseAiApi,
+    private val firebaseAiApi: IFirebaseAiApi,
     private val gptInvestorPreferences: GPTInvestorPreferences,
 ) : IConversationRepository {
 
@@ -124,7 +124,7 @@ class ConversationRepository(
                     )
                     messageDao.insertMessage(message)
                 }.collect { result ->
-                    result.text?.let { responseText ->
+                    result?.let { responseText ->
 
                         chunk.append(responseText)
 
@@ -143,7 +143,7 @@ class ConversationRepository(
                 }
             } catch (e: Exception) {
                 when (e) {
-                    is FirebaseAIException -> {
+                    is RuntimeException -> {
                         emit(Either.Left(GenAIException()))
                         Logger.e(e.stackTraceToString())
                     }
@@ -301,7 +301,7 @@ class ConversationRepository(
                         }
                     }
                 }.collect { result ->
-                    result.text?.let { responseText ->
+                    result?.let { responseText ->
                         chunk.append(responseText)
 
                         // Create a new list for modification to maintain immutability
@@ -355,7 +355,7 @@ class ConversationRepository(
                 analyticsLogger.logEvent(eventName = "Query Submitted", params = mapOf())
             } catch (e: Exception) {
                 when (e) {
-                    is FirebaseAIException -> {
+                    is RuntimeException -> {
                         Logger.e(e.stackTraceToString())
                         emit(Either.Left(GenAIException()))
                     }
@@ -451,7 +451,7 @@ class ConversationRepository(
                         }
                     }
                 }.collect { result ->
-                    result.text?.let { responseText ->
+                    result?.let { responseText ->
                         chunk.append(responseText)
 
                         val lastMessage =
@@ -477,7 +477,7 @@ class ConversationRepository(
                 }
             } catch (e: Exception) {
                 when (e) {
-                    is FirebaseAIException -> {
+                    is RuntimeException -> {
                         Logger.e(e.stackTraceToString())
                         emit(Either.Left(GenAIException()))
                     }
@@ -500,7 +500,7 @@ class ConversationRepository(
             history = getHistory(conversation.id),
             prompt = Constants.SUGGESTION_PROMPT
         )
-        response.text?.let {
+        response?.let {
             val text = it.trimIndent().removeSurrounding("```").removePrefix("json")
             val suggestions = parser.parseSuggestions(text)
             suggestions?.let { suggestionsResponse ->
@@ -543,22 +543,22 @@ class ConversationRepository(
             )
         }
 
-    private suspend fun getHistory(conversationId: Long): List<Content> {
-        val history = mutableListOf<Content>()
+    private suspend fun getHistory(conversationId: Long): List<HistoryContent> {
+        val history = mutableListOf<HistoryContent>()
         val messageEntities = messageDao.getMessagesForConversation(conversationId)
         messageEntities.map { it.toGenAiMessage() }.forEach { message ->
             when (message) {
                 is GenAiTextMessage -> {
                     history.addAll(
                         listOf(
-                            content(role = "user") { text(message.query) },
-                            content(role = "model") { text(message.response.toString()) }
+                            HistoryContent(role = "user", message =  message.query),
+                            HistoryContent(role = "model", message = message.response.toString())
                         )
                     )
                 }
 
                 is GenAiEntityMessage -> {
-                    history.add(content(role = "user") { text(message.entity.toString()) })
+                    history.add(HistoryContent(role = "user", message = message.entity.toString()))
                 }
             }
         }
@@ -577,7 +577,7 @@ class ConversationRepository(
 
                 val response =
                     firebaseAiApi.sendMessage(history = history, prompt = Constants.TITLE_PROMPT)
-                response.text?.let {
+                response?.let {
                     val text = it.trimIndent().removeSurrounding("```").removePrefix("json")
                     parser.parseTitle(text)?.title
                 }
@@ -594,9 +594,18 @@ class ConversationRepository(
         Logger.e("Checking rate limit")
 
         // Use UTC timezone to avoid timezone inconsistencies
-        val todayString = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).apply {
-            timeZone = TimeZone.getTimeZone("UTC")
-        }.format(Date())
+        val todayString = Clock.System.now()
+            .toLocalDateTime(TimeZone.UTC)
+            .date
+            .format(
+                LocalDate.Format {
+                    year()
+                    char('-')
+                    monthNumber()
+                    char('-')
+                    day()
+                }
+            )
 
         // Capture auth state at the beginning to avoid mid-function changes
         val isUserSignedIn = auth.currentUser != null

@@ -1,24 +1,26 @@
 package com.thejawnpaul.gptinvestor.core.navigation
 
-import android.content.ClipData
-import android.content.Intent
-import android.widget.Toast
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.Clipboard
-import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
+import com.thejawnpaul.gptinvestor.core.utility.ShareService
+import com.thejawnpaul.gptinvestor.core.utility.ToastDuration
+import com.thejawnpaul.gptinvestor.core.utility.ToastManager
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.WebViewScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
@@ -57,7 +59,9 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun SetUpNavGraph(navController: NavHostController) {
     Scaffold { innerPadding ->
-
+        val clipboard = LocalClipboard.current
+        val toastManager by remember { mutableStateOf(ToastManager()) }
+        val shareService by remember { mutableStateOf(ShareService()) }
         NavHost(
             navController = navController,
             startDestination = HomeTabScreen,
@@ -208,8 +212,8 @@ fun SetUpNavGraph(navController: NavHostController) {
                 val detail = backStackEntry.toRoute<CompanyDetailScreen>()
                 val ticker = detail.ticker
                 val state = parentViewModel.selectedCompany.collectAsStateWithLifecycle()
-                val context = LocalContext.current
                 val scope = rememberCoroutineScope()
+                val clipboard = LocalClipboard.current
 
                 LaunchedEffect(Unit) {
                     parentViewModel.companyDetailAction.onEach { action ->
@@ -223,14 +227,8 @@ fun SetUpNavGraph(navController: NavHostController) {
                             }
 
                             is CompanyDetailAction.OnCopy -> {
-                                val clipboard =
-                                    context.getSystemService(Clipboard::class.java)
-                                val clipData = ClipData.newPlainText(
-                                    "",
-                                    action.text
-                                )
-                                clipboard.setPrimaryClip(clipData)
-                                Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+                                clipboard.setClipEntry(action.text.toClipEntry())
+                                toastManager.showToast("Copied", ToastDuration.Short)
                             }
                         }
                     }.launchIn(scope)
@@ -246,7 +244,6 @@ fun SetUpNavGraph(navController: NavHostController) {
             }
 
             composable<ConversationScreen> { navBackStackEntry ->
-                val context = LocalContext.current
                 val viewModel = koinViewModel<ConversationViewModel>()
                 val state = viewModel.conversation.collectAsStateWithLifecycle()
                 val conversation = navBackStackEntry.toRoute<ConversationScreen>()
@@ -265,14 +262,8 @@ fun SetUpNavGraph(navController: NavHostController) {
                             }
 
                             is ConversationAction.OnCopy -> {
-                                val clipboard =
-                                    context.getSystemService(Clipboard::class.java)
-                                val clipData = ClipData.newPlainText(
-                                    "",
-                                    action.text
-                                )
-                                clipboard.setPrimaryClip(clipData)
-                                Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+                                clipboard.setClipEntry(action.text.toClipEntry())
+                                toastManager.showToast("Copied", ToastDuration.Short)
                             }
                         }
                     }.launchIn(scope)
@@ -289,15 +280,13 @@ fun SetUpNavGraph(navController: NavHostController) {
             }
 
             composable<WebViewScreen> { navBackStackEntry ->
-
-                val data = navBackStackEntry.arguments?.getString("url") ?: ""
+                val data = navBackStackEntry.toRoute<WebViewScreen>().url
                 WebViewScreen(url = data, onGoBack = {
                     navController.navigateUp()
                 })
             }
 
             composable<HistoryDetailScreen> { navBackStackEntry ->
-                val context = LocalContext.current
                 val viewModel = koinViewModel<HistoryViewModel>()
                 val state = viewModel.conversation.collectAsStateWithLifecycle()
                 val history = navBackStackEntry.toRoute<HistoryDetailScreen>()
@@ -315,14 +304,8 @@ fun SetUpNavGraph(navController: NavHostController) {
                             }
 
                             is HistoryDetailAction.OnCopy -> {
-                                val clipboard =
-                                    context.getSystemService(ClipboardManager::class.java)
-                                val clipData = ClipData.newPlainText(
-                                    "",
-                                    action.text
-                                )
-                                clipboard.setPrimaryClip(clipData)
-                                Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+                                clipboard.setClipEntry(action.text.toClipEntry())
+                                toastManager.showToast("Copied", ToastDuration.Short)
                             }
                         }
                     }.launchIn(scope)
@@ -343,7 +326,6 @@ fun SetUpNavGraph(navController: NavHostController) {
                 val pickDetail = navBackStackEntry.toRoute<TopPickDetailScreen>()
                 val id = pickDetail.topPickId
                 val scope = rememberCoroutineScope()
-                val context = LocalContext.current
 
                 LaunchedEffect(Unit) {
                     viewModel.actions.onEach { action ->
@@ -353,22 +335,11 @@ fun SetUpNavGraph(navController: NavHostController) {
                             }
 
                             is TopPickAction.OnShare -> {
-                                val sendIntent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/plain"
-                                    putExtra(Intent.EXTRA_SUBJECT, "Top pick")
-                                    putExtra(Intent.EXTRA_TEXT, action.url)
-                                }
-                                context.startActivity(
-                                    Intent.createChooser(
-                                        sendIntent,
-                                        "Share via"
-                                    )
-                                )
+                                shareService.showChooser("Top pick", action.url)
                             }
 
                             is TopPickAction.ShowToast -> {
-                                Toast.makeText(context, action.message, Toast.LENGTH_SHORT)
-                                    .show()
+                                toastManager.showToast(action.message, ToastDuration.Short)
                             }
                         }
                     }.launchIn(scope)
@@ -441,7 +412,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 val viewModel = koinViewModel<TidbitViewModel>()
                 val state = viewModel.tidbitDetailState.collectAsStateWithLifecycle()
                 val scope = rememberCoroutineScope()
-                val context = LocalContext.current
+                val uriHandler = LocalUriHandler.current
                 LaunchedEffect(Unit) {
                     viewModel.tidbitDetailActions.onEach { action ->
                         when (action) {
@@ -451,25 +422,14 @@ fun SetUpNavGraph(navController: NavHostController) {
 
                             is TidbitDetailAction.OnOpenSource -> {
                                 try {
-                                    val intent = Intent(Intent.ACTION_VIEW, action.url.toUri())
-                                    context.startActivity(intent)
+                                    uriHandler.openUri(action.url)
                                 } catch (e: Exception) {
                                     // Toast.makeText(context, "Something went wrong.", Toast.LENGTH_SHORT).show()
                                 }
                             }
 
                             is TidbitDetailAction.OnShare -> {
-                                val sendIntent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/plain"
-                                    putExtra(Intent.EXTRA_SUBJECT, "Tidbit")
-                                    putExtra(Intent.EXTRA_TEXT, action.shareText)
-                                }
-                                context.startActivity(
-                                    Intent.createChooser(
-                                        sendIntent,
-                                        "Share via"
-                                    )
-                                )
+                                shareService.showChooser("Tidbit", action.shareText)
                             }
                         }
                     }.launchIn(scope)
@@ -488,7 +448,6 @@ fun SetUpNavGraph(navController: NavHostController) {
                 val viewModel = koinViewModel<TidbitViewModel>()
                 val state = viewModel.tidbitMainScreenState.collectAsStateWithLifecycle()
                 val scope = rememberCoroutineScope()
-                val context = LocalContext.current
                 LaunchedEffect(Unit) {
                     viewModel.actions.onEach { action ->
                         when (action) {
@@ -497,17 +456,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                             }
 
                             is TidbitAction.OnShare -> {
-                                val sendIntent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/plain"
-                                    putExtra(Intent.EXTRA_SUBJECT, "Tidbit")
-                                    putExtra(Intent.EXTRA_TEXT, action.shareText)
-                                }
-                                context.startActivity(
-                                    Intent.createChooser(
-                                        sendIntent,
-                                        "Share via"
-                                    )
-                                )
+                                shareService.showChooser("Tidbit", action.shareText)
                             }
 
                             is TidbitAction.OnGoToTidbitDetail -> {
@@ -530,7 +479,7 @@ fun SetUpNavGraph(navController: NavHostController) {
             composable<SavedTidbitScreen> {
                 val viewModel = koinViewModel<TidbitViewModel>()
                 val scope = rememberCoroutineScope()
-                val context = LocalContext.current
+
 
                 LaunchedEffect(Unit) {
                     viewModel.actions.onEach { action ->
@@ -546,17 +495,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                             }
 
                             is TidbitAction.OnShare -> {
-                                val sendIntent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/plain"
-                                    putExtra(Intent.EXTRA_SUBJECT, "Tidbit")
-                                    putExtra(Intent.EXTRA_TEXT, action.shareText)
-                                }
-                                context.startActivity(
-                                    Intent.createChooser(
-                                        sendIntent,
-                                        "Share via"
-                                    )
-                                )
+                                shareService.showChooser("Tidbit", action.shareText)
                             }
                         }
                     }.launchIn(scope)

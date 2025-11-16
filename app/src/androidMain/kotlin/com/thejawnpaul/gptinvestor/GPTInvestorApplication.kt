@@ -30,8 +30,10 @@ class GPTInvestorApplication :
             listOf(
                 RemoteModule.module,
                 analyticsModule,
-                authModule
-            ) + coreModules + viewModelModule + useCaseModules
+                authModule,
+                viewModelModule,
+            ).plus(useCaseModules)
+                .plus(coreModules)
         )
     }
 

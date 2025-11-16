@@ -13,7 +13,6 @@ val coreModules = listOf(
     bindingModule,
     coroutinesModule,
     coroutinesScopeModule,
-    databaseModule,
     preferenceModule,
     remoteConfigModule
-)
+).plus(databaseModule)

@@ -72,9 +72,6 @@ kotlin {
             baseName = "Analytics"
             isStatic = true
         }
-        pod("FirebaseCore") {
-            extraOpts += listOf("-compiler-option", "-fmodules")
-        }
         pod("FirebaseAnalytics") {
             extraOpts += listOf("-compiler-option", "-fmodules")
         }

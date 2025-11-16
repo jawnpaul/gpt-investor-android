@@ -23,6 +23,8 @@ import com.thejawnpaul.gptinvestor.core.navigation.SetUpNavGraph
 import com.thejawnpaul.gptinvestor.core.navigation.TidbitDetailScreen
 import com.thejawnpaul.gptinvestor.core.navigation.TidbitScreen
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
+import com.thejawnpaul.gptinvestor.core.utility.ToastDuration
+import com.thejawnpaul.gptinvestor.core.utility.ToastManager
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DefaultAuthenticationScreen
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.OnboardingScreen
 import com.thejawnpaul.gptinvestor.features.splash.AnimatedSplashScreen
@@ -99,23 +101,22 @@ fun App(deepLinkRoute: String?) {
 
                 // if user is not signed in show auth otherwise show onboarding
                 if (isUserSignedIn == false || isUserSignedIn == null) {
+                    val toastManager by remember { mutableStateOf(ToastManager()) }
                     // LOGIN SCREEN
                     DefaultAuthenticationScreen(
                         modifier = Modifier,
                         onAuthSuccess = {
-                            Toast.makeText(
-                                this@MainActivity,
+                            toastManager.showToast(
                                 "Authentication successful",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                                ToastDuration.Short
+                            )
                             // if user first time login, navigate to onboarding screen else navigate to home screen
                         },
                         onAuthFailure = {
-                            Toast.makeText(
-                                this@MainActivity,
+                            toastManager.showToast(
                                 "Authentication failed",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                                ToastDuration.Short
+                            )
                         }
                     )
                 } else {

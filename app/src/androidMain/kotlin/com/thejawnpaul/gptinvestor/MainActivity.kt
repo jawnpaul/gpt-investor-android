@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
+import com.thejawnpaul.gptinvestor.core.utility.setActivityProvider
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -20,7 +21,7 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-
+        setActivityProvider { this }
         setContent {
             var deepLinkRoute by remember { mutableStateOf<String?>(null) }
             // Handle deep link from intent

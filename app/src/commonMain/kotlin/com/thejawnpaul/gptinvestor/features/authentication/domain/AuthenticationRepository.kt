@@ -36,7 +36,6 @@ interface AuthenticationRepository {
 }
 
 class AuthenticationRepositoryImpl(
-    private val auth: FirebaseAuth,
     private val analyticsLogger: AnalyticsLogger,
     private val gptInvestorPreferences: GPTInvestorPreferences,
     private val tokenSyncManager: TokenSyncManager

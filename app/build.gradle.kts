@@ -112,6 +112,7 @@ kotlin {
             implementation(libs.youtube.player)
             implementation(libs.ktor.android)
             implementation(compose.uiTooling)
+            implementation(libs.androidx.paging.runtime.ktx)
         }
         commonMain.dependencies {
             implementation(project(":remote:remote"))
@@ -142,6 +143,7 @@ kotlin {
             implementation(libs.sqlite.bundled)
             implementation(libs.timeAgo)
             implementation(libs.kermit)
+            implementation(libs.androidx.paging.compose)
         }
 
         commonTest.dependencies {
@@ -294,8 +296,6 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.play.services.auth)
     implementation(libs.google.identity)
-    implementation(libs.androidx.paging.runtime.ktx)
-    implementation(libs.androidx.paging.compose)
 
     add("kspCommonMainMetadata", libs.koin.compiler)
     add("kspAndroid", libs.koin.compiler)

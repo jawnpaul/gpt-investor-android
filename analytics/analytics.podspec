@@ -10,7 +10,6 @@ Pod::Spec.new do |spec|
     spec.libraries                = 'c++'
     spec.ios.deployment_target    = '16.0'
     spec.dependency 'FirebaseAnalytics'
-    spec.dependency 'FirebaseCore'
     spec.dependency 'Mixpanel'
                 
     if !Dir.exist?('build/cocoapods/framework/Analytics.framework') || Dir.empty?('build/cocoapods/framework/Analytics.framework')

@@ -4,7 +4,6 @@ import co.touchlab.kermit.Logger
 import com.google.firebase.ai.type.Content
 import com.google.firebase.ai.type.FirebaseAIException
 import com.google.firebase.ai.type.content
-import com.google.firebase.auth.FirebaseAuth
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
@@ -51,7 +50,6 @@ class ConversationRepository(
     private val remoteConfig: RemoteConfig,
     private val firebaseAiApi: FirebaseAiApi,
     private val gptInvestorPreferences: GPTInvestorPreferences,
-    private val auth: FirebaseAuth
 ) : IConversationRepository {
 
     private val rateLimitMutex = Mutex()

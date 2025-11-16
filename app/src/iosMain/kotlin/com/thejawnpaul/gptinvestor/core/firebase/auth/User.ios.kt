@@ -13,6 +13,8 @@ actual class User {
         get() = firUser.displayName()
     actual val providerId: String
         get() = firUser.providerID()
+    actual val photoUrl: String?
+        get() = firUser.photoURL()?.absoluteString
 
     actual suspend fun delete() {
         firUser.deleteWithCompletion(null)

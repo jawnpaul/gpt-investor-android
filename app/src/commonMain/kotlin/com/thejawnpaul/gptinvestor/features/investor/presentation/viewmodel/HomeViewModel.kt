@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
-import com.google.firebase.auth.FirebaseUser
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.core.firebase.auth.User
 import com.thejawnpaul.gptinvestor.core.firebase.remoteconfig.RemoteConfig
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
@@ -272,7 +272,7 @@ class HomeViewModel(
 data class HomeUiState(
     val trendingCompaniesView: TrendingCompaniesView = TrendingCompaniesView(),
     val topPicksView: TopPicksView = TopPicksView(),
-    val currentUser: FirebaseUser? = null,
+    val currentUser: User? = null,
     val chatInput: String? = null,
     val theme: String? = "Dark",
     val requestForNotificationPermission: Boolean? = null,

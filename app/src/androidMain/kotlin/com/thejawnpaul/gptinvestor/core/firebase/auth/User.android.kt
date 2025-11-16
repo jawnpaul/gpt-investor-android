@@ -13,6 +13,8 @@ actual class User {
         get() = firebaseUser.displayName
     actual val providerId: String
         get() = firebaseUser.providerId
+    actual val photoUrl: String?
+        get() = firebaseUser.photoUrl?.toString()
 
     actual suspend fun delete() {
         firebaseUser.delete()

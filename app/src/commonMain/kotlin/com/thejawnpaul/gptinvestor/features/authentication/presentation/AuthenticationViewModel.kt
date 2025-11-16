@@ -5,8 +5,8 @@ import android.content.Context
 import androidx.activity.result.ActivityResult
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseUser
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.core.firebase.auth.User
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -269,7 +269,7 @@ sealed class AuthResult<T> {
 
 data class AuthenticationUIState(
     val isUserSignedIn: Boolean = false,
-    val user: FirebaseUser? = null,
+    val user: User? = null,
     val loading: Boolean = false,
     val errorMessage: String? = null,
     val showLoginInput: Boolean = false,
@@ -280,7 +280,7 @@ data class AuthenticationUIState(
     val enableLoginButton = email.trim().isNotEmpty() && password.trim().isNotEmpty()
 }
 
-data class DrawerState(val user: FirebaseUser? = null, val theme: String? = "Dark")
+data class DrawerState(val user: User? = null, val theme: String? = "Dark")
 
 data class NewAuthenticationUIState(
     val authenticationScreen: AuthenticationScreen = AuthenticationScreen.Login,

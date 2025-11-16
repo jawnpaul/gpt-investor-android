@@ -5,5 +5,6 @@ expect class User {
     val email: String?
     val displayName: String?
     val providerId: String
+    val photoUrl: String?
     suspend fun delete()
 }

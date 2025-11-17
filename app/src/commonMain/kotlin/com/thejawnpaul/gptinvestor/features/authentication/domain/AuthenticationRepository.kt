@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
 interface AuthenticationRepository {
     val currentUser: User?
     suspend fun signUp(activityContext: Context): Flow<Boolean>
-    suspend fun signOut(activityContext: Context)
+    suspend fun signOut()
     fun getAuthState(): Flow<Boolean>
     suspend fun deleteAccount()
     suspend fun loginWithEmailAndPassword(email: String, password: String): Flow<Boolean>
@@ -110,7 +110,7 @@ class AuthenticationRepositoryImpl(
         awaitClose()
     }
 
-    override suspend fun signOut(activityContext: Context) {
+    override suspend fun signOut() {
         try {
             auth.signOut()
             gptInvestorPreferences.clearUserId()

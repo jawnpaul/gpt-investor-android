@@ -58,9 +58,9 @@ class AuthenticationViewModel(
         }
     }
 
-    fun signOut(context: Context) {
+    fun signOut() {
         viewModelScope.launch {
-            authRepository.signOut(context)
+            authRepository.signOut()
         }
     }
 

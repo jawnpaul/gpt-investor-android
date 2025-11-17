@@ -1,6 +1,5 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
@@ -188,7 +187,7 @@ class HomeViewModel(
 
                 is HomeEvent.SignOut -> {
                     viewModelScope.launch {
-                        authenticationRepository.signOut(event.context)
+                        authenticationRepository.signOut()
                     }
                 }
 
@@ -304,7 +303,7 @@ sealed interface HomeEvent {
     data class SelectWaitListOption(val option: String) : HomeEvent
     data object JoinWaitlist : HomeEvent
     data class DefaultPromptClicked(val prompt: DefaultPrompt) : HomeEvent
-    data class SignOut(val context: Context) : HomeEvent
+    data object SignOut : HomeEvent
     data class ClickTidbit(val id: String) : HomeEvent
     data object GoToAllTidbits : HomeEvent
 }

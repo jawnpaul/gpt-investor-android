@@ -22,7 +22,7 @@ jsoup = "1.17.2"
 gemini = "0.9.0"
 richText = "1.0.0-alpha02"
 googleServices = "4.4.2"
-firebaseBom = "33.3.0"
+firebaseBom = "34.7.0"
 crashlytics = "3.0.2"
 truth = "1.4.2"
 mockk = "1.13.9"
@@ -85,6 +85,7 @@ firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashly
 firebase-config = { group = "com.google.firebase", name = "firebase-config" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+firebase-ai = { group = "com.google.firebase", name = "firebase-ai" }
 okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 coroutine-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutineTest" }

@@ -12,8 +12,6 @@ import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepositoryImpl
 import com.thejawnpaul.gptinvestor.features.history.data.repository.HistoryRepository
 import com.thejawnpaul.gptinvestor.features.history.domain.repository.IHistoryRepository
-import com.thejawnpaul.gptinvestor.features.investor.data.repository.InvestorRepository
-import com.thejawnpaul.gptinvestor.features.investor.domain.repository.IInvestorRepository
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepositoryImpl
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
@@ -31,9 +29,6 @@ abstract class BindsModule {
 
     @Binds
     abstract fun providesCompanyRepository(repository: CompanyRepository): ICompanyRepository
-
-    @Binds
-    abstract fun providesInvestorRepository(repository: InvestorRepository): IInvestorRepository
 
     @Binds
     abstract fun providesConversationRepository(repository: ConversationRepository): IConversationRepository

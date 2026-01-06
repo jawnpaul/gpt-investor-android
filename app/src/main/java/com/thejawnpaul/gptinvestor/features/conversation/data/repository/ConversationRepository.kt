@@ -1,15 +1,16 @@
 package com.thejawnpaul.gptinvestor.features.conversation.data.repository
 
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.BlockThreshold
-import com.google.ai.client.generativeai.type.Content
-import com.google.ai.client.generativeai.type.GoogleGenerativeAIException
-import com.google.ai.client.generativeai.type.HarmCategory
-import com.google.ai.client.generativeai.type.SafetySetting
-import com.google.ai.client.generativeai.type.content
-import com.google.ai.client.generativeai.type.generationConfig
+import com.google.firebase.Firebase
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.Content
+import com.google.firebase.ai.type.FirebaseAIException
+import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.HarmBlockThreshold.Companion.MEDIUM_AND_ABOVE
+import com.google.firebase.ai.type.HarmCategory
+import com.google.firebase.ai.type.SafetySetting
+import com.google.firebase.ai.type.content
+import com.google.firebase.ai.type.generationConfig
 import com.google.firebase.auth.FirebaseAuth
-import com.thejawnpaul.gptinvestor.BuildConfig
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
@@ -58,29 +59,25 @@ class ConversationRepository @Inject constructor(
 ) :
     IConversationRepository {
 
-    private val newModel = "gemini-1.5-pro-latest"
-    private val oldModel = "gemini-1.0-pro"
-    private val flashModel = "gemini-2.0-flash"
-
     private val rateLimitMutex = Mutex()
 
-    private val generativeModel = GenerativeModel(
-        modelName = remoteConfig.fetchAndActivateStringValue(Constants.MODEL_NAME_KEY),
-        apiKey = BuildConfig.GEMINI_API_KEY,
-        generationConfig = generationConfig {
-            temperature = 0.2f
-            topK = 1
-            topP = 1f
-            maxOutputTokens = 1024
-        },
-        safetySettings = listOf(
-            SafetySetting(HarmCategory.HARASSMENT, BlockThreshold.MEDIUM_AND_ABOVE),
-            SafetySetting(HarmCategory.HATE_SPEECH, BlockThreshold.MEDIUM_AND_ABOVE),
-            SafetySetting(HarmCategory.SEXUALLY_EXPLICIT, BlockThreshold.MEDIUM_AND_ABOVE),
-            SafetySetting(HarmCategory.DANGEROUS_CONTENT, BlockThreshold.MEDIUM_AND_ABOVE)
-        ),
-        systemInstruction = content { text(Constants.SYSTEM_INSTRUCTIONS) }
-    )
+    val generativeModel = Firebase.ai(backend = GenerativeBackend.googleAI())
+        .generativeModel(
+            modelName = remoteConfig.fetchAndActivateStringValue(Constants.MODEL_NAME_KEY),
+            generationConfig = generationConfig {
+                temperature = 0.2f
+                topK = 1
+                topP = 1f
+                maxOutputTokens = 1024
+            },
+            safetySettings = listOf(
+                SafetySetting(HarmCategory.HARASSMENT, MEDIUM_AND_ABOVE),
+                SafetySetting(HarmCategory.HATE_SPEECH, MEDIUM_AND_ABOVE),
+                SafetySetting(HarmCategory.SEXUALLY_EXPLICIT, MEDIUM_AND_ABOVE),
+                SafetySetting(HarmCategory.DANGEROUS_CONTENT, MEDIUM_AND_ABOVE)
+            ),
+            systemInstruction = content { text(Constants.SYSTEM_INSTRUCTIONS) }
+        )
 
     override suspend fun getDefaultPrompts(): Flow<Either<Failure, List<DefaultPrompt>>> = flow {
         try {
@@ -181,7 +178,7 @@ class ConversationRepository @Inject constructor(
             }
         } catch (e: Exception) {
             when (e) {
-                is GoogleGenerativeAIException -> {
+                is FirebaseAIException -> {
                     emit(Either.Left(GenAIException()))
                     Timber.e(e.stackTraceToString())
                 }
@@ -391,7 +388,7 @@ class ConversationRepository @Inject constructor(
             analyticsLogger.logEvent(eventName = "Query Submitted", params = mapOf())
         } catch (e: Exception) {
             when (e) {
-                is GoogleGenerativeAIException -> {
+                is FirebaseAIException -> {
                     Timber.e(e.stackTraceToString())
                     emit(Either.Left(GenAIException()))
                 }
@@ -510,7 +507,7 @@ class ConversationRepository @Inject constructor(
             }
         } catch (e: Exception) {
             when (e) {
-                is GoogleGenerativeAIException -> {
+                is FirebaseAIException -> {
                     Timber.e(e.stackTraceToString())
                     emit(Either.Left(GenAIException()))
                 }

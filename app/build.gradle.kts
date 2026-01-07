@@ -187,6 +187,8 @@ dependencies {
     implementation(libs.google.identity)
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.ai)
+    implementation(libs.firebase.appcheck.debug)
+    implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.exoplayer)
     implementation(libs.exoplayer.dash)
     implementation(libs.exoplayer.ui)

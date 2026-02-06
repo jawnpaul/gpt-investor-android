@@ -97,4 +97,7 @@ interface ApiService {
     suspend fun removeBookmark(@Body request: TidbitBookmarkRequest): Response<TidbitBookmarkResponse>
     @POST("v1.1/login")
     suspend fun loginWithEmailAndPassword(@Body request: LoginRequest): Response<LoginResponse>
+
+    @POST("v1.1/firebase-login")
+    suspend fun loginWithFirebase(@Body request: FirebaseLoginRequest): Response<LoginResponse>
 }

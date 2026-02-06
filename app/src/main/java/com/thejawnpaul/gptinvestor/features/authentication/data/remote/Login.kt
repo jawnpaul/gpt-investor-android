@@ -23,3 +23,8 @@ data class User(
     @field:Json(name = "email") val email: String?,
     @field:Json(name = "uid") val uid: String?
 )
+
+@JsonClass(generateAdapter = true)
+data class FirebaseLoginRequest(
+    @field:Json(name = "id_token") val idToken: String
+)

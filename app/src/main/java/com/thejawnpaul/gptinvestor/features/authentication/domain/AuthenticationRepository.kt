@@ -16,6 +16,7 @@ import com.thejawnpaul.gptinvestor.BuildConfig
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
+import com.thejawnpaul.gptinvestor.features.authentication.data.remote.FirebaseLoginRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginRequest
 import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
 import com.thejawnpaul.gptinvestor.remote.TokenStorage
@@ -25,6 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -37,6 +39,7 @@ interface AuthenticationRepository {
     suspend fun loginWithEmailAndPassword(email: String, password: String): Boolean
     suspend fun signUpWithEmailAndPassword(email: String, password: String): Flow<Boolean>
     suspend fun loginWithGoogle(activityContext: Context): Flow<Boolean>
+    suspend fun loginWithFirebase(idToken: String): Boolean
 }
 
 class AuthenticationRepositoryImpl @Inject constructor(
@@ -83,10 +86,12 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 val credential =
                     GoogleAuthProvider.getCredential(googleIdTokenCredential.idToken, null)
                 auth.signInWithCredential(credential).addOnCompleteListener { task ->
-                    trySend(task.isSuccessful)
-                    getAuthState()
                     if (task.isSuccessful) {
                         CoroutineScope(Dispatchers.IO).launch {
+                            val idToken = googleIdTokenCredential.idToken
+                            val success = loginWithFirebase(idToken)
+                            trySend(success)
+
                             gptInvestorPreferences.setUserId(auth.currentUser?.uid.toString())
                             gptInvestorPreferences.setIsUserLoggedIn(true)
                             tokenSyncManager.syncToken()
@@ -100,6 +105,8 @@ class AuthenticationRepositoryImpl @Inject constructor(
                                 "sign_up_method" to auth.currentUser?.providerId.toString()
                             )
                         )
+                    } else {
+                        trySend(false)
                     }
                 }
             } else {
@@ -135,15 +142,8 @@ class AuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getAuthState(): Flow<Boolean> = callbackFlow {
-        val authStateListener = FirebaseAuth.AuthStateListener { auth ->
-            trySend(auth.currentUser != null)
-        }
-        auth.addAuthStateListener(authStateListener)
-
-        awaitClose {
-            auth.removeAuthStateListener(authStateListener)
-        }
+    override fun getAuthState(): Flow<Boolean> = flow {
+        emit(tokenStorage.getAccessToken() != null)
     }
 
     override suspend fun deleteAccount() {
@@ -246,10 +246,12 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 val credential =
                     GoogleAuthProvider.getCredential(googleIdTokenCredential.idToken, null)
                 auth.signInWithCredential(credential).addOnCompleteListener { task ->
-                    trySend(task.isSuccessful)
-                    getAuthState()
                     if (task.isSuccessful) {
                         CoroutineScope(Dispatchers.IO).launch {
+                            val idToken = googleIdTokenCredential.idToken
+                            val success = loginWithFirebase(idToken)
+                            trySend(success)
+
                             tokenSyncManager.syncToken()
                         }
                         analyticsLogger.identifyUser(
@@ -261,6 +263,8 @@ class AuthenticationRepositoryImpl @Inject constructor(
                                 "sign_up_method" to auth.currentUser?.providerId.toString()
                             )
                         )
+                    } else {
+                        trySend(false)
                     }
                 }
             } else {
@@ -279,5 +283,25 @@ class AuthenticationRepositoryImpl @Inject constructor(
         }
 
         awaitClose()
+    }
+
+    override suspend fun loginWithFirebase(idToken: String): Boolean {
+        return try {
+            val response = apiService.loginWithFirebase(
+                request = FirebaseLoginRequest(idToken)
+            )
+            if (response.isSuccessful) {
+                response.body()?.let { loginResponse ->
+                    tokenStorage.saveAccessToken(loginResponse.accessToken ?: "")
+                    tokenStorage.saveRefreshToken(loginResponse.refreshToken ?: "")
+                    true
+                } ?: false
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
     }
 }

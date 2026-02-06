@@ -111,11 +111,11 @@ class MainActivity : ComponentActivity() {
                             // LOGIN SCREEN
                             DefaultAuthenticationScreen(
                                 modifier = Modifier,
-                                onAuthSuccess = {
+                                onAuthSuccess = { text ->
                                     Toast.makeText(
                                         this@MainActivity,
-                                        "Authentication successful",
-                                        Toast.LENGTH_SHORT
+                                        text,
+                                        Toast.LENGTH_LONG
                                     ).show()
                                     // if user first time login, navigate to onboarding screen else navigate to home screen
                                 },

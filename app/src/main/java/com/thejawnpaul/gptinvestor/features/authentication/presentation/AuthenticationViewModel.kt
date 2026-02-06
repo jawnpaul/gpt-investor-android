@@ -200,7 +200,7 @@ class AuthenticationViewModel @Inject constructor(
         }
     }
 
-    fun signUpWithEmailAndPassword() {
+    private fun signUpWithEmailAndPassword() {
         val email = _newAuthState.value.email
         val password = _newAuthState.value.password
         _newAuthState.update {
@@ -209,25 +209,24 @@ class AuthenticationViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            authRepository.signUpWithEmailAndPassword(email, password).collect { isSuccessful ->
-                if (isSuccessful) {
-                    _newAuthState.update {
-                        it.copy(
-                            loading = false,
-                            email = "",
-                            password = ""
-                        )
-                    }
-                    _actions.emit(AuthenticationAction.OnSignUp("Sign up Success"))
-                } else {
-                    _newAuthState.update {
-                        it.copy(
-                            loading = false,
-                            errorMessage = "Sign up failed"
-                        )
-                    }
-                    _actions.emit(AuthenticationAction.OnSignUp("Sign up failed"))
+            val signUpResponse = authRepository.signUpWithEmailAndPassword(email, password)
+            if (signUpResponse) {
+                _newAuthState.update {
+                    it.copy(
+                        loading = false,
+                        email = "",
+                        password = ""
+                    )
                 }
+                _actions.emit(AuthenticationAction.OnSignUp("Sign up Success, Please check your email to verify your account"))
+            } else {
+                _newAuthState.update {
+                    it.copy(
+                        loading = false,
+                        errorMessage = "Sign up failed"
+                    )
+                }
+                _actions.emit(AuthenticationAction.OnSignUp("Sign up failed"))
             }
         }
     }

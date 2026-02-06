@@ -18,6 +18,7 @@ import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.FirebaseLoginRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginRequest
+import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpRequest
 import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
 import com.thejawnpaul.gptinvestor.remote.TokenStorage
 import javax.inject.Inject
@@ -37,7 +38,7 @@ interface AuthenticationRepository {
     fun getAuthState(): Flow<Boolean>
     suspend fun deleteAccount()
     suspend fun loginWithEmailAndPassword(email: String, password: String): Boolean
-    suspend fun signUpWithEmailAndPassword(email: String, password: String): Flow<Boolean>
+    suspend fun signUpWithEmailAndPassword(email: String, password: String): Boolean
     suspend fun loginWithGoogle(activityContext: Context): Flow<Boolean>
     suspend fun loginWithFirebase(idToken: String): Boolean
 }
@@ -191,32 +192,33 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 false
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Timber.e(e.stackTraceToString())
             false
         }
     }
 
-    override suspend fun signUpWithEmailAndPassword(email: String, password: String): Flow<Boolean> = callbackFlow {
-        auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-            trySend(task.isSuccessful)
-            if (task.isSuccessful) {
-                CoroutineScope(Dispatchers.IO).launch {
-                    tokenSyncManager.syncToken()
-                }
-                analyticsLogger.identifyUser(
-                    eventName = "Sign Up",
-                    params = mapOf(
-                        "user_id" to auth.currentUser?.uid.toString(),
-                        "email" to email,
-                        "name" to auth.currentUser?.displayName.toString(),
-                        "sign_up_method" to auth.currentUser?.providerId.toString()
+    override suspend fun signUpWithEmailAndPassword(email: String, password: String): Boolean {
+        return try {
+            val response = apiService.signUpWithEmailAndPassword(request = SignUpRequest(email = email, password = password))
+            if (response.isSuccessful) {
+                response.body()?.let { signUpResponse ->
+                    analyticsLogger.identifyUser(
+                        eventName = "Sign Up",
+                        params = mapOf(
+                            "user_id" to signUpResponse.userId.toString(),
+                            "email" to email,
+                            "sign_up_method" to "email_and_password"
+                        )
                     )
-                )
+                    true
+                } ?: false
+            } else {
+                false
             }
-        }.addOnFailureListener {
-            Timber.e(it.stackTraceToString())
+        } catch (e: Exception) {
+            Timber.e(e.stackTraceToString())
+            false
         }
-        awaitClose()
     }
 
     override suspend fun loginWithGoogle(activityContext: Context): Flow<Boolean> = callbackFlow {

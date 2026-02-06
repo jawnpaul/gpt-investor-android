@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -128,16 +127,9 @@ fun SignUpScreen(
                 GPTInvestorButton(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     text = stringResource(R.string.sign_up),
-                    enabled = false,
+                    enabled = enableButton,
                     onClick = onSignUpClick
                 )
-
-                Button(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    onClick = onSignUpWithGoogleClick
-                ) {
-                    Text(text = "Sign up with Google")
-                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),

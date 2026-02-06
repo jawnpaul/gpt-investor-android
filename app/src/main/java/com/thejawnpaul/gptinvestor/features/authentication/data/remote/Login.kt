@@ -28,3 +28,16 @@ data class User(
 data class FirebaseLoginRequest(
     @field:Json(name = "id_token") val idToken: String
 )
+
+@JsonClass(generateAdapter = true)
+data class SignUpRequest(
+    @field:Json(name = "email") val email: String,
+    @field:Json(name = "password") val password: String
+)
+
+@JsonClass(generateAdapter = true)
+data class SignUpResponse(
+    @field:Json(name = "message") val message: String?,
+    @field:Json(name = "status") val status: String?,
+    @field:Json(name = "user_id") val userId: String?
+)

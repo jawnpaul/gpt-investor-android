@@ -1,7 +1,10 @@
 package com.thejawnpaul.gptinvestor.core.api
 
+import com.thejawnpaul.gptinvestor.features.authentication.data.remote.FirebaseLoginRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginResponse
+import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpRequest
+import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRemote
@@ -100,4 +103,7 @@ interface ApiService {
 
     @POST("v1.1/firebase-login")
     suspend fun loginWithFirebase(@Body request: FirebaseLoginRequest): Response<LoginResponse>
+
+    @POST("v1.1/register")
+    suspend fun signUpWithEmailAndPassword(@Body request: SignUpRequest): Response<SignUpResponse>
 }

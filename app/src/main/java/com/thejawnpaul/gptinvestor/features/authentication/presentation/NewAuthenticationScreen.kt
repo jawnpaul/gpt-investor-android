@@ -51,7 +51,7 @@ fun NewAuthenticationScreen(modifier: Modifier, authViewModel: AuthenticationVie
                         authViewModel.handleEvent(AuthenticationEvent.Login)
                     },
                     onSignUpClick = {
-                        authViewModel.handleEvent(AuthenticationEvent.SignUpWithGoogle(context = context))
+                        authViewModel.handleEvent(AuthenticationEvent.GoToSignUpScreen)
                     },
                     onEmailChange = {
                         authViewModel.handleEvent(AuthenticationEvent.EmailChanged(it))

@@ -13,6 +13,14 @@ import javax.inject.Singleton
 object RemoteModule {
     @Provides @Singleton fun provideMoshi(): Moshi = Moshi.Builder().build()
 
-    @Provides @Singleton fun provideRetrofit(moshi: Moshi): Retrofit = RetrofitFactory.create(moshi)
+    @Provides @Singleton fun provideRetrofit(
+        moshi: Moshi,
+        unauthorizedInterceptor: UnauthorizedInterceptor,
+        tokenStorage: TokenStorage,
+        tokenAuthenticator: TokenAuthenticator
+    ): Retrofit = RetrofitFactory.create(moshi, unauthorizedInterceptor, tokenStorage, tokenAuthenticator)
+
+    @Provides @Singleton fun provideTokenApiService(moshi: Moshi): TokenApiService =
+        RetrofitFactory.provideTokenApiService(moshi)
 
 }

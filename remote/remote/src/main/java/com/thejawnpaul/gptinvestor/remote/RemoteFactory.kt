@@ -10,14 +10,23 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 
 internal object RetrofitFactory {
 
-    fun create(moshi: Moshi): Retrofit =
+    fun create(
+        moshi: Moshi,
+        unauthorizedInterceptor: UnauthorizedInterceptor,
+        tokenStorage: TokenStorage,
+        tokenAuthenticator: TokenAuthenticator
+    ): Retrofit =
         Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
-            .delegatingCallFactory { makeOkHttpClient() }
+            .delegatingCallFactory { makeOkHttpClient(unauthorizedInterceptor, tokenStorage, tokenAuthenticator) }
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
 
-    private fun makeOkHttpClient(): OkHttpClient {
+    private fun makeOkHttpClient(
+        unauthorizedInterceptor: UnauthorizedInterceptor,
+        tokenStorage: TokenStorage,
+        tokenAuthenticator: TokenAuthenticator
+    ): OkHttpClient {
         val loggingInterceptor = if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
         } else {
@@ -26,7 +35,9 @@ internal object RetrofitFactory {
 
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
-            .addInterceptor(AuthenticationInterceptor)
+            .addInterceptor(AuthenticationInterceptor(tokenStorage))
+            .addInterceptor(unauthorizedInterceptor)
+            .authenticator(tokenAuthenticator)
             .build()
     }
 
@@ -34,15 +45,34 @@ internal object RetrofitFactory {
     private inline fun Retrofit.Builder.delegatingCallFactory(
         delegate: dagger.Lazy<OkHttpClient>
     ): Retrofit.Builder = callFactory { delegate.get().newCall(it) }
+
+    fun provideTokenApiService(moshi: Moshi): TokenApiService {
+        val loggingInterceptor = if (BuildConfig.DEBUG) {
+            HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
+        } else {
+            HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.NONE }
+        }
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl(BuildConfig.BASE_URL)
+            .client(client)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(TokenApiService::class.java)
+    }
 }
 
-private object AuthenticationInterceptor : Interceptor {
+private class AuthenticationInterceptor(private val tokenStorage: TokenStorage) : Interceptor {
 
-    private const val TOKEN_TYPE = "Bearer "
-    private const val AUTH_HEADER = "Authorization"
+    private val TOKEN_TYPE = "Bearer "
+    private val AUTH_HEADER = "Authorization"
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        val token = BuildConfig.ACCESS_TOKEN.takeIf { it.isNotEmpty() }
+        val token = tokenStorage.getAccessToken()
         val request = chain.request()
         return if (token != null) {
             val interceptedRequest =

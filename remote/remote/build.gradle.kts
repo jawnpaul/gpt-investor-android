@@ -17,14 +17,10 @@ android {
         release {
             val baseUrl: String = localProperties.getProperty("BASE_URL") ?: ""
             buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
-            val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
-            buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
         }
         debug {
-            val baseUrl: String = localProperties.getProperty("BASE_URL") ?: ""
+            val baseUrl: String = localProperties.getProperty("BASE_URL_DEV") ?: ""
             buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
-            val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
-            buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
         }
     }
     compileOptions {

@@ -30,6 +30,8 @@ class GPTInvestorPreferences @Inject constructor(@ApplicationContext private val
             booleanPreferencesKey("is_user_on_model_waitlist_preference")
         private val FCM_TOKEN_KEY = stringPreferencesKey("fcm_token_preference")
         private val IS_TOKEN_SYNCED_KEY = booleanPreferencesKey("is_token_synced_preference")
+        private val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token_preference")
+        private val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token_preference")
         private val Context.dataStore by preferencesDataStore("gpt_investor_preferences")
     }
 
@@ -172,6 +174,38 @@ class GPTInvestorPreferences @Inject constructor(@ApplicationContext private val
     suspend fun setIsTokenSynced(isSynced: Boolean) {
         dataStore.edit { preferences ->
             preferences[IS_TOKEN_SYNCED_KEY] = isSynced
+        }
+    }
+
+    val accessToken: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[ACCESS_TOKEN_KEY]
+    }
+
+    suspend fun setAccessToken(token: String) {
+        dataStore.edit { preferences ->
+            preferences[ACCESS_TOKEN_KEY] = token
+        }
+    }
+
+    suspend fun clearAccessToken() {
+        dataStore.edit { preferences ->
+            preferences.remove(ACCESS_TOKEN_KEY)
+        }
+    }
+
+    val refreshToken: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[REFRESH_TOKEN_KEY]
+    }
+
+    suspend fun setRefreshToken(token: String) {
+        dataStore.edit { preferences ->
+            preferences[REFRESH_TOKEN_KEY] = token
+        }
+    }
+
+    suspend fun clearRefreshToken() {
+        dataStore.edit { preferences ->
+            preferences.remove(REFRESH_TOKEN_KEY)
         }
     }
 }

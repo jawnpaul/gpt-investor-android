@@ -14,8 +14,11 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.thejawnpaul.gptinvestor.BuildConfig
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.core.api.ApiService
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
+import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginRequest
 import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
+import com.thejawnpaul.gptinvestor.remote.TokenStorage
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +34,7 @@ interface AuthenticationRepository {
     suspend fun signOut(activityContext: Context)
     fun getAuthState(): Flow<Boolean>
     suspend fun deleteAccount()
-    suspend fun loginWithEmailAndPassword(email: String, password: String): Flow<Boolean>
+    suspend fun loginWithEmailAndPassword(email: String, password: String): Boolean
     suspend fun signUpWithEmailAndPassword(email: String, password: String): Flow<Boolean>
     suspend fun loginWithGoogle(activityContext: Context): Flow<Boolean>
 }
@@ -40,7 +43,9 @@ class AuthenticationRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth,
     private val analyticsLogger: AnalyticsLogger,
     private val gptInvestorPreferences: GPTInvestorPreferences,
-    private val tokenSyncManager: TokenSyncManager
+    private val tokenSyncManager: TokenSyncManager,
+    private val apiService: ApiService,
+    private val tokenStorage: TokenStorage
 ) :
     AuthenticationRepository {
     override val currentUser: FirebaseUser?
@@ -150,35 +155,45 @@ class AuthenticationRepositoryImpl @Inject constructor(
             gptInvestorPreferences.clearThemePreference()
             gptInvestorPreferences.clearIsFirstInstall()
             gptInvestorPreferences.clearIsUserOnModelWaitlist()
+            gptInvestorPreferences.clearAccessToken()
+            gptInvestorPreferences.clearRefreshToken()
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    override suspend fun loginWithEmailAndPassword(email: String, password: String): Flow<Boolean> = callbackFlow {
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                trySend(task.isSuccessful)
-                getAuthState()
-                if (task.isSuccessful) {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        gptInvestorPreferences.setUserId(auth.currentUser?.uid.toString())
-                        gptInvestorPreferences.setIsUserLoggedIn(true)
-                        tokenSyncManager.syncToken()
-                    }
+    override suspend fun loginWithEmailAndPassword(email: String, password: String): Boolean {
+        return try {
+            val response = apiService.loginWithEmailAndPassword(
+                request = LoginRequest(
+                    email,
+                    password
+                )
+            )
+            if (response.isSuccessful) {
+                response.body()?.let { loginResponse ->
+                    gptInvestorPreferences.setUserId(loginResponse.user?.uid.toString())
+                    gptInvestorPreferences.setIsUserLoggedIn(true)
+                    tokenSyncManager.syncToken()
+                    tokenStorage.saveAccessToken(loginResponse.accessToken ?: "")
+                    tokenStorage.saveRefreshToken(loginResponse.refreshToken ?: "")
+
                     analyticsLogger.identifyUser(
                         eventName = "Log in",
                         params = mapOf(
-                            "user_id" to auth.currentUser?.uid.toString(),
-                            "email" to email
+                            "user_id" to loginResponse.user?.uid.toString(),
+                            "email" to loginResponse.user?.email.toString()
                         )
                     )
-                }
+                    true
+                } ?: false
+            } else {
+                false
             }
-            .addOnFailureListener { e ->
-                Timber.e(e.stackTraceToString())
-            }
-        awaitClose()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
     }
 
     override suspend fun signUpWithEmailAndPassword(email: String, password: String): Flow<Boolean> = callbackFlow {

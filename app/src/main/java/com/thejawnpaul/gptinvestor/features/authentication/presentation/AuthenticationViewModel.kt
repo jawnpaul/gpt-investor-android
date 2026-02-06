@@ -98,17 +98,16 @@ class AuthenticationViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            authRepository.loginWithEmailAndPassword(email, password).collect { isSuccessful ->
-                if (isSuccessful) {
-                    _authState.update {
-                        it.copy(
-                            loading = false,
-                            user = authRepository.currentUser
-                        )
-                    }
-                } else {
-                    _authState.update { it.copy(loading = false, errorMessage = "Login failed") }
+            val loginSuccess = authRepository.loginWithEmailAndPassword(email, password)
+            if (loginSuccess) {
+                _authState.update {
+                    it.copy(
+                        loading = false,
+                        user = authRepository.currentUser
+                    )
                 }
+            } else {
+                _authState.update { it.copy(loading = false, errorMessage = "Login failed") }
             }
         }
     }
@@ -184,20 +183,19 @@ class AuthenticationViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            authRepository.loginWithEmailAndPassword(email, password).collect { isSuccessful ->
-                if (isSuccessful) {
-                    _newAuthState.update {
-                        it.copy(
-                            loading = false,
-                            email = "",
-                            password = ""
-                        )
-                    }
-                    _actions.emit(AuthenticationAction.OnLogin("Login Success"))
-                } else {
-                    _actions.emit(AuthenticationAction.OnLogin("Login failed"))
-                    _newAuthState.update { it.copy(loading = false, errorMessage = "Login failed") }
+            val loginSuccess = authRepository.loginWithEmailAndPassword(email, password)
+            if (loginSuccess) {
+                _newAuthState.update {
+                    it.copy(
+                        loading = false,
+                        email = "",
+                        password = ""
+                    )
                 }
+                _actions.emit(AuthenticationAction.OnLogin("Login Success"))
+            } else {
+                _actions.emit(AuthenticationAction.OnLogin("Login failed"))
+                _newAuthState.update { it.copy(loading = false, errorMessage = "Login failed") }
             }
         }
     }

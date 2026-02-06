@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.core.di
 
+import com.thejawnpaul.gptinvestor.core.preferences.TokenStorageImpl
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepositoryImpl
 import com.thejawnpaul.gptinvestor.features.company.data.repository.CompanyRepository
@@ -18,6 +19,8 @@ import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepositoryImpl
 import com.thejawnpaul.gptinvestor.features.toppick.data.repository.TopPickRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
+import com.thejawnpaul.gptinvestor.remote.TokenStorage
+import com.thejawnpaul.gptinvestor.remote.UnauthorizedCallback
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -52,5 +55,11 @@ abstract class BindsModule {
     abstract fun providesModelsRepository(repository: ModelsRepositoryImpl): ModelsRepository
 
     @Binds
+    abstract fun providesUnauthorizedCallback(callbackImpl: UnauthorizedCallbackImpl): UnauthorizedCallback
+
+    @Binds
     abstract fun providesTidbitRepository(repository: TidbitRepositoryImpl): TidbitRepository
+
+    @Binds
+    abstract fun providesTokenStorage(storageImpl: TokenStorageImpl): TokenStorage
 }

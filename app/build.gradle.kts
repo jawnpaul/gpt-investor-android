@@ -67,9 +67,6 @@ android {
             val baseUrl: String = localProperties.getProperty("BASE_URL") ?: ""
             buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
 
-            val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
-            buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
-
             val webClientId: String = localProperties.getProperty("WEB_CLIENT_ID_PROD") ?: ""
             buildConfigField("String", "WEB_CLIENT_ID", "\"$webClientId\"")
 
@@ -84,11 +81,8 @@ android {
             val geminiApiKey: String = localProperties.getProperty("GEMINI_DEBUG_KEY") ?: ""
             buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
 
-            val baseUrl: String = localProperties.getProperty("BASE_URL") ?: ""
+            val baseUrl: String = localProperties.getProperty("BASE_URL_DEV") ?: ""
             buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
-
-            val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
-            buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
 
             val webClientId: String = localProperties.getProperty("WEB_CLIENT_ID_DEV") ?: ""
             buildConfigField("String", "WEB_CLIENT_ID", "\"$webClientId\"")
@@ -186,7 +180,6 @@ dependencies {
     implementation(libs.androidx.play.services.auth)
     implementation(libs.google.identity)
     implementation(libs.firebase.messaging)
-    implementation(libs.firebase.ai)
     implementation(libs.firebase.appcheck.debug)
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.exoplayer)

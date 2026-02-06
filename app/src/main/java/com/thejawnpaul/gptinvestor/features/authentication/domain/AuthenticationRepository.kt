@@ -37,10 +37,9 @@ interface AuthenticationRepository {
     suspend fun signOut(activityContext: Context)
     fun getAuthState(): Flow<Boolean>
     suspend fun deleteAccount()
-    suspend fun loginWithEmailAndPassword(email: String, password: String): Boolean
-    suspend fun signUpWithEmailAndPassword(email: String, password: String): Boolean
+    suspend fun loginWithEmailAndPassword(email: String, password: String): Result<String>
+    suspend fun signUpWithEmailAndPassword(email: String, password: String): Result<String>
     suspend fun loginWithGoogle(activityContext: Context): Flow<Boolean>
-    suspend fun loginWithFirebase(idToken: String): Boolean
 }
 
 class AuthenticationRepositoryImpl @Inject constructor(
@@ -163,7 +162,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun loginWithEmailAndPassword(email: String, password: String): Boolean {
+    override suspend fun loginWithEmailAndPassword(email: String, password: String): Result<String> {
         return try {
             val response = apiService.loginWithEmailAndPassword(
                 request = LoginRequest(
@@ -186,20 +185,29 @@ class AuthenticationRepositoryImpl @Inject constructor(
                             "email" to loginResponse.user?.email.toString()
                         )
                     )
-                    true
-                } ?: false
+                    Result.success(loginResponse.message ?: "Login successful")
+                } ?: Result.failure(Exception(response.body()?.message ?: "Login failed"))
             } else {
-                false
+                response.errorBody()?.let { error ->
+
+                    val errorMessage = extractMessageFromErrorBody(error.string()) ?: "An unknown error occurred."
+                    Result.failure(Exception(errorMessage))
+                } ?: Result.failure(Exception(response.body()?.message ?: "Login failed"))
             }
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
-            false
+            Result.failure(e)
         }
     }
 
-    override suspend fun signUpWithEmailAndPassword(email: String, password: String): Boolean {
+    override suspend fun signUpWithEmailAndPassword(email: String, password: String): Result<String> {
         return try {
-            val response = apiService.signUpWithEmailAndPassword(request = SignUpRequest(email = email, password = password))
+            val response = apiService.signUpWithEmailAndPassword(
+                request = SignUpRequest(
+                    email = email,
+                    password = password
+                )
+            )
             if (response.isSuccessful) {
                 response.body()?.let { signUpResponse ->
                     analyticsLogger.identifyUser(
@@ -210,14 +218,18 @@ class AuthenticationRepositoryImpl @Inject constructor(
                             "sign_up_method" to "email_and_password"
                         )
                     )
-                    true
-                } ?: false
+                    Result.success(signUpResponse.message ?: "Sign up successful")
+                } ?: Result.failure(Exception(response.body()?.message ?: "Sign up failed"))
             } else {
-                false
+                response.errorBody()?.let { error ->
+
+                    val errorMessage = extractMessageFromErrorBody(error.string()) ?: "An unknown error occurred."
+                    Result.failure(Exception(errorMessage))
+                } ?: Result.failure(Exception(response.body()?.message ?: "Sign up failed"))
             }
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
-            false
+            Result.failure(e)
         }
     }
 
@@ -287,7 +299,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
         awaitClose()
     }
 
-    override suspend fun loginWithFirebase(idToken: String): Boolean {
+    private suspend fun loginWithFirebase(idToken: String): Boolean {
         return try {
             val response = apiService.loginWithFirebase(
                 request = FirebaseLoginRequest(idToken)
@@ -304,6 +316,18 @@ class AuthenticationRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             e.printStackTrace()
             false
+        }
+    }
+
+    private fun extractMessageFromErrorBody(errorBody: String): String? {
+        return try {
+            // This is a simple manual parsing. For a more robust solution, use Moshi.
+            // Example error JSON: {"message": "Invalid credentials"}
+            val json = org.json.JSONObject(errorBody)
+            json.getString("message")
+        } catch (e: Exception) {
+            Timber.e("Failed to parse error body: $errorBody")
+            null
         }
     }
 }

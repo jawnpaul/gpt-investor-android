@@ -44,7 +44,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 @Composable
-fun DefaultAuthenticationScreen(modifier: Modifier, onAuthSuccess: (String) -> Unit, onAuthFailure: () -> Unit, authViewModel: AuthenticationViewModel = hiltViewModel()) {
+fun DefaultAuthenticationScreen(modifier: Modifier, onAuthSuccess: (String) -> Unit, onAuthFailure: (String) -> Unit, authViewModel: AuthenticationViewModel = hiltViewModel()) {
     var showDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
@@ -60,7 +60,7 @@ fun DefaultAuthenticationScreen(modifier: Modifier, onAuthSuccess: (String) -> U
                     if (action.message.contains("success", ignoreCase = true)) {
                         onAuthSuccess(action.message)
                     } else {
-                        onAuthFailure()
+                        onAuthFailure(action.message)
                     }
                 }
             }
@@ -87,7 +87,7 @@ fun DefaultAuthenticationScreen(modifier: Modifier, onAuthSuccess: (String) -> U
                         onAuthSuccess(message)
                         showDialog = false
                     } else {
-                        onAuthFailure()
+                        onAuthFailure(message)
                         showDialog = false
                     }
                 }

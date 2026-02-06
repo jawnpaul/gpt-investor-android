@@ -119,10 +119,10 @@ class MainActivity : ComponentActivity() {
                                     ).show()
                                     // if user first time login, navigate to onboarding screen else navigate to home screen
                                 },
-                                onAuthFailure = {
+                                onAuthFailure = { text ->
                                     Toast.makeText(
                                         this@MainActivity,
-                                        "Authentication failed",
+                                        text,
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }

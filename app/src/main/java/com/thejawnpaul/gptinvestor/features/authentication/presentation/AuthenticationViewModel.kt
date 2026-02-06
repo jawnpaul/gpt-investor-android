@@ -99,7 +99,7 @@ class AuthenticationViewModel @Inject constructor(
         }
         viewModelScope.launch {
             val loginSuccess = authRepository.loginWithEmailAndPassword(email, password)
-            if (loginSuccess) {
+            if (loginSuccess.isSuccess) {
                 _authState.update {
                     it.copy(
                         loading = false,
@@ -107,7 +107,12 @@ class AuthenticationViewModel @Inject constructor(
                     )
                 }
             } else {
-                _authState.update { it.copy(loading = false, errorMessage = "Login failed") }
+                _authState.update {
+                    it.copy(
+                        loading = false,
+                        errorMessage = loginSuccess.exceptionOrNull()?.message
+                    )
+                }
             }
         }
     }
@@ -184,7 +189,7 @@ class AuthenticationViewModel @Inject constructor(
         }
         viewModelScope.launch {
             val loginSuccess = authRepository.loginWithEmailAndPassword(email, password)
-            if (loginSuccess) {
+            if (loginSuccess.isSuccess) {
                 _newAuthState.update {
                     it.copy(
                         loading = false,
@@ -194,7 +199,7 @@ class AuthenticationViewModel @Inject constructor(
                 }
                 _actions.emit(AuthenticationAction.OnLogin("Login Success"))
             } else {
-                _actions.emit(AuthenticationAction.OnLogin("Login failed"))
+                _actions.emit(AuthenticationAction.OnLogin(loginSuccess.exceptionOrNull()?.message.toString()))
                 _newAuthState.update { it.copy(loading = false, errorMessage = "Login failed") }
             }
         }
@@ -210,7 +215,7 @@ class AuthenticationViewModel @Inject constructor(
         }
         viewModelScope.launch {
             val signUpResponse = authRepository.signUpWithEmailAndPassword(email, password)
-            if (signUpResponse) {
+            if (signUpResponse.isSuccess) {
                 _newAuthState.update {
                     it.copy(
                         loading = false,
@@ -226,7 +231,7 @@ class AuthenticationViewModel @Inject constructor(
                         errorMessage = "Sign up failed"
                     )
                 }
-                _actions.emit(AuthenticationAction.OnSignUp("Sign up failed"))
+                _actions.emit(AuthenticationAction.OnSignUp(signUpResponse.exceptionOrNull()?.message.toString()))
             }
         }
     }

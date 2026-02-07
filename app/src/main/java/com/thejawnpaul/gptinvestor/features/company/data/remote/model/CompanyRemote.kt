@@ -41,20 +41,20 @@ data class CompanyDetailRemoteRequest(
 @JsonClass(generateAdapter = true)
 data class CompanyDetailRemoteResponse(
     @field:Json(name = "ticker") val ticker: String,
-    @field:Json(name = "summary") val about: String,
-    @field:Json(name = "market_cap") val marketCap: Long,
-    @field:Json(name = "news") val news: List<CompanyNews>,
-    @field:Json(name = "pe_ratio") val peRatio: Float,
-    @field:Json(name = "percentage_change") val change: Float,
-    @field:Json(name = "revenue") val revenue: Long,
-    @field:Json(name = "current_price") val price: Float,
-    @field:Json(name = "historical_data") val historicalData: List<HistoricalData>,
-    @field:Json(name = "company_name") val name: String,
-    @field:Json(name = "logo_url") val imageUrl: String
+    @field:Json(name = "summary") val about: String? = null,
+    @field:Json(name = "market_cap") val marketCap: Long? = null,
+    @field:Json(name = "news") val news: List<CompanyNews>? = null,
+    @field:Json(name = "pe_ratio") val peRatio: Float? = null,
+    @field:Json(name = "percentage_change") val change: Float? = null,
+    @field:Json(name = "revenue") val revenue: Long? = null,
+    @field:Json(name = "current_price") val price: Float? = null,
+    @field:Json(name = "historical_data") val historicalData: List<HistoricalData>? = null,
+    @field:Json(name = "company_name") val name: String? = null,
+    @field:Json(name = "logo_url") val imageUrl: String? = null
 ) {
     val newsSourcesString = buildString {
         appendLine("- [Yahoo finance](https://finance.yahoo.com/quote/$ticker)")
-        news.forEach { appendLine("- [${it.publisher}](${it.link})") }
+        news?.forEach { appendLine("- [${it.publisher}](${it.link})") }
     }
 }
 

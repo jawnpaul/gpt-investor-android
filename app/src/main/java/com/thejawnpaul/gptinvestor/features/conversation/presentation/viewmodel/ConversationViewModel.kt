@@ -173,7 +173,6 @@ class ConversationViewModel @Inject constructor(
         conversation as StructuredConversation
 
         selectedConversationId.update {
-            Timber.e(conversation.id.toString())
             conversation.id
         }
 

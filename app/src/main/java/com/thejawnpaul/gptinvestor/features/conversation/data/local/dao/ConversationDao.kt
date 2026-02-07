@@ -18,6 +18,9 @@ interface ConversationDao {
     @Query("SELECT * FROM conversation_table WHERE conversationId =:id")
     suspend fun getSingleConversation(id: Long): ConversationEntity?
 
+    @Query("SELECT * FROM conversation_table WHERE remoteId =:remoteId")
+    suspend fun getConversationByRemoteId(remoteId: String): ConversationEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertConversation(conversation: ConversationEntity): Long
 

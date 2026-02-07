@@ -112,13 +112,13 @@ class CompanyViewModel @Inject constructor(
                                 response = company
                             ),
                             loading = false,
-                            companyName = company.name,
+                            companyName = company.name ?: "",
                             header = CompanyHeaderPresentation(
                                 companyTicker = company.ticker,
-                                companyLogo = company.imageUrl,
-                                price = company.price,
-                                percentageChange = company.change,
-                                companyName = company.name
+                                companyLogo = company.imageUrl ?: "",
+                                price = company.price ?: 0.0f,
+                                percentageChange = company.change ?: 0.0f,
+                                companyName = company.name ?: ""
                             )
                         )
                     }

@@ -28,7 +28,7 @@ internal object RetrofitFactory {
         tokenAuthenticator: TokenAuthenticator
     ): OkHttpClient {
         val loggingInterceptor = if (BuildConfig.DEBUG) {
-            HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
+            HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.HEADERS }
         } else {
             HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.NONE }
         }

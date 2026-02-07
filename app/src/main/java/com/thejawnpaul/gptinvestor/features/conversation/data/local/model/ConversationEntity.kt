@@ -3,17 +3,22 @@ package com.thejawnpaul.gptinvestor.features.conversation.data.local.model
 import androidx.room.DatabaseView
 import androidx.room.Embedded
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 
-@Entity(tableName = "conversation_table")
+@Entity(
+    tableName = "conversation_table",
+    indices = [Index(value = ["remoteId"], unique = true)]
+)
 data class ConversationEntity(
     @PrimaryKey(autoGenerate = true)
     val conversationId: Long = 0,
     val title: String,
     val createdAt: Long,
     val tokenCount: Int = 0,
-    val lastMessageTimestamp: Long? = null
+    val lastMessageTimestamp: Long? = null,
+    val remoteId: String? = null
 )
 
 data class ConversationWithMessages(

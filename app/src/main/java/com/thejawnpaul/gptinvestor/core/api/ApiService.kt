@@ -15,12 +15,10 @@ import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyRem
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.TrendingRemote
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.AddToWaitlistRequest
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.AddToWaitlistResponse
-import com.thejawnpaul.gptinvestor.features.conversation.data.remote.ChatRequest
-import com.thejawnpaul.gptinvestor.features.conversation.data.remote.ConversationTitleResponse
+import com.thejawnpaul.gptinvestor.features.conversation.data.remote.AiChatRequest
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.DefaultPromptRemote
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityRequest
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityResponse
-import com.thejawnpaul.gptinvestor.features.conversation.data.remote.SuggestionResponse
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenResponse
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.AllTidbitResponse
@@ -98,6 +96,11 @@ interface ApiService {
 
     @POST("v1/tidbit/unbookmark-tidbit")
     suspend fun removeBookmark(@Body request: TidbitBookmarkRequest): Response<TidbitBookmarkResponse>
+
+    @Streaming
+    @POST("v1/ai/chat")
+    suspend fun chatAiResponse(@Body request: AiChatRequest): Response<ResponseBody>
+
     @POST("v1.1/login")
     suspend fun loginWithEmailAndPassword(@Body request: LoginRequest): Response<LoginResponse>
 

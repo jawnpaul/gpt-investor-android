@@ -101,7 +101,7 @@ class CompanyRepository @Inject constructor(
                     emit(Either.Right(it))
                     analyticsLogger.logEvent(
                         eventName = "Company Selected",
-                        params = mapOf("company_ticker" to ticker, "company_name" to it.name)
+                        params = mapOf("company_ticker" to ticker, "company_name" to it.name.toString())
                     )
                 }
             }

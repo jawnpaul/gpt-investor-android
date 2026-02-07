@@ -276,10 +276,10 @@ fun CompanyDetailTab(modifier: Modifier, company: CompanyDetailRemoteResponse, o
                 0 -> {
                     CompanyHistoryGraph(
                         modifier = Modifier,
-                        historicalData = company.historicalData,
-                        companySummary = company.about,
-                        companyName = company.name,
-                        sources = company.news.map { it.toPresentation() },
+                        historicalData = company.historicalData ?: emptyList(),
+                        companySummary = company.about ?: "",
+                        companyName = company.name ?: "",
+                        sources = company.news?.map { it.toPresentation() } ?: emptyList(),
                         onClickSources = onClickSources
                     )
                 }
@@ -287,16 +287,16 @@ fun CompanyDetailTab(modifier: Modifier, company: CompanyDetailRemoteResponse, o
                 1 -> {
                     CompanyKeyRatios(
                         modifier = Modifier,
-                        marketCap = company.marketCap,
-                        peRatio = company.peRatio,
-                        revenue = company.revenue
+                        marketCap = company.marketCap ?: 1L,
+                        peRatio = company.peRatio ?: 0.0F,
+                        revenue = company.revenue ?: 1L
                     )
                 }
 
                 2 -> {
                     CompanyDetailsNews(
                         modifier = Modifier,
-                        news = company.news.map { it.toPresentation() },
+                        news = company.news?.map { it.toPresentation() } ?: emptyList(),
                         onClick = onClickNews
                     )
                 }

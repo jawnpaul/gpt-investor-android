@@ -126,8 +126,7 @@ class ConversationRepository @Inject constructor(
                     )
                 }
             } else {
-                // Handle rate limit error
-                emit(Either.Left(Failure.ServerError))
+                emit(Either.Left(mapHttpCodeToFailure(chatResponse.code())))
             }
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
@@ -180,7 +179,7 @@ class ConversationRepository @Inject constructor(
                     )
                 }
             } else {
-                emit(Either.Left(Failure.ServerError))
+                emit(Either.Left(mapHttpCodeToFailure(chatResponse.code())))
             }
 
             analyticsLogger.logEvent(eventName = "Query Submitted", params = mapOf())
@@ -254,7 +253,7 @@ class ConversationRepository @Inject constructor(
                     handleSseStream(responseBody, conversation, prompt.query, newMessageId)
                 }
             } else {
-                emit(Either.Left(Failure.ServerError))
+                emit(Either.Left(mapHttpCodeToFailure(chatResponse.code())))
             }
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
@@ -412,7 +411,7 @@ class ConversationRepository @Inject constructor(
                         "error" -> {
                             errorAdapter.fromJson(data)?.error?.let { error ->
                                 Timber.e("SSE Error: $error")
-                                emit(Either.Left(Failure.ServerError))
+                                emit(Either.Left(mapSseErrorToFailure(error)))
                             }
                         }
 
@@ -442,6 +441,23 @@ class ConversationRepository @Inject constructor(
         } catch (e: Exception) {
             Timber.e(e, "Error during SSE stream")
             emit(Either.Left(Failure.ServerError))
+        }
+    }
+
+    private fun mapHttpCodeToFailure(code: Int): Failure {
+        return when (code) {
+            429 -> Failure.RateLimitExceeded
+            413 -> Failure.ContextLimitReached
+            else -> Failure.ServerError
+        }
+    }
+
+    private fun mapSseErrorToFailure(error: String): Failure {
+        val normalized = error.lowercase()
+        return when {
+            normalized.contains("429") || normalized.contains("rate limit") -> Failure.RateLimitExceeded
+            normalized.contains("413") || normalized.contains("context limit") -> Failure.ContextLimitReached
+            else -> Failure.ServerError
         }
     }
 }

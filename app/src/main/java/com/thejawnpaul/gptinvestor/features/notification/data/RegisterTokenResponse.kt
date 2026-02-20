@@ -11,6 +11,5 @@ data class RegisterTokenResponse(
 
 @JsonClass(generateAdapter = true)
 data class RegisterTokenRequest(
-    @field:Json(name = "token")val token: String? = null,
-    @field:Json(name = "user_id")val userId: String? = null
+    @field:Json(name = "token")val token: String? = null
 )

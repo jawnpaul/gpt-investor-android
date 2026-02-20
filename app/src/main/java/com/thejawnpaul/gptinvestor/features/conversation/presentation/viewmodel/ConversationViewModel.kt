@@ -84,6 +84,7 @@ class ConversationViewModel @Inject constructor(
         }
         getDefaultPromptResponseUseCase(prompt) {
             it.onFailure {
+                handleConversationFailure(it)
             }
             it.onSuccess { result ->
                 result as StructuredConversation
@@ -158,9 +159,23 @@ class ConversationViewModel @Inject constructor(
     }
 
     private fun handleInputResponseFailure(failure: Failure) {
+        handleConversationFailure(failure)
+    }
+
+    private fun handleConversationFailure(failure: Failure) {
         when (failure) {
             is GenAIException -> {
                 Timber.e("AI exception")
+            }
+
+            is Failure.RateLimitExceeded -> {
+                conversationViewMutableStateFlow.update { state ->
+                    state.copy(
+                        loading = false,
+                        showRateLimitBottomSheet = true
+                    )
+                }
+                Timber.e("Rate limit exceeded")
             }
 
             else -> {
@@ -223,13 +238,21 @@ class ConversationViewModel @Inject constructor(
                     joinModelWaitlist(it)
                 }
             }
+
             is ConversationEvent.SelectWaitlistOption -> {
                 selectWaitListOption(event.option)
             }
+
             is ConversationEvent.UpgradeModel -> {
                 conversationViewMutableStateFlow.update { it.copy(showWaitListBottomSheet = event.showBottomSheet) }
                 event.modelId?.let {
                     upgradeModelId = it
+                }
+            }
+
+            is ConversationEvent.ShowRateLimitBottomSheet -> {
+                conversationViewMutableStateFlow.update {
+                    it.copy(showRateLimitBottomSheet = event.showBottomSheet)
                 }
             }
         }
@@ -310,7 +333,10 @@ sealed interface ConversationEvent {
     data class ModelChanged(val model: AvailableModel) : ConversationEvent
     data class SelectWaitlistOption(val option: String) : ConversationEvent
     data object JoinWaitlist : ConversationEvent
-    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : ConversationEvent
+    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) :
+        ConversationEvent
+
+    data class ShowRateLimitBottomSheet(val showBottomSheet: Boolean) : ConversationEvent
 }
 
 sealed interface ConversationAction {

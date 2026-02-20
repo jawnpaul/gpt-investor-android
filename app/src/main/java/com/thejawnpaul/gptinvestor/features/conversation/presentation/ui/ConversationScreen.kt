@@ -66,6 +66,21 @@ fun ConversationScreen(
         }
     }
 
+    if (state.showRateLimitBottomSheet) {
+        GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
+            onEvent(ConversationEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
+        }) {
+            RateLimitBottomSheetContent(
+                modifier = Modifier,
+                onDismiss = {
+                    onEvent(ConversationEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
+                },
+                onUpgrade = {
+                }
+            )
+        }
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
         when (state.conversation) {
             is DefaultConversation -> {

@@ -48,7 +48,7 @@ class TidbitRepositoryImpl @Inject constructor(
     override suspend fun getTodayTidbit(): Result<Tidbit> {
         return try {
             val userId = preferences.userId.first() ?: ""
-            val response = apiService.getTodayTidbit(userId = userId)
+            val response = apiService.getTodayTidbit()
             if (response.isSuccessful) {
                 response.body()?.let { data ->
                     val res = with(data) {
@@ -79,8 +79,7 @@ class TidbitRepositoryImpl @Inject constructor(
 
     override suspend fun getTidbit(id: String): Result<Tidbit> {
         return try {
-            val userId = preferences.userId.first() ?: ""
-            val response = apiService.getSingleTidbit(id = id, userId = userId)
+            val response = apiService.getSingleTidbit(id = id)
             if (response.isSuccessful) {
                 response.body()?.let { data ->
                     val res = with(data) {

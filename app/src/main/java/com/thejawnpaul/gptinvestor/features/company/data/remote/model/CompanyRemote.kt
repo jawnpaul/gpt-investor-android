@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.features.company.data.remote.model
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import com.thejawnpaul.gptinvestor.features.company.data.local.model.CompanyEntity
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyNews
 
 @JsonClass(generateAdapter = true)
 data class CompanyRemote(
@@ -39,6 +40,16 @@ data class CompanyDetailRemoteRequest(
 )
 
 @JsonClass(generateAdapter = true)
+data class HistoricalData(
+    @field:Json(name = "Close") val close: Float,
+    @field:Json(name = "Date") val date: String,
+    @field:Json(name = "High") val high: Float,
+    @field:Json(name = "Low") val low: Float,
+    @field:Json(name = "Open") val open: Float,
+    @field:Json(name = "Volume") val volume: Long
+)
+
+@JsonClass(generateAdapter = true)
 data class CompanyDetailRemoteResponse(
     @field:Json(name = "ticker") val ticker: String,
     @field:Json(name = "summary") val about: String? = null,
@@ -52,21 +63,13 @@ data class CompanyDetailRemoteResponse(
     @field:Json(name = "company_name") val name: String? = null,
     @field:Json(name = "logo_url") val imageUrl: String? = null
 ) {
-    val newsSourcesString = buildString {
-        appendLine("- [Yahoo finance](https://finance.yahoo.com/quote/$ticker)")
-        news?.forEach { appendLine("- [${it.publisher}](${it.link})") }
-    }
+    val newsSourcesString: String
+        get() = buildString {
+            appendLine("- [Yahoo finance](https://finance.yahoo.com/quote/$ticker)")
+            news?.forEach { appendLine("- [${it.publisher}](${it.link})") }
+        }
 }
 
-@JsonClass(generateAdapter = true)
-data class HistoricalData(
-    @field:Json(name = "Close") val close: Float,
-    @field:Json(name = "Date") val date: String,
-    @field:Json(name = "High") val high: Float,
-    @field:Json(name = "Low") val low: Float,
-    @field:Json(name = "Open") val open: Float,
-    @field:Json(name = "Volume") val volume: Long
-)
 
 @JsonClass(generateAdapter = true)
 data class CompanyPriceRequest(@field:Json(name = "tickers") val tickers: List<String>)

@@ -186,6 +186,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 val viewModel = hiltViewModel<HistoryViewModel>()
                 val state = viewModel.historyScreenViewState.collectAsStateWithLifecycle()
                 val scope = rememberCoroutineScope()
+                val context = LocalContext.current
 
                 LaunchedEffect(Unit) {
                     viewModel.actions.onEach { action ->
@@ -199,6 +200,10 @@ fun SetUpNavGraph(navController: NavHostController) {
                             HistoryScreenAction.OnGoBack -> {
                                 navController.navigateUp()
                             }
+
+                            is HistoryScreenAction.ShowToast -> {
+                                Toast.makeText(context, action.message, Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }.launchIn(scope)
                 }
@@ -207,7 +212,6 @@ fun SetUpNavGraph(navController: NavHostController) {
                     modifier = Modifier.padding(top = 20.dp),
                     state = state.value,
                     onEvent = viewModel::handleEvent,
-                    onAction = viewModel::processAction
                 )
             }
 
@@ -292,6 +296,10 @@ fun SetUpNavGraph(navController: NavHostController) {
                                 clipboard.setPrimaryClip(clipData)
                                 Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
                             }
+
+                            is ConversationAction.ShowToast -> {
+                                Toast.makeText(context, action.message, Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }.launchIn(scope)
                 }
@@ -343,6 +351,10 @@ fun SetUpNavGraph(navController: NavHostController) {
                                 )
                                 clipboard.setPrimaryClip(clipData)
                                 Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+                            }
+
+                            is HistoryDetailAction.ShowToast -> {
+                                Toast.makeText(context, action.message, Toast.LENGTH_SHORT).show()
                             }
                         }
                     }.launchIn(scope)

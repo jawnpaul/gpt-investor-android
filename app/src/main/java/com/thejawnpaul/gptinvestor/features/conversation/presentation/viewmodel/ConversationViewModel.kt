@@ -163,23 +163,54 @@ class ConversationViewModel @Inject constructor(
     }
 
     private fun handleConversationFailure(failure: Failure) {
+        conversationViewMutableStateFlow.update { state ->
+            val updatedConversation = (state.conversation as? StructuredConversation)?.let { conversation ->
+                val updatedMessages = ArrayList(conversation.messageList)
+                if (updatedMessages.isNotEmpty()) {
+                    val lastMessage = updatedMessages.last()
+                    if (lastMessage is GenAiTextMessage && lastMessage.loading) {
+                        updatedMessages[updatedMessages.size - 1] = lastMessage.copy(
+                            loading = false,
+                            response = lastMessage.response ?: "Couldn't generate a response"
+                        )
+                    }
+                }
+                conversation.copy(messageList = updatedMessages)
+            } ?: state.conversation
+            state.copy(loading = false, conversation = updatedConversation)
+        }
         when (failure) {
             is GenAIException -> {
                 Timber.e("AI exception")
+                processAction(ConversationAction.ShowToast( "An error occurred"))
             }
 
             is Failure.RateLimitExceeded -> {
                 conversationViewMutableStateFlow.update { state ->
                     state.copy(
-                        loading = false,
                         showRateLimitBottomSheet = true
                     )
                 }
                 Timber.e("Rate limit exceeded")
+                processAction(ConversationAction.ShowToast("Rate limit exceeded. Please try again later."))
+            }
+
+            is Failure.ContextLimitReached -> {
+                Timber.e("Context limit reached")
+                processAction(ConversationAction.ShowToast("Context limit reached."))
+            }
+
+            is Failure.NetworkConnection -> {
+                processAction(ConversationAction.ShowToast("No internet connection"))
+            }
+
+            is Failure.ServerError -> {
+                processAction(ConversationAction.ShowToast("Server error. Please try again later."))
             }
 
             else -> {
                 Timber.e(failure.toString())
+                processAction(ConversationAction.ShowToast("Something went wrong"))
             }
         }
     }
@@ -343,4 +374,5 @@ sealed interface ConversationAction {
     data object OnGoBack : ConversationAction
     data class OnGoToWebView(val url: String) : ConversationAction
     data class OnCopy(val text: String) : ConversationAction
+    data class ShowToast(val message: String) : ConversationAction
 }

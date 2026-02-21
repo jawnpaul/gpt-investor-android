@@ -1,47 +1,40 @@
 package com.thejawnpaul.gptinvestor.features.conversation.domain.model
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
-import com.squareup.moshi.Types
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 data class DefaultPrompt(
     val title: String,
     val query: String
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class RemoteConfigPrompt(
-    @field:Json(name = "_id") val id: RemoteConfigId? = null,
-    @field:Json(name = "label")val label: String? = null,
-    @field:Json(name = "query")val query: String? = null
+    @SerialName("_id") val id: RemoteConfigId? = null,
+    @SerialName("label") val label: String? = null,
+    @SerialName("query") val query: String? = null
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class RemoteConfigId(
-    @field:Json(name = "\$oid")val id: String? = null
+    @SerialName("\$oid") val id: String? = null
 )
 
 class DefaultPromptParser {
-    private val moshi = com.squareup.moshi.Moshi.Builder()
-        .addLast(com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory())
-        .build()
-
-    private val jsonAdapter: com.squareup.moshi.JsonAdapter<List<RemoteConfigPrompt>> =
-        moshi.adapter(
-            Types.newParameterizedType(
-                List::class.java,
-                RemoteConfigPrompt::class.java
-            )
-        )
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
 
     fun parseDefaultPrompts(jsonString: String): List<RemoteConfigPrompt>? {
         return try {
-            jsonAdapter.fromJson(jsonString)
+            json.decodeFromString<List<RemoteConfigPrompt>>(jsonString)
         } catch (e: Exception) {
             println("Error parsing JSON: $jsonString")
-            // println("Error parsing JSON: ${e.message}")
             e.printStackTrace()
             null
         }
     }
 }
+

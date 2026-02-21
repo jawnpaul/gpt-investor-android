@@ -14,13 +14,14 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.thejawnpaul.gptinvestor.BuildConfig
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
-import com.thejawnpaul.gptinvestor.core.api.ApiService
+import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.FirebaseLoginRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpRequest
 import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
 import com.thejawnpaul.gptinvestor.remote.TokenStorage
+
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +48,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
     private val analyticsLogger: AnalyticsLogger,
     private val gptInvestorPreferences: GPTInvestorPreferences,
     private val tokenSyncManager: TokenSyncManager,
-    private val apiService: ApiService,
+    private val apiService: KtorApiService,
     private val tokenStorage: TokenStorage
 ) :
     AuthenticationRepository {
@@ -171,7 +172,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 )
             )
             if (response.isSuccessful) {
-                response.body()?.let { loginResponse ->
+                response.body?.let { loginResponse ->
                     gptInvestorPreferences.setUserId(loginResponse.user?.uid.toString())
                     gptInvestorPreferences.setIsUserLoggedIn(true)
                     tokenSyncManager.syncToken()
@@ -186,13 +187,13 @@ class AuthenticationRepositoryImpl @Inject constructor(
                         )
                     )
                     Result.success(loginResponse.message ?: "Login successful")
-                } ?: Result.failure(Exception(response.body()?.message ?: "Login failed"))
+                } ?: Result.failure(Exception(response.body?.message ?: "Login failed"))
             } else {
-                response.errorBody()?.let { error ->
+                response.errorBody?.let { error ->
 
-                    val errorMessage = extractMessageFromErrorBody(error.string()) ?: "An unknown error occurred."
+                    val errorMessage = extractMessageFromErrorBody(error) ?: "An unknown error occurred."
                     Result.failure(Exception(errorMessage))
-                } ?: Result.failure(Exception(response.body()?.message ?: "Login failed"))
+                } ?: Result.failure(Exception(response.body?.message ?: "Login failed"))
             }
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
@@ -209,7 +210,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 )
             )
             if (response.isSuccessful) {
-                response.body()?.let { signUpResponse ->
+                response.body?.let { signUpResponse ->
                     analyticsLogger.identifyUser(
                         eventName = "Sign Up",
                         params = mapOf(
@@ -219,13 +220,13 @@ class AuthenticationRepositoryImpl @Inject constructor(
                         )
                     )
                     Result.success(signUpResponse.message ?: "Sign up successful")
-                } ?: Result.failure(Exception(response.body()?.message ?: "Sign up failed"))
+                } ?: Result.failure(Exception(response.body?.message ?: "Sign up failed"))
             } else {
-                response.errorBody()?.let { error ->
+                response.errorBody?.let { error ->
 
-                    val errorMessage = extractMessageFromErrorBody(error.string()) ?: "An unknown error occurred."
+                    val errorMessage = extractMessageFromErrorBody(error) ?: "An unknown error occurred."
                     Result.failure(Exception(errorMessage))
-                } ?: Result.failure(Exception(response.body()?.message ?: "Sign up failed"))
+                } ?: Result.failure(Exception(response.body?.message ?: "Sign up failed"))
             }
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
@@ -305,7 +306,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 request = FirebaseLoginRequest(idToken)
             )
             if (response.isSuccessful) {
-                response.body()?.let { loginResponse ->
+                response.body?.let { loginResponse ->
                     tokenStorage.saveAccessToken(loginResponse.accessToken ?: "")
                     tokenStorage.saveRefreshToken(loginResponse.refreshToken ?: "")
                     true
@@ -331,3 +332,4 @@ class AuthenticationRepositoryImpl @Inject constructor(
         }
     }
 }
+

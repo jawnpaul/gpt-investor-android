@@ -4,6 +4,7 @@ plugins {
     id("com.android.library")
     alias(libs.plugins.hiltAndroid)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -31,9 +32,15 @@ android {
 
 dependencies {
     implementation(libs.dagger.hilt)
-    implementation(libs.retrofit)
-    implementation(libs.moshi.converter)
-    implementation(libs.okhttp.logger)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.client.auth)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.timber)
     ksp(libs.dagger.hilt.compiler)
-    ksp(libs.moshi.codeGen)
 }
+
+

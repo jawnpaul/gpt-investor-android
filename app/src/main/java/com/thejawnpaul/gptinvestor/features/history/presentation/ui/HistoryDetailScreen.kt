@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.RateLimitBottomSheetContent
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.StructuredConversationScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryConversationView
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction
@@ -15,9 +16,30 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.Histo
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.WaitlistBottomSheetContent
 
 @Composable
-fun HistoryDetailScreen(modifier: Modifier, conversationId: String, state: HistoryConversationView, onEvent: (HistoryDetailEvent) -> Unit, onAction: (HistoryDetailAction) -> Unit) {
+fun HistoryDetailScreen(
+    modifier: Modifier,
+    conversationId: String,
+    state: HistoryConversationView,
+    onEvent: (HistoryDetailEvent) -> Unit,
+    onAction: (HistoryDetailAction) -> Unit,
+    onUpgradeFromRateLimit: () -> Unit = {}
+) {
     LaunchedEffect(conversationId) {
         onEvent(HistoryDetailEvent.GetHistory(conversationId.toLong()))
+    }
+
+    if (state.showRateLimitBottomSheet) {
+        GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
+            onEvent(HistoryDetailEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
+        }) {
+            RateLimitBottomSheetContent(
+                modifier = Modifier,
+                onDismiss = {
+                    onEvent(HistoryDetailEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
+                },
+                onUpgrade = onUpgradeFromRateLimit
+            )
+        }
     }
 
     if (state.showWaitListBottomSheet) {

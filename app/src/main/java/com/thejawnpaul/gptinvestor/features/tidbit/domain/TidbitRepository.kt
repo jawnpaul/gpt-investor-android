@@ -4,8 +4,9 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
-import com.thejawnpaul.gptinvestor.core.api.ApiService
+import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
+
 import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfig
 import com.thejawnpaul.gptinvestor.core.utility.Constants
 import com.thejawnpaul.gptinvestor.features.tidbit.data.paging.TidbitPagingSource
@@ -39,7 +40,7 @@ interface TidbitRepository {
 }
 
 class TidbitRepositoryImpl @Inject constructor(
-    private val apiService: ApiService,
+    private val apiService: KtorApiService,
     private val remoteConfig: RemoteConfig,
     private val analyticsLogger: AnalyticsLogger,
     private val preferences: GPTInvestorPreferences
@@ -47,10 +48,9 @@ class TidbitRepositoryImpl @Inject constructor(
     TidbitRepository {
     override suspend fun getTodayTidbit(): Result<Tidbit> {
         return try {
-            val userId = preferences.userId.first() ?: ""
             val response = apiService.getTodayTidbit()
             if (response.isSuccessful) {
-                response.body()?.let { data ->
+                response.body?.let { data ->
                     val res = with(data) {
                         Tidbit(
                             id = id,
@@ -81,7 +81,7 @@ class TidbitRepositoryImpl @Inject constructor(
         return try {
             val response = apiService.getSingleTidbit(id = id)
             if (response.isSuccessful) {
-                response.body()?.let { data ->
+                response.body?.let { data ->
                     val res = with(data) {
                         Tidbit(
                             id = id,
@@ -260,3 +260,4 @@ class TidbitRepositoryImpl @Inject constructor(
         ).flow
     }
 }
+

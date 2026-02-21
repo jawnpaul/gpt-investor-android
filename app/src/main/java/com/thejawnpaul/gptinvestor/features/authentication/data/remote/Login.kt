@@ -1,43 +1,43 @@
 package com.thejawnpaul.gptinvestor.features.authentication.data.remote
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class LoginRequest(
-    @field:Json(name = "email") val email: String,
-    @field:Json(name = "password") val password: String
+    @SerialName("email") val email: String,
+    @SerialName("password") val password: String
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class LoginResponse(
-    @field:Json(name = "access_token") val accessToken: String?,
-    @field:Json(name = "refresh_token") val refreshToken: String?,
-    @field:Json(name = "message") val message: String?,
-    @field:Json(name = "status") val status: String?,
-    @field:Json(name = "user") val user: User?
+    @SerialName("access_token") val accessToken: String?,
+    @SerialName("refresh_token") val refreshToken: String?,
+    @SerialName("message") val message: String?,
+    @SerialName("status") val status: String?,
+    @SerialName("user") val user: User?
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class User(
-    @field:Json(name = "email") val email: String?,
-    @field:Json(name = "uid") val uid: String?
+    @SerialName("email") val email: String?,
+    @SerialName("uid") val uid: String?
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class FirebaseLoginRequest(
-    @field:Json(name = "id_token") val idToken: String
+    @SerialName("id_token") val idToken: String
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class SignUpRequest(
-    @field:Json(name = "email") val email: String,
-    @field:Json(name = "password") val password: String
+    @SerialName("email") val email: String,
+    @SerialName("password") val password: String
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class SignUpResponse(
-    @field:Json(name = "message") val message: String?,
-    @field:Json(name = "status") val status: String?,
-    @field:Json(name = "user_id") val userId: String?
+    @SerialName("message") val message: String?,
+    @SerialName("status") val status: String?,
+    @SerialName("user_id") val userId: String?
 )

@@ -198,6 +198,11 @@ class ConversationViewModel @Inject constructor(
             is Failure.ContextLimitReached -> {
                 Timber.e("Context limit reached")
                 processAction(ConversationAction.ShowToast("Context limit reached."))
+                conversationViewMutableStateFlow.update { state ->
+                    state.copy(
+                        showRateLimitBottomSheet = true
+                    )
+                }
             }
 
             is Failure.NetworkConnection -> {

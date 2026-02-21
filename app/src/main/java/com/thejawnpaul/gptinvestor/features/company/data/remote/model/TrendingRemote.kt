@@ -1,12 +1,13 @@
 package com.thejawnpaul.gptinvestor.features.company.data.remote.model
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class TrendingRemote(
-    @field:Json(name = "ticker") val tickerSymbol: String,
-    @field:Json(name = "change")val percentageChange: Float,
-    @field:Json(name = "name") val name: String,
-    @field:Json(name = "logo") val logo: String
+    @SerialName("ticker") val tickerSymbol: String,
+    @SerialName("change")val percentageChange: Float,
+    @SerialName("name") val name: String,
+    @SerialName("logo") val logo: String
 )
+

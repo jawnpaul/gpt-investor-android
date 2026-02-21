@@ -1,7 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.toppick.data.repository
 
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
-import com.thejawnpaul.gptinvestor.core.api.ApiService
+import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfig
@@ -21,12 +21,13 @@ import kotlinx.coroutines.flow.map
 import timber.log.Timber
 
 class TopPickRepository @Inject constructor(
-    private val apiService: ApiService,
+    private val apiService: KtorApiService,
     private val topPickDao: TopPickDao,
     private val companyDao: CompanyDao,
     private val analyticsLogger: AnalyticsLogger,
     private val remoteConfig: RemoteConfig
 ) :
+
     ITopPickRepository {
     override suspend fun getTopPicks(): Flow<Either<Failure, Unit>> = flow {
         try {
@@ -34,7 +35,7 @@ class TopPickRepository @Inject constructor(
 
             val response = apiService.getTopPicks(date = today)
             if (response.isSuccessful) {
-                response.body()?.let { remotePick ->
+                response.body?.let { remotePick ->
                     val topPickEntities = remotePick.map { aa ->
                         with(aa) {
                             TopPickEntity(
@@ -56,6 +57,7 @@ class TopPickRepository @Inject constructor(
                     emit(Either.Right(Unit))
                 } ?: emit(Either.Left(Failure.DataError))
             }
+
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.ServerError))

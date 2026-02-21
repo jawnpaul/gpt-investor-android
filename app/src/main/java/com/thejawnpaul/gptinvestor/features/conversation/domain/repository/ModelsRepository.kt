@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.conversation.domain.repository
 
-import com.thejawnpaul.gptinvestor.core.api.ApiService
+import com.thejawnpaul.gptinvestor.core.api.KtorApiService
+
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.AddToWaitlistRequest
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AnotherModel
@@ -17,7 +18,7 @@ interface ModelsRepository {
 
 class ModelsRepositoryImpl @Inject constructor(
     private val gptInvestorPreferences: GPTInvestorPreferences,
-    private val apiService: ApiService
+    private val apiService: KtorApiService
 ) : ModelsRepository {
     override suspend fun getAvailableModels(): Result<List<AvailableModel>> {
         return try {
@@ -60,3 +61,4 @@ class ModelsRepositoryImpl @Inject constructor(
         }
     }
 }
+

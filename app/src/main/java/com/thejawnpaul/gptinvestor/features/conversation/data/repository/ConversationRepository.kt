@@ -1,8 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.conversation.data.repository
 
-import com.squareup.moshi.Moshi
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
-import com.thejawnpaul.gptinvestor.core.api.ApiService
+import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfig
@@ -16,6 +15,8 @@ import com.thejawnpaul.gptinvestor.features.conversation.data.remote.AiChatReque
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.ConversationIdResponse
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.ConversationTitleResponse
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.ErrorResponse
+import com.thejawnpaul.gptinvestor.features.conversation.data.remote.SuggestionRemote
+import com.thejawnpaul.gptinvestor.features.conversation.data.remote.SuggestionResponse
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.TextStreamResponse
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
@@ -26,24 +27,29 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntit
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsChannel
+import io.ktor.utils.io.readUTF8Line
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import okhttp3.ResponseBody
+import kotlinx.serialization.json.Json
 import timber.log.Timber
 
 class ConversationRepository @Inject constructor(
-    private val apiService: ApiService,
+    private val apiService: KtorApiService,
     private val analyticsLogger: AnalyticsLogger,
     private val messageDao: MessageDao,
     private val conversationDao: ConversationDao,
-    private val remoteConfig: RemoteConfig,
-    private val moshi: Moshi
+    private val remoteConfig: RemoteConfig
 ) :
     IConversationRepository {
+
+    private val json = Json { ignoreUnknownKeys = true }
+
 
     override suspend fun getDefaultPrompts(): Flow<Either<Failure, List<DefaultPrompt>>> = flow {
         try {
@@ -118,15 +124,13 @@ class ConversationRepository @Inject constructor(
             val aiChatRequest = AiChatRequest(prompt = prompt.query)
             val chatResponse = apiService.chatAiResponse(aiChatRequest)
 
-            if (chatResponse.isSuccessful) {
-                chatResponse.body()?.let { responseBody ->
-                    handleSseStream(
-                        responseBody = responseBody,
-                        initialConversation = structuredConversation,
-                        prompt = prompt.query,
-                        messageId = messageId
-                    )
-                }
+            if (chatResponse.status.value in 200..299) {
+                handleSseStream(
+                    response = chatResponse,
+                    initialConversation = structuredConversation,
+                    prompt = prompt.query,
+                    messageId = messageId
+                )
             } else {
                 structuredConversation.let { conversation ->
                     val updatedMessages = ArrayList(conversation.messageList)
@@ -140,7 +144,7 @@ class ConversationRepository @Inject constructor(
                         emit(Either.Right(conversation.copy(messageList = updatedMessages)))
                     }
                 }
-                emit(Either.Left(mapHttpCodeToFailure(chatResponse.code())))
+                emit(Either.Left(mapHttpCodeToFailure(chatResponse.status.value)))
             }
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
@@ -197,16 +201,14 @@ class ConversationRepository @Inject constructor(
             )
             val chatResponse = apiService.chatAiResponse(aiChatRequest)
 
-            if (chatResponse.isSuccessful) {
-                chatResponse.body()?.let { responseBody ->
-                    currentConversation?.let {
-                        handleSseStream(
-                            responseBody,
-                            it,
-                            prompt.query,
-                            newMessageId ?: -1L
-                        )
-                    }
+            if (chatResponse.status.value in 200..299) {
+                currentConversation?.let {
+                    handleSseStream(
+                        chatResponse,
+                        it,
+                        prompt.query,
+                        newMessageId ?: -1L
+                    )
                 }
             } else {
                 currentConversation?.let { conversation ->
@@ -221,7 +223,7 @@ class ConversationRepository @Inject constructor(
                         emit(Either.Right(conversation.copy(messageList = updatedMessages)))
                     }
                 }
-                emit(Either.Left(mapHttpCodeToFailure(chatResponse.code())))
+                emit(Either.Left(mapHttpCodeToFailure(chatResponse.status.value)))
             }
 
             analyticsLogger.logEvent(eventName = "Query Submitted", params = mapOf())
@@ -304,10 +306,8 @@ class ConversationRepository @Inject constructor(
             )
             val chatResponse = apiService.chatAiResponse(aiChatRequest)
 
-            if (chatResponse.isSuccessful) {
-                chatResponse.body()?.let { responseBody ->
-                    handleSseStream(responseBody, conversation, prompt.query, newMessageId)
-                }
+            if (chatResponse.status.value in 200..299) {
+                handleSseStream(chatResponse, conversation, prompt.query, newMessageId)
             } else {
                 val updatedMessages = ArrayList(conversation.messageList)
                 val index = updatedMessages.indexOfFirst { it.id == newMessageId }
@@ -319,7 +319,7 @@ class ConversationRepository @Inject constructor(
                     )
                     emit(Either.Right(conversation.copy(messageList = updatedMessages)))
                 }
-                emit(Either.Left(mapHttpCodeToFailure(chatResponse.code())))
+                emit(Either.Left(mapHttpCodeToFailure(chatResponse.status.value)))
             }
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
@@ -368,7 +368,7 @@ class ConversationRepository @Inject constructor(
     }
 
     private suspend fun FlowCollector<Either<Failure, Conversation>>.handleSseStream(
-        responseBody: ResponseBody,
+        response: HttpResponse,
         initialConversation: StructuredConversation,
         prompt: String,
         messageId: Long
@@ -376,19 +376,12 @@ class ConversationRepository @Inject constructor(
         var currentConversation = initialConversation
         val chunk = StringBuilder()
 
-        val textAdapter = moshi.adapter(TextStreamResponse::class.java)
-        val entityAdapter = moshi.adapter(CompanyDetailRemoteResponse::class.java)
-        val suggestionsAdapter = moshi.adapter(SuggestionsResponse::class.java)
-        val titleAdapter = moshi.adapter(ConversationTitleResponse::class.java)
-        val errorAdapter = moshi.adapter(ErrorResponse::class.java)
-        val conversationIdAdapter = moshi.adapter(ConversationIdResponse::class.java)
-
         var currentEvent: String? = null
 
         try {
-            val source = responseBody.source()
-            while (!source.exhausted()) {
-                val line = source.readUtf8Line()?.trim() ?: continue
+            val channel = response.bodyAsChannel()
+            while (!channel.isClosedForRead) {
+                val line = channel.readUTF8Line()?.trim() ?: continue
                 if (line.isEmpty()) {
                     currentEvent = null
                     continue
@@ -401,109 +394,138 @@ class ConversationRepository @Inject constructor(
                     Timber.d("SSE Event: $currentEvent, Data: $data")
                     when (currentEvent) {
                         "text" -> {
-                            textAdapter.fromJson(data)?.text?.let { text ->
-                                chunk.append(text)
-                                val updatedMessages = ArrayList(currentConversation.messageList)
-                                val index =
-                                    updatedMessages.indexOfFirst { it.id == messageId && it is GenAiTextMessage }
-                                if (index != -1) {
-                                    val original = updatedMessages[index] as GenAiTextMessage
-                                    updatedMessages[index] =
-                                        original.copy(
-                                            response = chunk.toString(),
-                                            loading = false // Set loading false as soon as text arrives
-                                        )
-                                    currentConversation =
-                                        currentConversation.copy(messageList = updatedMessages)
-                                    emit(Either.Right(currentConversation))
+                            try {
+                                val textResponse = json.decodeFromString<TextStreamResponse>(data)
+                                textResponse.text.let { text ->
+                                    chunk.append(text)
+                                    val updatedMessages = ArrayList(currentConversation.messageList)
+                                    val index =
+                                        updatedMessages.indexOfFirst { it.id == messageId && it is GenAiTextMessage }
+                                    if (index != -1) {
+                                        val original = updatedMessages[index] as GenAiTextMessage
+                                        updatedMessages[index] =
+                                            original.copy(
+                                                response = chunk.toString(),
+                                                loading = false // Set loading false as soon as text arrives
+                                            )
+                                        currentConversation =
+                                            currentConversation.copy(messageList = updatedMessages)
+                                        emit(Either.Right(currentConversation))
+                                    }
                                 }
+                            } catch (e: Exception) {
+                                Timber.e(e, "Error parsing text event")
                             }
                         }
 
                         "conversation_id" -> {
-                            conversationIdAdapter.fromJson(data)?.id?.let { remoteId ->
-                                Timber.d("Syncing Remote ID: $remoteId")
-                                conversationDao.getSingleConversation(currentConversation.id)
-                                    ?.let { entity ->
-                                        conversationDao.updateConversation(entity.copy(remoteId = remoteId))
-                                    }
+                            try {
+                                val conversationIdResponse = json.decodeFromString<ConversationIdResponse>(data)
+                                conversationIdResponse.id.let { remoteId ->
+                                    Timber.d("Syncing Remote ID: $remoteId")
+                                    conversationDao.getSingleConversation(currentConversation.id)
+                                        ?.let { entity ->
+                                            conversationDao.updateConversation(entity.copy(remoteId = remoteId))
+                                        }
+                                }
+                            } catch (e: Exception) {
+                                Timber.e(e, "Error parsing conversation_id event")
                             }
                         }
 
                         "entity" -> {
-                            entityAdapter.fromJson(data)?.let { entity ->
+                            try {
+                                val entity = json.decodeFromString<CompanyDetailRemoteResponse>(data)
                                 if (currentConversation.messageList.any { it is GenAiEntityMessage && it.entity?.ticker == entity.ticker }) {
-                                    return@let
-                                }
-                                val updatedMessages = ArrayList(currentConversation.messageList)
-                                val newId = messageDao.insertMessage(
-                                    MessageEntity(
-                                        conversationId = currentConversation.id,
-                                        companyDetailRemoteResponse = entity,
-                                        createdAt = System.currentTimeMillis()
-                                    )
-                                )
-                                // Try to insert before the current text message
-                                val textMsgIndex =
-                                    updatedMessages.indexOfFirst { it.id == messageId }
-                                if (textMsgIndex != -1) {
-                                    updatedMessages.add(
-                                        textMsgIndex,
-                                        GenAiEntityMessage(id = newId, entity = entity)
-                                    )
+                                    // continue
                                 } else {
-                                    updatedMessages.add(
-                                        GenAiEntityMessage(
-                                            id = newId,
-                                            entity = entity
+                                    val updatedMessages = ArrayList(currentConversation.messageList)
+                                    val newId = messageDao.insertMessage(
+                                        MessageEntity(
+                                            conversationId = currentConversation.id,
+                                            companyDetailRemoteResponse = entity,
+                                            createdAt = System.currentTimeMillis()
                                         )
                                     )
-                                }
-                                currentConversation =
-                                    currentConversation.copy(messageList = updatedMessages)
-                                emit(Either.Right(currentConversation))
-                            }
-                        }
-
-                        "suggestions" -> {
-                            suggestionsAdapter.fromJson(data)?.suggestions?.let { suggestions ->
-                                val domainSuggestions = suggestions.map {
-                                    Suggestion(label = it.label, query = it.query)
-                                }
-                                currentConversation =
-                                    currentConversation.copy(suggestedPrompts = domainSuggestions)
-                                emit(Either.Right(currentConversation))
-                            }
-                        }
-
-                        "title" -> {
-                            titleAdapter.fromJson(data)?.title?.let { title ->
-                                currentConversation = currentConversation.copy(title = title)
-                                emit(Either.Right(currentConversation))
-                                conversationDao.getSingleConversation(currentConversation.id)?.let {
-                                    conversationDao.updateConversation(it.copy(title = title))
-                                }
-                            }
-                        }
-
-                        "error" -> {
-                            errorAdapter.fromJson(data)?.error?.let { error ->
-                                Timber.e("SSE Error: $error")
-                                val updatedMessages = ArrayList(currentConversation.messageList)
-                                val index =
-                                    updatedMessages.indexOfFirst { it.id == messageId && it is GenAiTextMessage }
-                                if (index != -1) {
-                                    val original = updatedMessages[index] as GenAiTextMessage
-                                    updatedMessages[index] =
-                                        original.copy(
-                                            loading = false,
-                                            response = original.response ?: "Couldn't generate a response"
+                                    // Try to insert before the current text message
+                                    val textMsgIndex =
+                                        updatedMessages.indexOfFirst { it.id == messageId }
+                                    if (textMsgIndex != -1) {
+                                        updatedMessages.add(
+                                            textMsgIndex,
+                                            GenAiEntityMessage(id = newId, entity = entity)
                                         )
+                                    } else {
+                                        updatedMessages.add(
+                                            GenAiEntityMessage(
+                                                id = newId,
+                                                entity = entity
+                                            )
+                                        )
+                                    }
                                     currentConversation =
                                         currentConversation.copy(messageList = updatedMessages)
                                     emit(Either.Right(currentConversation))
                                 }
-                                emit(Either.Left(mapSseErrorToFailure(error)))
+                            } catch (e: Exception) {
+                                Timber.e(e, "Error parsing entity event")
+                            }
+                        }
+
+                        "suggestions" -> {
+                            try {
+                                val suggestionsResponse = json.decodeFromString<SuggestionResponse>(data)
+                                suggestionsResponse.suggestions.let { suggestions ->
+                                    val domainSuggestions = suggestions.map {
+                                        SuggestionRemote(label = it.label ?: "", query = it.query ?: "")
+                                    }
+                                    currentConversation =
+                                        currentConversation.copy(suggestedPrompts = domainSuggestions)
+                                    emit(Either.Right(currentConversation))
+                                }
+                            } catch (e: Exception) {
+                                Timber.e(e, "Error parsing suggestions event")
+                            }
+                        }
+
+                        "title" -> {
+                            try {
+                                val titleResponse = json.decodeFromString<ConversationTitleResponse>(data)
+                                titleResponse.title.let { title ->
+                                    currentConversation = currentConversation.copy(title = title)
+                                    emit(Either.Right(currentConversation))
+                                    conversationDao.getSingleConversation(currentConversation.id)?.let {
+                                        conversationDao.updateConversation(it.copy(title = title))
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                Timber.e(e, "Error parsing title event")
+                            }
+                        }
+
+                        "error" -> {
+                            try {
+                                val errorResponse = json.decodeFromString<ErrorResponse>(data)
+                                errorResponse.error.let { error ->
+                                    Timber.e("SSE Error: $error")
+                                    val updatedMessages = ArrayList(currentConversation.messageList)
+                                    val index =
+                                        updatedMessages.indexOfFirst { it.id == messageId && it is GenAiTextMessage }
+                                    if (index != -1) {
+                                        val original = updatedMessages[index] as GenAiTextMessage
+                                        updatedMessages[index] =
+                                            original.copy(
+                                                loading = false,
+                                                response = original.response ?: "Couldn't generate a response"
+                                            )
+                                        currentConversation =
+                                            currentConversation.copy(messageList = updatedMessages)
+                                        emit(Either.Right(currentConversation))
+                                    }
+                                    emit(Either.Left(mapSseErrorToFailure(error)))
+                                }
+                            } catch (e: Exception) {
+                                Timber.e(e, "Error parsing error event")
                             }
                         }
 
@@ -549,6 +571,7 @@ class ConversationRepository @Inject constructor(
             emit(Either.Left(Failure.ServerError))
         }
     }
+
 
     private fun mapHttpCodeToFailure(code: Int): Failure {
         return when (code) {

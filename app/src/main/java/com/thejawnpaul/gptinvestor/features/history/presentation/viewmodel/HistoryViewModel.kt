@@ -160,11 +160,13 @@ class HistoryViewModel @Inject constructor(
 
             is Failure.RateLimitExceeded -> {
                 Timber.e("Rate limit exceeded")
+                conversationView.update { it.copy(showRateLimitBottomSheet = true) }
                 processHistoryDetailAction(HistoryDetailAction.ShowToast("Rate limit exceeded. Please try again later."))
             }
 
             is Failure.ContextLimitReached -> {
                 Timber.e("Context limit reached")
+                conversationView.update { it.copy(showRateLimitBottomSheet = true) }
                 processHistoryDetailAction(HistoryDetailAction.ShowToast("Context limit reached."))
             }
 
@@ -276,6 +278,10 @@ class HistoryViewModel @Inject constructor(
                     upgradeModelId = it
                 }
             }
+
+            is HistoryDetailEvent.ShowRateLimitBottomSheet -> {
+                conversationView.update { it.copy(showRateLimitBottomSheet = event.showBottomSheet) }
+            }
         }
     }
 
@@ -343,6 +349,8 @@ sealed interface HistoryDetailEvent {
         HistoryDetailEvent
 
     data class SelectWaitlistOption(val option: String) : HistoryDetailEvent
+
+    data class ShowRateLimitBottomSheet(val showBottomSheet: Boolean) : HistoryDetailEvent
 }
 
 sealed interface HistoryDetailAction {

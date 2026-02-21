@@ -12,4 +12,5 @@ keystore.properties
 google-services.json
 /fastlane
 .kotlin/
-
+Gemfile
+Gemfile.lock

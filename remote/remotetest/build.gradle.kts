@@ -2,6 +2,7 @@ plugins {
     id("com.android.library")
     alias(libs.plugins.hiltAndroid)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -22,8 +23,5 @@ kotlin {
 
 dependencies {
     implementation(libs.dagger.hilt)
-    implementation(libs.retrofit)
-    implementation(libs.moshi.converter)
-    implementation(libs.okhttp.logger)
     ksp(libs.dagger.hilt.compiler)
 }

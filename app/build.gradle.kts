@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.ktLint)
     alias(libs.plugins.googleServices)
     alias(libs.plugins.crashlytics)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 val keystoreProperties = Properties()
@@ -152,8 +153,6 @@ dependencies {
     implementation(libs.timber)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation)
-    implementation(libs.moshi.converter)
-    implementation(libs.moshi.kotlin)
     implementation(libs.coil.compose)
     implementation(libs.core.ktx)
     implementation(libs.androidx.junit.ktx)
@@ -161,8 +160,6 @@ dependencies {
     implementation(libs.androidx.room)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
-    implementation(libs.moshi)
-    ksp(libs.moshi.codeGen)
     implementation(libs.timeAgo)
     implementation(libs.jsoup)
     implementation(libs.richtext.compose)
@@ -188,13 +185,19 @@ dependencies {
     implementation(libs.androidx.paging.runtime.ktx)
     implementation(libs.androidx.paging.compose)
     implementation(libs.android.billing)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.client.auth)
+    implementation(libs.kotlinx.serialization.json)
 
     // test
     testImplementation(project(":remote:remotetest"))
     kspTest(libs.dagger.hilt.compiler)
     testImplementation(libs.junit)
     testImplementation(libs.google.truth)
-    testImplementation(libs.okhttp.mockwebserver)
     testImplementation(libs.mockk)
     testImplementation(libs.coroutine.test)
 

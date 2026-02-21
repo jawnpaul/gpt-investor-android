@@ -1,62 +1,59 @@
 package com.thejawnpaul.gptinvestor.features.conversation.data.remote
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class ChatRequest(
-    @field:Json(name = "query") val query: String,
-    @field:Json(name = "history") val history: List<ChatMessageRemote> = emptyList()
+    @SerialName("query") val query: String,
+    @SerialName("history") val history: List<ChatMessageRemote> = emptyList()
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class AiChatRequest(
-    @field:Json(name = "prompt") val prompt: String,
-    @field:Json(name = "models") val models: List<String>? = listOf(
-        "arcee-ai/trinity-mini:free",
-        "qwen/qwen3-4b:free"
-    ),
-    @field:Json(name = "conversation_id") val conversationId: String? = null
+    @SerialName("prompt") val prompt: String,
+    @SerialName("conversation_id") val conversationId: String? = null
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class ChatMessageRemote(
-    @field:Json(name = "role") val role: String, // "user" or "model"
-    @field:Json(name = "text") val text: String
+    @SerialName("role") val role: String, // "user" or "model"
+    @SerialName("text") val text: String
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class SuggestionResponse(
-    @field:Json(name = "suggestions") val suggestions: List<SuggestionRemote> = emptyList()
+    @SerialName("suggestions") val suggestions: List<SuggestionRemote> = emptyList()
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class SuggestionRemote(
-    @field:Json(name = "label") val label: String?,
-    @field:Json(name = "query") val query: String?
+    @SerialName("label") val label: String?,
+    @SerialName("query") val query: String?
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class ConversationTitleResponse(
-    @field:Json(name = "title") val title: String
+    @SerialName("title") val title: String
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class TextStreamResponse(
-    @field:Json(name = "text") val text: String
+    @SerialName("text") val text: String
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class ConversationIdResponse(
-    @field:Json(name = "id") val id: String
+    @SerialName("id") val id: String
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class CompletionResponse(
-    @field:Json(name = "done") val done: Boolean
+    @SerialName("done") val done: Boolean
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class ErrorResponse(
-    @field:Json(name = "error") val error: String
+    @SerialName("error") val error: String
 )
+

@@ -23,7 +23,8 @@ fun ConversationScreen(
     chatInput: String? = null,
     title: String? = null,
     onEvent: (ConversationEvent) -> Unit,
-    onAction: (ConversationAction) -> Unit
+    onAction: (ConversationAction) -> Unit,
+    onUpgradeFromRateLimit: () -> Unit = {}
 ) {
     LaunchedEffect(key1 = chatInput) {
         if (chatInput != null) {
@@ -75,8 +76,7 @@ fun ConversationScreen(
                 onDismiss = {
                     onEvent(ConversationEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
                 },
-                onUpgrade = {
-                }
+                onUpgrade = onUpgradeFromRateLimit
             )
         }
     }

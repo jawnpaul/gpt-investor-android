@@ -57,7 +57,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetai
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailTab
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.ExpandableRichText
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
-import com.thejawnpaul.gptinvestor.features.conversation.data.repository.Suggestion
+import com.thejawnpaul.gptinvestor.features.conversation.data.remote.SuggestionRemote
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntityMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiMessage
@@ -136,7 +136,7 @@ fun StructuredConversationScreen(
                         entity = null,
                         list = conversation.suggestedPrompts,
                         onClick = { prompt ->
-                            onClickSuggestedPrompt(prompt.query)
+                            onClickSuggestedPrompt(prompt.query?: "")
                         }
                     )
                 }
@@ -515,7 +515,7 @@ fun SingleStructuredResponse(
 }
 
 @Composable
-fun FollowUpQuestions(modifier: Modifier, entity: String? = null, list: List<Suggestion>, onClick: (prompt: Suggestion) -> Unit) {
+fun FollowUpQuestions(modifier: Modifier, entity: String? = null, list: List<SuggestionRemote>, onClick: (prompt: SuggestionRemote) -> Unit) {
     if (list.isNotEmpty()) {
         LazyRow(
             modifier = Modifier,
@@ -535,7 +535,7 @@ fun FollowUpQuestions(modifier: Modifier, entity: String? = null, list: List<Sug
                     )
                 ) {
                     Text(
-                        text = suggestion.label,
+                        text = suggestion.label?: "",
                         modifier = Modifier
                             .padding(horizontal = 16.dp, vertical = 10.dp),
                         style = MaterialTheme.typography.bodySmall,
@@ -567,16 +567,16 @@ fun ConversationPreview(modifier: Modifier = Modifier) {
     val conversation =
         StructuredConversation(id = 1, title = "Aak me", messageList = messages.toMutableList())
     val prompts = listOf(
-        Suggestion(
+        SuggestionRemote(
             label = "Netflix stock prices is going ",
             query = ""
         ),
-        Suggestion(
+        SuggestionRemote(
             label = "Netflix stock prices is going " +
                 "really high and things are expected tp go higher the more this season",
             query = ""
         ),
-        Suggestion(
+        SuggestionRemote(
             label = "Netflix stock prices is going " +
                 "really high and things are expected tp go higher the more this season",
             query = ""

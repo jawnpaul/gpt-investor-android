@@ -1,73 +1,48 @@
 package com.thejawnpaul.gptinvestor.utils
 
-import java.net.HttpURLConnection
-import okhttp3.mockwebserver.Dispatcher
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.RecordedRequest
+import io.ktor.client.engine.mock.MockRequestHandleScope
+import io.ktor.client.request.HttpRequestData
+import io.ktor.client.request.HttpResponseData
+import io.ktor.http.HttpStatusCode
 
 class RequestDispatcher {
 
-    /**
-     * Return ok response from mock server
-     */
-    inner class RequestDispatcher : Dispatcher() {
-        override fun dispatch(request: RecordedRequest): MockResponse {
-            return when (request.path) {
-                COMPANIES_REQUEST_PATH -> {
-                    MockResponse()
-                        .setResponseCode(HttpURLConnection.HTTP_OK)
-                        .setBody(getJson("response/companies.json"))
-                }
-
-                COMPANY_REQUEST_PATH -> {
-                    MockResponse()
-                        .setResponseCode(HttpURLConnection.HTTP_OK)
-                        .setBody(getJson("response/company.json"))
-                }
-
-                SAVE_COMPARISON_REQUEST_PATH -> {
-                    MockResponse()
-                        .setResponseCode(HttpURLConnection.HTTP_OK)
-                        .setBody(getJson("response/default_save.json"))
-                }
-
-                else -> throw IllegalArgumentException("Unknown Request Path ${request.path}")
+    val successHandler: suspend MockRequestHandleScope.(HttpRequestData) -> HttpResponseData = { request ->
+        val path = request.url.encodedPath
+        when {
+            path.contains(COMPANIES_REQUEST_PATH) -> {
+                mockResponse(getJson("response/companies.json"))
             }
+
+            path.contains(COMPANY_REQUEST_PATH) -> {
+                mockResponse(getJson("response/company.json"))
+            }
+
+            path.contains(SAVE_COMPARISON_REQUEST_PATH) -> {
+                mockResponse(getJson("response/default_save.json"))
+            }
+
+            else -> throw IllegalArgumentException("Unknown Request Path $path")
         }
     }
 
-    /**
-     * Return conflict response from mock server
-     */
-    internal inner class ConflictRequestDispatcher : Dispatcher() {
-        override fun dispatch(request: RecordedRequest) = MockResponse().setResponseCode(HttpURLConnection.HTTP_CONFLICT)
+    val conflictHandler: suspend MockRequestHandleScope.(HttpRequestData) -> HttpResponseData = {
+        mockResponse("", HttpStatusCode.Conflict)
     }
 
-    /**
-     * Return bad request response from mock server
-     */
-    internal inner class BadRequestDispatcher : Dispatcher() {
-        override fun dispatch(request: RecordedRequest) = MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST)
+    val badRequestHandler: suspend MockRequestHandleScope.(HttpRequestData) -> HttpResponseData = {
+        mockResponse("", HttpStatusCode.BadRequest)
     }
 
-    /**
-     * Return server error response from mock server
-     */
-    internal inner class ErrorRequestDispatcher : Dispatcher() {
-        override fun dispatch(request: RecordedRequest) = MockResponse().setResponseCode(HttpURLConnection.HTTP_INTERNAL_ERROR)
+    val errorHandler: suspend MockRequestHandleScope.(HttpRequestData) -> HttpResponseData = {
+        mockResponse("", HttpStatusCode.InternalServerError)
     }
 
-    /**
-     * Return incorrect body(aka null) response from mock server
-     */
-    internal inner class IncorrectBodyRequestDispatcher : Dispatcher() {
-        override fun dispatch(request: RecordedRequest) = MockResponse().setResponseCode(HttpURLConnection.HTTP_NO_CONTENT)
+    val noContentHandler: suspend MockRequestHandleScope.(HttpRequestData) -> HttpResponseData = {
+        mockResponse("", HttpStatusCode.NoContent)
     }
 
-    /**
-     * Return unauthorized error response from mock server
-     */
-    internal inner class UnAuthorizedErrorRequestDispatcher : Dispatcher() {
-        override fun dispatch(request: RecordedRequest) = MockResponse().setResponseCode(HttpURLConnection.HTTP_UNAUTHORIZED)
+    val unauthorizedHandler: suspend MockRequestHandleScope.(HttpRequestData) -> HttpResponseData = {
+        mockResponse("", HttpStatusCode.Unauthorized)
     }
 }

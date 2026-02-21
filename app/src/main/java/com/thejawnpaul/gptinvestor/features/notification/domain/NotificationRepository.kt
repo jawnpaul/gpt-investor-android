@@ -1,7 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.notification.domain
 
 import com.google.firebase.messaging.FirebaseMessaging
-import com.thejawnpaul.gptinvestor.core.api.ApiService
+import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
 import javax.inject.Inject
@@ -17,9 +17,10 @@ interface NotificationRepository {
 }
 
 class NotificationRepositoryImpl @Inject constructor(
-    private val apiService: ApiService,
+    private val apiService: KtorApiService,
     private val preferences: GPTInvestorPreferences
 ) : NotificationRepository {
+
 
     override suspend fun saveToken(token: String) {
         preferences.setFcmToken(token)

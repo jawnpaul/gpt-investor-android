@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -22,6 +23,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.core.navigation.SetUpNavGraph
+import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
+import com.thejawnpaul.gptinvestor.features.billing.presentation.LocalBillingRepository
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DefaultAuthenticationScreen
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.OnboardingScreen
@@ -36,6 +39,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var preferences: GPTInvestorPreferences
+
+    @Inject
+    lateinit var billingRepository: IBillingRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -89,15 +95,17 @@ class MainActivity : ComponentActivity() {
                     }
                 } else {
                     if (isUserSignedIn == true && isFirstInstall == false) {
-                        Surface(
-                            modifier = Modifier.fillMaxSize(),
-                            color = MaterialTheme.colorScheme.background
-                        ) {
-                            SetUpNavGraph(navController = navController)
+                        CompositionLocalProvider(LocalBillingRepository provides billingRepository) {
+                            Surface(
+                                modifier = Modifier.fillMaxSize(),
+                                color = MaterialTheme.colorScheme.background
+                            ) {
+                                SetUpNavGraph(navController = navController)
 
-                            // Mark nav graph as ready after composition
-                            LaunchedEffect(Unit) {
-                                isNavGraphReady = true
+                                // Mark nav graph as ready after composition
+                                LaunchedEffect(Unit) {
+                                    isNavGraphReady = true
+                                }
                             }
                         }
                     } else {

@@ -1,9 +1,13 @@
 package com.thejawnpaul.gptinvestor.core.navigation
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
+import android.view.View
 import android.widget.Toast
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -27,12 +31,16 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.Compa
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDiscoveryAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ConversationScreen
+import com.thejawnpaul.gptinvestor.features.billing.domain.BillingConstants
+import com.thejawnpaul.gptinvestor.features.billing.presentation.LocalBillingRepository
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationEvent
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationViewModel
 import com.thejawnpaul.gptinvestor.features.discover.DiscoverScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryDetailScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction
+import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailEvent
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenAction
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
@@ -54,6 +62,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SavedTopPick
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPickDetailScreen
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 @Composable
 fun SetUpNavGraph(navController: NavHostController) {
@@ -270,6 +279,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 )
             ) { navBackStackEntry ->
                 val context = LocalContext.current
+                val billingRepo = LocalBillingRepository.current
                 val viewModel = hiltViewModel<ConversationViewModel>()
                 val state = viewModel.conversation.collectAsStateWithLifecycle()
                 val chatInput = navBackStackEntry.arguments?.getString("chatInput")
@@ -310,7 +320,29 @@ fun SetUpNavGraph(navController: NavHostController) {
                     title = title,
                     state = state.value,
                     onEvent = viewModel::handleEvent,
-                    onAction = viewModel::processAction
+                    onAction = viewModel::processAction,
+                    onUpgradeFromRateLimit = {
+                        context.findActivity()?.let { activity ->
+                            scope.launch {
+                                val result = billingRepo.launchPurchaseFlow(
+                                    activity = activity,
+                                    productId = BillingConstants.PRO_SUBSCRIPTION_PRODUCT_ID
+                                )
+                                viewModel.handleEvent(
+                                    ConversationEvent.ShowRateLimitBottomSheet(
+                                        showBottomSheet = false
+                                    )
+                                )
+                                if (result is com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult.Error) {
+                                    Toast.makeText(
+                                        context,
+                                        "Billing Error: ${result.message}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        }
+                    }
                 )
             }
 
@@ -327,6 +359,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 arguments = listOf(navArgument("conversationId") { NavType.StringType })
             ) { navBackStackEntry ->
                 val context = LocalContext.current
+                val billingRepo = LocalBillingRepository.current
                 val viewModel = hiltViewModel<HistoryViewModel>()
                 val state = viewModel.conversation.collectAsStateWithLifecycle()
                 val id = navBackStackEntry.arguments?.getString("conversationId") ?: ""
@@ -365,7 +398,17 @@ fun SetUpNavGraph(navController: NavHostController) {
                     conversationId = id,
                     state = state.value,
                     onEvent = viewModel::handleHistoryDetailEvent,
-                    onAction = viewModel::processHistoryDetailAction
+                    onAction = viewModel::processHistoryDetailAction,
+                    onUpgradeFromRateLimit = {
+                        (context as? Activity)?.let { activity ->
+                            scope.launch {
+                                billingRepo.launchPurchaseFlow(activity, BillingConstants.PRO_SUBSCRIPTION_PRODUCT_ID)
+                                viewModel.handleHistoryDetailEvent(
+                                    HistoryDetailEvent.ShowRateLimitBottomSheet(showBottomSheet = false)
+                                )
+                            }
+                        }
+                    }
                 )
             }
 
@@ -610,4 +653,13 @@ fun SetUpNavGraph(navController: NavHostController) {
             }
         }
     }
+}
+
+fun Context.findActivity(): Activity? {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is Activity) return context
+        context = context.baseContext
+    }
+    return null
 }

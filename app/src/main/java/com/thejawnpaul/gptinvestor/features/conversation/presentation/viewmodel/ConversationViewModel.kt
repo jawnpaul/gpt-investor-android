@@ -188,7 +188,7 @@ class ConversationViewModel @Inject constructor(
             is Failure.RateLimitExceeded -> {
                 conversationViewMutableStateFlow.update { state ->
                     state.copy(
-                        showRateLimitBottomSheet = true
+                        showRateLimitBottomSheet = false
                     )
                 }
                 Timber.e("Rate limit exceeded")
@@ -200,7 +200,7 @@ class ConversationViewModel @Inject constructor(
                 processAction(ConversationAction.ShowToast("Context limit reached."))
                 conversationViewMutableStateFlow.update { state ->
                     state.copy(
-                        showRateLimitBottomSheet = true
+                        showRateLimitBottomSheet = false
                     )
                 }
             }

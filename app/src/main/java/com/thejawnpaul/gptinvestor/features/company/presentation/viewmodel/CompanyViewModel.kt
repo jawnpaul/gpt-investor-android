@@ -3,19 +3,10 @@ package com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.util.query
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
-import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
-import com.thejawnpaul.gptinvestor.features.company.domain.model.SearchCompanyQuery
-import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
-import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetAllCompaniesUseCase
-import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetAllSectorUseCase
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
-import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetSectorCompaniesUseCase
-import com.thejawnpaul.gptinvestor.features.company.domain.usecases.SearchCompaniesUseCase
-import com.thejawnpaul.gptinvestor.features.company.presentation.state.AllCompanyView
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyFinancialsView
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCompanyView
@@ -27,9 +18,6 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversati
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
-import com.thejawnpaul.gptinvestor.features.investor.presentation.state.AllSectorView
-import com.thejawnpaul.gptinvestor.features.toppick.data.repository.TopPickRepository
-import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.onSuccess
@@ -41,23 +29,11 @@ import timber.log.Timber
 
 @HiltViewModel
 class CompanyViewModel @Inject constructor(
-    private val getAllSectorUseCase: GetAllSectorUseCase,
-    private val getAllCompaniesUseCase: GetAllCompaniesUseCase,
-    private val getSectorCompaniesUseCase: GetSectorCompaniesUseCase,
     private val getCompanyUseCase: GetCompanyUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val getInputPromptUseCase: GetInputPromptUseCase,
-    private val searchCompaniesUseCase: SearchCompaniesUseCase,
     private val modelsRepository: ModelsRepository,
-    private val topPickRepository: TopPickRepository
-
 ) : ViewModel() {
-
-    private val _companyDiscoveryState = MutableStateFlow(CompanyDiscoveryState())
-    val companyDiscoveryState get() = _companyDiscoveryState
-
-    private val _companyDiscoveryAction = MutableSharedFlow<CompanyDiscoveryAction>()
-    val companyDiscoveryAction get() = _companyDiscoveryAction
 
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
     val selectedCompany get() = _selectedCompany
@@ -81,10 +57,7 @@ class CompanyViewModel @Inject constructor(
         get() = savedStateHandle.get<String>("ticker")
 
     init {
-        getAllSector()
-        getAllCompanies()
         getAvailableModels()
-        getTopPicks()
     }
 
     fun updateTicker(ticker: String) {
@@ -211,220 +184,6 @@ class CompanyViewModel @Inject constructor(
         selectedConversationId.update { s.id }
     }
 
-    private fun getAllSector() {
-        getAllSectorUseCase(GetAllSectorUseCase.None()) {
-            it.fold(
-                ::handleGetAllSectorFailure,
-                ::handleGetAllSectorSuccess
-            )
-        }
-    }
-
-    private fun handleGetAllSectorFailure(failure: Failure) {
-        Timber.e(failure.toString())
-    }
-
-    private fun handleGetAllSectorSuccess(sectors: List<SectorInput>) {
-        _companyDiscoveryState.update {
-            it.copy(sectorView = AllSectorView(sectors = sectors))
-        }
-        selectSector(selected = sectors.first())
-    }
-
-    fun selectSector(selected: SectorInput) {
-        _companyDiscoveryState.update {
-            it.copy(sectorView = it.sectorView.copy(selected = selected))
-        }
-        getSectorCompanies(selected)
-    }
-
-    fun getAllCompanies() {
-        _companyDiscoveryState.update { it.copy(companyView = it.companyView.copy(loading = true)) }
-        getAllCompaniesUseCase(GetAllCompaniesUseCase.None()) {
-            it.fold(
-                ::handleAllCompaniesFailure,
-                ::handleAllCompaniesSuccess
-            )
-        }
-    }
-
-    private fun handleAllCompaniesFailure(failure: Failure) {
-        _companyDiscoveryState.update {
-            it.copy(
-                companyView = it.companyView.copy(
-                    loading = false,
-                    error = "Something went wrong."
-                )
-            )
-        }
-        Timber.e(failure.toString())
-    }
-
-    private fun handleAllCompaniesSuccess(response: List<Company>) {
-        getSectorCompanies(_companyDiscoveryState.value.sectorView.selected)
-
-        _companyDiscoveryState.update {
-            it.copy(
-                companyView = it.companyView.copy(
-                    loading = false,
-                    companies = response.map { company -> company.toPresentation() }
-                )
-            )
-        }
-    }
-
-    private fun getSectorCompanies(sectorInput: SectorInput) {
-        val sectorKey = when (sectorInput) {
-            is SectorInput.AllSector -> {
-                null
-            }
-
-            is SectorInput.CustomSector -> {
-                sectorInput.sectorKey
-            }
-        }
-
-        if (sectorKey == "top-picks") {
-            // show top picks
-            _companyDiscoveryState.update { it.copy(showTopPicks = true) }
-        } else {
-            _companyDiscoveryState.update { it.copy(showTopPicks = false) }
-            getSectorCompaniesUseCase(sectorKey) {
-                it.onSuccess { result ->
-                    _companyDiscoveryState.update { state ->
-                        state.copy(
-                            companyView = state.companyView.copy(
-                                loading = false,
-                                companies = result.map { company -> company.toPresentation() }
-                            )
-                        )
-                    }
-                }
-                it.onFailure { failure ->
-                    Timber.e(failure.toString())
-                }
-            }
-            /*if (_companyDiscoveryState.value.companyView.query.isNotBlank()) {
-                //performSearch(_companyDiscoveryState.value.companyView.query)
-            } else {
-
-            }*/
-        }
-    }
-
-    fun updateSearchQuery(query: String) {
-        _companyDiscoveryState.update {
-            it.copy(
-                companyView = it.companyView.copy(
-                    query = query
-                )
-            )
-        }
-        searchCompany()
-    }
-
-    fun searchCompany() {
-        val query = _companyDiscoveryState.value.companyView.query
-
-        if (_companyDiscoveryState.value.showTopPicks) {
-            searchTopPicks(query)
-        } else {
-            if (query.trim().isNotBlank()) {
-                // perform search
-                performSearch(query.trim())
-            } else {
-                // get local companies
-                getSectorCompanies(_companyDiscoveryState.value.sectorView.selected)
-            }
-        }
-    }
-
-    private fun performSearch(query: String) {
-        val sectorKey = when (_companyDiscoveryState.value.sectorView.selected) {
-            is SectorInput.AllSector -> {
-                null
-            }
-
-            is SectorInput.CustomSector -> {
-                val sector =
-                    _companyDiscoveryState.value.sectorView.selected as SectorInput.CustomSector
-                sector.sectorKey
-            }
-        }
-        val companyQuery = SearchCompanyQuery(query = query, sector = sectorKey)
-        if (_companyDiscoveryState.value.showTopPicks) {
-            searchTopPicks(query)
-        } else {
-            searchCompaniesUseCase(companyQuery) {
-                it.onSuccess { result ->
-                    if (result.isNotEmpty()) {
-                        _companyDiscoveryState.update { state ->
-                            state.copy(
-                                companyView = state.companyView.copy(
-                                    loading = false,
-                                    companies = result.map { company -> company.toPresentation() }
-                                )
-                            )
-                        }
-                    } else {
-                        // No result found
-                        _companyDiscoveryState.update { state ->
-                            state.copy(
-                                companyView = state.companyView.copy(
-                                    loading = false,
-                                    companies = emptyList()
-                                )
-                            )
-                        }
-                        Timber.e("No result found")
-                    }
-                }
-                it.onFailure { failure ->
-                    Timber.e(failure.toString())
-                }
-            }
-        }
-    }
-
-    fun processCompanyDiscoveryAction(action: CompanyDiscoveryAction) {
-        viewModelScope.launch {
-            _companyDiscoveryAction.emit(action)
-        }
-    }
-
-    fun handleCompanyDiscoveryEvent(event: CompanyDiscoveryEvent) {
-        when (event) {
-            CompanyDiscoveryEvent.PerformSearch -> {
-                searchCompany()
-            }
-
-            CompanyDiscoveryEvent.RetryCompanies -> {
-                getAllCompanies()
-            }
-
-            is CompanyDiscoveryEvent.SearchQueryChanged -> {
-                updateSearchQuery(event.query)
-            }
-
-            is CompanyDiscoveryEvent.SelectSector -> {
-                selectSector(event.sector)
-            }
-
-            CompanyDiscoveryEvent.GoBack -> {
-                processCompanyDiscoveryAction(CompanyDiscoveryAction.OnGoBack)
-            }
-
-            is CompanyDiscoveryEvent.ToggleSearchMode -> {
-                _companyDiscoveryState.update {
-                    it.copy(
-                        searchMode = event.searchMode,
-                        companyView = it.companyView.copy(query = "")
-                    )
-                }
-                searchTopPicks(query = "")
-            }
-        }
-    }
 
     fun handleCompanyDetailEvent(event: CompanyDetailEvent) {
         when (event) {
@@ -493,61 +252,6 @@ class CompanyViewModel @Inject constructor(
         }
     }
 
-    private fun getTopPicks() {
-        viewModelScope.launch {
-            topPickRepository.getTopPicksByDate().collect { topPicks ->
-                val topPicksPresentation = topPicks.map { topPick ->
-                    with(topPick) {
-                        TopPickPresentation(
-                            id = id,
-                            companyName = companyName,
-                            ticker = ticker,
-                            rationale = rationale,
-                            metrics = metrics,
-                            risks = risks,
-                            confidenceScore = confidenceScore,
-                            isSaved = isSaved,
-                            imageUrl = imageUrl,
-                            percentageChange = percentageChange,
-                            currentPrice = currentPrice
-                        )
-                    }
-                }
-                _companyDiscoveryState.update { currentState -> currentState.copy(topPicks = topPicksPresentation) }
-            }
-        }
-    }
-
-    private fun searchTopPicks(query: String) {
-        if (query.isNotBlank()) {
-            viewModelScope.launch {
-                topPickRepository.searchTopPicks(query = query.trim()).collect { topPicks ->
-                    val topPicksPresentation = topPicks.map { topPick ->
-                        with(topPick) {
-                            TopPickPresentation(
-                                id = id,
-                                companyName = companyName,
-                                ticker = ticker,
-                                rationale = rationale,
-                                metrics = metrics,
-                                risks = risks,
-                                confidenceScore = confidenceScore,
-                                isSaved = isSaved,
-                                imageUrl = imageUrl,
-                                percentageChange = percentageChange,
-                                currentPrice = currentPrice
-                            )
-                        }
-                    }
-                    _companyDiscoveryState.update { currentState -> currentState.copy(topPicks = topPicksPresentation) }
-                }
-            }
-        } else {
-            Timber.e("No query")
-            getTopPicks()
-        }
-    }
-
     private fun selectWaitListOption(option: String) {
         if (_selectedCompany.value.selectedWaitlistOptions.contains(option)) {
             _selectedCompany.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions - option) }
@@ -568,29 +272,6 @@ class CompanyViewModel @Inject constructor(
             }
         }
     }
-}
-
-data class CompanyDiscoveryState(
-    val sectorView: AllSectorView = AllSectorView(),
-    val companyView: AllCompanyView = AllCompanyView(),
-    val searchMode: Boolean = false,
-    val showTopPicks: Boolean = false,
-    val topPicks: List<TopPickPresentation> = emptyList()
-)
-
-sealed interface CompanyDiscoveryEvent {
-    data class SearchQueryChanged(val query: String) : CompanyDiscoveryEvent
-    data object PerformSearch : CompanyDiscoveryEvent
-    data class SelectSector(val sector: SectorInput) : CompanyDiscoveryEvent
-    data object RetryCompanies : CompanyDiscoveryEvent
-    data object GoBack : CompanyDiscoveryEvent
-    data class ToggleSearchMode(val searchMode: Boolean) : CompanyDiscoveryEvent
-}
-
-sealed interface CompanyDiscoveryAction {
-    data class OnNavigateToCompanyDetail(val ticker: String) : CompanyDiscoveryAction
-    data object OnGoBack : CompanyDiscoveryAction
-    data class OnGoToPickDetail(val id: String) : CompanyDiscoveryAction
 }
 
 sealed interface CompanyDetailEvent {

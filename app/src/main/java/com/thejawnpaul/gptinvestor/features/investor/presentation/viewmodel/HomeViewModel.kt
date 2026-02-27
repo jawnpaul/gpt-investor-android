@@ -42,7 +42,6 @@ class HomeViewModel @Inject constructor(
     private val remoteConfig: RemoteConfig,
     private val preferences: GPTInvestorPreferences,
     private val analyticsLogger: AnalyticsLogger,
-    private val topPickRepository: ITopPickRepository,
     private val notificationRepository: NotificationRepository,
     private val modelsRepository: ModelsRepository,
     private val tidbitRepository: TidbitRepository

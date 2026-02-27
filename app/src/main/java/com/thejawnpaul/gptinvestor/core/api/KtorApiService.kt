@@ -176,6 +176,13 @@ class KtorApiService @Inject constructor(
         client.post("v1.1/refresh") {
             header("Authorization", "Bearer $refreshToken")
         }.toKtorResponse()
+    suspend fun getPagedCompanies(query: String? = null, page: Int = 1, sector: String? = null, pageSize: Int = 20): KtorResponse<com.thejawnpaul.gptinvestor.features.company.data.remote.model.AllCompanyResponse> =
+        client.get("v1.1/companies") {
+            if (!query.isNullOrBlank()) parameter("query", query)
+            parameter("page", page)
+            if (!sector.isNullOrBlank()) parameter("sector", sector)
+            parameter("page_size", pageSize)
+        }.toKtorResponse()
 }
 
 class KtorResponse<T>(

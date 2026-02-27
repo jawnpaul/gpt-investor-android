@@ -1,10 +1,14 @@
 package com.thejawnpaul.gptinvestor.features.company.data.repository
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.company.data.local.dao.CompanyDao
+import com.thejawnpaul.gptinvestor.features.company.data.paging.CompanyPagingSource
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
@@ -190,6 +194,23 @@ class CompanyRepository @Inject constructor(
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.DataError))
         }
+    }
+
+    override fun searchCompaniesPaged(query: SearchCompanyQuery): Flow<PagingData<Company>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = CompanyPagingSource.PAGE_SIZE,
+                enablePlaceholders = false,
+                initialLoadSize = CompanyPagingSource.PAGE_SIZE
+            ),
+            pagingSourceFactory = {
+                CompanyPagingSource(
+                    apiService = apiService,
+                    query = query.query.ifBlank { null },
+                    sector = query.sector
+                )
+            }
+        ).flow
     }
 
     private suspend fun updateCompanyList(): List<Company>? {

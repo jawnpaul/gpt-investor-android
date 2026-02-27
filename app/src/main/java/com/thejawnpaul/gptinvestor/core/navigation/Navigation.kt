@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
-import android.view.View
 import android.widget.Toast
 import android.content.Context
 import android.content.ContextWrapper
@@ -28,7 +27,6 @@ import androidx.navigation.navDeepLink
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.WebViewScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
-import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDiscoveryAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ConversationScreen
 import com.thejawnpaul.gptinvestor.features.billing.domain.BillingConstants
@@ -37,6 +35,8 @@ import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationEvent
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationViewModel
 import com.thejawnpaul.gptinvestor.features.discover.DiscoverScreen
+import com.thejawnpaul.gptinvestor.features.discover.DiscoverViewModel
+import com.thejawnpaul.gptinvestor.features.discover.DiscoveryAction
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryDetailScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction
@@ -155,13 +155,13 @@ fun SetUpNavGraph(navController: NavHostController) {
                 route = Screen.DiscoverTabScreen.route,
                 deepLinks = listOf(navDeepLink { uriPattern = Screen.DiscoverTabScreen.deepLink })
             ) {
-                val companyViewModel = hiltViewModel<CompanyViewModel>()
-                val state = companyViewModel.companyDiscoveryState.collectAsStateWithLifecycle()
+                val viewModel = hiltViewModel<DiscoverViewModel>()
+                val state = viewModel.discoveryScreenState.collectAsStateWithLifecycle()
                 val scope = rememberCoroutineScope()
                 LaunchedEffect(Unit) {
-                    companyViewModel.companyDiscoveryAction.onEach { action ->
+                    viewModel.actions.onEach { action ->
                         when (action) {
-                            is CompanyDiscoveryAction.OnNavigateToCompanyDetail -> {
+                            is DiscoveryAction.OnNavigateToCompanyDetail -> {
                                 navController.navigate(
                                     Screen.CompanyDetailScreen.createRoute(
                                         action.ticker
@@ -169,11 +169,11 @@ fun SetUpNavGraph(navController: NavHostController) {
                                 )
                             }
 
-                            CompanyDiscoveryAction.OnGoBack -> {
+                            DiscoveryAction.OnGoBack -> {
                                 navController.navigateUp()
                             }
 
-                            is CompanyDiscoveryAction.OnGoToPickDetail -> {
+                            is DiscoveryAction.OnGoToPickDetail -> {
                                 navController.navigate(
                                     Screen.TopPickDetailScreen.createRoute(
                                         action.id
@@ -187,8 +187,8 @@ fun SetUpNavGraph(navController: NavHostController) {
                 DiscoverScreen(
                     modifier = Modifier.padding(top = 20.dp),
                     state = state.value,
-                    onEvent = companyViewModel::handleCompanyDiscoveryEvent,
-                    onAction = companyViewModel::processCompanyDiscoveryAction
+                    paging = viewModel.companiesPagingData,
+                    onEvent = viewModel::handleEvent,
                 )
             }
             composable(Screen.HistoryTabScreen.route) {

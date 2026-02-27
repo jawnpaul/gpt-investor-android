@@ -36,19 +36,29 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.R
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
+import androidx.paging.LoadState
+import androidx.paging.PagingData
+import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.SingleCompanyItem
-import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDiscoveryAction
-import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDiscoveryEvent
-import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDiscoveryState
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.SectorChoiceQuestion
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SingleTopPickItem
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import kotlinx.coroutines.flow.Flow
 
 @Composable
-fun DiscoverScreen(modifier: Modifier, state: CompanyDiscoveryState, onEvent: (CompanyDiscoveryEvent) -> Unit, onAction: (CompanyDiscoveryAction) -> Unit) {
+fun DiscoverScreen(
+    modifier: Modifier,
+    paging: Flow<PagingData<CompanyPresentation>>,
+    state: DiscoveryScreenState,
+    onEvent: (DiscoveryEvent) -> Unit,
+) {
     // Discover Screen
     val keyboardController = LocalSoftwareKeyboardController.current
     val gptInvestorColors = LocalGPTInvestorColors.current
+
+    val companiesList = paging.collectAsLazyPagingItems()
 
     Scaffold(
         modifier = modifier,
@@ -64,7 +74,7 @@ fun DiscoverScreen(modifier: Modifier, state: CompanyDiscoveryState, onEvent: (C
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { onEvent(CompanyDiscoveryEvent.GoBack) }) {
+                    IconButton(onClick = { onEvent(DiscoveryEvent.GoBack) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
                             contentDescription = stringResource(id = R.string.back)
@@ -75,18 +85,18 @@ fun DiscoverScreen(modifier: Modifier, state: CompanyDiscoveryState, onEvent: (C
                         SearchBarCustom(
                             modifier = Modifier
                                 .fillMaxWidth(),
-                            query = state.companyView.query,
-                            placeHolder = state.sectorView.searchPlaceHolder,
+                            query = "",
+                            placeHolder = "",
                             onQueryChange = { newQuery ->
-                                onEvent(CompanyDiscoveryEvent.SearchQueryChanged(newQuery))
+                                onEvent(DiscoveryEvent.SearchQueryChanged(newQuery))
                             },
                             onSearch = {
                                 keyboardController?.hide()
-                                onEvent(CompanyDiscoveryEvent.PerformSearch)
+                                onEvent(DiscoveryEvent.PerformSearch)
                             },
                             onClose = {
                                 keyboardController?.hide()
-                                onEvent(CompanyDiscoveryEvent.ToggleSearchMode(false))
+                                onEvent(DiscoveryEvent.ToggleSearchMode(false))
                             }
                         )
                     } else {
@@ -108,7 +118,7 @@ fun DiscoverScreen(modifier: Modifier, state: CompanyDiscoveryState, onEvent: (C
                                     MaterialTheme.colorScheme.outlineVariant
                                 ),
                                 onClick = {
-                                    onEvent(CompanyDiscoveryEvent.ToggleSearchMode(true))
+                                    onEvent(DiscoveryEvent.ToggleSearchMode(true))
                                 }
                             ) {
                                 Row(
@@ -154,10 +164,10 @@ fun DiscoverScreen(modifier: Modifier, state: CompanyDiscoveryState, onEvent: (C
                 item {
                     // row of sectors
                     SectorChoiceQuestion(
-                        possibleAnswers = state.sectorView.sectors,
-                        selectedAnswer = state.sectorView.selected,
+                        possibleAnswers = state.sectors,
+                        selectedAnswer = state.selected,
                         onOptionSelected = {
-                            onEvent(CompanyDiscoveryEvent.SelectSector(it))
+                            onEvent(DiscoveryEvent.SelectSector(it))
                         }
                     )
                 }
@@ -171,22 +181,18 @@ fun DiscoverScreen(modifier: Modifier, state: CompanyDiscoveryState, onEvent: (C
                             modifier = Modifier,
                             pickPresentation = pickPresentation,
                             onClick = { topPickId ->
-                                onAction(
-                                    CompanyDiscoveryAction.OnGoToPickDetail(
-                                        id = topPickId
-                                    )
-                                )
+                                DiscoveryEvent.GoToTopPickDetail(topPickId)
                             }
                         )
                     }
                 } else {
-                    if (state.companyView.loading) {
+                    if (companiesList.loadState.refresh is LoadState.Loading) {
                         item {
                             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                         }
                     }
 
-                    if (state.companyView.showError) {
+                    if (companiesList.loadState.refresh is LoadState.Error) {
                         item {
                             Box(modifier = Modifier.fillMaxSize()) {
                                 Column(modifier = Modifier.align(Alignment.Center)) {
@@ -212,7 +218,8 @@ fun DiscoverScreen(modifier: Modifier, state: CompanyDiscoveryState, onEvent: (C
 
                                     Spacer(modifier = Modifier.padding(8.dp))
                                     OutlinedButton(onClick = {
-                                        onEvent(CompanyDiscoveryEvent.RetryCompanies)
+                                        companiesList.retry()
+                                        onEvent(DiscoveryEvent.RetryCompanies)
                                     }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
                                         Text(text = stringResource(id = R.string.retry))
                                     }
@@ -221,7 +228,7 @@ fun DiscoverScreen(modifier: Modifier, state: CompanyDiscoveryState, onEvent: (C
                         }
                     }
 
-                    if (state.companyView.showSearchError) {
+                    if (companiesList.loadState.refresh is LoadState.NotLoading && companiesList.itemCount == 0 && state.query.isNotBlank()) {
                         item {
                             Box(modifier = Modifier.fillMaxSize()) {
                                 Column(modifier = Modifier.align(Alignment.Center)) {
@@ -250,12 +257,20 @@ fun DiscoverScreen(modifier: Modifier, state: CompanyDiscoveryState, onEvent: (C
                     }
 
                     items(
-                        items = state.companyView.companies,
-                        key = { company -> company.ticker }
-                    ) { company ->
-                        SingleCompanyItem(modifier = Modifier, company = company, onClick = {
-                            onAction(CompanyDiscoveryAction.OnNavigateToCompanyDetail(company.ticker))
-                        })
+                        count = companiesList.itemCount,
+                        key = companiesList.itemKey { it.ticker }
+                    ) { index ->
+                        val company = companiesList[index]
+                        if (company != null) {
+                            SingleCompanyItem(modifier = Modifier, company = company, onClick = {
+                                onEvent(DiscoveryEvent.GoToCompanyDetail(company.ticker))
+                            })
+                        }
+                    }
+                    if (companiesList.loadState.append is LoadState.Loading) {
+                        item {
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                        }
                     }
                 }
             }

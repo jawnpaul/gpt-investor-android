@@ -29,16 +29,16 @@ class TopPickRepository @Inject constructor(
 ) :
 
     ITopPickRepository {
-    override suspend fun getTopPicks(): Flow<Either<Failure, Unit>> = flow {
+    override suspend fun getTopPicks(): Flow<Either<Failure, List<TopPick>>> = flow {
         try {
             val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-            val response = apiService.getTopPicks(date = today)
+            val response = apiService.getTopPicks(date = "2026-01-10")
             if (response.isSuccessful) {
                 response.body?.let { remotePick ->
                     val topPickEntities = remotePick.map { aa ->
                         with(aa) {
-                            TopPickEntity(
+                            TopPick(
                                 id = id,
                                 companyName = companyName,
                                 ticker = ticker,
@@ -46,15 +46,14 @@ class TopPickRepository @Inject constructor(
                                 metrics = metrics,
                                 risks = risks,
                                 confidenceScore = confidenceScore,
-                                date = date,
-                                price = price ?: 0.0f,
-                                change = percentageChange ?: 0.0f,
-                                imageUrl = imageUrl ?: ""
+                                isSaved = false,
+                                imageUrl = imageUrl?: "",
+                                percentageChange = percentageChange?: 0f,
+                                currentPrice = 0f
                             )
                         }
                     }
-                    topPickDao.replaceUnsavedWithNewPicks(topPickEntities)
-                    emit(Either.Right(Unit))
+                    emit(Either.Right(topPickEntities))
                 } ?: emit(Either.Left(Failure.DataError))
             }
 

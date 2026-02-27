@@ -12,7 +12,6 @@ import com.thejawnpaul.gptinvestor.features.company.domain.model.SearchCompanyQu
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetAllCompaniesUseCase
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetAllSectorUseCase
-import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyDetailInputResponseUseCase
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetSectorCompaniesUseCase
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.SearchCompaniesUseCase
@@ -23,10 +22,11 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCom
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction.*
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyDetailDefaultConversation
-import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.ConversationPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
+import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.AllSectorView
 import com.thejawnpaul.gptinvestor.features.toppick.data.repository.TopPickRepository
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
@@ -46,7 +46,7 @@ class CompanyViewModel @Inject constructor(
     private val getSectorCompaniesUseCase: GetSectorCompaniesUseCase,
     private val getCompanyUseCase: GetCompanyUseCase,
     private val savedStateHandle: SavedStateHandle,
-    private val companyDetailInputResponseUseCase: GetCompanyDetailInputResponseUseCase,
+    private val getInputPromptUseCase: GetInputPromptUseCase,
     private val searchCompaniesUseCase: SearchCompaniesUseCase,
     private val modelsRepository: ModelsRepository,
     private val topPickRepository: TopPickRepository
@@ -140,12 +140,12 @@ class CompanyViewModel @Inject constructor(
             _selectedCompany.update { it.copy(loading = true) }
             when (_selectedCompany.value.conversation) {
                 is CompanyDetailDefaultConversation -> {
-                    val prompt = CompanyPrompt(
+                    val prompt = ConversationPrompt(
                         query = _selectedCompany.value.inputQuery,
-                        company = (_selectedCompany.value.conversation as CompanyDetailDefaultConversation).response,
+                        tickerSymbol = _selectedCompany.value.header.companyTicker,
                         conversationId = -1L
                     )
-                    companyDetailInputResponseUseCase(params = prompt) {
+                    getInputPromptUseCase(params = prompt) {
                         it.fold(
                             ::handleCompanyInputResponseFailure,
                             ::handleCompanyInputResponseSuccess
@@ -154,11 +154,11 @@ class CompanyViewModel @Inject constructor(
                 }
 
                 is StructuredConversation -> {
-                    val prompt = CompanyPrompt(
+                    val prompt = ConversationPrompt(
                         query = _selectedCompany.value.inputQuery,
                         conversationId = selectedConversationId.value
                     )
-                    companyDetailInputResponseUseCase(params = prompt) {
+                    getInputPromptUseCase(params = prompt) {
                         it.fold(
                             ::handleCompanyInputResponseFailure,
                             ::handleCompanyInputResponseSuccess
@@ -174,11 +174,11 @@ class CompanyViewModel @Inject constructor(
 
     fun getSuggestedPromptResponse(query: String) {
         _selectedCompany.update { it.copy(loading = true) }
-        val prompt = CompanyPrompt(
+        val prompt = ConversationPrompt(
             query = query,
             conversationId = selectedConversationId.value
         )
-        companyDetailInputResponseUseCase(params = prompt) {
+        getInputPromptUseCase(params = prompt) {
             it.fold(
                 ::handleCompanyInputResponseFailure,
                 ::handleCompanyInputResponseSuccess

@@ -18,7 +18,6 @@ import com.thejawnpaul.gptinvestor.features.conversation.data.remote.ErrorRespon
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.SuggestionRemote
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.SuggestionResponse
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.TextStreamResponse
-import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.ConversationPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
@@ -170,12 +169,12 @@ class ConversationRepository @Inject constructor(
         try {
             // Use 'var' to allow reassignment of the conversation object
             currentConversation = getConversation(prompt)
-            Timber.e(currentConversation?.id.toString())
+            Timber.e(currentConversation.id.toString())
 
             newMessageId =
                 messageDao.insertMessage(
                     MessageEntity(
-                        conversationId = currentConversation?.id ?: -1L,
+                        conversationId = currentConversation.id,
                         createdAt = System.currentTimeMillis(),
                         query = prompt.query
                     )
@@ -191,13 +190,14 @@ class ConversationRepository @Inject constructor(
                     feedbackStatus = 0
                 )
             )
-            currentConversation = currentConversation?.copy(messageList = messagesWithNewQuery)
+            currentConversation = currentConversation.copy(messageList = messagesWithNewQuery)
             currentConversation?.let { emit(Either.Right(it)) }
 
-            val entity = conversationDao.getSingleConversation(currentConversation?.id ?: -1L)
+            val entity = conversationDao.getSingleConversation(currentConversation.id ?: -1L)
             val aiChatRequest = AiChatRequest(
                 prompt = prompt.query,
-                conversationId = entity?.remoteId
+                conversationId = entity?.remoteId,
+                tickerSymbol = prompt.tickerSymbol
             )
             val chatResponse = apiService.chatAiResponse(aiChatRequest)
 
@@ -244,100 +244,6 @@ class ConversationRepository @Inject constructor(
             emit(Either.Left(Failure.ServerError))
         }
     }.flowOn(Dispatchers.IO)
-
-    override suspend fun getCompanyInputResponse(prompt: CompanyPrompt): Flow<Either<Failure, Conversation>> = flow {
-        var conversation: StructuredConversation? = null
-        var newMessageId: Long? = null
-        try {
-            // get conversation
-            conversation =
-                getConversation(ConversationPrompt(prompt.conversationId, prompt.query))
-            if (prompt.company != null) {
-                val alreadyExists = conversation.messageList.any {
-                    it is GenAiEntityMessage && it.entity?.ticker == prompt.company.ticker
-                }
-                if (!alreadyExists) {
-                    val newMessages = ArrayList(conversation.messageList)
-
-                    val newId = messageDao.insertMessage(
-                        MessageEntity(
-                            conversationId = conversation.id,
-                            createdAt = System.currentTimeMillis(),
-                            companyDetailRemoteResponse = prompt.company
-                        )
-                    )
-
-                    newMessages.add(
-                        GenAiEntityMessage(id = newId, entity = prompt.company)
-                    )
-
-                    conversation = conversation.copy(messageList = newMessages)
-                    emit(Either.Right(conversation))
-                }
-            }
-
-            newMessageId = messageDao.insertMessage(
-                MessageEntity(
-                    conversationId = conversation.id,
-                    createdAt = System.currentTimeMillis(),
-                    query = prompt.query
-                )
-            )
-
-            val newMessages = ArrayList(conversation.messageList)
-            newMessages.add(
-                GenAiTextMessage(
-                    id = newMessageId,
-                    query = prompt.query,
-                    loading = true,
-                    feedbackStatus = 0
-                )
-            )
-
-            conversation =
-                conversation.copy(messageList = newMessages)
-
-            emit(Either.Right(conversation))
-
-            val entity = conversationDao.getSingleConversation(conversation.id)
-            val aiChatRequest = AiChatRequest(
-                prompt = prompt.query,
-                conversationId = entity?.remoteId
-            )
-            val chatResponse = apiService.chatAiResponse(aiChatRequest)
-
-            if (chatResponse.status.value in 200..299) {
-                handleSseStream(chatResponse, conversation, prompt.query, newMessageId)
-            } else {
-                val updatedMessages = ArrayList(conversation.messageList)
-                val index = updatedMessages.indexOfFirst { it.id == newMessageId }
-                if (index != -1) {
-                    val original = updatedMessages[index] as GenAiTextMessage
-                    updatedMessages[index] = original.copy(
-                        loading = false,
-                        response = original.response ?: "Couldn't generate a response"
-                    )
-                    emit(Either.Right(conversation.copy(messageList = updatedMessages)))
-                }
-                emit(Either.Left(mapHttpCodeToFailure(chatResponse.status.value)))
-            }
-        } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
-            conversation?.let { conv ->
-                val updatedMessages = ArrayList(conv.messageList)
-                val index = updatedMessages.indexOfFirst { it.id == newMessageId }
-                if (index != -1) {
-                    val original = updatedMessages[index] as GenAiTextMessage
-                    updatedMessages[index] = original.copy(
-                        loading = false,
-                        response = original.response ?: "Couldn't generate a response"
-                    )
-                    emit(Either.Right(conv.copy(messageList = updatedMessages)))
-                }
-            }
-            emit(Either.Left(Failure.ServerError))
-        }
-    }
 
     private suspend fun getConversation(conversation: ConversationPrompt): StructuredConversation {
         return if (conversationDao.getSingleConversation(conversation.conversationId) != null) {

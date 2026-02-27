@@ -12,7 +12,8 @@ data class ChatRequest(
 @Serializable
 data class AiChatRequest(
     @SerialName("prompt") val prompt: String,
-    @SerialName("conversation_id") val conversationId: String? = null
+    @SerialName("conversation_id") val conversationId: String? = null,
+    @SerialName("entity") val tickerSymbol: String? = null
 )
 
 @Serializable

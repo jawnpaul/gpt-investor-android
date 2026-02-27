@@ -192,6 +192,8 @@ dependencies {
     implementation(libs.ktor.client.logging)
     implementation(libs.ktor.client.auth)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.play.app.update)
+    implementation(libs.play.app.update.ktx)
 
     // test
     testImplementation(project(":remote:remotetest"))

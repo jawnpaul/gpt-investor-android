@@ -33,7 +33,7 @@ class TopPickRepository @Inject constructor(
         try {
             val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-            val response = apiService.getTopPicks(date = "2026-01-10")
+            val response = apiService.getTopPicks(date = today)
             if (response.isSuccessful) {
                 response.body?.let { remotePick ->
                     val topPickEntities = remotePick.map { aa ->

@@ -6,7 +6,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class VerifyPurchaseRequest(
     @SerialName("purchase_token") val purchaseToken: String,
-    @SerialName("product_id") val productId: String,
-    @SerialName("order_id") val orderId: String? = null
+    @SerialName("subscription_id") val subscriptionId: String
 )
 

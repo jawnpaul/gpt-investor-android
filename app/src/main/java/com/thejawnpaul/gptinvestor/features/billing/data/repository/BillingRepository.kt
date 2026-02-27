@@ -18,6 +18,7 @@ import com.thejawnpaul.gptinvestor.features.billing.data.remote.VerifyPurchaseRe
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingPurchase
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult as DomainBillingResult
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
+import com.thejawnpaul.gptinvestor.remote.TokenStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -34,6 +35,7 @@ import kotlin.coroutines.resume
 class BillingRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val apiService: KtorApiService,
+    private val tokenStorage: TokenStorage,
     private val scope: CoroutineScope
 ) : IBillingRepository, PurchasesUpdatedListener {
 
@@ -41,7 +43,7 @@ class BillingRepository @Inject constructor(
     private val billingClient: BillingClient by lazy {
         BillingClient.newBuilder(context)
             .setListener(this)
-            .enablePendingPurchases(com.android.billingclient.api.PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
+            .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
             .build()
     }
 
@@ -54,7 +56,10 @@ class BillingRepository @Inject constructor(
                     scope.launch(Dispatchers.IO) {
                         val domainPurchase = purchase.toDomainPurchase()
                         acknowledgePurchase(domainPurchase)
-                        syncPurchaseToBackend(domainPurchase)
+                        val syncResult = syncPurchaseToBackend(domainPurchase)
+                        if (syncResult.isSuccess) {
+                            refreshAccessTokenAfterPurchaseSync()
+                        }
                         refreshPurchases()
                     }
                 }
@@ -212,17 +217,48 @@ class BillingRepository @Inject constructor(
         try {
             val request = VerifyPurchaseRequest(
                 purchaseToken = purchase.purchaseToken,
-                productId = purchase.productId,
-                orderId = purchase.orderId
+                subscriptionId = purchase.productId
             )
             val response = apiService.verifyPlayPurchase(request)
-            if (response.isSuccessful) {
+            val isVerificationSuccessful = response.isSuccessful && response.body?.success == true
+            if (isVerificationSuccessful) {
+                Timber.d("Purchase sync succeeded for productId=${purchase.productId}")
                 Result.success(Unit)
             } else {
+                Timber.e(
+                    "Purchase sync failed for productId=${purchase.productId}: code=${response.code}, " +
+                        "successFlag=${response.body?.success}, error=${response.errorBody}"
+                )
                 Result.failure(Exception("Backend verification failed: ${response.code}"))
             }
         } catch (e: Exception) {
             Timber.e(e, "Failed to sync purchase to backend")
+            Result.failure(e)
+        }
+
+    private suspend fun refreshAccessTokenAfterPurchaseSync(): Result<Unit> =
+        try {
+            val refreshToken = tokenStorage.getRefreshToken()
+            if (refreshToken.isNullOrBlank()) {
+                Timber.e("Skipping token refresh after purchase sync: refresh token missing")
+                return Result.failure(Exception("Refresh token missing"))
+            }
+
+            val refreshResponse = apiService.refreshAccessToken(refreshToken)
+            val newAccessToken = refreshResponse.body?.accessToken
+            if (refreshResponse.isSuccessful && !newAccessToken.isNullOrBlank()) {
+                tokenStorage.saveAccessToken(newAccessToken)
+                Timber.d("Access token refreshed after purchase sync")
+                Result.success(Unit)
+            } else {
+                Timber.e(
+                    "Access token refresh failed after purchase sync: code=${refreshResponse.code}, " +
+                        "error=${refreshResponse.errorBody}"
+                )
+                Result.failure(Exception("Refresh failed: ${refreshResponse.code}"))
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to refresh token after purchase sync")
             Result.failure(e)
         }
 

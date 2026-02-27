@@ -30,9 +30,11 @@ import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitLikeRequest
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitLikeResponse
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitRemote
 import com.thejawnpaul.gptinvestor.features.toppick.data.remote.TopPickRemote
+import com.thejawnpaul.gptinvestor.remote.TokenResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -169,6 +171,11 @@ class KtorApiService @Inject constructor(
         client.post("v1/google-play/verify") {
             setBody(request)
         }.toKtorResponse()
+
+    suspend fun refreshAccessToken(refreshToken: String): KtorResponse<TokenResponse> =
+        client.post("v1.1/refresh") {
+            header("Authorization", "Bearer $refreshToken")
+        }.toKtorResponse()
 }
 
 class KtorResponse<T>(
@@ -187,4 +194,3 @@ suspend inline fun <reified T> HttpResponse.toKtorResponse(): KtorResponse<T> {
         code = status.value
     )
 }
-

@@ -6,7 +6,6 @@ import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfig
 import com.thejawnpaul.gptinvestor.core.utility.Constants
-import com.thejawnpaul.gptinvestor.features.company.data.local.dao.CompanyDao
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.dao.TopPickDao
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.model.TopPickEntity
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
@@ -23,7 +22,6 @@ import timber.log.Timber
 class TopPickRepository @Inject constructor(
     private val apiService: KtorApiService,
     private val topPickDao: TopPickDao,
-    private val companyDao: CompanyDao,
     private val analyticsLogger: AnalyticsLogger,
     private val remoteConfig: RemoteConfig
 ) :
@@ -38,6 +36,23 @@ class TopPickRepository @Inject constructor(
                 response.body?.let { remotePick ->
                     val topPickEntities = remotePick.map { aa ->
                         with(aa) {
+                            TopPickEntity(
+                                id = id,
+                                companyName = companyName,
+                                ticker = ticker,
+                                rationale = rationale,
+                                metrics = metrics,
+                                risks = risks,
+                                confidenceScore = confidenceScore,
+                                date = date,
+                                price = price ?: 0.0f,
+                                change = percentageChange ?: 0.0f
+                            )
+                        }
+                    }
+                    topPickDao.replaceUnsavedWithNewPicks(topPickEntities)
+                    val picks = remotePick.map { pickEntity ->
+                        with(pickEntity) {
                             TopPick(
                                 id = id,
                                 companyName = companyName,
@@ -53,7 +68,7 @@ class TopPickRepository @Inject constructor(
                             )
                         }
                     }
-                    emit(Either.Right(topPickEntities))
+                    emit(Either.Right(picks))
                 } ?: emit(Either.Left(Failure.DataError))
             }
 

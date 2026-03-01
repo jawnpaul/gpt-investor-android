@@ -175,8 +175,8 @@ fun SetUpNavGraph(navController: NavHostController) {
 
                             is DiscoveryAction.OnGoToPickDetail -> {
                                 navController.navigate(
-                                    Screen.TopPickDetailScreen.createRoute(
-                                        action.id
+                                    route = Screen.TopPickDetailScreen.createRoute(
+                                        topPickId = action.id
                                     )
                                 )
                             }

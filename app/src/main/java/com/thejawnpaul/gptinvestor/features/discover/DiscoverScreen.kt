@@ -189,7 +189,7 @@ fun DiscoverScreen(
                             modifier = Modifier,
                             pickPresentation = pickPresentation,
                             onClick = { topPickId ->
-                                DiscoveryEvent.GoToTopPickDetail(topPickId)
+                                onEvent(DiscoveryEvent.GoToTopPickDetail(topPickId))
                             }
                         )
                     }

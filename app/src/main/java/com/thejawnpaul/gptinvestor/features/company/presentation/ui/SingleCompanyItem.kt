@@ -24,11 +24,14 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
+import com.thejawnpaul.gptinvestor.features.company.data.local.model.PriceChange
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
@@ -68,6 +71,7 @@ fun SingleCompanyItem(modifier: Modifier, company: CompanyPresentation, onClick:
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(
+                        modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         // Text - company ticker
@@ -147,6 +151,30 @@ fun SingleCompanyItem(modifier: Modifier, company: CompanyPresentation, onClick:
                 maxLines = 3,
                 style = MaterialTheme.typography.bodyMedium,
                 overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun SingleCompanyItemPreview() {
+    GPTInvestorTheme {
+        Surface {
+            SingleCompanyItem(
+                modifier = Modifier,
+                company = CompanyPresentation(
+                    ticker = "AAPL",
+                    name = "I am a long company with a very long name",
+                    logo = "https://logo.clearbit.com/apple.com",
+                    summary = "Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide. It also sells various related services. The company's products include iPhone, Mac, iPad, and Wearables, Home and Accessories.",
+                    price = 150.12f,
+                    priceChange = PriceChange(
+                        change = 1.25f,
+                        date = System.currentTimeMillis()
+                    )
+                ),
+                onClick = {}
             )
         }
     }

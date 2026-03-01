@@ -67,6 +67,7 @@ fun NewAuthenticationScreen(modifier: Modifier, authViewModel: AuthenticationVie
                     modifier = Modifier,
                     email = state.value.email,
                     password = state.value.password,
+                    name = state.value.name,
                     loading = state.value.loading,
                     enableButton = state.value.enableButton,
                     onLoginClick = {
@@ -80,6 +81,9 @@ fun NewAuthenticationScreen(modifier: Modifier, authViewModel: AuthenticationVie
                     },
                     onPasswordChange = {
                         authViewModel.handleEvent(AuthenticationEvent.PasswordChanged(it))
+                    },
+                    onNameChange = {
+                        authViewModel.handleEvent(AuthenticationEvent.NameChanged(it))
                     },
                     onSignUpWithGoogleClick = {
                         authViewModel.handleEvent(AuthenticationEvent.SignUpWithGoogle(context))

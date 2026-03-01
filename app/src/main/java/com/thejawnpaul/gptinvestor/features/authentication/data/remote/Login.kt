@@ -21,7 +21,8 @@ data class LoginResponse(
 @Serializable
 data class User(
     @SerialName("email") val email: String?,
-    @SerialName("uid") val uid: String?
+    @SerialName("uid") val uid: String?,
+    @SerialName("name") val name: String?
 )
 
 @Serializable
@@ -32,7 +33,8 @@ data class FirebaseLoginRequest(
 @Serializable
 data class SignUpRequest(
     @SerialName("email") val email: String,
-    @SerialName("password") val password: String
+    @SerialName("password") val password: String,
+    @SerialName("name") val name: String
 )
 
 @Serializable

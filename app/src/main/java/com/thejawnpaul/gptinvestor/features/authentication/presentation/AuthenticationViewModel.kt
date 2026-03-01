@@ -25,9 +25,6 @@ class AuthenticationViewModel @Inject constructor(
 ) :
     ViewModel() {
 
-    private val _authState = MutableStateFlow(AuthenticationUIState())
-    val authState = _authState.asStateFlow()
-
     private val _isUserSignedIn = MutableStateFlow(false)
     val isUserSignedIn = _isUserSignedIn.asStateFlow()
 
@@ -36,98 +33,6 @@ class AuthenticationViewModel @Inject constructor(
 
     private val _actions = MutableSharedFlow<AuthenticationAction>()
     val actions get() = _actions
-
-    init {
-        viewModelScope.launch {
-            authRepository.getAuthState().collect { isSignedIn ->
-                _authState.update {
-                    it.copy(
-                        isUserSignedIn = isSignedIn,
-                        user = authRepository.currentUser
-                    )
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            gptInvestorPreferences.themePreference.collect { theme ->
-                _authState.update { it.copy(theme = theme) }
-            }
-        }
-    }
-
-    fun signIn() {
-        viewModelScope.launch {
-            _authState.update { it.copy(loading = true) }
-        }
-    }
-
-    fun signOut(context: Context) {
-        viewModelScope.launch {
-            authRepository.signOut(context)
-        }
-    }
-
-    fun handleSignInResult(result: ActivityResult) {
-        when (result.resultCode) {
-            Activity.RESULT_OK -> {
-                _authState.update { it.copy(loading = false, user = authRepository.currentUser) }
-                analyticsLogger.identifyUser(
-                    eventName = "Sign Up",
-                    params = mapOf(
-                        "user_id" to authRepository.currentUser?.uid.toString(),
-                        "email" to authRepository.currentUser?.email.toString(),
-                        "name" to authRepository.currentUser?.displayName.toString(),
-                        "sign_up_method" to authRepository.currentUser?.providerId.toString()
-                    )
-                )
-            }
-
-            else -> {
-                _authState.update { it.copy(loading = false, errorMessage = "Sign in failed") }
-            }
-        }
-    }
-
-    fun login() {
-        val email = _authState.value.email
-        val password = _authState.value.password
-        _authState.update {
-            it.copy(
-                loading = true
-            )
-        }
-        viewModelScope.launch {
-            val loginSuccess = authRepository.loginWithEmailAndPassword(email, password)
-            if (loginSuccess.isSuccess) {
-                _authState.update {
-                    it.copy(
-                        loading = false,
-                        user = authRepository.currentUser
-                    )
-                }
-            } else {
-                _authState.update {
-                    it.copy(
-                        loading = false,
-                        errorMessage = loginSuccess.exceptionOrNull()?.message
-                    )
-                }
-            }
-        }
-    }
-
-    fun showLoginInput() {
-        _authState.update { it.copy(showLoginInput = true) }
-    }
-
-    fun updateEmail(email: String) {
-        _authState.update { it.copy(email = email) }
-    }
-
-    fun updatePassword(password: String) {
-        _authState.update { it.copy(password = password) }
-    }
 
     fun handleEvent(event: AuthenticationEvent) {
         when (event) {
@@ -176,6 +81,10 @@ class AuthenticationViewModel @Inject constructor(
             is AuthenticationEvent.SignUpWithGoogle -> {
                 signUpWithGoogle(event.context)
             }
+
+            is AuthenticationEvent.NameChanged -> {
+                _newAuthState.update { it.copy(name = event.name) }
+            }
         }
     }
 
@@ -208,13 +117,18 @@ class AuthenticationViewModel @Inject constructor(
     private fun signUpWithEmailAndPassword() {
         val email = _newAuthState.value.email
         val password = _newAuthState.value.password
+        val name = _newAuthState.value.name
         _newAuthState.update {
             it.copy(
                 loading = true
             )
         }
         viewModelScope.launch {
-            val signUpResponse = authRepository.signUpWithEmailAndPassword(email, password)
+            val signUpResponse = authRepository.signUpWithEmailAndPassword(
+                email = email,
+                password = password,
+                name = name
+            )
             if (signUpResponse.isSuccess) {
                 _newAuthState.update {
                     it.copy(
@@ -273,21 +187,8 @@ sealed class AuthResult<T> {
     class Loading<T> : AuthResult<T>()
 }
 
-data class AuthenticationUIState(
-    val isUserSignedIn: Boolean = false,
-    val user: FirebaseUser? = null,
-    val loading: Boolean = false,
-    val errorMessage: String? = null,
-    val showLoginInput: Boolean = false,
-    val email: String = "",
-    val password: String = "",
-    val theme: String? = "Dark"
-) {
-    val enableLoginButton = email.trim().isNotEmpty() && password.trim().isNotEmpty()
-}
-
 data class DrawerState(
-    val user: FirebaseUser? = null,
+    val user: String? = null,
     val theme: String? = "Dark"
 )
 
@@ -295,10 +196,16 @@ data class NewAuthenticationUIState(
     val authenticationScreen: AuthenticationScreen = AuthenticationScreen.Login,
     val email: String = "",
     val password: String = "",
+    val name: String = "",
     val loading: Boolean = false,
     val errorMessage: String? = null
 ) {
-    val enableButton = email.trim().isNotEmpty() && password.trim().isNotEmpty() && !loading
+    val enableButton = if (authenticationScreen == AuthenticationScreen.Login) {
+        email.trim().isNotEmpty() && password.trim().isNotEmpty() && !loading
+    } else {
+        email.trim().isNotEmpty() && password.trim().isNotEmpty() && name.trim()
+            .isNotEmpty() && !loading
+    }
 }
 
 sealed interface AuthenticationScreen {
@@ -313,6 +220,7 @@ sealed interface AuthenticationEvent {
     data object SignUp : AuthenticationEvent
     data class EmailChanged(val email: String) : AuthenticationEvent
     data class PasswordChanged(val password: String) : AuthenticationEvent
+    data class NameChanged(val name: String) : AuthenticationEvent
     data class SignUpWithGoogle(val context: Context) : AuthenticationEvent
     data class LoginWithGoogle(val context: Context) : AuthenticationEvent
 }

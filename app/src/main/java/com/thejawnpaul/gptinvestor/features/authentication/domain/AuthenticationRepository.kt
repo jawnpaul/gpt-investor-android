@@ -39,7 +39,7 @@ interface AuthenticationRepository {
     fun getAuthState(): Flow<Boolean>
     suspend fun deleteAccount()
     suspend fun loginWithEmailAndPassword(email: String, password: String): Result<String>
-    suspend fun signUpWithEmailAndPassword(email: String, password: String): Result<String>
+    suspend fun signUpWithEmailAndPassword(email: String, password: String, name: String): Result<String>
     suspend fun loginWithGoogle(activityContext: Context): Flow<Boolean>
 }
 
@@ -175,6 +175,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 response.body?.let { loginResponse ->
                     gptInvestorPreferences.setUserId(loginResponse.user?.uid.toString())
                     gptInvestorPreferences.setIsUserLoggedIn(true)
+                    gptInvestorPreferences.setUserName(loginResponse.user?.name.toString())
                     tokenSyncManager.syncToken()
                     tokenStorage.saveAccessToken(loginResponse.accessToken ?: "")
                     tokenStorage.saveRefreshToken(loginResponse.refreshToken ?: "")
@@ -201,12 +202,13 @@ class AuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun signUpWithEmailAndPassword(email: String, password: String): Result<String> {
+    override suspend fun signUpWithEmailAndPassword(email: String, password: String, name: String): Result<String> {
         return try {
             val response = apiService.signUpWithEmailAndPassword(
                 request = SignUpRequest(
                     email = email,
-                    password = password
+                    password = password,
+                    name = name
                 )
             )
             if (response.isSuccessful) {
@@ -268,6 +270,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
                             trySend(success)
 
                             tokenSyncManager.syncToken()
+                            gptInvestorPreferences.setUserName(auth.currentUser?.uid.toString())
                         }
                         analyticsLogger.identifyUser(
                             eventName = "Sign Up",

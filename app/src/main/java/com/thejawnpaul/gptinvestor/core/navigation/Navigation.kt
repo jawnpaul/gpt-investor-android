@@ -45,6 +45,7 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.Histo
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
+import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeUiState
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsAction
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsScreen
@@ -75,7 +76,7 @@ fun SetUpNavGraph(navController: NavHostController) {
         ) {
             composable(Screen.HomeTabScreen.route) {
                 val homeViewModel = hiltViewModel<HomeViewModel>()
-                val state = homeViewModel.uiState.collectAsStateWithLifecycle()
+                val state = homeViewModel.uiState.collectAsStateWithLifecycle(initialValue = HomeUiState())
                 val scope = rememberCoroutineScope()
                 LaunchedEffect(Unit) {
                     homeViewModel.actions.onEach { action ->

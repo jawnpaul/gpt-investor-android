@@ -131,4 +131,6 @@
     <string name="rate_limit_bottom_sheet_action">Okay</string>
     <string name="search_companies_in">Search companies in %1$s</string>
     <string name="search_all_companies">Search all companies</string>
+    <string name="name">Name</string>
+
 </resources>

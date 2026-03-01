@@ -50,7 +50,12 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.theme.bodyChatBody
 
 @Composable
-fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Unit, onAction: (NavDrawerAction) -> Unit, state: DrawerState) {
+fun NavDrawerContent(
+    onCloseDrawer: () -> Unit,
+    onEvent: (NavDrawerEvent) -> Unit,
+    onAction: (NavDrawerAction) -> Unit,
+    state: DrawerState
+) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     Column(
@@ -152,52 +157,35 @@ fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Uni
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     // Image
-                    if (state.user != null) {
-                        if (state.user.photoUrl != null) {
-                            Surface(
-                                modifier = Modifier.size(40.dp),
-                                shape = CircleShape
-                            ) {
-                                AsyncImage(
-                                    model = state.user.photoUrl,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Crop
-                                )
-                            }
-                        } else {
-                            Surface(
-                                modifier = Modifier.size(40.dp),
-                                shape = CircleShape
-                            ) {
-                                Text(
-                                    text = state.user.displayName?.ifBlank { "A" }?.take(1)
-                                        ?.uppercase() ?: "A"
-                                )
-                            }
-                        }
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(color = MaterialTheme.colorScheme.surfaceContainer),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "A")
-                        }
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(color = MaterialTheme.colorScheme.surfaceContainer),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = (state.user?.ifBlank { "A" }?.take(1) ?: "A").uppercase()
+                        )
                     }
+
 
                     // Text
                     Text(
-                        text = state.user?.displayName ?: "Anonymous",
+                        text = when (state.user) {
+                            "null" -> "Anonymous"
+                            else -> state.user ?: "Anonymous"
+                        },
                         style = MaterialTheme.typography.bodyChatBody
                     )
                 }
 
-                IconButton(modifier = Modifier.padding(end = 16.dp).size(24.dp), onClick = {
-                    expanded = !expanded
-                }) {
+                IconButton(
+                    modifier = Modifier
+                        .padding(end = 16.dp)
+                        .size(24.dp), onClick = {
+                        expanded = !expanded
+                    }) {
                     Icon(
                         imageVector = if (expanded) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
                         contentDescription = null

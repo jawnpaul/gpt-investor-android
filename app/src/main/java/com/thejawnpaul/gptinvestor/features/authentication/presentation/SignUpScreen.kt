@@ -42,11 +42,13 @@ import com.thejawnpaul.gptinvestor.theme.linkMedium
 fun SignUpScreen(
     modifier: Modifier,
     email: String,
+    name: String,
     password: String,
     loading: Boolean = false,
     enableButton: Boolean,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
+    onNameChange: (String) -> Unit,
     onSignUpClick: () -> Unit,
     onLoginClick: () -> Unit,
     onSignUpWithGoogleClick: () -> Unit
@@ -75,6 +77,26 @@ fun SignUpScreen(
                 // Input
                 OutlinedTextField(
                     keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next
+                    ),
+                    value = name,
+                    onValueChange = onNameChange,
+                    label = {
+                        Text(text = stringResource(R.string.name))
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_profile),
+                            contentDescription = null
+                        )
+                    }
+                )
+
+                // Input
+                OutlinedTextField(
+                    keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next
                     ),
@@ -86,7 +108,7 @@ fun SignUpScreen(
                     modifier = Modifier.fillMaxWidth(),
                     leadingIcon = {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_profile),
+                            painter = painterResource(id = R.drawable.ic_email),
                             contentDescription = null
                         )
                     }
@@ -167,11 +189,13 @@ fun SignUpPreview() {
                 modifier = Modifier,
                 email = "",
                 password = "",
+                name = "",
                 enableButton = false,
                 onEmailChange = {},
                 onPasswordChange = {},
                 onLoginClick = {},
                 onSignUpClick = {},
+                onNameChange = {},
                 onSignUpWithGoogleClick = {}
             )
         }

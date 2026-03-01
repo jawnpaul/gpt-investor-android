@@ -26,6 +26,7 @@ class GPTInvestorPreferences @Inject constructor(@ApplicationContext private val
         private val USER_ID_KEY = stringPreferencesKey("user_id_preference")
         private val IS_FIRST_INSTALL_KEY = booleanPreferencesKey("is_first_install_preference")
         private val IS_USER_LOGGED_IN_KEY = booleanPreferencesKey("is_user_logged_in_preference")
+        private val USER_NAME_KEY = stringPreferencesKey("user_name_preference")
         private val IS_USER_ON_MODEL_WAITLIST_KEY =
             booleanPreferencesKey("is_user_on_model_waitlist_preference")
         private val FCM_TOKEN_KEY = stringPreferencesKey("fcm_token_preference")
@@ -206,6 +207,22 @@ class GPTInvestorPreferences @Inject constructor(@ApplicationContext private val
     suspend fun clearRefreshToken() {
         dataStore.edit { preferences ->
             preferences.remove(REFRESH_TOKEN_KEY)
+        }
+    }
+
+    val userName: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[USER_NAME_KEY]
+    }
+
+    suspend fun setUserName(name: String) {
+        dataStore.edit { preferences ->
+            preferences[USER_NAME_KEY] = name
+        }
+    }
+
+    suspend fun clearUserName() {
+        dataStore.edit { preferences ->
+            preferences.remove(USER_NAME_KEY)
         }
     }
 }

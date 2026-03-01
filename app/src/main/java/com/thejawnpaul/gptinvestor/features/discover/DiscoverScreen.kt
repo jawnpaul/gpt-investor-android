@@ -40,6 +40,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import androidx.paging.LoadState
 import androidx.paging.PagingData
+import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.SingleCompanyItem
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.SectorChoiceQuestion
@@ -85,8 +86,15 @@ fun DiscoverScreen(
                         SearchBarCustom(
                             modifier = Modifier
                                 .fillMaxWidth(),
-                            query = "",
-                            placeHolder = "",
+                            query = state.query,
+                            placeHolder = state.selected?.let {
+                                when (it) {
+                                    SectorInput.AllSector -> stringResource(R.string.search_all_companies)
+                                    is SectorInput.CustomSector -> {
+                                        stringResource(R.string.search_companies_in, it.sectorName)
+                                    }
+                                }
+                            } ?: stringResource(R.string.search),
                             onQueryChange = { newQuery ->
                                 onEvent(DiscoveryEvent.SearchQueryChanged(newQuery))
                             },

@@ -73,9 +73,8 @@ object KtorClientFactory {
                                 tokenStorage.saveAccessToken(tokenResponse.accessToken)
                                 BearerTokens(tokenResponse.accessToken, refreshToken)
                             } else {
-                                if (response.status == HttpStatusCode.Unauthorized || response.status == HttpStatusCode.Forbidden) {
-                                    unauthorizedCallback.onUnauthorized()
-                                }
+
+                                unauthorizedCallback.onUnauthorized()
                                 null
                             }
                         } catch (e: Exception) {

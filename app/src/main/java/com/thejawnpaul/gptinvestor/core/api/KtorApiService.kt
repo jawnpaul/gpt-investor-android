@@ -70,8 +70,8 @@ class KtorApiService @Inject constructor(
         }.toKtorResponse()
 
     suspend fun getCompanyInfo(request: CompanyDetailRemoteRequest): KtorResponse<CompanyDetailRemoteResponse> =
-        client.post("v1/company-info") {
-            setBody(request)
+        client.get("v1.1/company-info") {
+            parameter("ticker", request.ticker)
         }.toKtorResponse()
 
     suspend fun getCompanyPrice(request: CompanyPriceRequest): KtorResponse<List<CompanyPriceResponse>> =

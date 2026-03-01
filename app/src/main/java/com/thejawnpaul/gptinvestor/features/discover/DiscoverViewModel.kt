@@ -17,10 +17,14 @@ import com.thejawnpaul.gptinvestor.features.toppick.data.repository.TopPickRepos
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -33,14 +37,14 @@ class DiscoverViewModel @Inject constructor(
     private val topPickRepository: TopPickRepository
 ) : ViewModel() {
 
-    private val _discoveryPagingFilter =
-        MutableStateFlow<DiscoveryPagingFilter>(DiscoveryPagingFilter.All)
-
     private val _discoveryScreenState = MutableStateFlow(DiscoveryScreenState())
     val discoveryScreenState get() = _discoveryScreenState
 
     private val _actions = MutableSharedFlow<DiscoveryAction>()
     val actions get() = _actions.asSharedFlow()
+
+    private val _appliedSearchQuery = MutableStateFlow("")
+    private var searchJob: Job? = null
 
     init {
         getAllSector()
@@ -50,23 +54,23 @@ class DiscoverViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val companiesPagingData: Flow<PagingData<CompanyPresentation>> =
-        _discoveryPagingFilter.flatMapLatest { filterType ->
-            val sourceFlow: Flow<PagingData<Company>> = when (filterType) {
-                DiscoveryPagingFilter.All -> companyRepository.searchCompaniesPaged(
-                    query = SearchCompanyQuery(
-                        sector = null,
-                        query = ""
-                    )
-                )
-
-                is DiscoveryPagingFilter.Custom -> companyRepository.searchCompaniesPaged(
-                    query = SearchCompanyQuery(
-                        sector = filterType.sectorKey,
-                        query = ""
-                    )
-                )
+        combine(
+            _discoveryScreenState.map { it.selected }.distinctUntilChanged(),
+            _appliedSearchQuery
+        ) { selectedSector, query ->
+            selectedSector to query
+        }.flatMapLatest { (selectedSector, query) ->
+            val sectorKey = when (selectedSector) {
+                is SectorInput.CustomSector -> if (selectedSector.sectorKey == "top-picks") null else selectedSector.sectorKey
+                else -> null
             }
-            sourceFlow.map { pagingData ->
+
+            companyRepository.searchCompaniesPaged(
+                query = SearchCompanyQuery(
+                    sector = sectorKey,
+                    query = query
+                )
+            ).map { pagingData ->
                 pagingData.map { company -> mapCompanyToPresentation(company) }
             }
         }.cachedIn(viewModelScope)
@@ -86,19 +90,19 @@ class DiscoverViewModel @Inject constructor(
     fun handleEvent(event: DiscoveryEvent) {
         when (event) {
             DiscoveryEvent.GoBack -> {
-
+                processAction(DiscoveryAction.OnGoBack)
             }
 
             is DiscoveryEvent.GoToCompanyDetail -> {
-
+                processAction(DiscoveryAction.OnNavigateToCompanyDetail(ticker = event.ticker))
             }
 
             is DiscoveryEvent.GoToTopPickDetail -> {
-
+                processAction(DiscoveryAction.OnGoToPickDetail(id = event.id))
             }
 
             DiscoveryEvent.PerformSearch -> {
-
+                searchCompanies(_discoveryScreenState.value.query, immediate = true)
             }
 
             DiscoveryEvent.RetryCompanies -> {
@@ -106,7 +110,10 @@ class DiscoverViewModel @Inject constructor(
             }
 
             is DiscoveryEvent.SearchQueryChanged -> {
-
+                _discoveryScreenState.update { currentState ->
+                    currentState.copy(query = event.query)
+                }
+                searchCompanies(event.query)
             }
 
             is DiscoveryEvent.SelectSector -> {
@@ -114,7 +121,15 @@ class DiscoverViewModel @Inject constructor(
             }
 
             is DiscoveryEvent.ToggleSearchMode -> {
-
+                _discoveryScreenState.update { currentState ->
+                    currentState.copy(searchMode = event.searchMode)
+                }
+                if (!event.searchMode) {
+                    _appliedSearchQuery.value = ""
+                    _discoveryScreenState.update { currentState ->
+                        currentState.copy(query = "")
+                    }
+                }
             }
         }
     }
@@ -166,18 +181,26 @@ class DiscoverViewModel @Inject constructor(
     }
 
     private fun handleSectorChange(sector: SectorInput) {
-        if (sector is SectorInput.CustomSector && sector.sectorKey == "top-picks") {
-            _discoveryScreenState.update { currentState ->
-                currentState.copy(selected = sector)
-            }
-            return
-        }
-        _discoveryPagingFilter.value = when (sector) {
-            SectorInput.AllSector -> DiscoveryPagingFilter.All
-            is SectorInput.CustomSector -> DiscoveryPagingFilter.Custom(sector.sectorKey)
-        }
         _discoveryScreenState.update { currentState ->
             currentState.copy(selected = sector)
+        }
+    }
+
+    private fun processAction(action: DiscoveryAction) {
+        viewModelScope.launch {
+            _actions.emit(action)
+        }
+    }
+
+    private fun searchCompanies(query: String, immediate: Boolean = false) {
+        searchJob?.cancel()
+        if (immediate || query.isEmpty()) {
+            _appliedSearchQuery.value = query
+        } else {
+            searchJob = viewModelScope.launch {
+                delay(500L)
+                _appliedSearchQuery.value = query
+            }
         }
     }
 }
@@ -207,9 +230,5 @@ sealed interface DiscoveryAction {
     data class OnNavigateToCompanyDetail(val ticker: String) : DiscoveryAction
     data object OnGoBack : DiscoveryAction
     data class OnGoToPickDetail(val id: String) : DiscoveryAction
-}
 
-sealed interface DiscoveryPagingFilter {
-    data object All : DiscoveryPagingFilter
-    data class Custom(val sectorKey: String) : DiscoveryPagingFilter
 }

@@ -121,29 +121,29 @@ class ConversationRepository @Inject constructor(
             emit(Either.Right(structuredConversation))
 
             val aiChatRequest = AiChatRequest(prompt = prompt.query)
-            val chatResponse = apiService.chatAiResponse(aiChatRequest)
-
-            if (chatResponse.status.value in 200..299) {
-                handleSseStream(
-                    response = chatResponse,
-                    initialConversation = structuredConversation,
-                    prompt = prompt.query,
-                    messageId = messageId
-                )
-            } else {
-                structuredConversation.let { conversation ->
-                    val updatedMessages = ArrayList(conversation.messageList)
-                    val index = updatedMessages.indexOfFirst { it.id == messageId }
-                    if (index != -1) {
-                        val original = updatedMessages[index] as GenAiTextMessage
-                        updatedMessages[index] = original.copy(
-                            loading = false,
-                            response = original.response ?: "Couldn't generate a response"
-                        )
-                        emit(Either.Right(conversation.copy(messageList = updatedMessages)))
+            apiService.chatAiResponse(aiChatRequest) { chatResponse ->
+                if (chatResponse.status.value in 200..299) {
+                    handleSseStream(
+                        response = chatResponse,
+                        initialConversation = structuredConversation,
+                        prompt = prompt.query,
+                        messageId = messageId
+                    )
+                } else {
+                    structuredConversation.let { conversation ->
+                        val updatedMessages = ArrayList(conversation.messageList)
+                        val index = updatedMessages.indexOfFirst { it.id == messageId }
+                        if (index != -1) {
+                            val original = updatedMessages[index] as GenAiTextMessage
+                            updatedMessages[index] = original.copy(
+                                loading = false,
+                                response = original.response ?: "Couldn't generate a response"
+                            )
+                            emit(Either.Right(conversation.copy(messageList = updatedMessages)))
+                        }
                     }
+                    emit(Either.Left(mapHttpCodeToFailure(chatResponse.status.value)))
                 }
-                emit(Either.Left(mapHttpCodeToFailure(chatResponse.status.value)))
             }
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
@@ -199,31 +199,31 @@ class ConversationRepository @Inject constructor(
                 conversationId = entity?.remoteId,
                 tickerSymbol = prompt.tickerSymbol
             )
-            val chatResponse = apiService.chatAiResponse(aiChatRequest)
-
-            if (chatResponse.status.value in 200..299) {
-                currentConversation?.let {
-                    handleSseStream(
-                        chatResponse,
-                        it,
-                        prompt.query,
-                        newMessageId ?: -1L
-                    )
-                }
-            } else {
-                currentConversation?.let { conversation ->
-                    val updatedMessages = ArrayList(conversation.messageList)
-                    val index = updatedMessages.indexOfFirst { it.id == newMessageId }
-                    if (index != -1) {
-                        val original = updatedMessages[index] as GenAiTextMessage
-                        updatedMessages[index] = original.copy(
-                            loading = false,
-                            response = original.response ?: "Couldn't generate a response"
+            apiService.chatAiResponse(aiChatRequest) { chatResponse ->
+                if (chatResponse.status.value in 200..299) {
+                    currentConversation?.let {
+                        handleSseStream(
+                            chatResponse,
+                            it,
+                            prompt.query,
+                            newMessageId ?: -1L
                         )
-                        emit(Either.Right(conversation.copy(messageList = updatedMessages)))
                     }
+                } else {
+                    currentConversation?.let { conversation ->
+                        val updatedMessages = ArrayList(conversation.messageList)
+                        val index = updatedMessages.indexOfFirst { it.id == newMessageId }
+                        if (index != -1) {
+                            val original = updatedMessages[index] as GenAiTextMessage
+                            updatedMessages[index] = original.copy(
+                                loading = false,
+                                response = original.response ?: "Couldn't generate a response"
+                            )
+                            emit(Either.Right(conversation.copy(messageList = updatedMessages)))
+                        }
+                    }
+                    emit(Either.Left(mapHttpCodeToFailure(chatResponse.status.value)))
                 }
-                emit(Either.Left(mapHttpCodeToFailure(chatResponse.status.value)))
             }
 
             analyticsLogger.logEvent(eventName = "Query Submitted", params = mapOf())
@@ -312,7 +312,7 @@ class ConversationRepository @Inject constructor(
                                         updatedMessages[index] =
                                             original.copy(
                                                 response = chunk.toString(),
-                                                loading = false // Set loading false as soon as text arrives
+                                                loading = true // Keep loading true during stream
                                             )
                                         currentConversation =
                                             currentConversation.copy(messageList = updatedMessages)

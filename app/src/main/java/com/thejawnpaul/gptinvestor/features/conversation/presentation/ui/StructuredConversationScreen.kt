@@ -277,7 +277,7 @@ fun SingleStructuredResponse(
 
     when (genAiMessage) {
         is GenAiTextMessage -> {
-            if (genAiMessage.loading) {
+            if (genAiMessage.loading && genAiMessage.response.isNullOrBlank()) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -321,46 +321,47 @@ fun SingleStructuredResponse(
                     }
                 }
             } else {
-                genAiMessage.response?.let { modelResponse ->
+                val modelResponse = genAiMessage.response ?: ""
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    val showDislikeReasons = remember { mutableStateOf(false) }
+                    val feedBackState = remember { mutableStateOf(genAiMessage.feedbackStatus) }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Spacer(modifier = Modifier.weight(0.1f))
+                        Surface(
+                            modifier = Modifier.weight(0.9f),
+                            shape = RoundedCornerShape(corner = CornerSize(12.dp))
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(16.dp),
+                                text = genAiMessage.query,
+                                style = MaterialTheme.typography.bodyChatBody,
+                                textAlign = TextAlign.Start
+                            )
+                        }
+                    }
+
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                            .fillMaxWidth()
+                            .align(Alignment.Start)
+                            .padding(bottom = 16.dp)
                     ) {
-                        val showDislikeReasons = remember { mutableStateOf(false) }
-                        val feedBackState = remember { mutableStateOf(genAiMessage.feedbackStatus) }
+                        ExpandableRichText(
+                            text = modelResponse,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
 
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            Spacer(modifier = Modifier.weight(0.1f))
-                            Surface(
-                                modifier = Modifier.weight(0.9f),
-                                shape = RoundedCornerShape(corner = CornerSize(12.dp))
-                            ) {
-                                Text(
-                                    modifier = Modifier.padding(16.dp),
-                                    text = genAiMessage.query,
-                                    style = MaterialTheme.typography.bodyChatBody,
-                                    textAlign = TextAlign.Start
-                                )
-                            }
-                        }
-
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.Start)
-                                .padding(bottom = 16.dp)
-                        ) {
-                            ExpandableRichText(
-                                text = modelResponse,
-                                modifier = Modifier.padding(horizontal = 16.dp)
-                            )
-
+                        if (!genAiMessage.loading) {
                             val dislikeReasons =
                                 listOf(
                                     R.string.too_complex,

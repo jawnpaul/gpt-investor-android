@@ -40,6 +40,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.client.request.preparePost
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
@@ -146,11 +147,11 @@ class KtorApiService @Inject constructor(
             setBody(request)
         }.toKtorResponse()
 
-    suspend fun chatAiResponse(request: AiChatRequest): HttpResponse =
-        client.post("v1/ai/chat") {
+    suspend fun chatAiResponse(request: AiChatRequest, block: suspend (HttpResponse) -> Unit) =
+        client.preparePost("v1/ai/chat") {
             contentType(ContentType.Application.Json)
             setBody(request)
-        }
+        }.execute(block)
 
     suspend fun loginWithEmailAndPassword(request: LoginRequest): KtorResponse<LoginResponse> =
         client.post("v1.1/login") {

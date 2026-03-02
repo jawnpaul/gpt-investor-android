@@ -270,7 +270,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
                             trySend(success)
 
                             tokenSyncManager.syncToken()
-                            gptInvestorPreferences.setUserName(auth.currentUser?.uid.toString())
+                            gptInvestorPreferences.setUserName(auth.currentUser?.displayName.toString())
                         }
                         analyticsLogger.identifyUser(
                             eventName = "Sign Up",

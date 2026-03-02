@@ -46,6 +46,8 @@ class DiscoverViewModel @Inject constructor(
     private val _appliedSearchQuery = MutableStateFlow("")
     private var searchJob: Job? = null
 
+    private var allTopPicks: List<TopPickPresentation> = emptyList()
+
     init {
         getAllSector()
         getTopPicks()
@@ -113,6 +115,7 @@ class DiscoverViewModel @Inject constructor(
                 _discoveryScreenState.update { currentState ->
                     currentState.copy(query = event.query)
                 }
+                updateFilteredTopPicks()
                 searchCompanies(event.query)
             }
 
@@ -125,10 +128,10 @@ class DiscoverViewModel @Inject constructor(
                     currentState.copy(searchMode = event.searchMode)
                 }
                 if (!event.searchMode) {
-                    _appliedSearchQuery.value = ""
                     _discoveryScreenState.update { currentState ->
                         currentState.copy(query = "")
                     }
+                    updateFilteredTopPicks()
                 }
             }
         }
@@ -173,10 +176,24 @@ class DiscoverViewModel @Inject constructor(
                             )
                         }
                     }
-                    _discoveryScreenState.update { currentState -> currentState.copy(topPicks = topPicksPresentation) }
+                    allTopPicks = topPicksPresentation
+                    updateFilteredTopPicks()
                 }
 
             }
+        }
+    }
+
+    private fun updateFilteredTopPicks() {
+        val query = _discoveryScreenState.value.query
+        if (query.isEmpty()) {
+            _discoveryScreenState.update { it.copy(topPicks = allTopPicks) }
+        } else {
+            val filtered = allTopPicks.filter {
+                it.companyName.contains(query, ignoreCase = true) ||
+                    it.ticker.contains(query, ignoreCase = true)
+            }
+            _discoveryScreenState.update { it.copy(topPicks = filtered) }
         }
     }
 

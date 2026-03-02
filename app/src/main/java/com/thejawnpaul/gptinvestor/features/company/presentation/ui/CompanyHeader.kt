@@ -35,7 +35,11 @@ import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
-fun CompanyDetailHeader(modifier: Modifier, onNavigateUp: () -> Unit, companyHeader: CompanyHeaderPresentation) {
+fun CompanyDetailHeader(
+    modifier: Modifier,
+    onNavigateUp: () -> Unit,
+    companyHeader: CompanyHeaderPresentation
+) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     Row(
@@ -46,6 +50,7 @@ fun CompanyDetailHeader(modifier: Modifier, onNavigateUp: () -> Unit, companyHea
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(
+            modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -147,11 +152,19 @@ fun CompanyHeaderPreview() {
         Surface(
             modifier = Modifier.fillMaxSize()
         ) {
-            CompanyDetailHeader(
-                modifier = Modifier,
-                onNavigateUp = {},
-                companyHeader = CompanyHeaderPresentation(percentageChange = -10f, price = 145.05f)
-            )
+            Column() {
+                CompanyDetailHeader(
+                    modifier = Modifier,
+                    onNavigateUp = {},
+                    companyHeader = CompanyHeaderPresentation(
+                        companyTicker = "AAPL",
+                        companyName = "Apple Inc. is a long name with another long name",
+                        price = 175.43f,
+                        percentageChange = 1.2f,
+                        companyLogo = ""
+                    )
+                )
+            }
         }
     }
 }

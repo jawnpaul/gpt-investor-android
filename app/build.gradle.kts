@@ -27,7 +27,7 @@ android {
         applicationId = "com.thejawnpaul.gptinvestor"
         minSdk = 24
         targetSdk = 36
-        versionCode = 25
+        versionCode = 29
         versionName = "1.1.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -139,6 +139,7 @@ tasks.getByPath(":app:preBuild").dependsOn("installGitHook")
 dependencies {
     implementation(project(":remote:remote"))
     implementation(libs.androidx.core.ktx)
+    implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))

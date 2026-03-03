@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.theme.linkMedium
+import com.thejawnpaul.gptinvestor.core.navigation.findActivity
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -54,6 +55,11 @@ fun DefaultAuthenticationScreen(modifier: Modifier, onAuthSuccess: (String) -> U
         authViewModel.actions.onEach { action ->
             when (action) {
                 is AuthenticationAction.OnLogin -> {
+                    if (action.message.contains("success", ignoreCase = true)) {
+                        onAuthSuccess(action.message)
+                    } else {
+                        onAuthFailure(action.message)
+                    }
                 }
 
                 is AuthenticationAction.OnSignUp -> {
@@ -244,11 +250,13 @@ fun DefaultAuthenticationScreen(modifier: Modifier, onAuthSuccess: (String) -> U
                                 color = Color.White,
                                 shape = RoundedCornerShape(corner = CornerSize(20.dp)),
                                 onClick = {
-                                    authViewModel.handleEvent(
-                                        AuthenticationEvent.SignUpWithGoogle(
-                                            context = context
+                                    context.findActivity()?.let { activity ->
+                                        authViewModel.handleEvent(
+                                            AuthenticationEvent.SignUpWithGoogle(
+                                                context = activity
+                                            )
                                         )
-                                    )
+                                    }
                                 }
                             ) {
                                 Box(

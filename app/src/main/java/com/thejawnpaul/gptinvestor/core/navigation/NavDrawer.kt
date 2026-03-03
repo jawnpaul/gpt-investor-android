@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -37,16 +36,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DrawerState
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.ThemeDropdown
-import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.bodyChatBody
 
 @Composable
@@ -56,8 +55,6 @@ fun NavDrawerContent(
     onAction: (NavDrawerAction) -> Unit,
     state: DrawerState
 ) {
-    val gptInvestorColors = LocalGPTInvestorColors.current
-
     Column(
         modifier = Modifier
             .fillMaxHeight()
@@ -153,6 +150,7 @@ fun NavDrawerContent(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(
+                    modifier = Modifier.weight(1f),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
@@ -176,13 +174,15 @@ fun NavDrawerContent(
                             "null" -> "Anonymous"
                             else -> state.user ?: "Anonymous"
                         },
-                        style = MaterialTheme.typography.bodyChatBody
+                        style = MaterialTheme.typography.bodyChatBody,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
                 IconButton(
                     modifier = Modifier
-                        .padding(end = 16.dp)
+                        .padding(end = 0.dp)
                         .size(24.dp), onClick = {
                         expanded = !expanded
                     }) {
@@ -308,3 +308,23 @@ sealed interface NavDrawerAction {
     data object OnGoToHistory : NavDrawerAction
     data object OnGoToSavedTidbits : NavDrawerAction
 }
+
+@Preview
+@Composable
+private fun NavDrawerContentPreview() {
+    GPTInvestorTheme {
+        Surface {
+
+            NavDrawerContent(
+                onCloseDrawer = {},
+                onEvent = {},
+                onAction = {},
+                state = DrawerState(
+                    user = "John Doeeeee is a long text with",
+                    theme = "Light"
+                )
+            )
+        }
+    }
+}
+

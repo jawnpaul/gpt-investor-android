@@ -11,18 +11,18 @@ data class LoginRequest(
 
 @Serializable
 data class LoginResponse(
-    @SerialName("access_token") val accessToken: String?,
-    @SerialName("refresh_token") val refreshToken: String?,
-    @SerialName("message") val message: String?,
-    @SerialName("status") val status: String?,
-    @SerialName("user") val user: User?
+    @SerialName("access_token") val accessToken: String? = null,
+    @SerialName("refresh_token") val refreshToken: String? = null,
+    @SerialName("message") val message: String? = null,
+    @SerialName("status") val status: String? = null,
+    @SerialName("user") val user: User? = null
 )
 
 @Serializable
 data class User(
-    @SerialName("email") val email: String?,
-    @SerialName("uid") val uid: String?,
-    @SerialName("name") val name: String?
+    @SerialName("email") val email: String? = null,
+    @SerialName("uid") val uid: String? = null,
+    @SerialName("name") val name: String? = null
 )
 
 @Serializable
@@ -39,7 +39,7 @@ data class SignUpRequest(
 
 @Serializable
 data class SignUpResponse(
-    @SerialName("message") val message: String?,
-    @SerialName("status") val status: String?,
-    @SerialName("user_id") val userId: String?
+    @SerialName("message") val message: String? = null,
+    @SerialName("status") val status: String? = null,
+    @SerialName("user_id") val userId: String? = null
 )

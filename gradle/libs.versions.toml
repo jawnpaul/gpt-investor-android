@@ -39,6 +39,7 @@ playBilling = "8.3.0"
 ktor = "3.0.3"
 kotlinxSerialization = "1.7.3"
 playAppUpdate = "2.1.0"
+coroutinesPlayServices = "1.10.2"
 
 
 
@@ -108,6 +109,7 @@ ktor-client-auth = { group = "io.ktor", name = "ktor-client-auth", version.ref =
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 play-app-update = { group = "com.google.android.play", name = "app-update", version.ref = "playAppUpdate" }
 play-app-update-ktx = { group = "com.google.android.play", name = "app-update-ktx", version.ref = "playAppUpdate" }
+kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutinesPlayServices" }
 
 
 

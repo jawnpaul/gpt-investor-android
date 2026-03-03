@@ -23,24 +23,24 @@ import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
 import com.thejawnpaul.gptinvestor.remote.TokenStorage
 
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
 interface AuthenticationRepository {
     val currentUser: FirebaseUser?
-    suspend fun signUp(activityContext: Context): Flow<Boolean>
     suspend fun signOut(activityContext: Context)
     fun getAuthState(): Flow<Boolean>
     suspend fun deleteAccount()
     suspend fun loginWithEmailAndPassword(email: String, password: String): Result<String>
-    suspend fun signUpWithEmailAndPassword(email: String, password: String, name: String): Result<String>
-    suspend fun loginWithGoogle(activityContext: Context): Flow<Boolean>
+    suspend fun signUpWithEmailAndPassword(
+        email: String,
+        password: String,
+        name: String
+    ): Result<String>
+
+    suspend fun loginWithGoogle(activityContext: Context): Result<Unit>
 }
 
 class AuthenticationRepositoryImpl @Inject constructor(
@@ -57,74 +57,6 @@ class AuthenticationRepositoryImpl @Inject constructor(
 
     private fun getCredentialManager(activityContext: Context): CredentialManager {
         return CredentialManager.create(activityContext)
-    }
-
-    override suspend fun signUp(activityContext: Context): Flow<Boolean> = callbackFlow {
-        try {
-            val credentialManager = getCredentialManager(activityContext)
-
-            val googleIdOption = GetGoogleIdOption.Builder()
-                .setServerClientId(BuildConfig.WEB_CLIENT_ID)
-                .setFilterByAuthorizedAccounts(false)
-                .build()
-
-            // Create the Credential Manager request
-            val request = GetCredentialRequest.Builder()
-                .addCredentialOption(googleIdOption)
-                .build()
-
-            val result = credentialManager.getCredential(
-                request = request,
-                context = activityContext
-            )
-            val credential = result.credential
-            // Check if credential is of type Google ID
-            if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                // Create Google ID Token
-                val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-
-                // Sign in to Firebase with using the token
-                val credential =
-                    GoogleAuthProvider.getCredential(googleIdTokenCredential.idToken, null)
-                auth.signInWithCredential(credential).addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            val idToken = googleIdTokenCredential.idToken
-                            val success = loginWithFirebase(idToken)
-                            trySend(success)
-
-                            gptInvestorPreferences.setUserId(auth.currentUser?.uid.toString())
-                            gptInvestorPreferences.setIsUserLoggedIn(true)
-                            tokenSyncManager.syncToken()
-                        }
-                        analyticsLogger.identifyUser(
-                            eventName = "Sign Up",
-                            params = mapOf(
-                                "user_id" to auth.currentUser?.uid.toString(),
-                                "email" to auth.currentUser?.email.toString(),
-                                "name" to auth.currentUser?.displayName.toString(),
-                                "sign_up_method" to auth.currentUser?.providerId.toString()
-                            )
-                        )
-                    } else {
-                        trySend(false)
-                    }
-                }
-            } else {
-                Timber.e("Credential is not of type Google ID!")
-            }
-        } catch (e: Exception) {
-            when (e) {
-                is GetCredentialException -> {
-                    Timber.e("Get Credential Exception: ${e.stackTraceToString()}")
-                }
-
-                else -> {
-                    Timber.e("Unknown Exception: ${e.stackTraceToString()}")
-                }
-            }
-        }
-        awaitClose()
     }
 
     override suspend fun signOut(activityContext: Context) {
@@ -163,7 +95,10 @@ class AuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun loginWithEmailAndPassword(email: String, password: String): Result<String> {
+    override suspend fun loginWithEmailAndPassword(
+        email: String,
+        password: String
+    ): Result<String> {
         return try {
             val response = apiService.loginWithEmailAndPassword(
                 request = LoginRequest(
@@ -192,7 +127,8 @@ class AuthenticationRepositoryImpl @Inject constructor(
             } else {
                 response.errorBody?.let { error ->
 
-                    val errorMessage = extractMessageFromErrorBody(error) ?: "An unknown error occurred."
+                    val errorMessage =
+                        extractMessageFromErrorBody(error) ?: "An unknown error occurred."
                     Result.failure(Exception(errorMessage))
                 } ?: Result.failure(Exception(response.body?.message ?: "Login failed"))
             }
@@ -202,7 +138,11 @@ class AuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun signUpWithEmailAndPassword(email: String, password: String, name: String): Result<String> {
+    override suspend fun signUpWithEmailAndPassword(
+        email: String,
+        password: String,
+        name: String
+    ): Result<String> {
         return try {
             val response = apiService.signUpWithEmailAndPassword(
                 request = SignUpRequest(
@@ -226,7 +166,8 @@ class AuthenticationRepositoryImpl @Inject constructor(
             } else {
                 response.errorBody?.let { error ->
 
-                    val errorMessage = extractMessageFromErrorBody(error) ?: "An unknown error occurred."
+                    val errorMessage =
+                        extractMessageFromErrorBody(error) ?: "An unknown error occurred."
                     Result.failure(Exception(errorMessage))
                 } ?: Result.failure(Exception(response.body?.message ?: "Sign up failed"))
             }
@@ -236,8 +177,8 @@ class AuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun loginWithGoogle(activityContext: Context): Flow<Boolean> = callbackFlow {
-        try {
+    override suspend fun loginWithGoogle(activityContext: Context): Result<Unit> {
+        return try {
             val credentialManager = getCredentialManager(activityContext)
             val googleIdOption = GetGoogleIdOption.Builder()
                 .setServerClientId(BuildConfig.WEB_CLIENT_ID)
@@ -260,47 +201,46 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
 
                 // Sign in to Firebase with using the token
-                val credential =
+                val firebaseCredential =
                     GoogleAuthProvider.getCredential(googleIdTokenCredential.idToken, null)
-                auth.signInWithCredential(credential).addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            val idToken = googleIdTokenCredential.idToken
-                            val success = loginWithFirebase(idToken)
-                            trySend(success)
+                auth.signInWithCredential(firebaseCredential).await()
 
-                            tokenSyncManager.syncToken()
-                            gptInvestorPreferences.setUserName(auth.currentUser?.displayName.toString())
-                        }
-                        analyticsLogger.identifyUser(
-                            eventName = "Sign Up",
-                            params = mapOf(
-                                "user_id" to auth.currentUser?.uid.toString(),
-                                "email" to auth.currentUser?.email.toString(),
-                                "name" to auth.currentUser?.displayName.toString(),
-                                "sign_up_method" to auth.currentUser?.providerId.toString()
-                            )
+                val firebaseIdToken = auth.currentUser?.getIdToken(false)?.await()?.token ?: ""
+
+                val success = loginWithFirebase(firebaseIdToken)
+                if (success) {
+                    tokenSyncManager.syncToken()
+                    gptInvestorPreferences.setUserName(auth.currentUser?.displayName.toString())
+                    analyticsLogger.identifyUser(
+                        eventName = "Sign Up",
+                        params = mapOf(
+                            "user_id" to auth.currentUser?.uid.toString(),
+                            "email" to auth.currentUser?.email.toString(),
+                            "name" to auth.currentUser?.displayName.toString(),
+                            "sign_up_method" to auth.currentUser?.providerId.toString()
                         )
-                    } else {
-                        trySend(false)
-                    }
+                    )
+                    Result.success(Unit)
+                } else {
+                    Result.failure(Exception("Failed to login with backend"))
                 }
             } else {
                 Timber.e("Credential is not of type Google ID!")
+                Result.failure(Exception("Credential is not of type Google ID!"))
             }
         } catch (e: Exception) {
             when (e) {
                 is GetCredentialException -> {
                     Timber.e("Get Credential Exception: ${e.stackTraceToString()}")
+                    Result.failure(e)
                 }
 
                 else -> {
                     Timber.e("Unknown Exception: ${e.stackTraceToString()}")
+                    Result.failure(e)
                 }
             }
         }
-
-        awaitClose()
     }
 
     private suspend fun loginWithFirebase(idToken: String): Boolean {
@@ -308,17 +248,25 @@ class AuthenticationRepositoryImpl @Inject constructor(
             val response = apiService.loginWithFirebase(
                 request = FirebaseLoginRequest(idToken)
             )
+            Timber.d("Firebase login response: code=${response.code}, isSuccessful=${response.isSuccessful}")
             if (response.isSuccessful) {
                 response.body?.let { loginResponse ->
+                    Timber.d("Login response body received: $loginResponse")
+                    gptInvestorPreferences.setUserId(loginResponse.user?.uid.toString())
+                    gptInvestorPreferences.setIsUserLoggedIn(true)
                     tokenStorage.saveAccessToken(loginResponse.accessToken ?: "")
                     tokenStorage.saveRefreshToken(loginResponse.refreshToken ?: "")
                     true
-                } ?: false
+                } ?: run {
+                    Timber.e("Firebase login successful but body is null")
+                    false
+                }
             } else {
+                Timber.e("Firebase login failed: code=${response.code}, error=${response.errorBody}")
                 false
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Timber.e(e, "Exception during Firebase login")
             false
         }
     }

@@ -74,12 +74,8 @@ class AuthenticationViewModel @Inject constructor(
                 _newAuthState.update { it.copy(password = event.password) }
             }
 
-            is AuthenticationEvent.LoginWithGoogle -> {
-                loginWithGoogle(event.context)
-            }
-
             is AuthenticationEvent.SignUpWithGoogle -> {
-                signUpWithGoogle(event.context)
+                loginWithGoogle(event.context)
             }
 
             is AuthenticationEvent.NameChanged -> {
@@ -150,26 +146,13 @@ class AuthenticationViewModel @Inject constructor(
         }
     }
 
-    private fun signUpWithGoogle(context: Context) {
-        viewModelScope.launch {
-            authRepository.signUp(context).collect {
-                if (it) {
-                    _actions.emit(AuthenticationAction.OnSignUp("Sign up Success"))
-                } else {
-                    _actions.emit(AuthenticationAction.OnSignUp("Sign up failed"))
-                }
-            }
-        }
-    }
-
     private fun loginWithGoogle(context: Context) {
         viewModelScope.launch {
-            authRepository.loginWithGoogle(context).collect {
-                if (it) {
-                    _actions.emit(AuthenticationAction.OnLogin("Login Success"))
-                } else {
-                    _actions.emit(AuthenticationAction.OnLogin("Login failed"))
-                }
+            val result = authRepository.loginWithGoogle(context)
+            if (result.isSuccess) {
+                _actions.emit(AuthenticationAction.OnLogin("Login Success"))
+            } else {
+                _actions.emit(AuthenticationAction.OnLogin(result.exceptionOrNull()?.message ?: "Login failed"))
             }
         }
     }
@@ -222,7 +205,6 @@ sealed interface AuthenticationEvent {
     data class PasswordChanged(val password: String) : AuthenticationEvent
     data class NameChanged(val name: String) : AuthenticationEvent
     data class SignUpWithGoogle(val context: Context) : AuthenticationEvent
-    data class LoginWithGoogle(val context: Context) : AuthenticationEvent
 }
 
 sealed interface AuthenticationAction {

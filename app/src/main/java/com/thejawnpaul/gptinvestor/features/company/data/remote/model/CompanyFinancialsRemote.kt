@@ -1,24 +1,24 @@
 package com.thejawnpaul.gptinvestor.features.company.data.remote.model
 
 import com.github.marlonlom.utilities.timeago.TimeAgo
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyFinancials
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.NewsPresentation
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class CompanyFinancialsRemote(
-    @field:Json(name = "balance_sheet") val balanceSheet: String,
-    @field:Json(name = "close") val close: Float,
-    @field:Json(name = "open") val open: Float,
-    @field:Json(name = "volume") val volume: Long,
-    @field:Json(name = "currency") val currency: String,
-    @field:Json(name = "financials") val financials: String,
-    @field:Json(name = "high") val high: Float,
-    @field:Json(name = "historical_data") val historicalData: String,
-    @field:Json(name = "low") val low: Float,
-    @field:Json(name = "market_cap") val marketCap: Long,
-    @field:Json(name = "news") val news: List<CompanyNews>
+    @SerialName("balance_sheet") val balanceSheet: String,
+    @SerialName("close") val close: Float,
+    @SerialName("open") val open: Float,
+    @SerialName("volume") val volume: Long,
+    @SerialName("currency") val currency: String,
+    @SerialName("financials") val financials: String,
+    @SerialName("high") val high: Float,
+    @SerialName("historical_data") val historicalData: String,
+    @SerialName("low") val low: Float,
+    @SerialName("market_cap") val marketCap: Long,
+    @SerialName("news") val news: List<CompanyNews>
 ) {
     fun toDomainObject() = CompanyFinancials(
         open = open,
@@ -35,16 +35,16 @@ data class CompanyFinancialsRemote(
     )
 }
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class CompanyNews(
-    @field:Json(name = "link") val link: String,
-    @field:Json(name = "providerPublishTime") val providerPublishTime: Long,
-    @field:Json(name = "publisher") val publisher: String,
-    @field:Json(name = "relatedTickers") val relatedTickers: List<String>,
-    @field:Json(name = "thumbnail") val thumbNail: NewsThumbNail?,
-    @field:Json(name = "title") val title: String,
-    @field:Json(name = "type") val type: String,
-    @field:Json(name = "uuid") val id: String
+    @SerialName("link") val link: String,
+    @SerialName("providerPublishTime") val providerPublishTime: Long,
+    @SerialName("publisher") val publisher: String,
+    @SerialName("relatedTickers") val relatedTickers: List<String>,
+    @SerialName("thumbnail") val thumbNail: NewsThumbNail?,
+    @SerialName("title") val title: String,
+    @SerialName("type") val type: String,
+    @SerialName("uuid") val id: String
 ) {
     fun toPresentation() = NewsPresentation(
         title = title,
@@ -52,26 +52,27 @@ data class CompanyNews(
         type = type,
         relativeDate = TimeAgo.using(time = providerPublishTime.times(1000)),
         publisher = publisher,
-        imageUrl = thumbNail?.resolutions?.first()?.url ?: "",
+        imageUrl = thumbNail?.resolutions?.firstOrNull()?.url ?: "",
         link = link
     )
 }
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class NewsThumbNail(
-    @field:Json(name = "resolutions") val resolutions: List<NewsResolution> = emptyList()
+    @SerialName("resolutions") val resolutions: List<NewsResolution?>? = null
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class NewsResolution(
-    @field:Json(name = "height") val height: Int,
-    @field:Json(name = "tag") val tag: String,
-    @field:Json(name = "url") val url: String,
-    @field:Json(name = "width") val width: Int
+    @SerialName("height") val height: Int? = null,
+    @SerialName("tag") val tag: String? = null,
+    @SerialName("url") val url: String? = null,
+    @SerialName("width") val width: Int? = null
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class CompanyFinancialsRequest(
-    @field:Json(name = "ticker") val ticker: String,
-    @field:Json(name = "years") val years: Int
+    @SerialName("ticker") val ticker: String,
+    @SerialName("years") val years: Int
 )
+

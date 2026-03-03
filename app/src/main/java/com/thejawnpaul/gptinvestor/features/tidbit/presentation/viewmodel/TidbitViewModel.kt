@@ -44,17 +44,17 @@ class TidbitViewModel @Inject constructor(
     private val _actions = MutableSharedFlow<TidbitAction>()
     val actions get() = _actions
 
-    private val _currentPagingFilter = MutableStateFlow<PagingFilterType>(PagingFilterType.All)
-    val currentPagingFilter: StateFlow<PagingFilterType> = _currentPagingFilter
+    private val _currentPagingFilter = MutableStateFlow<TidbitPagingFilterType>(TidbitPagingFilterType.All)
+    val currentPagingFilter: StateFlow<TidbitPagingFilterType> = _currentPagingFilter
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val tidbitsPagingData: Flow<PagingData<TidbitPresentation>> =
         _currentPagingFilter.flatMapLatest { filterType ->
             val sourceFlow: Flow<PagingData<Tidbit>> = when (filterType) {
-                PagingFilterType.All -> repository.getAllTidbitsPaged()
-                PagingFilterType.New -> repository.getNewTidbitsPaged()
-                PagingFilterType.Saved -> repository.getBookmarkedTidbitsPaged()
-                PagingFilterType.Trending -> repository.getTrendingTidbitsPaged()
+                TidbitPagingFilterType.All -> repository.getAllTidbitsPaged()
+                TidbitPagingFilterType.New -> repository.getNewTidbitsPaged()
+                TidbitPagingFilterType.Saved -> repository.getBookmarkedTidbitsPaged()
+                TidbitPagingFilterType.Trending -> repository.getTrendingTidbitsPaged()
             }
             sourceFlow.map { pagingData ->
                 pagingData.map { tidbit ->
@@ -220,7 +220,6 @@ class TidbitViewModel @Inject constructor(
         when (event) {
             TidbitScreenEvent.GetAllTidbits -> {
                 if (_tidbitMainScreenState.value.selectedOption == null) {
-                    getAllTidbits()
                 } else {
                     handleFilter(_tidbitMainScreenState.value.selectedOption!!)
                 }
@@ -272,60 +271,15 @@ class TidbitViewModel @Inject constructor(
         }
     }
 
-    private fun getAllTidbits() {
-        /*_tidbitMainScreenState.update { it.copy(isLoading = true) }
-        viewModelScope.launch {
-            repository.getAllTidbits().onSuccess { tidbits ->
-                _tidbitMainScreenState.update {
-                    it.copy(
-                        isLoading = false,
-                        tidbits = tidbits.map { tidbit ->
-                            mapTidbitToPresentation(tidbit)
-                        }
-                    )
-                }
-            }.onFailure {
-            }
-        }*/
-    }
-
-    /*private fun handleFilter(filter: SectorInput) {
-        when (filter) {
-            SectorInput.AllSector -> {
-                getAllTidbits()
-            }
-
-            is SectorInput.CustomSector -> {
-                when (filter.sectorKey) {
-                    "new" -> {
-                        getNewTidbits()
-                    }
-
-                    "trending" -> {
-                        getTrendingTidbits()
-                    }
-
-                    "saved" -> {
-                        getSavedTidbits()
-                    }
-
-                    else -> {
-                        getAllTidbits()
-                    }
-                }
-            }
-        }
-    }*/
-
     private fun handleFilter(filter: SectorInput) {
         val newFilterType = when (filter) {
-            SectorInput.AllSector -> PagingFilterType.All
+            SectorInput.AllSector -> TidbitPagingFilterType.All
             is SectorInput.CustomSector -> {
                 when (filter.sectorKey) {
-                    "new" -> PagingFilterType.New
-                    "trending" -> PagingFilterType.Trending
-                    "saved" -> PagingFilterType.Saved
-                    else -> PagingFilterType.All
+                    "new" -> TidbitPagingFilterType.New
+                    "trending" -> TidbitPagingFilterType.Trending
+                    "saved" -> TidbitPagingFilterType.Saved
+                    else -> TidbitPagingFilterType.All
                 }
             }
         }
@@ -405,9 +359,9 @@ sealed interface TidbitDetailAction {
     data class OnShare(val shareText: String) : TidbitDetailAction
 }
 
-sealed interface PagingFilterType {
-    data object All : PagingFilterType
-    data object Saved : PagingFilterType
-    data object Trending : PagingFilterType
-    data object New : PagingFilterType
+sealed interface TidbitPagingFilterType {
+    data object All : TidbitPagingFilterType
+    data object Saved : TidbitPagingFilterType
+    data object Trending : TidbitPagingFilterType
+    data object New : TidbitPagingFilterType
 }

@@ -84,6 +84,7 @@ class ConversationViewModel @Inject constructor(
         }
         getDefaultPromptResponseUseCase(prompt) {
             it.onFailure {
+                handleConversationFailure(it)
             }
             it.onSuccess { result ->
                 result as StructuredConversation
@@ -158,13 +159,63 @@ class ConversationViewModel @Inject constructor(
     }
 
     private fun handleInputResponseFailure(failure: Failure) {
+        handleConversationFailure(failure)
+    }
+
+    private fun handleConversationFailure(failure: Failure) {
+        conversationViewMutableStateFlow.update { state ->
+            val updatedConversation = (state.conversation as? StructuredConversation)?.let { conversation ->
+                val updatedMessages = ArrayList(conversation.messageList)
+                if (updatedMessages.isNotEmpty()) {
+                    val lastMessage = updatedMessages.last()
+                    if (lastMessage is GenAiTextMessage && lastMessage.loading) {
+                        updatedMessages[updatedMessages.size - 1] = lastMessage.copy(
+                            loading = false,
+                            response = lastMessage.response ?: "Couldn't generate a response"
+                        )
+                    }
+                }
+                conversation.copy(messageList = updatedMessages)
+            } ?: state.conversation
+            state.copy(loading = false, conversation = updatedConversation)
+        }
         when (failure) {
             is GenAIException -> {
                 Timber.e("AI exception")
+                processAction(ConversationAction.ShowToast( "An error occurred"))
+            }
+
+            is Failure.RateLimitExceeded -> {
+                conversationViewMutableStateFlow.update { state ->
+                    state.copy(
+                        showRateLimitBottomSheet = false
+                    )
+                }
+                Timber.e("Rate limit exceeded")
+                processAction(ConversationAction.ShowToast("Rate limit exceeded. Please try again later."))
+            }
+
+            is Failure.ContextLimitReached -> {
+                Timber.e("Context limit reached")
+                processAction(ConversationAction.ShowToast("Context limit reached."))
+                conversationViewMutableStateFlow.update { state ->
+                    state.copy(
+                        showRateLimitBottomSheet = false
+                    )
+                }
+            }
+
+            is Failure.NetworkConnection -> {
+                processAction(ConversationAction.ShowToast("No internet connection"))
+            }
+
+            is Failure.ServerError -> {
+                processAction(ConversationAction.ShowToast("Server error. Please try again later."))
             }
 
             else -> {
                 Timber.e(failure.toString())
+                processAction(ConversationAction.ShowToast("Something went wrong"))
             }
         }
     }
@@ -173,7 +224,6 @@ class ConversationViewModel @Inject constructor(
         conversation as StructuredConversation
 
         selectedConversationId.update {
-            Timber.e(conversation.id.toString())
             conversation.id
         }
 
@@ -224,13 +274,21 @@ class ConversationViewModel @Inject constructor(
                     joinModelWaitlist(it)
                 }
             }
+
             is ConversationEvent.SelectWaitlistOption -> {
                 selectWaitListOption(event.option)
             }
+
             is ConversationEvent.UpgradeModel -> {
                 conversationViewMutableStateFlow.update { it.copy(showWaitListBottomSheet = event.showBottomSheet) }
                 event.modelId?.let {
                     upgradeModelId = it
+                }
+            }
+
+            is ConversationEvent.ShowRateLimitBottomSheet -> {
+                conversationViewMutableStateFlow.update {
+                    it.copy(showRateLimitBottomSheet = event.showBottomSheet)
                 }
             }
         }
@@ -311,11 +369,15 @@ sealed interface ConversationEvent {
     data class ModelChanged(val model: AvailableModel) : ConversationEvent
     data class SelectWaitlistOption(val option: String) : ConversationEvent
     data object JoinWaitlist : ConversationEvent
-    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : ConversationEvent
+    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) :
+        ConversationEvent
+
+    data class ShowRateLimitBottomSheet(val showBottomSheet: Boolean) : ConversationEvent
 }
 
 sealed interface ConversationAction {
     data object OnGoBack : ConversationAction
     data class OnGoToWebView(val url: String) : ConversationAction
     data class OnCopy(val text: String) : ConversationAction
+    data class ShowToast(val message: String) : ConversationAction
 }

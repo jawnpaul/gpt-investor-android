@@ -29,6 +29,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -42,7 +43,6 @@ class HomeViewModel @Inject constructor(
     private val remoteConfig: RemoteConfig,
     private val preferences: GPTInvestorPreferences,
     private val analyticsLogger: AnalyticsLogger,
-    private val topPickRepository: ITopPickRepository,
     private val notificationRepository: NotificationRepository,
     private val modelsRepository: ModelsRepository,
     private val tidbitRepository: TidbitRepository
@@ -50,7 +50,9 @@ class HomeViewModel @Inject constructor(
     ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
-    val uiState = _uiState.asStateFlow()
+    val uiState = _uiState.asStateFlow().combine(preferences.userName) { state, userName ->
+        state.copy(drawerState = state.drawerState.copy(user = userName))
+    }
 
     private val _actions = MutableSharedFlow<HomeAction>()
     val actions get() = _actions
@@ -67,6 +69,7 @@ class HomeViewModel @Inject constructor(
         getAvailableModels()
         getDefaultPrompts()
         getTodayTidbit()
+        //doSomething()
 
         viewModelScope.launch {
             preferences.themePreference.collect { theme ->
@@ -80,12 +83,16 @@ class HomeViewModel @Inject constructor(
             preferences.notificationPermission.collect { permission ->
                 _uiState.update { it.copy(requestForNotificationPermission = permission) }
             }
+        }
+    }
 
-            authenticationRepository.getAuthState().collect { isSignedIn ->
-                _uiState.update {
-                    it.copy(
-                        drawerState = it.drawerState.copy(
-                            user = authenticationRepository.currentUser
+    private fun doSomething() {
+        viewModelScope.launch {
+            preferences.userName.collect {
+                _uiState.update { state ->
+                    state.copy(
+                        drawerState = state.drawerState.copy(
+                            user = it
                         )
                     )
                 }

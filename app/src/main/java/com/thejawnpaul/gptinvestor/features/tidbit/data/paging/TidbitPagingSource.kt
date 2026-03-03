@@ -2,15 +2,15 @@ package com.thejawnpaul.gptinvestor.features.tidbit.data.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.thejawnpaul.gptinvestor.core.api.ApiService
+import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
+
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.model.Tidbit
 import javax.inject.Inject
-import kotlinx.coroutines.flow.first
 import timber.log.Timber
 
 class TidbitPagingSource @Inject constructor(
-    private val apiService: ApiService,
+    private val apiService: KtorApiService,
     private val preferences: GPTInvestorPreferences,
     private val tidbitType: TidbitType
 ) : PagingSource<Int, Tidbit>() {
@@ -25,17 +25,16 @@ class TidbitPagingSource @Inject constructor(
         return try {
             val page = params.key ?: 1
             val pageSize = PAGE_SIZE
-            val userId = preferences.userId.first() ?: ""
 
             val response = when (tidbitType) {
-                TidbitType.ALL -> apiService.getAllTidbit(page, pageSize, userId)
-                TidbitType.TRENDING -> apiService.getTrendingTidbit(page, pageSize, userId)
-                TidbitType.LATEST -> apiService.getLatestTidbits(page, pageSize, userId)
-                TidbitType.SAVED -> apiService.getSavedTidbits(page, pageSize, userId)
+                TidbitType.ALL -> apiService.getAllTidbit(page, pageSize)
+                TidbitType.TRENDING -> apiService.getTrendingTidbit(page, pageSize)
+                TidbitType.LATEST -> apiService.getLatestTidbits(page, pageSize)
+                TidbitType.SAVED -> apiService.getSavedTidbits(page, pageSize)
             }
 
             if (response.isSuccessful) {
-                response.body()?.let { data ->
+                response.body?.let { data ->
                     val tidbits = data.data.map { remote ->
                         with(remote) {
                             Tidbit(
@@ -70,13 +69,14 @@ class TidbitPagingSource @Inject constructor(
                     )
                 } ?: LoadResult.Error(Exception("Empty response body"))
             } else {
-                LoadResult.Error(Exception("Failed to fetch tidbits: ${response.code()}"))
+                LoadResult.Error(Exception("Failed to fetch tidbits: ${response.code}"))
             }
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             LoadResult.Error(e)
         }
     }
+
 
     companion object {
         const val PAGE_SIZE = 20

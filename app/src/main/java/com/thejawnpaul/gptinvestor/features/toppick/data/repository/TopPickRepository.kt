@@ -1,12 +1,11 @@
 package com.thejawnpaul.gptinvestor.features.toppick.data.repository
 
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
-import com.thejawnpaul.gptinvestor.core.api.ApiService
+import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfig
 import com.thejawnpaul.gptinvestor.core.utility.Constants
-import com.thejawnpaul.gptinvestor.features.company.data.local.dao.CompanyDao
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.dao.TopPickDao
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.model.TopPickEntity
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
@@ -21,20 +20,20 @@ import kotlinx.coroutines.flow.map
 import timber.log.Timber
 
 class TopPickRepository @Inject constructor(
-    private val apiService: ApiService,
+    private val apiService: KtorApiService,
     private val topPickDao: TopPickDao,
-    private val companyDao: CompanyDao,
     private val analyticsLogger: AnalyticsLogger,
     private val remoteConfig: RemoteConfig
 ) :
+
     ITopPickRepository {
-    override suspend fun getTopPicks(): Flow<Either<Failure, Unit>> = flow {
+    override suspend fun getTopPicks(): Flow<Either<Failure, List<TopPick>>> = flow {
         try {
             val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
             val response = apiService.getTopPicks(date = today)
             if (response.isSuccessful) {
-                response.body()?.let { remotePick ->
+                response.body?.let { remotePick ->
                     val topPickEntities = remotePick.map { aa ->
                         with(aa) {
                             TopPickEntity(
@@ -47,15 +46,32 @@ class TopPickRepository @Inject constructor(
                                 confidenceScore = confidenceScore,
                                 date = date,
                                 price = price ?: 0.0f,
-                                change = percentageChange ?: 0.0f,
-                                imageUrl = imageUrl ?: ""
+                                change = percentageChange ?: 0.0f
                             )
                         }
                     }
                     topPickDao.replaceUnsavedWithNewPicks(topPickEntities)
-                    emit(Either.Right(Unit))
+                    val picks = remotePick.map { pickEntity ->
+                        with(pickEntity) {
+                            TopPick(
+                                id = id,
+                                companyName = companyName,
+                                ticker = ticker,
+                                rationale = rationale,
+                                metrics = metrics,
+                                risks = risks,
+                                confidenceScore = confidenceScore,
+                                isSaved = false,
+                                imageUrl = imageUrl?: "",
+                                percentageChange = percentageChange?: 0f,
+                                currentPrice = 0f
+                            )
+                        }
+                    }
+                    emit(Either.Right(picks))
                 } ?: emit(Either.Left(Failure.DataError))
             }
+
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.ServerError))

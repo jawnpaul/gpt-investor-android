@@ -42,7 +42,8 @@ jobs:
           DATA: ${{ secrets.GOOGLE_SERVICES_DEBUG }}
         run: |
           mkdir -p app/src/debug
-          echo "$DATA" | base64 -di > app/src/debug/google-services.json
+          cat <<EOF > app/src/debug/google-services.json${{ secrets.GOOGLE_SERVICES_DEBUG }}
+          EOF
 
       # Decode Release google-services.json
       - name: Load Release Google Services

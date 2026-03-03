@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,11 +42,13 @@ import com.thejawnpaul.gptinvestor.theme.linkMedium
 fun SignUpScreen(
     modifier: Modifier,
     email: String,
+    name: String,
     password: String,
     loading: Boolean = false,
     enableButton: Boolean,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
+    onNameChange: (String) -> Unit,
     onSignUpClick: () -> Unit,
     onLoginClick: () -> Unit,
     onSignUpWithGoogleClick: () -> Unit
@@ -76,6 +77,26 @@ fun SignUpScreen(
                 // Input
                 OutlinedTextField(
                     keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next
+                    ),
+                    value = name,
+                    onValueChange = onNameChange,
+                    label = {
+                        Text(text = stringResource(R.string.name))
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_profile),
+                            contentDescription = null
+                        )
+                    }
+                )
+
+                // Input
+                OutlinedTextField(
+                    keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next
                     ),
@@ -87,7 +108,7 @@ fun SignUpScreen(
                     modifier = Modifier.fillMaxWidth(),
                     leadingIcon = {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_profile),
+                            painter = painterResource(id = R.drawable.ic_email),
                             contentDescription = null
                         )
                     }
@@ -128,16 +149,9 @@ fun SignUpScreen(
                 GPTInvestorButton(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     text = stringResource(R.string.sign_up),
-                    enabled = false,
+                    enabled = enableButton,
                     onClick = onSignUpClick
                 )
-
-                Button(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    onClick = onSignUpWithGoogleClick
-                ) {
-                    Text(text = "Sign up with Google")
-                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -175,11 +189,13 @@ fun SignUpPreview() {
                 modifier = Modifier,
                 email = "",
                 password = "",
+                name = "",
                 enableButton = false,
                 onEmailChange = {},
                 onPasswordChange = {},
                 onLoginClick = {},
                 onSignUpClick = {},
+                onNameChange = {},
                 onSignUpWithGoogleClick = {}
             )
         }

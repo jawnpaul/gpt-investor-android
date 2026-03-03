@@ -20,7 +20,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextM
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index("conversationId")]
+    indices = [Index("conversationId"), Index(value = ["remoteId"], unique = true)]
 )
 data class MessageEntity(
     @PrimaryKey(autoGenerate = true)
@@ -31,7 +31,8 @@ data class MessageEntity(
     val companyDetailRemoteResponse: CompanyDetailRemoteResponse? = null,
     val createdAt: Long,
     @ColumnInfo(defaultValue = "0")
-    val feedbackStatus: Int = 0
+    val feedbackStatus: Int = 0,
+    val remoteId: String? = null
 ) {
     fun toGenAiMessage(): GenAiMessage {
         return if (companyDetailRemoteResponse != null) {

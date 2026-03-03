@@ -1,14 +1,15 @@
 package com.thejawnpaul.gptinvestor.features.conversation.data.remote
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class GetEntityRequest(
-    @field:Json(name = "query")val query: String
+    @SerialName("query")val query: String
 )
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class GetEntityResponse(
-    @field:Json(name = "entity")val entityList: List<String> = emptyList()
+    @SerialName("entity")val entityList: List<String> = emptyList()
 )
+

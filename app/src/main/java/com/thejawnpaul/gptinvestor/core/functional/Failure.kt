@@ -31,6 +31,8 @@ sealed class Failure {
 
     data object RateLimitExceeded : Failure()
 
+    data object ContextLimitReached : Failure()
+
     /** * Extend this class for feature specific failures.*/
     abstract class FeatureFailure : Failure()
 }

@@ -23,6 +23,9 @@ interface MessageDao {
     @Query("SELECT * FROM message_table WHERE messageId =:id")
     suspend fun getSingleMessage(id: Long): MessageEntity
 
+    @Query("SELECT * FROM message_table WHERE remoteId =:remoteId")
+    suspend fun getMessageByRemoteId(remoteId: String): MessageEntity?
+
     @Update
     suspend fun updateMessage(message: MessageEntity)
 }

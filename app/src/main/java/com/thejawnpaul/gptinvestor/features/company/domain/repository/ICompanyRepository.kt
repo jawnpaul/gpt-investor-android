@@ -24,4 +24,6 @@ interface ICompanyRepository {
     suspend fun getTrendingCompanies(): Flow<Either<Failure, List<TrendingCompany>>>
 
     suspend fun searchCompany(query: SearchCompanyQuery): Flow<Either<Failure, List<Company>>>
+
+    fun searchCompaniesPaged(query: SearchCompanyQuery): Flow<androidx.paging.PagingData<Company>>
 }

@@ -33,9 +33,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
+import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCompanyView
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailEvent
@@ -44,6 +47,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Structured
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.StructuredConversationScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.WaitlistBottomSheetContent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.QuestionInput
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -257,5 +261,42 @@ fun CompanyDetailScreen(modifier: Modifier, state: SingleCompanyView, ticker: St
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CompanyDetailScreenPreview() {
+    GPTInvestorTheme {
+        CompanyDetailScreen(
+            modifier = Modifier.fillMaxSize(),
+            state = SingleCompanyView(
+                companyName = "Apple Inc.",
+                header = CompanyHeaderPresentation(
+                    companyTicker = "AAPL",
+                    companyName = "Apple Inc.",
+                    price = 175.43f,
+                    percentageChange = 1.2f,
+                    companyLogo = ""
+                ),
+                conversation = CompanyDetailDefaultConversation(
+                    id = 1L,
+                    response = CompanyDetailRemoteResponse(
+                        ticker = "AAPL",
+                        name = "Apple Inc.",
+                        about = "Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide.",
+                        price = 175.43f,
+                        change = 1.2f,
+                        marketCap = 2800000000000L,
+                        peRatio = 28.5f,
+                        revenue = 383000000000L,
+                        news = emptyList()
+                    )
+                )
+            ),
+            ticker = "AAPL",
+            onEvent = {},
+            onAction = {}
+        )
     }
 }

@@ -126,4 +126,11 @@
     <string name="error_loading_tidbits">Error loading tidbits</string>
     <string name="load_more">Load more</string>
     <string name="saved_tidbits">Saved tidbits</string>
+    <string name="rate_limit_bottom_sheet_title">You have reached your message limit</string>
+    <string name="rate_limit_bottom_sheet_description">Upgrade your plan to continue chatting without interruptions.</string>
+    <string name="rate_limit_bottom_sheet_action">Okay</string>
+    <string name="search_companies_in">Search companies in %1$s</string>
+    <string name="search_all_companies">Search all companies</string>
+    <string name="name">Name</string>
+
 </resources>

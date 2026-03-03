@@ -1,9 +1,12 @@
 package com.thejawnpaul.gptinvestor.core.navigation
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.widget.Toast
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -24,19 +27,25 @@ import androidx.navigation.navDeepLink
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.WebViewScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
-import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDiscoveryAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ConversationScreen
+import com.thejawnpaul.gptinvestor.features.billing.domain.BillingConstants
+import com.thejawnpaul.gptinvestor.features.billing.presentation.LocalBillingRepository
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationEvent
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationViewModel
 import com.thejawnpaul.gptinvestor.features.discover.DiscoverScreen
+import com.thejawnpaul.gptinvestor.features.discover.DiscoverViewModel
+import com.thejawnpaul.gptinvestor.features.discover.DiscoveryAction
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryDetailScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction
+import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailEvent
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenAction
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
+import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeUiState
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsAction
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsScreen
@@ -54,6 +63,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SavedTopPick
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPickDetailScreen
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 @Composable
 fun SetUpNavGraph(navController: NavHostController) {
@@ -66,7 +76,7 @@ fun SetUpNavGraph(navController: NavHostController) {
         ) {
             composable(Screen.HomeTabScreen.route) {
                 val homeViewModel = hiltViewModel<HomeViewModel>()
-                val state = homeViewModel.uiState.collectAsStateWithLifecycle()
+                val state = homeViewModel.uiState.collectAsStateWithLifecycle(initialValue = HomeUiState())
                 val scope = rememberCoroutineScope()
                 LaunchedEffect(Unit) {
                     homeViewModel.actions.onEach { action ->
@@ -146,13 +156,13 @@ fun SetUpNavGraph(navController: NavHostController) {
                 route = Screen.DiscoverTabScreen.route,
                 deepLinks = listOf(navDeepLink { uriPattern = Screen.DiscoverTabScreen.deepLink })
             ) {
-                val companyViewModel = hiltViewModel<CompanyViewModel>()
-                val state = companyViewModel.companyDiscoveryState.collectAsStateWithLifecycle()
+                val viewModel = hiltViewModel<DiscoverViewModel>()
+                val state = viewModel.discoveryScreenState.collectAsStateWithLifecycle()
                 val scope = rememberCoroutineScope()
                 LaunchedEffect(Unit) {
-                    companyViewModel.companyDiscoveryAction.onEach { action ->
+                    viewModel.actions.onEach { action ->
                         when (action) {
-                            is CompanyDiscoveryAction.OnNavigateToCompanyDetail -> {
+                            is DiscoveryAction.OnNavigateToCompanyDetail -> {
                                 navController.navigate(
                                     Screen.CompanyDetailScreen.createRoute(
                                         action.ticker
@@ -160,14 +170,14 @@ fun SetUpNavGraph(navController: NavHostController) {
                                 )
                             }
 
-                            CompanyDiscoveryAction.OnGoBack -> {
+                            DiscoveryAction.OnGoBack -> {
                                 navController.navigateUp()
                             }
 
-                            is CompanyDiscoveryAction.OnGoToPickDetail -> {
+                            is DiscoveryAction.OnGoToPickDetail -> {
                                 navController.navigate(
-                                    Screen.TopPickDetailScreen.createRoute(
-                                        action.id
+                                    route = Screen.TopPickDetailScreen.createRoute(
+                                        topPickId = action.id
                                     )
                                 )
                             }
@@ -178,14 +188,15 @@ fun SetUpNavGraph(navController: NavHostController) {
                 DiscoverScreen(
                     modifier = Modifier.padding(top = 20.dp),
                     state = state.value,
-                    onEvent = companyViewModel::handleCompanyDiscoveryEvent,
-                    onAction = companyViewModel::processCompanyDiscoveryAction
+                    paging = viewModel.companiesPagingData,
+                    onEvent = viewModel::handleEvent,
                 )
             }
             composable(Screen.HistoryTabScreen.route) {
                 val viewModel = hiltViewModel<HistoryViewModel>()
                 val state = viewModel.historyScreenViewState.collectAsStateWithLifecycle()
                 val scope = rememberCoroutineScope()
+                val context = LocalContext.current
 
                 LaunchedEffect(Unit) {
                     viewModel.actions.onEach { action ->
@@ -199,6 +210,10 @@ fun SetUpNavGraph(navController: NavHostController) {
                             HistoryScreenAction.OnGoBack -> {
                                 navController.navigateUp()
                             }
+
+                            is HistoryScreenAction.ShowToast -> {
+                                Toast.makeText(context, action.message, Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }.launchIn(scope)
                 }
@@ -207,7 +222,6 @@ fun SetUpNavGraph(navController: NavHostController) {
                     modifier = Modifier.padding(top = 20.dp),
                     state = state.value,
                     onEvent = viewModel::handleEvent,
-                    onAction = viewModel::processAction
                 )
             }
 
@@ -266,6 +280,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 )
             ) { navBackStackEntry ->
                 val context = LocalContext.current
+                val billingRepo = LocalBillingRepository.current
                 val viewModel = hiltViewModel<ConversationViewModel>()
                 val state = viewModel.conversation.collectAsStateWithLifecycle()
                 val chatInput = navBackStackEntry.arguments?.getString("chatInput")
@@ -292,6 +307,10 @@ fun SetUpNavGraph(navController: NavHostController) {
                                 clipboard.setPrimaryClip(clipData)
                                 Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
                             }
+
+                            is ConversationAction.ShowToast -> {
+                                Toast.makeText(context, action.message, Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }.launchIn(scope)
                 }
@@ -302,7 +321,29 @@ fun SetUpNavGraph(navController: NavHostController) {
                     title = title,
                     state = state.value,
                     onEvent = viewModel::handleEvent,
-                    onAction = viewModel::processAction
+                    onAction = viewModel::processAction,
+                    onUpgradeFromRateLimit = {
+                        context.findActivity()?.let { activity ->
+                            scope.launch {
+                                val result = billingRepo.launchPurchaseFlow(
+                                    activity = activity,
+                                    productId = BillingConstants.PRO_SUBSCRIPTION_PRODUCT_ID
+                                )
+                                viewModel.handleEvent(
+                                    ConversationEvent.ShowRateLimitBottomSheet(
+                                        showBottomSheet = false
+                                    )
+                                )
+                                if (result is com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult.Error) {
+                                    Toast.makeText(
+                                        context,
+                                        "Billing Error: ${result.message}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        }
+                    }
                 )
             }
 
@@ -319,6 +360,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 arguments = listOf(navArgument("conversationId") { NavType.StringType })
             ) { navBackStackEntry ->
                 val context = LocalContext.current
+                val billingRepo = LocalBillingRepository.current
                 val viewModel = hiltViewModel<HistoryViewModel>()
                 val state = viewModel.conversation.collectAsStateWithLifecycle()
                 val id = navBackStackEntry.arguments?.getString("conversationId") ?: ""
@@ -344,6 +386,10 @@ fun SetUpNavGraph(navController: NavHostController) {
                                 clipboard.setPrimaryClip(clipData)
                                 Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
                             }
+
+                            is HistoryDetailAction.ShowToast -> {
+                                Toast.makeText(context, action.message, Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }.launchIn(scope)
                 }
@@ -353,7 +399,17 @@ fun SetUpNavGraph(navController: NavHostController) {
                     conversationId = id,
                     state = state.value,
                     onEvent = viewModel::handleHistoryDetailEvent,
-                    onAction = viewModel::processHistoryDetailAction
+                    onAction = viewModel::processHistoryDetailAction,
+                    onUpgradeFromRateLimit = {
+                        (context as? Activity)?.let { activity ->
+                            scope.launch {
+                                billingRepo.launchPurchaseFlow(activity, BillingConstants.PRO_SUBSCRIPTION_PRODUCT_ID)
+                                viewModel.handleHistoryDetailEvent(
+                                    HistoryDetailEvent.ShowRateLimitBottomSheet(showBottomSheet = false)
+                                )
+                            }
+                        }
+                    }
                 )
             }
 
@@ -598,4 +654,13 @@ fun SetUpNavGraph(navController: NavHostController) {
             }
         }
     }
+}
+
+fun Context.findActivity(): Activity? {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is Activity) return context
+        context = context.baseContext
+    }
+    return null
 }

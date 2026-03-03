@@ -75,10 +75,10 @@ fun TopPickDetailScreen(modifier: Modifier, topPickId: String, state: TopPickDet
                     modifier = Modifier,
                     companyHeader = CompanyHeaderPresentation(
                         companyTicker = company.ticker,
-                        companyName = company.name,
-                        price = company.price,
-                        percentageChange = company.change,
-                        companyLogo = company.imageUrl
+                        companyName = company.name ?: "",
+                        price = company.price ?: 0.0f,
+                        percentageChange = company.change ?: 0.0f,
+                        companyLogo = company.imageUrl ?: ""
                     ),
                     onNavigateUp = { onAction(TopPickAction.OnGoBack) }
                 )

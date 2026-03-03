@@ -1,10 +1,14 @@
 package com.thejawnpaul.gptinvestor.features.company.data.repository
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
-import com.thejawnpaul.gptinvestor.core.api.ApiService
+import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.company.data.local.dao.CompanyDao
+import com.thejawnpaul.gptinvestor.features.company.data.paging.CompanyPagingSource
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
@@ -20,7 +24,7 @@ import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 
 class CompanyRepository @Inject constructor(
-    private val apiService: ApiService,
+    private val apiService: KtorApiService,
     private val companyDao: CompanyDao,
     private val analyticsLogger: AnalyticsLogger
 ) :
@@ -37,7 +41,7 @@ class CompanyRepository @Inject constructor(
 
             val response = apiService.getCompanies()
             if (response.isSuccessful) {
-                response.body()?.let {
+                response.body?.let {
                     val remoteEntities = it.map { companyRemote -> companyRemote.toEntity() }
 
                     if (local.isEmpty()) {
@@ -97,11 +101,11 @@ class CompanyRepository @Inject constructor(
             val response =
                 apiService.getCompanyInfo(request = CompanyDetailRemoteRequest(ticker = ticker))
             if (response.isSuccessful) {
-                response.body()?.let {
+                response.body?.let {
                     emit(Either.Right(it))
                     analyticsLogger.logEvent(
                         eventName = "Company Selected",
-                        params = mapOf("company_ticker" to ticker, "company_name" to it.name)
+                        params = mapOf("company_ticker" to ticker, "company_name" to it.name.toString())
                     )
                 }
             }
@@ -116,7 +120,7 @@ class CompanyRepository @Inject constructor(
             val request = CompanyFinancialsRequest(ticker = ticker, years = 1)
             val response = apiService.getCompanyFinancials(request)
             if (response.isSuccessful) {
-                response.body()?.let {
+                response.body?.let {
                     val domainObject = it.toDomainObject()
                     emit(Either.Right(domainObject))
                 }
@@ -145,7 +149,7 @@ class CompanyRepository @Inject constructor(
         try {
             val response = apiService.getTrendingTickers()
             if (response.isSuccessful) {
-                response.body()?.let { trendingRemoteList ->
+                response.body?.let { trendingRemoteList ->
                     val trendingCompanies = trendingRemoteList.map { remote ->
                         with(remote) {
                             TrendingCompany(
@@ -192,6 +196,23 @@ class CompanyRepository @Inject constructor(
         }
     }
 
+    override fun searchCompaniesPaged(query: SearchCompanyQuery): Flow<PagingData<Company>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = CompanyPagingSource.PAGE_SIZE,
+                enablePlaceholders = false,
+                initialLoadSize = CompanyPagingSource.PAGE_SIZE
+            ),
+            pagingSourceFactory = {
+                CompanyPagingSource(
+                    apiService = apiService,
+                    query = query.query.ifBlank { null },
+                    sector = query.sector
+                )
+            }
+        ).flow
+    }
+
     private suspend fun updateCompanyList(): List<Company>? {
         try {
             val tickers = companyDao.getAllCompanies().map { it.ticker }
@@ -201,7 +222,7 @@ class CompanyRepository @Inject constructor(
                 /*val request = CompanyPriceRequest(tickers = batch)
                 val response = apiService.getCompanyPrice(request)
                 if (response.isSuccessful) {
-                    response.body()?.let { responseList ->
+                    response.body?.let { responseList ->
                         val entities = responseList.map { priceResponse ->
                             companyDao.getCompany(priceResponse.ticker)
                                 .copy(
@@ -226,3 +247,4 @@ class CompanyRepository @Inject constructor(
         }
     }
 }
+

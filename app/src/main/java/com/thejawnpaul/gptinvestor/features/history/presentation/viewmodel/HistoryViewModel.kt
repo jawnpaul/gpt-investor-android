@@ -73,6 +73,9 @@ class HistoryViewModel @Inject constructor(
     private fun handleGetAllHistoryFailure(failure: Failure) {
         _historyScreenViewState.update { it.copy(loading = false) }
         Timber.e(failure.toString())
+        viewModelScope.launch {
+            _actions.emit(HistoryScreenAction.ShowToast("Failed to load history"))
+        }
     }
 
     private fun handleGetAllHistorySuccess(response: Map<String, List<StructuredConversation>>) {
@@ -102,6 +105,7 @@ class HistoryViewModel @Inject constructor(
     private fun handleGetSingleHistoryFailure(failure: Failure) {
         conversationView.update { it.copy(loading = false) }
         Timber.e(failure.toString())
+        processHistoryDetailAction(HistoryDetailAction.ShowToast("Failed to load conversation"))
     }
 
     private fun handleGetSingleHistorySuccess(conversation: StructuredConversation) {
@@ -132,17 +136,51 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun handleInputResponseFailure(failure: Failure) {
+        conversationView.update { state ->
+            val updatedConversation = (state.conversation as? StructuredConversation)?.let { conversation ->
+                val updatedMessages = ArrayList(conversation.messageList)
+                if (updatedMessages.isNotEmpty()) {
+                    val lastMessage = updatedMessages.last()
+                    if (lastMessage is GenAiTextMessage && lastMessage.loading) {
+                        updatedMessages[updatedMessages.size - 1] = lastMessage.copy(
+                            loading = false,
+                            response = lastMessage.response ?: "Couldn't generate a response"
+                        )
+                    }
+                }
+                conversation.copy(messageList = updatedMessages)
+            } ?: state.conversation
+            state.copy(loading = false, conversation = updatedConversation)
+        }
         when (failure) {
             is GenAIException -> {
                 Timber.e("AI exception")
+                processHistoryDetailAction(HistoryDetailAction.ShowToast("An error occurred"))
             }
 
             is Failure.RateLimitExceeded -> {
                 Timber.e("Rate limit exceeded")
+                conversationView.update { it.copy(showRateLimitBottomSheet = false) }
+                processHistoryDetailAction(HistoryDetailAction.ShowToast("Rate limit exceeded. Please try again later."))
+            }
+
+            is Failure.ContextLimitReached -> {
+                Timber.e("Context limit reached")
+                conversationView.update { it.copy(showRateLimitBottomSheet = false) }
+                processHistoryDetailAction(HistoryDetailAction.ShowToast("Context limit reached."))
+            }
+
+            is Failure.NetworkConnection -> {
+                processHistoryDetailAction(HistoryDetailAction.ShowToast("No internet connection"))
+            }
+
+            is Failure.ServerError -> {
+                processHistoryDetailAction(HistoryDetailAction.ShowToast("Server error. Please try again later."))
             }
 
             else -> {
                 Timber.e(failure.toString())
+                processHistoryDetailAction(HistoryDetailAction.ShowToast("Something went wrong"))
             }
         }
     }
@@ -195,16 +233,6 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
-    fun processAction(action: HistoryScreenAction) {
-        when (action) {
-            is OnGoToHistoryDetail -> {
-            }
-
-            HistoryScreenAction.OnGoBack -> {
-            }
-        }
-    }
-
     fun handleHistoryDetailEvent(event: HistoryDetailEvent) {
         when (event) {
             is HistoryDetailEvent.ClickSuggestedPrompt -> {
@@ -249,6 +277,10 @@ class HistoryViewModel @Inject constructor(
                 event.modelId?.let {
                     upgradeModelId = it
                 }
+            }
+
+            is HistoryDetailEvent.ShowRateLimitBottomSheet -> {
+                conversationView.update { it.copy(showRateLimitBottomSheet = event.showBottomSheet) }
             }
         }
     }
@@ -299,6 +331,7 @@ sealed interface HistoryScreenEvent {
 sealed interface HistoryScreenAction {
     data class OnGoToHistoryDetail(val conversationId: Long) : HistoryScreenAction
     data object OnGoBack : HistoryScreenAction
+    data class ShowToast(val message: String) : HistoryScreenAction
 }
 
 sealed interface HistoryDetailEvent {
@@ -316,10 +349,13 @@ sealed interface HistoryDetailEvent {
         HistoryDetailEvent
 
     data class SelectWaitlistOption(val option: String) : HistoryDetailEvent
+
+    data class ShowRateLimitBottomSheet(val showBottomSheet: Boolean) : HistoryDetailEvent
 }
 
 sealed interface HistoryDetailAction {
     data object OnGoBack : HistoryDetailAction
     data class OnGoToWebView(val url: String) : HistoryDetailAction
     data class OnCopy(val text: String) : HistoryDetailAction
+    data class ShowToast(val message: String) : HistoryDetailAction
 }

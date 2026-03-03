@@ -3,13 +3,13 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hiltAndroid)
     alias(libs.plugins.ktLint)
     alias(libs.plugins.googleServices)
     alias(libs.plugins.crashlytics)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 val keystoreProperties = Properties()
@@ -27,8 +27,8 @@ android {
         applicationId = "com.thejawnpaul.gptinvestor"
         minSdk = 24
         targetSdk = 36
-        versionCode = 16
-        versionName = "1.1.7"
+        versionCode = 29
+        versionName = "1.1.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -67,9 +67,6 @@ android {
             val baseUrl: String = localProperties.getProperty("BASE_URL") ?: ""
             buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
 
-            val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
-            buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
-
             val webClientId: String = localProperties.getProperty("WEB_CLIENT_ID_PROD") ?: ""
             buildConfigField("String", "WEB_CLIENT_ID", "\"$webClientId\"")
 
@@ -84,11 +81,8 @@ android {
             val geminiApiKey: String = localProperties.getProperty("GEMINI_DEBUG_KEY") ?: ""
             buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
 
-            val baseUrl: String = localProperties.getProperty("BASE_URL") ?: ""
+            val baseUrl: String = localProperties.getProperty("BASE_URL_DEV") ?: ""
             buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
-
-            val accessToken: String = localProperties.getProperty("ACCESS_TOKEN") ?: ""
-            buildConfigField("String", "ACCESS_TOKEN", "\"$accessToken\"")
 
             val webClientId: String = localProperties.getProperty("WEB_CLIENT_ID_DEV") ?: ""
             buildConfigField("String", "WEB_CLIENT_ID", "\"$webClientId\"")
@@ -103,9 +97,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
     buildFeatures {
         compose = true
@@ -148,6 +139,7 @@ tasks.getByPath(":app:preBuild").dependsOn("installGitHook")
 dependencies {
     implementation(project(":remote:remote"))
     implementation(libs.androidx.core.ktx)
+    implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -155,13 +147,13 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.material.icons.core)
+    implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.dagger.hilt)
     implementation(libs.timber)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation)
-    implementation(libs.moshi.converter)
-    implementation(libs.moshi.kotlin)
     implementation(libs.coil.compose)
     implementation(libs.core.ktx)
     implementation(libs.androidx.junit.ktx)
@@ -169,8 +161,6 @@ dependencies {
     implementation(libs.androidx.room)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
-    implementation(libs.moshi)
-    ksp(libs.moshi.codeGen)
     implementation(libs.timeAgo)
     implementation(libs.jsoup)
     implementation(libs.richtext.compose)
@@ -186,7 +176,6 @@ dependencies {
     implementation(libs.androidx.play.services.auth)
     implementation(libs.google.identity)
     implementation(libs.firebase.messaging)
-    implementation(libs.firebase.ai)
     implementation(libs.firebase.appcheck.debug)
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.exoplayer)
@@ -196,13 +185,22 @@ dependencies {
     implementation(libs.youtube.player)
     implementation(libs.androidx.paging.runtime.ktx)
     implementation(libs.androidx.paging.compose)
+    implementation(libs.android.billing)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.client.auth)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.play.app.update)
+    implementation(libs.play.app.update.ktx)
 
     // test
     testImplementation(project(":remote:remotetest"))
     kspTest(libs.dagger.hilt.compiler)
     testImplementation(libs.junit)
     testImplementation(libs.google.truth)
-    testImplementation(libs.okhttp.mockwebserver)
     testImplementation(libs.mockk)
     testImplementation(libs.coroutine.test)
 

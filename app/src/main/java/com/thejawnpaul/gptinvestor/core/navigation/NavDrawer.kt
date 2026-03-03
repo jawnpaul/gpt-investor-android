@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -37,22 +36,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DrawerState
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.ThemeDropdown
-import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.bodyChatBody
 
 @Composable
-fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Unit, onAction: (NavDrawerAction) -> Unit, state: DrawerState) {
-    val gptInvestorColors = LocalGPTInvestorColors.current
-
+fun NavDrawerContent(
+    onCloseDrawer: () -> Unit,
+    onEvent: (NavDrawerEvent) -> Unit,
+    onAction: (NavDrawerAction) -> Unit,
+    state: DrawerState
+) {
     Column(
         modifier = Modifier
             .fillMaxHeight()
@@ -148,56 +150,42 @@ fun NavDrawerContent(onCloseDrawer: () -> Unit, onEvent: (NavDrawerEvent) -> Uni
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(
+                    modifier = Modifier.weight(1f),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     // Image
-                    if (state.user != null) {
-                        if (state.user.photoUrl != null) {
-                            Surface(
-                                modifier = Modifier.size(40.dp),
-                                shape = CircleShape
-                            ) {
-                                AsyncImage(
-                                    model = state.user.photoUrl,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Crop
-                                )
-                            }
-                        } else {
-                            Surface(
-                                modifier = Modifier.size(40.dp),
-                                shape = CircleShape
-                            ) {
-                                Text(
-                                    text = state.user.displayName?.ifBlank { "A" }?.take(1)
-                                        ?.uppercase() ?: "A"
-                                )
-                            }
-                        }
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(color = MaterialTheme.colorScheme.surfaceContainer),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "A")
-                        }
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(color = MaterialTheme.colorScheme.surfaceContainer),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = (state.user?.ifBlank { "A" }?.take(1) ?: "A").uppercase()
+                        )
                     }
+
 
                     // Text
                     Text(
-                        text = state.user?.displayName ?: "Anonymous",
-                        style = MaterialTheme.typography.bodyChatBody
+                        text = when (state.user) {
+                            "null" -> "Anonymous"
+                            else -> state.user ?: "Anonymous"
+                        },
+                        style = MaterialTheme.typography.bodyChatBody,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
-                IconButton(modifier = Modifier.padding(end = 16.dp).size(24.dp), onClick = {
-                    expanded = !expanded
-                }) {
+                IconButton(
+                    modifier = Modifier
+                        .padding(end = 0.dp)
+                        .size(24.dp), onClick = {
+                        expanded = !expanded
+                    }) {
                     Icon(
                         imageVector = if (expanded) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
                         contentDescription = null
@@ -320,3 +308,23 @@ sealed interface NavDrawerAction {
     data object OnGoToHistory : NavDrawerAction
     data object OnGoToSavedTidbits : NavDrawerAction
 }
+
+@Preview
+@Composable
+private fun NavDrawerContentPreview() {
+    GPTInvestorTheme {
+        Surface {
+
+            NavDrawerContent(
+                onCloseDrawer = {},
+                onEvent = {},
+                onAction = {},
+                state = DrawerState(
+                    user = "John Doeeeee is a long text with",
+                    theme = "Light"
+                )
+            )
+        }
+    }
+}
+

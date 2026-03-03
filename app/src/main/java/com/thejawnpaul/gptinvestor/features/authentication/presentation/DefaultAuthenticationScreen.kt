@@ -40,11 +40,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.theme.linkMedium
+import com.thejawnpaul.gptinvestor.core.navigation.findActivity
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 @Composable
-fun DefaultAuthenticationScreen(modifier: Modifier, onAuthSuccess: () -> Unit, onAuthFailure: () -> Unit, authViewModel: AuthenticationViewModel = hiltViewModel()) {
+fun DefaultAuthenticationScreen(modifier: Modifier, onAuthSuccess: (String) -> Unit, onAuthFailure: (String) -> Unit, authViewModel: AuthenticationViewModel = hiltViewModel()) {
     var showDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
@@ -54,13 +55,18 @@ fun DefaultAuthenticationScreen(modifier: Modifier, onAuthSuccess: () -> Unit, o
         authViewModel.actions.onEach { action ->
             when (action) {
                 is AuthenticationAction.OnLogin -> {
+                    if (action.message.contains("success", ignoreCase = true)) {
+                        onAuthSuccess(action.message)
+                    } else {
+                        onAuthFailure(action.message)
+                    }
                 }
 
                 is AuthenticationAction.OnSignUp -> {
                     if (action.message.contains("success", ignoreCase = true)) {
-                        onAuthSuccess()
+                        onAuthSuccess(action.message)
                     } else {
-                        onAuthFailure()
+                        onAuthFailure(action.message)
                     }
                 }
             }
@@ -84,10 +90,10 @@ fun DefaultAuthenticationScreen(modifier: Modifier, onAuthSuccess: () -> Unit, o
                     .padding(horizontal = 16.dp),
                 onAuthenticationComplete = { message ->
                     if (message.contains("success", ignoreCase = true)) {
-                        onAuthSuccess()
+                        onAuthSuccess(message)
                         showDialog = false
                     } else {
-                        onAuthFailure()
+                        onAuthFailure(message)
                         showDialog = false
                     }
                 }
@@ -244,11 +250,13 @@ fun DefaultAuthenticationScreen(modifier: Modifier, onAuthSuccess: () -> Unit, o
                                 color = Color.White,
                                 shape = RoundedCornerShape(corner = CornerSize(20.dp)),
                                 onClick = {
-                                    authViewModel.handleEvent(
-                                        AuthenticationEvent.SignUpWithGoogle(
-                                            context = context
+                                    context.findActivity()?.let { activity ->
+                                        authViewModel.handleEvent(
+                                            AuthenticationEvent.SignUpWithGoogle(
+                                                context = activity
+                                            )
                                         )
-                                    )
+                                    }
                                 }
                             ) {
                                 Box(

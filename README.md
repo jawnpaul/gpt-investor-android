@@ -101,7 +101,7 @@ The project uses ktlint to enforce proper code style. Github actions handles con
 
 Minimum Api Level: 24
 
-compileSdkVersion: 34
+compileSdkVersion: 36
 
 Build System: [Gradle](https://gradle.org/)
 

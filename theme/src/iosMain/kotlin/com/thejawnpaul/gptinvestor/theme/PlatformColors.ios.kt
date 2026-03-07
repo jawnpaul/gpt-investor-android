@@ -19,7 +19,7 @@ import platform.UIKit.UIWindow
 private fun statusBarView() = remember {
     val keyWindow: UIWindow? =
         UIApplication.sharedApplication.windows.firstOrNull { (it as? UIWindow)?.isKeyWindow() == true } as? UIWindow
-    val safeAreaInsets = UIApplication.sharedApplication.keyWindow?.safeAreaInsets
+    val safeAreaInsets = keyWindow?.safeAreaInsets
     val width = UIScreen.mainScreen.bounds.useContents { this.size.width }
     var topInsets = 0.0
 

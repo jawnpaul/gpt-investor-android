@@ -10,7 +10,7 @@ plugins {
 
 kotlin {
     android {
-        namespace = "com.example.shared"
+        namespace = "com.thejawnpaul.gptinvestor.theme"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 

@@ -1,29 +1,40 @@
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.koin.compiler)
     alias(libs.plugins.kotlin.serialization)
 }
 
-android {
-    namespace = "com.thejawnpaul.gptinvestor"
-    compileSdk = 36
-    defaultConfig.minSdk = 24
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-    buildFeatures { buildConfig = true }
-}
 kotlin {
-    compilerOptions {
-        jvmTarget = JvmTarget.JVM_21
-    }
-}
+    android {
+        namespace = "com.thejawnpaul.gptinvestor"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
 
-dependencies {
-    implementation(platform(libs.koin.bom))
-    implementation(libs.koin.core)
-    testImplementation(libs.koin.test)
+        compilations.all {
+            compileTaskProvider.configure {
+                compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+            }
+        }
+    }
+
+    listOf(
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "RemoteTeset"
+            isStatic = true
+        }
+    }
+
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    dependencies {
+        implementation(platform(libs.koin.bom))
+        implementation(libs.koin.core)
+        testImplementation(libs.koin.test)
+    }
 }

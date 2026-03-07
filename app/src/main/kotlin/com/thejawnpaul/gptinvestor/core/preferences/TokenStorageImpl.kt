@@ -3,11 +3,10 @@ package com.thejawnpaul.gptinvestor.core.preferences
 import com.thejawnpaul.gptinvestor.remote.TokenStorage
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import javax.inject.Inject
-import javax.inject.Singleton
+import org.koin.core.annotation.Singleton
 
-@Singleton
-class TokenStorageImpl @Inject constructor(
+@Singleton(binds = [TokenStorage::class])
+class TokenStorageImpl(
     private val gptInvestorPreferences: GPTInvestorPreferences
 ) : TokenStorage {
     override fun getAccessToken(): String? {

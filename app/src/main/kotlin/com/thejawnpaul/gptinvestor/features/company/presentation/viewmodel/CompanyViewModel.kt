@@ -19,16 +19,15 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversati
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 import timber.log.Timber
-import javax.inject.Inject
 
-@HiltViewModel
-class CompanyViewModel @Inject constructor(
+@KoinViewModel
+class CompanyViewModel(
     private val getCompanyUseCase: GetCompanyUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val getInputPromptUseCase: GetInputPromptUseCase,

@@ -6,14 +6,12 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
-import javax.inject.Singleton
+import org.koin.core.annotation.Singleton
 
 @Singleton
-class GPTInvestorPreferences @Inject constructor(@ApplicationContext private val context: Context) {
+class GPTInvestorPreferences(context: Context) {
 
     private val dataStore = context.dataStore
 

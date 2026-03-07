@@ -3,13 +3,12 @@ package com.thejawnpaul.gptinvestor.analytics.composite
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.analytics.di.FirebaseAnalytics
 import com.thejawnpaul.gptinvestor.analytics.di.MixpanelAnalytics
-import javax.inject.Inject
-import javax.inject.Singleton
+import org.koin.core.annotation.Singleton
 
-@Singleton
-class CompositeLogger @Inject constructor(
-    @FirebaseAnalytics private val firebaseLogger: AnalyticsLogger,
-    @MixpanelAnalytics private val mixpanelLogger: AnalyticsLogger
+@Singleton(binds = [AnalyticsLogger::class])
+class CompositeLogger(
+    @param: FirebaseAnalytics private val firebaseLogger: AnalyticsLogger,
+    @param: MixpanelAnalytics private val mixpanelLogger: AnalyticsLogger
 ) :
     AnalyticsLogger {
 

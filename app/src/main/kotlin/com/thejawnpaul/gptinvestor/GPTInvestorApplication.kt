@@ -7,21 +7,30 @@ import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.appCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
+import com.thejawnpaul.gptinvestor.core.di.AppModule
 import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
-import dagger.hilt.android.HiltAndroidApp
+import org.koin.android.ext.android.inject
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.annotation.KoinApplication
+import org.koin.plugin.module.dsl.startKoin
 import timber.log.Timber
-import javax.inject.Inject
 
-@HiltAndroidApp
+@KoinApplication(modules = [AppModule::class])
 class GPTInvestorApplication : Application() {
 
-    @Inject
-    lateinit var tokenSyncManager: TokenSyncManager
+    private val tokenSyncManager: TokenSyncManager by inject()
 
     override fun onCreate() {
         super.onCreate()
 
         FirebaseApp.initializeApp(this)
+
+        startKoin<GPTInvestorApplication> {
+            androidLogger()
+            androidContext(this@GPTInvestorApplication)
+        }
+
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
             Firebase.appCheck.installAppCheckProviderFactory(

@@ -44,13 +44,10 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
-import javax.inject.Inject
-import javax.inject.Singleton
+import org.koin.core.annotation.Singleton
 
 @Singleton
-class KtorApiService @Inject constructor(
-    private val client: HttpClient
-) {
+class KtorApiService(private val client: HttpClient) {
     suspend fun getCompanies(): KtorResponse<List<CompanyRemote>> =
         client.get("v1/companies").toKtorResponse()
 

@@ -1,17 +1,14 @@
 package com.thejawnpaul.gptinvestor.remote
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
-import javax.inject.Singleton
+import org.koin.core.annotation.ComponentScan
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Singleton
 
 @Module
-@InstallIn(SingletonComponent::class)
+@ComponentScan("com.thejawnpaul.gptinvestor.remote")
 object RemoteModule {
 
-    @Provides
     @Singleton
     fun provideHttpClient(
         tokenStorage: TokenStorage,

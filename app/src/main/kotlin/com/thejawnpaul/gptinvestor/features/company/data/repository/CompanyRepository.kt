@@ -20,15 +20,15 @@ import com.thejawnpaul.gptinvestor.features.company.domain.model.TrendingCompany
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.koin.core.annotation.Singleton
 import timber.log.Timber
-import javax.inject.Inject
 
-class CompanyRepository @Inject constructor(
+@Singleton(binds = [ICompanyRepository::class])
+class CompanyRepository(
     private val apiService: KtorApiService,
     private val companyDao: CompanyDao,
     private val analyticsLogger: AnalyticsLogger
-) :
-    ICompanyRepository {
+) : ICompanyRepository {
 
     override suspend fun getAllCompanies(): Flow<Either<Failure, List<Company>>> = flow {
         try {

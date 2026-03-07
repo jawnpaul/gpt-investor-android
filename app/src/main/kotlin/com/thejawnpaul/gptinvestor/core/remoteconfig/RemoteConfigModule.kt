@@ -5,17 +5,12 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.remoteConfig
 import com.google.firebase.remoteconfig.remoteConfigSettings
 import com.thejawnpaul.gptinvestor.BuildConfig
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Singleton
 
 @Module
-@InstallIn(SingletonComponent::class)
 object RemoteConfigModule {
 
-    @Provides
     @Singleton
     fun providesRemoteConfig(): FirebaseRemoteConfig {
         val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig

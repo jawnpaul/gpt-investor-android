@@ -18,7 +18,6 @@ import com.thejawnpaul.gptinvestor.features.billing.data.remote.VerifyPurchaseRe
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingPurchase
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.remote.TokenStorage
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -27,13 +26,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Singleton
 import timber.log.Timber
-import javax.inject.Inject
 import kotlin.coroutines.resume
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult as DomainBillingResult
 
-class BillingRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
+@Singleton(binds = [IBillingRepository::class])
+class BillingRepository(
+    private val context: Context,
     private val apiService: KtorApiService,
     private val tokenStorage: TokenStorage,
     private val scope: CoroutineScope
@@ -181,8 +181,8 @@ class BillingRepository @Inject constructor(
                 when (billingResult.responseCode) {
                     BillingClient.BillingResponseCode.OK -> {
                         val list = queryProductDetailsResult.productDetailsList
-                        Timber.d("Product details ($productType) list size: ${list?.size ?: 0}")
-                        cont.resume(list?.getOrNull(0))
+                        Timber.d("Product details ($productType) list size: ${list.size}")
+                        cont.resume(list.getOrNull(0))
                     }
 
                     else -> {
@@ -270,7 +270,7 @@ class BillingRepository @Inject constructor(
                 .build()
             billingClient.queryPurchasesAsync(params) { billingResult, purchases ->
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    _purchases.value = purchases?.map { it.toDomainPurchase() } ?: emptyList()
+                    _purchases.value = purchases.map { it.toDomainPurchase() }
                 }
                 cont.resume(Unit)
             }

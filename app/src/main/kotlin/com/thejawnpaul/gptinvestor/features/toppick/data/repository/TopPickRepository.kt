@@ -13,20 +13,19 @@ import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRe
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import org.koin.core.annotation.Singleton
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import javax.inject.Inject
 
-class TopPickRepository @Inject constructor(
+@Singleton(binds = [ITopPickRepository::class])
+class TopPickRepository(
     private val apiService: KtorApiService,
     private val topPickDao: TopPickDao,
     private val analyticsLogger: AnalyticsLogger,
     private val remoteConfig: RemoteConfig
-) :
-
-    ITopPickRepository {
+) : ITopPickRepository {
     override suspend fun getTopPicks(): Flow<Either<Failure, List<TopPick>>> = flow {
         try {
             val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())

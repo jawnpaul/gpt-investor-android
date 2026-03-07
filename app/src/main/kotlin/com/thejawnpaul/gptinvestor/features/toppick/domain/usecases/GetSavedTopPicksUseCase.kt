@@ -9,10 +9,11 @@ import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRe
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
+import org.koin.core.annotation.Factory
 
-class GetSavedTopPicksUseCase @Inject constructor(
-    @IoDispatcher private val dispatcher: CoroutineDispatcher,
+@Factory
+class GetSavedTopPicksUseCase(
+    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: ITopPickRepository
 ) : BaseUseCase<GetSavedTopPicksUseCase.None, List<TopPick>>(coroutineScope, dispatcher) {

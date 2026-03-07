@@ -6,16 +6,15 @@ import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import org.koin.core.annotation.KoinViewModel
 
-@HiltViewModel
-class AuthenticationViewModel @Inject constructor(
+@KoinViewModel
+class AuthenticationViewModel(
     private val authRepository: AuthenticationRepository,
     private val analyticsLogger: AnalyticsLogger,
     private val gptInvestorPreferences: GPTInvestorPreferences

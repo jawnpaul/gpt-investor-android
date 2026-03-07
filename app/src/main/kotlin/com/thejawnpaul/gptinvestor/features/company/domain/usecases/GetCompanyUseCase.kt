@@ -9,10 +9,11 @@ import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRe
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
+import org.koin.core.annotation.Factory
 
-class GetCompanyUseCase @Inject constructor(
-    @IoDispatcher private val dispatcher: CoroutineDispatcher,
+@Factory
+class GetCompanyUseCase(
+    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: ICompanyRepository
 ) : BaseUseCase<String, CompanyDetailRemoteResponse>(coroutineScope, dispatcher) {

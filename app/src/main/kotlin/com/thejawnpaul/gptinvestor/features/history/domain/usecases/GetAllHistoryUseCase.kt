@@ -9,10 +9,9 @@ import com.thejawnpaul.gptinvestor.features.history.domain.repository.IHistoryRe
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
 
-class GetAllHistoryUseCase @Inject constructor(
-    @IoDispatcher private val dispatcher: CoroutineDispatcher,
+class GetAllHistoryUseCase(
+    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: IHistoryRepository
 ) : BaseUseCase<GetAllHistoryUseCase.None, Map<String, List<StructuredConversation>>>(

@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
 
     private val preferences: GPTInvestorPreferences by inject()
 
-   private val billingRepository: IBillingRepository by inject()
+    private val billingRepository: IBillingRepository by inject()
 
     private lateinit var appUpdateManager: AppUpdateManager
 

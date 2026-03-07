@@ -8,7 +8,7 @@ import com.thejawnpaul.gptinvestor.analytics.di.FirebaseAnalytics as Firebase
 
 @Singleton(binds = [AnalyticsLogger::class])
 @Firebase
-class FirebaseLogger (private val firebaseAnalytics: FirebaseAnalytics) :
+class FirebaseLogger(private val firebaseAnalytics: FirebaseAnalytics) :
     AnalyticsLogger {
 
     override fun logEvent(

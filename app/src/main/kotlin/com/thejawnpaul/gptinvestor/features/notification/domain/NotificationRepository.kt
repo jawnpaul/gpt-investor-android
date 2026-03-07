@@ -8,15 +8,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.Singleton
 import timber.log.Timber
-import javax.inject.Inject
 
 interface NotificationRepository {
     suspend fun saveToken(token: String)
     suspend fun syncTokenIfNeeded()
 }
 
-class NotificationRepositoryImpl @Inject constructor(
+@Singleton(binds = [NotificationRepository::class])
+class NotificationRepositoryImpl (
     private val apiService: KtorApiService,
     private val preferences: GPTInvestorPreferences
 ) : NotificationRepository {

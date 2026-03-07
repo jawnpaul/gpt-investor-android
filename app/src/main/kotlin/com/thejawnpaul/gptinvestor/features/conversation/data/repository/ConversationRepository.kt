@@ -35,17 +35,17 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.serialization.json.Json
+import org.koin.core.annotation.Singleton
 import timber.log.Timber
-import javax.inject.Inject
 
-class ConversationRepository @Inject constructor(
+@Singleton(binds = [IConversationRepository::class])
+class ConversationRepository(
     private val apiService: KtorApiService,
     private val analyticsLogger: AnalyticsLogger,
     private val messageDao: MessageDao,
     private val conversationDao: ConversationDao,
     private val remoteConfig: RemoteConfig
-) :
-    IConversationRepository {
+) : IConversationRepository {
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -181,7 +181,7 @@ class ConversationRepository @Inject constructor(
                 )
 
             // Ensure we are modifying a mutable list or creating new lists when copying
-            val messagesWithNewQuery = ArrayList(currentConversation?.messageList ?: emptyList())
+            val messagesWithNewQuery = ArrayList(currentConversation.messageList)
             messagesWithNewQuery.add(
                 GenAiTextMessage(
                     id = newMessageId,
@@ -191,9 +191,9 @@ class ConversationRepository @Inject constructor(
                 )
             )
             currentConversation = currentConversation.copy(messageList = messagesWithNewQuery)
-            currentConversation?.let { emit(Either.Right(it)) }
+            emit(Either.Right(currentConversation))
 
-            val entity = conversationDao.getSingleConversation(currentConversation.id ?: -1L)
+            val entity = conversationDao.getSingleConversation(currentConversation.id)
             val aiChatRequest = AiChatRequest(
                 prompt = prompt.query,
                 conversationId = entity?.remoteId,
@@ -201,16 +201,14 @@ class ConversationRepository @Inject constructor(
             )
             apiService.chatAiResponse(aiChatRequest) { chatResponse ->
                 if (chatResponse.status.value in 200..299) {
-                    currentConversation?.let {
-                        handleSseStream(
-                            chatResponse,
-                            it,
-                            prompt.query,
-                            newMessageId ?: -1L
-                        )
-                    }
+                    handleSseStream(
+                        chatResponse,
+                        currentConversation,
+                        prompt.query,
+                        newMessageId
+                    )
                 } else {
-                    currentConversation?.let { conversation ->
+                    currentConversation.let { conversation ->
                         val updatedMessages = ArrayList(conversation.messageList)
                         val index = updatedMessages.indexOfFirst { it.id == newMessageId }
                         if (index != -1) {

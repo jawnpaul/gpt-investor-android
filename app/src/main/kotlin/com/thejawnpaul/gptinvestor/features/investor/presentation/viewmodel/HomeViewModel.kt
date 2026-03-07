@@ -25,7 +25,6 @@ import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,15 +32,15 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 import timber.log.Timber
-import javax.inject.Inject
 
-@HiltViewModel
-class HomeViewModel @Inject constructor(
+@KoinViewModel
+class HomeViewModel(
     private val getTopPicksUseCase: GetTopPicksUseCase,
     private val authenticationRepository: AuthenticationRepository,
     private val getDefaultPromptsUseCase: GetDefaultPromptsUseCase,
-    private val remoteConfig: RemoteConfig,
+    remoteConfig: RemoteConfig,
     private val preferences: GPTInvestorPreferences,
     private val analyticsLogger: AnalyticsLogger,
     private val notificationRepository: NotificationRepository,

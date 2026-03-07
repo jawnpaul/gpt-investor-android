@@ -20,15 +20,15 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInpu
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.state.ConversationView
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction.OnCopy
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 import timber.log.Timber
 import javax.inject.Inject
 
-@HiltViewModel
+@KoinViewModel
 class ConversationViewModel @Inject constructor(
     private val getDefaultPromptsUseCase: GetDefaultPromptsUseCase,
     private val getDefaultPromptResponseUseCase: GetDefaultPromptResponseUseCase,

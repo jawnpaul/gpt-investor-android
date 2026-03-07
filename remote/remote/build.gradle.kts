@@ -1,9 +1,8 @@
 import java.util.Properties
 
 plugins {
-    id("com.android.library")
-    alias(libs.plugins.hiltAndroid)
-    alias(libs.plugins.ksp)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.koin.compiler)
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -24,14 +23,17 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures { buildConfig = true }
 }
 
 dependencies {
-    implementation(libs.dagger.hilt)
+    implementation(project.dependencies.platform(libs.koin.bom))
+    implementation(libs.koin.core)
+    implementation(libs.koin.compose)
+    implementation(libs.koin.annotations)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.android)
     implementation(libs.ktor.client.content.negotiation)
@@ -40,7 +42,6 @@ dependencies {
     implementation(libs.ktor.client.auth)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.timber)
-    ksp(libs.dagger.hilt.compiler)
 }
 
 

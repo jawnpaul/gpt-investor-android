@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GetSectorCompaniesUseCase @Inject constructor(
-    @IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: ICompanyRepository
 ) : BaseUseCase<String?, List<Company>>(coroutineScope, dispatcher) {

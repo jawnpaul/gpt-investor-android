@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GetInputPromptUseCase @Inject constructor(
-    @DefaultDispatcher private val dispatcher: CoroutineDispatcher,
+    @param: DefaultDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: IConversationRepository
 ) : BaseUseCase<ConversationPrompt, Conversation>(coroutineScope, dispatcher) {

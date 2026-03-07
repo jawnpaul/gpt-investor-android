@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GetAnalystRatingUseCase @Inject constructor(
-    @IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: IInvestorRepository
 ) : BaseUseCase<String, String>(coroutineScope, dispatcher) {

@@ -1,11 +1,11 @@
-import java.util.Properties
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+import java.util.Properties
 
 plugins {
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.hiltAndroid)
+    alias(libs.plugins.koin.compiler)
     alias(libs.plugins.ktLint)
     alias(libs.plugins.googleServices)
     alias(libs.plugins.crashlytics)
@@ -95,8 +95,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures {
         compose = true
@@ -150,14 +150,11 @@ dependencies {
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.core.splashscreen)
-    implementation(libs.dagger.hilt)
     implementation(libs.timber)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.hilt.navigation)
     implementation(libs.coil.compose)
     implementation(libs.core.ktx)
     implementation(libs.androidx.junit.ktx)
-    ksp(libs.dagger.hilt.compiler)
     implementation(libs.androidx.room)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
@@ -185,6 +182,12 @@ dependencies {
     implementation(libs.youtube.player)
     implementation(libs.androidx.paging.runtime.ktx)
     implementation(libs.androidx.paging.compose)
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.compose)
+    implementation(libs.koin.compose.viewmodel)
+    implementation(libs.koin.annotations)
     implementation(libs.android.billing)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.android)
@@ -198,7 +201,6 @@ dependencies {
 
     // test
     testImplementation(project(":remote:remotetest"))
-    kspTest(libs.dagger.hilt.compiler)
     testImplementation(libs.junit)
     testImplementation(libs.google.truth)
     testImplementation(libs.mockk)

@@ -7,15 +7,16 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AnotherMod
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultModel
 import kotlinx.coroutines.flow.first
+import org.koin.core.annotation.Singleton
 import timber.log.Timber
-import javax.inject.Inject
 
 interface ModelsRepository {
     suspend fun getAvailableModels(): Result<List<AvailableModel>>
     suspend fun putUserOnModelWaitlist(modelId: String, reasons: List<String> = emptyList()): Result<Unit>
 }
 
-class ModelsRepositoryImpl @Inject constructor(
+@Singleton(binds = [ModelsRepository::class])
+class ModelsRepositoryImpl(
     private val gptInvestorPreferences: GPTInvestorPreferences,
     private val apiService: KtorApiService
 ) : ModelsRepository {

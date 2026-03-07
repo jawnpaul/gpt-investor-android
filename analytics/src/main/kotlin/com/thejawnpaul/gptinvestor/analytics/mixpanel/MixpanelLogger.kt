@@ -2,12 +2,13 @@ package com.thejawnpaul.gptinvestor.analytics.mixpanel
 
 import com.mixpanel.android.mpmetrics.MixpanelAPI
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.analytics.di.MixpanelAnalytics
 import org.json.JSONObject
-import javax.inject.Inject
-import javax.inject.Singleton
+import org.koin.core.annotation.Singleton
 
 @Singleton
-class MixpanelLogger @Inject constructor(private val mixpanel: MixpanelAPI) : AnalyticsLogger {
+@MixpanelAnalytics
+class MixpanelLogger (private val mixpanel: MixpanelAPI) : AnalyticsLogger {
 
     override fun logEvent(
         eventName: String,

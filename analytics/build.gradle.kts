@@ -1,8 +1,8 @@
 import java.util.Properties
 
 plugins {
-    id("com.android.library")
-    alias(libs.plugins.hiltAndroid)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.koin.compiler)
     alias(libs.plugins.ksp)
 }
 
@@ -24,15 +24,18 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures { buildConfig = true }
 }
 
 dependencies {
-    implementation(libs.dagger.hilt)
-    ksp(libs.dagger.hilt.compiler)
+    implementation(project.dependencies.platform(libs.koin.bom))
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.compose)
+    implementation(libs.koin.annotations)
     implementation(libs.mixpanel.android)
     implementation(platform(libs.firebase.compose.bom))
     implementation(libs.firebase.analaytics)

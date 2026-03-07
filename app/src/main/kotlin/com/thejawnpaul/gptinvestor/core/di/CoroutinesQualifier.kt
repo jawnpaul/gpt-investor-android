@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.core.di
 
-import javax.inject.Qualifier
+import org.koin.core.annotation.Qualifier
+
 
 @Retention(AnnotationRetention.BINARY)
 @Qualifier

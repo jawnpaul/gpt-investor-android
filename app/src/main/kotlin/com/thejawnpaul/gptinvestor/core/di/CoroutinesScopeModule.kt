@@ -1,18 +1,15 @@
 package com.thejawnpaul.gptinvestor.core.di
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import javax.inject.Singleton
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Singleton
 
-@InstallIn(SingletonComponent::class)
 @Module
 object CoroutinesScopeModule {
     @Singleton
-    @Provides
-    fun providesDefaultCoroutineScope(@DefaultDispatcher defaultDispatcher: CoroutineDispatcher): CoroutineScope = CoroutineScope(SupervisorJob() + defaultDispatcher)
+    fun providesDefaultCoroutineScope(
+        @DefaultDispatcher defaultDispatcher: CoroutineDispatcher
+    ): CoroutineScope = CoroutineScope(SupervisorJob() + defaultDispatcher)
 }

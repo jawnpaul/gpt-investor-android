@@ -24,8 +24,8 @@ import com.thejawnpaul.gptinvestor.remote.TokenStorage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
+import org.koin.core.annotation.Singleton
 import timber.log.Timber
-import javax.inject.Inject
 
 interface AuthenticationRepository {
     val currentUser: FirebaseUser?
@@ -42,15 +42,15 @@ interface AuthenticationRepository {
     suspend fun loginWithGoogle(activityContext: Context): Result<Unit>
 }
 
-class AuthenticationRepositoryImpl @Inject constructor(
+@Singleton(binds = [AuthenticationRepository::class])
+class AuthenticationRepositoryImpl(
     private val auth: FirebaseAuth,
     private val analyticsLogger: AnalyticsLogger,
     private val gptInvestorPreferences: GPTInvestorPreferences,
     private val tokenSyncManager: TokenSyncManager,
     private val apiService: KtorApiService,
     private val tokenStorage: TokenStorage
-) :
-    AuthenticationRepository {
+) : AuthenticationRepository {
     override val currentUser: FirebaseUser?
         get() = auth.currentUser
 

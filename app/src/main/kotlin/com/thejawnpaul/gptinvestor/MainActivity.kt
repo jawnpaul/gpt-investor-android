@@ -36,18 +36,14 @@ import com.thejawnpaul.gptinvestor.features.billing.presentation.LocalBillingRep
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.OnboardingScreen
 import com.thejawnpaul.gptinvestor.features.splash.AnimatedSplashScreen
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import org.koin.android.ext.android.inject
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    @Inject
-    lateinit var preferences: GPTInvestorPreferences
+    private val preferences: GPTInvestorPreferences by inject()
 
-    @Inject
-    lateinit var billingRepository: IBillingRepository
+   private val billingRepository: IBillingRepository by inject()
 
     private lateinit var appUpdateManager: AppUpdateManager
 

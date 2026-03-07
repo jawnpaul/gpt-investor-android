@@ -46,8 +46,7 @@ class HomeViewModel(
     private val notificationRepository: NotificationRepository,
     private val modelsRepository: ModelsRepository,
     private val tidbitRepository: TidbitRepository
-) :
-    ViewModel() {
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow().combine(preferences.userName) { state, userName ->
@@ -319,10 +318,7 @@ sealed interface HomeEvent {
 }
 
 sealed interface HomeAction {
-    data class OnStartConversation(
-        val input: String? = null,
-        val title: String? = null
-    ) : HomeAction
+    data class OnStartConversation(val input: String? = null, val title: String? = null) : HomeAction
 
     data object OnGoToAllTopPicks : HomeAction
     data class OnGoToTopPickDetail(val id: String) : HomeAction

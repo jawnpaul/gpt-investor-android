@@ -9,9 +9,10 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConv
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
+import org.koin.core.annotation.Factory
 
-class GetDefaultPromptsUseCase @Inject constructor(
+@Factory
+class GetDefaultPromptsUseCase(
     @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: IConversationRepository

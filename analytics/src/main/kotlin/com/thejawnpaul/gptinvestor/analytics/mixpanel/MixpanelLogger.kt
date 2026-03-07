@@ -6,7 +6,7 @@ import com.thejawnpaul.gptinvestor.analytics.di.MixpanelAnalytics
 import org.json.JSONObject
 import org.koin.core.annotation.Singleton
 
-@Singleton
+@Singleton(binds = [AnalyticsLogger::class])
 @MixpanelAnalytics
 class MixpanelLogger (private val mixpanel: MixpanelAPI) : AnalyticsLogger {
 

@@ -181,7 +181,7 @@ class ConversationRepository(
                 )
 
             // Ensure we are modifying a mutable list or creating new lists when copying
-            val messagesWithNewQuery = ArrayList(currentConversation.messageList)
+            val messagesWithNewQuery = ArrayList(currentConversation?.messageList ?: emptyList())
             messagesWithNewQuery.add(
                 GenAiTextMessage(
                     id = newMessageId,
@@ -205,7 +205,7 @@ class ConversationRepository(
                         chatResponse,
                         currentConversation,
                         prompt.query,
-                        newMessageId
+                        newMessageId ?: -1L
                     )
                 } else {
                     currentConversation.let { conversation ->

@@ -6,7 +6,7 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import org.koin.core.annotation.Singleton
 import com.thejawnpaul.gptinvestor.analytics.di.FirebaseAnalytics as Firebase
 
-@Singleton
+@Singleton(binds = [AnalyticsLogger::class])
 @Firebase
 class FirebaseLogger (private val firebaseAnalytics: FirebaseAnalytics) :
     AnalyticsLogger {

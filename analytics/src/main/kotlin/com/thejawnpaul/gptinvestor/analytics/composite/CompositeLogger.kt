@@ -5,7 +5,7 @@ import com.thejawnpaul.gptinvestor.analytics.di.FirebaseAnalytics
 import com.thejawnpaul.gptinvestor.analytics.di.MixpanelAnalytics
 import org.koin.core.annotation.Singleton
 
-@Singleton
+@Singleton(binds = [AnalyticsLogger::class])
 class CompositeLogger (
     @param: FirebaseAnalytics private val firebaseLogger: AnalyticsLogger,
     @param: MixpanelAnalytics private val mixpanelLogger: AnalyticsLogger

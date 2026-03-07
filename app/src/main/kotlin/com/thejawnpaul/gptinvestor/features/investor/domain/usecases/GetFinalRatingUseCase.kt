@@ -9,9 +9,10 @@ import com.thejawnpaul.gptinvestor.features.investor.domain.repository.IInvestor
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
+import org.koin.core.annotation.Factory
 
-class GetFinalRatingUseCase @Inject constructor(
+@Factory
+class GetFinalRatingUseCase(
     @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: IInvestorRepository

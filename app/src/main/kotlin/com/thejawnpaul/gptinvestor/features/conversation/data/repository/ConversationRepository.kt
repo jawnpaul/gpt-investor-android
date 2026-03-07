@@ -165,23 +165,23 @@ class ConversationRepository(
 
     override suspend fun getInputResponse(prompt: ConversationPrompt): Flow<Either<Failure, Conversation>> = flow {
         var currentConversation: StructuredConversation? = null
-        var newMessageId: Long? = null
+        var newMessageId: Long = -1L
         try {
-            // Use 'var' to allow reassignment of the conversation object
-            currentConversation = getConversation(prompt)
-            Timber.e(currentConversation.id.toString())
+            // Use a non-null local var to allow safe reassignment of the conversation object
+            var conversation: StructuredConversation = getConversation(prompt)
+            currentConversation = conversation
+            Timber.e(conversation.id.toString())
 
-            newMessageId =
-                messageDao.insertMessage(
-                    MessageEntity(
-                        conversationId = currentConversation.id,
-                        createdAt = System.currentTimeMillis(),
-                        query = prompt.query
-                    )
+            newMessageId = messageDao.insertMessage(
+                MessageEntity(
+                    conversationId = conversation.id,
+                    createdAt = System.currentTimeMillis(),
+                    query = prompt.query
                 )
+            )
 
             // Ensure we are modifying a mutable list or creating new lists when copying
-            val messagesWithNewQuery = ArrayList(currentConversation?.messageList ?: emptyList())
+            val messagesWithNewQuery = ArrayList(conversation.messageList)
             messagesWithNewQuery.add(
                 GenAiTextMessage(
                     id = newMessageId,
@@ -190,10 +190,11 @@ class ConversationRepository(
                     feedbackStatus = 0
                 )
             )
-            currentConversation = currentConversation.copy(messageList = messagesWithNewQuery)
-            emit(Either.Right(currentConversation))
+            conversation = conversation.copy(messageList = messagesWithNewQuery)
+            currentConversation = conversation
+            emit(Either.Right(conversation))
 
-            val entity = conversationDao.getSingleConversation(currentConversation.id)
+            val entity = conversationDao.getSingleConversation(conversation.id)
             val aiChatRequest = AiChatRequest(
                 prompt = prompt.query,
                 conversationId = entity?.remoteId,
@@ -203,22 +204,20 @@ class ConversationRepository(
                 if (chatResponse.status.value in 200..299) {
                     handleSseStream(
                         chatResponse,
-                        currentConversation,
+                        conversation,
                         prompt.query,
-                        newMessageId ?: -1L
+                        newMessageId
                     )
                 } else {
-                    currentConversation.let { conversation ->
-                        val updatedMessages = ArrayList(conversation.messageList)
-                        val index = updatedMessages.indexOfFirst { it.id == newMessageId }
-                        if (index != -1) {
-                            val original = updatedMessages[index] as GenAiTextMessage
-                            updatedMessages[index] = original.copy(
-                                loading = false,
-                                response = original.response ?: "Couldn't generate a response"
-                            )
-                            emit(Either.Right(conversation.copy(messageList = updatedMessages)))
-                        }
+                    val updatedMessages = ArrayList(conversation.messageList)
+                    val index = updatedMessages.indexOfFirst { it.id == newMessageId }
+                    if (index != -1) {
+                        val original = updatedMessages[index] as GenAiTextMessage
+                        updatedMessages[index] = original.copy(
+                            loading = false,
+                            response = original.response ?: "Couldn't generate a response"
+                        )
+                        emit(Either.Right(conversation.copy(messageList = updatedMessages)))
                     }
                     emit(Either.Left(mapHttpCodeToFailure(chatResponse.status.value)))
                 }

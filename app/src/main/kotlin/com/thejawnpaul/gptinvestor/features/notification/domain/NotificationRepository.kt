@@ -17,7 +17,7 @@ interface NotificationRepository {
 }
 
 @Singleton(binds = [NotificationRepository::class])
-class NotificationRepositoryImpl (
+class NotificationRepositoryImpl(
     private val apiService: KtorApiService,
     private val preferences: GPTInvestorPreferences
 ) : NotificationRepository {

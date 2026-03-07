@@ -8,7 +8,7 @@ import org.koin.core.annotation.Singleton
 
 @Singleton(binds = [AnalyticsLogger::class])
 @MixpanelAnalytics
-class MixpanelLogger (private val mixpanel: MixpanelAPI) : AnalyticsLogger {
+class MixpanelLogger(private val mixpanel: MixpanelAPI) : AnalyticsLogger {
 
     override fun logEvent(
         eventName: String,

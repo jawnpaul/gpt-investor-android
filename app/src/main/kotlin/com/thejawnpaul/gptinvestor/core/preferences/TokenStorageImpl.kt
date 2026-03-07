@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.core.annotation.Singleton
 
-@Singleton
+@Singleton(binds = [TokenStorage::class])
 class TokenStorageImpl(
     private val gptInvestorPreferences: GPTInvestorPreferences
 ) : TokenStorage {

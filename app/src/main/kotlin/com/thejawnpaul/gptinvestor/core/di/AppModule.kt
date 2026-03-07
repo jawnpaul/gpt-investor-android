@@ -9,7 +9,6 @@ import org.koin.core.annotation.Module
 
 @Module(includes = [
     AnalyticsModule::class,
-    ApiModule::class,
     AuthModule::class,
     CoroutinesModule::class,
     CoroutinesScopeModule::class,

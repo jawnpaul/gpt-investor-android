@@ -36,9 +36,9 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
 fun CompanyDetailHeader(
-    modifier: Modifier,
+    companyHeader: CompanyHeaderPresentation,
     onNavigateUp: () -> Unit,
-    companyHeader: CompanyHeaderPresentation
+    modifier: Modifier = Modifier
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
@@ -147,12 +147,12 @@ fun CompanyDetailHeader(
 
 @Preview
 @Composable
-fun CompanyHeaderPreview() {
+private fun CompanyHeaderPreview() {
     GPTInvestorTheme {
         Surface(
             modifier = Modifier.fillMaxSize()
         ) {
-            Column() {
+            Column {
                 CompanyDetailHeader(
                     modifier = Modifier,
                     onNavigateUp = {},

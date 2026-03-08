@@ -68,7 +68,13 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         job.cancel()
     }
 
-    private fun showNotification(title: String, body: String, deepLinkRoute: String?, notificationData: String?, imageUrl: String?) {
+    private fun showNotification(
+        title: String,
+        body: String,
+        deepLinkRoute: String?,
+        notificationData: String?,
+        imageUrl: String?
+    ) {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -121,7 +127,11 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
-    private suspend fun loadImageAndShowNotification(imageUrl: String, notificationBuilder: NotificationCompat.Builder, notificationManager: NotificationManager) {
+    private suspend fun loadImageAndShowNotification(
+        imageUrl: String,
+        notificationBuilder: NotificationCompat.Builder,
+        notificationManager: NotificationManager
+    ) {
         try {
             val request = ImageRequest.Builder(this)
                 .data(imageUrl)
@@ -153,7 +163,10 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
-    private fun showFallbackNotification(notificationBuilder: NotificationCompat.Builder, notificationManager: NotificationManager) {
+    private fun showFallbackNotification(
+        notificationBuilder: NotificationCompat.Builder,
+        notificationManager: NotificationManager
+    ) {
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 

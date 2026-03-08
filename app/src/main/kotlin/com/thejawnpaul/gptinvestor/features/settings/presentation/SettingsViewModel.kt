@@ -10,9 +10,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 
 @KoinViewModel
-class SettingsViewModel(
-    private val authenticationRepository: AuthenticationRepository
-) : ViewModel() {
+class SettingsViewModel(private val authenticationRepository: AuthenticationRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsView())
     val uiState get() = _uiState

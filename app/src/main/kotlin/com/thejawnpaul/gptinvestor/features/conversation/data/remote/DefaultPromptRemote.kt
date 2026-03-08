@@ -11,6 +11,4 @@ data class DefaultPromptRemote(
 )
 
 @Serializable
-data class DefaultPromptId(
-    @SerialName("\$oid") val id: String? = null
-)
+data class DefaultPromptId(@SerialName("\$oid") val id: String? = null)

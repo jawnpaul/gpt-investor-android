@@ -13,12 +13,11 @@ import org.koin.core.annotation.Factory
 
 @Factory
 class GetCompanyFinancialsUseCase(
-    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: ICompanyRepository
 ) : BaseUseCase<String, CompanyFinancials>(coroutineScope, dispatcher) {
 
-    override suspend fun run(params: String): Flow<Either<Failure, CompanyFinancials>> {
-        return repository.getCompanyFinancials(params)
-    }
+    override suspend fun run(params: String): Flow<Either<Failure, CompanyFinancials>> =
+        repository.getCompanyFinancials(params)
 }

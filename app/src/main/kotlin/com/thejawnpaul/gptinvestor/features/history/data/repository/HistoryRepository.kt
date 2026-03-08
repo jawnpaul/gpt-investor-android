@@ -14,10 +14,8 @@ import org.koin.core.annotation.Singleton
 import timber.log.Timber
 
 @Singleton(binds = [IHistoryRepository::class])
-class HistoryRepository(
-    private val conversationDao: ConversationDao,
-    private val analyticsLogger: AnalyticsLogger
-) : IHistoryRepository {
+class HistoryRepository(private val conversationDao: ConversationDao, private val analyticsLogger: AnalyticsLogger) :
+    IHistoryRepository {
     override suspend fun getAllHistory(): Flow<Either<Failure, Map<String, List<StructuredConversation>>>> = flow {
         try {
             val separated = conversationDao.getConversationsWithMessages()

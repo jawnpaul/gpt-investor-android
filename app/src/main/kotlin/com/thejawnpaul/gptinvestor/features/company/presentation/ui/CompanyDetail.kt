@@ -60,7 +60,11 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.theme.linkMedium
 
 @Composable
-fun CompanyDetailDataSource(modifier: Modifier, list: List<NewsPresentation> = emptyList(), onClick: () -> Unit) {
+fun CompanyDetailDataSource(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    list: List<NewsPresentation> = emptyList()
+) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
@@ -85,7 +89,7 @@ fun CompanyDetailDataSource(modifier: Modifier, list: List<NewsPresentation> = e
 }
 
 @Composable
-fun OverlappingIcons(modifier: Modifier, images: List<String>) {
+fun OverlappingIcons(images: List<String>, modifier: Modifier = Modifier) {
     Box(modifier) {
         images.reversed().forEachIndexed { index, it ->
             AsyncImage(
@@ -102,7 +106,13 @@ fun OverlappingIcons(modifier: Modifier, images: List<String>) {
 }
 
 @Composable
-fun CompanyDetailPriceCard(modifier: Modifier = Modifier, ticker: String, price: Float, imageUrl: String, change: Float) {
+fun CompanyDetailPriceCard(
+    ticker: String,
+    price: Float,
+    imageUrl: String,
+    change: Float,
+    modifier: Modifier = Modifier
+) {
     OutlinedCard(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
         Row(
             modifier = Modifier
@@ -134,7 +144,7 @@ fun CompanyDetailPriceCard(modifier: Modifier = Modifier, ticker: String, price:
 }
 
 @Composable
-fun StockPriceText(modifier: Modifier = Modifier, currencySymbol: String, amount: Float) {
+fun StockPriceText(currencySymbol: String, amount: Float, modifier: Modifier = Modifier) {
     Row(horizontalArrangement = Arrangement.Start, modifier = Modifier.padding(vertical = 8.dp)) {
         Text(currencySymbol, modifier = Modifier.align(Alignment.Bottom))
         Text(
@@ -148,7 +158,7 @@ fun StockPriceText(modifier: Modifier = Modifier, currencySymbol: String, amount
 }
 
 @Composable
-fun PercentageChangePill(modifier: Modifier = Modifier, change: Float, date: String) {
+fun PercentageChangePill(change: Float, date: String, modifier: Modifier = Modifier) {
     Surface(
         modifier = Modifier.height(36.dp),
         shape = RoundedCornerShape(16.dp),
@@ -195,7 +205,7 @@ fun PercentageChangePill(modifier: Modifier = Modifier, change: Float, date: Str
 }
 
 @Composable
-fun AboutStockCard(modifier: Modifier, companySummary: String, companyName: String) {
+fun AboutStockCard(companySummary: String, companyName: String, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(
             text = stringResource(R.string.about_company_name, companyName),
@@ -225,7 +235,12 @@ fun AboutStockCard(modifier: Modifier, companySummary: String, companyName: Stri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CompanyDetailTab(modifier: Modifier, company: CompanyDetailRemoteResponse, onClickNews: (url: String) -> Unit, onClickSources: () -> Unit) {
+fun CompanyDetailTab(
+    company: CompanyDetailRemoteResponse,
+    onClickNews: (url: String) -> Unit,
+    onClickSources: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val titles = listOf("Overview", "Key ratios", "News")
     val selectedTabIndex = remember { mutableIntStateOf(0) }
     val gptInvestorColors = LocalGPTInvestorColors.current
@@ -259,7 +274,11 @@ fun CompanyDetailTab(modifier: Modifier, company: CompanyDetailRemoteResponse, o
                             text = title,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            style = if (isSelected) MaterialTheme.typography.labelLarge else MaterialTheme.typography.bodyMedium
+                            style = if (isSelected) {
+                                MaterialTheme.typography.labelLarge
+                            } else {
+                                MaterialTheme.typography.bodyMedium
+                            }
                         )
                     }
                 )
@@ -306,12 +325,12 @@ fun CompanyDetailTab(modifier: Modifier, company: CompanyDetailRemoteResponse, o
 
 @Composable
 fun CompanyHistoryGraph(
-    modifier: Modifier,
     historicalData: List<HistoricalData>,
     companyName: String,
     companySummary: String,
-    sources: List<NewsPresentation> = emptyList(),
-    onClickSources: () -> Unit
+    onClickSources: () -> Unit,
+    modifier: Modifier = Modifier,
+    sources: List<NewsPresentation> = emptyList()
 ) {
     Surface(
         modifier = modifier
@@ -399,7 +418,12 @@ fun CompanyHistoryGraph(
 }
 
 @Composable
-fun TimePeriodRow(modifier: Modifier, list: List<TimePeriod>, selected: TimePeriod, onClick: (period: TimePeriod) -> Unit) {
+fun TimePeriodRow(
+    list: List<TimePeriod>,
+    selected: TimePeriod,
+    onClick: (period: TimePeriod) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -417,7 +441,12 @@ fun TimePeriodRow(modifier: Modifier, list: List<TimePeriod>, selected: TimePeri
 }
 
 @Composable
-fun SingleTimePeriod(modifier: Modifier, period: TimePeriod, isSelected: Boolean, onClick: (period: TimePeriod) -> Unit) {
+fun SingleTimePeriod(
+    period: TimePeriod,
+    isSelected: Boolean,
+    onClick: (period: TimePeriod) -> Unit,
+    modifier: Modifier = Modifier
+) {
     if (isSelected) {
         Surface(
             modifier = modifier,
@@ -442,7 +471,7 @@ fun SingleTimePeriod(modifier: Modifier, period: TimePeriod, isSelected: Boolean
 }
 
 @Composable
-fun CompanyKeyRatios(modifier: Modifier, marketCap: Long, peRatio: Float, revenue: Long) {
+fun CompanyKeyRatios(marketCap: Long, peRatio: Float, revenue: Long, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -500,7 +529,7 @@ fun CompanyKeyRatios(modifier: Modifier, marketCap: Long, peRatio: Float, revenu
 }
 
 @Composable
-fun CompanyDetailsNews(modifier: Modifier, news: List<NewsPresentation>, onClick: (url: String) -> Unit) {
+fun CompanyDetailsNews(news: List<NewsPresentation>, onClick: (url: String) -> Unit, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -532,7 +561,7 @@ fun CompanyDetailsNews(modifier: Modifier, news: List<NewsPresentation>, onClick
 }
 
 @Composable
-fun CompanyDetailNewsItem(modifier: Modifier, news: NewsPresentation, onClick: (url: String) -> Unit) {
+fun CompanyDetailNewsItem(news: NewsPresentation, onClick: (url: String) -> Unit, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(
             text = news.publisher,
@@ -564,7 +593,7 @@ fun CompanyDetailNewsItem(modifier: Modifier, news: NewsPresentation, onClick: (
 
 @Preview
 @Composable
-fun PreviewComposable(modifier: Modifier = Modifier) {
+private fun PreviewComposable(modifier: Modifier = Modifier) {
     GPTInvestorTheme {
         Surface {
             Column(modifier = Modifier.fillMaxSize()) {
@@ -603,8 +632,9 @@ fun PreviewComposable(modifier: Modifier = Modifier) {
                         publisher = "Yahoo Finance",
                         imageUrl = "",
                         link = ""
-                    )
-                ) { }
+                    ),
+                    onClick = {}
+                )
             }
         }
     }

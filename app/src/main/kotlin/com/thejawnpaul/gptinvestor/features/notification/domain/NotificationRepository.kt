@@ -22,7 +22,6 @@ class NotificationRepositoryImpl(
     private val preferences: GPTInvestorPreferences
 ) : NotificationRepository {
 
-
     override suspend fun saveToken(token: String) {
         preferences.setFcmToken(token)
         preferences.setIsTokenSynced(false)

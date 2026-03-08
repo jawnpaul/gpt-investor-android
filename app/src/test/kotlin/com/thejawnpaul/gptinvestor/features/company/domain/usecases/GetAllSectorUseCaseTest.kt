@@ -43,7 +43,8 @@ class GetAllSectorUseCaseTest {
 
     @Test
     fun `should return a list of sectors`() = runTest {
-        coEvery { repository.getAllSector() } returns flow { emit(Either.Right(listOf(SectorInput.CustomSector("", "")))) }
+        coEvery { repository.getAllSector() } returns
+            flow { emit(Either.Right(listOf(SectorInput.CustomSector("", "")))) }
 
         repository.getAllSector().collect {
             Truth.assertThat(it.isRight).isTrue()

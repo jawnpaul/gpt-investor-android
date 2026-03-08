@@ -46,10 +46,10 @@ fun InputBar(
     input: String,
     contentPadding: PaddingValues,
     sendEnabled: Boolean,
-    onInputChanged: (String) -> Unit,
+    placeholder: String,
+    onInputChange: (String) -> Unit,
     onSendClick: () -> Unit,
     modifier: Modifier = Modifier,
-    placeholder: String,
     shouldRequestFocus: Boolean = false
 ) {
     Box(
@@ -91,7 +91,7 @@ fun InputBar(
                 ) {
                     TextField(
                         value = input,
-                        onValueChange = onInputChanged,
+                        onValueChange = onInputChange,
                         modifier = Modifier
                             .weight(1f)
                             .defaultMinSize(minHeight = 56.dp)
@@ -133,15 +133,15 @@ fun InputBar(
 
 @Preview
 @Composable
-fun InputBarPreview(modifier: Modifier = Modifier) {
+private fun InputBarPreview() {
     GPTInvestorTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            Column(modifier.fillMaxSize()) {
+            Column(Modifier.fillMaxSize()) {
                 InputBar(
                     input = "",
                     contentPadding = PaddingValues(0.dp),
                     sendEnabled = false,
-                    onInputChanged = {},
+                    onInputChange = {},
                     onSendClick = {},
                     modifier = Modifier,
                     placeholder = "Ask anything about stocks"

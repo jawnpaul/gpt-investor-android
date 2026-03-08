@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.R
 
 @Composable
-fun RateLimitBottomSheetContent(modifier: Modifier = Modifier, onUpgrade: () -> Unit, onDismiss: () -> Unit) {
+fun RateLimitBottomSheetContent(onUpgrade: () -> Unit, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()

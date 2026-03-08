@@ -10,14 +10,14 @@ import com.thejawnpaul.gptinvestor.features.toppick.data.local.dao.TopPickDao
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.model.TopPickEntity
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Singleton
 import timber.log.Timber
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @Singleton(binds = [ITopPickRepository::class])
 class TopPickRepository(
@@ -61,8 +61,8 @@ class TopPickRepository(
                                 risks = risks,
                                 confidenceScore = confidenceScore,
                                 isSaved = false,
-                                imageUrl = imageUrl?: "",
-                                percentageChange = percentageChange?: 0f,
+                                imageUrl = imageUrl ?: "",
+                                percentageChange = percentageChange ?: 0f,
                                 currentPrice = 0f
                             )
                         }
@@ -70,7 +70,6 @@ class TopPickRepository(
                     emit(Either.Right(picks))
                 } ?: emit(Either.Left(Failure.DataError))
             }
-
         } catch (e: Exception) {
             Timber.e(e.stackTraceToString())
             emit(Either.Left(Failure.ServerError))
@@ -272,30 +271,28 @@ class TopPickRepository(
         }
     }
 
-    override suspend fun searchTopPicks(query: String): Flow<List<TopPick>> {
-        return try {
-            topPickDao.searchTopPicks(query).map { list ->
-                list.map { entity ->
-                    with(entity) {
-                        TopPick(
-                            id = id,
-                            companyName = companyName,
-                            ticker = ticker,
-                            rationale = rationale,
-                            metrics = metrics,
-                            risks = risks,
-                            confidenceScore = confidenceScore,
-                            isSaved = isSaved,
-                            imageUrl = imageUrl,
-                            percentageChange = change,
-                            currentPrice = price
-                        )
-                    }
+    override suspend fun searchTopPicks(query: String): Flow<List<TopPick>> = try {
+        topPickDao.searchTopPicks(query).map { list ->
+            list.map { entity ->
+                with(entity) {
+                    TopPick(
+                        id = id,
+                        companyName = companyName,
+                        ticker = ticker,
+                        rationale = rationale,
+                        metrics = metrics,
+                        risks = risks,
+                        confidenceScore = confidenceScore,
+                        isSaved = isSaved,
+                        imageUrl = imageUrl,
+                        percentageChange = change,
+                        currentPrice = price
+                    )
                 }
             }
-        } catch (e: Exception) {
-            Timber.e(e.stackTraceToString())
-            flow { emit(emptyList()) }
         }
+    } catch (e: Exception) {
+        Timber.e(e.stackTraceToString())
+        flow { emit(emptyList()) }
     }
 }

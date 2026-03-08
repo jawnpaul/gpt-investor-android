@@ -34,24 +34,16 @@ data class AllTidbitResponse(
 )
 
 @Serializable
-data class TidbitLikeRequest(
-    @SerialName("user_id") val userId: String,
-    @SerialName("tidbit_id") val tidbitId: String
-)
+data class TidbitLikeRequest(@SerialName("user_id") val userId: String, @SerialName("tidbit_id") val tidbitId: String)
 
 @Serializable
-data class TidbitLikeResponse(
-    @SerialName("message") val message: String
-)
+data class TidbitLikeResponse(@SerialName("message") val message: String)
 
 @Serializable
-data class TidbitBookmarkResponse(
-    @SerialName("message") val message: String
-)
+data class TidbitBookmarkResponse(@SerialName("message") val message: String)
 
 @Serializable
 data class TidbitBookmarkRequest(
     @SerialName("user_id") val userId: String,
     @SerialName("tidbit_id") val tidbitId: String
 )
-

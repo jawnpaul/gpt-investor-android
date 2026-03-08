@@ -6,19 +6,13 @@ import kotlinx.coroutines.runBlocking
 import org.koin.core.annotation.Singleton
 
 @Singleton(binds = [TokenStorage::class])
-class TokenStorageImpl(
-    private val gptInvestorPreferences: GPTInvestorPreferences
-) : TokenStorage {
-    override fun getAccessToken(): String? {
-        return runBlocking {
-            gptInvestorPreferences.accessToken.first()
-        }
+class TokenStorageImpl(private val gptInvestorPreferences: GPTInvestorPreferences) : TokenStorage {
+    override fun getAccessToken(): String? = runBlocking {
+        gptInvestorPreferences.accessToken.first()
     }
 
-    override fun getRefreshToken(): String? {
-        return runBlocking {
-            gptInvestorPreferences.refreshToken.first()
-        }
+    override fun getRefreshToken(): String? = runBlocking {
+        gptInvestorPreferences.refreshToken.first()
     }
 
     override fun saveAccessToken(token: String) {

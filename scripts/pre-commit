@@ -1,5 +1,28 @@
 #!/bin/bash
+
+# Get staged files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep '\.kt[s]\?$' || true)
+
+if [ -z "$STAGED_FILES" ]; then
+    echo "No Kotlin files staged. Skipping ktlint."
+    exit 0
+fi
+
 echo "............Starting ktlint check......................................"
 echo "Started Formatting...."
+
+# Run ktlintFormat - we don't use set -e here because it might fail on other files
 ./gradlew ktlintFormat
+
+# Re-stage formatted files that were originally staged
+for FILE in $STAGED_FILES; do
+    if [ -f "$FILE" ]; then
+        git add "$FILE"
+    fi
+done
+
+# Now run the check and fail if any errors remain (including Compose rules)
+set -e
+./gradlew ktlintCheck
+
 echo "Completed.............................................................."

@@ -14,12 +14,11 @@ import org.koin.core.annotation.Factory
 
 @Factory
 class GetSimilarCompaniesUseCase(
-    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: IInvestorRepository
 ) : BaseUseCase<SimilarCompanyRequest, SimilarCompanies>(coroutineScope, dispatcher) {
 
-    override suspend fun run(params: SimilarCompanyRequest): Flow<Either<Failure, SimilarCompanies>> {
-        return repository.getSimilarCompanies(params)
-    }
+    override suspend fun run(params: SimilarCompanyRequest): Flow<Either<Failure, SimilarCompanies>> =
+        repository.getSimilarCompanies(params)
 }

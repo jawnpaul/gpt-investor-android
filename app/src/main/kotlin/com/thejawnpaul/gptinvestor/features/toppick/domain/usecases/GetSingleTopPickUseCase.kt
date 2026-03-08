@@ -13,7 +13,7 @@ import org.koin.core.annotation.Factory
 
 @Factory
 class GetSingleTopPickUseCase(
-    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: ITopPickRepository
 ) : BaseUseCase<String, TopPick>(
@@ -21,7 +21,5 @@ class GetSingleTopPickUseCase(
     dispatcher
 ) {
 
-    override suspend fun run(params: String): Flow<Either<Failure, TopPick>> {
-        return repository.getSingleTopPick(params)
-    }
+    override suspend fun run(params: String): Flow<Either<Failure, TopPick>> = repository.getSingleTopPick(params)
 }

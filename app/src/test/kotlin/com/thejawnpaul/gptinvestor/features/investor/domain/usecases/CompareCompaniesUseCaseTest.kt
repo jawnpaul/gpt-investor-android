@@ -46,7 +46,8 @@ class CompareCompaniesUseCaseTest {
                 "",
                 ""
             ),
-            "", ""
+            "",
+            ""
         )
         useCase = CompareCompaniesUseCase(dispatcher, scope, repository)
     }
@@ -62,7 +63,8 @@ class CompareCompaniesUseCaseTest {
 
     @Test
     fun `should return unavailable error when getCompanyFinancials fails`() = runTest {
-        coEvery { repository.compareCompany(request) } returns flow { emit(Either.Left(Failure.UnAvailableError)) }
+        coEvery { repository.compareCompany(request) } returns
+            flow { emit(Either.Left(Failure.UnAvailableError)) }
 
         repository.compareCompany(request).collect {
             assertThat(it.isLeft).isTrue()

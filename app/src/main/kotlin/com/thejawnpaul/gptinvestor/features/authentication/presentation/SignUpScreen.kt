@@ -40,18 +40,17 @@ import com.thejawnpaul.gptinvestor.theme.linkMedium
 
 @Composable
 fun SignUpScreen(
-    modifier: Modifier,
     email: String,
     name: String,
     password: String,
-    loading: Boolean = false,
     enableButton: Boolean,
+    onSignUpClick: () -> Unit,
+    onLoginClick: () -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onNameChange: (String) -> Unit,
-    onSignUpClick: () -> Unit,
-    onLoginClick: () -> Unit,
-    onSignUpWithGoogleClick: () -> Unit
+    modifier: Modifier = Modifier,
+    loading: Boolean = false
 ) {
     var passwordHidden by remember { mutableStateOf(true) }
 
@@ -123,13 +122,21 @@ fun SignUpScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    visualTransformation = if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
+                    visualTransformation = if (passwordHidden) {
+                        PasswordVisualTransformation()
+                    } else {
+                        VisualTransformation.None
+                    },
                     trailingIcon = {
                         IconButton(onClick = {
                             passwordHidden = !passwordHidden
                         }) {
                             val visibilityIcon =
-                                if (passwordHidden) R.drawable.outline_visibility_24 else R.drawable.baseline_visibility_off_24
+                                if (passwordHidden) {
+                                    R.drawable.outline_visibility_24
+                                } else {
+                                    R.drawable.baseline_visibility_off_24
+                                }
 
                             Icon(
                                 painter = painterResource(id = visibilityIcon),
@@ -182,7 +189,7 @@ fun SignUpScreen(
 
 @PreviewLightDark()
 @Composable
-fun SignUpPreview() {
+private fun SignUpPreview() {
     GPTInvestorTheme {
         Surface {
             SignUpScreen(
@@ -195,8 +202,7 @@ fun SignUpPreview() {
                 onPasswordChange = {},
                 onLoginClick = {},
                 onSignUpClick = {},
-                onNameChange = {},
-                onSignUpWithGoogleClick = {}
+                onNameChange = {}
             )
         }
     }

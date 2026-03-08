@@ -16,7 +16,13 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun CompanyChoiceQuestion(possibleAnswers: List<String>, selectedAnswer: String?, onOptionSelected: (String) -> Unit, enabled: Boolean, modifier: Modifier = Modifier) {
+fun CompanyChoiceQuestion(
+    possibleAnswers: List<String>,
+    selectedAnswer: String?,
+    onSelectOption: (String) -> Unit,
+    enabled: Boolean,
+    modifier: Modifier = Modifier
+) {
     FlowRow(modifier = modifier.padding(start = 8.dp, end = 8.dp)) {
         possibleAnswers.forEach {
             val selected = it == selectedAnswer
@@ -25,28 +31,34 @@ fun CompanyChoiceQuestion(possibleAnswers: List<String>, selectedAnswer: String?
                 company = it,
                 selected = selected,
                 enabled = enabled,
-                onOptionSelected = { onOptionSelected(it) }
+                onSelectOption = { onSelectOption(it) }
             )
         }
     }
 }
 
 @Composable
-fun SingleCompanyChoice(company: String, selected: Boolean, enabled: Boolean, onOptionSelected: () -> Unit, modifier: Modifier = Modifier) {
+fun SingleCompanyChoice(
+    company: String,
+    selected: Boolean,
+    enabled: Boolean,
+    onSelectOption: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Surface(
         modifier = modifier
             .clip(MaterialTheme.shapes.small)
             .selectable(
                 selected,
                 enabled = enabled,
-                onClick = onOptionSelected,
+                onClick = onSelectOption,
                 role = Role.RadioButton
             )
     ) {
         FilterChip(
             selected = selected,
             enabled = enabled,
-            onClick = onOptionSelected,
+            onClick = onSelectOption,
             label = { Text(text = company) }
         )
     }

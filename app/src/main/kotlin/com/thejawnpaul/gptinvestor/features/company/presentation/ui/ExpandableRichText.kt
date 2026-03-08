@@ -29,7 +29,12 @@ const val DEFAULT_MINIMUM_TEXT_LINEE = 10
  * @param text The text to be displayed.
  */
 @Composable
-fun ExpandableRichText(modifier: Modifier = Modifier, textModifier: Modifier = Modifier, text: String, bodyTextStyle: TextStyle? = null) {
+fun ExpandableRichText(
+    text: String,
+    modifier: Modifier = Modifier,
+    textModifier: Modifier = Modifier,
+    bodyTextStyle: TextStyle? = null
+) {
     // State variables to track the expanded state, clickable state.
     var isExpanded by remember { mutableStateOf(false) }
     val clickable by remember { mutableStateOf(false) }
@@ -49,7 +54,9 @@ fun ExpandableRichText(modifier: Modifier = Modifier, textModifier: Modifier = M
         RichTextThemeProvider(
             textStyleProvider = {
                 bodyTextStyle
-                    ?: MaterialTheme.typography.bodyChatBody.copy(color = MaterialTheme.colorScheme.onBackground)
+                    ?: MaterialTheme.typography.bodyChatBody.copy(
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
             }
         ) {
             BasicRichText {
@@ -86,7 +93,11 @@ fun ExpandableRichText(modifier: Modifier = Modifier, textModifier: Modifier = M
 }
 
 @Composable
-fun CustomRichText(modifier: Modifier = Modifier, text: String, bodyTextStyle: TextStyle = MaterialTheme.typography.bodyMedium) {
+fun CustomRichText(
+    text: String,
+    modifier: Modifier = Modifier,
+    bodyTextStyle: TextStyle = MaterialTheme.typography.bodyMedium
+) {
     RichTextThemeProvider(
         textStyleProvider = {
             bodyTextStyle.copy(color = MaterialTheme.colorScheme.onBackground)

@@ -20,45 +20,40 @@ class ModelsRepositoryImpl(
     private val gptInvestorPreferences: GPTInvestorPreferences,
     private val apiService: KtorApiService
 ) : ModelsRepository {
-    override suspend fun getAvailableModels(): Result<List<AvailableModel>> {
-        return try {
-            val isUserOnWaitlist = gptInvestorPreferences.isUserOnModelWaitlist.first()
-            val models = buildList {
-                add(DefaultModel())
-                add(
-                    AnotherModel(
-                        isDefault = false,
-                        modelTitle = "Quantum Edge",
-                        modelSubtitle = "Access next-level financial intelligence",
-                        canUpgrade = isUserOnWaitlist != true,
-                        isUserOnWaitlist = isUserOnWaitlist,
-                        modelId = "gemini-2.5-flash"
-                    )
-                )
-            }
-            Result.success(models)
-        } catch (e: Exception) {
-            Timber.e(e.stackTrace.toString())
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun putUserOnModelWaitlist(modelId: String, reasons: List<String>): Result<Unit> {
-        return try {
-            val userId = gptInvestorPreferences.userId.first()
-            apiService.addUserToWaitlist(
-                request = AddToWaitlistRequest(
-                    userId = userId ?: "",
-                    modelId = modelId,
-                    reasons = reasons
+    override suspend fun getAvailableModels(): Result<List<AvailableModel>> = try {
+        val isUserOnWaitlist = gptInvestorPreferences.isUserOnModelWaitlist.first()
+        val models = buildList {
+            add(DefaultModel())
+            add(
+                AnotherModel(
+                    isDefault = false,
+                    modelTitle = "Quantum Edge",
+                    modelSubtitle = "Access next-level financial intelligence",
+                    canUpgrade = isUserOnWaitlist != true,
+                    isUserOnWaitlist = isUserOnWaitlist,
+                    modelId = "gemini-2.5-flash"
                 )
             )
-            gptInvestorPreferences.setIsUserOnModelWaitlist(isOnWaitlist = true)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Timber.e(e.stackTrace.toString())
-            Result.failure(e)
         }
+        Result.success(models)
+    } catch (e: Exception) {
+        Timber.e(e.stackTrace.toString())
+        Result.failure(e)
+    }
+
+    override suspend fun putUserOnModelWaitlist(modelId: String, reasons: List<String>): Result<Unit> = try {
+        val userId = gptInvestorPreferences.userId.first()
+        apiService.addUserToWaitlist(
+            request = AddToWaitlistRequest(
+                userId = userId ?: "",
+                modelId = modelId,
+                reasons = reasons
+            )
+        )
+        gptInvestorPreferences.setIsUserOnModelWaitlist(isOnWaitlist = true)
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Timber.e(e.stackTrace.toString())
+        Result.failure(e)
     }
 }
-

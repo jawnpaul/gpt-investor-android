@@ -42,7 +42,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -74,7 +74,12 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) -> Unit, onEvent: (HomeEvent) -> Unit) {
+fun HomeScreen(
+    state: HomeUiState,
+    onAction: (HomeAction) -> Unit,
+    onEvent: (HomeEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -189,7 +194,7 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
                             .windowInsetsPadding(
                                 insets = WindowInsets.ime
                             ),
-                        onSendClicked = {
+                        onSendClick = {
                             onEvent(HomeEvent.SendClick)
                         },
                         hint = stringResource(R.string.ask_me_a_question),
@@ -281,7 +286,7 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
                             modifier = Modifier,
                             options = state.waitlistAvailableOptions,
                             selectedOptions = state.selectedWaitlistOptions,
-                            onOptionSelected = {
+                            onSelectOption = {
                                 onEvent(HomeEvent.SelectWaitListOption(it))
                             },
                             onJoinWaitList = {
@@ -317,19 +322,19 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun WaitlistBottomSheetContent(
-    modifier: Modifier,
     options: List<String>,
     selectedOptions: List<String>,
-    onOptionSelected: (String) -> Unit,
     onJoinWaitList: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onSelectOption: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier.padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        var content by remember { mutableStateOf(0) }
+        var content by remember { mutableIntStateOf(0) }
 
         when (content) {
             0 -> {
@@ -344,7 +349,9 @@ fun WaitlistBottomSheetContent(
                 // Text
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(R.string.choose_the_capabilities_you_d_love_in_the_advanced_ai_model),
+                    text = stringResource(
+                        R.string.choose_the_capabilities_you_d_love_in_the_advanced_ai_model
+                    ),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -359,8 +366,8 @@ fun WaitlistBottomSheetContent(
                         SingleWaitlistOption(
                             modifier = Modifier,
                             isSelected = selectedOptions.contains(it),
-                            onOptionSelected = {
-                                onOptionSelected(it)
+                            onSelectOption = {
+                                onSelectOption(it)
                             },
                             text = it
                         )
@@ -428,7 +435,9 @@ fun WaitlistBottomSheetContent(
 
                 // Text
                 Text(
-                    text = stringResource(R.string.you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge),
+                    text = stringResource(
+                        R.string.you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )
@@ -456,14 +465,14 @@ fun WaitlistBottomSheetContent(
 }
 
 @Composable
-fun SingleWaitlistOption(modifier: Modifier, isSelected: Boolean, onOptionSelected: () -> Unit, text: String) {
+fun SingleWaitlistOption(isSelected: Boolean, text: String, onSelectOption: () -> Unit, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     if (isSelected) {
         Surface(
             modifier = modifier,
             shape = RoundedCornerShape(corner = CornerSize(20.dp)),
             border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onSurface),
-            onClick = onOptionSelected
+            onClick = onSelectOption
         ) {
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -477,7 +486,7 @@ fun SingleWaitlistOption(modifier: Modifier, isSelected: Boolean, onOptionSelect
             modifier = modifier,
             shape = RoundedCornerShape(corner = CornerSize(20.dp)),
             border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant),
-            onClick = onOptionSelected
+            onClick = onSelectOption
         ) {
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),

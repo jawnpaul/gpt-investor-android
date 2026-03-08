@@ -9,9 +9,7 @@ import org.koin.core.annotation.Singleton
 object ImageModule {
 
     @Singleton
-    fun provideImageLoader(context: Context): ImageLoader {
-        return ImageLoader.Builder(context)
-            .crossfade(true)
-            .build()
-    }
+    fun provideImageLoader(context: Context): ImageLoader = ImageLoader.Builder(context)
+        .crossfade(true)
+        .build()
 }

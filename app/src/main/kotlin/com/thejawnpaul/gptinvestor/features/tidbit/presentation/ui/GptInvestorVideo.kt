@@ -23,13 +23,13 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
 @Composable
 fun GptInvestorVideo(
     modifier: Modifier = Modifier,
+    aspectRatioMode: Int = AspectRatioFrameLayout.RESIZE_MODE_FILL,
     youtubeVideoId: String? = null,
     videoUrl: String? = null,
     autoplay: Boolean = false,
     showControls: Boolean = true,
     loop: Boolean = false,
-    aspectRatioMode: Int = AspectRatioFrameLayout.RESIZE_MODE_FILL,
-    onVideoStarted: (() -> Unit)? = null
+    onVideoStart: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
 
@@ -53,9 +53,12 @@ fun GptInvestorVideo(
                                 }
                             }
 
-                            override fun onStateChange(youTubePlayer: YouTubePlayer, state: PlayerConstants.PlayerState) {
+                            override fun onStateChange(
+                                youTubePlayer: YouTubePlayer,
+                                state: PlayerConstants.PlayerState
+                            ) {
                                 if (state == PlayerConstants.PlayerState.PLAYING) {
-                                    onVideoStarted?.invoke()
+                                    onVideoStart?.invoke()
                                 }
                             }
                         },
@@ -78,13 +81,13 @@ fun GptInvestorVideo(
                     addListener(object : Player.Listener {
                         override fun onPlaybackStateChanged(playbackState: Int) {
                             if (playbackState == Player.STATE_READY && playWhenReady) {
-                                onVideoStarted?.invoke()
+                                onVideoStart?.invoke()
                             }
                         }
 
                         override fun onIsPlayingChanged(isPlaying: Boolean) {
                             if (isPlaying) {
-                                onVideoStarted?.invoke()
+                                onVideoStart?.invoke()
                             }
                         }
                     })

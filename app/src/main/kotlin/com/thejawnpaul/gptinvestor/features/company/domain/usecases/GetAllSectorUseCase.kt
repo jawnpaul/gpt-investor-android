@@ -11,13 +11,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
 class GetAllSectorUseCase(
-    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: ICompanyRepository
 ) : BaseUseCase<GetAllSectorUseCase.None, List<SectorInput>>(coroutineScope, dispatcher) {
     class None
 
-    override suspend fun run(params: None): Flow<Either<Failure, List<SectorInput>>> {
-        return repository.getAllSector()
-    }
+    override suspend fun run(params: None): Flow<Either<Failure, List<SectorInput>>> = repository.getAllSector()
 }

@@ -9,9 +9,9 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @Singleton(binds = [UnauthorizedCallback::class])
-class UnauthorizedCallbackImpl(
-    private val context: Context
-) : UnauthorizedCallback, KoinComponent {
+class UnauthorizedCallbackImpl(private val context: Context) :
+    UnauthorizedCallback,
+    KoinComponent {
     private val authenticationRepository: AuthenticationRepository by inject()
 
     override fun onUnauthorized() {

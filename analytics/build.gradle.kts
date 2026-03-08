@@ -66,10 +66,10 @@ buildkonfig {
 
     defaultConfigs {
         val mixpanelToken: String = localProperties.getProperty("MIXPANEL_PROD_TOKEN") ?: ""
-        buildConfigField(STRING, "MIXPANEL_TOKEN", "\"$mixpanelToken\"")
+        buildConfigField(STRING, "MIXPANEL_TOKEN", mixpanelToken)
     }
     defaultConfigs("dev") {
         val mixpanelToken: String = localProperties.getProperty("MIXPANEL_DEV_TOKEN") ?: ""
-        buildConfigField(STRING, "MIXPANEL_TOKEN", "\"$mixpanelToken\"")
+        buildConfigField(STRING, "MIXPANEL_TOKEN", mixpanelToken)
     }
 }

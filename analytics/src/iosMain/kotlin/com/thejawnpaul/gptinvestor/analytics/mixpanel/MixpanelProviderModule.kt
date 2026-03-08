@@ -5,7 +5,7 @@ import org.koin.dsl.module
 
 /**
  * Returns a Koin module that overrides the default NoOpMixpanelProvider with a real provider.
- * The iosApp calls this with a Swift SwiftMixpanelProvider instance before or immediately
+ * The iosApp calls this with a SwiftMixpanelProvider instance before or immediately
  * after startKoin, before any analytics event is fired.
  *
  * The iosApp's startKoin block must set allowOverride = true for the override to take effect.

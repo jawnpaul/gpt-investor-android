@@ -56,11 +56,19 @@ class HistoryViewModel(
     private var upgradeModelId: String? = null
 
     private val conversationId: Long?
-        get() = savedStateHandle.get<Long>("conversationId")
+        get() {
+            val id = savedStateHandle.get<Any>("conversationId")
+            return when (id) {
+                is Long -> id
+                is String -> id.toLongOrNull()
+                else -> null
+            }
+        }
 
     init {
         getAllHistory()
         getAvailableModels()
+        getConversation()
     }
 
     private fun getAllHistory() {
@@ -88,7 +96,6 @@ class HistoryViewModel(
     }
 
     fun updateConversationId(conversationId: String) {
-        Timber.e("Abeg thee")
         savedStateHandle["conversationId"] = conversationId.toLong()
         getConversation()
     }

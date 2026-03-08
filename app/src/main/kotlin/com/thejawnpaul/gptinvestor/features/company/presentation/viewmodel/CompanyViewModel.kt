@@ -57,6 +57,7 @@ class CompanyViewModel(
 
     init {
         getAvailableModels()
+        getCompany()
     }
 
     fun updateTicker(ticker: String) {

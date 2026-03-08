@@ -47,6 +47,10 @@ class TidbitViewModel(private val repository: TidbitRepository, private val save
         MutableStateFlow<TidbitPagingFilterType>(TidbitPagingFilterType.All)
     val currentPagingFilter: StateFlow<TidbitPagingFilterType> = _currentPagingFilter
 
+    init {
+        getTidbit()
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val tidbitsPagingData: Flow<PagingData<TidbitPresentation>> =
         _currentPagingFilter.flatMapLatest { filterType ->

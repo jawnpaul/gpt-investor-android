@@ -14,4 +14,4 @@ annotation class FirebaseAnalytics
 
 @Module
 @ComponentScan("com.thejawnpaul.gptinvestor.analytics")
-class AnalyticsBindingModule
+object AnalyticsModule

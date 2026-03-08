@@ -1,16 +1,18 @@
 package com.thejawnpaul.gptinvestor.analytics.mixpanel
 
+import android.content.Context
 import com.mixpanel.android.mpmetrics.MixpanelAPI
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.analytics.BuildConfig
 import com.thejawnpaul.gptinvestor.analytics.di.MixpanelAnalytics
 import org.json.JSONObject
 import org.koin.core.annotation.Singleton
 
 @Singleton(binds = [AnalyticsLogger::class])
 @MixpanelAnalytics
-class MixpanelLogger(private val mixpanel: MixpanelAPI) : AnalyticsLogger {
-
-    override fun logEvent(
+actual class MixpanelLogger(context: Context) : AnalyticsLogger {
+    private val mixpanel = MixpanelAPI.getInstance(context, BuildConfig.MIXPANEL_TOKEN, true)
+    actual override fun logEvent(
         eventName: String,
         params: Map<String, Any>
     ) {
@@ -21,11 +23,11 @@ class MixpanelLogger(private val mixpanel: MixpanelAPI) : AnalyticsLogger {
         mixpanel.track(eventName, props)
     }
 
-    override fun logViewEvent(screenName: String) {
+    actual override fun logViewEvent(screenName: String) {
 
     }
 
-    override fun identifyUser(eventName: String, params: Map<String, Any>) {
+    actual override fun identifyUser(eventName: String, params: Map<String, Any>) {
         mixpanel.track(eventName)
         val props = JSONObject()
         params.forEach { (key, value) ->
@@ -37,9 +39,8 @@ class MixpanelLogger(private val mixpanel: MixpanelAPI) : AnalyticsLogger {
         mixpanel.people.set(props)
     }
 
-    override fun resetUser(eventName: String) {
+    actual override fun resetUser(eventName: String) {
         mixpanel.track(eventName)
         mixpanel.reset()
     }
-
 }

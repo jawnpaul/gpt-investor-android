@@ -61,6 +61,7 @@ class TopPickViewModel(
             }
         }
         getAllTopPicks()
+        getTopPick()
     }
 
     fun updateTopPickId(topPickId: String) {

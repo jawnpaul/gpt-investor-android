@@ -1,5 +1,5 @@
-import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 import java.util.Properties
+import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
     alias(libs.plugins.android.application)
@@ -124,7 +124,7 @@ ktlint {
         mapOf(
             "ktlint_code_style" to "android_studio",
             "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
-            "max_line_length" to "190"
+            "max_line_length" to "120"
         )
     )
 }
@@ -137,7 +137,9 @@ tasks.register<Copy>("installGitHook") {
 tasks.getByPath(":app:preBuild").dependsOn("installGitHook")
 
 dependencies {
+    ktlintRuleset(libs.ktlint.compose.rules)
     implementation(project(":remote:remote"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.androidx.lifecycle.runtime.ktx)

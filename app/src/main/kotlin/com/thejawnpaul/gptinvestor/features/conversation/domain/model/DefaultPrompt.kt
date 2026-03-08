@@ -4,10 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-data class DefaultPrompt(
-    val title: String,
-    val query: String
-)
+data class DefaultPrompt(val title: String, val query: String)
 
 @Serializable
 data class RemoteConfigPrompt(
@@ -17,9 +14,7 @@ data class RemoteConfigPrompt(
 )
 
 @Serializable
-data class RemoteConfigId(
-    @SerialName("\$oid") val id: String? = null
-)
+data class RemoteConfigId(@SerialName("\$oid") val id: String? = null)
 
 class DefaultPromptParser {
     private val json = Json {
@@ -27,14 +22,11 @@ class DefaultPromptParser {
         isLenient = true
     }
 
-    fun parseDefaultPrompts(jsonString: String): List<RemoteConfigPrompt>? {
-        return try {
-            json.decodeFromString<List<RemoteConfigPrompt>>(jsonString)
-        } catch (e: Exception) {
-            println("Error parsing JSON: $jsonString")
-            e.printStackTrace()
-            null
-        }
+    fun parseDefaultPrompts(jsonString: String): List<RemoteConfigPrompt>? = try {
+        json.decodeFromString<List<RemoteConfigPrompt>>(jsonString)
+    } catch (e: Exception) {
+        println("Error parsing JSON: $jsonString")
+        e.printStackTrace()
+        null
     }
 }
-

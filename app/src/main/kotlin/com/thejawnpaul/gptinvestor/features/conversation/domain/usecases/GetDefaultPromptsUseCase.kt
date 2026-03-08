@@ -13,13 +13,11 @@ import org.koin.core.annotation.Factory
 
 @Factory
 class GetDefaultPromptsUseCase(
-    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: IConversationRepository
 ) : BaseUseCase<GetDefaultPromptsUseCase.None, List<DefaultPrompt>>(coroutineScope, dispatcher) {
     class None
 
-    override suspend fun run(params: None): Flow<Either<Failure, List<DefaultPrompt>>> {
-        return repository.getDefaultPrompts()
-    }
+    override suspend fun run(params: None): Flow<Either<Failure, List<DefaultPrompt>>> = repository.getDefaultPrompts()
 }

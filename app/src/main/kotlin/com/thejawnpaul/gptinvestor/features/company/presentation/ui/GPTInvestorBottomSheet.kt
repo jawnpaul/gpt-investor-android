@@ -15,10 +15,10 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GptInvestorBottomSheet(
+    onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
     isFullScreen: Boolean = false,
     skipPartiallyExpanded: Boolean = true,
-    onDismiss: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)

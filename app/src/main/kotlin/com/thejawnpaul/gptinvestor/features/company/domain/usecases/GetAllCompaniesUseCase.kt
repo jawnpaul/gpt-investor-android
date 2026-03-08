@@ -19,7 +19,5 @@ class GetAllCompaniesUseCase(
 ) : BaseUseCase<GetAllCompaniesUseCase.None, List<Company>>(coroutineScope, dispatcher) {
     class None
 
-    override suspend fun run(params: None): Flow<Either<Failure, List<Company>>> {
-        return repository.getAllCompanies()
-    }
+    override suspend fun run(params: None): Flow<Either<Failure, List<Company>>> = repository.getAllCompanies()
 }

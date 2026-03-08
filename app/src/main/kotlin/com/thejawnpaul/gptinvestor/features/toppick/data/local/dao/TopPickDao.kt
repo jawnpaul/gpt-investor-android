@@ -39,6 +39,8 @@ interface TopPickDao {
         insertTopPicks(newPicks)
     }
 
-    @Query("SELECT * FROM top_picks_table WHERE companyName LIKE '%' || :query || '%' OR ticker LIKE '%' || :query || '%' ORDER BY confidenceScore DESC")
+    @Query(
+        "SELECT * FROM top_picks_table WHERE companyName LIKE '%' || :query || '%' OR ticker LIKE '%' || :query || '%' ORDER BY confidenceScore DESC"
+    )
     fun searchTopPicks(query: String): Flow<List<TopPickEntity>>
 }

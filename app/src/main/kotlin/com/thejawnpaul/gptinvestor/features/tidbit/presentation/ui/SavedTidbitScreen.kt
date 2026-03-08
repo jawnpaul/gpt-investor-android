@@ -19,7 +19,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,7 +30,6 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.model.TidbitPresentation
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitScreenEvent
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
@@ -39,19 +37,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
 @Composable
-fun SavedTidbitScreen(modifier: Modifier = Modifier, tidbitsPagingData: Flow<PagingData<TidbitPresentation>>, onEvent: (TidbitScreenEvent) -> Unit) {
+fun SavedTidbitScreen(
+    tidbitsPagingData: Flow<PagingData<TidbitPresentation>>,
+    onEvent: (TidbitScreenEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val lazyPagingItems = tidbitsPagingData.collectAsLazyPagingItems()
-
-    LaunchedEffect(Unit) {
-        onEvent(
-            TidbitScreenEvent.OnFilterSelected(
-                filter = SectorInput.CustomSector(
-                    sectorName = "Saved",
-                    sectorKey = "saved"
-                )
-            )
-        )
-    }
 
     Scaffold(
         modifier = modifier,
@@ -172,7 +163,9 @@ fun SavedTidbitScreen(modifier: Modifier = Modifier, tidbitsPagingData: Flow<Pag
                 }
             }
 
-            if (lazyPagingItems.loadState.refresh is LoadState.Error && lazyPagingItems.itemCount == 0) {
+            if (lazyPagingItems.loadState.refresh is LoadState.Error &&
+                lazyPagingItems.itemCount == 0
+            ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -192,7 +185,9 @@ fun SavedTidbitScreen(modifier: Modifier = Modifier, tidbitsPagingData: Flow<Pag
                 }
             }
 
-            if (lazyPagingItems.loadState.refresh is LoadState.NotLoading && lazyPagingItems.itemCount == 0) {
+            if (lazyPagingItems.loadState.refresh is LoadState.NotLoading &&
+                lazyPagingItems.itemCount == 0
+            ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -209,7 +204,7 @@ fun SavedTidbitScreen(modifier: Modifier = Modifier, tidbitsPagingData: Flow<Pag
 
 @Preview
 @Composable
-fun SavedTidbitScreenPreview() {
+private fun SavedTidbitScreenPreview() {
     val sampleTidbits = listOf(
         TidbitPresentation.AudioPresentation(
             id = "1",

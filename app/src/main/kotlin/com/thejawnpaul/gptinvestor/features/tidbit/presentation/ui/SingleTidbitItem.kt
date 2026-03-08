@@ -47,12 +47,12 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
 fun SingleTidbitItem(
-    modifier: Modifier = Modifier,
     tidbit: TidbitPresentation,
     onItemClick: (String) -> Unit,
     onLikeClick: (String, Boolean) -> Unit = { _, _ -> },
     onSaveClick: (String, Boolean) -> Unit = { _, _ -> },
-    onShareClick: (String) -> Unit = {}
+    onShareClick: (String) -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     val isLiked = remember { mutableStateOf(tidbit.isLiked) }
@@ -259,10 +259,14 @@ class TidbitPreviewParameterProvider : PreviewParameterProvider<TidbitPresentati
         TidbitPresentation.ArticlePresentation(
             id = "article1",
             name = "Exploring Jetpack Compose",
-            previewUrl = "https://images.unsplash.com/photo-1607025898864-1853606f7347?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8Y29tcG9zZXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&w=1000&q=80",
+            previewUrl =
+            "https://images.unsplash.com/photo-1607025898864-1853606f7347?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8" +
+                "Y29tcG9zZXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&w=1000&q=80",
             mediaUrl = "",
             title = "Deep Dive into Declarative UIs with Jetpack Compose",
-            content = "Jetpack Compose is Android’s modern toolkit for building native UI. It simplifies and accelerates UI development on Android. Learn how to get started and explore its powerful features.",
+            content =
+            "Jetpack Compose is Android’s modern toolkit for building native UI. It simplifies and accelerates" +
+                " UI development on Android. Learn how to get started and explore its powerful features.",
             originalAuthor = "Android Developers",
             category = "Android Development",
             sourceUrl = "https://developer.android.com/jetpack/compose"
@@ -270,10 +274,12 @@ class TidbitPreviewParameterProvider : PreviewParameterProvider<TidbitPresentati
         TidbitPresentation.VideoPresentation(
             id = "video1",
             name = "Compose for Beginners",
-            previewUrl = "https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixid=MnwxMjA3fDB8MHxzZWFyY2h8NHx8Y29kZSUyMHZpZGVvfGVufDB8fDB8fA%3D%3D&ixlib=rb-1.2.1&w=1000&q=80",
+            previewUrl = "https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixid=" +
+                "MnwxMjA3fDB8MHxzZWFyY2h8NHx8Y29kZSUyMHZpZGVvfGVufDB8fDB8fA%3D%3D&ixlib=rb-1.2.1&w=1000&q=80",
             mediaUrl = "", // Usually different from previewUrl for videos
             title = "Getting Started with Jetpack Compose: A Video Tutorial",
-            content = "This video walks you through the basics of setting up your first Jetpack Compose project, creating simple UI elements, and understanding the core concepts of declarative programming.",
+            content = "This video walks you through the basics of setting up your first Jetpack Compose project, " +
+                "creating simple UI elements, and understanding the core concepts of declarative programming.",
             originalAuthor = "Compose Community",
             category = "Tutorials",
             sourceUrl = "https://youtube.com/jetpackcompose"
@@ -281,10 +287,12 @@ class TidbitPreviewParameterProvider : PreviewParameterProvider<TidbitPresentati
         TidbitPresentation.AudioPresentation(
             id = "audio1",
             name = "Compose Podcast",
-            previewUrl = "https://images.unsplash.com/photo-1587160983999-a57e487ef00c?ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8YXVkaW8lMjBwb2RjYXN0fGVufDB8fDB8fA%3D%3D&ixlib=rb-1.2.1&w=1000&q=80",
+            previewUrl = "https://images.unsplash.com/photo-1587160983999-a57e487ef00c?ixid=" +
+                "MnwxMjA3fDB8MHxzZWFyY2h8Mnx8YXVkaW8lMjBwb2RjYXN0fGVufDB8fDB8fA%3D%3D&ixlib=rb-1.2.1&w=1000&q=80",
             mediaUrl = "", // Actual audio file URL
             title = "The Future of UI: A Podcast on Jetpack Compose",
-            content = "Listen to experts discuss the impact of Jetpack Compose on Android development, its adoption challenges, and best practices for building scalable applications.",
+            content = "Listen to experts discuss the impact of Jetpack Compose on Android development, " +
+                "its adoption challenges, and best practices for building scalable applications.",
             originalAuthor = "Android Dev Talks",
             category = "Podcast",
             sourceUrl = "https://anchor.fm/androiddevtalks"
@@ -294,7 +302,9 @@ class TidbitPreviewParameterProvider : PreviewParameterProvider<TidbitPresentati
 
 @Preview(showBackground = true, name = "Single Tidbit Item Preview")
 @Composable
-fun SingleTidbitItemPreview(@PreviewParameter(TidbitPreviewParameterProvider::class) tidbit: TidbitPresentation) {
+private fun SingleTidbitItemPreview(
+    @PreviewParameter(TidbitPreviewParameterProvider::class) tidbit: TidbitPresentation
+) {
     GPTInvestorTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             SingleTidbitItem(

@@ -42,7 +42,7 @@ class DiscoverViewModel(
     private val _actions = MutableSharedFlow<DiscoveryAction>()
     val actions get() = _actions.asSharedFlow()
 
-    private val _appliedSearchQuery = MutableStateFlow("")
+    private val appliedSearchQuery = MutableStateFlow("")
     private var searchJob: Job? = null
 
     private var allTopPicks: List<TopPickPresentation> = emptyList()
@@ -52,17 +52,22 @@ class DiscoverViewModel(
         getTopPicks()
     }
 
-
     @OptIn(ExperimentalCoroutinesApi::class)
     val companiesPagingData: Flow<PagingData<CompanyPresentation>> =
         combine(
             _discoveryScreenState.map { it.selected }.distinctUntilChanged(),
-            _appliedSearchQuery
+            appliedSearchQuery
         ) { selectedSector, query ->
             selectedSector to query
         }.flatMapLatest { (selectedSector, query) ->
             val sectorKey = when (selectedSector) {
-                is SectorInput.CustomSector -> if (selectedSector.sectorKey == "top-picks") null else selectedSector.sectorKey
+                is SectorInput.CustomSector -> if (selectedSector.sectorKey ==
+                    "top-picks"
+                ) {
+                    null
+                } else {
+                    selectedSector.sectorKey
+                }
                 else -> null
             }
 
@@ -76,17 +81,15 @@ class DiscoverViewModel(
             }
         }.cachedIn(viewModelScope)
 
-    private fun mapCompanyToPresentation(company: Company): CompanyPresentation {
-        return CompanyPresentation(
-            ticker = company.ticker,
-            name = company.name,
-            logo = company.logo,
-            price = company.price ?: 0.0f,
-            summary = company.summary,
-            priceChange = PriceChange(change = 0f, date = 1L)
+    private fun mapCompanyToPresentation(company: Company): CompanyPresentation = CompanyPresentation(
+        ticker = company.ticker,
+        name = company.name,
+        logo = company.logo,
+        price = company.price ?: 0.0f,
+        summary = company.summary,
+        priceChange = PriceChange(change = 0f, date = 1L)
 
-        )
-    }
+    )
 
     fun handleEvent(event: DiscoveryEvent) {
         when (event) {
@@ -107,7 +110,6 @@ class DiscoverViewModel(
             }
 
             DiscoveryEvent.RetryCompanies -> {
-
             }
 
             is DiscoveryEvent.SearchQueryChanged -> {
@@ -148,7 +150,6 @@ class DiscoverViewModel(
                     }
                 }
                 result.onFailure {
-
                 }
             }
         }
@@ -178,7 +179,6 @@ class DiscoverViewModel(
                     allTopPicks = topPicksPresentation
                     updateFilteredTopPicks()
                 }
-
             }
         }
     }
@@ -211,11 +211,11 @@ class DiscoverViewModel(
     private fun searchCompanies(query: String, immediate: Boolean = false) {
         searchJob?.cancel()
         if (immediate || query.isEmpty()) {
-            _appliedSearchQuery.value = query
+            appliedSearchQuery.value = query
         } else {
             searchJob = viewModelScope.launch {
                 delay(500L)
-                _appliedSearchQuery.value = query
+                appliedSearchQuery.value = query
             }
         }
     }
@@ -246,5 +246,4 @@ sealed interface DiscoveryAction {
     data class OnNavigateToCompanyDetail(val ticker: String) : DiscoveryAction
     data object OnGoBack : DiscoveryAction
     data class OnGoToPickDetail(val id: String) : DiscoveryAction
-
 }

@@ -68,7 +68,7 @@ class HomeViewModel(
         getAvailableModels()
         getDefaultPrompts()
         getTodayTidbit()
-        //doSomething()
+        // doSomething()
 
         viewModelScope.launch {
             preferences.themePreference.collect { theme ->
@@ -112,7 +112,9 @@ class HomeViewModel(
         viewModelScope.launch {
             authenticationRepository.getAuthState().collect { isSignedIn ->
                 _uiState.update {
-                    it.copy(currentUser = if (isSignedIn) authenticationRepository.currentUser else null)
+                    it.copy(
+                        currentUser = if (isSignedIn) authenticationRepository.currentUser else null
+                    )
                 }
             }
         }
@@ -219,9 +221,13 @@ class HomeViewModel(
 
     private fun selectWaitListOption(option: String) {
         if (_uiState.value.selectedWaitlistOptions.contains(option)) {
-            _uiState.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions - option) }
+            _uiState.update {
+                it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions - option)
+            }
         } else {
-            _uiState.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions + option) }
+            _uiState.update {
+                it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions + option)
+            }
         }
     }
 

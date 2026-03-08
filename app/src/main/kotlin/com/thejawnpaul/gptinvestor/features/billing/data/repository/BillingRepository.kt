@@ -16,8 +16,10 @@ import com.android.billingclient.api.QueryPurchasesParams
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.features.billing.data.remote.VerifyPurchaseRequest
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingPurchase
+import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult as DomainBillingResult
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.remote.TokenStorage
+import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -28,8 +30,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Singleton
 import timber.log.Timber
-import kotlin.coroutines.resume
-import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult as DomainBillingResult
 
 @Singleton(binds = [IBillingRepository::class])
 class BillingRepository(
@@ -37,17 +37,19 @@ class BillingRepository(
     private val apiService: KtorApiService,
     private val tokenStorage: TokenStorage,
     private val scope: CoroutineScope
-) : IBillingRepository, PurchasesUpdatedListener {
-
+) : IBillingRepository,
+    PurchasesUpdatedListener {
 
     private val billingClient: BillingClient by lazy {
         BillingClient.newBuilder(context)
             .setListener(this)
-            .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
+            .enablePendingPurchases(
+                PendingPurchasesParams.newBuilder().enableOneTimeProducts().build()
+            )
             .build()
     }
 
-    private val _purchases = MutableStateFlow<List<BillingPurchase>>(emptyList())
+    private val purchasesFlow = MutableStateFlow<List<BillingPurchase>>(emptyList())
 
     override fun onPurchasesUpdated(billingResult: BillingResult, purchases: List<Purchase>?) {
         when (billingResult.responseCode) {
@@ -82,7 +84,9 @@ class BillingRepository(
         Timber.d("Connecting to billing client...")
         billingClient.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(billingResult: BillingResult) {
-                Timber.d("Billing setup finished: ${billingResult.responseCode}, ${billingResult.debugMessage}")
+                Timber.d(
+                    "Billing setup finished: ${billingResult.responseCode}, ${billingResult.debugMessage}"
+                )
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                     cont.resume(Result.success(Unit))
                 } else {
@@ -156,7 +160,8 @@ class BillingRepository(
     }
 
     private suspend fun queryProductDetails(productId: String): ProductDetails? {
-        val subscriptionDetails = queryProductDetailsByType(productId, BillingClient.ProductType.SUBS)
+        val subscriptionDetails =
+            queryProductDetailsByType(productId, BillingClient.ProductType.SUBS)
         if (subscriptionDetails != null) return subscriptionDetails
 
         Timber.d("Product not found as SUBS, trying INAPP for: $productId")
@@ -176,8 +181,13 @@ class BillingRepository(
                 )
                 .build()
 
-            billingClient.queryProductDetailsAsync(params) { billingResult, queryProductDetailsResult ->
-                Timber.d("Query product details ($productType) result: ${billingResult.responseCode}, ${billingResult.debugMessage}")
+            billingClient.queryProductDetailsAsync(params) {
+                    billingResult,
+                    queryProductDetailsResult
+                ->
+                Timber.d(
+                    "Query product details ($productType) result: ${billingResult.responseCode}, ${billingResult.debugMessage}"
+                )
                 when (billingResult.responseCode) {
                     BillingClient.BillingResponseCode.OK -> {
                         val list = queryProductDetailsResult.productDetailsList
@@ -186,82 +196,81 @@ class BillingRepository(
                     }
 
                     else -> {
-                        Timber.e("Query product details ($productType) failed: ${billingResult.debugMessage}")
+                        Timber.e(
+                            "Query product details ($productType) failed: ${billingResult.debugMessage}"
+                        )
                         cont.resume(null)
                     }
                 }
             }
         }
 
-    override fun currentPurchases(): Flow<List<BillingPurchase>> = _purchases.asStateFlow()
+    override fun currentPurchases(): Flow<List<BillingPurchase>> = purchasesFlow.asStateFlow()
 
-    override suspend fun acknowledgePurchase(purchase: BillingPurchase): Result<Unit> =
-        try {
-            val params = AcknowledgePurchaseParams.newBuilder()
-                .setPurchaseToken(purchase.purchaseToken)
-                .build()
-            val result = suspendCancellableCoroutine<com.android.billingclient.api.BillingResult> { cont ->
+    override suspend fun acknowledgePurchase(purchase: BillingPurchase): Result<Unit> = try {
+        val params = AcknowledgePurchaseParams.newBuilder()
+            .setPurchaseToken(purchase.purchaseToken)
+            .build()
+        val result =
+            suspendCancellableCoroutine<com.android.billingclient.api.BillingResult> { cont ->
                 billingClient.acknowledgePurchase(params) { cont.resume(it) }
             }
-            if (result.responseCode == BillingClient.BillingResponseCode.OK) {
-                Result.success(Unit)
-            } else {
-                Result.failure(Exception(result.debugMessage))
-            }
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to acknowledge purchase")
-            Result.failure(e)
+        if (result.responseCode == BillingClient.BillingResponseCode.OK) {
+            Result.success(Unit)
+        } else {
+            Result.failure(Exception(result.debugMessage))
         }
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to acknowledge purchase")
+        Result.failure(e)
+    }
 
-    override suspend fun syncPurchaseToBackend(purchase: BillingPurchase): Result<Unit> =
-        try {
-            val request = VerifyPurchaseRequest(
-                purchaseToken = purchase.purchaseToken,
-                subscriptionId = purchase.productId
+    override suspend fun syncPurchaseToBackend(purchase: BillingPurchase): Result<Unit> = try {
+        val request = VerifyPurchaseRequest(
+            purchaseToken = purchase.purchaseToken,
+            subscriptionId = purchase.productId
+        )
+        val response = apiService.verifyPlayPurchase(request)
+        val isVerificationSuccessful = response.isSuccessful && response.body?.success == true
+        if (isVerificationSuccessful) {
+            Timber.d("Purchase sync succeeded for productId=${purchase.productId}")
+            Result.success(Unit)
+        } else {
+            Timber.e(
+                "Purchase sync failed for productId=${purchase.productId}: code=${response.code}, " +
+                    "successFlag=${response.body?.success}, error=${response.errorBody}"
             )
-            val response = apiService.verifyPlayPurchase(request)
-            val isVerificationSuccessful = response.isSuccessful && response.body?.success == true
-            if (isVerificationSuccessful) {
-                Timber.d("Purchase sync succeeded for productId=${purchase.productId}")
-                Result.success(Unit)
-            } else {
-                Timber.e(
-                    "Purchase sync failed for productId=${purchase.productId}: code=${response.code}, " +
-                        "successFlag=${response.body?.success}, error=${response.errorBody}"
-                )
-                Result.failure(Exception("Backend verification failed: ${response.code}"))
-            }
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to sync purchase to backend")
-            Result.failure(e)
+            Result.failure(Exception("Backend verification failed: ${response.code}"))
+        }
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to sync purchase to backend")
+        Result.failure(e)
+    }
+
+    private suspend fun refreshAccessTokenAfterPurchaseSync(): Result<Unit> = try {
+        val refreshToken = tokenStorage.getRefreshToken()
+        if (refreshToken.isNullOrBlank()) {
+            Timber.e("Skipping token refresh after purchase sync: refresh token missing")
+            return Result.failure(Exception("Refresh token missing"))
         }
 
-    private suspend fun refreshAccessTokenAfterPurchaseSync(): Result<Unit> =
-        try {
-            val refreshToken = tokenStorage.getRefreshToken()
-            if (refreshToken.isNullOrBlank()) {
-                Timber.e("Skipping token refresh after purchase sync: refresh token missing")
-                return Result.failure(Exception("Refresh token missing"))
-            }
-
-            val refreshResponse = apiService.refreshAccessToken(refreshToken)
-            val newAccessToken = refreshResponse.body?.accessToken
-            if (refreshResponse.isSuccessful && !newAccessToken.isNullOrBlank()) {
-                tokenStorage.saveAccessToken(newAccessToken)
-                Timber.d("Access token refreshed after purchase sync")
-                Result.success(Unit)
-            } else {
-                Timber.e(
-                    "Access token refresh failed after purchase sync: code=${refreshResponse.code}, " +
-                        "error=${refreshResponse.errorBody}"
-                )
-                Result.failure(Exception("Refresh failed: ${refreshResponse.code}"))
-            }
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to refresh token after purchase sync")
-            Result.failure(e)
+        val refreshResponse = apiService.refreshAccessToken(refreshToken)
+        val newAccessToken = refreshResponse.body?.accessToken
+        if (refreshResponse.isSuccessful && !newAccessToken.isNullOrBlank()) {
+            tokenStorage.saveAccessToken(newAccessToken)
+            Timber.d("Access token refreshed after purchase sync")
+            Result.success(Unit)
+        } else {
+            Timber.e(
+                "Access token refresh failed after purchase sync: code=${refreshResponse.code}, " +
+                    "error=${refreshResponse.errorBody}"
+            )
+            Result.failure(Exception("Refresh failed: ${refreshResponse.code}"))
         }
-
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to refresh token after purchase sync")
+        Result.failure(e)
+    }
 
     private suspend fun refreshPurchases() {
         suspendCancellableCoroutine<Unit> { cont ->
@@ -270,7 +279,7 @@ class BillingRepository(
                 .build()
             billingClient.queryPurchasesAsync(params) { billingResult, purchases ->
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    _purchases.value = purchases.map { it.toDomainPurchase() }
+                    purchasesFlow.value = purchases.map { it.toDomainPurchase() }
                 }
                 cont.resume(Unit)
             }

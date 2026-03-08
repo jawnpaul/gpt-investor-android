@@ -14,5 +14,4 @@ interface IConversationRepository {
     suspend fun getDefaultPromptResponse(prompt: DefaultPrompt): Flow<Either<Failure, Conversation>>
 
     suspend fun getInputResponse(prompt: ConversationPrompt): Flow<Either<Failure, Conversation>>
-
 }

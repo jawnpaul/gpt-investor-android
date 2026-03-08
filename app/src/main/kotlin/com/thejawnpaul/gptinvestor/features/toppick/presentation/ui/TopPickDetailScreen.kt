@@ -29,12 +29,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -46,7 +44,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
-import com.thejawnpaul.gptinvestor.features.authentication.presentation.NewAuthenticationScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailHeader
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailTab
@@ -60,11 +57,12 @@ import com.thejawnpaul.gptinvestor.theme.linkMedium
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopPickDetailScreen(modifier: Modifier, topPickId: String, state: TopPickDetailView, onEvent: (TopPickEvent) -> Unit, onAction: (TopPickAction) -> Unit) {
-    LaunchedEffect(topPickId) {
-        onEvent(TopPickEvent.GetTopPick(topPickId))
-    }
-
+fun TopPickDetailScreen(
+    state: TopPickDetailView,
+    onEvent: (TopPickEvent) -> Unit,
+    onAction: (TopPickAction) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -96,7 +94,8 @@ fun TopPickDetailScreen(modifier: Modifier, topPickId: String, state: TopPickDet
         bottomBar = {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth().padding(16.dp),
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -234,19 +233,23 @@ fun TopPickDetailScreen(modifier: Modifier, topPickId: String, state: TopPickDet
 }
 
 @Composable
-private fun ContentView(modifier: Modifier, state: TopPickDetailView, onEvent: (TopPickEvent) -> Unit) {
+private fun ContentView(state: TopPickDetailView, onEvent: (TopPickEvent) -> Unit, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     Box(
         modifier = modifier.clickable(interactionSource = null, indication = null, onClick = {
             onEvent(TopPickEvent.Authenticate(showDialog = false))
         })
     ) {
-        if (state.showAuthenticateDialog) {
-            NewAuthenticationScreen(
-                modifier = Modifier.align(Alignment.Center),
-                onAuthenticationComplete = { onEvent(TopPickEvent.AuthenticationResponse(it)) }
-            )
-            Column(modifier = Modifier.blur(radius = 8.dp)) {
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+        ) {
+            // rationale card
+            OutlinedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -281,176 +284,115 @@ private fun ContentView(modifier: Modifier, state: TopPickDetailView, onEvent: (
                             )
                         }
                     }
-                    Column {
-                        Text(
+                    if (state.isLoggedIn) {
+                        ExpandableText(
                             text = state.topPick?.rationale ?: "",
+                            collapsedMaxLine = 4,
                             style = MaterialTheme.typography.bodyMedium,
-                            maxLines = 3,
-                            overflow = TextOverflow.Ellipsis
+                            showMoreText = stringResource(R.string.read_more),
+                            showMoreStyle = SpanStyle(
+                                textDecoration = TextDecoration.Underline,
+                                fontStyle = MaterialTheme.typography.linkMedium.fontStyle,
+                                fontWeight = FontWeight.W500
+                            ),
+                            showLessText = stringResource(R.string.read_less),
+                            showLessStyle = SpanStyle(
+                                textDecoration = TextDecoration.Underline,
+                                fontStyle = MaterialTheme.typography.linkMedium.fontStyle,
+                                fontWeight = FontWeight.W500
+                            )
                         )
-                        TextButton(onClick = {
-                            onEvent(TopPickEvent.Authenticate(showDialog = true))
-                        }) {
-                            Text(text = "Read more")
-                        }
-                    }
-                }
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-            ) {
-                // rationale card
-                OutlinedCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
+
+                        // Metrics
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Image(
-                                    painter = painterResource(R.drawable.ic_top_pick_rationale),
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Outlined.List,
                                     contentDescription = null
                                 )
-
                                 Text(
-                                    text = stringResource(R.string.top_pick_rationale),
-                                    style = MaterialTheme.typography.titleMedium
+                                    text = stringResource(R.string.key_metrics),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
                                 )
                             }
-                            Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = gptInvestorColors.utilColors.borderBright10,
-                                contentColor = gptInvestorColors.greenColors.allGreen
-                            ) {
-                                Text(
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    text = "Score: ${state.topPick?.confidenceScore}/10",
-                                    style = MaterialTheme.typography.labelMedium
-                                )
-                            }
-                        }
-                        if (state.isLoggedIn) {
-                            ExpandableText(
-                                text = state.topPick?.rationale ?: "",
-                                collapsedMaxLine = 4,
-                                style = MaterialTheme.typography.bodyMedium,
-                                showMoreText = stringResource(R.string.read_more),
-                                showMoreStyle = SpanStyle(
-                                    textDecoration = TextDecoration.Underline,
-                                    fontStyle = MaterialTheme.typography.linkMedium.fontStyle,
-                                    fontWeight = FontWeight.W500
-                                ),
-                                showLessText = stringResource(R.string.read_less),
-                                showLessStyle = SpanStyle(
-                                    textDecoration = TextDecoration.Underline,
-                                    fontStyle = MaterialTheme.typography.linkMedium.fontStyle,
-                                    fontWeight = FontWeight.W500
-                                )
-                            )
 
-                            // Metrics
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Outlined.List,
-                                        contentDescription = null
-                                    )
+                            state.topPick?.let { topPick ->
+                                topPick.metrics.forEach { metric ->
                                     Text(
-                                        text = stringResource(R.string.key_metrics),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.SemiBold
+                                        text = metric
                                     )
                                 }
+                            }
+                        }
 
-                                state.topPick?.let { topPick ->
-                                    topPick.metrics.forEach { metric ->
+                        // Risks
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Warning,
+                                    contentDescription = null
+                                )
+                                Text(
+                                    text = stringResource(R.string.key_risks),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+
+                            state.topPick?.risks.let { risks ->
+                                risks?.forEach { risk ->
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.padding(start = 16.dp)
+                                    ) {
                                         Text(
-                                            text = metric
+                                            text = "•"
+                                        )
+                                        Text(
+                                            text = risk
                                         )
                                     }
                                 }
                             }
-
-                            // Risks
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Warning,
-                                        contentDescription = null
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.key_risks),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                }
-
-                                state.topPick?.risks.let { risks ->
-                                    risks?.forEach { risk ->
-                                        Row(
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            modifier = Modifier.padding(start = 16.dp)
-                                        ) {
-                                            Text(
-                                                text = "•"
-                                            )
-                                            Text(
-                                                text = risk
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            Column {
-                                Text(
-                                    text = state.topPick?.rationale ?: "",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    maxLines = 3,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                TextButton(onClick = {
-                                    onEvent(TopPickEvent.Authenticate(showDialog = true))
-                                }) {
-                                    Text(text = "Read more")
-                                }
+                        }
+                    } else {
+                        Column {
+                            Text(
+                                text = state.topPick?.rationale ?: "",
+                                style = MaterialTheme.typography.bodyMedium,
+                                maxLines = 3,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            TextButton(onClick = {
+                                onEvent(TopPickEvent.Authenticate(showDialog = true))
+                            }) {
+                                Text(text = "Read more")
                             }
                         }
                     }
                 }
+            }
 
-                // company detail
-                if (state.isLoggedIn) {
-                    state.companyPresentation?.let { company ->
-                        CompanyDetailTab(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            company = company,
-                            onClickNews = {
-                            },
-                            onClickSources = {
-                                onEvent(TopPickEvent.ClickNewsSources(show = true))
-                            }
-                        )
-                    }
+            // company detail
+            if (state.isLoggedIn) {
+                state.companyPresentation?.let { company ->
+                    CompanyDetailTab(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        company = company,
+                        onClickNews = {
+                        },
+                        onClickSources = {
+                            onEvent(TopPickEvent.ClickNewsSources(show = true))
+                        }
+                    )
                 }
             }
         }

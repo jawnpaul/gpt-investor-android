@@ -36,7 +36,11 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import kotlinx.coroutines.delay
 
 @Composable
-fun SingleDefaultPrompt(modifier: Modifier = Modifier, prompt: DefaultPrompt, onClick: (prompt: DefaultPrompt) -> Unit) {
+fun SingleDefaultPrompt(
+    prompt: DefaultPrompt,
+    onClick: (prompt: DefaultPrompt) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     Surface(
@@ -57,7 +61,11 @@ fun SingleDefaultPrompt(modifier: Modifier = Modifier, prompt: DefaultPrompt, on
 }
 
 @Composable
-fun DefaultPrompts(modifier: Modifier, prompts: List<DefaultPrompt>, onClick: (prompt: DefaultPrompt) -> Unit) {
+fun DefaultPrompts(
+    prompts: List<DefaultPrompt>,
+    onClick: (prompt: DefaultPrompt) -> Unit,
+    modifier: Modifier = Modifier
+) {
     var currentPrompts by remember { mutableStateOf(listOf<DefaultPrompt>()) }
     var visible by remember { mutableStateOf(true) }
     val gptInvestorColors = LocalGPTInvestorColors.current
@@ -104,7 +112,11 @@ fun DefaultPrompts(modifier: Modifier, prompts: List<DefaultPrompt>, onClick: (p
 }
 
 @Composable
-fun SingleHomeDefaultPrompt(modifier: Modifier = Modifier, prompt: DefaultPrompt, onClick: (prompt: DefaultPrompt) -> Unit) {
+fun SingleHomeDefaultPrompt(
+    prompt: DefaultPrompt,
+    onClick: (prompt: DefaultPrompt) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     Surface(
@@ -130,7 +142,11 @@ fun SingleHomeDefaultPrompt(modifier: Modifier = Modifier, prompt: DefaultPrompt
 }
 
 @Composable
-fun HomeDefaultPrompts(modifier: Modifier, prompts: List<DefaultPrompt>, onClick: (prompt: DefaultPrompt) -> Unit) {
+fun HomeDefaultPrompts(
+    prompts: List<DefaultPrompt>,
+    onClick: (prompt: DefaultPrompt) -> Unit,
+    modifier: Modifier = Modifier
+) {
     LazyRow(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,

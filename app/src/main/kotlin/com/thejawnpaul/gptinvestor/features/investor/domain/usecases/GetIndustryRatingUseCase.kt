@@ -12,12 +12,10 @@ import org.koin.core.annotation.Factory
 
 @Factory
 class GetIndustryRatingUseCase(
-    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: IInvestorRepository
 ) : BaseUseCase<String, String>(coroutineScope, dispatcher) {
 
-    override suspend fun run(params: String): Flow<Either<Failure, String>> {
-        return repository.getIndustryAnalysis(params)
-    }
+    override suspend fun run(params: String): Flow<Either<Failure, String>> = repository.getIndustryAnalysis(params)
 }

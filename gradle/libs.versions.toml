@@ -45,6 +45,8 @@ playAppUpdate = "2.1.0"
 coroutinesPlayServices = "1.10.2"
 koin = "4.2.0-RC1"
 koin-plugin = "0.3.0"
+compose-rules = "0.5.6"
+
 gitlive-firebase = "2.4.0"
 
 
@@ -128,6 +130,7 @@ koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmo
 koin-annotations = { group = "io.insert-koin", name = "koin-annotations" }
 koin-test = { group = "io.insert-koin", name = "koin-test" }
 kermit = { group = "co.touchlab", name = "kermit", version = "2.1.0" }
+ktlint-compose-rules = { group = "io.nlopez.compose.rules", name = "ktlint", version.ref = "compose-rules" }
 gitlive-firebase-common = { group = "dev.gitlive", name = "firebase-common", version.ref = "gitlive-firebase" }
 gitlive-firebase-analytics = { group = "dev.gitlive", name = "firebase-analytics", version.ref = "gitlive-firebase" }
 

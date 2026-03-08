@@ -11,7 +11,9 @@ import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.Messag
 @Dao
 interface MessageDao {
 
-    @Query("SELECT * FROM message_table WHERE conversationId = :conversationId ORDER BY createdAt ASC")
+    @Query(
+        "SELECT * FROM message_table WHERE conversationId = :conversationId ORDER BY createdAt ASC"
+    )
     suspend fun getMessagesForConversation(conversationId: Long): List<MessageEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

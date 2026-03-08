@@ -9,4 +9,3 @@ internal fun getJson(path: String): String {
     val file = File(uri.path)
     return String(file.readBytes())
 }
-

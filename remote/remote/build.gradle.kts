@@ -70,13 +70,13 @@ buildkonfig {
     objectName = "BuildConfig"
     val localProperties = Properties()
     localProperties.load(project.rootProject.file("local.properties").reader())
-    defaultConfigs {
+    defaultConfigs("dev") {
         val baseUrl: String = localProperties.getProperty("BASE_URL_DEV") ?: ""
         buildConfigField(BOOLEAN, "DEBUG", "true")
         buildConfigField(STRING, "BASE_URL", baseUrl)
     }
 
-    defaultConfigs("release") {
+    defaultConfigs {
         val baseUrl: String = localProperties.getProperty("BASE_URL") ?: ""
         buildConfigField(BOOLEAN, "DEBUG", "false")
         buildConfigField(STRING, "BASE_URL", baseUrl)

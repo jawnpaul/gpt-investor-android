@@ -72,22 +72,22 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StructuredConversationScreen(
-    modifier: Modifier,
-    conversation: StructuredConversation,
-    onNavigateUp: () -> Unit,
     text: String,
-    onClickNews: (url: String) -> Unit,
-    onClickFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
-    onCopy: (String) -> Unit,
+    conversation: StructuredConversation,
     inputQuery: String,
-    onInputQueryChanged: (String) -> Unit,
-    onSendClick: () -> Unit,
-    companyName: String = "",
-    onClickSuggestedPrompt: (String) -> Unit,
-    availableModels: List<AvailableModel>,
     selectedModel: AvailableModel,
+    availableModels: List<AvailableModel>,
+    onNavigateUp: () -> Unit,
+    onSendClick: () -> Unit,
+    onCopy: (String) -> Unit,
+    onInputQueryChange: (String) -> Unit,
+    onClickNews: (url: String) -> Unit,
+    onClickSuggestedPrompt: (String) -> Unit,
+    onClickFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
     onModelChange: (AvailableModel) -> Unit,
-    onUpgradeModel: (showBottomSheet: Boolean, modelId: String) -> Unit
+    onUpgradeModel: (showBottomSheet: Boolean, modelId: String) -> Unit,
+    modifier: Modifier = Modifier,
+    companyName: String = ""
 ) {
     val company = conversation.messageList.filterIsInstance<GenAiEntityMessage>().firstOrNull()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -133,10 +133,9 @@ fun StructuredConversationScreen(
                 if (conversation.suggestedPrompts.isNotEmpty()) {
                     FollowUpQuestions(
                         modifier = Modifier,
-                        entity = null,
                         list = conversation.suggestedPrompts,
                         onClick = { prompt ->
-                            onClickSuggestedPrompt(prompt.query?: "")
+                            onClickSuggestedPrompt(prompt.query ?: "")
                         }
                     )
                 }
@@ -147,7 +146,7 @@ fun StructuredConversationScreen(
                         .windowInsetsPadding(
                             insets = WindowInsets.ime
                         ),
-                    onSendClicked = {
+                    onSendClick = {
                         keyboardController?.hide()
                         onSendClick()
                     },
@@ -156,7 +155,7 @@ fun StructuredConversationScreen(
                         companyName
                     ),
                     onTextChange = { input ->
-                        onInputQueryChanged(input)
+                        onInputQueryChange(input)
                     },
                     text = inputQuery,
                     availableModels = availableModels,
@@ -265,13 +264,13 @@ fun StructuredConversationScreen(
 
 @Composable
 fun SingleStructuredResponse(
-    modifier: Modifier = Modifier,
     genAiMessage: GenAiMessage,
-    text: String = "",
     onClickNews: (url: String) -> Unit,
     onClickFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
     onCopy: (text: String) -> Unit,
-    onClickSource: () -> Unit
+    onClickSource: () -> Unit,
+    modifier: Modifier = Modifier,
+    text: String = ""
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
@@ -380,7 +379,7 @@ fun SingleStructuredResponse(
                                     items(dislikeReasons) { reason ->
                                         val stringReason = stringResource(reason)
                                         Surface(
-                                            modifier = modifier,
+                                            modifier = Modifier,
                                             onClick = {
                                                 onClickFeedback(
                                                     genAiMessage.id,
@@ -439,8 +438,12 @@ fun SingleStructuredResponse(
                                                 }
                                             ) {
                                                 Icon(
-                                                    painter = painterResource(id = R.drawable.ic_like_filled),
-                                                    contentDescription = stringResource(R.string.like_chosen)
+                                                    painter = painterResource(
+                                                        id = R.drawable.ic_like_filled
+                                                    ),
+                                                    contentDescription = stringResource(
+                                                        R.string.like_chosen
+                                                    )
                                                 )
                                             }
                                         }
@@ -450,8 +453,12 @@ fun SingleStructuredResponse(
                                             IconButton(modifier = Modifier.size(32.dp), onClick = {
                                             }) {
                                                 Icon(
-                                                    painter = painterResource(id = R.drawable.ic_dislike_filled),
-                                                    contentDescription = stringResource(R.string.dislike_chosen)
+                                                    painter = painterResource(
+                                                        id = R.drawable.ic_dislike_filled
+                                                    ),
+                                                    contentDescription = stringResource(
+                                                        R.string.dislike_chosen
+                                                    )
                                                 )
                                             }
                                         }
@@ -468,8 +475,12 @@ fun SingleStructuredResponse(
                                                 }
                                             ) {
                                                 Icon(
-                                                    painter = painterResource(id = R.drawable.ic_like),
-                                                    contentDescription = stringResource(R.string.like)
+                                                    painter = painterResource(
+                                                        id = R.drawable.ic_like
+                                                    ),
+                                                    contentDescription = stringResource(
+                                                        R.string.like
+                                                    )
                                                 )
                                             }
 
@@ -483,8 +494,12 @@ fun SingleStructuredResponse(
                                                 }
                                             ) {
                                                 Icon(
-                                                    painter = painterResource(id = R.drawable.ic_dislike),
-                                                    contentDescription = stringResource(R.string.dislike)
+                                                    painter = painterResource(
+                                                        id = R.drawable.ic_dislike
+                                                    ),
+                                                    contentDescription = stringResource(
+                                                        R.string.dislike
+                                                    )
                                                 )
                                             }
                                         }
@@ -516,16 +531,20 @@ fun SingleStructuredResponse(
 }
 
 @Composable
-fun FollowUpQuestions(modifier: Modifier, entity: String? = null, list: List<SuggestionRemote>, onClick: (prompt: SuggestionRemote) -> Unit) {
+fun FollowUpQuestions(
+    list: List<SuggestionRemote>,
+    onClick: (prompt: SuggestionRemote) -> Unit,
+    modifier: Modifier = Modifier
+) {
     if (list.isNotEmpty()) {
         LazyRow(
-            modifier = Modifier,
+            modifier = modifier,
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(items = list) { suggestion ->
                 Surface(
-                    modifier = modifier,
+                    modifier = Modifier,
                     onClick = {
                         onClick(suggestion)
                     },
@@ -536,7 +555,7 @@ fun FollowUpQuestions(modifier: Modifier, entity: String? = null, list: List<Sug
                     )
                 ) {
                     Text(
-                        text = suggestion.label?: "",
+                        text = suggestion.label ?: "",
                         modifier = Modifier
                             .padding(horizontal = 16.dp, vertical = 10.dp),
                         style = MaterialTheme.typography.bodySmall,
@@ -550,12 +569,13 @@ fun FollowUpQuestions(modifier: Modifier, entity: String? = null, list: List<Sug
 
 @Preview
 @Composable
-fun ConversationPreview(modifier: Modifier = Modifier) {
+private fun ConversationPreview(modifier: Modifier = Modifier) {
     val messages = listOf(
         GenAiTextMessage(
             query = "I am the best",
             loading = true,
-            response = "I am a fan of Manchester United based in Nigeria and also interested in the success of the club in general",
+            response = "I am a fan of Manchester United based in Nigeria and also " +
+                "interested in the success of the club in general",
             feedbackStatus = 0
         ),
         GenAiTextMessage(
@@ -585,7 +605,7 @@ fun ConversationPreview(modifier: Modifier = Modifier) {
     )
     GPTInvestorTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            FollowUpQuestions(modifier = Modifier, entity = "Netflix", list = prompts) { }
+            FollowUpQuestions(modifier = Modifier, list = prompts, onClick = {})
         }
     }
 }

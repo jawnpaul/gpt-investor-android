@@ -19,14 +19,10 @@ class Converters {
     }
 
     @TypeConverter
-    fun stringToPriceChange(string: String): PriceChange? {
-        return json.decodeFromString<PriceChange>(string)
-    }
+    fun stringToPriceChange(string: String): PriceChange? = json.decodeFromString<PriceChange>(string)
 
     @TypeConverter
-    fun priceChangeToString(priceChange: PriceChange): String {
-        return json.encodeToString(priceChange)
-    }
+    fun priceChangeToString(priceChange: PriceChange): String = json.encodeToString(priceChange)
 
     // CompanyDetailRemoteResponse converters
     @TypeConverter

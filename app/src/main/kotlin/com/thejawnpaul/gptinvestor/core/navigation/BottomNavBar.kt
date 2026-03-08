@@ -28,7 +28,7 @@ import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
-fun BottomNavBar(navController: NavController) {
+fun BottomNavBar(navController: NavController, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     val items = listOf(
@@ -40,7 +40,7 @@ fun BottomNavBar(navController: NavController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         if (items.any { it.first.route == currentRoute }) {
             NavigationBar(containerColor = Color.Transparent) {
                 items.forEach { (screen, icon) ->

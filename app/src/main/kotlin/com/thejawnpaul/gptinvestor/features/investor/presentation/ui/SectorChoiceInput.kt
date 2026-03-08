@@ -30,7 +30,12 @@ import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
-fun SectorChoiceQuestion(possibleAnswers: List<SectorInput>, selectedAnswer: SectorInput?, onOptionSelected: (SectorInput) -> Unit, modifier: Modifier = Modifier) {
+fun SectorChoiceQuestion(
+    possibleAnswers: List<SectorInput>,
+    selectedAnswer: SectorInput?,
+    onSelectOption: (SectorInput) -> Unit,
+    modifier: Modifier = Modifier
+) {
     LazyRow(
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = 16.dp),
@@ -41,14 +46,19 @@ fun SectorChoiceQuestion(possibleAnswers: List<SectorInput>, selectedAnswer: Sec
                 modifier = Modifier,
                 input = it,
                 selected = it == selectedAnswer,
-                onOptionSelected = { onOptionSelected(it) }
+                onSelectOption = { onSelectOption(it) }
             )
         }
     }
 }
 
 @Composable
-fun SingleSectorChoice(input: SectorInput, selected: Boolean, onOptionSelected: () -> Unit, modifier: Modifier) {
+fun SingleSectorChoice(
+    input: SectorInput,
+    selected: Boolean,
+    onSelectOption: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     val text = when (input) {
         is SectorInput.AllSector -> {
@@ -65,7 +75,7 @@ fun SingleSectorChoice(input: SectorInput, selected: Boolean, onOptionSelected: 
             modifier = modifier,
             shape = RoundedCornerShape(corner = CornerSize(20.dp)),
             color = gptInvestorColors.utilColors.borderBright10,
-            onClick = onOptionSelected
+            onClick = onSelectOption
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -86,7 +96,7 @@ fun SingleSectorChoice(input: SectorInput, selected: Boolean, onOptionSelected: 
             modifier = modifier,
             shape = RoundedCornerShape(corner = CornerSize(20.dp)),
             border = BorderStroke(width = 2.dp, color = MaterialTheme.colorScheme.outlineVariant),
-            onClick = onOptionSelected
+            onClick = onSelectOption
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -109,7 +119,7 @@ fun SingleSectorChoice(input: SectorInput, selected: Boolean, onOptionSelected: 
 
 @Preview
 @Composable
-fun SectorPreview() {
+private fun SectorPreview() {
     GPTInvestorTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
             var selectedAnswer by remember { mutableStateOf<SectorInput?>(null) }
@@ -125,7 +135,7 @@ fun SectorPreview() {
             SectorChoiceQuestion(
                 possibleAnswers = possibleAnswers,
                 selectedAnswer = selectedAnswer,
-                onOptionSelected = {
+                onSelectOption = {
                     selectedAnswer = it
                 }
             )

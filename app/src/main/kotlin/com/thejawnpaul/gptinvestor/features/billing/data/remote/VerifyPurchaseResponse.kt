@@ -8,4 +8,3 @@ data class VerifyPurchaseResponse(
     @SerialName("success") val success: Boolean? = null,
     @SerialName("message") val message: String? = null
 )
-

@@ -49,7 +49,11 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import kotlinx.coroutines.delay
 
 @Composable
-fun SingleTrendingStockItem(modifier: Modifier = Modifier, onClick: (tickerSymbol: String) -> Unit, trendingStock: TrendingStockPresentation) {
+fun SingleTrendingStockItem(
+    trendingStock: TrendingStockPresentation,
+    onClick: (tickerSymbol: String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     Surface(
@@ -125,7 +129,9 @@ fun SingleTrendingStockItem(modifier: Modifier = Modifier, onClick: (tickerSymbo
                                 modifier = Modifier.size(12.dp),
                                 painter = painterResource(R.drawable.trending_up),
                                 contentDescription = null,
-                                colorFilter = ColorFilter.tint(gptInvestorColors.greenColors.defaultGreen)
+                                colorFilter = ColorFilter.tint(
+                                    gptInvestorColors.greenColors.defaultGreen
+                                )
                             )
                             Text(
                                 "+${trendingStock.percentageChange}%",
@@ -141,7 +147,12 @@ fun SingleTrendingStockItem(modifier: Modifier = Modifier, onClick: (tickerSymbo
 }
 
 @Composable
-fun TrendingStockList(modifier: Modifier, state: TrendingCompaniesView, onClick: (tickerSymbol: String) -> Unit, onClickRetry: () -> Unit) {
+fun TrendingStockList(
+    state: TrendingCompaniesView,
+    onClickRetry: () -> Unit,
+    onClick: (tickerSymbol: String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val lazyGridState = rememberLazyStaggeredGridState()
     val coroutineScope = rememberCoroutineScope()
     val isScrollInProgress = lazyGridState.isScrollInProgress
@@ -207,7 +218,7 @@ fun TrendingStockList(modifier: Modifier, state: TrendingCompaniesView, onClick:
 
 @Preview(name = "Pixel 4", device = Devices.PHONE)
 @Composable
-fun TrendingPreview(modifier: Modifier = Modifier) {
+private fun TrendingPreview(modifier: Modifier = Modifier) {
     val companies = listOf(
         TrendingStockPresentation(
             companyName = "Apple Inc",

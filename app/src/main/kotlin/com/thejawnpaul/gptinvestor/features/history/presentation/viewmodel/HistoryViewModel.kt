@@ -1,9 +1,13 @@
 package com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel
 
+import android.app.Activity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.features.billing.domain.BillingConstants
+import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult
+import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
@@ -33,9 +37,9 @@ class HistoryViewModel(
     private val getSingleHistoryUseCase: GetSingleHistoryUseCase,
     private val getInputPromptUseCase: GetInputPromptUseCase,
     private val fedBackRepository: FeedbackRepository,
-    private val modelsRepository: ModelsRepository
-) :
-    ViewModel() {
+    private val modelsRepository: ModelsRepository,
+    private val billingRepository: IBillingRepository
+) : ViewModel() {
 
     private val _historyScreenViewState = MutableStateFlow(HistoryScreenView())
     val historyScreenViewState get() = _historyScreenViewState
@@ -52,11 +56,19 @@ class HistoryViewModel(
     private var upgradeModelId: String? = null
 
     private val conversationId: Long?
-        get() = savedStateHandle.get<Long>("conversationId")
+        get() {
+            val id = savedStateHandle.get<Any>("conversationId")
+            return when (id) {
+                is Long -> id
+                is String -> id.toLongOrNull()
+                else -> null
+            }
+        }
 
     init {
         getAllHistory()
         getAvailableModels()
+        getConversation()
     }
 
     private fun getAllHistory() {
@@ -136,19 +148,20 @@ class HistoryViewModel(
 
     private fun handleInputResponseFailure(failure: Failure) {
         conversationView.update { state ->
-            val updatedConversation = (state.conversation as? StructuredConversation)?.let { conversation ->
-                val updatedMessages = ArrayList(conversation.messageList)
-                if (updatedMessages.isNotEmpty()) {
-                    val lastMessage = updatedMessages.last()
-                    if (lastMessage is GenAiTextMessage && lastMessage.loading) {
-                        updatedMessages[updatedMessages.size - 1] = lastMessage.copy(
-                            loading = false,
-                            response = lastMessage.response ?: "Couldn't generate a response"
-                        )
+            val updatedConversation =
+                (state.conversation as? StructuredConversation)?.let { conversation ->
+                    val updatedMessages = ArrayList(conversation.messageList)
+                    if (updatedMessages.isNotEmpty()) {
+                        val lastMessage = updatedMessages.last()
+                        if (lastMessage is GenAiTextMessage && lastMessage.loading) {
+                            updatedMessages[updatedMessages.size - 1] = lastMessage.copy(
+                                loading = false,
+                                response = lastMessage.response ?: "Couldn't generate a response"
+                            )
+                        }
                     }
-                }
-                conversation.copy(messageList = updatedMessages)
-            } ?: state.conversation
+                    conversation.copy(messageList = updatedMessages)
+                } ?: state.conversation
             state.copy(loading = false, conversation = updatedConversation)
         }
         when (failure) {
@@ -160,7 +173,9 @@ class HistoryViewModel(
             is Failure.RateLimitExceeded -> {
                 Timber.e("Rate limit exceeded")
                 conversationView.update { it.copy(showRateLimitBottomSheet = false) }
-                processHistoryDetailAction(HistoryDetailAction.ShowToast("Rate limit exceeded. Please try again later."))
+                processHistoryDetailAction(
+                    HistoryDetailAction.ShowToast("Rate limit exceeded. Please try again later.")
+                )
             }
 
             is Failure.ContextLimitReached -> {
@@ -174,7 +189,9 @@ class HistoryViewModel(
             }
 
             is Failure.ServerError -> {
-                processHistoryDetailAction(HistoryDetailAction.ShowToast("Server error. Please try again later."))
+                processHistoryDetailAction(
+                    HistoryDetailAction.ShowToast("Server error. Please try again later.")
+                )
             }
 
             else -> {
@@ -208,7 +225,9 @@ class HistoryViewModel(
                         message
                     }
                 }
-                it.copy(conversation = conversation.copy(messageList = updatedMessages.toMutableList()))
+                it.copy(
+                    conversation = conversation.copy(messageList = updatedMessages.toMutableList())
+                )
             } ?: it
         }
         viewModelScope.launch {
@@ -279,7 +298,9 @@ class HistoryViewModel(
             }
 
             is HistoryDetailEvent.ShowRateLimitBottomSheet -> {
-                conversationView.update { it.copy(showRateLimitBottomSheet = event.showBottomSheet) }
+                conversationView.update {
+                    it.copy(showRateLimitBottomSheet = event.showBottomSheet)
+                }
             }
         }
     }
@@ -302,9 +323,19 @@ class HistoryViewModel(
 
     private fun selectWaitListOption(option: String) {
         if (conversationView.value.selectedWaitlistOptions.contains(option)) {
-            conversationView.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions - option) }
+            conversationView.update {
+                it.copy(
+                    selectedWaitlistOptions =
+                    it.selectedWaitlistOptions - option
+                )
+            }
         } else {
-            conversationView.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions + option) }
+            conversationView.update {
+                it.copy(
+                    selectedWaitlistOptions =
+                    it.selectedWaitlistOptions + option
+                )
+            }
         }
     }
 
@@ -317,6 +348,23 @@ class HistoryViewModel(
                 getAvailableModels()
             }.onFailure { failure ->
                 Timber.e(failure.stackTraceToString())
+            }
+        }
+    }
+
+    fun launchPurchaseFlow(activity: Activity) {
+        viewModelScope.launch {
+            val result = billingRepository.launchPurchaseFlow(
+                activity = activity,
+                productId = BillingConstants.PRO_SUBSCRIPTION_PRODUCT_ID
+            )
+            handleHistoryDetailEvent(
+                HistoryDetailEvent.ShowRateLimitBottomSheet(showBottomSheet = false)
+            )
+            if (result is BillingResult.Error) {
+                processHistoryDetailAction(
+                    HistoryDetailAction.ShowToast("Billing Error: ${result.message}")
+                )
             }
         }
     }
@@ -335,8 +383,7 @@ sealed interface HistoryScreenAction {
 
 sealed interface HistoryDetailEvent {
     data class GetHistory(val conversationId: Long) : HistoryDetailEvent
-    data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) :
-        HistoryDetailEvent
+    data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) : HistoryDetailEvent
 
     data class UpdateInputQuery(val input: String) : HistoryDetailEvent
     data object GetInputResponse : HistoryDetailEvent
@@ -344,8 +391,7 @@ sealed interface HistoryDetailEvent {
     data class CopyToClipboard(val text: String) : HistoryDetailEvent
     data class ModelChange(val model: AvailableModel) : HistoryDetailEvent
     data object JoinWaitlist : HistoryDetailEvent
-    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) :
-        HistoryDetailEvent
+    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : HistoryDetailEvent
 
     data class SelectWaitlistOption(val option: String) : HistoryDetailEvent
 

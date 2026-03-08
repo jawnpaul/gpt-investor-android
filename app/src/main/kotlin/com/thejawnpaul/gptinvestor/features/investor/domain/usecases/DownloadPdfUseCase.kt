@@ -13,12 +13,11 @@ import org.koin.core.annotation.Factory
 
 @Factory
 class DownloadPdfUseCase(
-    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: IInvestorRepository
 ) : BaseUseCase<GetPdfRequest, String>(coroutineScope, dispatcher) {
 
-    override suspend fun run(params: GetPdfRequest): Flow<Either<Failure, String>> {
-        return repository.downloadAnalysisPdf(params)
-    }
+    override suspend fun run(params: GetPdfRequest): Flow<Either<Failure, String>> =
+        repository.downloadAnalysisPdf(params)
 }

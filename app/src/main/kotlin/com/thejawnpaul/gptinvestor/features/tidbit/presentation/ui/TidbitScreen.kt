@@ -20,7 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -42,11 +41,12 @@ import kotlinx.coroutines.flow.flowOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TidbitScreen(modifier: Modifier = Modifier, state: TidbitScreenState, tidbitsPagingData: Flow<PagingData<TidbitPresentation>>, onEvent: (TidbitScreenEvent) -> Unit) {
-    LaunchedEffect(Unit) {
-        onEvent(TidbitScreenEvent.GetAllTidbits)
-    }
-
+fun TidbitScreen(
+    state: TidbitScreenState,
+    tidbitsPagingData: Flow<PagingData<TidbitPresentation>>,
+    onEvent: (TidbitScreenEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val lazyPagingItems = tidbitsPagingData.collectAsLazyPagingItems()
 
     Scaffold(
@@ -89,7 +89,7 @@ fun TidbitScreen(modifier: Modifier = Modifier, state: TidbitScreenState, tidbit
                         SectorChoiceQuestion(
                             possibleAnswers = state.options,
                             selectedAnswer = state.selectedOption,
-                            onOptionSelected = {
+                            onSelectOption = {
                                 onEvent(TidbitScreenEvent.OnFilterSelected(filter = it))
                             }
                         )
@@ -176,7 +176,9 @@ fun TidbitScreen(modifier: Modifier = Modifier, state: TidbitScreenState, tidbit
                     }
                 }
 
-                if (lazyPagingItems.loadState.refresh is LoadState.Error && lazyPagingItems.itemCount == 0) {
+                if (lazyPagingItems.loadState.refresh is LoadState.Error &&
+                    lazyPagingItems.itemCount == 0
+                ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -196,7 +198,9 @@ fun TidbitScreen(modifier: Modifier = Modifier, state: TidbitScreenState, tidbit
                     }
                 }
 
-                if (lazyPagingItems.loadState.refresh is LoadState.NotLoading && lazyPagingItems.itemCount == 0) {
+                if (lazyPagingItems.loadState.refresh is LoadState.NotLoading &&
+                    lazyPagingItems.itemCount == 0
+                ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -214,7 +218,7 @@ fun TidbitScreen(modifier: Modifier = Modifier, state: TidbitScreenState, tidbit
 
 @Preview(showBackground = true, backgroundColor = 0xFF1A1A2E)
 @Composable
-fun TidbitScreenPreview() {
+private fun TidbitScreenPreview() {
     GPTInvestorTheme(darkTheme = true) {
         val sampleTidbits = listOf(
             TidbitPresentation.AudioPresentation(
@@ -223,7 +227,7 @@ fun TidbitScreenPreview() {
                 previewUrl = "https://example.com/placeholder_image.jpg", // Use a real or placeholder URL
                 mediaUrl = "https://example.com/audio.mp3",
                 title = "Learn Everything on Tidbit",
-                content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt...",
+                content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
                 originalAuthor = "Morgan Housel",
                 category = "Investing 101",
                 sourceUrl = "https://example.com"
@@ -234,7 +238,7 @@ fun TidbitScreenPreview() {
                 previewUrl = "https://example.com/placeholder_image.jpg",
                 mediaUrl = "https://example.com/video.mp4",
                 title = "Learn Everything on Tidbit",
-                content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt...",
+                content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
                 originalAuthor = "Morgan Housel",
                 category = "Investing 101",
                 sourceUrl = "https://example.com"
@@ -245,7 +249,7 @@ fun TidbitScreenPreview() {
                 previewUrl = "https://example.com/placeholder_image.jpg",
                 mediaUrl = "https://example.com/placeholder_image.jpg",
                 title = "Learn Everything on Tidbit",
-                content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt...",
+                content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
                 originalAuthor = "Morgan Housel",
                 category = "Investing 101",
                 sourceUrl = "https://example.com"

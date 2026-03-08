@@ -36,7 +36,4 @@ data class CompanyEntity(
 }
 
 @Serializable
-data class PriceChange(
-    @SerialName("change") val change: Float,
-    @SerialName("date") val date: Long
-)
+data class PriceChange(@SerialName("change") val change: Float, @SerialName("date") val date: Long)

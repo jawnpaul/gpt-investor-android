@@ -25,10 +25,8 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 
 @KoinViewModel
-class TidbitViewModel(
-    private val repository: TidbitRepository,
-    private val savedStateHandle: SavedStateHandle
-) : ViewModel() {
+class TidbitViewModel(private val repository: TidbitRepository, private val savedStateHandle: SavedStateHandle) :
+    ViewModel() {
 
     private val tidbitId: String?
         get() = savedStateHandle.get<String>("tidbitId")
@@ -45,8 +43,13 @@ class TidbitViewModel(
     private val _actions = MutableSharedFlow<TidbitAction>()
     val actions get() = _actions
 
-    private val _currentPagingFilter = MutableStateFlow<TidbitPagingFilterType>(TidbitPagingFilterType.All)
+    private val _currentPagingFilter =
+        MutableStateFlow<TidbitPagingFilterType>(TidbitPagingFilterType.All)
     val currentPagingFilter: StateFlow<TidbitPagingFilterType> = _currentPagingFilter
+
+    init {
+        getTidbit()
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val tidbitsPagingData: Flow<PagingData<TidbitPresentation>> =
@@ -152,9 +155,54 @@ class TidbitViewModel(
         }
     }
 
-    private fun mapTidbitToPresentation(tidbit: Tidbit): TidbitPresentation {
-        return when (tidbit.type) {
-            "text" -> TidbitPresentation.ArticlePresentation(
+    private fun mapTidbitToPresentation(tidbit: Tidbit): TidbitPresentation = when (tidbit.type) {
+        "text" -> TidbitPresentation.ArticlePresentation(
+            id = tidbit.id,
+            name = tidbit.title,
+            previewUrl = tidbit.previewUrl,
+            mediaUrl = tidbit.mediaUrl,
+            title = tidbit.title,
+            content = tidbit.content,
+            originalAuthor = tidbit.originalAuthor,
+            category = tidbit.category,
+            sourceUrl = tidbit.sourceUrl,
+            isBookmarked = tidbit.isBookmarked,
+            isLiked = tidbit.isLiked,
+            summary = tidbit.summary
+        )
+
+        "video" -> TidbitPresentation.VideoPresentation(
+            id = tidbit.id,
+            name = tidbit.title,
+            previewUrl = tidbit.previewUrl,
+            mediaUrl = tidbit.mediaUrl,
+            title = tidbit.title,
+            content = tidbit.content,
+            originalAuthor = tidbit.originalAuthor,
+            category = tidbit.category,
+            sourceUrl = tidbit.sourceUrl,
+            isBookmarked = tidbit.isBookmarked,
+            isLiked = tidbit.isLiked,
+            summary = tidbit.summary
+        )
+
+        "audio" -> TidbitPresentation.AudioPresentation(
+            id = tidbit.id,
+            name = tidbit.title,
+            previewUrl = tidbit.previewUrl,
+            mediaUrl = tidbit.mediaUrl,
+            title = tidbit.title,
+            content = tidbit.content,
+            originalAuthor = tidbit.originalAuthor,
+            category = tidbit.category,
+            sourceUrl = tidbit.sourceUrl,
+            isBookmarked = tidbit.isBookmarked,
+            isLiked = tidbit.isLiked,
+            summary = tidbit.summary
+        )
+
+        else -> {
+            TidbitPresentation.ArticlePresentation(
                 id = tidbit.id,
                 name = tidbit.title,
                 previewUrl = tidbit.previewUrl,
@@ -165,55 +213,8 @@ class TidbitViewModel(
                 category = tidbit.category,
                 sourceUrl = tidbit.sourceUrl,
                 isBookmarked = tidbit.isBookmarked,
-                isLiked = tidbit.isLiked,
-                summary = tidbit.summary
+                isLiked = tidbit.isLiked
             )
-
-            "video" -> TidbitPresentation.VideoPresentation(
-                id = tidbit.id,
-                name = tidbit.title,
-                previewUrl = tidbit.previewUrl,
-                mediaUrl = tidbit.mediaUrl,
-                title = tidbit.title,
-                content = tidbit.content,
-                originalAuthor = tidbit.originalAuthor,
-                category = tidbit.category,
-                sourceUrl = tidbit.sourceUrl,
-                isBookmarked = tidbit.isBookmarked,
-                isLiked = tidbit.isLiked,
-                summary = tidbit.summary
-            )
-
-            "audio" -> TidbitPresentation.AudioPresentation(
-                id = tidbit.id,
-                name = tidbit.title,
-                previewUrl = tidbit.previewUrl,
-                mediaUrl = tidbit.mediaUrl,
-                title = tidbit.title,
-                content = tidbit.content,
-                originalAuthor = tidbit.originalAuthor,
-                category = tidbit.category,
-                sourceUrl = tidbit.sourceUrl,
-                isBookmarked = tidbit.isBookmarked,
-                isLiked = tidbit.isLiked,
-                summary = tidbit.summary
-            )
-
-            else -> {
-                TidbitPresentation.ArticlePresentation(
-                    id = tidbit.id,
-                    name = tidbit.title,
-                    previewUrl = tidbit.previewUrl,
-                    mediaUrl = tidbit.mediaUrl,
-                    title = tidbit.title,
-                    content = tidbit.content,
-                    originalAuthor = tidbit.originalAuthor,
-                    category = tidbit.category,
-                    sourceUrl = tidbit.sourceUrl,
-                    isBookmarked = tidbit.isBookmarked,
-                    isLiked = tidbit.isLiked
-                )
-            }
         }
     }
 

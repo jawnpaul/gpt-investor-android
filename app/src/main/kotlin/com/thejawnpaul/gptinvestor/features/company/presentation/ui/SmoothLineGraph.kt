@@ -44,14 +44,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toIntRect
 import androidx.compose.ui.unit.toSize
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 @Composable
-fun SmoothLineGraph(data: List<GraphPoint>) {
+fun SmoothLineGraph(data: List<GraphPoint>, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     Box(
-        modifier = Modifier
+        modifier = modifier
             .background(Color.Transparent)
             .fillMaxSize()
     ) {
@@ -203,7 +203,12 @@ fun generateSmoothPath(data: List<GraphPoint>, size: Size): Path {
     return path
 }
 
-fun DrawScope.drawHighlight(highlightedWeek: Int, graphData: List<GraphPoint>, textMeasurer: TextMeasurer, labelTextStyle: TextStyle) {
+fun DrawScope.drawHighlight(
+    highlightedWeek: Int,
+    graphData: List<GraphPoint>,
+    textMeasurer: TextMeasurer,
+    labelTextStyle: TextStyle
+) {
     val amount = graphData[highlightedWeek].amount
     val date = graphData[highlightedWeek].date
     val minAmount = graphData.minBy { it.amount }.amount

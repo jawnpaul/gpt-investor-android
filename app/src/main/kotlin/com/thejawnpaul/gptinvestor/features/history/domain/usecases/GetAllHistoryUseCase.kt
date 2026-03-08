@@ -9,9 +9,11 @@ import com.thejawnpaul.gptinvestor.features.history.domain.repository.IHistoryRe
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import org.koin.core.annotation.Factory
 
+@Factory
 class GetAllHistoryUseCase(
-    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: IHistoryRepository
 ) : BaseUseCase<GetAllHistoryUseCase.None, Map<String, List<StructuredConversation>>>(
@@ -20,7 +22,6 @@ class GetAllHistoryUseCase(
 ) {
     class None
 
-    override suspend fun run(params: None): Flow<Either<Failure, Map<String, List<StructuredConversation>>>> {
-        return repository.getAllHistory()
-    }
+    override suspend fun run(params: None): Flow<Either<Failure, Map<String, List<StructuredConversation>>>> =
+        repository.getAllHistory()
 }

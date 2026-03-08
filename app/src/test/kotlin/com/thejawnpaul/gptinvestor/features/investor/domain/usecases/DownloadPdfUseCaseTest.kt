@@ -57,7 +57,8 @@ class DownloadPdfUseCaseTest {
 
     @Test
     fun `should return server error when exception occurs`() = runTest {
-        coEvery { repository.downloadAnalysisPdf(request) } returns flow { emit(Either.Left(Failure.ServerError)) }
+        coEvery { repository.downloadAnalysisPdf(request) } returns
+            flow { emit(Either.Left(Failure.ServerError)) }
 
         repository.downloadAnalysisPdf(request).collect {
             assertThat(it.isLeft).isTrue()
@@ -68,7 +69,8 @@ class DownloadPdfUseCaseTest {
 
     @Test
     fun `should return data error when response body isn't parsed`() = runTest {
-        coEvery { repository.downloadAnalysisPdf(request) } returns flow { emit(Either.Left(Failure.DataError)) }
+        coEvery { repository.downloadAnalysisPdf(request) } returns
+            flow { emit(Either.Left(Failure.DataError)) }
 
         repository.downloadAnalysisPdf(request).collect {
             assertThat(it.isLeft).isTrue()

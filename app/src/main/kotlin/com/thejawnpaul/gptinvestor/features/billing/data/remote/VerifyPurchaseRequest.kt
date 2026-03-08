@@ -8,4 +8,3 @@ data class VerifyPurchaseRequest(
     @SerialName("purchase_token") val purchaseToken: String,
     @SerialName("subscription_id") val subscriptionId: String
 )
-

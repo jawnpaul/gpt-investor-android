@@ -36,6 +36,8 @@ interface ConversationDao {
     suspend fun getConversationsWithMessages(): List<ConversationWithMessages>
 
     @Transaction
-    @Query("SELECT * FROM ConversationWithLastMessage WHERE conversationId =:id ORDER BY timestamp ASC")
+    @Query(
+        "SELECT * FROM ConversationWithLastMessage WHERE conversationId =:id ORDER BY timestamp ASC"
+    )
     suspend fun getSingleConversationWithMessages(id: Long): ConversationWithMessages
 }

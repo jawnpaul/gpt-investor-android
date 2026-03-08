@@ -49,7 +49,7 @@ fun HomeBackground(modifier: Modifier = Modifier) {
 
 @Preview
 @Composable
-fun HomeBackgroundPreview(modifier: Modifier = Modifier) {
+private fun HomeBackgroundPreview(modifier: Modifier = Modifier) {
     GPTInvestorTheme {
         HomeBackground(modifier = Modifier.fillMaxSize())
     }

@@ -1,25 +1,22 @@
 package com.thejawnpaul.gptinvestor.analytics.firebase
 
-import android.os.Bundle
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import dev.gitlive.firebase.Firebase
+import dev.gitlive.firebase.analytics.FirebaseAnalytics
+import dev.gitlive.firebase.analytics.analytics
 import org.koin.core.annotation.Singleton
-import com.thejawnpaul.gptinvestor.analytics.di.FirebaseAnalytics as Firebase
 
 @Singleton(binds = [AnalyticsLogger::class])
-@Firebase
-class FirebaseLogger(private val firebaseAnalytics: FirebaseAnalytics) :
-    AnalyticsLogger {
+@com.thejawnpaul.gptinvestor.analytics.di.FirebaseAnalytics
+class FirebaseLogger : AnalyticsLogger {
+
+    private val firebaseAnalytics: FirebaseAnalytics = Firebase.analytics
 
     override fun logEvent(
         eventName: String,
         params: Map<String, Any>
     ) {
-        val bundle = Bundle()
-        params.forEach { (key, value) ->
-            bundle.putString(key, value.toString())
-        }
-        firebaseAnalytics.logEvent(eventName.lowercase().replace(" ", "_"), bundle)
+        firebaseAnalytics.logEvent(eventName.lowercase().replace(" ", "_"), params)
     }
 
     override fun logViewEvent(screenName: String) {

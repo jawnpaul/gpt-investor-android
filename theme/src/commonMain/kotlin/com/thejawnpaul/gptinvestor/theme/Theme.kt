@@ -100,6 +100,7 @@ fun GPTInvestorTheme(
     } else {
         LightColors
     }
+    val typography = rememberGptInvestorTypography()
 
     val gptInvestorColors = if (useDarkTheme) gptInvestorColorsDark else gptInvestorColorsLight
 
@@ -112,7 +113,11 @@ fun GPTInvestorTheme(
     CompositionLocalProvider(
         LocalGPTInvestorColors provides gptInvestorColors
     ) {
-        MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = typography,
+            content = content
+        )
     }
 
 }

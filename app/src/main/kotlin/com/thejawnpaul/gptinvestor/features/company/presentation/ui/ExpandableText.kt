@@ -41,11 +41,11 @@ const val DEFAULT_MINIMUM_TEXT_LINE = 10
  */
 @Composable
 fun ExpandableText(
+    text: String,
     modifier: Modifier = Modifier,
     textModifier: Modifier = Modifier,
     style: TextStyle = LocalTextStyle.current,
     fontStyle: FontStyle? = null,
-    text: String,
     collapsedMaxLine: Int = DEFAULT_MINIMUM_TEXT_LINE,
     showMoreText: String = "... Show More",
     showMoreStyle: SpanStyle = SpanStyle(fontWeight = FontWeight.W500),

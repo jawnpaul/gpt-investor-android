@@ -9,7 +9,6 @@ import org.koin.core.annotation.Singleton
 @Module
 object CoroutinesScopeModule {
     @Singleton
-    fun providesDefaultCoroutineScope(
-        @DefaultDispatcher defaultDispatcher: CoroutineDispatcher
-    ): CoroutineScope = CoroutineScope(SupervisorJob() + defaultDispatcher)
+    fun providesDefaultCoroutineScope(@DefaultDispatcher defaultDispatcher: CoroutineDispatcher): CoroutineScope =
+        CoroutineScope(SupervisorJob() + defaultDispatcher)
 }

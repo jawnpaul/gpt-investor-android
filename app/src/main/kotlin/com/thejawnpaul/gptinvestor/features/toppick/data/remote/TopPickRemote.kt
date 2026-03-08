@@ -17,4 +17,3 @@ data class TopPickRemote(
     @SerialName("change") val percentageChange: Float? = null,
     @SerialName("logo_url") val imageUrl: String? = null
 )
-

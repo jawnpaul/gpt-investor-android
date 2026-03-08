@@ -31,17 +31,17 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.Q
 
 @Composable
 fun DefaultConversationScreen(
-    modifier: Modifier,
     conversation: DefaultConversation,
-    onPromptClicked: (prompt: DefaultPrompt) -> Unit,
+    onPromptClick: (prompt: DefaultPrompt) -> Unit,
     onNavigateUp: () -> Unit,
     inputQuery: String,
-    onInputQueryChanged: (String) -> Unit,
+    onInputQueryChange: (String) -> Unit,
     onSendClick: () -> Unit,
     availableModels: List<AvailableModel>,
     selectedModel: AvailableModel,
     onModelChange: (AvailableModel) -> Unit,
-    onUpgradeModel: (showBottomSheet: Boolean, modelId: String) -> Unit
+    onUpgradeModel: (showBottomSheet: Boolean, modelId: String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -69,7 +69,7 @@ fun DefaultConversationScreen(
                     .windowInsetsPadding(
                         insets = WindowInsets.ime
                     ),
-                onSendClicked = {
+                onSendClick = {
                     keyboardController?.hide()
                     onSendClick()
                 },
@@ -77,7 +77,7 @@ fun DefaultConversationScreen(
                     R.string.ask_anything_about_stocks
                 ),
                 onTextChange = { input ->
-                    onInputQueryChanged(input)
+                    onInputQueryChange(input)
                 },
                 text = inputQuery,
                 availableModels = availableModels,
@@ -108,7 +108,7 @@ fun DefaultConversationScreen(
                     .padding(horizontal = 8.dp)
                     .align(Alignment.CenterHorizontally),
                 prompts = conversation.prompts,
-                onClick = onPromptClicked
+                onClick = onPromptClick
             )
         }
     }

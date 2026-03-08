@@ -21,7 +21,11 @@ import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
-fun SingleHistoryItem(modifier: Modifier, conversation: StructuredConversation, onClick: (id: Long) -> Unit) {
+fun SingleHistoryItem(
+    conversation: StructuredConversation,
+    onClick: (id: Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     Row(
         modifier = modifier
@@ -52,18 +56,19 @@ fun SingleHistoryItem(modifier: Modifier, conversation: StructuredConversation, 
 
 @Preview
 @Composable
-fun ItemPreview(modifier: Modifier = Modifier) {
+private fun ItemPreview() {
     GPTInvestorTheme {
         Surface {
             Column(modifier = Modifier.fillMaxSize()) {
                 SingleHistoryItem(
                     modifier = Modifier,
+                    onClick = {},
                     conversation = StructuredConversation(
                         id = 0,
                         title = "What factors are influencing Netflix stock price today?",
                         lastMessageTime = "10:00"
                     )
-                ) { }
+                )
             }
         }
     }

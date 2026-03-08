@@ -36,7 +36,7 @@ import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
-fun SingleTopPickItem(modifier: Modifier, pickPresentation: TopPickPresentation, onClick: (String) -> Unit) {
+fun SingleTopPickItem(pickPresentation: TopPickPresentation, onClick: (String) -> Unit, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     OutlinedCard(
@@ -159,7 +159,7 @@ fun SingleTopPickItem(modifier: Modifier, pickPresentation: TopPickPresentation,
 }
 
 @Composable
-fun HomeTopPickItem(modifier: Modifier, pickPresentation: TopPickPresentation, onClick: (String) -> Unit) {
+fun HomeTopPickItem(pickPresentation: TopPickPresentation, onClick: (String) -> Unit, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     Column(
         modifier = modifier.clickable(
@@ -272,7 +272,7 @@ fun HomeTopPickItem(modifier: Modifier, pickPresentation: TopPickPresentation, o
 
 @Preview
 @Composable
-fun SinglePickPreview(modifier: Modifier = Modifier) {
+private fun SinglePickPreview(modifier: Modifier = Modifier) {
     GPTInvestorTheme {
         Surface {
             Column(modifier = Modifier.fillMaxSize()) {
@@ -280,7 +280,8 @@ fun SinglePickPreview(modifier: Modifier = Modifier) {
                     id = "1",
                     ticker = "AAPL",
                     companyName = "Microsoft",
-                    rationale = "This is the day that the Lord has made I will be glad and rejoice in it because, oh well it is just blah lorem ipsum ",
+                    rationale = "This is the day that the Lord has made I will be glad and rejoice in it because, " +
+                        "oh well it is just blah lorem ipsum ",
                     confidenceScore = 2,
                     metrics = emptyList(),
                     risks = emptyList(),
@@ -290,7 +291,7 @@ fun SinglePickPreview(modifier: Modifier = Modifier) {
                     currentPrice = 0.0f
                 )
 
-                SingleTopPickItem(modifier = Modifier, pickPresentation = pick) { }
+                SingleTopPickItem(modifier = Modifier, pickPresentation = pick, onClick = {})
             }
         }
     }

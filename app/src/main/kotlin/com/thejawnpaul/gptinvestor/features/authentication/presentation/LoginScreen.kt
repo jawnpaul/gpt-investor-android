@@ -40,15 +40,15 @@ import com.thejawnpaul.gptinvestor.theme.linkMedium
 
 @Composable
 fun LoginScreen(
-    modifier: Modifier,
     email: String,
     password: String,
-    loading: Boolean = false,
     enableButton: Boolean,
+    onLoginClick: () -> Unit,
+    onSignUpClick: () -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
-    onLoginClick: () -> Unit,
-    onSignUpClick: () -> Unit
+    modifier: Modifier = Modifier,
+    loading: Boolean = false
 ) {
     var passwordHidden by remember { mutableStateOf(true) }
 
@@ -100,13 +100,21 @@ fun LoginScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    visualTransformation = if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
+                    visualTransformation = if (passwordHidden) {
+                        PasswordVisualTransformation()
+                    } else {
+                        VisualTransformation.None
+                    },
                     trailingIcon = {
                         IconButton(onClick = {
                             passwordHidden = !passwordHidden
                         }) {
                             val visibilityIcon =
-                                if (passwordHidden) R.drawable.outline_visibility_24 else R.drawable.baseline_visibility_off_24
+                                if (passwordHidden) {
+                                    R.drawable.outline_visibility_24
+                                } else {
+                                    R.drawable.baseline_visibility_off_24
+                                }
 
                             Icon(
                                 painter = painterResource(id = visibilityIcon),
@@ -123,7 +131,9 @@ fun LoginScreen(
                 )
 
                 Button(
-                    modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
                     onClick = onLoginClick,
                     enabled = enableButton
                 ) {
@@ -159,7 +169,7 @@ fun LoginScreen(
 
 @PreviewLightDark()
 @Composable
-fun LoginPreview() {
+private fun LoginPreview() {
     GPTInvestorTheme {
         Surface {
             LoginScreen(

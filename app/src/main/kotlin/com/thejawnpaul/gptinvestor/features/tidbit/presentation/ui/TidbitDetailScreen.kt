@@ -27,7 +27,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -43,7 +42,6 @@ import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CustomRichText
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.model.TidbitPresentation
-import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailAction
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailEvent
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailState
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
@@ -52,57 +50,48 @@ import com.thejawnpaul.gptinvestor.theme.bodyChatBody
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TidbitDetailScreen(
-    modifier: Modifier = Modifier,
-    tidbitId: String,
-    state: TidbitDetailState,
-    onEvent: (TidbitDetailEvent) -> Unit,
-    onAction: (TidbitDetailAction) -> Unit // This onAction is for TidbitDetailScreen, might be used by other presentation types
-) {
-    LaunchedEffect(tidbitId) {
-        onEvent(TidbitDetailEvent.GetTidbit(tidbitId))
-    }
-    if (state.isLoading) {
-        Box(modifier = Modifier.fillMaxSize()) {
+fun TidbitDetailScreen(state: TidbitDetailState, onEvent: (TidbitDetailEvent) -> Unit, modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize()) {
+        if (state.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
-    }
-    state.presentation?.let { presentation ->
-        when (presentation) {
-            is TidbitPresentation.ArticlePresentation -> {
-                TidbitArticleDetail(
-                    modifier = modifier,
-                    presentation = presentation,
-                    onEvent = onEvent
-                )
-            }
+        state.presentation?.let { presentation ->
+            when (presentation) {
+                is TidbitPresentation.ArticlePresentation -> {
+                    TidbitArticleDetail(
+                        modifier = Modifier,
+                        presentation = presentation,
+                        onEvent = onEvent
+                    )
+                }
 
-            is TidbitPresentation.AudioPresentation -> {
-                TidbitAudioDetail(
-                    modifier = modifier,
-                    presentation = presentation,
-                    onEvent = onEvent
-                )
-            }
+                is TidbitPresentation.AudioPresentation -> {
+                    TidbitAudioDetail(
+                        modifier = Modifier,
+                        presentation = presentation,
+                        onEvent = onEvent
+                    )
+                }
 
-            is TidbitPresentation.VideoPresentation -> {
-                TidbitVideoDetail(
-                    modifier = modifier,
-                    onEvent = onEvent,
-                    presentation = presentation
-                )
+                is TidbitPresentation.VideoPresentation -> {
+                    TidbitVideoDetail(
+                        modifier = Modifier,
+                        onEvent = onEvent,
+                        presentation = presentation
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun DetailTopAppBar(modifier: Modifier = Modifier, onBackClicked: () -> Unit) {
+private fun DetailTopAppBar(onBackClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onBackClicked) {
+        IconButton(onClick = onBackClick) {
             Icon(
                 imageVector = Icons.AutoMirrored.Default.ArrowBack,
                 contentDescription = stringResource(id = R.string.back)
@@ -112,7 +101,7 @@ private fun DetailTopAppBar(modifier: Modifier = Modifier, onBackClicked: () -> 
 }
 
 @Composable
-private fun AuthorCategoryInfo(modifier: Modifier = Modifier, author: String, category: String) {
+private fun AuthorCategoryInfo(author: String, category: String, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     Row(
         modifier = modifier,
@@ -145,13 +134,13 @@ private fun AuthorCategoryInfo(modifier: Modifier = Modifier, author: String, ca
 
 @Composable
 private fun TidbitActionRow(
-    modifier: Modifier = Modifier,
     isLiked: Boolean,
     isBookmarked: Boolean,
     onLikeClick: () -> Unit,
     onBookmarkClick: () -> Unit,
     onShareClick: () -> Unit,
-    onSourceClick: () -> Unit
+    onSourceClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     val likeIcon = if (isLiked) R.drawable.ic_like_filled else R.drawable.ic_like
@@ -209,14 +198,18 @@ private fun TidbitActionRow(
 }
 
 @Composable
-private fun TidbitArticleDetail(modifier: Modifier = Modifier, presentation: TidbitPresentation.ArticlePresentation, onEvent: (TidbitDetailEvent) -> Unit) {
+private fun TidbitArticleDetail(
+    presentation: TidbitPresentation.ArticlePresentation,
+    onEvent: (TidbitDetailEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val isLiked = remember { mutableStateOf(presentation.isLiked) }
     val isBookmarked = remember { mutableStateOf(presentation.isBookmarked) } // State managed here
 
     Scaffold(
         modifier = modifier,
         topBar = {
-            DetailTopAppBar(onBackClicked = { onEvent(TidbitDetailEvent.GoBack) })
+            DetailTopAppBar(onBackClick = { onEvent(TidbitDetailEvent.GoBack) })
         },
         bottomBar = {
             TidbitActionRow(
@@ -289,14 +282,18 @@ private fun TidbitArticleDetail(modifier: Modifier = Modifier, presentation: Tid
 }
 
 @Composable
-private fun TidbitVideoDetail(modifier: Modifier = Modifier, presentation: TidbitPresentation.VideoPresentation, onEvent: (TidbitDetailEvent) -> Unit) {
+private fun TidbitVideoDetail(
+    presentation: TidbitPresentation.VideoPresentation,
+    onEvent: (TidbitDetailEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val isLiked = remember { mutableStateOf(false) } // State managed here
     val isBookmarked = remember { mutableStateOf(false) } // State managed here
 
     Scaffold(
         modifier = modifier,
         topBar = {
-            DetailTopAppBar(onBackClicked = { onEvent(TidbitDetailEvent.GoBack) })
+            DetailTopAppBar(onBackClick = { onEvent(TidbitDetailEvent.GoBack) })
         }
     ) { innerPadding ->
         Column(
@@ -376,14 +373,18 @@ private fun TidbitVideoDetail(modifier: Modifier = Modifier, presentation: Tidbi
 }
 
 @Composable
-private fun TidbitAudioDetail(modifier: Modifier = Modifier, presentation: TidbitPresentation.AudioPresentation, onEvent: (TidbitDetailEvent) -> Unit) {
+private fun TidbitAudioDetail(
+    presentation: TidbitPresentation.AudioPresentation,
+    onEvent: (TidbitDetailEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val isLiked = remember { mutableStateOf(presentation.isLiked) }
     val isBookmarked = remember { mutableStateOf(presentation.isBookmarked) }
 
     Scaffold(
         modifier = modifier,
         topBar = {
-            DetailTopAppBar(onBackClicked = { onEvent(TidbitDetailEvent.GoBack) })
+            DetailTopAppBar(onBackClick = { onEvent(TidbitDetailEvent.GoBack) })
         }
     ) { innerPadding ->
         Column(
@@ -457,12 +458,10 @@ private fun TidbitAudioDetail(modifier: Modifier = Modifier, presentation: Tidbi
 
 @Preview
 @Composable
-fun TidbitDetailScreenPreview() {
+private fun TidbitDetailScreenPreview() {
     GPTInvestorTheme {
         TidbitDetailScreen(
-            tidbitId = "1",
             onEvent = {},
-            onAction = {},
             state = TidbitDetailState(
                 id = "1",
                 presentation = TidbitPresentation.AudioPresentation(

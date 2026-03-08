@@ -18,8 +18,7 @@ class AuthenticationViewModel(
     private val authRepository: AuthenticationRepository,
     private val analyticsLogger: AnalyticsLogger,
     private val gptInvestorPreferences: GPTInvestorPreferences
-) :
-    ViewModel() {
+) : ViewModel() {
 
     private val _isUserSignedIn = MutableStateFlow(false)
     val isUserSignedIn = _isUserSignedIn.asStateFlow()
@@ -100,7 +99,9 @@ class AuthenticationViewModel(
                 }
                 _actions.emit(AuthenticationAction.OnLogin("Login Success"))
             } else {
-                _actions.emit(AuthenticationAction.OnLogin(loginSuccess.exceptionOrNull()?.message.toString()))
+                _actions.emit(
+                    AuthenticationAction.OnLogin(loginSuccess.exceptionOrNull()?.message.toString())
+                )
                 _newAuthState.update { it.copy(loading = false, errorMessage = "Login failed") }
             }
         }
@@ -129,7 +130,11 @@ class AuthenticationViewModel(
                         password = ""
                     )
                 }
-                _actions.emit(AuthenticationAction.OnSignUp("Sign up Success, Please check your email to verify your account"))
+                _actions.emit(
+                    AuthenticationAction.OnSignUp(
+                        "Sign up Success, Please check your email to verify your account"
+                    )
+                )
             } else {
                 _newAuthState.update {
                     it.copy(
@@ -137,7 +142,11 @@ class AuthenticationViewModel(
                         errorMessage = "Sign up failed"
                     )
                 }
-                _actions.emit(AuthenticationAction.OnSignUp(signUpResponse.exceptionOrNull()?.message.toString()))
+                _actions.emit(
+                    AuthenticationAction.OnSignUp(
+                        signUpResponse.exceptionOrNull()?.message.toString()
+                    )
+                )
             }
         }
     }
@@ -148,7 +157,11 @@ class AuthenticationViewModel(
             if (result.isSuccess) {
                 _actions.emit(AuthenticationAction.OnLogin("Login Success"))
             } else {
-                _actions.emit(AuthenticationAction.OnLogin(result.exceptionOrNull()?.message ?: "Login failed"))
+                _actions.emit(
+                    AuthenticationAction.OnLogin(
+                        result.exceptionOrNull()?.message ?: "Login failed"
+                    )
+                )
             }
         }
     }
@@ -166,10 +179,7 @@ sealed class AuthResult<T> {
     class Loading<T> : AuthResult<T>()
 }
 
-data class DrawerState(
-    val user: String? = null,
-    val theme: String? = "Dark"
-)
+data class DrawerState(val user: String? = null, val theme: String? = "Dark")
 
 data class NewAuthenticationUIState(
     val authenticationScreen: AuthenticationScreen = AuthenticationScreen.Login,
@@ -182,8 +192,11 @@ data class NewAuthenticationUIState(
     val enableButton = if (authenticationScreen == AuthenticationScreen.Login) {
         email.trim().isNotEmpty() && password.trim().isNotEmpty() && !loading
     } else {
-        email.trim().isNotEmpty() && password.trim().isNotEmpty() && name.trim()
-            .isNotEmpty() && !loading
+        email.trim().isNotEmpty() &&
+            password.trim().isNotEmpty() &&
+            name.trim()
+                .isNotEmpty() &&
+            !loading
     }
 }
 

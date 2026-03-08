@@ -11,7 +11,4 @@ data class AddToWaitlistRequest(
 )
 
 @Serializable
-data class AddToWaitlistResponse(
-    @SerialName("message")val status: String
-)
-
+data class AddToWaitlistResponse(@SerialName("message")val status: String)

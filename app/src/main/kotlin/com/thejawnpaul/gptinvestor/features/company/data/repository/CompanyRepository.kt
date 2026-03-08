@@ -73,7 +73,11 @@ class CompanyRepository(
 
     override suspend fun getAllSector(): Flow<Either<Failure, List<SectorInput>>> = flow {
         val list = listOf(
-            SectorInput.CustomSector(sectorName = "Top picks", sectorKey = "top-picks", hasImage = true),
+            SectorInput.CustomSector(
+                sectorName = "Top picks",
+                sectorKey = "top-picks",
+                hasImage = true
+            ),
             SectorInput.AllSector
         )
         val companyList = companyDao.getAllCompanies()
@@ -105,7 +109,10 @@ class CompanyRepository(
                     emit(Either.Right(it))
                     analyticsLogger.logEvent(
                         eventName = "Company Selected",
-                        params = mapOf("company_ticker" to ticker, "company_name" to it.name.toString())
+                        params = mapOf(
+                            "company_ticker" to ticker,
+                            "company_name" to it.name.toString()
+                        )
                     )
                 }
             }
@@ -196,22 +203,20 @@ class CompanyRepository(
         }
     }
 
-    override fun searchCompaniesPaged(query: SearchCompanyQuery): Flow<PagingData<Company>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = CompanyPagingSource.PAGE_SIZE,
-                enablePlaceholders = false,
-                initialLoadSize = CompanyPagingSource.PAGE_SIZE
-            ),
-            pagingSourceFactory = {
-                CompanyPagingSource(
-                    apiService = apiService,
-                    query = query.query.ifBlank { null },
-                    sector = query.sector
-                )
-            }
-        ).flow
-    }
+    override fun searchCompaniesPaged(query: SearchCompanyQuery): Flow<PagingData<Company>> = Pager(
+        config = PagingConfig(
+            pageSize = CompanyPagingSource.PAGE_SIZE,
+            enablePlaceholders = false,
+            initialLoadSize = CompanyPagingSource.PAGE_SIZE
+        ),
+        pagingSourceFactory = {
+            CompanyPagingSource(
+                apiService = apiService,
+                query = query.query.ifBlank { null },
+                sector = query.sector
+            )
+        }
+    ).flow
 
     private suspend fun updateCompanyList(): List<Company>? {
         try {
@@ -247,4 +252,3 @@ class CompanyRepository(
         }
     }
 }
-

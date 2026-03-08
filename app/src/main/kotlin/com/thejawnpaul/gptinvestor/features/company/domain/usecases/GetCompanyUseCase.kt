@@ -13,12 +13,11 @@ import org.koin.core.annotation.Factory
 
 @Factory
 class GetCompanyUseCase(
-    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: ICompanyRepository
 ) : BaseUseCase<String, CompanyDetailRemoteResponse>(coroutineScope, dispatcher) {
 
-    override suspend fun run(params: String): Flow<Either<Failure, CompanyDetailRemoteResponse>> {
-        return repository.getCompany(params)
-    }
+    override suspend fun run(params: String): Flow<Either<Failure, CompanyDetailRemoteResponse>> =
+        repository.getCompany(params)
 }

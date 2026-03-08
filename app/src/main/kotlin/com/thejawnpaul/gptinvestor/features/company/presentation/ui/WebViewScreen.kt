@@ -24,8 +24,9 @@ import com.thejawnpaul.gptinvestor.R
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun WebViewScreen(url: String, onGoBack: () -> Unit) {
+fun WebViewScreen(url: String, onGoBack: () -> Unit, modifier: Modifier = Modifier) {
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(

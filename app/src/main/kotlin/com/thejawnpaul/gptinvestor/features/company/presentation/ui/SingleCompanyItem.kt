@@ -35,7 +35,7 @@ import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
-fun SingleCompanyItem(modifier: Modifier, company: CompanyPresentation, onClick: (String) -> Unit) {
+fun SingleCompanyItem(company: CompanyPresentation, onClick: (String) -> Unit, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     OutlinedCard(
@@ -158,7 +158,7 @@ fun SingleCompanyItem(modifier: Modifier, company: CompanyPresentation, onClick:
 
 @Preview
 @Composable
-fun SingleCompanyItemPreview() {
+private fun SingleCompanyItemPreview() {
     GPTInvestorTheme {
         Surface {
             SingleCompanyItem(
@@ -167,7 +167,9 @@ fun SingleCompanyItemPreview() {
                     ticker = "AAPL",
                     name = "I am a long company with a very long name",
                     logo = "https://logo.clearbit.com/apple.com",
-                    summary = "Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide. It also sells various related services. The company's products include iPhone, Mac, iPad, and Wearables, Home and Accessories.",
+                    summary =
+                    "Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets," +
+                        " wearables, and accessories worldwide. It also sells various related services. The company's products include iPhone, Mac, iPad, and Wearables, Home and Accessories.",
                     price = 150.12f,
                     priceChange = PriceChange(
                         change = 1.25f,

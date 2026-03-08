@@ -10,4 +10,3 @@ data class TrendingRemote(
     @SerialName("name") val name: String,
     @SerialName("logo") val logo: String
 )
-

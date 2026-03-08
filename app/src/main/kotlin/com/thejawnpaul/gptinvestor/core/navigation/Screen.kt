@@ -10,9 +10,7 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
     }
 
     data object WebViewScreen : Screen("web_view_screen/{url}", false) {
-        fun createRoute(url: String): String {
-            return "web_view_screen/$url"
-        }
+        fun createRoute(url: String): String = "web_view_screen/$url"
     }
 
     data object HistoryDetailScreen : Screen("history_detail_screen/{conversationId}", false) {
@@ -38,7 +36,9 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
             val params = mutableListOf<String>()
 
             if (chatInput.isNotEmpty()) {
-                params.add("chatInput=${URLEncoder.encode(chatInput, StandardCharsets.UTF_8.toString())}")
+                params.add(
+                    "chatInput=${URLEncoder.encode(chatInput, StandardCharsets.UTF_8.toString())}"
+                )
             }
 
             if (title != null) {
@@ -55,7 +55,7 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
 
     data object HomeTabScreen : Screen("home_tab_screen", true)
     data object DiscoverTabScreen : Screen("discover_tab_screen", true) {
-        const val deepLink = "app://gpt-investor/discover_tab_screen"
+        const val DEEP_LINK = "app://gpt-investor/discover_tab_screen"
     }
     data object HistoryTabScreen : Screen("history_tab_screen", true)
 

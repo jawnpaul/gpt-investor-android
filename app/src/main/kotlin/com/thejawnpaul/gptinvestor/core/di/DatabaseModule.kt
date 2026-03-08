@@ -14,15 +14,13 @@ import org.koin.core.annotation.Singleton
 object DatabaseModule {
 
     @Singleton
-    fun provideDataBase(context: Context): GPTInvestorDatabase {
-        return Room.databaseBuilder(
-            context.applicationContext,
-            GPTInvestorDatabase::class.java,
-            GPTInvestorDatabase.DB_NAME
-            // TODO:Remove fallback to destructive migration
-        ).fallbackToDestructiveMigration()
-            .build()
-    }
+    fun provideDataBase(context: Context): GPTInvestorDatabase = Room.databaseBuilder(
+        context.applicationContext,
+        GPTInvestorDatabase::class.java,
+        GPTInvestorDatabase.DB_NAME
+        // TODO:Remove fallback to destructive migration
+    ).fallbackToDestructiveMigration()
+        .build()
 
     @Singleton
     fun providesCompanyDao(db: GPTInvestorDatabase): CompanyDao = db.companyDao()

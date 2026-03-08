@@ -35,7 +35,14 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBarCustom(modifier: Modifier, query: String, placeHolder: String, onQueryChange: (newQuery: String) -> Unit, onSearch: (query: String) -> Unit, onClose: () -> Unit) {
+fun SearchBarCustom(
+    query: String,
+    placeHolder: String,
+    onClose: () -> Unit,
+    onQueryChange: (newQuery: String) -> Unit,
+    onSearch: (query: String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     Surface(
@@ -120,7 +127,7 @@ fun SearchBarCustom(modifier: Modifier, query: String, placeHolder: String, onQu
 
 @Preview
 @Composable
-fun SearchPreview(modifier: Modifier = Modifier) {
+private fun SearchPreview(modifier: Modifier = Modifier) {
     GPTInvestorTheme {
         SearchBarCustom(
             modifier = Modifier,

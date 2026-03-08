@@ -22,7 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,13 +50,14 @@ import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CompanyDetailScreen(modifier: Modifier, state: SingleCompanyView, ticker: String, onEvent: (CompanyDetailEvent) -> Unit, onAction: (CompanyDetailAction) -> Unit) {
+fun CompanyDetailScreen(
+    state: SingleCompanyView,
+    onEvent: (CompanyDetailEvent) -> Unit,
+    onAction: (CompanyDetailAction) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     var showBottomSheet by remember { mutableStateOf(false) }
-
-    LaunchedEffect(ticker) {
-        onEvent(CompanyDetailEvent.UpdateTicker(ticker))
-    }
 
     Column(
         modifier = modifier
@@ -89,7 +89,7 @@ fun CompanyDetailScreen(modifier: Modifier, state: SingleCompanyView, ticker: St
                                         .windowInsetsPadding(
                                             insets = WindowInsets.ime
                                         ),
-                                    onSendClicked = {
+                                    onSendClick = {
                                         keyboardController?.hide()
                                         onEvent(CompanyDetailEvent.SendClick)
                                     },
@@ -170,20 +170,26 @@ fun CompanyDetailScreen(modifier: Modifier, state: SingleCompanyView, ticker: St
 
                             if (state.showWaitListBottomSheet) {
                                 GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
-                                    onEvent(CompanyDetailEvent.UpgradeModel(showBottomSheet = false))
+                                    onEvent(
+                                        CompanyDetailEvent.UpgradeModel(showBottomSheet = false)
+                                    )
                                 }) {
                                     WaitlistBottomSheetContent(
                                         modifier = Modifier,
                                         options = state.waitlistAvailableOptions,
                                         selectedOptions = state.selectedWaitlistOptions,
-                                        onOptionSelected = {
+                                        onSelectOption = {
                                             onEvent(CompanyDetailEvent.SelectWaitlistOption(it))
                                         },
                                         onJoinWaitList = {
                                             onEvent(CompanyDetailEvent.JoinWaitList)
                                         },
                                         onDismiss = {
-                                            onEvent(CompanyDetailEvent.UpgradeModel(showBottomSheet = false))
+                                            onEvent(
+                                                CompanyDetailEvent.UpgradeModel(
+                                                    showBottomSheet = false
+                                                )
+                                            )
                                         }
                                     )
                                 }
@@ -209,7 +215,9 @@ fun CompanyDetailScreen(modifier: Modifier, state: SingleCompanyView, ticker: St
                                             .padding(top = 16.dp),
                                         company = company,
                                         onClickNews = {
-                                            onAction(CompanyDetailAction.OnNavigateToWebView(url = it))
+                                            onAction(
+                                                CompanyDetailAction.OnNavigateToWebView(url = it)
+                                            )
                                         },
                                         onClickSources = {
                                             showBottomSheet = true
@@ -237,7 +245,7 @@ fun CompanyDetailScreen(modifier: Modifier, state: SingleCompanyView, ticker: St
                                 onEvent(CompanyDetailEvent.CopyToClipboard(it))
                             },
                             inputQuery = state.inputQuery,
-                            onInputQueryChanged = { input ->
+                            onInputQueryChange = { input ->
                                 onEvent(CompanyDetailEvent.QueryInputChanged(input))
                             },
                             onSendClick = {
@@ -266,7 +274,7 @@ fun CompanyDetailScreen(modifier: Modifier, state: SingleCompanyView, ticker: St
 
 @Preview(showBackground = true)
 @Composable
-fun CompanyDetailScreenPreview() {
+private fun CompanyDetailScreenPreview() {
     GPTInvestorTheme {
         CompanyDetailScreen(
             modifier = Modifier.fillMaxSize(),
@@ -284,7 +292,9 @@ fun CompanyDetailScreenPreview() {
                     response = CompanyDetailRemoteResponse(
                         ticker = "AAPL",
                         name = "Apple Inc.",
-                        about = "Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide.",
+                        about =
+                        "Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets" +
+                            ", wearables, and accessories worldwide.",
                         price = 175.43f,
                         change = 1.2f,
                         marketCap = 2800000000000L,
@@ -294,7 +304,6 @@ fun CompanyDetailScreenPreview() {
                     )
                 )
             ),
-            ticker = "AAPL",
             onEvent = {},
             onAction = {}
         )

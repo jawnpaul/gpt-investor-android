@@ -14,11 +14,10 @@ import org.koin.core.annotation.Factory
 
 @Factory
 class SearchCompaniesUseCase(
-    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: ICompanyRepository
 ) : BaseUseCase<SearchCompanyQuery, List<Company>>(coroutineScope, dispatcher) {
-    override suspend fun run(params: SearchCompanyQuery): Flow<Either<Failure, List<Company>>> {
-        return repository.searchCompany(params)
-    }
+    override suspend fun run(params: SearchCompanyQuery): Flow<Either<Failure, List<Company>>> =
+        repository.searchCompany(params)
 }

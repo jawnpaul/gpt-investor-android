@@ -23,38 +23,22 @@ data class ChatMessageRemote(
 )
 
 @Serializable
-data class SuggestionResponse(
-    @SerialName("suggestions") val suggestions: List<SuggestionRemote> = emptyList()
-)
+data class SuggestionResponse(@SerialName("suggestions") val suggestions: List<SuggestionRemote> = emptyList())
 
 @Serializable
-data class SuggestionRemote(
-    @SerialName("label") val label: String?,
-    @SerialName("query") val query: String?
-)
+data class SuggestionRemote(@SerialName("label") val label: String?, @SerialName("query") val query: String?)
 
 @Serializable
-data class ConversationTitleResponse(
-    @SerialName("title") val title: String
-)
+data class ConversationTitleResponse(@SerialName("title") val title: String)
 
 @Serializable
-data class TextStreamResponse(
-    @SerialName("text") val text: String
-)
+data class TextStreamResponse(@SerialName("text") val text: String)
 
 @Serializable
-data class ConversationIdResponse(
-    @SerialName("id") val id: String
-)
+data class ConversationIdResponse(@SerialName("id") val id: String)
 
 @Serializable
-data class CompletionResponse(
-    @SerialName("done") val done: Boolean
-)
+data class CompletionResponse(@SerialName("done") val done: Boolean)
 
 @Serializable
-data class ErrorResponse(
-    @SerialName("error") val error: String
-)
-
+data class ErrorResponse(@SerialName("error") val error: String)

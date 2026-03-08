@@ -49,7 +49,6 @@ class ConversationRepository(
 
     private val json = Json { ignoreUnknownKeys = true }
 
-
     override suspend fun getDefaultPrompts(): Flow<Either<Failure, List<DefaultPrompt>>> = flow {
         try {
             /*val response = apiService.getDefaultPrompts()
@@ -242,8 +241,8 @@ class ConversationRepository(
         }
     }.flowOn(Dispatchers.IO)
 
-    private suspend fun getConversation(conversation: ConversationPrompt): StructuredConversation {
-        return if (conversationDao.getSingleConversation(conversation.conversationId) != null) {
+    private suspend fun getConversation(conversation: ConversationPrompt): StructuredConversation =
+        if (conversationDao.getSingleConversation(conversation.conversationId) != null) {
             val existingConversation =
                 conversationDao.getSingleConversation(conversation.conversationId)!!
             val messages = messageDao.getMessagesForConversation(conversation.conversationId)
@@ -268,7 +267,6 @@ class ConversationRepository(
                 messageList = mutableListOf()
             )
         }
-    }
 
     private suspend fun FlowCollector<Either<Failure, Conversation>>.handleSseStream(
         response: HttpResponse,
@@ -303,7 +301,10 @@ class ConversationRepository(
                                     chunk.append(text)
                                     val updatedMessages = ArrayList(currentConversation.messageList)
                                     val index =
-                                        updatedMessages.indexOfFirst { it.id == messageId && it is GenAiTextMessage }
+                                        updatedMessages.indexOfFirst {
+                                            it.id == messageId &&
+                                                it is GenAiTextMessage
+                                        }
                                     if (index != -1) {
                                         val original = updatedMessages[index] as GenAiTextMessage
                                         updatedMessages[index] =
@@ -323,12 +324,16 @@ class ConversationRepository(
 
                         "conversation_id" -> {
                             try {
-                                val conversationIdResponse = json.decodeFromString<ConversationIdResponse>(data)
+                                val conversationIdResponse = json.decodeFromString<ConversationIdResponse>(
+                                    data
+                                )
                                 conversationIdResponse.id.let { remoteId ->
                                     Timber.d("Syncing Remote ID: $remoteId")
                                     conversationDao.getSingleConversation(currentConversation.id)
                                         ?.let { entity ->
-                                            conversationDao.updateConversation(entity.copy(remoteId = remoteId))
+                                            conversationDao.updateConversation(
+                                                entity.copy(remoteId = remoteId)
+                                            )
                                         }
                                 }
                             } catch (e: Exception) {
@@ -338,8 +343,14 @@ class ConversationRepository(
 
                         "entity" -> {
                             try {
-                                val entity = json.decodeFromString<CompanyDetailRemoteResponse>(data)
-                                if (currentConversation.messageList.any { it is GenAiEntityMessage && it.entity?.ticker == entity.ticker }) {
+                                val entity = json.decodeFromString<CompanyDetailRemoteResponse>(
+                                    data
+                                )
+                                if (currentConversation.messageList.any {
+                                        it is GenAiEntityMessage &&
+                                            it.entity?.ticker == entity.ticker
+                                    }
+                                ) {
                                     // continue
                                 } else {
                                     val updatedMessages = ArrayList(currentConversation.messageList)
@@ -377,13 +388,21 @@ class ConversationRepository(
 
                         "suggestions" -> {
                             try {
-                                val suggestionsResponse = json.decodeFromString<SuggestionResponse>(data)
+                                val suggestionsResponse = json.decodeFromString<SuggestionResponse>(
+                                    data
+                                )
                                 suggestionsResponse.suggestions.let { suggestions ->
                                     val domainSuggestions = suggestions.map {
-                                        SuggestionRemote(label = it.label ?: "", query = it.query ?: "")
+                                        SuggestionRemote(
+                                            label = it.label ?: "",
+                                            query =
+                                            it.query ?: ""
+                                        )
                                     }
                                     currentConversation =
-                                        currentConversation.copy(suggestedPrompts = domainSuggestions)
+                                        currentConversation.copy(
+                                            suggestedPrompts = domainSuggestions
+                                        )
                                     emit(Either.Right(currentConversation))
                                 }
                             } catch (e: Exception) {
@@ -393,11 +412,15 @@ class ConversationRepository(
 
                         "title" -> {
                             try {
-                                val titleResponse = json.decodeFromString<ConversationTitleResponse>(data)
+                                val titleResponse = json.decodeFromString<ConversationTitleResponse>(
+                                    data
+                                )
                                 titleResponse.title.let { title ->
                                     currentConversation = currentConversation.copy(title = title)
                                     emit(Either.Right(currentConversation))
-                                    conversationDao.getSingleConversation(currentConversation.id)?.let {
+                                    conversationDao.getSingleConversation(
+                                        currentConversation.id
+                                    )?.let {
                                         conversationDao.updateConversation(it.copy(title = title))
                                     }
                                 }
@@ -413,13 +436,18 @@ class ConversationRepository(
                                     Timber.e("SSE Error: $error")
                                     val updatedMessages = ArrayList(currentConversation.messageList)
                                     val index =
-                                        updatedMessages.indexOfFirst { it.id == messageId && it is GenAiTextMessage }
+                                        updatedMessages.indexOfFirst {
+                                            it.id == messageId &&
+                                                it is GenAiTextMessage
+                                        }
                                     if (index != -1) {
                                         val original = updatedMessages[index] as GenAiTextMessage
                                         updatedMessages[index] =
                                             original.copy(
                                                 loading = false,
-                                                response = original.response ?: "Couldn't generate a response"
+                                                response =
+                                                original.response
+                                                    ?: "Couldn't generate a response"
                                             )
                                         currentConversation =
                                             currentConversation.copy(messageList = updatedMessages)
@@ -442,7 +470,10 @@ class ConversationRepository(
                             // Final UI update to stop loading
                             val updatedMessages = ArrayList(currentConversation.messageList)
                             val index =
-                                updatedMessages.indexOfFirst { it.id == messageId && it is GenAiTextMessage }
+                                updatedMessages.indexOfFirst {
+                                    it.id == messageId &&
+                                        it is GenAiTextMessage
+                                }
                             if (index != -1) {
                                 val original = updatedMessages[index] as GenAiTextMessage
                                 updatedMessages[index] =
@@ -475,20 +506,23 @@ class ConversationRepository(
         }
     }
 
-
-    private fun mapHttpCodeToFailure(code: Int): Failure {
-        return when (code) {
-            429 -> Failure.RateLimitExceeded
-            413 -> Failure.ContextLimitReached
-            else -> Failure.ServerError
-        }
+    private fun mapHttpCodeToFailure(code: Int): Failure = when (code) {
+        429 -> Failure.RateLimitExceeded
+        413 -> Failure.ContextLimitReached
+        else -> Failure.ServerError
     }
 
     private fun mapSseErrorToFailure(error: String): Failure {
         val normalized = error.lowercase()
         return when {
-            normalized.contains("429") || normalized.contains("rate_limit") -> Failure.RateLimitExceeded
-            normalized.contains("413") || normalized.contains("context_limit") -> Failure.ContextLimitReached
+            normalized.contains(
+                "429"
+            ) ||
+                normalized.contains("rate_limit") -> Failure.RateLimitExceeded
+            normalized.contains(
+                "413"
+            ) ||
+                normalized.contains("context_limit") -> Failure.ContextLimitReached
             else -> Failure.ServerError
         }
     }

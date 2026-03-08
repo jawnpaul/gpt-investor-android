@@ -13,7 +13,7 @@ import org.koin.core.annotation.Factory
 
 @Factory
 class GetSingleHistoryUseCase(
-    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: IHistoryRepository
 ) : BaseUseCase<Long, StructuredConversation>(
@@ -21,7 +21,6 @@ class GetSingleHistoryUseCase(
     dispatcher
 ) {
 
-    override suspend fun run(params: Long): Flow<Either<Failure, StructuredConversation>> {
-        return repository.getSingleHistory(params)
-    }
+    override suspend fun run(params: Long): Flow<Either<Failure, StructuredConversation>> =
+        repository.getSingleHistory(params)
 }

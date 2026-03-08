@@ -31,10 +31,14 @@ interface CompanyDao {
     @Query("SELECT * FROM company_table WHERE ticker IN (:ids)")
     suspend fun getCompaniesByTicker(ids: List<String>): List<CompanyEntity>
 
-    @Query("SELECT * FROM company_table WHERE name LIKE '%' || :query || '%' OR ticker LIKE '%' || :query || '%'")
+    @Query(
+        "SELECT * FROM company_table WHERE name LIKE '%' || :query || '%' OR ticker LIKE '%' || :query || '%'"
+    )
     fun searchAllCompanies(query: String): List<CompanyEntity>
 
-    @Query("SELECT * FROM company_table WHERE sectorKey = :sectorKey AND name LIKE '%' || :query || '%' OR ticker LIKE '%' || :query || '%'")
+    @Query(
+        "SELECT * FROM company_table WHERE sectorKey = :sectorKey AND name LIKE '%' || :query || '%' OR ticker LIKE '%' || :query || '%'"
+    )
     fun searchCompaniesInSector(query: String, sectorKey: String): List<CompanyEntity>
 
     @Update

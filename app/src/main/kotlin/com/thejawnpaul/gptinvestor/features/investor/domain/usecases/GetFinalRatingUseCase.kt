@@ -13,12 +13,11 @@ import org.koin.core.annotation.Factory
 
 @Factory
 class GetFinalRatingUseCase(
-    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: IInvestorRepository
 ) : BaseUseCase<FinalAnalysisRequest, String>(coroutineScope, dispatcher) {
 
-    override suspend fun run(params: FinalAnalysisRequest): Flow<Either<Failure, String>> {
-        return repository.getFinalAnalysis(params)
-    }
+    override suspend fun run(params: FinalAnalysisRequest): Flow<Either<Failure, String>> =
+        repository.getFinalAnalysis(params)
 }

@@ -48,10 +48,10 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
 @Composable
-fun SmoothLineGraph(data: List<GraphPoint>) {
+fun SmoothLineGraph(data: List<GraphPoint>, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     Box(
-        modifier = Modifier
+        modifier = modifier
             .background(Color.Transparent)
             .fillMaxSize()
     ) {

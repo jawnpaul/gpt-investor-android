@@ -10,7 +10,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,12 +29,14 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.core.navigation.SetUpNavGraph
 import com.thejawnpaul.gptinvestor.core.preferences.GPTInvestorPreferences
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.AuthenticationAction
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.AuthenticationViewModel
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DefaultAuthenticationScreen
-import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
-import com.thejawnpaul.gptinvestor.features.billing.presentation.LocalBillingRepository
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.OnboardingScreen
 import com.thejawnpaul.gptinvestor.features.splash.AnimatedSplashScreen
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
@@ -43,9 +44,9 @@ class MainActivity : ComponentActivity() {
 
     private val preferences: GPTInvestorPreferences by inject()
 
-    private val billingRepository: IBillingRepository by inject()
-
     private lateinit var appUpdateManager: AppUpdateManager
+
+    private val authenticationViewModel: AuthenticationViewModel by inject()
 
     private val updateResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
@@ -101,28 +102,48 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
+            LaunchedEffect(Unit) {
+                authenticationViewModel.actions.onEach { action ->
+                    when (action) {
+                        is AuthenticationAction.OnLogin -> {
+                            Toast.makeText(
+                                this@MainActivity,
+                                action.message,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        is AuthenticationAction.OnSignUp -> {
+                            Toast.makeText(
+                                this@MainActivity,
+                                action.message,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }.launchIn(scope)
+            }
+
             GPTInvestorTheme(
                 userThemePreference = themePreference
             ) {
                 if (showSplash) {
-                    AnimatedSplashScreen {
-                        showSplash = false
-                    }
+                    AnimatedSplashScreen(
+                        onSplashFinish = {
+                            showSplash = false
+                        }
+                    )
                 } else {
                     if (isUserSignedIn == true && isFirstInstall == false) {
-                        CompositionLocalProvider(
-                            LocalBillingRepository provides billingRepository
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.background
                         ) {
-                            Surface(
-                                modifier = Modifier.fillMaxSize(),
-                                color = MaterialTheme.colorScheme.background
-                            ) {
-                                SetUpNavGraph(navController = navController)
+                            SetUpNavGraph(navController = navController)
 
-                                // Mark nav graph as ready after composition
-                                LaunchedEffect(Unit) {
-                                    isNavGraphReady = true
-                                }
+                            // Mark nav graph as ready after composition
+                            LaunchedEffect(Unit) {
+                                isNavGraphReady = true
                             }
                         }
                     } else {
@@ -136,21 +157,7 @@ class MainActivity : ComponentActivity() {
                             // LOGIN SCREEN
                             DefaultAuthenticationScreen(
                                 modifier = Modifier,
-                                onAuthSuccess = { text ->
-                                    Toast.makeText(
-                                        this@MainActivity,
-                                        text,
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                    // if user first time login, navigate to onboarding screen else navigate to home screen
-                                },
-                                onAuthFailure = { text ->
-                                    Toast.makeText(
-                                        this@MainActivity,
-                                        text,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
+                                authViewModel = authenticationViewModel
                             )
                         } else {
                             // ONBOARDING SCREEN
@@ -205,9 +212,11 @@ class MainActivity : ComponentActivity() {
                 Screen.TidbitDetailScreen.createRoute(tidbitId = it)
             } ?: Screen.TidbitScreen.route
         }
+
         deepLink.contains("discover") -> {
             Screen.DiscoverTabScreen.route
         }
+
         else -> {
             Screen.HomeScreen.route
         }

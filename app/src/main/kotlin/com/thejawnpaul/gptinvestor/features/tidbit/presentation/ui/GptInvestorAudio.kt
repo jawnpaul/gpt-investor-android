@@ -54,14 +54,14 @@ import timber.log.Timber
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun GptInvestorAudio(
-    modifier: Modifier = Modifier,
     audioUrl: String,
+    modifier: Modifier = Modifier,
     artworkUrl: String? = null,
     autoplay: Boolean = false,
     showControls: Boolean = true,
     loop: Boolean = false,
-    onAudioStarted: (() -> Unit)? = null,
-    onAudioEnded: (() -> Unit)? = null,
+    onAudioStart: (() -> Unit)? = null,
+    onAudioEnd: (() -> Unit)? = null,
     onError: ((String) -> Unit)? = null
 ) {
     val context = LocalContext.current
@@ -99,19 +99,19 @@ fun GptInvestorAudio(
                     when (playbackState) {
                         Player.STATE_READY -> {
                             if (playWhenReady) {
-                                onAudioStarted?.invoke()
+                                onAudioStart?.invoke()
                             }
                         }
 
                         Player.STATE_ENDED -> {
-                            onAudioEnded?.invoke()
+                            onAudioEnd?.invoke()
                         }
                     }
                 }
 
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
                     if (isPlaying) {
-                        onAudioStarted?.invoke()
+                        onAudioStart?.invoke()
                     }
                 }
 
@@ -148,14 +148,14 @@ fun GptInvestorAudio(
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun GptInvestorAudioCompact(
-    modifier: Modifier = Modifier,
     audioUrl: String,
+    modifier: Modifier = Modifier,
     artworkUrl: String? = null,
     title: String? = null,
     autoplay: Boolean = false,
     loop: Boolean = false,
-    onAudioStarted: (() -> Unit)? = null,
-    onAudioEnded: (() -> Unit)? = null,
+    onAudioStart: (() -> Unit)? = null,
+    onAudioEnd: (() -> Unit)? = null,
     onError: ((String) -> Unit)? = null
 ) {
     val context = LocalContext.current
@@ -176,12 +176,12 @@ fun GptInvestorAudioCompact(
                         Player.STATE_READY -> {
                             duration = this@apply.duration
                             if (playWhenReady) {
-                                onAudioStarted?.invoke()
+                                onAudioStart?.invoke()
                             }
                         }
 
                         Player.STATE_ENDED -> {
-                            onAudioEnded?.invoke()
+                            onAudioEnd?.invoke()
                         }
                     }
                 }
@@ -189,7 +189,7 @@ fun GptInvestorAudioCompact(
                 override fun onIsPlayingChanged(playing: Boolean) {
                     isPlaying = playing
                     if (playing) {
-                        onAudioStarted?.invoke()
+                        onAudioStart?.invoke()
                     }
                 }
 

@@ -47,12 +47,12 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
 fun SingleTidbitItem(
-    modifier: Modifier = Modifier,
     tidbit: TidbitPresentation,
     onItemClick: (String) -> Unit,
     onLikeClick: (String, Boolean) -> Unit = { _, _ -> },
     onSaveClick: (String, Boolean) -> Unit = { _, _ -> },
-    onShareClick: (String) -> Unit = {}
+    onShareClick: (String) -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     val isLiked = remember { mutableStateOf(tidbit.isLiked) }

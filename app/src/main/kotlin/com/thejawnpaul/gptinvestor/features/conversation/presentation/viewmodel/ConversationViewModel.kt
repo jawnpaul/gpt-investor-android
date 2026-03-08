@@ -1,10 +1,15 @@
 package com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel
 
+import android.app.Activity
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
+import com.thejawnpaul.gptinvestor.features.billing.domain.BillingConstants
+import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult
+import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
@@ -20,6 +25,8 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInpu
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.state.ConversationView
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction.OnCopy
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -29,11 +36,13 @@ import timber.log.Timber
 
 @KoinViewModel
 class ConversationViewModel(
+    savedStateHandle: SavedStateHandle,
     private val getDefaultPromptsUseCase: GetDefaultPromptsUseCase,
     private val getDefaultPromptResponseUseCase: GetDefaultPromptResponseUseCase,
     private val getInputPromptUseCase: GetInputPromptUseCase,
     private val fedBackRepository: FeedbackRepository,
-    private val modelsRepository: ModelsRepository
+    private val modelsRepository: ModelsRepository,
+    private val billingRepository: IBillingRepository
 ) : ViewModel() {
 
     private val conversationViewMutableStateFlow = MutableStateFlow(ConversationView())
@@ -49,9 +58,13 @@ class ConversationViewModel(
 
     private var upgradeModelId: String? = null
 
+    val title: String? = savedStateHandle["title"]
+    val chatInput: String? = savedStateHandle["chatInput"]
+
     init {
         getDefaultPrompts()
         getAvailableModels()
+        startConversation(title = title, chatInput = chatInput)
     }
 
     fun updateInput(input: String) {
@@ -365,6 +378,42 @@ class ConversationViewModel(
             }
         }
     }
+
+    fun launchPurchaseFlow(activity: Activity) {
+        viewModelScope.launch {
+            val result = billingRepository.launchPurchaseFlow(
+                activity = activity,
+                productId = BillingConstants.PRO_SUBSCRIPTION_PRODUCT_ID
+            )
+            handleEvent(ConversationEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
+            if (result is BillingResult.Error) {
+                processAction(ConversationAction.ShowToast("Billing Error: ${result.message}"))
+            }
+        }
+    }
+
+    private fun startConversation(title: String?, chatInput: String?) {
+        if (chatInput != null) {
+            val decodedChatInput =
+                URLDecoder.decode(chatInput, StandardCharsets.UTF_8.toString())
+            if (title != null) {
+                val decodedTitle =
+                    title.let {
+                        URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+                    }
+                handleEvent(
+                    ConversationEvent.DefaultPromptClicked(
+                        prompt = DefaultPrompt(
+                            title = decodedTitle,
+                            query = decodedChatInput
+                        )
+                    )
+                )
+            } else {
+                handleEvent(ConversationEvent.SendPrompt(query = decodedChatInput))
+            }
+        }
+    }
 }
 
 sealed interface ConversationEvent {
@@ -393,3 +442,5 @@ sealed interface ConversationAction {
     data class OnCopy(val text: String) : ConversationAction
     data class ShowToast(val message: String) : ConversationAction
 }
+
+data class HomeChatInput(val title: String? = null, val input: String? = null)

@@ -30,9 +30,9 @@ const val DEFAULT_MINIMUM_TEXT_LINEE = 10
  */
 @Composable
 fun ExpandableRichText(
+    text: String,
     modifier: Modifier = Modifier,
     textModifier: Modifier = Modifier,
-    text: String,
     bodyTextStyle: TextStyle? = null
 ) {
     // State variables to track the expanded state, clickable state.
@@ -94,8 +94,8 @@ fun ExpandableRichText(
 
 @Composable
 fun CustomRichText(
-    modifier: Modifier = Modifier,
     text: String,
+    modifier: Modifier = Modifier,
     bodyTextStyle: TextStyle = MaterialTheme.typography.bodyMedium
 ) {
     RichTextThemeProvider(

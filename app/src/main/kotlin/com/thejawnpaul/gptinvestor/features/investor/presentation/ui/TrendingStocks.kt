@@ -50,9 +50,9 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SingleTrendingStockItem(
-    modifier: Modifier = Modifier,
+    trendingStock: TrendingStockPresentation,
     onClick: (tickerSymbol: String) -> Unit,
-    trendingStock: TrendingStockPresentation
+    modifier: Modifier = Modifier
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
@@ -148,10 +148,10 @@ fun SingleTrendingStockItem(
 
 @Composable
 fun TrendingStockList(
-    modifier: Modifier = Modifier,
     state: TrendingCompaniesView,
+    onClickRetry: () -> Unit,
     onClick: (tickerSymbol: String) -> Unit,
-    onClickRetry: () -> Unit
+    modifier: Modifier = Modifier
 ) {
     val lazyGridState = rememberLazyStaggeredGridState()
     val coroutineScope = rememberCoroutineScope()

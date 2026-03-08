@@ -35,7 +35,7 @@ import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.theme.linkMedium
 
 @Composable
-fun OnboardingScreen(modifier: Modifier = Modifier, onFinishOnboarding: () -> Unit) {
+fun OnboardingScreen(onFinishOnboarding: () -> Unit, modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier
     ) { innerPadding ->

@@ -37,9 +37,9 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SingleDefaultPrompt(
-    modifier: Modifier = Modifier,
     prompt: DefaultPrompt,
-    onClick: (prompt: DefaultPrompt) -> Unit
+    onClick: (prompt: DefaultPrompt) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
@@ -62,9 +62,9 @@ fun SingleDefaultPrompt(
 
 @Composable
 fun DefaultPrompts(
-    modifier: Modifier = Modifier,
     prompts: List<DefaultPrompt>,
-    onClick: (prompt: DefaultPrompt) -> Unit
+    onClick: (prompt: DefaultPrompt) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var currentPrompts by remember { mutableStateOf(listOf<DefaultPrompt>()) }
     var visible by remember { mutableStateOf(true) }
@@ -113,9 +113,9 @@ fun DefaultPrompts(
 
 @Composable
 fun SingleHomeDefaultPrompt(
-    modifier: Modifier = Modifier,
     prompt: DefaultPrompt,
-    onClick: (prompt: DefaultPrompt) -> Unit
+    onClick: (prompt: DefaultPrompt) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
@@ -143,9 +143,9 @@ fun SingleHomeDefaultPrompt(
 
 @Composable
 fun HomeDefaultPrompts(
-    modifier: Modifier = Modifier,
     prompts: List<DefaultPrompt>,
-    onClick: (prompt: DefaultPrompt) -> Unit
+    onClick: (prompt: DefaultPrompt) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     LazyRow(
         modifier = modifier,

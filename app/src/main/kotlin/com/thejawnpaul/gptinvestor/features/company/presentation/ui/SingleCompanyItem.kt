@@ -35,7 +35,7 @@ import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
-fun SingleCompanyItem(modifier: Modifier = Modifier, company: CompanyPresentation, onClick: (String) -> Unit) {
+fun SingleCompanyItem(company: CompanyPresentation, onClick: (String) -> Unit, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     OutlinedCard(

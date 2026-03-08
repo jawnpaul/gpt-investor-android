@@ -20,11 +20,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,43 +38,11 @@ import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.core.navigation.findActivity
 import com.thejawnpaul.gptinvestor.theme.linkMedium
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun DefaultAuthenticationScreen(
-    modifier: Modifier = Modifier,
-    onAuthSuccess: (String) -> Unit,
-    onAuthFailure: (String) -> Unit,
-    authViewModel: AuthenticationViewModel = koinViewModel()
-) {
+fun DefaultAuthenticationScreen(authViewModel: AuthenticationViewModel, modifier: Modifier = Modifier) {
     var showDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
-
-    val scope = rememberCoroutineScope()
-
-    LaunchedEffect(Unit) {
-        authViewModel.actions.onEach { action ->
-            when (action) {
-                is AuthenticationAction.OnLogin -> {
-                    if (action.message.contains("success", ignoreCase = true)) {
-                        onAuthSuccess(action.message)
-                    } else {
-                        onAuthFailure(action.message)
-                    }
-                }
-
-                is AuthenticationAction.OnSignUp -> {
-                    if (action.message.contains("success", ignoreCase = true)) {
-                        onAuthSuccess(action.message)
-                    } else {
-                        onAuthFailure(action.message)
-                    }
-                }
-            }
-        }.launchIn(scope)
-    }
 
     Box(
         modifier = modifier
@@ -92,16 +58,7 @@ fun DefaultAuthenticationScreen(
             NewAuthenticationScreen(
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .padding(horizontal = 16.dp),
-                onAuthenticationComplete = { message ->
-                    if (message.contains("success", ignoreCase = true)) {
-                        onAuthSuccess(message)
-                        showDialog = false
-                    } else {
-                        onAuthFailure(message)
-                        showDialog = false
-                    }
-                }
+                    .padding(horizontal = 16.dp)
             )
 
             Column(

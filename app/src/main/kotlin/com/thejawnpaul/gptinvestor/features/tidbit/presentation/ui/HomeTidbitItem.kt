@@ -27,13 +27,13 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
 fun HomeTidbitItem(
-    modifier: Modifier = Modifier,
     tidbitId: String,
     imageUrl: String,
     title: String,
     description: String,
+    onClickSeeAll: () -> Unit,
     onTidbitClick: (String) -> Unit,
-    onClickSeeAll: () -> Unit
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier.padding(horizontal = 16.dp),

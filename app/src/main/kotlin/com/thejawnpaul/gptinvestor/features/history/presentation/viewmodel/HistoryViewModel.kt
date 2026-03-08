@@ -1,9 +1,13 @@
 package com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel
 
+import android.app.Activity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.features.billing.domain.BillingConstants
+import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult
+import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
@@ -33,7 +37,8 @@ class HistoryViewModel(
     private val getSingleHistoryUseCase: GetSingleHistoryUseCase,
     private val getInputPromptUseCase: GetInputPromptUseCase,
     private val fedBackRepository: FeedbackRepository,
-    private val modelsRepository: ModelsRepository
+    private val modelsRepository: ModelsRepository,
+    private val billingRepository: IBillingRepository
 ) : ViewModel() {
 
     private val _historyScreenViewState = MutableStateFlow(HistoryScreenView())
@@ -83,6 +88,7 @@ class HistoryViewModel(
     }
 
     fun updateConversationId(conversationId: String) {
+        Timber.e("Abeg thee")
         savedStateHandle["conversationId"] = conversationId.toLong()
         getConversation()
     }
@@ -335,6 +341,23 @@ class HistoryViewModel(
                 getAvailableModels()
             }.onFailure { failure ->
                 Timber.e(failure.stackTraceToString())
+            }
+        }
+    }
+
+    fun launchPurchaseFlow(activity: Activity) {
+        viewModelScope.launch {
+            val result = billingRepository.launchPurchaseFlow(
+                activity = activity,
+                productId = BillingConstants.PRO_SUBSCRIPTION_PRODUCT_ID
+            )
+            handleHistoryDetailEvent(
+                HistoryDetailEvent.ShowRateLimitBottomSheet(showBottomSheet = false)
+            )
+            if (result is BillingResult.Error) {
+                processHistoryDetailAction(
+                    HistoryDetailAction.ShowToast("Billing Error: ${result.message}")
+                )
             }
         }
     }

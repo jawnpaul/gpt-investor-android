@@ -36,9 +36,9 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
 fun CompanyDetailHeader(
-    modifier: Modifier = Modifier,
+    companyHeader: CompanyHeaderPresentation,
     onNavigateUp: () -> Unit,
-    companyHeader: CompanyHeaderPresentation
+    modifier: Modifier = Modifier
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 

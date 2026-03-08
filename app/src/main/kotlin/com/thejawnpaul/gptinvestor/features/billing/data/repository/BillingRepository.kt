@@ -49,7 +49,7 @@ class BillingRepository(
             .build()
     }
 
-    private val _purchases = MutableStateFlow<List<BillingPurchase>>(emptyList())
+    private val purchasesFlow = MutableStateFlow<List<BillingPurchase>>(emptyList())
 
     override fun onPurchasesUpdated(billingResult: BillingResult, purchases: List<Purchase>?) {
         when (billingResult.responseCode) {
@@ -205,7 +205,7 @@ class BillingRepository(
             }
         }
 
-    override fun currentPurchases(): Flow<List<BillingPurchase>> = _purchases.asStateFlow()
+    override fun currentPurchases(): Flow<List<BillingPurchase>> = purchasesFlow.asStateFlow()
 
     override suspend fun acknowledgePurchase(purchase: BillingPurchase): Result<Unit> = try {
         val params = AcknowledgePurchaseParams.newBuilder()
@@ -279,7 +279,7 @@ class BillingRepository(
                 .build()
             billingClient.queryPurchasesAsync(params) { billingResult, purchases ->
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    _purchases.value = purchases.map { it.toDomainPurchase() }
+                    purchasesFlow.value = purchases.map { it.toDomainPurchase() }
                 }
                 cont.resume(Unit)
             }

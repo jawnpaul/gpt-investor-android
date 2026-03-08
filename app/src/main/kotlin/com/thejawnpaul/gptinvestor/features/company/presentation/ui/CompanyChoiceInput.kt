@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 fun CompanyChoiceQuestion(
     possibleAnswers: List<String>,
     selectedAnswer: String?,
-    onOptionSelected: (String) -> Unit,
+    onSelectOption: (String) -> Unit,
     enabled: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -31,7 +31,7 @@ fun CompanyChoiceQuestion(
                 company = it,
                 selected = selected,
                 enabled = enabled,
-                onOptionSelected = { onOptionSelected(it) }
+                onSelectOption = { onSelectOption(it) }
             )
         }
     }
@@ -42,7 +42,7 @@ fun SingleCompanyChoice(
     company: String,
     selected: Boolean,
     enabled: Boolean,
-    onOptionSelected: () -> Unit,
+    onSelectOption: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -51,14 +51,14 @@ fun SingleCompanyChoice(
             .selectable(
                 selected,
                 enabled = enabled,
-                onClick = onOptionSelected,
+                onClick = onSelectOption,
                 role = Role.RadioButton
             )
     ) {
         FilterChip(
             selected = selected,
             enabled = enabled,
-            onClick = onOptionSelected,
+            onClick = onSelectOption,
             label = { Text(text = company) }
         )
     }

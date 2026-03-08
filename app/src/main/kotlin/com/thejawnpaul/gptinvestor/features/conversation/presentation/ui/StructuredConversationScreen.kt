@@ -72,22 +72,22 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StructuredConversationScreen(
-    modifier: Modifier = Modifier,
-    conversation: StructuredConversation,
-    onNavigateUp: () -> Unit,
     text: String,
-    onClickNews: (url: String) -> Unit,
-    onClickFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
-    onCopy: (String) -> Unit,
+    conversation: StructuredConversation,
     inputQuery: String,
-    onInputQueryChanged: (String) -> Unit,
-    onSendClick: () -> Unit,
-    companyName: String = "",
-    onClickSuggestedPrompt: (String) -> Unit,
-    availableModels: List<AvailableModel>,
     selectedModel: AvailableModel,
+    availableModels: List<AvailableModel>,
+    onNavigateUp: () -> Unit,
+    onSendClick: () -> Unit,
+    onCopy: (String) -> Unit,
+    onInputQueryChange: (String) -> Unit,
+    onClickNews: (url: String) -> Unit,
+    onClickSuggestedPrompt: (String) -> Unit,
+    onClickFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
     onModelChange: (AvailableModel) -> Unit,
-    onUpgradeModel: (showBottomSheet: Boolean, modelId: String) -> Unit
+    onUpgradeModel: (showBottomSheet: Boolean, modelId: String) -> Unit,
+    modifier: Modifier = Modifier,
+    companyName: String = ""
 ) {
     val company = conversation.messageList.filterIsInstance<GenAiEntityMessage>().firstOrNull()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -133,7 +133,6 @@ fun StructuredConversationScreen(
                 if (conversation.suggestedPrompts.isNotEmpty()) {
                     FollowUpQuestions(
                         modifier = Modifier,
-                        entity = null,
                         list = conversation.suggestedPrompts,
                         onClick = { prompt ->
                             onClickSuggestedPrompt(prompt.query ?: "")
@@ -147,7 +146,7 @@ fun StructuredConversationScreen(
                         .windowInsetsPadding(
                             insets = WindowInsets.ime
                         ),
-                    onSendClicked = {
+                    onSendClick = {
                         keyboardController?.hide()
                         onSendClick()
                     },
@@ -156,7 +155,7 @@ fun StructuredConversationScreen(
                         companyName
                     ),
                     onTextChange = { input ->
-                        onInputQueryChanged(input)
+                        onInputQueryChange(input)
                     },
                     text = inputQuery,
                     availableModels = availableModels,
@@ -265,13 +264,13 @@ fun StructuredConversationScreen(
 
 @Composable
 fun SingleStructuredResponse(
-    modifier: Modifier = Modifier,
     genAiMessage: GenAiMessage,
-    text: String = "",
     onClickNews: (url: String) -> Unit,
     onClickFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
     onCopy: (text: String) -> Unit,
-    onClickSource: () -> Unit
+    onClickSource: () -> Unit,
+    modifier: Modifier = Modifier,
+    text: String = ""
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
@@ -380,7 +379,7 @@ fun SingleStructuredResponse(
                                     items(dislikeReasons) { reason ->
                                         val stringReason = stringResource(reason)
                                         Surface(
-                                            modifier = modifier,
+                                            modifier = Modifier,
                                             onClick = {
                                                 onClickFeedback(
                                                     genAiMessage.id,
@@ -533,20 +532,19 @@ fun SingleStructuredResponse(
 
 @Composable
 fun FollowUpQuestions(
-    modifier: Modifier = Modifier,
-    entity: String? = null,
     list: List<SuggestionRemote>,
-    onClick: (prompt: SuggestionRemote) -> Unit
+    onClick: (prompt: SuggestionRemote) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     if (list.isNotEmpty()) {
         LazyRow(
-            modifier = Modifier,
+            modifier = modifier,
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(items = list) { suggestion ->
                 Surface(
-                    modifier = modifier,
+                    modifier = Modifier,
                     onClick = {
                         onClick(suggestion)
                     },
@@ -607,7 +605,7 @@ private fun ConversationPreview(modifier: Modifier = Modifier) {
     )
     GPTInvestorTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            FollowUpQuestions(modifier = Modifier, entity = "Netflix", list = prompts) { }
+            FollowUpQuestions(modifier = Modifier, list = prompts, onClick = {})
         }
     }
 }

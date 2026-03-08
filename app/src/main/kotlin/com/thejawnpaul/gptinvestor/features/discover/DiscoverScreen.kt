@@ -50,10 +50,10 @@ import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun DiscoverScreen(
-    modifier: Modifier = Modifier,
-    paging: Flow<PagingData<CompanyPresentation>>,
     state: DiscoveryScreenState,
-    onEvent: (DiscoveryEvent) -> Unit
+    paging: Flow<PagingData<CompanyPresentation>>,
+    onEvent: (DiscoveryEvent) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     // Discover Screen
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -176,7 +176,7 @@ fun DiscoverScreen(
                     SectorChoiceQuestion(
                         possibleAnswers = state.sectors,
                         selectedAnswer = state.selected,
-                        onOptionSelected = {
+                        onSelectOption = {
                             onEvent(DiscoveryEvent.SelectSector(it))
                         }
                     )

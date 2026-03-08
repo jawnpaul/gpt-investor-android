@@ -20,7 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -43,15 +42,11 @@ import kotlinx.coroutines.flow.flowOf
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TidbitScreen(
-    modifier: Modifier = Modifier,
     state: TidbitScreenState,
     tidbitsPagingData: Flow<PagingData<TidbitPresentation>>,
-    onEvent: (TidbitScreenEvent) -> Unit
+    onEvent: (TidbitScreenEvent) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    LaunchedEffect(Unit) {
-        onEvent(TidbitScreenEvent.GetAllTidbits)
-    }
-
     val lazyPagingItems = tidbitsPagingData.collectAsLazyPagingItems()
 
     Scaffold(
@@ -94,7 +89,7 @@ fun TidbitScreen(
                         SectorChoiceQuestion(
                             possibleAnswers = state.options,
                             selectedAnswer = state.selectedOption,
-                            onOptionSelected = {
+                            onSelectOption = {
                                 onEvent(TidbitScreenEvent.OnFilterSelected(filter = it))
                             }
                         )

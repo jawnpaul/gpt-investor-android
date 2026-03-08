@@ -33,7 +33,7 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 fun SectorChoiceQuestion(
     possibleAnswers: List<SectorInput>,
     selectedAnswer: SectorInput?,
-    onOptionSelected: (SectorInput) -> Unit,
+    onSelectOption: (SectorInput) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyRow(
@@ -46,7 +46,7 @@ fun SectorChoiceQuestion(
                 modifier = Modifier,
                 input = it,
                 selected = it == selectedAnswer,
-                onOptionSelected = { onOptionSelected(it) }
+                onSelectOption = { onSelectOption(it) }
             )
         }
     }
@@ -56,7 +56,7 @@ fun SectorChoiceQuestion(
 fun SingleSectorChoice(
     input: SectorInput,
     selected: Boolean,
-    onOptionSelected: () -> Unit,
+    onSelectOption: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
@@ -75,7 +75,7 @@ fun SingleSectorChoice(
             modifier = modifier,
             shape = RoundedCornerShape(corner = CornerSize(20.dp)),
             color = gptInvestorColors.utilColors.borderBright10,
-            onClick = onOptionSelected
+            onClick = onSelectOption
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -96,7 +96,7 @@ fun SingleSectorChoice(
             modifier = modifier,
             shape = RoundedCornerShape(corner = CornerSize(20.dp)),
             border = BorderStroke(width = 2.dp, color = MaterialTheme.colorScheme.outlineVariant),
-            onClick = onOptionSelected
+            onClick = onSelectOption
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -135,7 +135,7 @@ private fun SectorPreview() {
             SectorChoiceQuestion(
                 possibleAnswers = possibleAnswers,
                 selectedAnswer = selectedAnswer,
-                onOptionSelected = {
+                onSelectOption = {
                     selectedAnswer = it
                 }
             )

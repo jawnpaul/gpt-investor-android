@@ -22,7 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,18 +51,13 @@ import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CompanyDetailScreen(
-    modifier: Modifier = Modifier,
     state: SingleCompanyView,
-    ticker: String,
     onEvent: (CompanyDetailEvent) -> Unit,
-    onAction: (CompanyDetailAction) -> Unit
+    onAction: (CompanyDetailAction) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     var showBottomSheet by remember { mutableStateOf(false) }
-
-    LaunchedEffect(ticker) {
-        onEvent(CompanyDetailEvent.UpdateTicker(ticker))
-    }
 
     Column(
         modifier = modifier
@@ -95,7 +89,7 @@ fun CompanyDetailScreen(
                                         .windowInsetsPadding(
                                             insets = WindowInsets.ime
                                         ),
-                                    onSendClicked = {
+                                    onSendClick = {
                                         keyboardController?.hide()
                                         onEvent(CompanyDetailEvent.SendClick)
                                     },
@@ -184,7 +178,7 @@ fun CompanyDetailScreen(
                                         modifier = Modifier,
                                         options = state.waitlistAvailableOptions,
                                         selectedOptions = state.selectedWaitlistOptions,
-                                        onOptionSelected = {
+                                        onSelectOption = {
                                             onEvent(CompanyDetailEvent.SelectWaitlistOption(it))
                                         },
                                         onJoinWaitList = {
@@ -251,7 +245,7 @@ fun CompanyDetailScreen(
                                 onEvent(CompanyDetailEvent.CopyToClipboard(it))
                             },
                             inputQuery = state.inputQuery,
-                            onInputQueryChanged = { input ->
+                            onInputQueryChange = { input ->
                                 onEvent(CompanyDetailEvent.QueryInputChanged(input))
                             },
                             onSendClick = {
@@ -310,7 +304,6 @@ private fun CompanyDetailScreenPreview() {
                     )
                 )
             ),
-            ticker = "AAPL",
             onEvent = {},
             onAction = {}
         )

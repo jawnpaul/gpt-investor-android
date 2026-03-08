@@ -9,7 +9,9 @@ import com.thejawnpaul.gptinvestor.features.history.domain.repository.IHistoryRe
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import org.koin.core.annotation.Factory
 
+@Factory
 class GetAllHistoryUseCase(
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,

@@ -25,10 +25,10 @@ import com.thejawnpaul.gptinvestor.R
 
 @Composable
 fun ThemeDropdown(
-    modifier: Modifier = Modifier,
-    onClick: (String) -> Unit,
+    selectedOption: String,
     options: List<String>,
-    selectedOption: String
+    onClick: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box(

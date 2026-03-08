@@ -40,18 +40,17 @@ import com.thejawnpaul.gptinvestor.theme.linkMedium
 
 @Composable
 fun SignUpScreen(
-    modifier: Modifier = Modifier,
     email: String,
     name: String,
     password: String,
-    loading: Boolean = false,
     enableButton: Boolean,
+    onSignUpClick: () -> Unit,
+    onLoginClick: () -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onNameChange: (String) -> Unit,
-    onSignUpClick: () -> Unit,
-    onLoginClick: () -> Unit,
-    onSignUpWithGoogleClick: () -> Unit
+    modifier: Modifier = Modifier,
+    loading: Boolean = false
 ) {
     var passwordHidden by remember { mutableStateOf(true) }
 
@@ -203,8 +202,7 @@ private fun SignUpPreview() {
                 onPasswordChange = {},
                 onLoginClick = {},
                 onSignUpClick = {},
-                onNameChange = {},
-                onSignUpWithGoogleClick = {}
+                onNameChange = {}
             )
         }
     }

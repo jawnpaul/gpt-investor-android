@@ -56,11 +56,11 @@ import com.thejawnpaul.gptinvestor.theme.bodyChatBody
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionInput(
+    onSendClick: () -> Unit,
     modifier: Modifier = Modifier,
     text: String = "",
     hint: String = "",
     onTextChange: (String) -> Unit = {},
-    onSendClicked: () -> Unit,
     availableModels: List<AvailableModel> = emptyList(),
     selectedModel: AvailableModel = DefaultModel(),
     onModelChange: (AvailableModel) -> Unit = {}
@@ -98,7 +98,7 @@ fun QuestionInput(
                         capitalization = KeyboardCapitalization.Sentences,
                         imeAction = ImeAction.Send
                     ),
-                    keyboardActions = KeyboardActions(onSend = { onSendClicked() }),
+                    keyboardActions = KeyboardActions(onSend = { onSendClick() }),
                     placeholder = {
                         Text(
                             text = hint,
@@ -130,12 +130,12 @@ fun QuestionInput(
                         modifier = Modifier,
                         options = availableModels,
                         selectedOption = selectedModel,
-                        onOptionSelected = onModelChange
+                        onOptionSelect = onModelChange
                     )
                 }
 
                 IconButton(onClick = {
-                    onSendClicked()
+                    onSendClick()
                 }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_send),
@@ -149,10 +149,10 @@ fun QuestionInput(
 
 @Composable
 private fun ModelListDropDown(
-    modifier: Modifier = Modifier,
     options: List<AvailableModel>,
     selectedOption: AvailableModel,
-    onOptionSelected: (AvailableModel) -> Unit
+    onOptionSelect: (AvailableModel) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -243,7 +243,7 @@ private fun ModelListDropDown(
                     modifier = Modifier.padding(start = 16.dp),
                     model = model,
                     onModelChange = {
-                        onOptionSelected(it)
+                        onOptionSelect(it)
                         expanded = false
                     }
                 )
@@ -254,7 +254,7 @@ private fun ModelListDropDown(
 }
 
 @Composable
-fun SingleModelItem(modifier: Modifier = Modifier, model: AvailableModel, onModelChange: (AvailableModel) -> Unit) {
+fun SingleModelItem(model: AvailableModel, onModelChange: (AvailableModel) -> Unit, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     when (model) {
@@ -351,7 +351,7 @@ private fun QuestionInputPreview() {
     GPTInvestorTheme {
         Surface {
             QuestionInput(
-                onSendClicked = {},
+                onSendClick = {},
                 modifier = Modifier,
                 hint = "Ask me a question about stocks"
             )

@@ -1,9 +1,8 @@
 package com.thejawnpaul.gptinvestor.features.history.presentation.ui
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultConversation
@@ -17,53 +16,48 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.WaitlistBot
 
 @Composable
 fun HistoryDetailScreen(
-    modifier: Modifier = Modifier,
-    conversationId: String,
     state: HistoryConversationView,
     onEvent: (HistoryDetailEvent) -> Unit,
     onAction: (HistoryDetailAction) -> Unit,
-    onUpgradeFromRateLimit: () -> Unit = {}
+    onUpgradeFromRateLimit: () -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
-    LaunchedEffect(conversationId) {
-        onEvent(HistoryDetailEvent.GetHistory(conversationId.toLong()))
-    }
-
-    if (state.showRateLimitBottomSheet) {
-        GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
-            onEvent(HistoryDetailEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
-        }) {
-            RateLimitBottomSheetContent(
-                modifier = Modifier,
-                onDismiss = {
-                    onEvent(HistoryDetailEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
-                },
-                onUpgrade = onUpgradeFromRateLimit
-            )
+    Column(modifier = modifier.fillMaxSize()) {
+        if (state.showRateLimitBottomSheet) {
+            GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
+                onEvent(HistoryDetailEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
+            }) {
+                RateLimitBottomSheetContent(
+                    modifier = Modifier,
+                    onDismiss = {
+                        onEvent(HistoryDetailEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
+                    },
+                    onUpgrade = onUpgradeFromRateLimit
+                )
+            }
         }
-    }
 
-    if (state.showWaitListBottomSheet) {
-        GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
-            onEvent(HistoryDetailEvent.UpgradeModel(showBottomSheet = false))
-        }) {
-            WaitlistBottomSheetContent(
-                modifier = Modifier,
-                options = state.waitlistAvailableOptions,
-                selectedOptions = state.selectedWaitlistOptions,
-                onOptionSelected = {
-                    onEvent(HistoryDetailEvent.SelectWaitlistOption(it))
-                },
-                onJoinWaitList = {
-                    onEvent(HistoryDetailEvent.JoinWaitlist)
-                },
-                onDismiss = {
-                    onEvent(HistoryDetailEvent.UpgradeModel(showBottomSheet = false))
-                }
-            )
+        if (state.showWaitListBottomSheet) {
+            GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
+                onEvent(HistoryDetailEvent.UpgradeModel(showBottomSheet = false))
+            }) {
+                WaitlistBottomSheetContent(
+                    modifier = Modifier,
+                    options = state.waitlistAvailableOptions,
+                    selectedOptions = state.selectedWaitlistOptions,
+                    onSelectOption = {
+                        onEvent(HistoryDetailEvent.SelectWaitlistOption(it))
+                    },
+                    onJoinWaitList = {
+                        onEvent(HistoryDetailEvent.JoinWaitlist)
+                    },
+                    onDismiss = {
+                        onEvent(HistoryDetailEvent.UpgradeModel(showBottomSheet = false))
+                    }
+                )
+            }
         }
-    }
 
-    Box(modifier = modifier.fillMaxSize()) {
         when (state.conversation) {
             is DefaultConversation -> {
             }
@@ -86,7 +80,7 @@ fun HistoryDetailScreen(
                         onEvent(HistoryDetailEvent.CopyToClipboard(text))
                     },
                     inputQuery = state.query,
-                    onInputQueryChanged = { input ->
+                    onInputQueryChange = { input ->
                         onEvent(HistoryDetailEvent.UpdateInputQuery(input))
                     },
                     onSendClick = {

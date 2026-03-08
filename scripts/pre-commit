@@ -21,4 +21,8 @@ for FILE in $STAGED_FILES; do
     fi
 done
 
+# Now run the check and fail if any errors remain (including Compose rules)
+set -e
+./gradlew ktlintCheck
+
 echo "Completed.............................................................."

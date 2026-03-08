@@ -23,16 +23,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
-import com.thejawnpaul.gptinvestor.features.billing.domain.BillingConstants
-import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult
-import com.thejawnpaul.gptinvestor.features.billing.presentation.LocalBillingRepository
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.WebViewScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ConversationScreen
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction
-import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationEvent
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationViewModel
 import com.thejawnpaul.gptinvestor.features.discover.DiscoverScreen
 import com.thejawnpaul.gptinvestor.features.discover.DiscoverViewModel
@@ -40,7 +36,6 @@ import com.thejawnpaul.gptinvestor.features.discover.DiscoveryAction
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryDetailScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction
-import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailEvent
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenAction
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
@@ -63,11 +58,10 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SavedTopPick
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPickDetailScreen
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun SetUpNavGraph(navController: NavHostController) {
+fun SetUpNavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     Scaffold { innerPadding ->
 
         NavHost(
@@ -230,7 +224,6 @@ fun SetUpNavGraph(navController: NavHostController) {
 
             composable(route = Screen.CompanyDetailScreen.route) { backStackEntry ->
                 val parentViewModel = koinViewModel<CompanyViewModel>()
-                val ticker = backStackEntry.arguments?.getString("ticker") ?: ""
                 val state = parentViewModel.selectedCompany.collectAsStateWithLifecycle()
                 val context = LocalContext.current
                 val scope = rememberCoroutineScope()
@@ -262,7 +255,6 @@ fun SetUpNavGraph(navController: NavHostController) {
 
                 CompanyDetailScreen(
                     modifier = Modifier.padding(top = 20.dp),
-                    ticker = ticker,
                     state = state.value,
                     onEvent = parentViewModel::handleCompanyDetailEvent,
                     onAction = parentViewModel::processCompanyDetailAction
@@ -283,11 +275,8 @@ fun SetUpNavGraph(navController: NavHostController) {
                 )
             ) { navBackStackEntry ->
                 val context = LocalContext.current
-                val billingRepo = LocalBillingRepository.current
                 val viewModel = koinViewModel<ConversationViewModel>()
                 val state = viewModel.conversation.collectAsStateWithLifecycle()
-                val chatInput = navBackStackEntry.arguments?.getString("chatInput")
-                val title = navBackStackEntry.arguments?.getString("title")
                 val scope = rememberCoroutineScope()
                 LaunchedEffect(Unit) {
                     viewModel.actions.onEach { action ->
@@ -320,31 +309,12 @@ fun SetUpNavGraph(navController: NavHostController) {
 
                 ConversationScreen(
                     modifier = Modifier.padding(top = 20.dp),
-                    chatInput = chatInput,
-                    title = title,
                     state = state.value,
                     onEvent = viewModel::handleEvent,
                     onAction = viewModel::processAction,
                     onUpgradeFromRateLimit = {
                         context.findActivity()?.let { activity ->
-                            scope.launch {
-                                val result = billingRepo.launchPurchaseFlow(
-                                    activity = activity,
-                                    productId = BillingConstants.PRO_SUBSCRIPTION_PRODUCT_ID
-                                )
-                                viewModel.handleEvent(
-                                    ConversationEvent.ShowRateLimitBottomSheet(
-                                        showBottomSheet = false
-                                    )
-                                )
-                                if (result is BillingResult.Error) {
-                                    Toast.makeText(
-                                        context,
-                                        "Billing Error: ${result.message}",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }
+                            viewModel.launchPurchaseFlow(activity)
                         }
                     }
                 )
@@ -363,10 +333,8 @@ fun SetUpNavGraph(navController: NavHostController) {
                 arguments = listOf(navArgument("conversationId") { NavType.StringType })
             ) { navBackStackEntry ->
                 val context = LocalContext.current
-                val billingRepo = LocalBillingRepository.current
                 val viewModel = koinViewModel<HistoryViewModel>()
                 val state = viewModel.conversation.collectAsStateWithLifecycle()
-                val id = navBackStackEntry.arguments?.getString("conversationId") ?: ""
                 val scope = rememberCoroutineScope()
                 LaunchedEffect(Unit) {
                     viewModel.historyDetailAction.onEach { action ->
@@ -399,23 +367,12 @@ fun SetUpNavGraph(navController: NavHostController) {
 
                 HistoryDetailScreen(
                     modifier = Modifier.padding(top = 20.dp),
-                    conversationId = id,
                     state = state.value,
                     onEvent = viewModel::handleHistoryDetailEvent,
                     onAction = viewModel::processHistoryDetailAction,
                     onUpgradeFromRateLimit = {
-                        (context as? Activity)?.let { activity ->
-                            scope.launch {
-                                billingRepo.launchPurchaseFlow(
-                                    activity,
-                                    BillingConstants.PRO_SUBSCRIPTION_PRODUCT_ID
-                                )
-                                viewModel.handleHistoryDetailEvent(
-                                    HistoryDetailEvent.ShowRateLimitBottomSheet(
-                                        showBottomSheet = false
-                                    )
-                                )
-                            }
+                        context.findActivity()?.let { activity ->
+                            viewModel.launchPurchaseFlow(activity)
                         }
                     }
                 )
@@ -427,7 +384,6 @@ fun SetUpNavGraph(navController: NavHostController) {
             ) { navBackStackEntry ->
                 val viewModel = koinViewModel<TopPickViewModel>()
                 val state = viewModel.topPickView.collectAsStateWithLifecycle()
-                val id = navBackStackEntry.arguments?.getString("topPickId") ?: ""
                 val scope = rememberCoroutineScope()
                 val context = LocalContext.current
 
@@ -462,7 +418,6 @@ fun SetUpNavGraph(navController: NavHostController) {
 
                 TopPickDetailScreen(
                     modifier = Modifier.padding(top = 20.dp),
-                    topPickId = id,
                     state = state.value,
                     onEvent = viewModel::handleEvent,
                     onAction = viewModel::processAction
@@ -525,7 +480,6 @@ fun SetUpNavGraph(navController: NavHostController) {
                 route = Screen.TidbitDetailScreen.route,
                 arguments = listOf(navArgument("tidbitId") { NavType.StringType })
             ) { navBackStackEntry ->
-                val tidbitId = navBackStackEntry.arguments?.getString("tidbitId") ?: ""
                 val viewModel = koinViewModel<TidbitViewModel>()
                 val state = viewModel.tidbitDetailState.collectAsStateWithLifecycle()
                 val scope = rememberCoroutineScope()
@@ -565,7 +519,6 @@ fun SetUpNavGraph(navController: NavHostController) {
 
                 TidbitDetailScreen(
                     modifier = Modifier,
-                    tidbitId = tidbitId,
                     onEvent = viewModel::handleDetailEvent,
                     state = state.value
                 )

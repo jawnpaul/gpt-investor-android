@@ -40,15 +40,15 @@ import com.thejawnpaul.gptinvestor.theme.linkMedium
 
 @Composable
 fun LoginScreen(
-    modifier: Modifier = Modifier,
     email: String,
     password: String,
-    loading: Boolean = false,
     enableButton: Boolean,
+    onLoginClick: () -> Unit,
+    onSignUpClick: () -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
-    onLoginClick: () -> Unit,
-    onSignUpClick: () -> Unit
+    modifier: Modifier = Modifier,
+    loading: Boolean = false
 ) {
     var passwordHidden by remember { mutableStateOf(true) }
 

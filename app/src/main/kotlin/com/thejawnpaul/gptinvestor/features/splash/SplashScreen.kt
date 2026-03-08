@@ -47,7 +47,7 @@ private const val FADE_IN_DURATION_MS = 1500
 private const val GLOW_ANIMATION_DURATION_MS = 2000
 
 @Composable
-fun AnimatedSplashScreen(onSplashFinished: () -> Unit) {
+fun AnimatedSplashScreen(onSplashFinish: () -> Unit, modifier: Modifier = Modifier) {
     var startAnimation by remember { mutableStateOf(false) }
     val alpha = remember { Animatable(0f) }
 
@@ -78,18 +78,18 @@ fun AnimatedSplashScreen(onSplashFinished: () -> Unit) {
         label = "logoGlowAlpha"
     )
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(onSplashFinish) {
         startAnimation = true
         alpha.animateTo(
             targetValue = 1f,
             animationSpec = tween(durationMillis = FADE_IN_DURATION_MS)
         )
         delay(SPLASH_DURATION_MS - FADE_IN_DURATION_MS) // Wait for the remaining duration
-        onSplashFinished()
+        onSplashFinish()
     }
 
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize(),
         contentColor = Color.White
     ) {
@@ -157,6 +157,6 @@ fun AnimatedSplashScreen(onSplashFinished: () -> Unit) {
 @Composable
 private fun AnimatedSplashScreenPreview() {
     GPTInvestorTheme {
-        AnimatedSplashScreen(onSplashFinished = { })
+        AnimatedSplashScreen(onSplashFinish = { })
     }
 }

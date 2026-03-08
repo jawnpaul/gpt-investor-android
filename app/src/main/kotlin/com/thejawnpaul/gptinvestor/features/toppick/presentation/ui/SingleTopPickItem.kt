@@ -36,7 +36,7 @@ import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
-fun SingleTopPickItem(modifier: Modifier = Modifier, pickPresentation: TopPickPresentation, onClick: (String) -> Unit) {
+fun SingleTopPickItem(pickPresentation: TopPickPresentation, onClick: (String) -> Unit, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     OutlinedCard(
@@ -159,7 +159,7 @@ fun SingleTopPickItem(modifier: Modifier = Modifier, pickPresentation: TopPickPr
 }
 
 @Composable
-fun HomeTopPickItem(modifier: Modifier = Modifier, pickPresentation: TopPickPresentation, onClick: (String) -> Unit) {
+fun HomeTopPickItem(pickPresentation: TopPickPresentation, onClick: (String) -> Unit, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     Column(
         modifier = modifier.clickable(
@@ -291,7 +291,7 @@ private fun SinglePickPreview(modifier: Modifier = Modifier) {
                     currentPrice = 0.0f
                 )
 
-                SingleTopPickItem(modifier = Modifier, pickPresentation = pick) { }
+                SingleTopPickItem(modifier = Modifier, pickPresentation = pick, onClick = {})
             }
         }
     }

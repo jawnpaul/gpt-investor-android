@@ -30,10 +30,10 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksV
 
 @Composable
 fun SavedTopPicksScreen(
-    modifier: Modifier = Modifier,
     state: TopPicksView,
     onGoBack: () -> Unit,
-    onGoToDetail: (String) -> Unit
+    onGoToDetail: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
         Column(modifier = Modifier) {

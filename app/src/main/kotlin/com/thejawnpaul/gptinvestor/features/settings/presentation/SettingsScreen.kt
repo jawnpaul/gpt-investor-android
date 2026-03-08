@@ -31,10 +31,10 @@ import com.thejawnpaul.gptinvestor.features.settings.presentation.state.Settings
 
 @Composable
 fun SettingsScreen(
-    modifier: Modifier = Modifier,
     state: SettingsView,
     onEvent: (SettingsEvent) -> Unit,
-    onAction: (SettingsAction) -> Unit
+    onAction: (SettingsAction) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
 

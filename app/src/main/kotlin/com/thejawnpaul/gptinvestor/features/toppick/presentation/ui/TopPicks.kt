@@ -30,13 +30,13 @@ import com.thejawnpaul.gptinvestor.theme.linkMedium
 
 @Composable
 fun TopPicks(
-    modifier: Modifier = Modifier,
     state: TopPicksView,
     onClickRetry: () -> Unit,
+    onClickSeeAll: () -> Unit,
     onClick: (id: String) -> Unit,
-    onClickSeeAll: () -> Unit
+    modifier: Modifier = Modifier
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         if (state.loading) {
             // Text
             Text(

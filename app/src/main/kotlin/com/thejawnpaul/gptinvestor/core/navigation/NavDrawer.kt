@@ -53,10 +53,11 @@ fun NavDrawerContent(
     onCloseDrawer: () -> Unit,
     onEvent: (NavDrawerEvent) -> Unit,
     onAction: (NavDrawerAction) -> Unit,
-    state: DrawerState
+    state: DrawerState,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxHeight()
             .width(300.dp)
             .background(MaterialTheme.colorScheme.surface)
@@ -277,7 +278,7 @@ fun NavDrawerContent(
 }
 
 @Composable
-private fun DrawerItem(modifier: Modifier = Modifier, icon: ImageVector, label: String, onClick: () -> Unit) {
+private fun DrawerItem(icon: ImageVector, label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -316,6 +317,7 @@ private fun NavDrawerContentPreview() {
     GPTInvestorTheme {
         Surface {
             NavDrawerContent(
+                modifier = Modifier,
                 onCloseDrawer = {},
                 onEvent = {},
                 onAction = {},

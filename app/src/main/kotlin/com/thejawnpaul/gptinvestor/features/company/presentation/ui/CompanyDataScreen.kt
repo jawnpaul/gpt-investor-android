@@ -34,7 +34,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyFi
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 
 @Composable
-fun CompanyDataScreen(modifier: Modifier, viewModel: CompanyViewModel) {
+fun CompanyDataScreen(modifier: Modifier = Modifier, viewModel: CompanyViewModel) {
     val company = viewModel.selectedCompany.collectAsState()
     val financials = viewModel.companyFinancials.collectAsState()
 
@@ -124,7 +124,9 @@ private fun CardNumbers(title: String, financials: CompanyFinancialsPresentation
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(top = 8.dp)
                 )
-                IconButton(onClick = { expanded = !expanded }, modifier = Modifier.align(Alignment.TopEnd)) {
+                IconButton(onClick = {
+                    expanded = !expanded
+                }, modifier = Modifier.align(Alignment.TopEnd)) {
                     Icon(
                         imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
                         contentDescription = if (expanded) {
@@ -143,7 +145,9 @@ private fun CardNumbers(title: String, financials: CompanyFinancialsPresentation
                                 cell {
                                     Text(
                                         text = stringResource(id = R.string.open),
-                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Bold
+                                        )
                                     )
                                 }
                                 cell { Text(financials.open) }
@@ -153,7 +157,9 @@ private fun CardNumbers(title: String, financials: CompanyFinancialsPresentation
                                 cell {
                                     Text(
                                         text = stringResource(id = R.string.high),
-                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Bold
+                                        )
                                     )
                                 }
                                 cell { Text(financials.high) }
@@ -163,7 +169,9 @@ private fun CardNumbers(title: String, financials: CompanyFinancialsPresentation
                                 cell {
                                     Text(
                                         text = stringResource(id = R.string.low),
-                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Bold
+                                        )
                                     )
                                 }
                                 cell { Text(financials.low) }
@@ -173,7 +181,9 @@ private fun CardNumbers(title: String, financials: CompanyFinancialsPresentation
                                 cell {
                                     Text(
                                         text = stringResource(id = R.string.close),
-                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Bold
+                                        )
                                     )
                                 }
                                 cell { Text(financials.close) }
@@ -182,7 +192,9 @@ private fun CardNumbers(title: String, financials: CompanyFinancialsPresentation
                                 cell {
                                     Text(
                                         text = stringResource(id = R.string.volume),
-                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Bold
+                                        )
                                     )
                                 }
                                 cell { Text(financials.volume) }
@@ -191,7 +203,9 @@ private fun CardNumbers(title: String, financials: CompanyFinancialsPresentation
                                 cell {
                                     Text(
                                         text = stringResource(id = R.string.market_cap),
-                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Bold
+                                        )
                                     )
                                 }
                                 cell { Text(financials.marketCap) }

@@ -39,7 +39,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
 @Composable
-fun SavedTidbitScreen(modifier: Modifier = Modifier, tidbitsPagingData: Flow<PagingData<TidbitPresentation>>, onEvent: (TidbitScreenEvent) -> Unit) {
+fun SavedTidbitScreen(
+    modifier: Modifier = Modifier,
+    tidbitsPagingData: Flow<PagingData<TidbitPresentation>>,
+    onEvent: (TidbitScreenEvent) -> Unit
+) {
     val lazyPagingItems = tidbitsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -172,7 +176,9 @@ fun SavedTidbitScreen(modifier: Modifier = Modifier, tidbitsPagingData: Flow<Pag
                 }
             }
 
-            if (lazyPagingItems.loadState.refresh is LoadState.Error && lazyPagingItems.itemCount == 0) {
+            if (lazyPagingItems.loadState.refresh is LoadState.Error &&
+                lazyPagingItems.itemCount == 0
+            ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -192,7 +198,9 @@ fun SavedTidbitScreen(modifier: Modifier = Modifier, tidbitsPagingData: Flow<Pag
                 }
             }
 
-            if (lazyPagingItems.loadState.refresh is LoadState.NotLoading && lazyPagingItems.itemCount == 0) {
+            if (lazyPagingItems.loadState.refresh is LoadState.NotLoading &&
+                lazyPagingItems.itemCount == 0
+            ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -209,7 +217,7 @@ fun SavedTidbitScreen(modifier: Modifier = Modifier, tidbitsPagingData: Flow<Pag
 
 @Preview
 @Composable
-fun SavedTidbitScreenPreview() {
+private fun SavedTidbitScreenPreview() {
     val sampleTidbits = listOf(
         TidbitPresentation.AudioPresentation(
             id = "1",

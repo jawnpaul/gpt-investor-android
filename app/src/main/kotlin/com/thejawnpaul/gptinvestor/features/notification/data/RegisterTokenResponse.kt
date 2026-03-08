@@ -10,7 +10,4 @@ data class RegisterTokenResponse(
 )
 
 @Serializable
-data class RegisterTokenRequest(
-    @SerialName("token")val token: String? = null
-)
-
+data class RegisterTokenRequest(@SerialName("token")val token: String? = null)

@@ -40,7 +40,7 @@ import com.thejawnpaul.gptinvestor.theme.linkMedium
 
 @Composable
 fun SignUpScreen(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     email: String,
     name: String,
     password: String,
@@ -123,13 +123,21 @@ fun SignUpScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    visualTransformation = if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
+                    visualTransformation = if (passwordHidden) {
+                        PasswordVisualTransformation()
+                    } else {
+                        VisualTransformation.None
+                    },
                     trailingIcon = {
                         IconButton(onClick = {
                             passwordHidden = !passwordHidden
                         }) {
                             val visibilityIcon =
-                                if (passwordHidden) R.drawable.outline_visibility_24 else R.drawable.baseline_visibility_off_24
+                                if (passwordHidden) {
+                                    R.drawable.outline_visibility_24
+                                } else {
+                                    R.drawable.baseline_visibility_off_24
+                                }
 
                             Icon(
                                 painter = painterResource(id = visibilityIcon),
@@ -182,7 +190,7 @@ fun SignUpScreen(
 
 @PreviewLightDark()
 @Composable
-fun SignUpPreview() {
+private fun SignUpPreview() {
     GPTInvestorTheme {
         Surface {
             SignUpScreen(

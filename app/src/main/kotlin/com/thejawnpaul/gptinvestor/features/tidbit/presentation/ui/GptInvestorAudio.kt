@@ -45,11 +45,11 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import java.net.URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.net.URL
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable

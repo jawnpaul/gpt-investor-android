@@ -13,14 +13,12 @@ import org.koin.core.annotation.Factory
 
 @Factory
 class GetLocalTopPicksUseCase(
-    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: ITopPickRepository
 ) : BaseUseCase<GetLocalTopPicksUseCase.None, List<TopPick>>(coroutineScope, dispatcher) {
 
     class None
 
-    override suspend fun run(params: None): Flow<Either<Failure, List<TopPick>>> {
-        return repository.getLocalTopPicks()
-    }
+    override suspend fun run(params: None): Flow<Either<Failure, List<TopPick>>> = repository.getLocalTopPicks()
 }

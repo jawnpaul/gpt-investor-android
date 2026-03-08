@@ -24,6 +24,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.thejawnpaul.gptinvestor.features.billing.domain.BillingConstants
+import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult
 import com.thejawnpaul.gptinvestor.features.billing.presentation.LocalBillingRepository
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.WebViewScreen
@@ -76,7 +77,9 @@ fun SetUpNavGraph(navController: NavHostController) {
         ) {
             composable(Screen.HomeTabScreen.route) {
                 val homeViewModel = koinViewModel<HomeViewModel>()
-                val state = homeViewModel.uiState.collectAsStateWithLifecycle(initialValue = HomeUiState())
+                val state = homeViewModel.uiState.collectAsStateWithLifecycle(
+                    initialValue = HomeUiState()
+                )
                 val scope = rememberCoroutineScope()
                 LaunchedEffect(Unit) {
                     homeViewModel.actions.onEach { action ->
@@ -154,7 +157,7 @@ fun SetUpNavGraph(navController: NavHostController) {
             }
             composable(
                 route = Screen.DiscoverTabScreen.route,
-                deepLinks = listOf(navDeepLink { uriPattern = Screen.DiscoverTabScreen.deepLink })
+                deepLinks = listOf(navDeepLink { uriPattern = Screen.DiscoverTabScreen.DEEP_LINK })
             ) {
                 val viewModel = koinViewModel<DiscoverViewModel>()
                 val state = viewModel.discoveryScreenState.collectAsStateWithLifecycle()
@@ -189,7 +192,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                     modifier = Modifier.padding(top = 20.dp),
                     state = state.value,
                     paging = viewModel.companiesPagingData,
-                    onEvent = viewModel::handleEvent,
+                    onEvent = viewModel::handleEvent
                 )
             }
             composable(Screen.HistoryTabScreen.route) {
@@ -221,7 +224,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                 HistoryScreen(
                     modifier = Modifier.padding(top = 20.dp),
                     state = state.value,
-                    onEvent = viewModel::handleEvent,
+                    onEvent = viewModel::handleEvent
                 )
             }
 
@@ -334,7 +337,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                                         showBottomSheet = false
                                     )
                                 )
-                                if (result is com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult.Error) {
+                                if (result is BillingResult.Error) {
                                     Toast.makeText(
                                         context,
                                         "Billing Error: ${result.message}",
@@ -403,9 +406,14 @@ fun SetUpNavGraph(navController: NavHostController) {
                     onUpgradeFromRateLimit = {
                         (context as? Activity)?.let { activity ->
                             scope.launch {
-                                billingRepo.launchPurchaseFlow(activity, BillingConstants.PRO_SUBSCRIPTION_PRODUCT_ID)
+                                billingRepo.launchPurchaseFlow(
+                                    activity,
+                                    BillingConstants.PRO_SUBSCRIPTION_PRODUCT_ID
+                                )
                                 viewModel.handleHistoryDetailEvent(
-                                    HistoryDetailEvent.ShowRateLimitBottomSheet(showBottomSheet = false)
+                                    HistoryDetailEvent.ShowRateLimitBottomSheet(
+                                        showBottomSheet = false
+                                    )
                                 )
                             }
                         }
@@ -559,8 +567,7 @@ fun SetUpNavGraph(navController: NavHostController) {
                     modifier = Modifier,
                     tidbitId = tidbitId,
                     onEvent = viewModel::handleDetailEvent,
-                    state = state.value,
-                    onAction = viewModel::handleDetailAction
+                    state = state.value
                 )
             }
 

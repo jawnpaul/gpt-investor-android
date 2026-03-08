@@ -24,7 +24,12 @@ import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.R
 
 @Composable
-fun ThemeDropdown(modifier: Modifier, onClick: (String) -> Unit, options: List<String>, selectedOption: String) {
+fun ThemeDropdown(
+    modifier: Modifier = Modifier,
+    onClick: (String) -> Unit,
+    options: List<String>,
+    selectedOption: String
+) {
     var expanded by remember { mutableStateOf(false) }
     Box(
         modifier = modifier

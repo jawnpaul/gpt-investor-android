@@ -74,7 +74,12 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) -> Unit, onEvent: (HomeEvent) -> Unit) {
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    state: HomeUiState,
+    onAction: (HomeAction) -> Unit,
+    onEvent: (HomeEvent) -> Unit
+) {
     val context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -317,7 +322,7 @@ fun HomeScreen(modifier: Modifier, state: HomeUiState, onAction: (HomeAction) ->
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun WaitlistBottomSheetContent(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     options: List<String>,
     selectedOptions: List<String>,
     onOptionSelected: (String) -> Unit,
@@ -344,7 +349,9 @@ fun WaitlistBottomSheetContent(
                 // Text
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(R.string.choose_the_capabilities_you_d_love_in_the_advanced_ai_model),
+                    text = stringResource(
+                        R.string.choose_the_capabilities_you_d_love_in_the_advanced_ai_model
+                    ),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -428,7 +435,9 @@ fun WaitlistBottomSheetContent(
 
                 // Text
                 Text(
-                    text = stringResource(R.string.you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge),
+                    text = stringResource(
+                        R.string.you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )
@@ -456,7 +465,12 @@ fun WaitlistBottomSheetContent(
 }
 
 @Composable
-fun SingleWaitlistOption(modifier: Modifier, isSelected: Boolean, onOptionSelected: () -> Unit, text: String) {
+fun SingleWaitlistOption(
+    modifier: Modifier = Modifier,
+    isSelected: Boolean,
+    onOptionSelected: () -> Unit,
+    text: String
+) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     if (isSelected) {
         Surface(

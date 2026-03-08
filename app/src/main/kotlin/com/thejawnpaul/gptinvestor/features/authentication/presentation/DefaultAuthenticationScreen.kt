@@ -46,7 +46,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun DefaultAuthenticationScreen(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     onAuthSuccess: (String) -> Unit,
     onAuthFailure: (String) -> Unit,
     authViewModel: AuthenticationViewModel = koinViewModel()

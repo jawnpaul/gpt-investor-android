@@ -12,12 +12,10 @@ import org.koin.core.annotation.Factory
 
 @Factory
 class ShareTopPickUseCase(
-    @param: IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: ITopPickRepository
 ) : BaseUseCase<String, String>(coroutineScope, dispatcher) {
 
-    override suspend fun run(params: String): Flow<Either<Failure, String>> {
-        return repository.shareTopPick(params)
-    }
+    override suspend fun run(params: String): Flow<Either<Failure, String>> = repository.shareTopPick(params)
 }

@@ -21,7 +21,11 @@ import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
-fun SingleHistoryItem(modifier: Modifier, conversation: StructuredConversation, onClick: (id: Long) -> Unit) {
+fun SingleHistoryItem(
+    modifier: Modifier = Modifier,
+    conversation: StructuredConversation,
+    onClick: (id: Long) -> Unit
+) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     Row(
         modifier = modifier
@@ -52,7 +56,7 @@ fun SingleHistoryItem(modifier: Modifier, conversation: StructuredConversation, 
 
 @Preview
 @Composable
-fun ItemPreview(modifier: Modifier = Modifier) {
+private fun ItemPreview(modifier: Modifier = Modifier) {
     GPTInvestorTheme {
         Surface {
             Column(modifier = Modifier.fillMaxSize()) {

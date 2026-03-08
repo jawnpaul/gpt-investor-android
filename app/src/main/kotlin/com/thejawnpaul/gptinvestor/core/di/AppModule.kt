@@ -7,15 +7,17 @@ import com.thejawnpaul.gptinvestor.remote.RemoteModule
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
 
-@Module(includes = [
-    AnalyticsModule::class,
-    AuthModule::class,
-    CoroutinesModule::class,
-    CoroutinesScopeModule::class,
-    DatabaseModule::class,
-    ImageModule::class,
-    RemoteModule::class,
-    RemoteConfigModule::class,
-])
+@Module(
+    includes = [
+        AnalyticsModule::class,
+        AuthModule::class,
+        CoroutinesModule::class,
+        CoroutinesScopeModule::class,
+        DatabaseModule::class,
+        ImageModule::class,
+        RemoteModule::class,
+        RemoteConfigModule::class
+    ]
+)
 @ComponentScan("com.thejawnpaul.gptinvestor")
 class AppModule

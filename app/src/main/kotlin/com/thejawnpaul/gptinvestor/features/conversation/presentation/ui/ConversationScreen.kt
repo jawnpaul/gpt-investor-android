@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets
 
 @Composable
 fun ConversationScreen(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     state: ConversationView,
     chatInput: String? = null,
     title: String? = null,

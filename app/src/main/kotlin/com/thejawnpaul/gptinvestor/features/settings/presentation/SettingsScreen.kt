@@ -30,7 +30,12 @@ import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.settings.presentation.state.SettingsView
 
 @Composable
-fun SettingsScreen(modifier: Modifier, state: SettingsView, onEvent: (SettingsEvent) -> Unit, onAction: (SettingsAction) -> Unit) {
+fun SettingsScreen(
+    modifier: Modifier = Modifier,
+    state: SettingsView,
+    onEvent: (SettingsEvent) -> Unit,
+    onAction: (SettingsAction) -> Unit
+) {
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
@@ -82,7 +87,9 @@ fun SettingsScreen(modifier: Modifier, state: SettingsView, onEvent: (SettingsEv
                     },
                     text = {
                         Text(
-                            text = stringResource(R.string.are_you_sure_you_want_to_delete_your_account)
+                            text = stringResource(
+                                R.string.are_you_sure_you_want_to_delete_your_account
+                            )
                         )
                     },
                     confirmButton = {

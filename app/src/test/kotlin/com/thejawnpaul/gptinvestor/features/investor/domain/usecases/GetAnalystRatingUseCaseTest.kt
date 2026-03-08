@@ -56,7 +56,8 @@ class GetAnalystRatingUseCaseTest {
 
     @Test
     fun `should return server error when exception occurs`() = runTest {
-        coEvery { repository.getAnalystRating(ticker) } returns flow { emit(Either.Left(Failure.ServerError)) }
+        coEvery { repository.getAnalystRating(ticker) } returns
+            flow { emit(Either.Left(Failure.ServerError)) }
 
         repository.getAnalystRating(ticker).collect {
             assertThat(it.isLeft).isTrue()
@@ -67,7 +68,8 @@ class GetAnalystRatingUseCaseTest {
 
     @Test
     fun `should return data error when response body isn't parsed`() = runTest {
-        coEvery { repository.getAnalystRating(ticker) } returns flow { emit(Either.Left(Failure.DataError)) }
+        coEvery { repository.getAnalystRating(ticker) } returns
+            flow { emit(Either.Left(Failure.DataError)) }
 
         repository.getAnalystRating(ticker).collect {
             assertThat(it.isLeft).isTrue()

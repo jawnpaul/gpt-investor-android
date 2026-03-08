@@ -17,7 +17,7 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.WaitlistBot
 
 @Composable
 fun HistoryDetailScreen(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     conversationId: String,
     state: HistoryConversationView,
     onEvent: (HistoryDetailEvent) -> Unit,

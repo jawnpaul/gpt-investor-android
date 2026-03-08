@@ -43,7 +43,6 @@ import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CustomRichText
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.model.TidbitPresentation
-import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailAction
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailEvent
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailState
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
@@ -56,8 +55,7 @@ fun TidbitDetailScreen(
     modifier: Modifier = Modifier,
     tidbitId: String,
     state: TidbitDetailState,
-    onEvent: (TidbitDetailEvent) -> Unit,
-    onAction: (TidbitDetailAction) -> Unit // This onAction is for TidbitDetailScreen, might be used by other presentation types
+    onEvent: (TidbitDetailEvent) -> Unit
 ) {
     LaunchedEffect(tidbitId) {
         onEvent(TidbitDetailEvent.GetTidbit(tidbitId))
@@ -209,7 +207,11 @@ private fun TidbitActionRow(
 }
 
 @Composable
-private fun TidbitArticleDetail(modifier: Modifier = Modifier, presentation: TidbitPresentation.ArticlePresentation, onEvent: (TidbitDetailEvent) -> Unit) {
+private fun TidbitArticleDetail(
+    modifier: Modifier = Modifier,
+    presentation: TidbitPresentation.ArticlePresentation,
+    onEvent: (TidbitDetailEvent) -> Unit
+) {
     val isLiked = remember { mutableStateOf(presentation.isLiked) }
     val isBookmarked = remember { mutableStateOf(presentation.isBookmarked) } // State managed here
 
@@ -289,7 +291,11 @@ private fun TidbitArticleDetail(modifier: Modifier = Modifier, presentation: Tid
 }
 
 @Composable
-private fun TidbitVideoDetail(modifier: Modifier = Modifier, presentation: TidbitPresentation.VideoPresentation, onEvent: (TidbitDetailEvent) -> Unit) {
+private fun TidbitVideoDetail(
+    modifier: Modifier = Modifier,
+    presentation: TidbitPresentation.VideoPresentation,
+    onEvent: (TidbitDetailEvent) -> Unit
+) {
     val isLiked = remember { mutableStateOf(false) } // State managed here
     val isBookmarked = remember { mutableStateOf(false) } // State managed here
 
@@ -376,7 +382,11 @@ private fun TidbitVideoDetail(modifier: Modifier = Modifier, presentation: Tidbi
 }
 
 @Composable
-private fun TidbitAudioDetail(modifier: Modifier = Modifier, presentation: TidbitPresentation.AudioPresentation, onEvent: (TidbitDetailEvent) -> Unit) {
+private fun TidbitAudioDetail(
+    modifier: Modifier = Modifier,
+    presentation: TidbitPresentation.AudioPresentation,
+    onEvent: (TidbitDetailEvent) -> Unit
+) {
     val isLiked = remember { mutableStateOf(presentation.isLiked) }
     val isBookmarked = remember { mutableStateOf(presentation.isBookmarked) }
 
@@ -457,12 +467,11 @@ private fun TidbitAudioDetail(modifier: Modifier = Modifier, presentation: Tidbi
 
 @Preview
 @Composable
-fun TidbitDetailScreenPreview() {
+private fun TidbitDetailScreenPreview() {
     GPTInvestorTheme {
         TidbitDetailScreen(
             tidbitId = "1",
             onEvent = {},
-            onAction = {},
             state = TidbitDetailState(
                 id = "1",
                 presentation = TidbitPresentation.AudioPresentation(

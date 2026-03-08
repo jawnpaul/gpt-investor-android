@@ -167,7 +167,6 @@ fun NavDrawerContent(
                         )
                     }
 
-
                     // Text
                     Text(
                         text = when (state.user) {
@@ -183,9 +182,11 @@ fun NavDrawerContent(
                 IconButton(
                     modifier = Modifier
                         .padding(end = 0.dp)
-                        .size(24.dp), onClick = {
+                        .size(24.dp),
+                    onClick = {
                         expanded = !expanded
-                    }) {
+                    }
+                ) {
                     Icon(
                         imageVector = if (expanded) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
                         contentDescription = null
@@ -276,7 +277,7 @@ fun NavDrawerContent(
 }
 
 @Composable
-private fun DrawerItem(modifier: Modifier, icon: ImageVector, label: String, onClick: () -> Unit) {
+private fun DrawerItem(modifier: Modifier = Modifier, icon: ImageVector, label: String, onClick: () -> Unit) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -314,7 +315,6 @@ sealed interface NavDrawerAction {
 private fun NavDrawerContentPreview() {
     GPTInvestorTheme {
         Surface {
-
             NavDrawerContent(
                 onCloseDrawer = {},
                 onEvent = {},
@@ -327,4 +327,3 @@ private fun NavDrawerContentPreview() {
         }
     }
 }
-

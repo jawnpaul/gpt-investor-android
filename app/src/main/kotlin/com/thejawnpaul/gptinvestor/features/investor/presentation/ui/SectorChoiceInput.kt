@@ -30,7 +30,12 @@ import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
-fun SectorChoiceQuestion(possibleAnswers: List<SectorInput>, selectedAnswer: SectorInput?, onOptionSelected: (SectorInput) -> Unit, modifier: Modifier = Modifier) {
+fun SectorChoiceQuestion(
+    possibleAnswers: List<SectorInput>,
+    selectedAnswer: SectorInput?,
+    onOptionSelected: (SectorInput) -> Unit,
+    modifier: Modifier = Modifier
+) {
     LazyRow(
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = 16.dp),
@@ -48,7 +53,12 @@ fun SectorChoiceQuestion(possibleAnswers: List<SectorInput>, selectedAnswer: Sec
 }
 
 @Composable
-fun SingleSectorChoice(input: SectorInput, selected: Boolean, onOptionSelected: () -> Unit, modifier: Modifier) {
+fun SingleSectorChoice(
+    input: SectorInput,
+    selected: Boolean,
+    onOptionSelected: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     val text = when (input) {
         is SectorInput.AllSector -> {
@@ -109,7 +119,7 @@ fun SingleSectorChoice(input: SectorInput, selected: Boolean, onOptionSelected: 
 
 @Preview
 @Composable
-fun SectorPreview() {
+private fun SectorPreview() {
     GPTInvestorTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
             var selectedAnswer by remember { mutableStateOf<SectorInput?>(null) }

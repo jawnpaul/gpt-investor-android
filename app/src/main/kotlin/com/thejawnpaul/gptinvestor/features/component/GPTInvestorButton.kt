@@ -16,7 +16,7 @@ import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
-fun GPTInvestorButton(modifier: Modifier, text: String, enabled: Boolean = true, onClick: () -> Unit) {
+fun GPTInvestorButton(modifier: Modifier = Modifier, text: String, enabled: Boolean = true, onClick: () -> Unit) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     Button(
@@ -43,7 +43,7 @@ fun GPTInvestorButton(modifier: Modifier, text: String, enabled: Boolean = true,
 
 @PreviewLightDark()
 @Composable
-fun ButtonPreview() {
+private fun ButtonPreview() {
     GPTInvestorTheme {
         Surface {
             GPTInvestorButton(

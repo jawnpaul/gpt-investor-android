@@ -60,7 +60,13 @@ import com.thejawnpaul.gptinvestor.theme.linkMedium
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopPickDetailScreen(modifier: Modifier, topPickId: String, state: TopPickDetailView, onEvent: (TopPickEvent) -> Unit, onAction: (TopPickAction) -> Unit) {
+fun TopPickDetailScreen(
+    modifier: Modifier = Modifier,
+    topPickId: String,
+    state: TopPickDetailView,
+    onEvent: (TopPickEvent) -> Unit,
+    onAction: (TopPickAction) -> Unit
+) {
     LaunchedEffect(topPickId) {
         onEvent(TopPickEvent.GetTopPick(topPickId))
     }
@@ -234,7 +240,7 @@ fun TopPickDetailScreen(modifier: Modifier, topPickId: String, state: TopPickDet
 }
 
 @Composable
-private fun ContentView(modifier: Modifier, state: TopPickDetailView, onEvent: (TopPickEvent) -> Unit) {
+private fun ContentView(modifier: Modifier = Modifier, state: TopPickDetailView, onEvent: (TopPickEvent) -> Unit) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     Box(
         modifier = modifier.clickable(interactionSource = null, indication = null, onClick = {

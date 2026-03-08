@@ -29,7 +29,12 @@ import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 
 @Composable
-fun SavedTopPicksScreen(modifier: Modifier, state: TopPicksView, onGoBack: () -> Unit, onGoToDetail: (String) -> Unit) {
+fun SavedTopPicksScreen(
+    modifier: Modifier = Modifier,
+    state: TopPicksView,
+    onGoBack: () -> Unit,
+    onGoToDetail: (String) -> Unit
+) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
         Column(modifier = Modifier) {
             Row(

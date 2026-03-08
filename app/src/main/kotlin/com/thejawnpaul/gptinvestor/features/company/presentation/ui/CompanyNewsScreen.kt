@@ -11,7 +11,7 @@ import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 
 @Composable
-fun CompanyNewsScreen(modifier: Modifier, navController: NavController, viewModel: CompanyViewModel) {
+fun CompanyNewsScreen(modifier: Modifier = Modifier, navController: NavController, viewModel: CompanyViewModel) {
     val financials = viewModel.companyFinancials.collectAsState()
 
     Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp)) {

@@ -31,7 +31,7 @@ class CompanyViewModel(
     private val getCompanyUseCase: GetCompanyUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val getInputPromptUseCase: GetInputPromptUseCase,
-    private val modelsRepository: ModelsRepository,
+    private val modelsRepository: ModelsRepository
 ) : ViewModel() {
 
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
@@ -183,7 +183,6 @@ class CompanyViewModel(
         selectedConversationId.update { s.id }
     }
 
-
     fun handleCompanyDetailEvent(event: CompanyDetailEvent) {
         when (event) {
             CompanyDetailEvent.GoBack -> {
@@ -253,9 +252,19 @@ class CompanyViewModel(
 
     private fun selectWaitListOption(option: String) {
         if (_selectedCompany.value.selectedWaitlistOptions.contains(option)) {
-            _selectedCompany.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions - option) }
+            _selectedCompany.update {
+                it.copy(
+                    selectedWaitlistOptions =
+                    it.selectedWaitlistOptions - option
+                )
+            }
         } else {
-            _selectedCompany.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions + option) }
+            _selectedCompany.update {
+                it.copy(
+                    selectedWaitlistOptions =
+                    it.selectedWaitlistOptions + option
+                )
+            }
         }
     }
 
@@ -283,8 +292,7 @@ sealed interface CompanyDetailEvent {
     data class ModelChange(val model: AvailableModel) : CompanyDetailEvent
     data class SelectWaitlistOption(val option: String) : CompanyDetailEvent
     data object JoinWaitList : CompanyDetailEvent
-    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) :
-        CompanyDetailEvent
+    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : CompanyDetailEvent
 }
 
 sealed interface CompanyDetailAction {

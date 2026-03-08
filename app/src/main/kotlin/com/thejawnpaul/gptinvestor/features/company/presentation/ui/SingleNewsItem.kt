@@ -19,7 +19,7 @@ import coil.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.NewsPresentation
 
 @Composable
-fun SingleNewsItem(modifier: Modifier, newsPresentation: NewsPresentation, onClick: (String) -> Unit) {
+fun SingleNewsItem(modifier: Modifier = Modifier, newsPresentation: NewsPresentation, onClick: (String) -> Unit) {
     ElevatedCard(modifier = Modifier.padding(16.dp), onClick = {
         onClick(newsPresentation.link)
     }) {

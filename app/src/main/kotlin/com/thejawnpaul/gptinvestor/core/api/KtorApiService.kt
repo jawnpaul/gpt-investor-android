@@ -48,8 +48,7 @@ import org.koin.core.annotation.Singleton
 
 @Singleton
 class KtorApiService(private val client: HttpClient) {
-    suspend fun getCompanies(): KtorResponse<List<CompanyRemote>> =
-        client.get("v1/companies").toKtorResponse()
+    suspend fun getCompanies(): KtorResponse<List<CompanyRemote>> = client.get("v1/companies").toKtorResponse()
 
     suspend fun getCompanyFinancials(request: CompanyFinancialsRequest): KtorResponse<CompanyFinancialsRemote> =
         client.post("v1/company") {
@@ -62,10 +61,9 @@ class KtorApiService(private val client: HttpClient) {
     suspend fun getDefaultPrompts(): KtorResponse<List<DefaultPromptRemote>> =
         client.get("v1/default-prompts").toKtorResponse()
 
-    suspend fun getEntity(request: GetEntityRequest): KtorResponse<GetEntityResponse> =
-        client.post("v1/get-entity") {
-            setBody(request)
-        }.toKtorResponse()
+    suspend fun getEntity(request: GetEntityRequest): KtorResponse<GetEntityResponse> = client.post("v1/get-entity") {
+        setBody(request)
+    }.toKtorResponse()
 
     suspend fun getCompanyInfo(request: CompanyDetailRemoteRequest): KtorResponse<CompanyDetailRemoteResponse> =
         client.get("v1.1/company-info") {
@@ -77,10 +75,9 @@ class KtorApiService(private val client: HttpClient) {
             setBody(request)
         }.toKtorResponse()
 
-    suspend fun getTopPicks(date: String): KtorResponse<List<TopPickRemote>> =
-        client.get("v1.1/top-picks") {
-            parameter("date", date)
-        }.toKtorResponse()
+    suspend fun getTopPicks(date: String): KtorResponse<List<TopPickRemote>> = client.get("v1.1/top-picks") {
+        parameter("date", date)
+    }.toKtorResponse()
 
     suspend fun registerToken(request: RegisterTokenRequest): KtorResponse<RegisterTokenResponse> =
         client.post("v1/notifications/register-token") {
@@ -116,13 +113,11 @@ class KtorApiService(private val client: HttpClient) {
             parameter("page_size", pageSize)
         }.toKtorResponse()
 
-    suspend fun getTodayTidbit(): KtorResponse<TidbitRemote> =
-        client.get("v1/tidbit/today-tidbit").toKtorResponse()
+    suspend fun getTodayTidbit(): KtorResponse<TidbitRemote> = client.get("v1/tidbit/today-tidbit").toKtorResponse()
 
-    suspend fun getSingleTidbit(id: String): KtorResponse<TidbitRemote> =
-        client.get("v1/tidbit/single-tidbit") {
-            parameter("id", id)
-        }.toKtorResponse()
+    suspend fun getSingleTidbit(id: String): KtorResponse<TidbitRemote> = client.get("v1/tidbit/single-tidbit") {
+        parameter("id", id)
+    }.toKtorResponse()
 
     suspend fun likeTidbit(request: TidbitLikeRequest): KtorResponse<TidbitLikeResponse> =
         client.post("v1/tidbit/like-tidbit") {
@@ -170,11 +165,15 @@ class KtorApiService(private val client: HttpClient) {
             setBody(request)
         }.toKtorResponse()
 
-    suspend fun refreshAccessToken(refreshToken: String): KtorResponse<TokenResponse> =
-        client.post("v1.1/refresh") {
-            header("Authorization", "Bearer $refreshToken")
-        }.toKtorResponse()
-    suspend fun getPagedCompanies(query: String? = null, page: Int = 1, sector: String? = null, pageSize: Int = 20): KtorResponse<com.thejawnpaul.gptinvestor.features.company.data.remote.model.AllCompanyResponse> =
+    suspend fun refreshAccessToken(refreshToken: String): KtorResponse<TokenResponse> = client.post("v1.1/refresh") {
+        header("Authorization", "Bearer $refreshToken")
+    }.toKtorResponse()
+    suspend fun getPagedCompanies(
+        query: String? = null,
+        page: Int = 1,
+        sector: String? = null,
+        pageSize: Int = 20
+    ): KtorResponse<com.thejawnpaul.gptinvestor.features.company.data.remote.model.AllCompanyResponse> =
         client.get("v1.1/companies") {
             if (!query.isNullOrBlank()) parameter("query", query)
             parameter("page", page)
@@ -183,12 +182,7 @@ class KtorApiService(private val client: HttpClient) {
         }.toKtorResponse()
 }
 
-class KtorResponse<T>(
-    val isSuccessful: Boolean,
-    val body: T?,
-    val errorBody: String?,
-    val code: Int
-)
+class KtorResponse<T>(val isSuccessful: Boolean, val body: T?, val errorBody: String?, val code: Int)
 
 suspend inline fun <reified T> HttpResponse.toKtorResponse(): KtorResponse<T> {
     val isSuccess = status.isSuccess()

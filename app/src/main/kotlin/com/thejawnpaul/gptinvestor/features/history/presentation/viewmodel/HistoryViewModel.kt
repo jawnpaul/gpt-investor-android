@@ -34,8 +34,7 @@ class HistoryViewModel(
     private val getInputPromptUseCase: GetInputPromptUseCase,
     private val fedBackRepository: FeedbackRepository,
     private val modelsRepository: ModelsRepository
-) :
-    ViewModel() {
+) : ViewModel() {
 
     private val _historyScreenViewState = MutableStateFlow(HistoryScreenView())
     val historyScreenViewState get() = _historyScreenViewState
@@ -136,19 +135,20 @@ class HistoryViewModel(
 
     private fun handleInputResponseFailure(failure: Failure) {
         conversationView.update { state ->
-            val updatedConversation = (state.conversation as? StructuredConversation)?.let { conversation ->
-                val updatedMessages = ArrayList(conversation.messageList)
-                if (updatedMessages.isNotEmpty()) {
-                    val lastMessage = updatedMessages.last()
-                    if (lastMessage is GenAiTextMessage && lastMessage.loading) {
-                        updatedMessages[updatedMessages.size - 1] = lastMessage.copy(
-                            loading = false,
-                            response = lastMessage.response ?: "Couldn't generate a response"
-                        )
+            val updatedConversation =
+                (state.conversation as? StructuredConversation)?.let { conversation ->
+                    val updatedMessages = ArrayList(conversation.messageList)
+                    if (updatedMessages.isNotEmpty()) {
+                        val lastMessage = updatedMessages.last()
+                        if (lastMessage is GenAiTextMessage && lastMessage.loading) {
+                            updatedMessages[updatedMessages.size - 1] = lastMessage.copy(
+                                loading = false,
+                                response = lastMessage.response ?: "Couldn't generate a response"
+                            )
+                        }
                     }
-                }
-                conversation.copy(messageList = updatedMessages)
-            } ?: state.conversation
+                    conversation.copy(messageList = updatedMessages)
+                } ?: state.conversation
             state.copy(loading = false, conversation = updatedConversation)
         }
         when (failure) {
@@ -160,7 +160,9 @@ class HistoryViewModel(
             is Failure.RateLimitExceeded -> {
                 Timber.e("Rate limit exceeded")
                 conversationView.update { it.copy(showRateLimitBottomSheet = false) }
-                processHistoryDetailAction(HistoryDetailAction.ShowToast("Rate limit exceeded. Please try again later."))
+                processHistoryDetailAction(
+                    HistoryDetailAction.ShowToast("Rate limit exceeded. Please try again later.")
+                )
             }
 
             is Failure.ContextLimitReached -> {
@@ -174,7 +176,9 @@ class HistoryViewModel(
             }
 
             is Failure.ServerError -> {
-                processHistoryDetailAction(HistoryDetailAction.ShowToast("Server error. Please try again later."))
+                processHistoryDetailAction(
+                    HistoryDetailAction.ShowToast("Server error. Please try again later.")
+                )
             }
 
             else -> {
@@ -208,7 +212,9 @@ class HistoryViewModel(
                         message
                     }
                 }
-                it.copy(conversation = conversation.copy(messageList = updatedMessages.toMutableList()))
+                it.copy(
+                    conversation = conversation.copy(messageList = updatedMessages.toMutableList())
+                )
             } ?: it
         }
         viewModelScope.launch {
@@ -279,7 +285,9 @@ class HistoryViewModel(
             }
 
             is HistoryDetailEvent.ShowRateLimitBottomSheet -> {
-                conversationView.update { it.copy(showRateLimitBottomSheet = event.showBottomSheet) }
+                conversationView.update {
+                    it.copy(showRateLimitBottomSheet = event.showBottomSheet)
+                }
             }
         }
     }
@@ -302,9 +310,19 @@ class HistoryViewModel(
 
     private fun selectWaitListOption(option: String) {
         if (conversationView.value.selectedWaitlistOptions.contains(option)) {
-            conversationView.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions - option) }
+            conversationView.update {
+                it.copy(
+                    selectedWaitlistOptions =
+                    it.selectedWaitlistOptions - option
+                )
+            }
         } else {
-            conversationView.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions + option) }
+            conversationView.update {
+                it.copy(
+                    selectedWaitlistOptions =
+                    it.selectedWaitlistOptions + option
+                )
+            }
         }
     }
 
@@ -335,8 +353,7 @@ sealed interface HistoryScreenAction {
 
 sealed interface HistoryDetailEvent {
     data class GetHistory(val conversationId: Long) : HistoryDetailEvent
-    data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) :
-        HistoryDetailEvent
+    data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) : HistoryDetailEvent
 
     data class UpdateInputQuery(val input: String) : HistoryDetailEvent
     data object GetInputResponse : HistoryDetailEvent
@@ -344,8 +361,7 @@ sealed interface HistoryDetailEvent {
     data class CopyToClipboard(val text: String) : HistoryDetailEvent
     data class ModelChange(val model: AvailableModel) : HistoryDetailEvent
     data object JoinWaitlist : HistoryDetailEvent
-    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) :
-        HistoryDetailEvent
+    data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : HistoryDetailEvent
 
     data class SelectWaitlistOption(val option: String) : HistoryDetailEvent
 

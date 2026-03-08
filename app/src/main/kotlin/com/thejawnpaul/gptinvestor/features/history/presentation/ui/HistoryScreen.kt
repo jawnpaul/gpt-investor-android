@@ -29,7 +29,7 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistorySc
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenEvent
 
 @Composable
-fun HistoryScreen(modifier: Modifier, state: HistoryScreenView, onEvent: (HistoryScreenEvent) -> Unit) {
+fun HistoryScreen(modifier: Modifier = Modifier, state: HistoryScreenView, onEvent: (HistoryScreenEvent) -> Unit) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
         Column(modifier = Modifier) {
             Row(

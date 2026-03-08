@@ -53,7 +53,10 @@ fun GptInvestorVideo(
                                 }
                             }
 
-                            override fun onStateChange(youTubePlayer: YouTubePlayer, state: PlayerConstants.PlayerState) {
+                            override fun onStateChange(
+                                youTubePlayer: YouTubePlayer,
+                                state: PlayerConstants.PlayerState
+                            ) {
                                 if (state == PlayerConstants.PlayerState.PLAYING) {
                                     onVideoStarted?.invoke()
                                 }

@@ -14,11 +14,10 @@ import org.koin.core.annotation.Factory
 
 @Factory
 class GetInputPromptUseCase(
-    @param: DefaultDispatcher private val dispatcher: CoroutineDispatcher,
+    @param:DefaultDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,
     private val repository: IConversationRepository
 ) : BaseUseCase<ConversationPrompt, Conversation>(coroutineScope, dispatcher) {
-    override suspend fun run(params: ConversationPrompt): Flow<Either<Failure, Conversation>> {
-        return repository.getInputResponse(params)
-    }
+    override suspend fun run(params: ConversationPrompt): Flow<Either<Failure, Conversation>> =
+        repository.getInputResponse(params)
 }

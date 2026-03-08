@@ -72,7 +72,7 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StructuredConversationScreen(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     conversation: StructuredConversation,
     onNavigateUp: () -> Unit,
     text: String,
@@ -136,7 +136,7 @@ fun StructuredConversationScreen(
                         entity = null,
                         list = conversation.suggestedPrompts,
                         onClick = { prompt ->
-                            onClickSuggestedPrompt(prompt.query?: "")
+                            onClickSuggestedPrompt(prompt.query ?: "")
                         }
                     )
                 }
@@ -439,8 +439,12 @@ fun SingleStructuredResponse(
                                                 }
                                             ) {
                                                 Icon(
-                                                    painter = painterResource(id = R.drawable.ic_like_filled),
-                                                    contentDescription = stringResource(R.string.like_chosen)
+                                                    painter = painterResource(
+                                                        id = R.drawable.ic_like_filled
+                                                    ),
+                                                    contentDescription = stringResource(
+                                                        R.string.like_chosen
+                                                    )
                                                 )
                                             }
                                         }
@@ -450,8 +454,12 @@ fun SingleStructuredResponse(
                                             IconButton(modifier = Modifier.size(32.dp), onClick = {
                                             }) {
                                                 Icon(
-                                                    painter = painterResource(id = R.drawable.ic_dislike_filled),
-                                                    contentDescription = stringResource(R.string.dislike_chosen)
+                                                    painter = painterResource(
+                                                        id = R.drawable.ic_dislike_filled
+                                                    ),
+                                                    contentDescription = stringResource(
+                                                        R.string.dislike_chosen
+                                                    )
                                                 )
                                             }
                                         }
@@ -468,8 +476,12 @@ fun SingleStructuredResponse(
                                                 }
                                             ) {
                                                 Icon(
-                                                    painter = painterResource(id = R.drawable.ic_like),
-                                                    contentDescription = stringResource(R.string.like)
+                                                    painter = painterResource(
+                                                        id = R.drawable.ic_like
+                                                    ),
+                                                    contentDescription = stringResource(
+                                                        R.string.like
+                                                    )
                                                 )
                                             }
 
@@ -483,8 +495,12 @@ fun SingleStructuredResponse(
                                                 }
                                             ) {
                                                 Icon(
-                                                    painter = painterResource(id = R.drawable.ic_dislike),
-                                                    contentDescription = stringResource(R.string.dislike)
+                                                    painter = painterResource(
+                                                        id = R.drawable.ic_dislike
+                                                    ),
+                                                    contentDescription = stringResource(
+                                                        R.string.dislike
+                                                    )
                                                 )
                                             }
                                         }
@@ -516,7 +532,12 @@ fun SingleStructuredResponse(
 }
 
 @Composable
-fun FollowUpQuestions(modifier: Modifier, entity: String? = null, list: List<SuggestionRemote>, onClick: (prompt: SuggestionRemote) -> Unit) {
+fun FollowUpQuestions(
+    modifier: Modifier = Modifier,
+    entity: String? = null,
+    list: List<SuggestionRemote>,
+    onClick: (prompt: SuggestionRemote) -> Unit
+) {
     if (list.isNotEmpty()) {
         LazyRow(
             modifier = Modifier,
@@ -536,7 +557,7 @@ fun FollowUpQuestions(modifier: Modifier, entity: String? = null, list: List<Sug
                     )
                 ) {
                     Text(
-                        text = suggestion.label?: "",
+                        text = suggestion.label ?: "",
                         modifier = Modifier
                             .padding(horizontal = 16.dp, vertical = 10.dp),
                         style = MaterialTheme.typography.bodySmall,
@@ -550,12 +571,13 @@ fun FollowUpQuestions(modifier: Modifier, entity: String? = null, list: List<Sug
 
 @Preview
 @Composable
-fun ConversationPreview(modifier: Modifier = Modifier) {
+private fun ConversationPreview(modifier: Modifier = Modifier) {
     val messages = listOf(
         GenAiTextMessage(
             query = "I am the best",
             loading = true,
-            response = "I am a fan of Manchester United based in Nigeria and also interested in the success of the club in general",
+            response = "I am a fan of Manchester United based in Nigeria and also " +
+                "interested in the success of the club in general",
             feedbackStatus = 0
         ),
         GenAiTextMessage(

@@ -31,7 +31,7 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.Q
 
 @Composable
 fun DefaultConversationScreen(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     conversation: DefaultConversation,
     onPromptClicked: (prompt: DefaultPrompt) -> Unit,
     onNavigateUp: () -> Unit,

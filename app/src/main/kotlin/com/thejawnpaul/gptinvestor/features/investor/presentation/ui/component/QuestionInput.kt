@@ -56,7 +56,7 @@ import com.thejawnpaul.gptinvestor.theme.bodyChatBody
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionInput(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     text: String = "",
     hint: String = "",
     onTextChange: (String) -> Unit = {},
@@ -148,7 +148,12 @@ fun QuestionInput(
 }
 
 @Composable
-private fun ModelListDropDown(modifier: Modifier, options: List<AvailableModel>, selectedOption: AvailableModel, onOptionSelected: (AvailableModel) -> Unit) {
+private fun ModelListDropDown(
+    modifier: Modifier = Modifier,
+    options: List<AvailableModel>,
+    selectedOption: AvailableModel,
+    onOptionSelected: (AvailableModel) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Box(
@@ -225,7 +230,9 @@ private fun ModelListDropDown(modifier: Modifier, options: List<AvailableModel>,
                         Image(
                             painter = painterResource(R.drawable.outline_close_small_24),
                             contentDescription = null,
-                            colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSurface)
+                            colorFilter = ColorFilter.tint(
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
                         )
                     }
                 }
@@ -247,7 +254,7 @@ private fun ModelListDropDown(modifier: Modifier, options: List<AvailableModel>,
 }
 
 @Composable
-fun SingleModelItem(modifier: Modifier, model: AvailableModel, onModelChange: (AvailableModel) -> Unit) {
+fun SingleModelItem(modifier: Modifier = Modifier, model: AvailableModel, onModelChange: (AvailableModel) -> Unit) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     when (model) {
@@ -340,7 +347,7 @@ fun SingleModelItem(modifier: Modifier, model: AvailableModel, onModelChange: (A
 
 @PreviewLightDark()
 @Composable
-fun QuestionInputPreview() {
+private fun QuestionInputPreview() {
     GPTInvestorTheme {
         Surface {
             QuestionInput(

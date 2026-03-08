@@ -26,7 +26,15 @@ import com.thejawnpaul.gptinvestor.R
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
-fun HomeTidbitItem(modifier: Modifier = Modifier, tidbitId: String, imageUrl: String, title: String, description: String, onTidbitClick: (String) -> Unit, onClickSeeAll: () -> Unit) {
+fun HomeTidbitItem(
+    modifier: Modifier = Modifier,
+    tidbitId: String,
+    imageUrl: String,
+    title: String,
+    description: String,
+    onTidbitClick: (String) -> Unit,
+    onClickSeeAll: () -> Unit
+) {
     Column(
         modifier = modifier.padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -95,12 +103,13 @@ fun HomeTidbitItem(modifier: Modifier = Modifier, tidbitId: String, imageUrl: St
 
 @Preview
 @Composable
-fun HomeTidbitItemPreview() {
+private fun HomeTidbitItemPreview() {
     HomeTidbitItem(
         tidbitId = "1",
         imageUrl = "https://www.example.com/image.jpg",
         title = "Understanding Compound Interest",
-        description = "Compound interest is the interest on a loan or deposit calculated based on both the initial principal and the accumulated interest from previous periods.",
+        description = "Compound interest is the interest on a loan or deposit calculated based on both the initial " +
+            "principal and the accumulated interest from previous periods.",
         onTidbitClick = {},
         onClickSeeAll = {}
     )

@@ -90,11 +90,13 @@ fun <L, R> Either<L, R>.getOrElse(value: R): R = when (this) {
  * the onFailure functionality passed as a parameter, but, overall will still return an either
  * object so you chain calls.
  */
-fun <L, R> Either<L, R>.onFailure(fn: (failure: L) -> Unit): Either<L, R> = this.apply { if (this is Either.Left) fn(a) }
+fun <L, R> Either<L, R>.onFailure(fn: (failure: L) -> Unit): Either<L, R> =
+    this.apply { if (this is Either.Left) fn(a) }
 
 /**
  * Right-biased onSuccess() FP convention dictates that when this class is Right, it'll perform
  * the onSuccess functionality passed as a parameter, but, overall will still return an either
  * object so you chain calls.
  */
-fun <L, R> Either<L, R>.onSuccess(fn: (success: R) -> Unit): Either<L, R> = this.apply { if (this is Either.Right) fn(b) }
+fun <L, R> Either<L, R>.onSuccess(fn: (success: R) -> Unit): Either<L, R> =
+    this.apply { if (this is Either.Right) fn(b) }

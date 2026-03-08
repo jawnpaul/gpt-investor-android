@@ -18,18 +18,16 @@ data class CompanyFinancials(
     val balanceSheet: String,
     val financials: String
 ) {
-    fun toPresentation(): CompanyFinancialsPresentation {
-        return CompanyFinancialsPresentation(
-            open = open.toCurrency(getCurrencySymbol(currency)),
-            low = low.toCurrency(getCurrencySymbol(currency)),
-            close = close.toCurrency(getCurrencySymbol(currency)),
-            volume = volume.toString(),
-            high = high.toCurrency(getCurrencySymbol(currency)),
-            marketCap = marketCap.toString(),
-            news = news.map { it.toPresentation() },
-            balanceSheet = balanceSheet,
-            historicalData = historicalData,
-            financials = financials
-        )
-    }
+    fun toPresentation(): CompanyFinancialsPresentation = CompanyFinancialsPresentation(
+        open = open.toCurrency(getCurrencySymbol(currency)),
+        low = low.toCurrency(getCurrencySymbol(currency)),
+        close = close.toCurrency(getCurrencySymbol(currency)),
+        volume = volume.toString(),
+        high = high.toCurrency(getCurrencySymbol(currency)),
+        marketCap = marketCap.toString(),
+        news = news.map { it.toPresentation() },
+        balanceSheet = balanceSheet,
+        historicalData = historicalData,
+        financials = financials
+    )
 }

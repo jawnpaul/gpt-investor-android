@@ -36,7 +36,7 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 
 @Composable
 fun CompanyDetailHeader(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     onNavigateUp: () -> Unit,
     companyHeader: CompanyHeaderPresentation
 ) {
@@ -147,12 +147,12 @@ fun CompanyDetailHeader(
 
 @Preview
 @Composable
-fun CompanyHeaderPreview() {
+private fun CompanyHeaderPreview() {
     GPTInvestorTheme {
         Surface(
             modifier = Modifier.fillMaxSize()
         ) {
-            Column() {
+            Column {
                 CompanyDetailHeader(
                     modifier = Modifier,
                     onNavigateUp = {},

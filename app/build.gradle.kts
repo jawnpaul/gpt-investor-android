@@ -1,5 +1,5 @@
-import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 import java.util.Properties
+import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
     alias(libs.plugins.android.application)
@@ -124,7 +124,7 @@ ktlint {
         mapOf(
             "ktlint_code_style" to "android_studio",
             "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
-            "max_line_length" to "190"
+            "max_line_length" to "120"
         )
     )
 }

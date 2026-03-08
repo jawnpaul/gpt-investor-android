@@ -29,7 +29,13 @@ import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.linkMedium
 
 @Composable
-fun TopPicks(modifier: Modifier = Modifier, state: TopPicksView, onClickRetry: () -> Unit, onClick: (id: String) -> Unit, onClickSeeAll: () -> Unit) {
+fun TopPicks(
+    modifier: Modifier = Modifier,
+    state: TopPicksView,
+    onClickRetry: () -> Unit,
+    onClick: (id: String) -> Unit,
+    onClickSeeAll: () -> Unit
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
         if (state.loading) {
             // Text
@@ -63,7 +69,9 @@ fun TopPicks(modifier: Modifier = Modifier, state: TopPicksView, onClickRetry: (
                 // Text
                 Text(
                     text = stringResource(R.string.top_picks),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
                     modifier = Modifier.padding(16.dp)
                 )
 
@@ -99,7 +107,7 @@ fun TopPicks(modifier: Modifier = Modifier, state: TopPicksView, onClickRetry: (
 
 @Preview
 @Composable
-fun TopPicksPreview(modifier: Modifier = Modifier) {
+private fun TopPicksPreview(modifier: Modifier = Modifier) {
     GPTInvestorTheme {
         Surface {
             Column(modifier = Modifier.fillMaxSize()) {
@@ -112,7 +120,8 @@ fun TopPicksPreview(modifier: Modifier = Modifier) {
                                 id = "1",
                                 ticker = "AAPL",
                                 companyName = "Apple",
-                                rationale = "This is the day that the Lord has made I will be glad and rejoice in it because, oh well it is just blah lorem ipsum ",
+                                rationale = "This is the day that the Lord has made I will be glad and rejoice in it " +
+                                    "because, oh well it is just blah lorem ipsum ",
                                 confidenceScore = 2,
                                 metrics = emptyList(),
                                 risks = emptyList(),
@@ -125,7 +134,8 @@ fun TopPicksPreview(modifier: Modifier = Modifier) {
                                 id = "2",
                                 ticker = "AAPL",
                                 companyName = "Microsoft corporation",
-                                rationale = "This is the day that the Lord has made I will be glad and rejoice in it because, oh well it is just blah lorem ipsum ",
+                                rationale = "This is the day that the Lord has made I will be glad and rejoice in it" +
+                                    " because, oh well it is just blah lorem ipsum ",
                                 confidenceScore = 2,
                                 metrics = emptyList(),
                                 risks = emptyList(),
@@ -138,7 +148,8 @@ fun TopPicksPreview(modifier: Modifier = Modifier) {
                                 id = "2",
                                 ticker = "AAPL",
                                 companyName = "Netflix",
-                                rationale = "This is the day that the Lord has made I will be glad and rejoice in it because, oh well it is just blah lorem ipsum ",
+                                rationale = "This is the day that the Lord has made I will be glad and " +
+                                    "rejoice in it because, oh well it is just blah lorem ipsum ",
                                 confidenceScore = 2,
                                 metrics = emptyList(),
                                 risks = emptyList(),

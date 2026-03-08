@@ -50,10 +50,10 @@ import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun DiscoverScreen(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     paging: Flow<PagingData<CompanyPresentation>>,
     state: DiscoveryScreenState,
-    onEvent: (DiscoveryEvent) -> Unit,
+    onEvent: (DiscoveryEvent) -> Unit
 ) {
     // Discover Screen
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -89,7 +89,9 @@ fun DiscoverScreen(
                             query = state.query,
                             placeHolder = state.selected?.let {
                                 when (it) {
-                                    SectorInput.AllSector -> stringResource(R.string.search_all_companies)
+                                    SectorInput.AllSector -> stringResource(
+                                        R.string.search_all_companies
+                                    )
                                     is SectorInput.CustomSector -> {
                                         stringResource(R.string.search_companies_in, it.sectorName)
                                     }
@@ -236,7 +238,10 @@ fun DiscoverScreen(
                         }
                     }
 
-                    if (companiesList.loadState.refresh is LoadState.NotLoading && companiesList.itemCount == 0 && state.query.isNotBlank()) {
+                    if (companiesList.loadState.refresh is LoadState.NotLoading &&
+                        companiesList.itemCount == 0 &&
+                        state.query.isNotBlank()
+                    ) {
                         item {
                             Box(modifier = Modifier.fillMaxSize()) {
                                 Column(modifier = Modifier.align(Alignment.Center)) {

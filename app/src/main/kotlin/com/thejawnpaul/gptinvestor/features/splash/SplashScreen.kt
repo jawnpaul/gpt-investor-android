@@ -155,7 +155,7 @@ fun AnimatedSplashScreen(onSplashFinished: () -> Unit) {
 
 @Preview(showBackground = true, backgroundColor = 0xFF000000)
 @Composable
-fun AnimatedSplashScreenPreview() {
+private fun AnimatedSplashScreenPreview() {
     GPTInvestorTheme {
         AnimatedSplashScreen(onSplashFinished = { })
     }

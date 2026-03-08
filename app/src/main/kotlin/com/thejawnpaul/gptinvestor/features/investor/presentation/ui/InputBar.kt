@@ -133,7 +133,7 @@ fun InputBar(
 
 @Preview
 @Composable
-fun InputBarPreview(modifier: Modifier = Modifier) {
+private fun InputBarPreview(modifier: Modifier = Modifier) {
     GPTInvestorTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             Column(modifier.fillMaxSize()) {

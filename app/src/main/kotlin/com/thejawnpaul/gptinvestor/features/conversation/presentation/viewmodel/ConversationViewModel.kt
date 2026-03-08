@@ -161,19 +161,20 @@ class ConversationViewModel(
 
     private fun handleConversationFailure(failure: Failure) {
         conversationViewMutableStateFlow.update { state ->
-            val updatedConversation = (state.conversation as? StructuredConversation)?.let { conversation ->
-                val updatedMessages = ArrayList(conversation.messageList)
-                if (updatedMessages.isNotEmpty()) {
-                    val lastMessage = updatedMessages.last()
-                    if (lastMessage is GenAiTextMessage && lastMessage.loading) {
-                        updatedMessages[updatedMessages.size - 1] = lastMessage.copy(
-                            loading = false,
-                            response = lastMessage.response ?: "Couldn't generate a response"
-                        )
+            val updatedConversation =
+                (state.conversation as? StructuredConversation)?.let { conversation ->
+                    val updatedMessages = ArrayList(conversation.messageList)
+                    if (updatedMessages.isNotEmpty()) {
+                        val lastMessage = updatedMessages.last()
+                        if (lastMessage is GenAiTextMessage && lastMessage.loading) {
+                            updatedMessages[updatedMessages.size - 1] = lastMessage.copy(
+                                loading = false,
+                                response = lastMessage.response ?: "Couldn't generate a response"
+                            )
+                        }
                     }
-                }
-                conversation.copy(messageList = updatedMessages)
-            } ?: state.conversation
+                    conversation.copy(messageList = updatedMessages)
+                } ?: state.conversation
             state.copy(loading = false, conversation = updatedConversation)
         }
         when (failure) {
@@ -189,7 +190,9 @@ class ConversationViewModel(
                     )
                 }
                 Timber.e("Rate limit exceeded")
-                processAction(ConversationAction.ShowToast("Rate limit exceeded. Please try again later."))
+                processAction(
+                    ConversationAction.ShowToast("Rate limit exceeded. Please try again later.")
+                )
             }
 
             is Failure.ContextLimitReached -> {
@@ -277,7 +280,9 @@ class ConversationViewModel(
             }
 
             is ConversationEvent.UpgradeModel -> {
-                conversationViewMutableStateFlow.update { it.copy(showWaitListBottomSheet = event.showBottomSheet) }
+                conversationViewMutableStateFlow.update {
+                    it.copy(showWaitListBottomSheet = event.showBottomSheet)
+                }
                 event.modelId?.let {
                     upgradeModelId = it
                 }
@@ -308,7 +313,9 @@ class ConversationViewModel(
                         message
                     }
                 }
-                it.copy(conversation = conversation.copy(messageList = updatedMessages.toMutableList()))
+                it.copy(
+                    conversation = conversation.copy(messageList = updatedMessages.toMutableList())
+                )
             } ?: it
         }
         viewModelScope.launch {
@@ -330,9 +337,19 @@ class ConversationViewModel(
 
     private fun selectWaitListOption(option: String) {
         if (conversationViewMutableStateFlow.value.selectedWaitlistOptions.contains(option)) {
-            conversationViewMutableStateFlow.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions - option) }
+            conversationViewMutableStateFlow.update {
+                it.copy(
+                    selectedWaitlistOptions =
+                    it.selectedWaitlistOptions - option
+                )
+            }
         } else {
-            conversationViewMutableStateFlow.update { it.copy(selectedWaitlistOptions = it.selectedWaitlistOptions + option) }
+            conversationViewMutableStateFlow.update {
+                it.copy(
+                    selectedWaitlistOptions =
+                    it.selectedWaitlistOptions + option
+                )
+            }
         }
     }
 

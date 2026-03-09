@@ -1,0 +1,182 @@
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+
+plugins {
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
+    alias(libs.plugins.koin.compiler)
+    alias(libs.plugins.ktLint)
+    alias(libs.plugins.kotlin.serialization)
+}
+
+kotlin {
+    android {
+        namespace = "com.thejawnpaul.gptinvestor"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+
+        compilations.all {
+            compileTaskProvider.configure {
+                compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+            }
+        }
+
+        androidResources {
+            enable = true
+        }
+
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
+
+        withDeviceTest {
+            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        }
+    }
+
+    listOf(
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "ComposeApp"
+            isStatic = true
+        }
+    }
+
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    dependencies {
+        implementation(project(":remote:remote"))
+
+        implementation(project(":analytics"))
+        implementation(project(":theme"))
+
+        implementation(libs.androidx.lifecycle.runtime.compose)
+        implementation(libs.compose.ui)
+        implementation(libs.compose.ui.tooling.preview)
+        implementation(libs.compose.material3)
+        implementation(libs.compose.material.icons.core)
+        implementation(libs.compose.material.icons.extended)
+        implementation(libs.androidx.navigation.compose)
+        implementation(libs.gitlive.firebase.common)
+        implementation(libs.gitlive.firebase.auth)
+        implementation(libs.gitlive.firebase.config)
+        implementation(libs.gitlive.firebase.messaging)
+        implementation(project.dependencies.platform(libs.coil.bom))
+        implementation(libs.coil.compose)
+        implementation(libs.coil.network.ktor)
+        implementation(libs.androidx.sqlite.bundled)
+        implementation(libs.androidx.room)
+        implementation(libs.datastore.core)
+        implementation(libs.datastore.preferences)
+        implementation(project.dependencies.platform(libs.koin.bom))
+        implementation(libs.koin.core)
+        implementation(libs.koin.compose)
+        implementation(libs.koin.compose.viewmodel)
+        implementation(libs.koin.annotations)
+        implementation(libs.ktor.client.core)
+        implementation(libs.ktor.client.content.negotiation)
+        implementation(libs.ktor.serialization.kotlinx.json)
+        implementation(libs.ktor.client.logging)
+        implementation(libs.ktor.client.auth)
+        implementation(libs.kotlinx.serialization.json)
+    }
+
+    sourceSets {
+        androidMain {
+            dependencies {
+                implementation(libs.androidx.activity.compose)
+                implementation(libs.androidx.core.ktx)
+                implementation(libs.kotlinx.coroutines.play.services)
+                implementation(project.dependencies.platform(libs.firebase.compose.bom))
+                implementation(libs.firebase.auth)
+                implementation(libs.firebase.config)
+                implementation(libs.firebase.messaging)
+                implementation(libs.firebase.appcheck.debug)
+                implementation(libs.firebase.appcheck.playintegrity)
+                implementation(libs.timber)
+                implementation(libs.androidx.paging.runtime.ktx)
+                implementation(libs.androidx.paging.compose)
+                implementation(libs.timeAgo)
+                implementation(libs.jsoup)
+                implementation(libs.richtext.compose)
+                implementation(libs.richtext.commonmark)
+                implementation(libs.androidx.credentials)
+                implementation(libs.androidx.play.services.auth)
+                implementation(libs.google.identity)
+                implementation(libs.android.billing)
+                implementation(libs.koin.android)
+                implementation(libs.ktor.client.android)
+                implementation(libs.exoplayer)
+                implementation(libs.exoplayer.dash)
+                implementation(libs.exoplayer.ui)
+                implementation(libs.exoplayer.compose)
+                implementation(libs.youtube.player)
+                implementation(libs.androidx.core.splashscreen)
+                implementation(libs.play.app.update)
+                implementation(libs.play.app.update.ktx)
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation(libs.kotlin.test)
+                implementation(libs.coroutine.test)
+                implementation(project(":remote:remotetest"))
+                implementation(libs.google.truth)
+                implementation(libs.cashapp.turbine)
+            }
+        }
+        val androidHostTest = findByName("androidHostTest")
+        androidHostTest?.dependencies {
+            implementation(libs.core.ktx)
+            implementation(libs.androidx.junit.ktx)
+            implementation(libs.mockk)
+            implementation(libs.junit)
+        }
+        val androidDeviceTest = findByName("androidDeviceTest")
+        androidDeviceTest?.dependencies {
+            implementation(libs.androidx.junit)
+            implementation(libs.androidx.espresso.core)
+            implementation(libs.androidx.ui.test.junit4)
+        }
+        iosMain {
+            dependencies {
+            }
+        }
+    }
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
+ktlint {
+    android = true
+    ignoreFailures = false
+    reporters {
+        reporter(ReporterType.PLAIN)
+        reporter(ReporterType.CHECKSTYLE)
+        reporter(ReporterType.SARIF)
+    }
+    additionalEditorconfig.set(
+        mapOf(
+            "ktlint_code_style" to "android_studio",
+            "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
+            "max_line_length" to "120"
+        )
+    )
+}
+
+dependencies {
+    ktlintRuleset(libs.ktlint.compose.rules)
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
+    "androidRuntimeClasspath"(libs.compose.ui.tooling)
+    "androidRuntimeClasspath"(libs.androidx.ui.test.manifest)
+}

@@ -1,3 +1,4 @@
+import java.util.Properties
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
@@ -5,6 +6,7 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.buildkonfig)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
@@ -90,6 +92,9 @@ kotlin {
     sourceSets {
         androidMain {
             dependencies {
+                implementation(project.dependencies.platform(libs.coil.bom))
+                implementation(libs.coil.compose)
+                implementation(libs.coil.network.ktor)
                 implementation(libs.androidx.activity.compose)
                 implementation(libs.androidx.core.ktx)
                 implementation(libs.kotlinx.coroutines.play.services)
@@ -155,9 +160,50 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 
+buildkonfig {
+    packageName = "com.thejawnpaul.gptinvestor"
+    objectName = "BuildConfig"
+
+    val localProperties = Properties()
+    localProperties.load(project.rootProject.file("local.properties").reader())
+
+    defaultConfigs {
+        buildConfigField(
+            com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN,
+            "DEBUG",
+            "false"
+        )
+        buildConfigField(
+            com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
+            "WEB_CLIENT_ID",
+            localProperties.getProperty("WEB_CLIENT_ID_PROD") ?: ""
+        )
+    }
+
+    defaultConfigs("debug") {
+        buildConfigField(
+            com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN,
+            "DEBUG",
+            "true"
+        )
+        buildConfigField(
+            com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
+            "WEB_CLIENT_ID",
+            localProperties.getProperty("WEB_CLIENT_ID_DEV") ?: ""
+        )
+    }
+}
+
 ktlint {
     android = true
     ignoreFailures = false
+    filter {
+        exclude("**/build/**")
+        exclude("**/generated/**")
+        exclude { element ->
+            element.file.path.startsWith(layout.buildDirectory.get().asFile.path)
+        }
+    }
     reporters {
         reporter(ReporterType.PLAIN)
         reporter(ReporterType.CHECKSTYLE)

@@ -30,7 +30,7 @@ android {
     val localProperties = Properties()
     localProperties.load(project.rootProject.file("local.properties").reader())
 
-    namespace = "com.thejawnpaul.gptinvestor"
+    namespace = "com.thejawnpaul.gptinvestor.androidApp"
     compileSdk = 36
 
     defaultConfig {

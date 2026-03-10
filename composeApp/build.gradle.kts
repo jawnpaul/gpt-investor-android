@@ -180,7 +180,7 @@ buildkonfig {
         )
     }
 
-    defaultConfigs("debug") {
+    defaultConfigs("dev") {
         buildConfigField(
             com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN,
             "DEBUG",

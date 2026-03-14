@@ -12,6 +12,7 @@
 		517D80EB2F65B1D8003EC92D /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 517D80EA2F65B1D8003EC92D /* FirebaseCore */; };
 		517D80ED2F65B1D8003EC92D /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 517D80EC2F65B1D8003EC92D /* FirebaseMessaging */; };
 		517D80EF2F65B1D8003EC92D /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 517D80EE2F65B1D8003EC92D /* FirebaseRemoteConfig */; };
+		517D81032F65C411003EC92D /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = 517D81022F65C411003EC92D /* Mixpanel */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -49,6 +50,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				517D81032F65C411003EC92D /* Mixpanel in Frameworks */,
 				517D80ED2F65B1D8003EC92D /* FirebaseMessaging in Frameworks */,
 				517D80E72F65B1D8003EC92D /* FirebaseAnalytics in Frameworks */,
 				517D80EB2F65B1D8003EC92D /* FirebaseCore in Frameworks */,
@@ -103,6 +105,7 @@
 				517D80EA2F65B1D8003EC92D /* FirebaseCore */,
 				517D80EC2F65B1D8003EC92D /* FirebaseMessaging */,
 				517D80EE2F65B1D8003EC92D /* FirebaseRemoteConfig */,
+				517D81022F65C411003EC92D /* Mixpanel */,
 			);
 			productName = iosApp;
 			productReference = BE15D34BA5370888110A187D /* GPT Investor.app */;
@@ -134,6 +137,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				517D80E52F65B1D8003EC92D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				517D81012F65C411003EC92D /* XCRemoteSwiftPackageReference "mixpanel-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = ECEFFE98EDAF09A63182EEB4 /* Products */;
@@ -242,6 +246,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -357,6 +362,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -399,6 +405,14 @@
 				minimumVersion = 12.10.0;
 			};
 		};
+		517D81012F65C411003EC92D /* XCRemoteSwiftPackageReference "mixpanel-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mixpanel/mixpanel-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.2.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -426,6 +440,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 517D80E52F65B1D8003EC92D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseRemoteConfig;
+		};
+		517D81022F65C411003EC92D /* Mixpanel */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 517D81012F65C411003EC92D /* XCRemoteSwiftPackageReference "mixpanel-swift" */;
+			productName = Mixpanel;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

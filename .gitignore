@@ -15,3 +15,4 @@ google-services.json
 Gemfile
 Gemfile.lock
 app/build
+/iosApp/iosApp/GoogleService-*.plist

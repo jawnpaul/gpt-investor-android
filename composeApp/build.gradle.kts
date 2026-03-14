@@ -49,6 +49,7 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            export(project(":analytics"))
         }
     }
 
@@ -56,7 +57,7 @@ kotlin {
     dependencies {
         implementation(project(":remote:remote"))
 
-        implementation(project(":analytics"))
+        api(project(":analytics"))
         implementation(project(":theme"))
 
         implementation(libs.compose.components.resources)
@@ -201,7 +202,7 @@ dependencies {
 }
 buildkonfig {
     packageName = "com.thejawnpaul.gptinvestor.shared"
-    objectName = "KmpBuildConfig"
+    objectName = "BuildConfig"
 
     val localProperties = Properties()
     val localPropertiesFile = project.rootProject.file("local.properties")

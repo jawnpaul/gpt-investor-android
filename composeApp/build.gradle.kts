@@ -1,8 +1,8 @@
 import com.codingfeline.buildkonfig.compiler.FieldSpec
-import java.util.Properties
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -61,22 +61,22 @@ kotlin {
 
         implementation(libs.compose.components.resources)
         implementation(libs.androidx.lifecycle.runtime.compose)
-        implementation(libs.compose.ui)
+        api(libs.compose.ui)
         implementation(libs.compose.ui.tooling.preview)
-        implementation(libs.compose.material3)
+        api(libs.compose.material3)
         implementation(libs.compose.material.icons.core)
         implementation(libs.compose.material.icons.extended)
         implementation(libs.androidx.navigation.compose)
-        implementation(project.dependencies.platform(libs.coil.bom))
-        implementation(libs.coil.compose)
+        api(project.dependencies.platform(libs.coil.bom))
+        api(libs.coil.compose)
         implementation(libs.coil.network.ktor)
         implementation(libs.androidx.sqlite.bundled)
         implementation(libs.androidx.room)
-        implementation(project.dependencies.platform(libs.koin.bom))
-        implementation(libs.koin.core)
-        implementation(libs.koin.compose)
+        api(project.dependencies.platform(libs.koin.bom))
+        api(libs.koin.core)
+        api(libs.koin.compose)
         implementation(libs.koin.compose.viewmodel)
-        implementation(libs.koin.annotations)
+        api(libs.koin.annotations)
         implementation(libs.ktor.client.core)
         implementation(libs.ktor.http)
         implementation(libs.ktor.client.content.negotiation)
@@ -116,7 +116,7 @@ kotlin {
                 implementation(libs.androidx.play.services.auth)
                 implementation(libs.google.identity)
                 implementation(libs.android.billing)
-                implementation(libs.koin.android)
+                api(libs.koin.android)
                 implementation(libs.ktor.client.android)
                 implementation(libs.exoplayer)
                 implementation(libs.exoplayer.dash)

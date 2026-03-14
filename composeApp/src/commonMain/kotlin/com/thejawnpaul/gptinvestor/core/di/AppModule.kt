@@ -6,8 +6,11 @@ import org.koin.core.annotation.Module
 @Module(
     includes = [
         CommonAppModule::class,
-        DatabaseModule::class
+        AuthModule::class,
+        DatabaseModule::class,
+        PreferenceModule::class,
+        RemoteConfigModule::class
     ]
 )
 @ComponentScan("com.thejawnpaul.gptinvestor")
-class IosAppModule
+class AppModule

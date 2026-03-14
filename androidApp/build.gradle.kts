@@ -29,9 +29,6 @@ kotlin {
         implementation(libs.firebase.appcheck.playintegrity)
 
         implementation(libs.timber)
-        implementation(project.dependencies.platform(libs.koin.bom))
-        implementation(libs.koin.android)
-        implementation(libs.koin.annotations)
         implementation(libs.firebase.messaging)
         implementation(libs.androidx.activity.compose)
         implementation(libs.androidx.core.splashscreen)
@@ -39,12 +36,6 @@ kotlin {
         implementation(libs.androidx.lifecycle.runtime.ktx)
         implementation(libs.play.app.update)
         implementation(libs.play.app.update.ktx)
-        implementation(project.dependencies.platform(libs.coil.bom))
-        implementation(libs.coil)
-        implementation(libs.coil.compose)
-        implementation(libs.coil.network.ktor)
-        implementation(libs.compose.ui)
-        implementation(libs.compose.material3)
         implementation(libs.compose.runtime)
         implementation(libs.compose.foundation)
     }

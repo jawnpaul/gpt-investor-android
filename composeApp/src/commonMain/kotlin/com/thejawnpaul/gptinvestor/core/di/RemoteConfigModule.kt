@@ -1,4 +1,4 @@
-package com.thejawnpaul.gptinvestor.core.remoteconfig
+package com.thejawnpaul.gptinvestor.core.di
 
 import org.koin.core.annotation.Module
 

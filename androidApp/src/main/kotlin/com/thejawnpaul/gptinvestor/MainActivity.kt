@@ -8,7 +8,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
@@ -17,7 +16,11 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
+import com.thejawnpaul.gptinvestor.core.di.GPTKoinApp
 import kotlinx.coroutines.launch
+import org.koin.android.ext.koin.androidContext
+import org.koin.compose.KoinApplication
+import org.koin.plugin.module.dsl.koinConfiguration
 
 class MainActivity : ComponentActivity() {
 
@@ -45,11 +48,15 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             var deepLinkRoute by deepLinkRouteState
-
-            App(
-                deepLinkRoute = deepLinkRoute,
-                onDeepLinkConsume = { deepLinkRoute = null }
-            )
+            KoinApplication(configuration = koinConfiguration<GPTKoinApp> {
+                printLogger()
+                androidContext(this@MainActivity)
+            }) {
+                App(
+                    deepLinkRoute = deepLinkRoute,
+                    onDeepLinkConsume = { deepLinkRoute = null }
+                )
+            }
         }
     }
 

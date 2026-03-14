@@ -14,6 +14,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
+import coil3.request.crossfade
 import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.core.navigation.SetUpNavGraph
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
@@ -21,6 +24,7 @@ import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.AuthenticationAction
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.AuthenticationViewModel
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DefaultAuthenticationScreen
+import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.OnboardingScreen
 import com.thejawnpaul.gptinvestor.features.splash.AnimatedSplashScreen
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
@@ -35,6 +39,7 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
     val preferences: AppPreferences = koinInject()
     val authenticationViewModel: AuthenticationViewModel = koinViewModel()
     val platformActions: PlatformActions = koinInject()
+    val tokenSyncManager: TokenSyncManager = koinInject()
 
     val themePreference by preferences.themePreference.collectAsState(initial = "Dark")
     val isUserSignedIn by preferences.isUserLoggedIn.collectAsState(initial = false)
@@ -49,6 +54,7 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
     val currentOnDeepLinkConsume by rememberUpdatedState(onDeepLinkConsume)
 
     LaunchedEffect(Unit) {
+        tokenSyncManager.syncToken()
         authenticationViewModel.actions.onEach { action ->
             when (action) {
                 is AuthenticationAction.OnLogin -> platformActions.showMessage(action.message)
@@ -72,6 +78,12 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
                 currentOnDeepLinkConsume()
             }
         }
+    }
+
+    SingletonImageLoader.setSafe { context ->
+        ImageLoader.Builder(context)
+            .crossfade(true)
+            .build()
     }
 
     GPTInvestorTheme(userThemePreference = themePreference) {

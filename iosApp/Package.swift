@@ -9,11 +9,24 @@ let package = Package(
     products: [
         .executable(name: "iosApp", targets: ["iosApp"])
     ],
+    dependencies: [
+        .package(
+            url: "https://github.com/firebase/firebase-ios-sdk",
+            from: "12.10.0"
+        )
+    ],
     targets: [
         .executableTarget(
             name: "iosApp",
-            dependencies: ["ComposeApp"],
-            path: "Sources/iosApp"
+            dependencies: [
+                "ComposeApp",
+                .product(name: "FirebaseAnalytics", package: "firebase-ios-sdk"),
+                .product(name: "FirebaseAuth", package: "firebase-ios-sdk"),
+                .product(name: "FirebaseCore", package: "firebase-ios-sdk"),
+                .product(name: "FirebaseMessaging", package: "firebase-ios-sdk"),
+                .product(name: "FirebaseRemoteConfig", package: "firebase-ios-sdk"),
+            ],
+            path: "/iosApp"
         ),
         .binaryTarget(
             name: "ComposeApp",

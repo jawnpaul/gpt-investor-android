@@ -1,7 +1,6 @@
 package com.thejawnpaul.gptinvestor.core.di
 
 import com.thejawnpaul.gptinvestor.core.database.GPTInvestorDatabase
-import com.thejawnpaul.gptinvestor.core.database.getDatabaseBuilder
 import com.thejawnpaul.gptinvestor.features.company.data.local.dao.CompanyDao
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.dao.ConversationDao
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.dao.MessageDao
@@ -10,12 +9,10 @@ import org.koin.core.annotation.Module
 import org.koin.core.annotation.Singleton
 
 @Module
-object DatabaseModule {
+expect class DatabaseProviderModule
 
-    @Singleton
-    fun provideDataBase(): GPTInvestorDatabase = getDatabaseBuilder()
-        .fallbackToDestructiveMigration(true)
-        .build()
+@Module(includes = [DatabaseProviderModule::class])
+object DatabaseModule {
 
     @Singleton
     fun providesCompanyDao(db: GPTInvestorDatabase): CompanyDao = db.companyDao()

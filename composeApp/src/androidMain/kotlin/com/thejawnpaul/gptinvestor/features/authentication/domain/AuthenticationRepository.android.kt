@@ -63,11 +63,14 @@ actual suspend fun loginWithGooglePlatform(
                     firebaseIdToken ?: ""
                 )
             )
+            gptInvestorPreferences.setUserName(currentUser.displayName ?: "null")
             if (loginResponse.isSuccessful) {
                 loginResponse.body?.let { response ->
                     gptInvestorPreferences.setUserId(response.user?.uid.toString())
                     gptInvestorPreferences.setIsUserLoggedIn(true)
-                    gptInvestorPreferences.setUserName(response.user?.name.toString())
+                    response.user?.name?.let {
+                        gptInvestorPreferences.setUserName(response.user.name)
+                    }
                     tokenStorage.saveAccessToken(response.accessToken ?: "")
                     tokenStorage.saveRefreshToken(response.refreshToken ?: "")
                     tokenSyncManager.syncToken()

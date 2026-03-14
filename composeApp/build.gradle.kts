@@ -1,3 +1,5 @@
+import com.codingfeline.buildkonfig.compiler.FieldSpec
+import java.util.Properties
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
@@ -11,12 +13,13 @@ plugins {
     alias(libs.plugins.androidx.room)
     alias(libs.plugins.koin.compiler)
     alias(libs.plugins.ktLint)
+    alias(libs.plugins.buildkonfig)
     alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
     android {
-        namespace = "com.thejawnpaul.gptinvestor"
+        namespace = "com.thejawnpaul.gptinvestor.shared"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
@@ -56,6 +59,7 @@ kotlin {
         implementation(project(":analytics"))
         implementation(project(":theme"))
 
+        implementation(libs.compose.components.resources)
         implementation(libs.androidx.lifecycle.runtime.compose)
         implementation(libs.compose.ui)
         implementation(libs.compose.ui.tooling.preview)
@@ -63,28 +67,32 @@ kotlin {
         implementation(libs.compose.material.icons.core)
         implementation(libs.compose.material.icons.extended)
         implementation(libs.androidx.navigation.compose)
-        implementation(libs.gitlive.firebase.common)
-        implementation(libs.gitlive.firebase.auth)
-        implementation(libs.gitlive.firebase.config)
-        implementation(libs.gitlive.firebase.messaging)
         implementation(project.dependencies.platform(libs.coil.bom))
         implementation(libs.coil.compose)
         implementation(libs.coil.network.ktor)
         implementation(libs.androidx.sqlite.bundled)
         implementation(libs.androidx.room)
-        implementation(libs.datastore.core)
-        implementation(libs.datastore.preferences)
         implementation(project.dependencies.platform(libs.koin.bom))
         implementation(libs.koin.core)
         implementation(libs.koin.compose)
         implementation(libs.koin.compose.viewmodel)
         implementation(libs.koin.annotations)
         implementation(libs.ktor.client.core)
+        implementation(libs.ktor.http)
         implementation(libs.ktor.client.content.negotiation)
         implementation(libs.ktor.serialization.kotlinx.json)
         implementation(libs.ktor.client.logging)
-        implementation(libs.ktor.client.auth)
         implementation(libs.kotlinx.serialization.json)
+        implementation(libs.kotlinx.datetime)
+        implementation(libs.kermit)
+        implementation(libs.datastore.core)
+        implementation(libs.datastore.preferences)
+        implementation(libs.gitlive.firebase.common)
+        implementation(libs.gitlive.firebase.auth)
+        implementation(libs.gitlive.firebase.config)
+        implementation(libs.gitlive.firebase.messaging)
+        implementation(libs.androidx.paging.common)
+        implementation(libs.androidx.paging.compose)
     }
 
     sourceSets {
@@ -100,8 +108,6 @@ kotlin {
                 implementation(libs.firebase.appcheck.debug)
                 implementation(libs.firebase.appcheck.playintegrity)
                 implementation(libs.timber)
-                implementation(libs.androidx.paging.runtime.ktx)
-                implementation(libs.androidx.paging.compose)
                 implementation(libs.timeAgo)
                 implementation(libs.jsoup)
                 implementation(libs.richtext.compose)
@@ -151,6 +157,10 @@ kotlin {
     }
 }
 
+compose.resources {
+    packageOfResClass = "com.thejawnpaul.gptinvestor"
+}
+
 room {
     schemaDirectory("$projectDir/schemas")
 }
@@ -158,6 +168,15 @@ room {
 ktlint {
     android = true
     ignoreFailures = false
+
+    filter {
+        exclude("**/build/**")
+        exclude("**/generated/**")
+        exclude { element ->
+            element.file.path.startsWith(layout.buildDirectory.get().asFile.path)
+        }
+    }
+
     reporters {
         reporter(ReporterType.PLAIN)
         reporter(ReporterType.CHECKSTYLE)
@@ -179,4 +198,42 @@ dependencies {
     add("kspIosArm64", libs.androidx.room.compiler)
     "androidRuntimeClasspath"(libs.compose.ui.tooling)
     "androidRuntimeClasspath"(libs.androidx.ui.test.manifest)
+}
+buildkonfig {
+    packageName = "com.thejawnpaul.gptinvestor.shared"
+    objectName = "KmpBuildConfig"
+
+    val localProperties = Properties()
+    val localPropertiesFile = project.rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localProperties.load(localPropertiesFile.reader())
+    }
+
+    defaultConfigs {
+        buildConfigField(FieldSpec.Type.BOOLEAN, "DEBUG", "false")
+        buildConfigField(FieldSpec.Type.STRING, "BASE_URL", localProperties.getProperty("BASE_URL") ?: "")
+        buildConfigField(FieldSpec.Type.STRING, "GEMINI_API_KEY", localProperties.getProperty("GEMINI_API_KEY") ?: "")
+        buildConfigField(
+            FieldSpec.Type.STRING,
+            "WEB_CLIENT_ID",
+            localProperties.getProperty("WEB_CLIENT_ID_PROD") ?: ""
+        )
+    }
+
+    targetConfigs {
+        create("dev") {
+            buildConfigField(FieldSpec.Type.BOOLEAN, "DEBUG", "true")
+            buildConfigField(FieldSpec.Type.STRING, "BASE_URL", localProperties.getProperty("BASE_URL_DEV") ?: "")
+            buildConfigField(
+                FieldSpec.Type.STRING,
+                "GEMINI_API_KEY",
+                localProperties.getProperty("GEMINI_DEBUG_KEY") ?: ""
+            )
+            buildConfigField(
+                FieldSpec.Type.STRING,
+                "WEB_CLIENT_ID",
+                localProperties.getProperty("WEB_CLIENT_ID_DEV") ?: ""
+            )
+        }
+    }
 }

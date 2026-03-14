@@ -220,20 +220,16 @@ buildkonfig {
         )
     }
 
-    targetConfigs {
-        create("dev") {
-            buildConfigField(FieldSpec.Type.BOOLEAN, "DEBUG", "true")
-            buildConfigField(FieldSpec.Type.STRING, "BASE_URL", localProperties.getProperty("BASE_URL_DEV") ?: "")
-            buildConfigField(
-                FieldSpec.Type.STRING,
-                "GEMINI_API_KEY",
-                localProperties.getProperty("GEMINI_DEBUG_KEY") ?: ""
-            )
-            buildConfigField(
-                FieldSpec.Type.STRING,
-                "WEB_CLIENT_ID",
-                localProperties.getProperty("WEB_CLIENT_ID_DEV") ?: ""
-            )
-        }
+    defaultConfigs("dev") {
+        buildConfigField(
+            FieldSpec.Type.BOOLEAN,
+            "DEBUG",
+            "true"
+        )
+        buildConfigField(
+            FieldSpec.Type.STRING,
+            "WEB_CLIENT_ID",
+            localProperties.getProperty("WEB_CLIENT_ID_DEV") ?: ""
+        )
     }
 }

@@ -21,7 +21,7 @@ class KmpRemoteConfig : RemoteConfigClient {
                     "prompt_count" to 100,
                     "default_model_name" to "gemini-2.0-flash",
                     "free_prompt_count" to 2,
-                    "website_domain" to "https://m7mxrc35hp.us-west-2.awsapprunner.com/"
+                    "website_domain" to "https://gptinvestorapp.com/"
                 )
                 remoteConfig.fetchAndActivate()
             } catch (e: Exception) {

@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.googleServices)
     alias(libs.plugins.crashlytics)
+    alias(libs.plugins.koin.compiler)
 }
 
 val keystoreProperties = Properties()
@@ -23,6 +24,20 @@ kotlin {
         implementation(project(":composeApp"))
         implementation(project.dependencies.platform(libs.firebase.compose.bom))
         implementation(libs.firebase.crashlytics)
+        implementation(libs.firebase.appcheck)
+        implementation(libs.firebase.appcheck.debug)
+        implementation(libs.firebase.appcheck.playintegrity)
+
+        implementation(libs.timber)
+        implementation(libs.firebase.messaging)
+        implementation(libs.androidx.activity.compose)
+        implementation(libs.androidx.core.splashscreen)
+        implementation(libs.androidx.lifecycle.runtime.compose)
+        implementation(libs.androidx.lifecycle.runtime.ktx)
+        implementation(libs.play.app.update)
+        implementation(libs.play.app.update.ktx)
+        implementation(libs.compose.runtime)
+        implementation(libs.compose.foundation)
     }
 }
 
@@ -106,7 +121,7 @@ android {
     }
     buildFeatures {
         compose = true
-        buildConfig = true
+       buildConfig = true
     }
 
     packaging {

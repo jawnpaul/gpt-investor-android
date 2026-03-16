@@ -8,7 +8,6 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import platform.CoreGraphics.CGRectMake
 import platform.UIKit.UIApplication
 import platform.UIKit.UIColor
-import platform.UIKit.UINavigationBar
 import platform.UIKit.UIStatusBarStyleDarkContent
 import platform.UIKit.UIStatusBarStyleLightContent
 import platform.UIKit.UIView
@@ -58,7 +57,6 @@ internal actual fun SetPlatformColors(
      */
     SideEffect {
         statusBar.backgroundColor = statusBarColor.toUIColor()
-        UINavigationBar.appearance().backgroundColor = navigationBarColor.toUIColor()
         UIApplication.sharedApplication.setStatusBarStyle(
             if (useDarkTheme) UIStatusBarStyleLightContent else UIStatusBarStyleDarkContent,
             animated = true

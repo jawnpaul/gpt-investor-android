@@ -120,7 +120,7 @@ fun StructuredConversationScreen(
                     companyHeader = CompanyHeaderPresentation(
                         companyTicker = it.entity?.ticker ?: "",
                         companyName = it.entity?.name ?: "",
-                        companyLogo = it.entity?.imageUrl ?: "",
+                        companyLogo = it.entity?.formattedImageUrl ?: "",
                         price = it.entity?.price ?: 0f,
                         percentageChange = it.entity?.change ?: 0f
                     )

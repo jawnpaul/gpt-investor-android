@@ -4,13 +4,18 @@ import ComposeApp
 
 /// Wraps the KMP Compose UI in a UIViewControllerRepresentable.
 ///
-/// [mixpanelProvider] is forwarded directly to `mainViewController(mixpanelProvider:)`
-/// so that the Koin graph is fully configured before the first composition.
+/// Both [mixpanelProvider] and [youtubePlayerProvider] are forwarded directly to
+/// `mainViewController(...)` so that the Koin graph is fully configured before the
+/// first composition.
 struct ComposeView: UIViewControllerRepresentable {
     let mixpanelProvider: any MixpanelProvider
+    let youtubePlayerProvider: any YoutubePlayerProvider
 
     func makeUIViewController(context: Context) -> UIViewController {
-        MainViewControllerKt.mainViewController(mixpanelProvider: mixpanelProvider)
+        MainViewControllerKt.mainViewController(
+            mixpanelProvider: mixpanelProvider,
+            youtubePlayerProvider: youtubePlayerProvider
+        )
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
@@ -18,9 +23,13 @@ struct ComposeView: UIViewControllerRepresentable {
 
 struct ContentView: View {
     let mixpanelProvider: any MixpanelProvider
+    let youtubePlayerProvider: any YoutubePlayerProvider
 
     var body: some View {
-        ComposeView(mixpanelProvider: mixpanelProvider)
-            .ignoresSafeArea()
+        ComposeView(
+            mixpanelProvider: mixpanelProvider,
+            youtubePlayerProvider: youtubePlayerProvider
+        )
+        .ignoresSafeArea()
     }
 }

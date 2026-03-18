@@ -7,6 +7,7 @@ import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
+import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyFinancialsView
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
@@ -88,7 +89,7 @@ class CompanyViewModel(
                             companyName = company.name ?: "",
                             header = CompanyHeaderPresentation(
                                 companyTicker = company.ticker,
-                                companyLogo = company.imageUrl ?: "",
+                                companyLogo = company.imageUrl?.toHttpsUrl() ?: "",
                                 price = company.price ?: 0.0f,
                                 percentageChange = company.change ?: 0.0f,
                                 companyName = company.name ?: ""

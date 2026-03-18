@@ -94,6 +94,8 @@ kotlin {
         implementation(libs.gitlive.firebase.messaging)
         implementation(libs.androidx.paging.common)
         implementation(libs.androidx.paging.compose)
+        implementation(libs.markdown.renderer.m3)
+        implementation(libs.markdown.renderer)
     }
 
     sourceSets {
@@ -111,8 +113,6 @@ kotlin {
                 implementation(libs.timber)
                 implementation(libs.timeAgo)
                 implementation(libs.jsoup)
-                implementation(libs.richtext.compose)
-                implementation(libs.richtext.commonmark)
                 implementation(libs.androidx.credentials)
                 implementation(libs.androidx.play.services.auth)
                 implementation(libs.google.identity)

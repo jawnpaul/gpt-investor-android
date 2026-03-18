@@ -7,6 +7,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfigClient
 import com.thejawnpaul.gptinvestor.core.utility.Constants
+import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.dao.TopPickDao
 import com.thejawnpaul.gptinvestor.features.toppick.data.local.model.TopPickEntity
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
@@ -61,7 +62,7 @@ class TopPickRepository(
                                 risks = risks,
                                 confidenceScore = confidenceScore,
                                 isSaved = false,
-                                imageUrl = imageUrl ?: "",
+                                imageUrl = imageUrl?.toHttpsUrl() ?: "",
                                 percentageChange = percentageChange ?: 0f,
                                 currentPrice = 0f
                             )

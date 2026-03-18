@@ -13,6 +13,14 @@ let package = Package(
         .package(
             url: "https://github.com/firebase/firebase-ios-sdk",
             from: "12.10.0"
+        ),
+        .package(
+            url: "https://github.com/youtube/youtube-ios-player-helper",
+            from: "1.0.4"
+        ),
+        .package(
+            url: "https://github.com/mixpanel/mixpanel-swift",
+            from: "5.2.0"
         )
     ],
     targets: [
@@ -25,6 +33,8 @@ let package = Package(
                 .product(name: "FirebaseCore", package: "firebase-ios-sdk"),
                 .product(name: "FirebaseMessaging", package: "firebase-ios-sdk"),
                 .product(name: "FirebaseRemoteConfig", package: "firebase-ios-sdk"),
+                .product(name: "YouTubeiOSPlayerHelper", package: "youtube-ios-player-helper"),
+                .product(name: "Mixpanel", package: "mixpanel-swift"),
             ],
             path: "/iosApp"
         ),

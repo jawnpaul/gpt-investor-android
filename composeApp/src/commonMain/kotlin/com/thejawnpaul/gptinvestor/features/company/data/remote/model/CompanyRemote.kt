@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.company.data.remote.model
 
+import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.features.company.data.local.model.CompanyEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -27,7 +28,7 @@ data class CompanyRemote(
         sectorKey = sectorKey,
         country = country,
         name = name,
-        logoUrl = logoUrl,
+        logoUrl = logoUrl.toHttpsUrl(),
         website = website,
         date = date
     )
@@ -65,6 +66,8 @@ data class CompanyDetailRemoteResponse(
             appendLine("- [Yahoo finance](https://finance.yahoo.com/quote/$ticker)")
             news?.forEach { appendLine("- [${it.publisher}](${it.link})") }
         }
+    val formattedImageUrl: String
+        get() = imageUrl?.toHttpsUrl() ?: ""
 }
 
 @Serializable

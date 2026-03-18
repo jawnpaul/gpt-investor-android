@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 
 private val LightColors =
     lightColorScheme(
@@ -110,7 +112,13 @@ fun GPTInvestorTheme(
         useDarkTheme = useDarkTheme
     )
 
+    val correctedDensity = Density(
+        density = LocalDensity.current.density,
+        fontScale = platformFontScale()
+    )
+
     CompositionLocalProvider(
+        LocalDensity provides correctedDensity,
         LocalGPTInvestorColors provides gptInvestorColors
     ) {
         MaterialTheme(

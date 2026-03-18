@@ -8,6 +8,7 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.features.company.data.local.dao.CompanyDao
 import com.thejawnpaul.gptinvestor.features.company.data.paging.CompanyPagingSource
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
@@ -122,7 +123,7 @@ class CompanyRepository(
                                 tickerSymbol = tickerSymbol,
                                 companyName = name,
                                 percentageChange = percentageChange,
-                                imageUrl = logo
+                                imageUrl = logo.toHttpsUrl()
                             )
                         }
                     }.sortedByDescending { it.change }.take(20)

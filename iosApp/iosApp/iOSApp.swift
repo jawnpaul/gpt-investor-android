@@ -24,12 +24,16 @@ struct iOSApp: App {
     /// BuildConfig object is re-exported as the public `mixpanelToken` property in
     /// MixpanelProviderModule.kt so it is visible here via `import ComposeApp`.
     private let mixpanelProvider = SwiftMixpanelProvider(token: MixpanelProviderModuleKt.mixpanelToken)
-    
+    private let youtubePlayerProvider = SwiftYoutubePlayerProvider()
+
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     var body: some Scene {
         WindowGroup {
-            ContentView(mixpanelProvider: mixpanelProvider)
+            ContentView(
+                mixpanelProvider: mixpanelProvider,
+                youtubePlayerProvider: youtubePlayerProvider
+            )
         }
     }
 }

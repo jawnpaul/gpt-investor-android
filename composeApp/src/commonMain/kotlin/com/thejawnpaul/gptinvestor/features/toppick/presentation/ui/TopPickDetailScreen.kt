@@ -89,7 +89,7 @@ fun TopPickDetailScreen(
                         companyName = company.name ?: "",
                         price = company.price ?: 0.0f,
                         percentageChange = company.change ?: 0.0f,
-                        companyLogo = company.imageUrl ?: ""
+                        companyLogo = company.formattedImageUrl
                     ),
                     onNavigateUp = { onAction(TopPickAction.OnGoBack) }
                 )

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5179A5232F68C55300CC9BA2 /* YouTubeiOSPlayerHelper in Frameworks */ = {isa = PBXBuildFile; productRef = 5179A5222F68C55300CC9BA2 /* YouTubeiOSPlayerHelper */; };
 		517D80E72F65B1D8003EC92D /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 517D80E62F65B1D8003EC92D /* FirebaseAnalytics */; };
 		517D80E92F65B1D8003EC92D /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 517D80E82F65B1D8003EC92D /* FirebaseAuth */; };
 		517D80EB2F65B1D8003EC92D /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 517D80EA2F65B1D8003EC92D /* FirebaseCore */; };
@@ -51,6 +52,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				517D81032F65C411003EC92D /* Mixpanel in Frameworks */,
+				5179A5232F68C55300CC9BA2 /* YouTubeiOSPlayerHelper in Frameworks */,
 				517D80ED2F65B1D8003EC92D /* FirebaseMessaging in Frameworks */,
 				517D80E72F65B1D8003EC92D /* FirebaseAnalytics in Frameworks */,
 				517D80EB2F65B1D8003EC92D /* FirebaseCore in Frameworks */,
@@ -106,6 +108,7 @@
 				517D80EC2F65B1D8003EC92D /* FirebaseMessaging */,
 				517D80EE2F65B1D8003EC92D /* FirebaseRemoteConfig */,
 				517D81022F65C411003EC92D /* Mixpanel */,
+				5179A5222F68C55300CC9BA2 /* YouTubeiOSPlayerHelper */,
 			);
 			productName = iosApp;
 			productReference = BE15D34BA5370888110A187D /* GPT Investor.app */;
@@ -138,6 +141,7 @@
 			packageReferences = (
 				517D80E52F65B1D8003EC92D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				517D81012F65C411003EC92D /* XCRemoteSwiftPackageReference "mixpanel-swift" */,
+				5179A5212F68C55300CC9BA2 /* XCRemoteSwiftPackageReference "youtube-ios-player-helper" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = ECEFFE98EDAF09A63182EEB4 /* Products */;
@@ -397,6 +401,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		5179A5212F68C55300CC9BA2 /* XCRemoteSwiftPackageReference "youtube-ios-player-helper" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/youtube/youtube-ios-player-helper";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.4;
+			};
+		};
 		517D80E52F65B1D8003EC92D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -416,6 +428,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		5179A5222F68C55300CC9BA2 /* YouTubeiOSPlayerHelper */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5179A5212F68C55300CC9BA2 /* XCRemoteSwiftPackageReference "youtube-ios-player-helper" */;
+			productName = YouTubeiOSPlayerHelper;
+		};
 		517D80E62F65B1D8003EC92D /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 517D80E52F65B1D8003EC92D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

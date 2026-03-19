@@ -1,6 +1,9 @@
 package com.thejawnpaul.gptinvestor.core.platform
 
-interface PlatformActions {
+import org.koin.core.annotation.Factory
+
+@Factory
+expect class PlatformActions {
     fun showMessage(message: String)
     fun copyToClipboard(label: String, text: String)
     fun openUrl(url: String)

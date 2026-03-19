@@ -21,7 +21,7 @@ timeAgo = "4.2.0"
 jsoup = "1.22.1"
 markdownRenderer = "0.39.2"
 googleServices = "4.4.4"
-firebaseBom = "34.10.0"
+firebaseBom = "34.11.0"
 crashlytics = "3.0.6"
 truth = "1.4.5"
 mockk = "1.14.9"
@@ -51,6 +51,7 @@ lifecycle = "2.10.0"
 gitlive-firebase = "2.4.0"
 turbine = "1.2.1"
 kotlinxDatetime = "0.7.1"
+browser = "1.9.0"
 
 
 
@@ -114,6 +115,7 @@ exoplayer-compose = { group = "androidx.media3", name = "media3-ui-compose", ver
 youtube-player = { group = "com.pierfrancescosoffritti.androidyoutubeplayer", name = "core", version.ref = "youtubeplayer"}
 androidx-paging-common = { group = "androidx.paging", name = "paging-common", version.ref = "paging" }
 androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
+androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 android-billing = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "playBilling" }
 ktor-http = { group = "io.ktor", name = "ktor-http", version.ref = "ktor" }
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }

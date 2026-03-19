@@ -115,6 +115,7 @@ kotlin {
                 implementation(libs.jsoup)
                 implementation(libs.androidx.credentials)
                 implementation(libs.androidx.play.services.auth)
+                implementation(libs.androidx.browser)
                 implementation(libs.google.identity)
                 implementation(libs.android.billing)
                 api(libs.koin.android)

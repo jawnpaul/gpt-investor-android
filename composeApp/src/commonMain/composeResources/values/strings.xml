@@ -26,7 +26,7 @@
     <string name="explore_the_competitive_landscape">Explore the competitive landscape and identify emerging opportunities</string>
     <string name="comprehensive_analysis_summary">Comprehensive analysis summary</string>
     <string name="synthesize_key_findings">Synthesize key findings into an actionable investment strategy</string>
-    <string name="let_s_go">Let\'s go!</string>
+    <string name="let_s_go">Let's go!</string>
     <string name="retry">Retry</string>
     <string name="something_went_wrong">Something went wrong</string>
     <string name="download_report">Download report</string>
@@ -91,7 +91,7 @@
     <string name="top_pick_rationale">Top pick rationale</string>
     <string name="sign_up">Sign up</string>
     <string name="already_have_an_account">Already have an account?</string>
-    <string name="don_t_have_an_account">Don\'t have an account?</string>
+    <string name="don_t_have_an_account">Don't have an account?</string>
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
     <string name="continue_with_google">Continue with Google</string>
     <string name="continue_with_email">Continue with email</string>
@@ -104,7 +104,7 @@
     <string name="waitlisted">Waitlisted</string>
     <string name="join_list">Join list</string>
     <string name="join_our_waitlist">Join our waitlist</string>
-    <string name="you_are_a_real_mvp">You\'re a real MVP</string>
+    <string name="you_are_a_real_mvp">You're a real MVP</string>
     <string name="thank_you_for_joining_our_waitlist">Thank you for joining our waitlist! \nWe will keep you updated</string>
     <string name="continue_">Continue</string>
     <string name="discover">Discover</string>
@@ -113,9 +113,9 @@
     <string name="your_personal_financial_guru">Your Personal Financial Guru. \nJust Chat.</string>
     <string name="get_actionable_stock_picks_everyday">Get Actionable Stock Picks. \nEvery Day.</string>
     <string name="join_the_waitlist">Join the waitlist</string>
-    <string name="choose_the_capabilities_you_d_love_in_the_advanced_ai_model">Choose the capabilities you\'d love in the advanced AI model</string>
-    <string name="you_re_on_the_list">You\'re on the list!</string>
-    <string name="you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge">You\'re one step closer to unlocking the power of Quantum Edge. We\'ll notify you as soon as it\'s ready.</string>
+    <string name="choose_the_capabilities_you_d_love_in_the_advanced_ai_model">Choose the capabilities you'd love in the advanced AI model</string>
+    <string name="you_re_on_the_list">You're on the list!</string>
+    <string name="you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge">You're one step closer to unlocking the power of Quantum Edge. We'll notify you as soon as it's ready.</string>
     <string name="theme">Theme</string>
     <string name="history">History</string>
     <string name="tidbit">Tidbit</string>

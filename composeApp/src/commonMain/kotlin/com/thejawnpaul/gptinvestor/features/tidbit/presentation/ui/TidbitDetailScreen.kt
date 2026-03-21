@@ -69,7 +69,9 @@ fun TidbitDetailScreen(state: TidbitDetailState, onEvent: (TidbitDetailEvent) ->
             Column {
                 DetailTopAppBar(onBackClick = { onEvent(TidbitDetailEvent.GoBack) })
                 if (state.isGuestSession) {
-                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {})
+                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {
+                        onEvent(TidbitDetailEvent.GoToSignUp)
+                    })
                 }
             }
         }

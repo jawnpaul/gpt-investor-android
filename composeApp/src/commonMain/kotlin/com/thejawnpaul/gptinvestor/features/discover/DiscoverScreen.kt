@@ -168,7 +168,9 @@ fun DiscoverScreen(
 
                 HorizontalDivider(modifier = Modifier.padding(top = 12.dp))
                 if (state.isGuestSession) {
-                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {})
+                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {
+                        onEvent(DiscoveryEvent.GoToSignUp)
+                    })
                 }
             }
         }

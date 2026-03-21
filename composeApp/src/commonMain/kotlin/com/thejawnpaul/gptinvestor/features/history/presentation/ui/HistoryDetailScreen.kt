@@ -97,6 +97,9 @@ fun HistoryDetailScreen(
                     },
                     onUpgradeModel = { showBottomSheet, modelId ->
                         onEvent(HistoryDetailEvent.UpgradeModel(showBottomSheet, modelId))
+                    },
+                    onSignUpClick = {
+                        onEvent(HistoryDetailEvent.GoToSignUp)
                     }
                 )
             }

@@ -242,6 +242,10 @@ class HomeViewModel(
                         _actions.emit(HomeAction.OnGoToSettings)
                     }
                 }
+
+                HomeEvent.GoToSignUp -> {
+                    _actions.emit(HomeAction.OnGoToSignUp)
+                }
             }
         }
     }
@@ -360,6 +364,7 @@ sealed interface HomeEvent {
     data object GoToDiscover : HomeEvent
     data object GoToSettings : HomeEvent
     data object GoToHistory : HomeEvent
+    data object GoToSignUp : HomeEvent
 }
 
 sealed interface HomeAction {
@@ -376,4 +381,5 @@ sealed interface HomeAction {
     data object OnGoToAllTidbits : HomeAction
     data object OnGoToSavedTidbits : HomeAction
     data class ShowToast(val message: String) : HomeAction
+    data object OnGoToSignUp : HomeAction
 }

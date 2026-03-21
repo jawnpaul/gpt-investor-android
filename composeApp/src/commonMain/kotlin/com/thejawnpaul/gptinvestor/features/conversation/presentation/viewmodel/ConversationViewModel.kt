@@ -318,6 +318,10 @@ class ConversationViewModel(
                     it.copy(showRateLimitBottomSheet = event.showBottomSheet)
                 }
             }
+
+            ConversationEvent.GoToSignUp -> {
+                processAction(ConversationAction.OnGoToSignUp)
+            }
         }
     }
 
@@ -449,6 +453,7 @@ sealed interface ConversationEvent {
     data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : ConversationEvent
 
     data class ShowRateLimitBottomSheet(val showBottomSheet: Boolean) : ConversationEvent
+    data object GoToSignUp : ConversationEvent
 }
 
 sealed interface ConversationAction {
@@ -457,6 +462,7 @@ sealed interface ConversationAction {
     data class OnCopy(val text: String) : ConversationAction
     data class ShowToast(val message: String) : ConversationAction
     data object OnSignOutGuest : ConversationAction
+    data object OnGoToSignUp : ConversationAction
 }
 
 data class HomeChatInput(val title: String? = null, val input: String? = null)

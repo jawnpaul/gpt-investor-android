@@ -98,6 +98,7 @@ fun StructuredConversationScreen(
     availableModels: List<AvailableModel>,
     onNavigateUp: () -> Unit,
     onSendClick: () -> Unit,
+    onSignUpClick: () -> Unit,
     onCopy: (String) -> Unit,
     onInputQueryChange: (String) -> Unit,
     onClickNews: (url: String) -> Unit,
@@ -147,7 +148,7 @@ fun StructuredConversationScreen(
                     )
                 }
                 if (isGuest) {
-                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {})
+                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = onSignUpClick)
                 }
             }
         },

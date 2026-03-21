@@ -84,6 +84,9 @@ fun ConversationScreen(
                     },
                     onUpgradeModel = { showBottomSheet, modelId ->
                         onEvent(ConversationEvent.UpgradeModel(showBottomSheet, modelId))
+                    },
+                    onSignUpClick = {
+                        onEvent(ConversationEvent.GoToSignUp)
                     }
                 )
             }
@@ -124,6 +127,9 @@ fun ConversationScreen(
                     },
                     onUpgradeModel = { showBottomSheet, modelId ->
                         onEvent(ConversationEvent.UpgradeModel(showBottomSheet, modelId))
+                    },
+                    onSignUpClick = {
+                        onEvent(ConversationEvent.GoToSignUp)
                     }
                 )
             }

@@ -240,6 +240,10 @@ class CompanyViewModel(
                     upgradeModelId = it
                 }
             }
+
+            CompanyDetailEvent.SignUpClicked -> {
+                processCompanyDetailAction(CompanyDetailAction.OnGoToSignUp)
+            }
         }
     }
 
@@ -299,6 +303,7 @@ sealed interface CompanyDetailEvent {
     data class ModelChange(val model: AvailableModel) : CompanyDetailEvent
     data class SelectWaitlistOption(val option: String) : CompanyDetailEvent
     data object JoinWaitList : CompanyDetailEvent
+    data object SignUpClicked : CompanyDetailEvent
     data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : CompanyDetailEvent
 }
 
@@ -306,4 +311,5 @@ sealed interface CompanyDetailAction {
     data object OnGoBack : CompanyDetailAction
     data class OnNavigateToWebView(val url: String) : CompanyDetailAction
     data class OnCopy(val text: String) : CompanyDetailAction
+    data object OnGoToSignUp : CompanyDetailAction
 }

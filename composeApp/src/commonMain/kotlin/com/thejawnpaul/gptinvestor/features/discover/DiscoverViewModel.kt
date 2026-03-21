@@ -148,6 +148,10 @@ class DiscoverViewModel(
                     updateFilteredTopPicks()
                 }
             }
+
+            DiscoveryEvent.GoToSignUp -> {
+                processAction(DiscoveryAction.OnGoToSignUp)
+            }
         }
     }
 
@@ -254,10 +258,12 @@ sealed interface DiscoveryEvent {
     data class ToggleSearchMode(val searchMode: Boolean) : DiscoveryEvent
     data class GoToTopPickDetail(val id: String) : DiscoveryEvent
     data class GoToCompanyDetail(val ticker: String) : DiscoveryEvent
+    data object GoToSignUp : DiscoveryEvent
 }
 
 sealed interface DiscoveryAction {
     data class OnNavigateToCompanyDetail(val ticker: String) : DiscoveryAction
     data object OnGoBack : DiscoveryAction
     data class OnGoToPickDetail(val id: String) : DiscoveryAction
+    data object OnGoToSignUp : DiscoveryAction
 }

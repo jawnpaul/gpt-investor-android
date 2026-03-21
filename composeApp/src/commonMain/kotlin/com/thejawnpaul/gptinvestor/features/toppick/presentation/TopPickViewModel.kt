@@ -323,6 +323,10 @@ class TopPickViewModel(
             TopPickEvent.RemoveLikeTopPick -> {
                 // Remove like top pick
             }
+
+            TopPickEvent.GoToSignUp -> {
+                processAction(TopPickAction.OnGoToSignUp)
+            }
         }
     }
 
@@ -337,6 +341,7 @@ sealed interface TopPickAction {
     data class OnShare(val url: String) : TopPickAction
     data class ShowToast(val message: String) : TopPickAction
     data object OnGoBack : TopPickAction
+    data object OnGoToSignUp : TopPickAction
 }
 
 sealed interface TopPickEvent {
@@ -349,4 +354,5 @@ sealed interface TopPickEvent {
     data object RemoveBookmarkTopPick : TopPickEvent
     data object LikeTopPick : TopPickEvent
     data object RemoveLikeTopPick : TopPickEvent
+    data object GoToSignUp : TopPickEvent
 }

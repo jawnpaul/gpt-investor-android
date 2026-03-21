@@ -15,6 +15,7 @@ import com.thejawnpaul.gptinvestor.remote.TokenStorage
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.FirebaseAuth
 import dev.gitlive.firebase.auth.auth
+import dev.gitlive.firebase.installations.installations
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -197,8 +198,7 @@ class AuthenticationRepositoryImpl(
     }
 
     override suspend fun guestLogin(): Result<String> = try {
-        // val id = Firebase.installations.getId()
-        val id = "mr paul"
+        val id = Firebase.installations.getId()
         val response = apiService.guestLogin(request = GuestLoginRequest(id = id))
         if (response.isSuccessful) {
             response.body?.let { guestLoginResponse ->

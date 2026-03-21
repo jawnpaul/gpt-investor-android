@@ -41,6 +41,7 @@ fun DefaultConversationScreen(
     inputQuery: String,
     onInputQueryChange: (String) -> Unit,
     onSendClick: () -> Unit,
+    onSignUpClick: () -> Unit,
     availableModels: List<AvailableModel>,
     selectedModel: AvailableModel,
     onModelChange: (AvailableModel) -> Unit,
@@ -67,7 +68,7 @@ fun DefaultConversationScreen(
                     }
                 }
                 if (isGuest) {
-                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {})
+                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = onSignUpClick)
                 }
             }
         },

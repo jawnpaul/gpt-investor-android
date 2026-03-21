@@ -83,7 +83,9 @@ fun CompanyDetailScreen(
                                         companyHeader = state.header
                                     )
                                     if (state.isGuestSession) {
-                                        TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {})
+                                        TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {
+                                            onEvent(CompanyDetailEvent.SignUpClicked)
+                                        })
                                     }
                                 }
                             },
@@ -265,6 +267,9 @@ fun CompanyDetailScreen(
                             onModelChange = { onEvent(CompanyDetailEvent.ModelChange(it)) },
                             onUpgradeModel = { showBottomSheet, modelId ->
                                 onEvent(CompanyDetailEvent.UpgradeModel(showBottomSheet, modelId))
+                            },
+                            onSignUpClick = {
+                                onEvent(CompanyDetailEvent.SignUpClicked)
                             }
                         )
                     }

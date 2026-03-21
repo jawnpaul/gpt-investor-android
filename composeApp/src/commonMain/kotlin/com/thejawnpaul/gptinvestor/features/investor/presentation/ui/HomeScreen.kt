@@ -259,6 +259,7 @@ private fun HomeScreenContent(
                         TopGuestLabel(
                             modifier = Modifier,
                             onClick = {
+                                onEvent(HomeEvent.GoToSignUp)
                             }
                         )
                     }

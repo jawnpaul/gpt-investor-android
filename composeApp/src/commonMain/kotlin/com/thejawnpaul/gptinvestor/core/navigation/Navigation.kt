@@ -73,7 +73,7 @@ fun SetUpNavGraph(
     val platformActions: PlatformActions = koinInject()
     Scaffold { innerPadding ->
 
-        val statDestination: String =
+        val startDestination: String =
             if (isUserSignedIn ||
                 isGuestSignedIn
             ) {
@@ -84,7 +84,7 @@ fun SetUpNavGraph(
 
         NavHost(
             navController = navController,
-            startDestination = statDestination,
+            startDestination = startDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.HomeTabScreen.route) {
@@ -158,6 +158,12 @@ fun SetUpNavGraph(
                             is HomeAction.ShowToast -> {
                                 platformActions.showMessage(action.message)
                             }
+
+                            HomeAction.OnGoToSignUp -> {
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                }
+                            }
                         }
                     }.launchIn(scope)
                 }
@@ -196,6 +202,12 @@ fun SetUpNavGraph(
                                         topPickId = action.id
                                     )
                                 )
+                            }
+
+                            DiscoveryAction.OnGoToSignUp -> {
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                }
                             }
                         }
                     }.launchIn(scope)
@@ -260,6 +272,12 @@ fun SetUpNavGraph(
                                 platformActions.copyToClipboard("", action.text)
                                 platformActions.showMessage("Copied")
                             }
+
+                            CompanyDetailAction.OnGoToSignUp -> {
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                }
+                            }
                         }
                     }.launchIn(scope)
                 }
@@ -309,6 +327,11 @@ fun SetUpNavGraph(
                             }
 
                             ConversationAction.OnSignOutGuest -> {}
+                            ConversationAction.OnGoToSignUp -> {
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                }
+                            }
                         }
                     }.launchIn(scope)
                 }
@@ -320,7 +343,9 @@ fun SetUpNavGraph(
                     onAction = viewModel::processAction,
                     onUpgradeFromRateLimit = {
                         if (isGuestSignedIn) {
-                            navController.navigate(Screen.DefaultAuthenticationScreen.route)
+                            navController.navigate(Screen.SignUpScreen.route) {
+                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                            }
                         } else {
                             viewModel.launchPurchaseFlow(platformContext)
                         }
@@ -365,6 +390,12 @@ fun SetUpNavGraph(
                             is HistoryDetailAction.ShowToast -> {
                                 platformActions.showMessage(action.message)
                             }
+
+                            HistoryDetailAction.OnGoToSignUp -> {
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                }
+                            }
                         }
                     }.launchIn(scope)
                 }
@@ -376,7 +407,9 @@ fun SetUpNavGraph(
                     onAction = viewModel::processHistoryDetailAction,
                     onUpgradeFromRateLimit = {
                         if (isGuestSignedIn) {
-                            navController.navigate(Screen.DefaultAuthenticationScreen.route)
+                            navController.navigate(Screen.SignUpScreen.route) {
+                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                            }
                         } else {
                             viewModel.launchPurchaseFlow(platformContext)
                         }
@@ -405,6 +438,12 @@ fun SetUpNavGraph(
 
                             is TopPickAction.ShowToast -> {
                                 platformActions.showMessage(action.message)
+                            }
+
+                            TopPickAction.OnGoToSignUp -> {
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                }
                             }
                         }
                     }.launchIn(scope)
@@ -490,6 +529,12 @@ fun SetUpNavGraph(
 
                             is TidbitDetailAction.OnShare -> {
                                 platformActions.shareText(action.shareText)
+                            }
+
+                            TidbitDetailAction.OnGoToSignUp -> {
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                }
                             }
                         }
                     }.launchIn(scope)
@@ -585,7 +630,11 @@ fun SetUpNavGraph(
                             }
 
                             DefaultAuthenticationAction.OnGoToSignUp -> {
-                                navController.navigate(Screen.SignUpScreen.route)
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    if (isGuestSignedIn) {
+                                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                    }
+                                }
                             }
 
                             is DefaultAuthenticationAction.ShowToast -> {
@@ -614,7 +663,11 @@ fun SetUpNavGraph(
                             }
 
                             LoginUiAction.OnGoToSignUp -> {
-                                navController.navigate(Screen.SignUpScreen.route)
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    if (isGuestSignedIn) {
+                                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                    }
+                                }
                             }
 
                             is LoginUiAction.OnShowToast -> {
@@ -643,7 +696,7 @@ fun SetUpNavGraph(
                     viewModel.actions.onEach { action ->
                         when (action) {
                             SignUpUiAction.OnGoBack -> {
-                                navController.navigateUp()
+                                navController.popBackStack()
                             }
 
                             SignUpUiAction.OnGoToHome -> {

@@ -36,8 +36,9 @@ fun ExpandableRichText(text: String, modifier: Modifier = Modifier, bodyTextStyl
             .clickable(
                 indication = null,
                 enabled = clickable,
+                onClick = {},
                 interactionSource = remember { MutableInteractionSource() }
-            ) {}
+            )
             .then(modifier)
     ) {
         val textToShow = if (isExpanded) {
@@ -83,8 +84,9 @@ fun ExpandableRichText(text: String, modifier: Modifier = Modifier, bodyTextStyl
 }
 
 @Composable
-fun CustomRichText(text: String, modifier: Modifier = Modifier, bodyTextStyle: TextStyle = TextStyle.Default) {
-    val resolvedStyle = bodyTextStyle.copy(color = MaterialTheme.colorScheme.onBackground)
+fun CustomRichText(text: String, modifier: Modifier = Modifier, bodyTextStyle: TextStyle? = null) {
+    val resolvedStyle = bodyTextStyle
+        ?: MaterialTheme.typography.bodyChatBody.copy(color = MaterialTheme.colorScheme.onBackground)
     val markdownState = rememberMarkdownState(
         content = text,
         retainState = true

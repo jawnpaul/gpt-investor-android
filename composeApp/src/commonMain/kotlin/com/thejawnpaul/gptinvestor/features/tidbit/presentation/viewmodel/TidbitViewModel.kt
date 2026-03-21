@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.model.Tidbit
@@ -25,8 +26,11 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 
 @KoinViewModel
-class TidbitViewModel(private val repository: TidbitRepository, private val savedStateHandle: SavedStateHandle) :
-    ViewModel() {
+class TidbitViewModel(
+    private val repository: TidbitRepository,
+    private val savedStateHandle: SavedStateHandle,
+    private val appPreferences: AppPreferences
+) : ViewModel() {
 
     private val tidbitId: String?
         get() = savedStateHandle.get<String>("tidbitId")
@@ -49,6 +53,27 @@ class TidbitViewModel(private val repository: TidbitRepository, private val save
 
     init {
         getTidbit()
+        checkGuestStatus()
+    }
+
+    private fun checkGuestStatus() {
+        viewModelScope.launch {
+            appPreferences.isGuestLoggedIn.collect { isGuest ->
+                _tidbitDetailState.update { it.copy(isGuestSession = isGuest == true) }
+                _tidbitMainScreenState.update { state ->
+                    state.copy(
+                        isGuest = isGuest == true,
+                        options = if (isGuest == true) {
+                            state.options.filter {
+                                !(it is SectorInput.CustomSector && it.sectorKey == "saved")
+                            }
+                        } else {
+                            state.options
+                        }
+                    )
+                }
+            }
+        }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -123,6 +148,7 @@ class TidbitViewModel(private val repository: TidbitRepository, private val save
             }
 
             is TidbitDetailEvent.OnClickBookmark -> {
+                if (_tidbitDetailState.value.isGuestSession) return@handleDetailEvent
                 viewModelScope.launch {
                     if (event.newValue) {
                         repository.bookmarkTidbit(tidbitId = event.id)
@@ -133,6 +159,7 @@ class TidbitViewModel(private val repository: TidbitRepository, private val save
             }
 
             is TidbitDetailEvent.OnClickLike -> {
+                if (_tidbitDetailState.value.isGuestSession) return@handleDetailEvent
                 viewModelScope.launch {
                     if (event.newValue) {
                         repository.likeTidbit(tidbitId = event.id)
@@ -244,6 +271,7 @@ class TidbitViewModel(private val repository: TidbitRepository, private val save
             }
 
             is TidbitScreenEvent.OnTidbitLikeClick -> {
+                if (_tidbitMainScreenState.value.isGuest) return@handleMainScreenEvent
                 viewModelScope.launch {
                     if (event.newValue) {
                         repository.likeTidbit(tidbitId = event.tidbitId)
@@ -254,6 +282,7 @@ class TidbitViewModel(private val repository: TidbitRepository, private val save
             }
 
             is TidbitScreenEvent.OnTidbitSaveClick -> {
+                if (_tidbitMainScreenState.value.isGuest) return@handleMainScreenEvent
                 viewModelScope.launch {
                     if (event.newValue) {
                         repository.bookmarkTidbit(tidbitId = event.tidbitId)
@@ -298,7 +327,8 @@ class TidbitViewModel(private val repository: TidbitRepository, private val save
 data class TidbitDetailState(
     val id: String = "",
     val isLoading: Boolean = false,
-    val presentation: TidbitPresentation? = null
+    val presentation: TidbitPresentation? = null,
+    val isGuestSession: Boolean = false
 )
 
 data class TidbitScreenState(
@@ -319,7 +349,8 @@ data class TidbitScreenState(
     ),
     val selectedOption: SectorInput? = SectorInput.AllSector,
     val isLoading: Boolean = false,
-    val tidbits: List<TidbitPresentation> = emptyList()
+    val tidbits: List<TidbitPresentation> = emptyList(),
+    val isGuest: Boolean = false
 )
 
 sealed interface TidbitScreenEvent {

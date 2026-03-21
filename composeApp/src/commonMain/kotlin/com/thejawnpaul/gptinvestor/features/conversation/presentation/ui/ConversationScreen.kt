@@ -48,6 +48,7 @@ fun ConversationScreen(
             }) {
                 RateLimitBottomSheetContent(
                     modifier = Modifier,
+                    isGuest = state.isGuest,
                     onDismiss = {
                         onEvent(ConversationEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
                     },
@@ -62,6 +63,7 @@ fun ConversationScreen(
                 DefaultConversationScreen(
                     modifier = Modifier,
                     conversation = default,
+                    isGuest = state.isGuest,
                     onNavigateUp = {
                         onAction(ConversationAction.OnGoBack)
                     },
@@ -91,6 +93,7 @@ fun ConversationScreen(
                 StructuredConversationScreen(
                     modifier = Modifier,
                     conversation = state.conversation,
+                    isGuest = state.isGuest,
                     onNavigateUp = { onAction(ConversationAction.OnGoBack) },
                     text = state.genText,
                     onClickNews = {

@@ -5,6 +5,7 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfigClient
 import com.thejawnpaul.gptinvestor.core.utility.Constants
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
@@ -36,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.serialization.json.Json
@@ -47,7 +49,8 @@ class ConversationRepository(
     private val analyticsLogger: AnalyticsLogger,
     private val messageDao: MessageDao,
     private val conversationDao: ConversationDao,
-    private val remoteConfig: RemoteConfigClient
+    private val remoteConfig: RemoteConfigClient,
+    private val gptInvestorPreferences: AppPreferences
 ) : IConversationRepository {
 
     private val json = Json { ignoreUnknownKeys = true }
@@ -87,10 +90,20 @@ class ConversationRepository(
         var structuredConversation: StructuredConversation? = null
         var messageId: Long? = null
         try {
-            analyticsLogger.logEvent(
-                eventName = "Default Prompt Selected",
-                params = mapOf("prompt_title" to prompt.title, "prompt_query" to prompt.query)
-            )
+            if (gptInvestorPreferences.isGuestLoggedIn.first() == true) {
+                analyticsLogger.logEvent(
+                    eventName = "Guest Default Prompt Selected",
+                    params = mapOf(
+                        "prompt_title" to prompt.title,
+                        "prompt_query" to prompt.query
+                    )
+                )
+            } else {
+                analyticsLogger.logEvent(
+                    eventName = "Default Prompt Selected",
+                    params = mapOf("prompt_title" to prompt.title, "prompt_query" to prompt.query)
+                )
+            }
 
             // Always create a new conversation entity
             val conversationId = conversationDao.insertConversation(
@@ -224,8 +237,11 @@ class ConversationRepository(
                     emit(Either.Left(mapHttpCodeToFailure(chatResponse.status.value)))
                 }
             }
-
-            analyticsLogger.logEvent(eventName = "Query Submitted", params = mapOf())
+            if (gptInvestorPreferences.isGuestLoggedIn.first() == true) {
+                analyticsLogger.logEvent(eventName = "Guest Query Submitted", params = mapOf())
+            } else {
+                analyticsLogger.logEvent(eventName = "Query Submitted", params = mapOf())
+            }
         } catch (e: Exception) {
             Logger.e(e.stackTraceToString())
             currentConversation?.let { conversation ->

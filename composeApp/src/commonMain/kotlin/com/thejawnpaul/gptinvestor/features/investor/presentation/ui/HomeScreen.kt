@@ -45,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.arrow_right_gradient
@@ -58,17 +59,21 @@ import com.thejawnpaul.gptinvestor.core.navigation.NavDrawerEvent
 import com.thejawnpaul.gptinvestor.core.platform.NotificationPermissionController
 import com.thejawnpaul.gptinvestor.discover
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultModel
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.HomeDefaultPrompts
+import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.QuestionInput
-import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeUiState
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.HomeTidbitItem
 import com.thejawnpaul.gptinvestor.gpt_investor
 import com.thejawnpaul.gptinvestor.ic_menu
 import com.thejawnpaul.gptinvestor.ic_search_status_two
 import com.thejawnpaul.gptinvestor.join_list
 import com.thejawnpaul.gptinvestor.join_the_waitlist
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.you_re_on_the_list
 import com.thejawnpaul.gptinvestor.you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge
@@ -78,17 +83,28 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.koinInject
 
+@Composable
+fun HomeScreen(state: HomeUiState, onEvent: (HomeEvent) -> Unit, modifier: Modifier = Modifier) {
+    val notificationPermissionController: NotificationPermissionController = koinInject()
+
+    HomeScreenContent(
+        state = state,
+        onEvent = onEvent,
+        notificationPermissionController = notificationPermissionController,
+        modifier = modifier
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
+private fun HomeScreenContent(
     state: HomeUiState,
-    onAction: (HomeAction) -> Unit,
     onEvent: (HomeEvent) -> Unit,
+    notificationPermissionController: NotificationPermissionController,
     modifier: Modifier = Modifier
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val notificationPermissionController: NotificationPermissionController = koinInject()
 
     notificationPermissionController.RequestPermissionIfNeeded(
         shouldRequest = state.requestForNotificationPermission == null,
@@ -120,23 +136,19 @@ fun HomeScreen(
                 onAction = { action ->
                     when (action) {
                         NavDrawerAction.OnGoToSavedPicks -> {
-                            // navController.navigate(Screen.SavedTopPicksScreen.route)
-                            onAction(HomeAction.OnGoToSavedPicks)
+                            onEvent(HomeEvent.GoToSavedPicks)
                         }
 
                         NavDrawerAction.OnGoToSettings -> {
-                            // navController.navigate(Screen.SettingsScreen.route)
-                            onAction(HomeAction.OnGoToSettings)
+                            onEvent(HomeEvent.GoToSettings)
                         }
 
                         NavDrawerAction.OnGoToHistory -> {
-                            // navController.navigate(Screen.HistoryTabScreen.route)
-                            onAction(HomeAction.OnGoToHistory)
+                            onEvent(HomeEvent.GoToHistory)
                         }
 
                         NavDrawerAction.OnGoToSavedTidbits -> {
-                            // navController.navigate(Screen.SavedTidbitsScreen.route)
-                            onAction(HomeAction.OnGoToSavedTidbits)
+                            onEvent(HomeEvent.GoToSavedTidbits)
                         }
                     }
                 },
@@ -193,53 +205,62 @@ fun HomeScreen(
                 }
             },
             topBar = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 0.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = {
-                        scope.launch {
-                            drawerState.open()
-                        }
-                    }) {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.ic_menu),
-                            contentDescription = null
-                        )
-                    }
-
-                    Text(
-                        text = stringResource(Res.string.gpt_investor),
-                        modifier = Modifier,
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-
+                Column {
                     Row(
-                        modifier = Modifier.clickable(
-                            indication = null,
-                            interactionSource = null,
-                            onClick = { onAction(HomeAction.OnGoToDiscover) }
-                        ),
-                        horizontalArrangement = Arrangement.spacedBy(0.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 0.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = stringResource(Res.string.discover),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
-                        IconButton(modifier = Modifier, onClick = {
-                            onAction(HomeAction.OnGoToDiscover)
+                        IconButton(onClick = {
+                            scope.launch {
+                                drawerState.open()
+                            }
                         }) {
                             Icon(
-                                painter = painterResource(Res.drawable.ic_search_status_two),
+                                imageVector = vectorResource(Res.drawable.ic_menu),
                                 contentDescription = null
                             )
                         }
+
+                        Text(
+                            text = stringResource(Res.string.gpt_investor),
+                            modifier = Modifier,
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+
+                        Row(
+                            modifier = Modifier.clickable(
+                                indication = null,
+                                interactionSource = null,
+                                onClick = { onEvent(HomeEvent.GoToDiscover) }
+                            ),
+                            horizontalArrangement = Arrangement.spacedBy(0.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.discover),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+
+                            IconButton(modifier = Modifier, onClick = {
+                                onEvent(HomeEvent.GoToDiscover)
+                            }) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_search_status_two),
+                                    contentDescription = null
+                                )
+                            }
+                        }
+                    }
+                    if (state.isGuestSession) {
+                        TopGuestLabel(
+                            modifier = Modifier,
+                            onClick = {
+                            }
+                        )
                     }
                 }
             }
@@ -399,7 +420,10 @@ fun WaitlistBottomSheetContent(
             1 -> {
                 Spacer(modifier = Modifier.height(16.dp))
                 // Image
-                Image(painter = painterResource(Res.drawable.copy_success), contentDescription = null)
+                Image(
+                    painter = painterResource(Res.drawable.copy_success),
+                    contentDescription = null
+                )
 
                 Text(
                     text = stringResource(Res.string.you_re_on_the_list),
@@ -468,5 +492,45 @@ fun SingleWaitlistOption(isSelected: Boolean, text: String, onSelectOption: () -
                 color = gptInvestorColors.textColors.secondary50
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun HomeScreenPreview() {
+    GPTInvestorTheme {
+        HomeScreenContent(
+            state = HomeUiState(
+                isGuestSession = true,
+                defaultPrompts = listOf(
+                    DefaultPrompt(
+                        title = "What is the best way to invest in stocks?",
+                        query = "What is the best way to invest in stocks?"
+                    ),
+                    DefaultPrompt(
+                        title = "How to save for retirement?",
+                        query = "How to save for retirement?"
+                    )
+                ),
+                availableModels = listOf(DefaultModel()),
+                selectedModel = DefaultModel(),
+                homeTidbitView = HomeTidbitView(
+                    id = "1",
+                    previewUrl = "",
+                    title = "The Power of Compounding",
+                    description = "Learn how compounding works and why it is the key to wealth creation."
+                )
+            ),
+            onEvent = {},
+            notificationPermissionController = object : NotificationPermissionController {
+                @Composable
+                override fun RequestPermissionIfNeeded(
+                    shouldRequest: Boolean,
+                    onGrant: () -> Unit,
+                    onDeny: () -> Unit
+                ) {
+                }
+            }
+        )
     }
 }

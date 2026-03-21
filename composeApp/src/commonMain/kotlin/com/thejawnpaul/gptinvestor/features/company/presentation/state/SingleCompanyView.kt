@@ -24,7 +24,8 @@ data class SingleCompanyView(
         "Unlimited queries"
     ),
     val selectedWaitlistOptions: List<String> = emptyList(),
-    val showWaitListBottomSheet: Boolean = false
+    val showWaitListBottomSheet: Boolean = false,
+    val isGuestSession: Boolean = false
 ) {
     val enableSend = inputQuery.trim().isNotEmpty()
 }

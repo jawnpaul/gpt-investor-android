@@ -92,6 +92,7 @@ kotlin {
         implementation(libs.gitlive.firebase.auth)
         implementation(libs.gitlive.firebase.config)
         implementation(libs.gitlive.firebase.messaging)
+        implementation(libs.gitlive.firebase.installations)
         implementation(libs.androidx.paging.common)
         implementation(libs.androidx.paging.compose)
         implementation(libs.markdown.renderer.m3)

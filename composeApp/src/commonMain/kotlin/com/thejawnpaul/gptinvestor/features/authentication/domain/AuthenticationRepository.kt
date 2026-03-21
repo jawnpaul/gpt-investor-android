@@ -12,4 +12,6 @@ interface AuthenticationRepository {
     suspend fun loginWithEmailAndPassword(email: String, password: String): Result<String>
     suspend fun signUpWithEmailAndPassword(email: String, password: String, name: String): Result<String>
     suspend fun loginWithGoogle(platformContext: PlatformContext): Result<Unit>
+    suspend fun signUpWithGoogle(platformContext: PlatformContext): Result<Unit>
+    suspend fun guestLogin(): Result<String>
 }

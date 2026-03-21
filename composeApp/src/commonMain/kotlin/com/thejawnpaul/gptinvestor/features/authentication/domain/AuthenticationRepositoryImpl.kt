@@ -9,12 +9,14 @@ import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.User
+import com.thejawnpaul.gptinvestor.features.guest.data.remote.GuestLoginRequest
 import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
 import com.thejawnpaul.gptinvestor.remote.TokenStorage
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.FirebaseAuth
 import dev.gitlive.firebase.auth.auth
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import org.koin.core.annotation.Singleton
 
@@ -45,6 +47,9 @@ class AuthenticationRepositoryImpl(
             gptInvestorPreferences.clearIsUserLoggedIn()
             gptInvestorPreferences.clearThemePreference()
             gptInvestorPreferences.clearIsUserOnModelWaitlist()
+            gptInvestorPreferences.clearAccessToken()
+            gptInvestorPreferences.clearRefreshToken()
+            gptInvestorPreferences.clearIsGuestLoggedIn()
             analyticsLogger.resetUser(eventName = "Log Out")
             signOutPlatform()
         } catch (e: Exception) {
@@ -84,6 +89,7 @@ class AuthenticationRepositoryImpl(
                 tokenSyncManager.syncToken()
                 tokenStorage.saveAccessToken(loginResponse.accessToken ?: "")
                 tokenStorage.saveRefreshToken(loginResponse.refreshToken ?: "")
+                gptInvestorPreferences.clearIsGuestLoggedIn()
 
                 analyticsLogger.identifyUser(
                     eventName = "Log in",
@@ -109,14 +115,29 @@ class AuthenticationRepositoryImpl(
             )
             if (response.isSuccessful) {
                 response.body?.let { signUpResponse ->
-                    analyticsLogger.identifyUser(
-                        eventName = "Sign Up",
-                        params = mapOf(
-                            "user_id" to signUpResponse.userId.toString(),
-                            "email" to email,
-                            "sign_up_method" to "email_and_password"
+
+                    if (gptInvestorPreferences.isGuestLoggedIn.first() == true) {
+                        analyticsLogger.logEvent(
+                            eventName = "Guest Sign Up",
+                            params = mapOf(
+                                "user_id" to signUpResponse.userId.toString(),
+                                "email" to email,
+                                "sign_up_method" to "email_and_password",
+                                "sign_up_source" to "guest_flow"
+                            )
                         )
-                    )
+                    } else {
+                        analyticsLogger.identifyUser(
+                            eventName = "Sign Up",
+                            params = mapOf(
+                                "user_id" to signUpResponse.userId.toString(),
+                                "email" to email,
+                                "sign_up_method" to "email_and_password"
+                            )
+                        )
+                    }
+
+                    gptInvestorPreferences.clearIsGuestLoggedIn()
                     Result.success(signUpResponse.message ?: "Signup successful")
                 } ?: Result.failure(Exception(response.body?.message ?: "Sign up failed"))
             } else {
@@ -135,7 +156,64 @@ class AuthenticationRepositoryImpl(
         tokenSyncManager = tokenSyncManager,
         platformContext = platformContext,
         appConfig = appConfig
-    )
+    ).onSuccess {
+        val isGuest = gptInvestorPreferences.isGuestLoggedIn.first() == true
+        val params = buildMap {
+            put("user_id", auth.currentUser?.uid ?: "")
+            put("email", auth.currentUser?.email ?: "")
+            put("log_in_method", "google")
+            if (isGuest) {
+                put("log_in_source", "guest_flow")
+            }
+        }
+        analyticsLogger.identifyUser(
+            eventName = "Log in",
+            params = params
+        )
+    }
+
+    override suspend fun signUpWithGoogle(platformContext: PlatformContext): Result<Unit> = loginWithGooglePlatform(
+        auth = auth,
+        apiService = apiService,
+        gptInvestorPreferences = gptInvestorPreferences,
+        tokenStorage = tokenStorage,
+        tokenSyncManager = tokenSyncManager,
+        platformContext = platformContext,
+        appConfig = appConfig
+    ).onSuccess {
+        val isGuest = gptInvestorPreferences.isGuestLoggedIn.first() == true
+        val params = buildMap {
+            put("user_id", auth.currentUser?.uid ?: "")
+            put("email", auth.currentUser?.email ?: "")
+            put("sign_up_method", "google")
+            if (isGuest) {
+                put("sign_up_source", "guest_flow")
+            }
+        }
+        analyticsLogger.identifyUser(
+            eventName = "Sign Up",
+            params = params
+        )
+    }
+
+    override suspend fun guestLogin(): Result<String> = try {
+        // val id = Firebase.installations.getId()
+        val id = "mr paul"
+        val response = apiService.guestLogin(request = GuestLoginRequest(id = id))
+        if (response.isSuccessful) {
+            response.body?.let { guestLoginResponse ->
+                tokenStorage.saveAccessToken(guestLoginResponse.accessToken ?: "")
+                gptInvestorPreferences.setIsGuestLoggedIn(true)
+                analyticsLogger.logEvent(eventName = "Guest Session Start", params = mapOf())
+                Result.success(guestLoginResponse.message ?: "Guest login successful")
+            } ?: Result.failure(Exception(response.body?.message ?: "Guest login failed"))
+        } else {
+            val errorMessage = response.errorBody ?: "Guest login failed"
+            return Result.failure(Exception(errorMessage))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
 }
 
 expect suspend fun signOutPlatform()

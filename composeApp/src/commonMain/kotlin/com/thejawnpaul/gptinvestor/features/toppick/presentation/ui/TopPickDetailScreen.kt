@@ -39,17 +39,21 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.back
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailHeader
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailTab
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.ExpandableText
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
+import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickAction
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickEvent
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPickDetailView
 import com.thejawnpaul.gptinvestor.ic_bookmark
 import com.thejawnpaul.gptinvestor.ic_bookmark_filled
@@ -63,6 +67,7 @@ import com.thejawnpaul.gptinvestor.like_chosen
 import com.thejawnpaul.gptinvestor.read_less
 import com.thejawnpaul.gptinvestor.read_more
 import com.thejawnpaul.gptinvestor.sources
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.theme.linkMedium
 import com.thejawnpaul.gptinvestor.top_pick_details
@@ -81,29 +86,34 @@ fun TopPickDetailScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            state.companyPresentation?.let { company ->
-                CompanyDetailHeader(
-                    modifier = Modifier,
-                    companyHeader = CompanyHeaderPresentation(
-                        companyTicker = company.ticker,
-                        companyName = company.name ?: "",
-                        price = company.price ?: 0.0f,
-                        percentageChange = company.change ?: 0.0f,
-                        companyLogo = company.formattedImageUrl
-                    ),
-                    onNavigateUp = { onAction(TopPickAction.OnGoBack) }
-                )
-            } ?: Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                IconButton(onClick = { onAction(TopPickAction.OnGoBack) }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = stringResource(Res.string.back)
+            Column {
+                state.companyPresentation?.let { company ->
+                    CompanyDetailHeader(
+                        modifier = Modifier,
+                        companyHeader = CompanyHeaderPresentation(
+                            companyTicker = company.ticker,
+                            companyName = company.name ?: "",
+                            price = company.price ?: 0.0f,
+                            percentageChange = company.change ?: 0.0f,
+                            companyLogo = company.formattedImageUrl
+                        ),
+                        onNavigateUp = { onAction(TopPickAction.OnGoBack) }
                     )
+                } ?: Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    IconButton(onClick = { onAction(TopPickAction.OnGoBack) }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = stringResource(Res.string.back)
+                        )
+                    }
+                    Text(text = stringResource(Res.string.top_pick_details))
                 }
-                Text(text = stringResource(Res.string.top_pick_details))
+                if (state.isGuestSession) {
+                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {})
+                }
             }
         },
         bottomBar = {
@@ -410,6 +420,58 @@ private fun ContentView(state: TopPickDetailView, onEvent: (TopPickEvent) -> Uni
                     )
                 }
             }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun TopPickDetailScreenPreview() {
+    val sampleTopPick = TopPickPresentation(
+        id = "1",
+        ticker = "AAPL",
+        companyName = "Apple Inc.",
+        rationale = "Apple continues to dominate the premium smartphone market with high margins and a " +
+            "growing services ecosystem. The upcoming AI features in iOS are " +
+            "expected to drive a significant upgrade cycle.",
+        confidenceScore = 8,
+        metrics = listOf("P/E Ratio: 30.5", "Dividend Yield: 0.5%", "Revenue Growth: 5%"),
+        risks = listOf(
+            "Regulatory scrutiny in EU",
+            "Supply chain dependencies in China",
+            "Competition in the AI space"
+        ),
+        isSaved = true,
+        imageUrl = "https://example.com/apple.png",
+        percentageChange = 1.2f,
+        currentPrice = 220.50f
+    )
+
+    val sampleCompanyDetail = CompanyDetailRemoteResponse(
+        ticker = "AAPL",
+        name = "Apple Inc.",
+        price = 220.50f,
+        change = 1.2f,
+        imageUrl = "https://example.com/apple.png",
+        about = "Apple Inc. designs, manufactures, and markets smartphones, personal computers, " +
+            "tablets, wearables, and accessories worldwide.",
+        news = emptyList()
+    )
+
+    val sampleState = TopPickDetailView(
+        isLoggedIn = true,
+        topPick = sampleTopPick,
+        isGuestSession = true,
+        companyPresentation = sampleCompanyDetail
+    )
+
+    GPTInvestorTheme {
+        Surface {
+            TopPickDetailScreen(
+                state = sampleState,
+                onEvent = {},
+                onAction = {}
+            )
         }
     }
 }

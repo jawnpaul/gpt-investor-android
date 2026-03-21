@@ -44,6 +44,7 @@ import com.thejawnpaul.gptinvestor.empty
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.SingleCompanyItem
+import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.SectorChoiceQuestion
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SingleTopPickItem
 import com.thejawnpaul.gptinvestor.ic_search
@@ -76,8 +77,7 @@ fun DiscoverScreen(
         modifier = modifier,
         topBar = {
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
                     modifier = Modifier
@@ -166,7 +166,10 @@ fun DiscoverScreen(
                     }
                 }
 
-                HorizontalDivider()
+                HorizontalDivider(modifier = Modifier.padding(top = 12.dp))
+                if (state.isGuestSession) {
+                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {})
+                }
             }
         }
     ) { innerPadding ->

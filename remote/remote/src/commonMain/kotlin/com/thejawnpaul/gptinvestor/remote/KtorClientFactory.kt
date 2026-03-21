@@ -52,8 +52,8 @@ object KtorClientFactory {
                     loadTokens {
                         val token = tokenStorage.getAccessToken()
                         val refreshToken = tokenStorage.getRefreshToken()
-                        if (token != null && refreshToken != null) {
-                            BearerTokens(token, refreshToken)
+                        if (token != null) {
+                            BearerTokens(accessToken = token, refreshToken = refreshToken)
                         } else {
                             null
                         }

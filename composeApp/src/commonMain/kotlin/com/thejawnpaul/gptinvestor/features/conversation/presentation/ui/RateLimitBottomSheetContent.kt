@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.guest_limit_reached_description
 import com.thejawnpaul.gptinvestor.guest_limit_reached_title
-import com.thejawnpaul.gptinvestor.rate_limit_bottom_sheet_action
 import com.thejawnpaul.gptinvestor.rate_limit_bottom_sheet_description
 import com.thejawnpaul.gptinvestor.rate_limit_bottom_sheet_title
 import com.thejawnpaul.gptinvestor.sign_in
@@ -25,12 +24,7 @@ import com.thejawnpaul.gptinvestor.upgrade
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun RateLimitBottomSheetContent(
-    isGuest: Boolean,
-    onUpgrade: () -> Unit,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun RateLimitBottomSheetContent(isGuest: Boolean, onUpgrade: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -76,14 +70,6 @@ fun RateLimitBottomSheetContent(
                     )
                 }
             )
-        }
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            onClick = onDismiss
-        ) {
-            Text(text = stringResource(Res.string.rate_limit_bottom_sheet_action))
         }
         Spacer(modifier = Modifier.height(24.dp))
     }

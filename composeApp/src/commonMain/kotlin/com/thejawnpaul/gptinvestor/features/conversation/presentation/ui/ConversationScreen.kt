@@ -49,9 +49,6 @@ fun ConversationScreen(
                 RateLimitBottomSheetContent(
                     modifier = Modifier,
                     isGuest = state.isGuest,
-                    onDismiss = {
-                        onEvent(ConversationEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
-                    },
                     onUpgrade = onUpgradeFromRateLimit
                 )
             }

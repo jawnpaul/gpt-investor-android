@@ -30,9 +30,6 @@ fun HistoryDetailScreen(
                 RateLimitBottomSheetContent(
                     modifier = Modifier,
                     isGuest = state.isGuest,
-                    onDismiss = {
-                        onEvent(HistoryDetailEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
-                    },
                     onUpgrade = onUpgradeFromRateLimit
                 )
             }

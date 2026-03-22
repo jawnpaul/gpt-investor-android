@@ -61,6 +61,7 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
                 is AuthenticationAction.OnSignUp -> platformActions.showMessage(action.message)
             }
         }.launchIn(scope)
+        platformActions.showMessage("Just testing the toast feature")
     }
 
     LaunchedEffect(deepLinkRoute, isNavGraphReady, isUserSignedIn, isFirstInstall) {

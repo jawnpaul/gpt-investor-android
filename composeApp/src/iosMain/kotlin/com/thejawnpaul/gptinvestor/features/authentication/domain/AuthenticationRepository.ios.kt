@@ -30,7 +30,6 @@ actual suspend fun loginWithGooglePlatform(
 ): Result<Unit> = try {
     val googleSignInProvider: GoogleSignInProvider = getKoin().get()
 
-    // Bridge the callback-based GoogleSignInProvider to a coroutine suspension.
     val details: Pair<String, String> = suspendCancellableCoroutine { continuation ->
         googleSignInProvider.signIn(
             onSuccess = { token, accessToken -> continuation.resume(Pair(token, accessToken)) },
@@ -38,7 +37,6 @@ actual suspend fun loginWithGooglePlatform(
         )
     }
 
-    // Sign in to Firebase with the Google ID token.
     auth.signInWithCredential(
         GitLiveGoogleAuthProvider.credential(
             details.first,
@@ -59,14 +57,11 @@ actual suspend fun loginWithGooglePlatform(
                 gptInvestorPreferences.setIsUserLoggedIn(true)
                 response.user?.name?.let {
                     gptInvestorPreferences.setUserName(response.user.name)
-                    println("User name: ${response.user.name}")
                 }
                 tokenStorage.saveAccessToken(response.accessToken ?: "")
                 tokenStorage.saveRefreshToken(response.refreshToken ?: "")
                 tokenSyncManager.syncToken()
             }
-        } else {
-            println("Login response error: ${loginResponse.errorBody}")
         }
     }
     Result.success(Unit)

@@ -62,7 +62,6 @@ final class SwiftGoogleSignInProvider: NSObject, GoogleSignInProvider {
                     return
                 }
                 let accessToken = user.accessToken.tokenString
-                print("ID token: \(idToken)", "Access token: \(accessToken)")
                 onSuccess(idToken, accessToken)
             } catch {
                 onError(error.localizedDescription)

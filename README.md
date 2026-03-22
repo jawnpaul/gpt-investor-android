@@ -51,9 +51,8 @@ Libraries used in the application are:
   - [Compose](https://developer.android.com/jetpack/androidx/releases/compose) - Define your UI programmatically with composable functions that describe its shape and data dependencies.
   - [Navigation](https://developer.android.com/jetpack/androidx/releases/navigation) - Build and structure your in-app UI, handle deep links, and navigate between screens.
   - [Room](https://developer.android.com/jetpack/androidx/releases/room) - Create, store, and manage persistent data backed by a SQLite database.
-- [Retrofit](https://square.github.io/retrofit/) - Type safe http client and supports coroutines out of the box.
-- [Moshi](https://github.com/square/moshi) - JSON Parser, used to parse requests on the data layer for Entities and understands Kotlin non-nullable
-and default parameters.
+- [Ktor](https://github.com/ktorio/ktor) - Create asynchronous client and server applications. Anything from microservices to multiplatform HTTP client apps in a simple way. Open Source, free, and fun!
+- [Kotlinx Serialization](https://github.com/Kotlin/kotlinx.serialization) - Kotlin serialization consists of a compiler plugin, that generates visitor code for serializable classes, runtime library with core serialization API and support libraries with various serialization formats.
 - [okhttp-logging-interceptor](https://github.com/square/okhttp/blob/master/okhttp-logging-interceptor/README.md) - Logs HTTP request and response data.
 - [StateFlow](https://developer.android.com/kotlin/flow/stateflow-and-sharedflow#stateflow) - A state-holder observable flow that emits the current and new state updates to its collectors.
 - [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines) - Library Support for coroutines. I used this for asynchronous programming in order to obtain data from the network as well as the database.
@@ -65,8 +64,8 @@ and default parameters.
 - [JUnit](https://junit.org/junit4/) - This was used for unit testing the repository, the use cases and the ViewModels.
 - [Mockk](https://mockk.io/) This is a mocking library for Kotlin. I used it to provide test doubles during testing.
 - [Truth](https://truth.dev/) - Assertions Library, provides readability as far as assertions are concerned.
-- [Hilt](https://github.com/InsertKoinIO/koin) - Dependency injection plays a central role in the architectural pattern used.
-For this reason I have chosen Hilt which is built on top of the battle tested DI framework - Dagger 2.
+- [Koin](https://github.com/InsertKoinIO/koin) - Dependency injection plays a central role in the architectural pattern used. 
+For this reason I have chosen Koin which is the most recommended for [CMP](https://www.jetbrains.com/compose-multiplatform/) projects
 
 ## Process
 

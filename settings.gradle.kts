@@ -25,7 +25,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "GPT Investor"
-include(":app")
+include(":composeApp")
+include(":androidApp")
 include(":remote:remote")
 include(":remote:remotetest")
 include(":analytics")

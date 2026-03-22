@@ -14,3 +14,5 @@ google-services.json
 .kotlin/
 Gemfile
 Gemfile.lock
+app/build
+/iosApp/iosApp/GoogleService-*.plist

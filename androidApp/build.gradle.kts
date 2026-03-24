@@ -52,7 +52,7 @@ android {
         applicationId = "com.thejawnpaul.gptinvestor"
         minSdk = 24
         targetSdk = 36
-        versionCode = 30
+        versionCode = 31
         versionName = "1.1.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

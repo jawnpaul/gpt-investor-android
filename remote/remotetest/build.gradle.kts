@@ -1,27 +1,40 @@
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
-    id("com.android.library")
-    alias(libs.plugins.hiltAndroid)
-    alias(libs.plugins.ksp)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.koin.compiler)
     alias(libs.plugins.kotlin.serialization)
 }
 
-android {
-    namespace = "com.thejawnpaul.gptinvestor"
-    compileSdk = 36
-    defaultConfig.minSdk = 24
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    buildFeatures { buildConfig = true }
-}
 kotlin {
-    compilerOptions {
-        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
-    }
-}
+    android {
+        namespace = "com.thejawnpaul.gptinvestor.remotetest"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
 
-dependencies {
-    implementation(libs.dagger.hilt)
-    ksp(libs.dagger.hilt.compiler)
+        compilations.all {
+            compileTaskProvider.configure {
+                compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+            }
+        }
+    }
+
+    listOf(
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "RemoteTest"
+            isStatic = true
+        }
+    }
+
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    dependencies {
+        implementation(platform(libs.koin.bom))
+        implementation(libs.koin.core)
+        testImplementation(libs.koin.test)
+    }
 }

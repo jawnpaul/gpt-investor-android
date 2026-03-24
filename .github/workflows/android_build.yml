@@ -41,17 +41,17 @@ jobs:
         env:
           DATA: ${{ secrets.GOOGLE_SERVICES_DEBUG }}
         run: |
-          mkdir -p app/src/debug
-          echo "$DATA" | base64 -di > app/src/debug/google-services.json
-          cp app/src/debug/google-services.json app/google-services.json
+          mkdir -p androidApp/src/debug
+          echo "$DATA" | base64 -di > androidApp/src/debug/google-services.json
+          cp androidApp/src/debug/google-services.json androidApp/google-services.json
 
       # Decode Release google-services.json
       - name: Load Release Google Services
         env:
           DATA: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
-          mkdir -p app/src/release
-          echo "$DATA" | base64 -di > app/src/release/google-services.json
+          mkdir -p androidApp/src/release
+          echo "$DATA" | base64 -di > androidApp/src/release/google-services.json
 
       # Decode Keystore
       - name: Decode Keystore

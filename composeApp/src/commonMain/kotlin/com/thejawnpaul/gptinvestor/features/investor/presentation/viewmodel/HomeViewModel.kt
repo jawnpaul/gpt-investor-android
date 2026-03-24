@@ -27,9 +27,11 @@ import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksU
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
@@ -48,9 +50,20 @@ class HomeViewModel(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
-    val uiState = _uiState.asStateFlow().combine(preferences.userName) { state, userName ->
-        state.copy(drawerState = state.drawerState.copy(user = userName))
-    }
+    val uiState = combine(
+        _uiState.asStateFlow(),
+        preferences.userName,
+        preferences.isGuestLoggedIn
+    ) { state, userName, isGuestLoggedIn ->
+        state.copy(
+            drawerState = state.drawerState.copy(user = userName),
+            isGuestSession = isGuestLoggedIn == true
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = HomeUiState()
+    )
 
     private val _actions = MutableSharedFlow<HomeAction>()
     val actions get() = _actions
@@ -67,7 +80,6 @@ class HomeViewModel(
         getAvailableModels()
         getDefaultPrompts()
         getTodayTidbit()
-        // doSomething()
 
         viewModelScope.launch {
             preferences.themePreference.collect { theme ->
@@ -80,20 +92,6 @@ class HomeViewModel(
             }
             preferences.notificationPermission.collect { permission ->
                 _uiState.update { it.copy(requestForNotificationPermission = permission) }
-            }
-        }
-    }
-
-    private fun doSomething() {
-        viewModelScope.launch {
-            preferences.userName.collect {
-                _uiState.update { state ->
-                    state.copy(
-                        drawerState = state.drawerState.copy(
-                            user = it
-                        )
-                    )
-                }
             }
         }
     }
@@ -208,6 +206,46 @@ class HomeViewModel(
                 HomeEvent.GoToAllTidbits -> {
                     _actions.emit(OnGoToAllTidbits)
                 }
+
+                HomeEvent.GoToDiscover -> {
+                    _actions.emit(HomeAction.OnGoToDiscover)
+                }
+
+                HomeEvent.GoToHistory -> {
+                    if (uiState.value.isGuestSession) {
+                        _actions.emit(HomeAction.ShowToast(message = "You can only see history after signing in"))
+                    } else {
+                        _actions.emit(HomeAction.OnGoToHistory)
+                    }
+                }
+
+                HomeEvent.GoToSavedPicks -> {
+                    if (uiState.value.isGuestSession) {
+                        _actions.emit(HomeAction.ShowToast(message = "You can only see saved picks after signing in"))
+                    } else {
+                        _actions.emit(HomeAction.OnGoToSavedPicks)
+                    }
+                }
+
+                HomeEvent.GoToSavedTidbits -> {
+                    if (uiState.value.isGuestSession) {
+                        _actions.emit(HomeAction.ShowToast(message = "You can only see saved tidbits after signing in"))
+                    } else {
+                        _actions.emit(HomeAction.OnGoToSavedTidbits)
+                    }
+                }
+
+                HomeEvent.GoToSettings -> {
+                    if (uiState.value.isGuestSession) {
+                        _actions.emit(HomeAction.ShowToast(message = "You can only see settings after signing in"))
+                    } else {
+                        _actions.emit(HomeAction.OnGoToSettings)
+                    }
+                }
+
+                HomeEvent.GoToSignUp -> {
+                    _actions.emit(HomeAction.OnGoToSignUp)
+                }
             }
         }
     }
@@ -303,7 +341,8 @@ data class HomeUiState(
     val selectedWaitlistOptions: List<String> = emptyList(),
     val defaultPrompts: List<DefaultPrompt> = emptyList(),
     val drawerState: DrawerState = DrawerState(),
-    val homeTidbitView: HomeTidbitView? = null
+    val homeTidbitView: HomeTidbitView? = null,
+    val isGuestSession: Boolean = false
 )
 
 sealed interface HomeEvent {
@@ -320,6 +359,12 @@ sealed interface HomeEvent {
     data object SignOut : HomeEvent
     data class ClickTidbit(val id: String) : HomeEvent
     data object GoToAllTidbits : HomeEvent
+    data object GoToSavedPicks : HomeEvent
+    data object GoToSavedTidbits : HomeEvent
+    data object GoToDiscover : HomeEvent
+    data object GoToSettings : HomeEvent
+    data object GoToHistory : HomeEvent
+    data object GoToSignUp : HomeEvent
 }
 
 sealed interface HomeAction {
@@ -335,4 +380,6 @@ sealed interface HomeAction {
     data class OnGoToTidbitDetail(val id: String) : HomeAction
     data object OnGoToAllTidbits : HomeAction
     data object OnGoToSavedTidbits : HomeAction
+    data class ShowToast(val message: String) : HomeAction
+    data object OnGoToSignUp : HomeAction
 }

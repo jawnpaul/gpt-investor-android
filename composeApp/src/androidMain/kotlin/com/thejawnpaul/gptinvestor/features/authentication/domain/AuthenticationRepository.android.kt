@@ -74,6 +74,7 @@ actual suspend fun loginWithGooglePlatform(
                     tokenStorage.saveAccessToken(response.accessToken ?: "")
                     tokenStorage.saveRefreshToken(response.refreshToken ?: "")
                     tokenSyncManager.syncToken()
+                    gptInvestorPreferences.clearIsGuestLoggedIn()
                 }
             }
         }

@@ -8,6 +8,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
+import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.billing.domain.BillingConstants
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
@@ -41,7 +42,8 @@ class ConversationViewModel(
     private val getInputPromptUseCase: GetInputPromptUseCase,
     private val fedBackRepository: FeedbackRepository,
     private val modelsRepository: ModelsRepository,
-    private val billingRepository: IBillingRepository
+    private val billingRepository: IBillingRepository,
+    private val appPreferences: AppPreferences
 ) : ViewModel() {
 
     private val conversationViewMutableStateFlow = MutableStateFlow(ConversationView())
@@ -64,6 +66,15 @@ class ConversationViewModel(
         getDefaultPrompts()
         getAvailableModels()
         startConversation(title = title, chatInput = chatInput)
+        checkGuestStatus()
+    }
+
+    private fun checkGuestStatus() {
+        viewModelScope.launch {
+            appPreferences.isGuestLoggedIn.collect { isGuest ->
+                conversationViewMutableStateFlow.update { it.copy(isGuest = isGuest ?: false) }
+            }
+        }
     }
 
     fun updateInput(input: String) {
@@ -198,13 +209,15 @@ class ConversationViewModel(
             is Failure.RateLimitExceeded -> {
                 conversationViewMutableStateFlow.update { state ->
                     state.copy(
-                        showRateLimitBottomSheet = false
+                        showRateLimitBottomSheet = state.isGuest
                     )
                 }
                 Logger.e("Rate limit exceeded")
-                processAction(
-                    ConversationAction.ShowToast("Rate limit exceeded. Please try again later.")
-                )
+                if (!conversationViewMutableStateFlow.value.isGuest) {
+                    processAction(
+                        ConversationAction.ShowToast("Rate limit exceeded. Please try again later.")
+                    )
+                }
             }
 
             is Failure.ContextLimitReached -> {
@@ -305,6 +318,10 @@ class ConversationViewModel(
                     it.copy(showRateLimitBottomSheet = event.showBottomSheet)
                 }
             }
+
+            ConversationEvent.GoToSignUp -> {
+                processAction(ConversationAction.OnGoToSignUp)
+            }
         }
     }
 
@@ -380,13 +397,18 @@ class ConversationViewModel(
 
     fun launchPurchaseFlow(platformContext: PlatformContext) {
         viewModelScope.launch {
-            val result = billingRepository.launchPurchaseFlow(
-                platformContext = platformContext,
-                productId = BillingConstants.PRO_SUBSCRIPTION_PRODUCT_ID
-            )
-            handleEvent(ConversationEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
-            if (result is BillingResult.Error) {
-                processAction(ConversationAction.ShowToast("Billing Error: ${result.message}"))
+            if (conversationViewMutableStateFlow.value.isGuest) {
+                appPreferences.setIsGuestLoggedIn(false)
+                processAction(ConversationAction.OnSignOutGuest)
+            } else {
+                val result = billingRepository.launchPurchaseFlow(
+                    platformContext = platformContext,
+                    productId = BillingConstants.PRO_SUBSCRIPTION_PRODUCT_ID
+                )
+                handleEvent(ConversationEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
+                if (result is BillingResult.Error) {
+                    processAction(ConversationAction.ShowToast("Billing Error: ${result.message}"))
+                }
             }
         }
     }
@@ -431,6 +453,7 @@ sealed interface ConversationEvent {
     data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : ConversationEvent
 
     data class ShowRateLimitBottomSheet(val showBottomSheet: Boolean) : ConversationEvent
+    data object GoToSignUp : ConversationEvent
 }
 
 sealed interface ConversationAction {
@@ -438,6 +461,8 @@ sealed interface ConversationAction {
     data class OnGoToWebView(val url: String) : ConversationAction
     data class OnCopy(val text: String) : ConversationAction
     data class ShowToast(val message: String) : ConversationAction
+    data object OnSignOutGuest : ConversationAction
+    data object OnGoToSignUp : ConversationAction
 }
 
 data class HomeChatInput(val title: String? = null, val input: String? = null)

@@ -66,6 +66,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntit
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
+import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.QuestionInput
 import com.thejawnpaul.gptinvestor.ic_copy
 import com.thejawnpaul.gptinvestor.ic_dislike
@@ -97,6 +98,7 @@ fun StructuredConversationScreen(
     availableModels: List<AvailableModel>,
     onNavigateUp: () -> Unit,
     onSendClick: () -> Unit,
+    onSignUpClick: () -> Unit,
     onCopy: (String) -> Unit,
     onInputQueryChange: (String) -> Unit,
     onClickNews: (url: String) -> Unit,
@@ -105,7 +107,8 @@ fun StructuredConversationScreen(
     onModelChange: (AvailableModel) -> Unit,
     onUpgradeModel: (showBottomSheet: Boolean, modelId: String) -> Unit,
     modifier: Modifier = Modifier,
-    companyName: String = ""
+    companyName: String = "",
+    isGuest: Boolean = false
 ) {
     val company = conversation.messageList.filterIsInstance<GenAiEntityMessage>().firstOrNull()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -113,35 +116,40 @@ fun StructuredConversationScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            company?.let {
-                CompanyDetailHeader(
-                    modifier = Modifier.fillMaxWidth(),
-                    onNavigateUp = onNavigateUp,
-                    companyHeader = CompanyHeaderPresentation(
-                        companyTicker = it.entity?.ticker ?: "",
-                        companyName = it.entity?.name ?: "",
-                        companyLogo = it.entity?.formattedImageUrl ?: "",
-                        price = it.entity?.price ?: 0f,
-                        percentageChange = it.entity?.change ?: 0f
+            Column {
+                company?.let {
+                    CompanyDetailHeader(
+                        modifier = Modifier.fillMaxWidth(),
+                        onNavigateUp = onNavigateUp,
+                        companyHeader = CompanyHeaderPresentation(
+                            companyTicker = it.entity?.ticker ?: "",
+                            companyName = it.entity?.name ?: "",
+                            companyLogo = it.entity?.formattedImageUrl ?: "",
+                            price = it.entity?.price ?: 0f,
+                            percentageChange = it.entity?.change ?: 0f
+                        )
                     )
-                )
-            } ?: Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                IconButton(onClick = onNavigateUp) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null
+                } ?: Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    IconButton(onClick = onNavigateUp) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null
+                        )
+                    }
+                    Text(
+                        text = conversation.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
-                Text(
-                    text = conversation.title,
-                    style = MaterialTheme.typography.titleLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                if (isGuest) {
+                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = onSignUpClick)
+                }
             }
         },
         bottomBar = {
@@ -265,6 +273,7 @@ fun StructuredConversationScreen(
                             onClickNews = onClickNews,
                             onClickFeedback = onClickFeedback,
                             onCopy = onCopy,
+                            isGuest = isGuest,
                             onClickSource = {
                                 showBottomSheet = true
                             }
@@ -288,7 +297,8 @@ fun SingleStructuredResponse(
     onCopy: (text: String) -> Unit,
     onClickSource: () -> Unit,
     modifier: Modifier = Modifier,
-    text: String = ""
+    text: String = "",
+    isGuest: Boolean = false
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
@@ -378,7 +388,7 @@ fun SingleStructuredResponse(
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
 
-                        if (!genAiMessage.loading) {
+                        if (!genAiMessage.loading && !isGuest) {
                             val dislikeReasons =
                                 listOf(
                                     Res.string.too_complex,

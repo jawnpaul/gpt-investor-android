@@ -302,6 +302,10 @@ class HistoryViewModel(
                     it.copy(showRateLimitBottomSheet = event.showBottomSheet)
                 }
             }
+
+            HistoryDetailEvent.GoToSignUp -> {
+                processHistoryDetailAction(HistoryDetailAction.OnGoToSignUp)
+            }
         }
     }
 
@@ -396,6 +400,7 @@ sealed interface HistoryDetailEvent {
     data class SelectWaitlistOption(val option: String) : HistoryDetailEvent
 
     data class ShowRateLimitBottomSheet(val showBottomSheet: Boolean) : HistoryDetailEvent
+    data object GoToSignUp : HistoryDetailEvent
 }
 
 sealed interface HistoryDetailAction {
@@ -403,4 +408,5 @@ sealed interface HistoryDetailAction {
     data class OnGoToWebView(val url: String) : HistoryDetailAction
     data class OnCopy(val text: String) : HistoryDetailAction
     data class ShowToast(val message: String) : HistoryDetailAction
+    data object OnGoToSignUp : HistoryDetailAction
 }

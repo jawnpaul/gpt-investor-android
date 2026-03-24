@@ -41,6 +41,7 @@ import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.bookmark
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CustomRichText
+import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.model.TidbitPresentation
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailEvent
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailState
@@ -62,34 +63,48 @@ import org.jetbrains.compose.resources.stringResource
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TidbitDetailScreen(state: TidbitDetailState, onEvent: (TidbitDetailEvent) -> Unit, modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize()) {
-        if (state.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = {
+            Column {
+                DetailTopAppBar(onBackClick = { onEvent(TidbitDetailEvent.GoBack) })
+                if (state.isGuestSession) {
+                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {
+                        onEvent(TidbitDetailEvent.GoToSignUp)
+                    })
+                }
+            }
         }
-        state.presentation?.let { presentation ->
-            when (presentation) {
-                is TidbitPresentation.ArticlePresentation -> {
-                    TidbitArticleDetail(
-                        modifier = Modifier,
-                        presentation = presentation,
-                        onEvent = onEvent
-                    )
-                }
+    ) { paddingValues ->
+        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+            if (state.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+            state.presentation?.let { presentation ->
+                when (presentation) {
+                    is TidbitPresentation.ArticlePresentation -> {
+                        TidbitArticleDetail(
+                            presentation = presentation,
+                            onEvent = onEvent,
+                            isGuest = state.isGuestSession
+                        )
+                    }
 
-                is TidbitPresentation.AudioPresentation -> {
-                    TidbitAudioDetail(
-                        modifier = Modifier,
-                        presentation = presentation,
-                        onEvent = onEvent
-                    )
-                }
+                    is TidbitPresentation.AudioPresentation -> {
+                        TidbitAudioDetail(
+                            presentation = presentation,
+                            onEvent = onEvent,
+                            isGuest = state.isGuestSession
+                        )
+                    }
 
-                is TidbitPresentation.VideoPresentation -> {
-                    TidbitVideoDetail(
-                        modifier = Modifier,
-                        onEvent = onEvent,
-                        presentation = presentation
-                    )
+                    is TidbitPresentation.VideoPresentation -> {
+                        TidbitVideoDetail(
+                            onEvent = onEvent,
+                            presentation = presentation,
+                            isGuest = state.isGuestSession
+                        )
+                    }
                 }
             }
         }
@@ -151,11 +166,13 @@ private fun TidbitActionRow(
     onBookmarkClick: () -> Unit,
     onShareClick: () -> Unit,
     onSourceClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isGuest: Boolean = false
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     val likeIcon = if (isLiked) Res.drawable.ic_like_filled else Res.drawable.ic_like
-    val bookmarkIcon = if (isBookmarked) Res.drawable.ic_bookmark_filled else Res.drawable.ic_bookmark
+    val bookmarkIcon =
+        if (isBookmarked) Res.drawable.ic_bookmark_filled else Res.drawable.ic_bookmark
 
     Row(
         modifier = modifier,
@@ -166,17 +183,19 @@ private fun TidbitActionRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(modifier = Modifier.size(32.dp), onClick = onLikeClick) {
-                Icon(
-                    painter = painterResource(likeIcon),
-                    contentDescription = stringResource(Res.string.like)
-                )
-            }
-            IconButton(modifier = Modifier.size(32.dp), onClick = onBookmarkClick) {
-                Icon(
-                    painter = painterResource(bookmarkIcon),
-                    contentDescription = stringResource(Res.string.bookmark)
-                )
+            if (!isGuest) {
+                IconButton(modifier = Modifier.size(32.dp), onClick = onLikeClick) {
+                    Icon(
+                        painter = painterResource(likeIcon),
+                        contentDescription = stringResource(Res.string.like)
+                    )
+                }
+                IconButton(modifier = Modifier.size(32.dp), onClick = onBookmarkClick) {
+                    Icon(
+                        painter = painterResource(bookmarkIcon),
+                        contentDescription = stringResource(Res.string.bookmark)
+                    )
+                }
             }
             IconButton(modifier = Modifier.size(32.dp), onClick = onShareClick) {
                 Icon(
@@ -212,83 +231,75 @@ private fun TidbitActionRow(
 private fun TidbitArticleDetail(
     presentation: TidbitPresentation.ArticlePresentation,
     onEvent: (TidbitDetailEvent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isGuest: Boolean = false
 ) {
     val isLiked = remember { mutableStateOf(presentation.isLiked) }
     val isBookmarked = remember { mutableStateOf(presentation.isBookmarked) } // State managed here
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            DetailTopAppBar(onBackClick = { onEvent(TidbitDetailEvent.GoBack) })
-        },
-        bottomBar = {
-            TidbitActionRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                isLiked = isLiked.value,
-                isBookmarked = isBookmarked.value,
-                onLikeClick = {
-                    onEvent(
-                        TidbitDetailEvent.OnClickLike(
-                            id = presentation.id,
-                            newValue = !isLiked.value
-                        )
-                    )
-                    isLiked.value = !isLiked.value
-                },
-                onBookmarkClick = {
-                    onEvent(
-                        TidbitDetailEvent.OnClickBookmark(
-                            id = presentation.id,
-                            newValue = !isBookmarked.value
-                        )
-                    )
-                    isBookmarked.value = !isBookmarked.value
-                },
-                onShareClick = { onEvent(TidbitDetailEvent.OnClickShare) },
-                onSourceClick = { onEvent(TidbitDetailEvent.OnClickSource) }
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        Spacer(modifier = Modifier)
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(193.dp),
+            shape = RoundedCornerShape(corner = CornerSize(20.dp))
+        ) {
+            AsyncImage(
+                modifier = Modifier.fillMaxSize(),
+                model = presentation.mediaUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop
             )
         }
-    ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                Spacer(modifier = Modifier)
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(193.dp),
-                    shape = RoundedCornerShape(corner = CornerSize(20.dp))
-                ) {
-                    AsyncImage(
-                        modifier = Modifier.fillMaxSize(),
-                        model = presentation.mediaUrl,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop
+
+        AuthorCategoryInfo(
+            modifier = Modifier.fillMaxWidth(),
+            author = presentation.originalAuthor,
+            category = presentation.category
+        )
+
+        Text(text = presentation.title, style = MaterialTheme.typography.titleLarge)
+        CustomRichText(
+            modifier = Modifier.padding(horizontal = 4.dp),
+            text = presentation.content
+        )
+
+        TidbitActionRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            isLiked = isLiked.value,
+            isBookmarked = isBookmarked.value,
+            onLikeClick = {
+                onEvent(
+                    TidbitDetailEvent.OnClickLike(
+                        id = presentation.id,
+                        newValue = !isLiked.value
                     )
-                }
-
-                AuthorCategoryInfo(
-                    modifier = Modifier.fillMaxWidth(),
-                    author = presentation.originalAuthor,
-                    category = presentation.category
                 )
-
-                Text(text = presentation.title, style = MaterialTheme.typography.titleLarge)
-                CustomRichText(
-                    modifier = Modifier.padding(horizontal = 4.dp),
-                    text = presentation.content
+                isLiked.value = !isLiked.value
+            },
+            onBookmarkClick = {
+                onEvent(
+                    TidbitDetailEvent.OnClickBookmark(
+                        id = presentation.id,
+                        newValue = !isBookmarked.value
+                    )
                 )
-                Spacer(modifier = Modifier)
-            }
-        }
+                isBookmarked.value = !isBookmarked.value
+            },
+            onShareClick = { onEvent(TidbitDetailEvent.OnClickShare) },
+            onSourceClick = { onEvent(TidbitDetailEvent.OnClickSource) },
+            isGuest = isGuest
+        )
+        Spacer(modifier = Modifier)
     }
 }
 
@@ -296,90 +307,84 @@ private fun TidbitArticleDetail(
 private fun TidbitVideoDetail(
     presentation: TidbitPresentation.VideoPresentation,
     onEvent: (TidbitDetailEvent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isGuest: Boolean = false
 ) {
     val isLiked = remember { mutableStateOf(false) } // State managed here
     val isBookmarked = remember { mutableStateOf(false) } // State managed here
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            DetailTopAppBar(onBackClick = { onEvent(TidbitDetailEvent.GoBack) })
-        }
-    ) { innerPadding ->
-        Column(
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp) // Consistent spacing for children
+    ) {
+        Spacer(modifier = Modifier.height(16.dp)) // Initial spacer from top bar
+
+        Surface(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding) // Apply scaffold padding
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp) // Consistent spacing for children
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = 200.dp)
+                .padding(horizontal = 16.dp),
+            shape = RoundedCornerShape(corner = CornerSize(20.dp))
         ) {
-            Spacer(modifier = Modifier.height(16.dp)) // Initial spacer from top bar
-
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .defaultMinSize(minHeight = 200.dp)
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(corner = CornerSize(20.dp))
-            ) {
-                GptInvestorVideo( // Assuming this is a custom composable
-                    modifier = Modifier.fillMaxSize(),
-                    youtubeVideoId = presentation.videoId,
-                    url = presentation.mediaUrl,
-                    autoplay = true,
-                    showControls = true
-                )
-            }
-
-            AuthorCategoryInfo(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp), // Consistent padding
-                author = presentation.originalAuthor,
-                category = presentation.category
+            GptInvestorVideo( // Assuming this is a custom composable
+                modifier = Modifier.fillMaxSize(),
+                youtubeVideoId = presentation.videoId,
+                url = presentation.mediaUrl,
+                autoplay = true,
+                showControls = true
             )
-
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp), // Consistent padding
-                text = presentation.title, // Assuming VideoPresentation also has a title
-                style = MaterialTheme.typography.titleLarge // Video title, if exists
-            )
-
-            CustomRichText(
-                modifier = Modifier.padding(horizontal = 4.dp),
-                text = presentation.content
-            )
-
-            TidbitActionRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                isLiked = isLiked.value,
-                isBookmarked = isBookmarked.value,
-                onLikeClick = {
-                    onEvent(
-                        TidbitDetailEvent.OnClickLike(
-                            id = presentation.id,
-                            newValue = !isLiked.value
-                        )
-                    )
-                    isLiked.value = !isLiked.value
-                },
-                onBookmarkClick = {
-                    onEvent(
-                        TidbitDetailEvent.OnClickBookmark(
-                            id = presentation.id,
-                            newValue = !isBookmarked.value
-                        )
-                    )
-                    isBookmarked.value = !isBookmarked.value
-                },
-                onShareClick = { onEvent(TidbitDetailEvent.OnClickShare) },
-                onSourceClick = { onEvent(TidbitDetailEvent.OnClickSource) }
-            )
-            Spacer(modifier = Modifier.height(16.dp))
         }
+
+        AuthorCategoryInfo(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp), // Consistent padding
+            author = presentation.originalAuthor,
+            category = presentation.category
+        )
+
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp), // Consistent padding
+            text = presentation.title, // Assuming VideoPresentation also has a title
+            style = MaterialTheme.typography.titleLarge // Video title, if exists
+        )
+
+        CustomRichText(
+            modifier = Modifier.padding(horizontal = 4.dp),
+            text = presentation.content
+        )
+
+        TidbitActionRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            isLiked = isLiked.value,
+            isBookmarked = isBookmarked.value,
+            onLikeClick = {
+                onEvent(
+                    TidbitDetailEvent.OnClickLike(
+                        id = presentation.id,
+                        newValue = !isLiked.value
+                    )
+                )
+                isLiked.value = !isLiked.value
+            },
+            onBookmarkClick = {
+                onEvent(
+                    TidbitDetailEvent.OnClickBookmark(
+                        id = presentation.id,
+                        newValue = !isBookmarked.value
+                    )
+                )
+                isBookmarked.value = !isBookmarked.value
+            },
+            onShareClick = { onEvent(TidbitDetailEvent.OnClickShare) },
+            onSourceClick = { onEvent(TidbitDetailEvent.OnClickSource) },
+            isGuest = isGuest
+        )
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -387,83 +392,77 @@ private fun TidbitVideoDetail(
 private fun TidbitAudioDetail(
     presentation: TidbitPresentation.AudioPresentation,
     onEvent: (TidbitDetailEvent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isGuest: Boolean = false
 ) {
     val isLiked = remember { mutableStateOf(presentation.isLiked) }
     val isBookmarked = remember { mutableStateOf(presentation.isBookmarked) }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            DetailTopAppBar(onBackClick = { onEvent(TidbitDetailEvent.GoBack) })
-        }
-    ) { innerPadding ->
-        Column(
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp) // Consistent spacing for children
+    ) {
+        Spacer(modifier = Modifier.height(16.dp)) // Initial spacer from top bar
+
+        GptInvestorVideo(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding) // Apply scaffold padding
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp) // Consistent spacing for children
-        ) {
-            Spacer(modifier = Modifier.height(16.dp)) // Initial spacer from top bar
+                .fillMaxWidth()
+                .height(200.dp),
+            url = presentation.mediaUrl,
+            autoplay = true,
+            showControls = true
+        )
 
-            GptInvestorVideo(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-                url = presentation.mediaUrl,
-                autoplay = true,
-                showControls = true
-            )
+        AuthorCategoryInfo(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            author = presentation.originalAuthor,
+            category = presentation.category
+        )
 
-            AuthorCategoryInfo(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                author = presentation.originalAuthor,
-                category = presentation.category
-            )
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp), // Consistent padding
+            text = presentation.title, // Assuming AudioPresentation also has a title
+            style = MaterialTheme.typography.titleLarge // Audio title, if exists
+        )
 
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp), // Consistent padding
-                text = presentation.title, // Assuming AudioPresentation also has a title
-                style = MaterialTheme.typography.titleLarge // Audio title, if exists
-            )
+        CustomRichText(
+            modifier = Modifier.padding(horizontal = 4.dp),
+            text = presentation.content
+        )
 
-            CustomRichText(
-                modifier = Modifier.padding(horizontal = 4.dp),
-                text = presentation.content
-            )
-
-            TidbitActionRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                isLiked = isLiked.value,
-                isBookmarked = isBookmarked.value,
-                onLikeClick = {
-                    onEvent(
-                        TidbitDetailEvent.OnClickLike(
-                            id = presentation.id,
-                            newValue = !isLiked.value
-                        )
+        TidbitActionRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            isLiked = isLiked.value,
+            isBookmarked = isBookmarked.value,
+            onLikeClick = {
+                onEvent(
+                    TidbitDetailEvent.OnClickLike(
+                        id = presentation.id,
+                        newValue = !isLiked.value
                     )
-                    isLiked.value = !isLiked.value
-                },
-                onBookmarkClick = {
-                    onEvent(
-                        TidbitDetailEvent.OnClickBookmark(
-                            id = presentation.id,
-                            newValue = !isBookmarked.value
-                        )
+                )
+                isLiked.value = !isLiked.value
+            },
+            onBookmarkClick = {
+                onEvent(
+                    TidbitDetailEvent.OnClickBookmark(
+                        id = presentation.id,
+                        newValue = !isBookmarked.value
                     )
-                    isBookmarked.value = !isBookmarked.value
-                },
-                onShareClick = { onEvent(TidbitDetailEvent.OnClickShare) },
-                onSourceClick = { onEvent(TidbitDetailEvent.OnClickSource) }
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+                )
+                isBookmarked.value = !isBookmarked.value
+            },
+            onShareClick = { onEvent(TidbitDetailEvent.OnClickShare) },
+            onSourceClick = { onEvent(TidbitDetailEvent.OnClickSource) },
+            isGuest = isGuest
+        )
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 

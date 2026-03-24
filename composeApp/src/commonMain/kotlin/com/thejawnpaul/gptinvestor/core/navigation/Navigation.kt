@@ -16,6 +16,15 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.DefaultAuthenticationAction
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.DefaultAuthenticationScreen
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.DefaultAuthenticationViewModel
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.LoginScreen
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.LoginUiAction
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.LoginViewModel
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.SignUpScreen
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.SignUpUiAction
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.SignUpViewModel
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.WebViewScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
@@ -33,7 +42,6 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.Histo
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
-import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeUiState
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsAction
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsScreen
@@ -55,21 +63,33 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun SetUpNavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
+fun SetUpNavGraph(
+    navController: NavHostController,
+    modifier: Modifier = Modifier,
+    isUserSignedIn: Boolean = false,
+    isGuestSignedIn: Boolean = false
+) {
     val platformContext: PlatformContext = koinInject()
     val platformActions: PlatformActions = koinInject()
     Scaffold { innerPadding ->
 
+        val startDestination: String =
+            if (isUserSignedIn ||
+                isGuestSignedIn
+            ) {
+                Screen.HomeTabScreen.route
+            } else {
+                Screen.DefaultAuthenticationScreen.route
+            }
+
         NavHost(
             navController = navController,
-            startDestination = Screen.HomeTabScreen.route,
+            startDestination = startDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.HomeTabScreen.route) {
                 val homeViewModel = koinViewModel<HomeViewModel>()
-                val state = homeViewModel.uiState.collectAsState(
-                    initial = HomeUiState()
-                )
+                val state = homeViewModel.uiState.collectAsState()
                 val scope = rememberCoroutineScope()
                 LaunchedEffect(Unit) {
                     homeViewModel.actions.onEach { action ->
@@ -134,6 +154,16 @@ fun SetUpNavGraph(navController: NavHostController, modifier: Modifier = Modifie
                             HomeAction.OnGoToSavedTidbits -> {
                                 navController.navigate(route = Screen.SavedTidbitScreen.route)
                             }
+
+                            is HomeAction.ShowToast -> {
+                                platformActions.showMessage(action.message)
+                            }
+
+                            HomeAction.OnGoToSignUp -> {
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                }
+                            }
                         }
                     }.launchIn(scope)
                 }
@@ -141,8 +171,7 @@ fun SetUpNavGraph(navController: NavHostController, modifier: Modifier = Modifie
                 HomeScreen(
                     modifier = Modifier.padding(top = 20.dp),
                     state = state.value,
-                    onEvent = homeViewModel::handleEvent,
-                    onAction = homeViewModel::processAction
+                    onEvent = homeViewModel::handleEvent
                 )
             }
             composable(
@@ -173,6 +202,12 @@ fun SetUpNavGraph(navController: NavHostController, modifier: Modifier = Modifie
                                         topPickId = action.id
                                     )
                                 )
+                            }
+
+                            DiscoveryAction.OnGoToSignUp -> {
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                }
                             }
                         }
                     }.launchIn(scope)
@@ -237,6 +272,12 @@ fun SetUpNavGraph(navController: NavHostController, modifier: Modifier = Modifie
                                 platformActions.copyToClipboard("", action.text)
                                 platformActions.showMessage("Copied")
                             }
+
+                            CompanyDetailAction.OnGoToSignUp -> {
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                }
+                            }
                         }
                     }.launchIn(scope)
                 }
@@ -284,6 +325,13 @@ fun SetUpNavGraph(navController: NavHostController, modifier: Modifier = Modifie
                             is ConversationAction.ShowToast -> {
                                 platformActions.showMessage(action.message)
                             }
+
+                            ConversationAction.OnSignOutGuest -> {}
+                            ConversationAction.OnGoToSignUp -> {
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                }
+                            }
                         }
                     }.launchIn(scope)
                 }
@@ -294,7 +342,13 @@ fun SetUpNavGraph(navController: NavHostController, modifier: Modifier = Modifie
                     onEvent = viewModel::handleEvent,
                     onAction = viewModel::processAction,
                     onUpgradeFromRateLimit = {
-                        viewModel.launchPurchaseFlow(platformContext)
+                        if (isGuestSignedIn) {
+                            navController.navigate(Screen.SignUpScreen.route) {
+                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                            }
+                        } else {
+                            viewModel.launchPurchaseFlow(platformContext)
+                        }
                     }
                 )
             }
@@ -336,6 +390,12 @@ fun SetUpNavGraph(navController: NavHostController, modifier: Modifier = Modifie
                             is HistoryDetailAction.ShowToast -> {
                                 platformActions.showMessage(action.message)
                             }
+
+                            HistoryDetailAction.OnGoToSignUp -> {
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                }
+                            }
                         }
                     }.launchIn(scope)
                 }
@@ -346,7 +406,13 @@ fun SetUpNavGraph(navController: NavHostController, modifier: Modifier = Modifie
                     onEvent = viewModel::handleHistoryDetailEvent,
                     onAction = viewModel::processHistoryDetailAction,
                     onUpgradeFromRateLimit = {
-                        viewModel.launchPurchaseFlow(platformContext)
+                        if (isGuestSignedIn) {
+                            navController.navigate(Screen.SignUpScreen.route) {
+                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                            }
+                        } else {
+                            viewModel.launchPurchaseFlow(platformContext)
+                        }
                     }
                 )
             }
@@ -372,6 +438,12 @@ fun SetUpNavGraph(navController: NavHostController, modifier: Modifier = Modifie
 
                             is TopPickAction.ShowToast -> {
                                 platformActions.showMessage(action.message)
+                            }
+
+                            TopPickAction.OnGoToSignUp -> {
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                }
                             }
                         }
                     }.launchIn(scope)
@@ -458,6 +530,12 @@ fun SetUpNavGraph(navController: NavHostController, modifier: Modifier = Modifie
                             is TidbitDetailAction.OnShare -> {
                                 platformActions.shareText(action.shareText)
                             }
+
+                            TidbitDetailAction.OnGoToSignUp -> {
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                }
+                            }
                         }
                     }.launchIn(scope)
                 }
@@ -534,6 +612,130 @@ fun SetUpNavGraph(navController: NavHostController, modifier: Modifier = Modifie
                     tidbitsPagingData = viewModel.tidbitsPagingData,
                     onEvent = viewModel::handleMainScreenEvent
                 )
+            }
+
+            composable(route = Screen.DefaultAuthenticationScreen.route) {
+                val viewModel = koinViewModel<DefaultAuthenticationViewModel>()
+                val state = viewModel.loading.collectAsState()
+                val scope = rememberCoroutineScope()
+                LaunchedEffect(Unit) {
+                    viewModel.actions.onEach { action ->
+                        when (action) {
+                            DefaultAuthenticationAction.OnGoToHome -> {
+                                navController.navigate(Screen.HomeTabScreen.route) {
+                                    popUpTo(Screen.DefaultAuthenticationScreen.route) {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+
+                            DefaultAuthenticationAction.OnGoToSignUp -> {
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    if (isGuestSignedIn) {
+                                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                    }
+                                }
+                            }
+
+                            is DefaultAuthenticationAction.ShowToast -> {
+                                platformActions.showMessage(action.message)
+                            }
+                        }
+                    }.launchIn(scope)
+                }
+
+                DefaultAuthenticationScreen(
+                    modifier = Modifier,
+                    onEvent = viewModel::handleEvent,
+                    loading = state.value
+                )
+            }
+
+            composable(route = Screen.LoginScreen.route) {
+                val viewModel = koinViewModel<LoginViewModel>()
+                val state = viewModel.loginUiState.collectAsState()
+                val scope = rememberCoroutineScope()
+                LaunchedEffect(Unit) {
+                    viewModel.actions.onEach { action ->
+                        when (action) {
+                            LoginUiAction.OnGoBack -> {
+                                navController.navigateUp()
+                            }
+
+                            LoginUiAction.OnGoToSignUp -> {
+                                navController.navigate(Screen.SignUpScreen.route) {
+                                    if (isGuestSignedIn) {
+                                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                    }
+                                }
+                            }
+
+                            is LoginUiAction.OnShowToast -> {
+                                platformActions.showMessage(action.message)
+                            }
+
+                            LoginUiAction.OnGoToHome -> {
+                                navController.navigate(route = Screen.HomeTabScreen.route) {
+                                    popUpTo(Screen.LoginScreen.route) { inclusive = true }
+                                }
+                            }
+                        }
+                    }.launchIn(scope)
+                }
+
+                LoginScreen(state = state.value, onEvent = viewModel::handleEvent)
+            }
+
+            composable(
+                route = Screen.SignUpScreen.route
+            ) {
+                val viewModel = koinViewModel<SignUpViewModel>()
+                val state = viewModel.signUpUiState.collectAsState()
+                val scope = rememberCoroutineScope()
+                LaunchedEffect(Unit) {
+                    viewModel.actions.onEach { action ->
+                        when (action) {
+                            SignUpUiAction.OnGoBack -> {
+                                navController.popBackStack()
+                            }
+
+                            SignUpUiAction.OnGoToHome -> {
+                                navController.navigate(route = Screen.HomeTabScreen.route) {
+                                    popUpTo(Screen.SignUpScreen.route) {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+
+                            SignUpUiAction.OnGoToLogin -> {
+                                navController.navigate(Screen.LoginScreen.route)
+                            }
+
+                            is SignUpUiAction.OnShowToast -> {
+                                platformActions.showMessage(action.message)
+                            }
+                        }
+                    }.launchIn(scope)
+                }
+                SignUpScreen(
+                    modifier = Modifier,
+                    state = state.value,
+                    onEvent = viewModel::handleEvent
+                )
+            }
+        }
+    }
+
+    LaunchedEffect(isUserSignedIn, isGuestSignedIn) {
+        if (isUserSignedIn || isGuestSignedIn) {
+            if (navController.currentDestination?.route == Screen.DefaultAuthenticationScreen.route) {
+                navController.navigate(Screen.HomeTabScreen.route) {
+                    popUpTo(Screen.DefaultAuthenticationScreen.route) { inclusive = true }
+                }
+            }
+        } else {
+            navController.navigate(Screen.DefaultAuthenticationScreen.route) {
+                popUpTo(0) { inclusive = true }
             }
         }
     }

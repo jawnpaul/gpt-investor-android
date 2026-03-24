@@ -30,6 +30,10 @@ interface AppPreferences {
     suspend fun setIsUserLoggedIn(isLoggedIn: Boolean)
     suspend fun clearIsUserLoggedIn()
 
+    val isGuestLoggedIn: Flow<Boolean?>
+    suspend fun setIsGuestLoggedIn(isLoggedIn: Boolean)
+    suspend fun clearIsGuestLoggedIn()
+
     val isUserOnModelWaitlist: Flow<Boolean?>
     suspend fun setIsUserOnModelWaitlist(isOnWaitlist: Boolean)
     suspend fun clearIsUserOnModelWaitlist()

@@ -7,11 +7,11 @@ import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
+import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetLocalTopPicksUseCase
-import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetSavedTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetSingleTopPickUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.RemoveTopPickFromSavedUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.SaveTopPickUseCase
@@ -22,6 +22,9 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPickDe
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
@@ -34,16 +37,23 @@ class TopPickViewModel(
     private val authenticationRepository: AuthenticationRepository,
     private val saveTopPickUseCase: SaveTopPickUseCase,
     private val removeTopPickFromSavedUseCase: RemoveTopPickFromSavedUseCase,
-    private val getSavedTopPicksUseCase: GetSavedTopPicksUseCase,
     private val shareTopPickUseCase: ShareTopPickUseCase,
-    private val getCompanyUseCase: GetCompanyUseCase
+    private val getCompanyUseCase: GetCompanyUseCase,
+    private val appPreferences: AppPreferences
 ) : ViewModel() {
 
     private val topPickId: String?
         get() = savedStateHandle.get<String>("topPickId")
 
     private val _topPickView = MutableStateFlow(TopPickDetailView())
-    val topPickView get() = _topPickView
+    val topPickView =
+        combine(_topPickView, appPreferences.isGuestLoggedIn) { state, isGuestLoggedIn ->
+            state.copy(isGuestSession = isGuestLoggedIn == true)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = TopPickDetailView()
+        )
 
     private val _actions = MutableSharedFlow<TopPickAction>()
     val actions get() = _actions
@@ -297,18 +307,25 @@ class TopPickViewModel(
             TopPickEvent.BookmarkTopPick -> {
                 saveTopPick()
             }
+
             TopPickEvent.LikeTopPick -> {
                 // Like top pick
             }
+
             TopPickEvent.RemoveBookmarkTopPick -> {
                 removeTopPickFromSaved()
             }
+
             TopPickEvent.ShareTopPick -> {
                 shareTopPick()
             }
 
             TopPickEvent.RemoveLikeTopPick -> {
                 // Remove like top pick
+            }
+
+            TopPickEvent.GoToSignUp -> {
+                processAction(TopPickAction.OnGoToSignUp)
             }
         }
     }
@@ -324,6 +341,7 @@ sealed interface TopPickAction {
     data class OnShare(val url: String) : TopPickAction
     data class ShowToast(val message: String) : TopPickAction
     data object OnGoBack : TopPickAction
+    data object OnGoToSignUp : TopPickAction
 }
 
 sealed interface TopPickEvent {
@@ -336,4 +354,5 @@ sealed interface TopPickEvent {
     data object RemoveBookmarkTopPick : TopPickEvent
     data object LikeTopPick : TopPickEvent
     data object RemoveLikeTopPick : TopPickEvent
+    data object GoToSignUp : TopPickEvent
 }

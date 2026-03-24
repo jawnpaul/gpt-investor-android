@@ -1,21 +1,26 @@
 package com.thejawnpaul.gptinvestor.features.authentication.presentation
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,12 +38,17 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.baseline_visibility_off_24
+import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.don_t_have_an_account
 import com.thejawnpaul.gptinvestor.email_address
+import com.thejawnpaul.gptinvestor.google_icon
 import com.thejawnpaul.gptinvestor.ic_lock
 import com.thejawnpaul.gptinvestor.ic_profile
+import com.thejawnpaul.gptinvestor.log_in_with_google
 import com.thejawnpaul.gptinvestor.login
+import com.thejawnpaul.gptinvestor.or
 import com.thejawnpaul.gptinvestor.outline_visibility_24
 import com.thejawnpaul.gptinvestor.password
 import com.thejawnpaul.gptinvestor.sign_up
@@ -46,26 +56,38 @@ import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.linkMedium
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(
-    email: String,
-    password: String,
-    enableButton: Boolean,
-    onLoginClick: () -> Unit,
-    onSignUpClick: () -> Unit,
-    onEmailChange: (String) -> Unit,
-    onPasswordChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    loading: Boolean = false
-) {
+fun LoginScreen(state: LoginUiState, onEvent: (LoginUiEvent) -> Unit, modifier: Modifier = Modifier) {
     var passwordHidden by remember { mutableStateOf(true) }
+    val platformContext: PlatformContext = koinInject()
 
-    OutlinedCard(
-        modifier
-    ) {
-        Box {
-            if (loading) {
+    Scaffold(modifier = modifier, topBar = {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = { onEvent(LoginUiEvent.GoBack) }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                    contentDescription = stringResource(Res.string.back)
+                )
+            }
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(Res.string.login),
+                style = MaterialTheme.typography.headlineMedium
+            )
+        }
+    }) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+        ) {
+            if (state.loading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
 
@@ -73,21 +95,14 @@ fun LoginScreen(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    text = stringResource(Res.string.login),
-                    style = MaterialTheme.typography.headlineMedium
-                )
-
                 // Input
                 OutlinedTextField(
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next
                     ),
-                    value = email,
-                    onValueChange = onEmailChange,
+                    value = state.email,
+                    onValueChange = { onEvent(LoginUiEvent.EmailChanged(it)) },
                     label = {
                         Text(text = stringResource(Res.string.email_address))
                     },
@@ -102,8 +117,8 @@ fun LoginScreen(
                 // Input
                 OutlinedTextField(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    value = password,
-                    onValueChange = onPasswordChange,
+                    value = state.password,
+                    onValueChange = { onEvent(LoginUiEvent.PasswordChanged(it)) },
                     label = {
                         Text(text = stringResource(Res.string.password))
                     },
@@ -143,10 +158,34 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.CenterHorizontally),
-                    onClick = onLoginClick,
-                    enabled = enableButton
+                    onClick = { onEvent(LoginUiEvent.LoginClick) },
+                    enabled = state.enableButton
                 ) {
                     Text(text = stringResource(Res.string.login).uppercase())
+                }
+
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(Res.string.or).uppercase(),
+                    textAlign = TextAlign.Center
+                )
+
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { onEvent(LoginUiEvent.LoginWithGoogle(platformContext = platformContext)) },
+                    enabled = !state.loading
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            modifier = Modifier.size(20.dp),
+                            painter = painterResource(Res.drawable.google_icon),
+                            contentDescription = null
+                        )
+                        Text(text = stringResource(Res.string.log_in_with_google))
+                    }
                 }
 
                 Row(
@@ -164,7 +203,7 @@ fun LoginScreen(
                         modifier = Modifier.clickable(
                             indication = null,
                             interactionSource = null,
-                            onClick = onSignUpClick
+                            onClick = { onEvent(LoginUiEvent.GoToSignUp) }
                         ),
                         text = stringResource(Res.string.sign_up),
                         textDecoration = TextDecoration.Underline,
@@ -176,21 +215,14 @@ fun LoginScreen(
     }
 }
 
-@PreviewLightDark()
+@PreviewLightDark
 @Composable
 private fun LoginPreview() {
     GPTInvestorTheme {
-        Surface {
-            LoginScreen(
-                modifier = Modifier,
-                email = "",
-                password = "",
-                enableButton = false,
-                onEmailChange = {},
-                onPasswordChange = {},
-                onLoginClick = {},
-                onSignUpClick = {}
-            )
-        }
+        LoginScreen(
+            modifier = Modifier,
+            state = LoginUiState(),
+            onEvent = {}
+        )
     }
 }

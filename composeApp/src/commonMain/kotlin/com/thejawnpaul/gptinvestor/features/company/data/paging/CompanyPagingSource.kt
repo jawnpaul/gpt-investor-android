@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
+import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.features.company.data.local.model.PriceChange
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
 
@@ -37,7 +38,7 @@ class CompanyPagingSource(
                             ticker = ticker,
                             summary = summary,
                             name = name,
-                            logo = logoUrl,
+                            logo = logoUrl.toHttpsUrl(),
                             change = PriceChange(change = 0f, date = 1L)
                         )
                     }

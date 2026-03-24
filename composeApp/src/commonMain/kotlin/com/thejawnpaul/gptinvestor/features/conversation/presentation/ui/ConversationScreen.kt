@@ -48,9 +48,7 @@ fun ConversationScreen(
             }) {
                 RateLimitBottomSheetContent(
                     modifier = Modifier,
-                    onDismiss = {
-                        onEvent(ConversationEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
-                    },
+                    isGuest = state.isGuest,
                     onUpgrade = onUpgradeFromRateLimit
                 )
             }
@@ -62,6 +60,7 @@ fun ConversationScreen(
                 DefaultConversationScreen(
                     modifier = Modifier,
                     conversation = default,
+                    isGuest = state.isGuest,
                     onNavigateUp = {
                         onAction(ConversationAction.OnGoBack)
                     },
@@ -82,6 +81,9 @@ fun ConversationScreen(
                     },
                     onUpgradeModel = { showBottomSheet, modelId ->
                         onEvent(ConversationEvent.UpgradeModel(showBottomSheet, modelId))
+                    },
+                    onSignUpClick = {
+                        onEvent(ConversationEvent.GoToSignUp)
                     }
                 )
             }
@@ -91,6 +93,7 @@ fun ConversationScreen(
                 StructuredConversationScreen(
                     modifier = Modifier,
                     conversation = state.conversation,
+                    isGuest = state.isGuest,
                     onNavigateUp = { onAction(ConversationAction.OnGoBack) },
                     text = state.genText,
                     onClickNews = {
@@ -121,6 +124,9 @@ fun ConversationScreen(
                     },
                     onUpgradeModel = { showBottomSheet, modelId ->
                         onEvent(ConversationEvent.UpgradeModel(showBottomSheet, modelId))
+                    },
+                    onSignUpClick = {
+                        onEvent(ConversationEvent.GoToSignUp)
                     }
                 )
             }

@@ -22,7 +22,8 @@ data class HistoryConversationView(
     ),
     val selectedWaitlistOptions: List<String> = emptyList(),
     val showWaitListBottomSheet: Boolean = false,
-    val showRateLimitBottomSheet: Boolean = false
+    val showRateLimitBottomSheet: Boolean = false,
+    val isGuest: Boolean = false
 ) {
     val enableSend = !loading && query.trim().isNotEmpty()
 }

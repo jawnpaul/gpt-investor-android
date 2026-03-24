@@ -21,6 +21,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.data.remote.AiChatReque
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.DefaultPromptRemote
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityRequest
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityResponse
+import com.thejawnpaul.gptinvestor.features.guest.data.remote.GuestLoginRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenResponse
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.AllTidbitResponse
@@ -180,6 +181,10 @@ class KtorApiService(private val client: HttpClient) {
             if (!sector.isNullOrBlank()) parameter("sector", sector)
             parameter("page_size", pageSize)
         }.toKtorResponse()
+
+    suspend fun guestLogin(request: GuestLoginRequest): KtorResponse<LoginResponse> = client.post("v1/guest-login") {
+        setBody(request)
+    }.toKtorResponse()
 }
 
 class KtorResponse<T>(val isSuccessful: Boolean, val body: T?, val errorBody: String?, val code: Int)

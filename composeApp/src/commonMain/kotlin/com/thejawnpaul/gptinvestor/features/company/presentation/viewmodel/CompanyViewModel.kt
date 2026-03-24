@@ -7,6 +7,7 @@ import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
+import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyFinancialsView
@@ -23,6 +24,9 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.Model
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
@@ -32,20 +36,25 @@ class CompanyViewModel(
     private val getCompanyUseCase: GetCompanyUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val getInputPromptUseCase: GetInputPromptUseCase,
-    private val modelsRepository: ModelsRepository
+    private val modelsRepository: ModelsRepository,
+    private val appPreferences: AppPreferences
 ) : ViewModel() {
 
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
-    val selectedCompany get() = _selectedCompany
+    val selectedCompany =
+        combine(_selectedCompany, appPreferences.isGuestLoggedIn) { company, isGuest ->
+            company.copy(isGuestSession = isGuest == true)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = SingleCompanyView()
+        )
 
     private val _companyDetailAction = MutableSharedFlow<CompanyDetailAction>()
     val companyDetailAction get() = _companyDetailAction
 
     private val _companyFinancials = MutableStateFlow(CompanyFinancialsView())
     val companyFinancials get() = _companyFinancials
-
-    private val _urlToLoad = MutableStateFlow(String())
-    val urlToLoad get() = _urlToLoad
 
     private var upgradeModelId: String? = null
 
@@ -231,6 +240,10 @@ class CompanyViewModel(
                     upgradeModelId = it
                 }
             }
+
+            CompanyDetailEvent.SignUpClicked -> {
+                processCompanyDetailAction(CompanyDetailAction.OnGoToSignUp)
+            }
         }
     }
 
@@ -290,6 +303,7 @@ sealed interface CompanyDetailEvent {
     data class ModelChange(val model: AvailableModel) : CompanyDetailEvent
     data class SelectWaitlistOption(val option: String) : CompanyDetailEvent
     data object JoinWaitList : CompanyDetailEvent
+    data object SignUpClicked : CompanyDetailEvent
     data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : CompanyDetailEvent
 }
 
@@ -297,4 +311,5 @@ sealed interface CompanyDetailAction {
     data object OnGoBack : CompanyDetailAction
     data class OnNavigateToWebView(val url: String) : CompanyDetailAction
     data class OnCopy(val text: String) : CompanyDetailAction
+    data object OnGoToSignUp : CompanyDetailAction
 }

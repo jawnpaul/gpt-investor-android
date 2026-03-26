@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
@@ -15,13 +16,18 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHe
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCompanyView
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction.OnCopy
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction.OnGoBack
+import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyDetailDefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.ConversationPrompt
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
+import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
+import kotlin.collections.mapOf
+import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -37,7 +43,9 @@ class CompanyViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val getInputPromptUseCase: GetInputPromptUseCase,
     private val modelsRepository: ModelsRepository,
-    private val appPreferences: AppPreferences
+    private val feedbackRepository: FeedbackRepository,
+    private val appPreferences: AppPreferences,
+    private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
@@ -61,6 +69,8 @@ class CompanyViewModel(
     private var companyTicker = ""
 
     private val selectedConversationId = MutableStateFlow(-1L)
+
+    private var requestStartTime: Long = 0L
 
     private val selectedCompanyTicker: String?
         get() = savedStateHandle.get<String>("ticker")
@@ -117,6 +127,13 @@ class CompanyViewModel(
     fun getInputResponse() {
         if (_selectedCompany.value.inputQuery.trim().isNotEmpty()) {
             _selectedCompany.update { it.copy(loading = true) }
+            requestStartTime = Clock.System.now().toEpochMilliseconds()
+            analyticsLogger.logEvent(
+                eventName = "message-sent",
+                params = mapOf(
+                    "source" to "user_input"
+                )
+            )
             when (_selectedCompany.value.conversation) {
                 is CompanyDetailDefaultConversation -> {
                     val prompt = ConversationPrompt(
@@ -153,6 +170,13 @@ class CompanyViewModel(
 
     fun getSuggestedPromptResponse(query: String) {
         _selectedCompany.update { it.copy(loading = true) }
+        requestStartTime = Clock.System.now().toEpochMilliseconds()
+        analyticsLogger.logEvent(
+            eventName = "message-sent",
+            params = mapOf(
+                "source" to "suggested_prompt"
+            )
+        )
         val prompt = ConversationPrompt(
             query = query,
             conversationId = selectedConversationId.value
@@ -167,6 +191,49 @@ class CompanyViewModel(
 
     private fun handleCompanyInputResponseFailure(failure: Failure) {
         Logger.e(failure.toString())
+        when (failure) {
+            is Failure.RateLimitExceeded -> {
+                analyticsLogger.logEvent(
+                    eventName = "rate-limit-hit",
+                    params = mapOf(
+                        "user_type" to if (_selectedCompany.value.isGuestSession) "guest" else "logged_in"
+                    )
+                )
+                processCompanyDetailAction(
+                    CompanyDetailAction.ShowToast("Rate limit exceeded. Please try again later.")
+                )
+            }
+
+            is GenAIException -> {
+                processCompanyDetailAction(
+                    CompanyDetailAction.ShowToast("An error occurred")
+                )
+            }
+
+            is Failure.ContextLimitReached -> {
+                processCompanyDetailAction(
+                    CompanyDetailAction.ShowToast("Context limit reached.")
+                )
+            }
+
+            is Failure.NetworkConnection -> {
+                processCompanyDetailAction(
+                    CompanyDetailAction.ShowToast("No internet connection")
+                )
+            }
+
+            is Failure.ServerError -> {
+                processCompanyDetailAction(
+                    CompanyDetailAction.ShowToast("Server error. Please try again later.")
+                )
+            }
+
+            else -> {
+                processCompanyDetailAction(
+                    CompanyDetailAction.ShowToast("Something went wrong")
+                )
+            }
+        }
         _selectedCompany.update {
             it.copy(
                 error = "Something went wrong.",
@@ -179,6 +246,14 @@ class CompanyViewModel(
     private fun handleCompanyInputResponseSuccess(conversation: Conversation) {
         val s = conversation as StructuredConversation
         Logger.e(s.toString())
+        val duration = Clock.System.now().toEpochMilliseconds() - requestStartTime
+        analyticsLogger.logEvent(
+            eventName = "response-received",
+            params = mapOf(
+                "duration_ms" to duration,
+                "status" to "success"
+            )
+        )
         _selectedCompany.update {
             it.copy(
                 conversation = conversation,
@@ -213,10 +288,18 @@ class CompanyViewModel(
             }
 
             is CompanyDetailEvent.CopyToClipboard -> {
+                analyticsLogger.logEvent(
+                    eventName = "message-copied",
+                    params = mapOf("text_length" to event.text.length)
+                )
                 processCompanyDetailAction(OnCopy(event.text))
             }
 
             is CompanyDetailEvent.ModelChange -> {
+                analyticsLogger.logEvent(
+                    eventName = "model-changed-in-chat",
+                    params = mapOf("model_id" to event.model.modelId)
+                )
                 _selectedCompany.update {
                     it.copy(selectedModel = event.model)
                 }
@@ -243,6 +326,10 @@ class CompanyViewModel(
 
             CompanyDetailEvent.SignUpClicked -> {
                 processCompanyDetailAction(CompanyDetailAction.OnGoToSignUp)
+            }
+
+            is CompanyDetailEvent.SendFeedback -> {
+                sendFeedback(event.messageId, event.status, event.reason)
             }
         }
     }
@@ -291,6 +378,36 @@ class CompanyViewModel(
             }
         }
     }
+
+    private fun sendFeedback(messageId: Long, status: Int, reason: String?) {
+        _selectedCompany.update {
+            (it.conversation as? StructuredConversation)?.let { conversation ->
+                val updatedMessages = conversation.messageList.map { message ->
+                    if (message.id == messageId) {
+                        (message as? GenAiTextMessage)?.copy(feedbackStatus = status)
+                            ?: message
+                    } else {
+                        message
+                    }
+                }
+                it.copy(
+                    conversation = conversation.copy(messageList = updatedMessages.toMutableList())
+                )
+            } ?: it
+        }
+
+        viewModelScope.launch {
+            analyticsLogger.logEvent(
+                eventName = "feedback-given",
+                params = mapOf(
+                    "message_id" to messageId,
+                    "status" to status,
+                    "reason" to (reason ?: "")
+                )
+            )
+            feedbackRepository.giveFeedback(messageId = messageId, status = status, reason = reason)
+        }
+    }
 }
 
 sealed interface CompanyDetailEvent {
@@ -305,6 +422,8 @@ sealed interface CompanyDetailEvent {
     data object JoinWaitList : CompanyDetailEvent
     data object SignUpClicked : CompanyDetailEvent
     data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : CompanyDetailEvent
+
+    data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) : CompanyDetailEvent
 }
 
 sealed interface CompanyDetailAction {
@@ -312,4 +431,5 @@ sealed interface CompanyDetailAction {
     data class OnNavigateToWebView(val url: String) : CompanyDetailAction
     data class OnCopy(val text: String) : CompanyDetailAction
     data object OnGoToSignUp : CompanyDetailAction
+    data class ShowToast(val message: String) : CompanyDetailAction
 }

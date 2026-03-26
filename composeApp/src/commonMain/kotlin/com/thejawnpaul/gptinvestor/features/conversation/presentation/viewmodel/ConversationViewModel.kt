@@ -42,7 +42,7 @@ class ConversationViewModel(
     private val getDefaultPromptsUseCase: GetDefaultPromptsUseCase,
     private val getDefaultPromptResponseUseCase: GetDefaultPromptResponseUseCase,
     private val getInputPromptUseCase: GetInputPromptUseCase,
-    private val fedBackRepository: FeedbackRepository,
+    private val feedBackRepository: FeedbackRepository,
     private val modelsRepository: ModelsRepository,
     private val billingRepository: IBillingRepository,
     private val appPreferences: AppPreferences,
@@ -412,7 +412,7 @@ class ConversationViewModel(
                     "reason" to (reason ?: "")
                 )
             )
-            fedBackRepository.giveFeedback(messageId, status, reason)
+            feedBackRepository.giveFeedback(messageId, status, reason)
         }
     }
 

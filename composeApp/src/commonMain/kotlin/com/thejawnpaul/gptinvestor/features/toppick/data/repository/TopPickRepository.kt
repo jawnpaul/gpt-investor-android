@@ -96,7 +96,7 @@ class TopPickRepository(
             }
             emit(Either.Right(pick))
             analyticsLogger.logEvent(
-                eventName = "Top Pick Selected",
+                eventName = "top-pick-selected",
                 params = mapOf("company_ticker" to pick.ticker, "company_name" to pick.companyName)
             )
         } catch (e: Exception) {

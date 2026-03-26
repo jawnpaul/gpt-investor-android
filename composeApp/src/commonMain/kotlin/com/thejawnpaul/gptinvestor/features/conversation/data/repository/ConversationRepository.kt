@@ -238,9 +238,9 @@ class ConversationRepository(
                 }
             }
             if (gptInvestorPreferences.isGuestLoggedIn.first() == true) {
-                analyticsLogger.logEvent(eventName = "Guest Query Submitted", params = mapOf())
+                analyticsLogger.logEvent(eventName = "guest-query-submitted", params = mapOf())
             } else {
-                analyticsLogger.logEvent(eventName = "Query Submitted", params = mapOf())
+                analyticsLogger.logEvent(eventName = "query-submitted", params = mapOf())
             }
         } catch (e: Exception) {
             Logger.e(e.stackTraceToString())

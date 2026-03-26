@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
@@ -28,6 +29,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.presentation.state.Conv
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction.OnCopy
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
 import io.ktor.http.decodeURLQueryComponent
+import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -43,7 +45,8 @@ class ConversationViewModel(
     private val fedBackRepository: FeedbackRepository,
     private val modelsRepository: ModelsRepository,
     private val billingRepository: IBillingRepository,
-    private val appPreferences: AppPreferences
+    private val appPreferences: AppPreferences,
+    private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
     private val conversationViewMutableStateFlow = MutableStateFlow(ConversationView())
@@ -61,6 +64,8 @@ class ConversationViewModel(
 
     val title: String? = savedStateHandle["title"]
     val chatInput: String? = savedStateHandle["chatInput"]
+
+    private var requestStartTime: Long = 0L
 
     init {
         getDefaultPrompts()
@@ -102,6 +107,13 @@ class ConversationViewModel(
         conversationViewMutableStateFlow.update {
             it.copy(loading = true)
         }
+        requestStartTime = Clock.System.now().toEpochMilliseconds()
+        analyticsLogger.logEvent(
+            eventName = "message-sent",
+            params = mapOf(
+                "source" to "default_prompt"
+            )
+        )
         getDefaultPromptResponseUseCase(prompt) {
             it.onFailure {
                 handleConversationFailure(it)
@@ -130,6 +142,13 @@ class ConversationViewModel(
             conversationViewMutableStateFlow.update {
                 it.copy(loading = true)
             }
+            requestStartTime = Clock.System.now().toEpochMilliseconds()
+            analyticsLogger.logEvent(
+                eventName = "message-sent",
+                params = mapOf(
+                    "source" to "user_input"
+                )
+            )
             getInputPromptUseCase(
                 ConversationPrompt(
                     conversationId = selectedConversationId.value,
@@ -146,6 +165,13 @@ class ConversationViewModel(
                 conversationViewMutableStateFlow.update {
                     it.copy(loading = true)
                 }
+                requestStartTime = Clock.System.now().toEpochMilliseconds()
+                analyticsLogger.logEvent(
+                    eventName = "message-sent",
+                    params = mapOf(
+                        "source" to "user_input"
+                    )
+                )
                 getInputPromptUseCase(
                     ConversationPrompt(
                         conversationId = selectedConversationId.value,
@@ -165,6 +191,13 @@ class ConversationViewModel(
         conversationViewMutableStateFlow.update {
             it.copy(loading = true)
         }
+        requestStartTime = Clock.System.now().toEpochMilliseconds()
+        analyticsLogger.logEvent(
+            eventName = "message-sent",
+            params = mapOf(
+                "source" to "suggested_prompt"
+            )
+        )
         getInputPromptUseCase(
             ConversationPrompt(
                 conversationId = selectedConversationId.value,
@@ -207,6 +240,12 @@ class ConversationViewModel(
             }
 
             is Failure.RateLimitExceeded -> {
+                analyticsLogger.logEvent(
+                    eventName = "rate-limit-hit",
+                    params = mapOf(
+                        "user_type" to if (conversationViewMutableStateFlow.value.isGuest) "guest" else "logged_in"
+                    )
+                )
                 conversationViewMutableStateFlow.update { state ->
                     state.copy(
                         showRateLimitBottomSheet = state.isGuest
@@ -252,6 +291,15 @@ class ConversationViewModel(
             conversation.id
         }
 
+        val duration = Clock.System.now().toEpochMilliseconds() - requestStartTime
+        analyticsLogger.logEvent(
+            eventName = "response-received",
+            params = mapOf(
+                "duration_ms" to duration,
+                "status" to "success"
+            )
+        )
+
         conversationViewMutableStateFlow.update { state ->
             state.copy(
                 query = "",
@@ -265,6 +313,10 @@ class ConversationViewModel(
     fun handleEvent(event: ConversationEvent) {
         when (event) {
             is ConversationEvent.CopyToClipboard -> {
+                analyticsLogger.logEvent(
+                    eventName = "message-copied",
+                    params = mapOf("text_length" to event.text.length)
+                )
                 processAction(OnCopy(event.text))
             }
 
@@ -289,6 +341,10 @@ class ConversationViewModel(
             }
 
             is ConversationEvent.ModelChanged -> {
+                analyticsLogger.logEvent(
+                    eventName = "model-changed-in-chat",
+                    params = mapOf("model_id" to event.model.modelId)
+                )
                 conversationViewMutableStateFlow.update {
                     it.copy(selectedModel = event.model)
                 }
@@ -348,6 +404,14 @@ class ConversationViewModel(
             } ?: it
         }
         viewModelScope.launch {
+            analyticsLogger.logEvent(
+                eventName = "feedback-given",
+                params = mapOf(
+                    "message_id" to messageId,
+                    "status" to status,
+                    "reason" to (reason ?: "")
+                )
+            )
             fedBackRepository.giveFeedback(messageId, status, reason)
         }
     }

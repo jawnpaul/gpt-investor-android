@@ -166,13 +166,9 @@ class TidbitViewModel(
 
             is TidbitDetailEvent.OnClickBookmark -> {
                 if (_tidbitDetailState.value.isGuestSession) return@handleDetailEvent
-                analyticsLogger.logEvent(
-                    eventName = "tidbit-interaction",
-                    params = mapOf(
-                        "tidbit_id" to event.id,
-                        "action" to if (event.newValue) "bookmark" else "remove_bookmark"
-                    )
-                )
+
+                val action = if (event.newValue) "bookmark" else "remove_bookmark"
+                logTidbitActionEvent(action = action, tidbitId = event.id)
                 viewModelScope.launch {
                     if (event.newValue) {
                         repository.bookmarkTidbit(tidbitId = event.id)
@@ -184,13 +180,9 @@ class TidbitViewModel(
 
             is TidbitDetailEvent.OnClickLike -> {
                 if (_tidbitDetailState.value.isGuestSession) return@handleDetailEvent
-                analyticsLogger.logEvent(
-                    eventName = "tidbit-interaction",
-                    params = mapOf(
-                        "tidbit_id" to event.id,
-                        "action" to if (event.newValue) "like" else "unlike"
-                    )
-                )
+
+                val action = if (event.newValue) "like" else "unlike"
+                logTidbitActionEvent(action = action, tidbitId = event.id)
                 viewModelScope.launch {
                     if (event.newValue) {
                         repository.likeTidbit(tidbitId = event.id)
@@ -311,13 +303,9 @@ class TidbitViewModel(
 
             is TidbitScreenEvent.OnTidbitLikeClick -> {
                 if (_tidbitMainScreenState.value.isGuest) return@handleMainScreenEvent
-                analyticsLogger.logEvent(
-                    eventName = "tidbit-interaction",
-                    params = mapOf(
-                        "tidbit_id" to event.tidbitId,
-                        "action" to if (event.newValue) "like" else "unlike"
-                    )
-                )
+
+                val action = if (event.newValue) "like" else "unlike"
+                logTidbitActionEvent(action = action, tidbitId = event.tidbitId)
                 viewModelScope.launch {
                     if (event.newValue) {
                         repository.likeTidbit(tidbitId = event.tidbitId)
@@ -329,13 +317,8 @@ class TidbitViewModel(
 
             is TidbitScreenEvent.OnTidbitSaveClick -> {
                 if (_tidbitMainScreenState.value.isGuest) return@handleMainScreenEvent
-                analyticsLogger.logEvent(
-                    eventName = "tidbit-interaction",
-                    params = mapOf(
-                        "tidbit_id" to event.tidbitId,
-                        "action" to if (event.newValue) "bookmark" else "remove_bookmark"
-                    )
-                )
+                val action = if (event.newValue) "bookmark" else "remove_bookmark"
+                logTidbitActionEvent(action = action, tidbitId = event.tidbitId)
                 viewModelScope.launch {
                     if (event.newValue) {
                         repository.bookmarkTidbit(tidbitId = event.tidbitId)
@@ -374,6 +357,16 @@ class TidbitViewModel(
         viewModelScope.launch {
             _actions.emit(action)
         }
+    }
+
+    private fun logTidbitActionEvent(action: String, tidbitId: String) {
+        analyticsLogger.logEvent(
+            eventName = "tidbit-interaction",
+            params = mapOf(
+                "tidbit_id" to tidbitId,
+                "action" to action
+            )
+        )
     }
 }
 

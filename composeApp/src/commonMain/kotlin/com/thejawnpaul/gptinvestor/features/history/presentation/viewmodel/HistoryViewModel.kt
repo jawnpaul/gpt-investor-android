@@ -254,6 +254,7 @@ class HistoryViewModel(
     fun handleHistoryDetailEvent(event: HistoryDetailEvent) {
         when (event) {
             is HistoryDetailEvent.ClickSuggestedPrompt -> {
+                getSuggestedPromptResponse(query = event.prompt)
             }
 
             is HistoryDetailEvent.GetHistory -> {
@@ -370,6 +371,23 @@ class HistoryViewModel(
                     HistoryDetailAction.ShowToast("Billing Error: ${result.message}")
                 )
             }
+        }
+    }
+
+    private fun getSuggestedPromptResponse(query: String) {
+        conversationView.update {
+            it.copy(loading = true)
+        }
+        getInputPromptUseCase(
+            ConversationPrompt(
+                conversationId = conversationId ?: -1L,
+                query = query
+            )
+        ) {
+            it.fold(
+                ::handleInputResponseFailure,
+                ::handleInputResponseSuccess
+            )
         }
     }
 }

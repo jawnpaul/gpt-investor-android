@@ -207,26 +207,18 @@ class HomeViewModel(
                 }
 
                 is HomeEvent.ClickTidbit -> {
-                    analyticsLogger.logEvent(
-                        eventName = "navigation-clicked",
-                        params = mapOf("destination" to "tidbit_detail", "tidbit_id" to event.id)
-                    )
+                    logNavigationEvent(destination = "tidbit_detail", tidbitId = event.id)
                     _actions.emit(OnGoToTidbitDetail(event.id))
                 }
 
                 HomeEvent.GoToAllTidbits -> {
-                    analyticsLogger.logEvent(
-                        eventName = "navigation-clicked",
-                        params = mapOf("destination" to "all_tidbits")
-                    )
+                    logNavigationEvent(destination = "all_tidbits")
+
                     _actions.emit(OnGoToAllTidbits)
                 }
 
                 HomeEvent.GoToDiscover -> {
-                    analyticsLogger.logEvent(
-                        eventName = "navigation-clicked",
-                        params = mapOf("destination" to "discover")
-                    )
+                    logNavigationEvent(destination = "discover")
                     _actions.emit(HomeAction.OnGoToDiscover)
                 }
 
@@ -234,10 +226,7 @@ class HomeViewModel(
                     if (uiState.value.isGuestSession) {
                         _actions.emit(HomeAction.ShowToast(message = "You can only see history after signing in"))
                     } else {
-                        analyticsLogger.logEvent(
-                            eventName = "navigation-clicked",
-                            params = mapOf("destination" to "history")
-                        )
+                        logNavigationEvent(destination = "history")
                         _actions.emit(HomeAction.OnGoToHistory)
                     }
                 }
@@ -246,10 +235,7 @@ class HomeViewModel(
                     if (uiState.value.isGuestSession) {
                         _actions.emit(HomeAction.ShowToast(message = "You can only see saved picks after signing in"))
                     } else {
-                        analyticsLogger.logEvent(
-                            eventName = "navigation-clicked",
-                            params = mapOf("destination" to "saved_picks")
-                        )
+                        logNavigationEvent(destination = "saved_picks")
                         _actions.emit(HomeAction.OnGoToSavedPicks)
                     }
                 }
@@ -258,10 +244,8 @@ class HomeViewModel(
                     if (uiState.value.isGuestSession) {
                         _actions.emit(HomeAction.ShowToast(message = "You can only see saved tidbits after signing in"))
                     } else {
-                        analyticsLogger.logEvent(
-                            eventName = "navigation-clicked",
-                            params = mapOf("destination" to "saved_tidbits")
-                        )
+                        logNavigationEvent(destination = "saved_tidbits")
+
                         _actions.emit(HomeAction.OnGoToSavedTidbits)
                     }
                 }
@@ -270,10 +254,8 @@ class HomeViewModel(
                     if (uiState.value.isGuestSession) {
                         _actions.emit(HomeAction.ShowToast(message = "You can only see settings after signing in"))
                     } else {
-                        analyticsLogger.logEvent(
-                            eventName = "navigation-clicked",
-                            params = mapOf("destination" to "settings")
-                        )
+                        logNavigationEvent(destination = "settings")
+
                         _actions.emit(HomeAction.OnGoToSettings)
                     }
                 }
@@ -352,6 +334,17 @@ class HomeViewModel(
                 }
             }
         }
+    }
+
+    private fun logNavigationEvent(destination: String, tidbitId: String? = null) {
+        val params = buildMap {
+            tidbitId?.let { put("tidbit_id", it) }
+            put("destination", destination)
+        }
+        analyticsLogger.logEvent(
+            eventName = "navigation-clicked",
+            params = params
+        )
     }
 }
 

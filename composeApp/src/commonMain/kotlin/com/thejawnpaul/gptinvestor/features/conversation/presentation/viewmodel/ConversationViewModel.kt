@@ -108,12 +108,8 @@ class ConversationViewModel(
             it.copy(loading = true)
         }
         requestStartTime = Clock.System.now().toEpochMilliseconds()
-        analyticsLogger.logEvent(
-            eventName = "message-sent",
-            params = mapOf(
-                "source" to "default_prompt"
-            )
-        )
+
+        logMessageSent(source = "default_prompt", title = prompt.title)
         getDefaultPromptResponseUseCase(prompt) {
             it.onFailure {
                 handleConversationFailure(it)
@@ -143,12 +139,8 @@ class ConversationViewModel(
                 it.copy(loading = true)
             }
             requestStartTime = Clock.System.now().toEpochMilliseconds()
-            analyticsLogger.logEvent(
-                eventName = "message-sent",
-                params = mapOf(
-                    "source" to "user_input"
-                )
-            )
+
+            logMessageSent(source = "user_input")
             getInputPromptUseCase(
                 ConversationPrompt(
                     conversationId = selectedConversationId.value,
@@ -166,12 +158,7 @@ class ConversationViewModel(
                     it.copy(loading = true)
                 }
                 requestStartTime = Clock.System.now().toEpochMilliseconds()
-                analyticsLogger.logEvent(
-                    eventName = "message-sent",
-                    params = mapOf(
-                        "source" to "user_input"
-                    )
-                )
+                logMessageSent(source = "user_input")
                 getInputPromptUseCase(
                     ConversationPrompt(
                         conversationId = selectedConversationId.value,
@@ -192,12 +179,8 @@ class ConversationViewModel(
             it.copy(loading = true)
         }
         requestStartTime = Clock.System.now().toEpochMilliseconds()
-        analyticsLogger.logEvent(
-            eventName = "message-sent",
-            params = mapOf(
-                "source" to "suggested_prompt"
-            )
-        )
+
+        logMessageSent(source = "suggested_prompt")
         getInputPromptUseCase(
             ConversationPrompt(
                 conversationId = selectedConversationId.value,
@@ -496,6 +479,19 @@ class ConversationViewModel(
                 handleEvent(ConversationEvent.SendPrompt(query = decodedChatInput))
             }
         }
+    }
+
+    private fun logMessageSent(source: String, title: String? = null) {
+        val params = buildMap {
+            put("source", source)
+            title?.let { put("title", it) }
+            if (conversation.value.isGuest) {
+                put("user_type", "guest")
+            } else {
+                put("user_type", "logged_in")
+            }
+        }
+        analyticsLogger.logEvent(eventName = "message-sent", params = params)
     }
 }
 

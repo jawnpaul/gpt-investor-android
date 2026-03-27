@@ -2,6 +2,7 @@ package com.thejawnpaul.gptinvestor.features.authentication.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -12,7 +13,10 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 
 @KoinViewModel
-class LoginViewModel(private val authRepository: AuthenticationRepository) : ViewModel() {
+class LoginViewModel(
+    private val authRepository: AuthenticationRepository,
+    private val analyticsLogger: AnalyticsLogger
+) : ViewModel() {
 
     private val _loginUiState = MutableStateFlow(LoginUiState())
     val loginUiState = _loginUiState.asStateFlow()
@@ -31,10 +35,12 @@ class LoginViewModel(private val authRepository: AuthenticationRepository) : Vie
             }
 
             LoginUiEvent.LoginClick -> {
+                analyticsLogger.logEvent(eventName = "login-button-clicked", params = mapOf())
                 loginWithEmailAndPassword()
             }
 
             is LoginUiEvent.LoginWithGoogle -> {
+                analyticsLogger.logEvent(eventName = "google-login-button-clicked", params = mapOf())
                 loginWithGoogle(event.platformContext)
             }
 

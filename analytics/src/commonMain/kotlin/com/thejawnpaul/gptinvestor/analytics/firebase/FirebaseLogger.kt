@@ -16,7 +16,7 @@ class FirebaseLogger : AnalyticsLogger {
         eventName: String,
         params: Map<String, Any>
     ) {
-        firebaseAnalytics.logEvent(eventName.lowercase().replace(" ", "_"), params)
+        firebaseAnalytics.logEvent(eventName.lowercase().replace("-", "_"), params)
     }
 
     override fun logViewEvent(screenName: String) {

@@ -278,6 +278,10 @@ fun SetUpNavGraph(
                                     popUpTo(navController.graph.startDestinationId) { inclusive = true }
                                 }
                             }
+
+                            is CompanyDetailAction.ShowToast -> {
+                                platformActions.showMessage(action.message)
+                            }
                         }
                     }.launchIn(scope)
                 }

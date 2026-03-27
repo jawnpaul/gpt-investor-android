@@ -50,7 +50,7 @@ class HistoryRepository(private val conversationDao: ConversationDao, private va
             }
             emit(Either.Right(conversation))
             analyticsLogger.logEvent(
-                eventName = "History Selected",
+                eventName = "history-selected",
                 params = mapOf("chat_title" to conversation.title)
             )
         } catch (e: Exception) {

@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.features.billing.domain.BillingConstants
@@ -24,6 +25,7 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryCo
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryScreenView
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction.OnCopy
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenAction.OnGoToHistoryDetail
+import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -36,9 +38,10 @@ class HistoryViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val getSingleHistoryUseCase: GetSingleHistoryUseCase,
     private val getInputPromptUseCase: GetInputPromptUseCase,
-    private val fedBackRepository: FeedbackRepository,
+    private val feedBackRepository: FeedbackRepository,
     private val modelsRepository: ModelsRepository,
-    private val billingRepository: IBillingRepository
+    private val billingRepository: IBillingRepository,
+    private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
     private val _historyScreenViewState = MutableStateFlow(HistoryScreenView())
@@ -54,6 +57,8 @@ class HistoryViewModel(
     val historyDetailAction get() = _historyDetailAction
 
     private var upgradeModelId: String? = null
+
+    private var requestStartTime: Long = 0L
 
     private val conversationId: Long?
         get() {
@@ -132,6 +137,9 @@ class HistoryViewModel(
             conversationView.update {
                 it.copy(loading = true)
             }
+
+            requestStartTime = Clock.System.now().toEpochMilliseconds()
+            logMessageSent(source = "user_input")
             getInputPromptUseCase(
                 ConversationPrompt(
                     conversationId = conversationId ?: -1L,
@@ -171,6 +179,12 @@ class HistoryViewModel(
             }
 
             is Failure.RateLimitExceeded -> {
+                analyticsLogger.logEvent(
+                    eventName = "rate-limit-hit",
+                    params = mapOf(
+                        "user_type" to if (conversation.value.isGuest) "guest" else "logged_in"
+                    )
+                )
                 Logger.e("Rate limit exceeded")
                 conversationView.update { it.copy(showRateLimitBottomSheet = false) }
                 processHistoryDetailAction(
@@ -204,6 +218,15 @@ class HistoryViewModel(
     private fun handleInputResponseSuccess(conversation: Conversation) {
         conversation as StructuredConversation
 
+        val duration = Clock.System.now().toEpochMilliseconds() - requestStartTime
+        analyticsLogger.logEvent(
+            eventName = "response-received",
+            params = mapOf(
+                "duration_ms" to duration,
+                "status" to "success"
+            )
+        )
+
         conversationView.update { state ->
             state.copy(
                 query = "",
@@ -231,7 +254,15 @@ class HistoryViewModel(
             } ?: it
         }
         viewModelScope.launch {
-            fedBackRepository.giveFeedback(messageId, status, reason)
+            analyticsLogger.logEvent(
+                eventName = "feedback-given",
+                params = mapOf(
+                    "message_id" to messageId,
+                    "status" to status,
+                    "reason" to (reason ?: "")
+                )
+            )
+            feedBackRepository.giveFeedback(messageId, status, reason)
         }
     }
 
@@ -274,10 +305,18 @@ class HistoryViewModel(
             }
 
             is HistoryDetailEvent.CopyToClipboard -> {
+                analyticsLogger.logEvent(
+                    eventName = "message-copied",
+                    params = mapOf("text_length" to event.text.length)
+                )
                 processHistoryDetailAction(OnCopy(event.text))
             }
 
             is HistoryDetailEvent.ModelChange -> {
+                analyticsLogger.logEvent(
+                    eventName = "model-changed-in-chat",
+                    params = mapOf("model_id" to event.model.modelId)
+                )
                 conversationView.update { it.copy(selectedModel = event.model) }
             }
 
@@ -378,6 +417,7 @@ class HistoryViewModel(
         conversationView.update {
             it.copy(loading = true)
         }
+        logMessageSent(source = "suggested_prompt")
         getInputPromptUseCase(
             ConversationPrompt(
                 conversationId = conversationId ?: -1L,
@@ -389,6 +429,18 @@ class HistoryViewModel(
                 ::handleInputResponseSuccess
             )
         }
+    }
+
+    private fun logMessageSent(source: String) {
+        val params = buildMap {
+            put("source", source)
+            if (conversation.value.isGuest) {
+                put("user_type", "guest")
+            } else {
+                put("user_type", "logged_in")
+            }
+        }
+        analyticsLogger.logEvent(eventName = "message-sent", params = params)
     }
 }
 

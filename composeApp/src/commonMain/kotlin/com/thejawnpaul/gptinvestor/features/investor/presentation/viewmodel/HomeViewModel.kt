@@ -132,7 +132,7 @@ class HomeViewModel(
                 is HomeEvent.ChangeTheme -> {
                     preferences.setThemePreference(event.theme)
                     analyticsLogger.logEvent(
-                        eventName = "Theme Changed",
+                        eventName = "theme-changed",
                         params = mapOf("theme" to event.theme)
                     )
                 }
@@ -147,7 +147,7 @@ class HomeViewModel(
                     }
                     preferences.setNotificationPermission(true)
                     analyticsLogger.logEvent(
-                        eventName = "Notification Permission Granted",
+                        eventName = "notification-permission-granted",
                         params = mapOf("permission" to true)
                     )
                     // firebase token generation
@@ -161,7 +161,7 @@ class HomeViewModel(
 
                     _uiState.update { it.copy(selectedModel = event.model) }
                     analyticsLogger.logEvent(
-                        eventName = "Model Changed",
+                        eventName = "model-changed",
                         params = mapOf("model" to event.model.modelId)
                     )
                 }
@@ -184,6 +184,13 @@ class HomeViewModel(
                 }
 
                 is HomeEvent.DefaultPromptClicked -> {
+                    analyticsLogger.logEvent(
+                        eventName = "default-prompt-clicked",
+                        params = mapOf(
+                            "prompt_title" to event.prompt.title,
+                            "source" to "home_screen"
+                        )
+                    )
                     _actions.emit(
                         OnStartConversation(
                             input = event.prompt.query,
@@ -200,14 +207,18 @@ class HomeViewModel(
                 }
 
                 is HomeEvent.ClickTidbit -> {
+                    logNavigationEvent(destination = "tidbit_detail", tidbitId = event.id)
                     _actions.emit(OnGoToTidbitDetail(event.id))
                 }
 
                 HomeEvent.GoToAllTidbits -> {
+                    logNavigationEvent(destination = "all_tidbits")
+
                     _actions.emit(OnGoToAllTidbits)
                 }
 
                 HomeEvent.GoToDiscover -> {
+                    logNavigationEvent(destination = "discover")
                     _actions.emit(HomeAction.OnGoToDiscover)
                 }
 
@@ -215,6 +226,7 @@ class HomeViewModel(
                     if (uiState.value.isGuestSession) {
                         _actions.emit(HomeAction.ShowToast(message = "You can only see history after signing in"))
                     } else {
+                        logNavigationEvent(destination = "history")
                         _actions.emit(HomeAction.OnGoToHistory)
                     }
                 }
@@ -223,6 +235,7 @@ class HomeViewModel(
                     if (uiState.value.isGuestSession) {
                         _actions.emit(HomeAction.ShowToast(message = "You can only see saved picks after signing in"))
                     } else {
+                        logNavigationEvent(destination = "saved_picks")
                         _actions.emit(HomeAction.OnGoToSavedPicks)
                     }
                 }
@@ -231,6 +244,8 @@ class HomeViewModel(
                     if (uiState.value.isGuestSession) {
                         _actions.emit(HomeAction.ShowToast(message = "You can only see saved tidbits after signing in"))
                     } else {
+                        logNavigationEvent(destination = "saved_tidbits")
+
                         _actions.emit(HomeAction.OnGoToSavedTidbits)
                     }
                 }
@@ -239,6 +254,8 @@ class HomeViewModel(
                     if (uiState.value.isGuestSession) {
                         _actions.emit(HomeAction.ShowToast(message = "You can only see settings after signing in"))
                     } else {
+                        logNavigationEvent(destination = "settings")
+
                         _actions.emit(HomeAction.OnGoToSettings)
                     }
                 }
@@ -317,6 +334,17 @@ class HomeViewModel(
                 }
             }
         }
+    }
+
+    private fun logNavigationEvent(destination: String, tidbitId: String? = null) {
+        val params = buildMap {
+            tidbitId?.let { put("tidbit_id", it) }
+            put("destination", destination)
+        }
+        analyticsLogger.logEvent(
+            eventName = "navigation-clicked",
+            params = params
+        )
     }
 }
 

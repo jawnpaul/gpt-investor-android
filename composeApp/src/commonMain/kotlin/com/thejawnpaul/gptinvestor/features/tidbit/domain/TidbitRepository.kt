@@ -112,6 +112,7 @@ class TidbitRepositoryImpl(
         analyticsLogger.logEvent(
             eventName = "share",
             params = mapOf(
+                "tidbit_id" to id,
                 "content_type" to "tidbit"
             )
         )

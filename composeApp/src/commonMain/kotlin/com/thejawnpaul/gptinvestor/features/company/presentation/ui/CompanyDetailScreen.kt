@@ -247,6 +247,13 @@ fun CompanyDetailScreen(
                                 onAction(CompanyDetailAction.OnNavigateToWebView(url = it))
                             },
                             onClickFeedback = { messageId, status, reason ->
+                                onEvent(
+                                    CompanyDetailEvent.SendFeedback(
+                                        messageId = messageId,
+                                        status = status,
+                                        reason = reason
+                                    )
+                                )
                             },
                             onCopy = {
                                 onEvent(CompanyDetailEvent.CopyToClipboard(it))

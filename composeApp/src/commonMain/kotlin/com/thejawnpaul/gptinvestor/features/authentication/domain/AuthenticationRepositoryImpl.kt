@@ -51,7 +51,7 @@ class AuthenticationRepositoryImpl(
             gptInvestorPreferences.clearAccessToken()
             gptInvestorPreferences.clearRefreshToken()
             gptInvestorPreferences.clearIsGuestLoggedIn()
-            analyticsLogger.resetUser(eventName = "Log Out")
+            analyticsLogger.resetUser(eventName = "log-out")
             signOutPlatform()
         } catch (e: Exception) {
             Logger.e(e) { "Sign out failed" }
@@ -65,7 +65,7 @@ class AuthenticationRepositoryImpl(
     override suspend fun deleteAccount() {
         try {
             auth.currentUser?.delete()
-            analyticsLogger.resetUser(eventName = "Delete Account")
+            analyticsLogger.resetUser(eventName = "delete-account")
             gptInvestorPreferences.clearUserId()
             gptInvestorPreferences.clearIsUserLoggedIn()
             gptInvestorPreferences.clearThemePreference()
@@ -93,7 +93,7 @@ class AuthenticationRepositoryImpl(
                 gptInvestorPreferences.clearIsGuestLoggedIn()
 
                 analyticsLogger.identifyUser(
-                    eventName = "Log in",
+                    eventName = "log-in",
                     params = mapOf(
                         "user_id" to loginResponse.user?.uid.toString(),
                         "email" to loginResponse.user?.email.toString()
@@ -119,7 +119,7 @@ class AuthenticationRepositoryImpl(
 
                     if (gptInvestorPreferences.isGuestLoggedIn.first() == true) {
                         analyticsLogger.logEvent(
-                            eventName = "Guest Sign Up",
+                            eventName = "sign-up",
                             params = mapOf(
                                 "user_id" to signUpResponse.userId.toString(),
                                 "email" to email,
@@ -129,11 +129,12 @@ class AuthenticationRepositoryImpl(
                         )
                     } else {
                         analyticsLogger.identifyUser(
-                            eventName = "Sign Up",
+                            eventName = "sign-up",
                             params = mapOf(
                                 "user_id" to signUpResponse.userId.toString(),
                                 "email" to email,
-                                "sign_up_method" to "email_and_password"
+                                "sign_up_method" to "email_and_password",
+                                "sign_up_source" to "default"
                             )
                         )
                     }
@@ -168,7 +169,7 @@ class AuthenticationRepositoryImpl(
             }
         }
         analyticsLogger.identifyUser(
-            eventName = "Log in",
+            eventName = "log-in",
             params = params
         )
     }
@@ -192,7 +193,7 @@ class AuthenticationRepositoryImpl(
             }
         }
         analyticsLogger.identifyUser(
-            eventName = "Sign Up",
+            eventName = "sign-up",
             params = params
         )
     }
@@ -204,7 +205,7 @@ class AuthenticationRepositoryImpl(
             response.body?.let { guestLoginResponse ->
                 tokenStorage.saveAccessToken(guestLoginResponse.accessToken ?: "")
                 gptInvestorPreferences.setIsGuestLoggedIn(true)
-                analyticsLogger.logEvent(eventName = "Guest Session Start", params = mapOf())
+                analyticsLogger.logEvent(eventName = "guest-session-start", params = mapOf())
                 Result.success(guestLoginResponse.message ?: "Guest login successful")
             } ?: Result.failure(Exception(response.body?.message ?: "Guest login failed"))
         } else {

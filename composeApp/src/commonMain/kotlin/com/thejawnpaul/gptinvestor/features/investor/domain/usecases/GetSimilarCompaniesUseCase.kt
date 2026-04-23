@@ -10,9 +10,7 @@ import com.thejawnpaul.gptinvestor.features.investor.domain.repository.IInvestor
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import org.koin.core.annotation.Factory
 
-@Factory
 class GetSimilarCompaniesUseCase(
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     coroutineScope: CoroutineScope,

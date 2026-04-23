@@ -2,7 +2,6 @@ package com.thejawnpaul.gptinvestor.core.di
 
 import com.thejawnpaul.gptinvestor.analytics.di.AnalyticsModule
 import com.thejawnpaul.gptinvestor.remote.RemoteModule
-import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
 
 @Module(
@@ -13,5 +12,4 @@ import org.koin.core.annotation.Module
         RemoteModule::class
     ]
 )
-@ComponentScan("com.thejawnpaul.gptinvestor")
 class CommonAppModule

@@ -2,11 +2,74 @@ import SwiftUI
 import ComposeApp
 import Mixpanel
 import FirebaseCore
+import FirebaseMessaging
 
-class AppDelegate: NSObject, UIApplicationDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        FirebaseApp.configure()
+        let fileName: String
+        
+        #if DEBUG
+            fileName = "GoogleService-Info-Dev"
+        #else
+            fileName = "GoogleService-Info-Prod"
+        #endif
+        
+        if let filePath = Bundle.main.path(forResource: fileName, ofType: "plist"),
+           let options = FirebaseOptions(contentsOfFile: filePath) {
+            print("FIR Options: Bundle ID: \(options.bundleID) Client ID: \(options.clientID)")
+            FirebaseApp.configure(options: options)
+        }
+        Messaging.messaging().delegate = self
+
+        UNUserNotificationCenter.current().delegate = self
+
+        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+        UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { _, _ in }
+
+        application.registerForRemoteNotifications()
+
         return true
+    }
+
+    @MainActor
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) async
+    -> UIBackgroundFetchResult {
+        print(userInfo)
+        print("Call exportDeliveryMetricsToBigQuery() from AppDelegate")
+        Messaging.serviceExtension().exportDeliveryMetricsToBigQuery(withMessageInfo: userInfo)
+        return UIBackgroundFetchResult.newData
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async
+    -> UNNotificationPresentationOptions {
+        let userInfo = notification.request.content.userInfo
+
+        print(userInfo)
+
+        return [.list, .banner, .sound]
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        let userInfo = response.notification.request.content.userInfo
+
+        print(userInfo)
+    }
+
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        print("Firebase registration token: \(String(describing: fcmToken))")
+    }
+
+    func logFCMToken() {
+        let token = Messaging.messaging().fcmToken
+        print("FCM token: \(token ?? "")")
+
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("Error retrieving FCM token: \(error)")
+            } else if let token = token {
+                print("Remote instance ID token: \(token)")
+            }
+        }
     }
 }
 
@@ -26,13 +89,21 @@ struct iOSApp: App {
     private let mixpanelProvider = SwiftMixpanelProvider(token: MixpanelProviderModuleKt.mixpanelToken)
     private let youtubePlayerProvider = SwiftYoutubePlayerProvider()
 
+    /// Google Sign-In bridge. The web client ID is the OAuth2 server client ID used by
+    /// Firebase; it is sourced from BuildConfig (WEB_CLIENT_ID in local.properties) and
+    /// re-exported via `googleSignInWebClientId` in GoogleSignInProviderModule.kt.
+    private let googleSignInProvider = SwiftGoogleSignInProvider(
+        webClientId: GoogleSignInProviderModuleKt.googleSignInWebClientId
+    )
+
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     var body: some Scene {
         WindowGroup {
             ContentView(
                 mixpanelProvider: mixpanelProvider,
-                youtubePlayerProvider: youtubePlayerProvider
+                youtubePlayerProvider: youtubePlayerProvider,
+                googleSignInProvider: googleSignInProvider
             )
         }
     }

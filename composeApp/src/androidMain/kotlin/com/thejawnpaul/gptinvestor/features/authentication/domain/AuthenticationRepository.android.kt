@@ -4,7 +4,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import co.touchlab.kermit.Logger
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
@@ -37,9 +37,9 @@ actual suspend fun loginWithGooglePlatform(
         ?: throw IllegalArgumentException("Invalid platform context")
 
     val credentialManager = CredentialManager.create(androidContext)
-    val googleIdOption = GetGoogleIdOption.Builder()
-        .setServerClientId(appConfig.webClientId)
-        .build()
+    val googleIdOption = GetSignInWithGoogleOption.Builder(
+        serverClientId = appConfig.webClientId
+    ).build()
 
     val request = GetCredentialRequest.Builder()
         .addCredentialOption(googleIdOption)

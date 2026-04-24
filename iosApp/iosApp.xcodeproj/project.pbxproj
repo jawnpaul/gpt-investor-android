@@ -14,6 +14,7 @@
 		517D80ED2F65B1D8003EC92D /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 517D80EC2F65B1D8003EC92D /* FirebaseMessaging */; };
 		517D80EF2F65B1D8003EC92D /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 517D80EE2F65B1D8003EC92D /* FirebaseRemoteConfig */; };
 		517D81032F65C411003EC92D /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = 517D81022F65C411003EC92D /* Mixpanel */; };
+		51996E722F6FF11100976C18 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 51996E712F6FF11100976C18 /* GoogleSignIn */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +53,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				517D81032F65C411003EC92D /* Mixpanel in Frameworks */,
+				51996E722F6FF11100976C18 /* GoogleSignIn in Frameworks */,
 				5179A5232F68C55300CC9BA2 /* YouTubeiOSPlayerHelper in Frameworks */,
 				517D80ED2F65B1D8003EC92D /* FirebaseMessaging in Frameworks */,
 				517D80E72F65B1D8003EC92D /* FirebaseAnalytics in Frameworks */,
@@ -89,6 +91,7 @@
 			buildConfigurationList = ACF9A3CB92EF14C3B3C4EF06 /* Build configuration list for PBXNativeTarget "iosApp" */;
 			buildPhases = (
 				15F22A8FDD7600FE46DBE785 /* Compile Kotlin Framework */,
+				51996E752F70291500976C18 /* ShellScript */,
 				1F32BE1B034A986D7BE77E23 /* Sources */,
 				7A61C14314F7917BAF3BE9FD /* Frameworks */,
 				F2028D1B33A9ECE4CED73523 /* Resources */,
@@ -109,6 +112,7 @@
 				517D80EE2F65B1D8003EC92D /* FirebaseRemoteConfig */,
 				517D81022F65C411003EC92D /* Mixpanel */,
 				5179A5222F68C55300CC9BA2 /* YouTubeiOSPlayerHelper */,
+				51996E712F6FF11100976C18 /* GoogleSignIn */,
 			);
 			productName = iosApp;
 			productReference = BE15D34BA5370888110A187D /* GPT Investor.app */;
@@ -142,6 +146,7 @@
 				517D80E52F65B1D8003EC92D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				517D81012F65C411003EC92D /* XCRemoteSwiftPackageReference "mixpanel-swift" */,
 				5179A5212F68C55300CC9BA2 /* XCRemoteSwiftPackageReference "youtube-ios-player-helper" */,
+				51996E702F6FF11100976C18 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = ECEFFE98EDAF09A63182EEB4 /* Products */;
@@ -183,6 +188,23 @@
 			shellPath = /bin/sh;
 			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :composeApp:embedAndSignAppleFrameworkForXcode\n";
 		};
+		51996E752F70291500976C18 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n# Copy the correct GoogleService-Info.plist based on config\nPLIST_SOURCE=\"${PROJECT_DIR}/iosApp/GoogleService-Info-${GOOGLE_SERVICES_PLIST}.plist\"\nPLIST_DEST=\"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\"\n\ncp \"${PLIST_SOURCE}\" \"${PLIST_DEST}\"\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -196,7 +218,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		322E5E87C2457348122AEB66 /* Debug */ = {
+		322E5E87C2457348122AEB66 /* Debug Prod */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = D8A3197734984FB05145E741 /* Configuration */;
 			baseConfigurationReferenceRelativePath = Config.xcconfig;
@@ -250,8 +272,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				GOOGLE_SERVICES_PLIST = Prod;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				KOTLIN_FRAMEWORK_BUILD_TYPE = debug;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -260,9 +284,77 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
-			name = Debug;
+			name = "Debug Prod";
 		};
-		5B3C7C68A27A49504DCF01A5 /* Release */ = {
+		51996E732F7027AE00976C18 /* Debug Dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = D8A3197734984FB05145E741 /* Configuration */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GOOGLE_SERVICES_PLIST = Dev;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				KOTLIN_FRAMEWORK_BUILD_TYPE = debug;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = "Debug Dev";
+		};
+		51996E742F7027AE00976C18 /* Debug Dev */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = arm64;
@@ -274,6 +366,7 @@
 				DEVELOPMENT_TEAM = "${TEAM_ID}";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.1017247757694-o8n6f7jrr5iblk53i2uv14aa0pbd1kkn";
 				INFOPLIST_FILE = iosApp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -288,9 +381,9 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
-			name = Release;
+			name = "Debug Dev";
 		};
-		AA4FF78D2B7555EE9AAC581E /* Debug */ = {
+		5B3C7C68A27A49504DCF01A5 /* Release Prod */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = arm64;
@@ -302,6 +395,7 @@
 				DEVELOPMENT_TEAM = "${TEAM_ID}";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.959018592951-eq89l0c2h171cmd569ko2m91kao0ht52";
 				INFOPLIST_FILE = iosApp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -316,9 +410,38 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
-			name = Debug;
+			name = "Release Prod";
 		};
-		AEE7B9D4D6BE257529B030C2 /* Release */ = {
+		AA4FF78D2B7555EE9AAC581E /* Debug Prod */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
+				DEVELOPMENT_TEAM = "${TEAM_ID}";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.959018592951-eq89l0c2h171cmd569ko2m91kao0ht52";
+				INFOPLIST_FILE = iosApp/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = "Debug Prod";
+		};
+		AEE7B9D4D6BE257529B030C2 /* Release Prod */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = D8A3197734984FB05145E741 /* Configuration */;
 			baseConfigurationReferenceRelativePath = Config.xcconfig;
@@ -366,8 +489,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				GOOGLE_SERVICES_PLIST = Prod;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				KOTLIN_FRAMEWORK_BUILD_TYPE = release;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -375,7 +500,7 @@
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
-			name = Release;
+			name = "Release Prod";
 		};
 /* End XCBuildConfiguration section */
 
@@ -383,20 +508,22 @@
 		8AA45AF4E50D78E9FD6D574D /* Build configuration list for PBXProject "iosApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				322E5E87C2457348122AEB66 /* Debug */,
-				AEE7B9D4D6BE257529B030C2 /* Release */,
+				322E5E87C2457348122AEB66 /* Debug Prod */,
+				51996E732F7027AE00976C18 /* Debug Dev */,
+				AEE7B9D4D6BE257529B030C2 /* Release Prod */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = "Release Prod";
 		};
 		ACF9A3CB92EF14C3B3C4EF06 /* Build configuration list for PBXNativeTarget "iosApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AA4FF78D2B7555EE9AAC581E /* Debug */,
-				5B3C7C68A27A49504DCF01A5 /* Release */,
+				AA4FF78D2B7555EE9AAC581E /* Debug Prod */,
+				51996E742F7027AE00976C18 /* Debug Dev */,
+				5B3C7C68A27A49504DCF01A5 /* Release Prod */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = "Release Prod";
 		};
 /* End XCConfigurationList section */
 
@@ -423,6 +550,14 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 5.2.0;
+			};
+		};
+		51996E702F6FF11100976C18 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.1.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -462,6 +597,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 517D81012F65C411003EC92D /* XCRemoteSwiftPackageReference "mixpanel-swift" */;
 			productName = Mixpanel;
+		};
+		51996E712F6FF11100976C18 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 51996E702F6FF11100976C18 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

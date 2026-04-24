@@ -21,6 +21,10 @@ let package = Package(
         .package(
             url: "https://github.com/mixpanel/mixpanel-swift",
             from: "5.2.0"
+        ),
+        .package(
+            url: "https://github.com/google/GoogleSignIn-iOS",
+            from: "8.0.0"
         )
     ],
     targets: [
@@ -35,6 +39,7 @@ let package = Package(
                 .product(name: "FirebaseRemoteConfig", package: "firebase-ios-sdk"),
                 .product(name: "YouTubeiOSPlayerHelper", package: "youtube-ios-player-helper"),
                 .product(name: "Mixpanel", package: "mixpanel-swift"),
+                .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),
             ],
             path: "/iosApp"
         ),

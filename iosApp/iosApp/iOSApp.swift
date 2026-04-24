@@ -71,12 +71,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
             }
         }
     }
-
-    func subscribeToTopic() {
-        Messaging.messaging().subscribe(toTopic: "weather") { error in
-            print("Subscribed to weather topic")
-        }
-    }
 }
 
 @main

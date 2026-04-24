@@ -28,17 +28,20 @@ import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
+import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.QuestionInput
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DefaultConversationScreen(
     conversation: DefaultConversation,
+    isGuest: Boolean,
     onPromptClick: (prompt: DefaultPrompt) -> Unit,
     onNavigateUp: () -> Unit,
     inputQuery: String,
     onInputQueryChange: (String) -> Unit,
     onSendClick: () -> Unit,
+    onSignUpClick: () -> Unit,
     availableModels: List<AvailableModel>,
     selectedModel: AvailableModel,
     onModelChange: (AvailableModel) -> Unit,
@@ -50,17 +53,22 @@ fun DefaultConversationScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onNavigateUp) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = stringResource(Res.string.back)
-                    )
+            Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onNavigateUp) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = stringResource(Res.string.back)
+                        )
+                    }
+                }
+                if (isGuest) {
+                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = onSignUpClick)
                 }
             }
         },

@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.model.Tidbit
@@ -25,8 +27,12 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 
 @KoinViewModel
-class TidbitViewModel(private val repository: TidbitRepository, private val savedStateHandle: SavedStateHandle) :
-    ViewModel() {
+class TidbitViewModel(
+    private val repository: TidbitRepository,
+    private val savedStateHandle: SavedStateHandle,
+    private val appPreferences: AppPreferences,
+    private val analyticsLogger: AnalyticsLogger
+) : ViewModel() {
 
     private val tidbitId: String?
         get() = savedStateHandle.get<String>("tidbitId")
@@ -49,6 +55,27 @@ class TidbitViewModel(private val repository: TidbitRepository, private val save
 
     init {
         getTidbit()
+        checkGuestStatus()
+    }
+
+    private fun checkGuestStatus() {
+        viewModelScope.launch {
+            appPreferences.isGuestLoggedIn.collect { isGuest ->
+                _tidbitDetailState.update { it.copy(isGuestSession = isGuest == true) }
+                _tidbitMainScreenState.update { state ->
+                    state.copy(
+                        isGuest = isGuest == true,
+                        options = if (isGuest == true) {
+                            state.options.filter {
+                                !(it is SectorInput.CustomSector && it.sectorKey == "saved")
+                            }
+                        } else {
+                            state.options
+                        }
+                    )
+                }
+            }
+        }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -79,6 +106,15 @@ class TidbitViewModel(private val repository: TidbitRepository, private val save
                             presentation = mapTidbitToPresentation(tidbit)
                         )
                     }
+                    _tidbitDetailState.value.presentation?.let { presentation ->
+                        analyticsLogger.logEvent(
+                            eventName = "tidbit-viewed",
+                            params = mapOf(
+                                "tidbit_id" to tidbit.id,
+                                "category" to tidbit.category
+                            )
+                        )
+                    }
                 }.onFailure {
                     _tidbitDetailState.update { it.copy(isLoading = false) }
                 }
@@ -106,6 +142,12 @@ class TidbitViewModel(private val repository: TidbitRepository, private val save
 
             is TidbitDetailEvent.OnClickSource -> {
                 _tidbitDetailState.value.presentation?.let { presentation ->
+                    analyticsLogger.logEvent(
+                        eventName = "tidbit-source-opened",
+                        params = mapOf(
+                            "tidbit_id" to _tidbitDetailState.value.id
+                        )
+                    )
                     when (presentation) {
                         is TidbitPresentation.ArticlePresentation -> {
                             handleDetailAction(action = OnOpenSource(url = presentation.sourceUrl))
@@ -123,6 +165,10 @@ class TidbitViewModel(private val repository: TidbitRepository, private val save
             }
 
             is TidbitDetailEvent.OnClickBookmark -> {
+                if (_tidbitDetailState.value.isGuestSession) return@handleDetailEvent
+
+                val action = if (event.newValue) "bookmark" else "remove_bookmark"
+                logTidbitActionEvent(action = action, tidbitId = event.id)
                 viewModelScope.launch {
                     if (event.newValue) {
                         repository.bookmarkTidbit(tidbitId = event.id)
@@ -133,6 +179,10 @@ class TidbitViewModel(private val repository: TidbitRepository, private val save
             }
 
             is TidbitDetailEvent.OnClickLike -> {
+                if (_tidbitDetailState.value.isGuestSession) return@handleDetailEvent
+
+                val action = if (event.newValue) "like" else "unlike"
+                logTidbitActionEvent(action = action, tidbitId = event.id)
                 viewModelScope.launch {
                     if (event.newValue) {
                         repository.likeTidbit(tidbitId = event.id)
@@ -140,6 +190,10 @@ class TidbitViewModel(private val repository: TidbitRepository, private val save
                         repository.unlikeTidbit(tidbitId = event.id)
                     }
                 }
+            }
+
+            TidbitDetailEvent.GoToSignUp -> {
+                handleDetailAction(action = TidbitDetailAction.OnGoToSignUp)
             }
         }
     }
@@ -232,6 +286,10 @@ class TidbitViewModel(private val repository: TidbitRepository, private val save
             }
 
             is TidbitScreenEvent.OnFilterSelected -> {
+                analyticsLogger.logEvent(
+                    eventName = "tidbit-filter-selected",
+                    params = mapOf("filter" to event.filter)
+                )
                 _tidbitMainScreenState.update {
                     it.copy(selectedOption = event.filter)
                 }
@@ -244,6 +302,10 @@ class TidbitViewModel(private val repository: TidbitRepository, private val save
             }
 
             is TidbitScreenEvent.OnTidbitLikeClick -> {
+                if (_tidbitMainScreenState.value.isGuest) return@handleMainScreenEvent
+
+                val action = if (event.newValue) "like" else "unlike"
+                logTidbitActionEvent(action = action, tidbitId = event.tidbitId)
                 viewModelScope.launch {
                     if (event.newValue) {
                         repository.likeTidbit(tidbitId = event.tidbitId)
@@ -254,6 +316,9 @@ class TidbitViewModel(private val repository: TidbitRepository, private val save
             }
 
             is TidbitScreenEvent.OnTidbitSaveClick -> {
+                if (_tidbitMainScreenState.value.isGuest) return@handleMainScreenEvent
+                val action = if (event.newValue) "bookmark" else "remove_bookmark"
+                logTidbitActionEvent(action = action, tidbitId = event.tidbitId)
                 viewModelScope.launch {
                     if (event.newValue) {
                         repository.bookmarkTidbit(tidbitId = event.tidbitId)
@@ -293,12 +358,23 @@ class TidbitViewModel(private val repository: TidbitRepository, private val save
             _actions.emit(action)
         }
     }
+
+    private fun logTidbitActionEvent(action: String, tidbitId: String) {
+        analyticsLogger.logEvent(
+            eventName = "tidbit-interaction",
+            params = mapOf(
+                "tidbit_id" to tidbitId,
+                "action" to action
+            )
+        )
+    }
 }
 
 data class TidbitDetailState(
     val id: String = "",
     val isLoading: Boolean = false,
-    val presentation: TidbitPresentation? = null
+    val presentation: TidbitPresentation? = null,
+    val isGuestSession: Boolean = false
 )
 
 data class TidbitScreenState(
@@ -319,7 +395,8 @@ data class TidbitScreenState(
     ),
     val selectedOption: SectorInput? = SectorInput.AllSector,
     val isLoading: Boolean = false,
-    val tidbits: List<TidbitPresentation> = emptyList()
+    val tidbits: List<TidbitPresentation> = emptyList(),
+    val isGuest: Boolean = false
 )
 
 sealed interface TidbitScreenEvent {
@@ -353,12 +430,14 @@ sealed interface TidbitDetailEvent {
     data class OnClickBookmark(val id: String, val newValue: Boolean) : TidbitDetailEvent
     data object OnClickSource : TidbitDetailEvent
     data object OnClickShare : TidbitDetailEvent
+    data object GoToSignUp : TidbitDetailEvent
 }
 
 sealed interface TidbitDetailAction {
     data object OnGoBack : TidbitDetailAction
     data class OnOpenSource(val url: String) : TidbitDetailAction
     data class OnShare(val shareText: String) : TidbitDetailAction
+    data object OnGoToSignUp : TidbitDetailAction
 }
 
 sealed interface TidbitPagingFilterType {

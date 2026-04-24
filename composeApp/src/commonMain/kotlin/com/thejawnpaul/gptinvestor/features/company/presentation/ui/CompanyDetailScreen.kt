@@ -19,8 +19,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +42,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.Compa
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyDetailDefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.StructuredConversationScreen
+import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.WaitlistBottomSheetContent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.QuestionInput
 import com.thejawnpaul.gptinvestor.sources
@@ -58,7 +57,6 @@ fun CompanyDetailScreen(
     onAction: (CompanyDetailAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     var showBottomSheet by remember { mutableStateOf(false) }
 
     Column(
@@ -76,13 +74,20 @@ fun CompanyDetailScreen(
                         val keyboardController = LocalSoftwareKeyboardController.current
                         Scaffold(
                             topBar = {
-                                CompanyDetailHeader(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    onNavigateUp = {
-                                        onAction(CompanyDetailAction.OnGoBack)
-                                    },
-                                    companyHeader = state.header
-                                )
+                                Column {
+                                    CompanyDetailHeader(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        onNavigateUp = {
+                                            onAction(CompanyDetailAction.OnGoBack)
+                                        },
+                                        companyHeader = state.header
+                                    )
+                                    if (state.isGuestSession) {
+                                        TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {
+                                            onEvent(CompanyDetailEvent.SignUpClicked)
+                                        })
+                                    }
+                                }
                             },
                             bottomBar = {
                                 QuestionInput(
@@ -242,6 +247,13 @@ fun CompanyDetailScreen(
                                 onAction(CompanyDetailAction.OnNavigateToWebView(url = it))
                             },
                             onClickFeedback = { messageId, status, reason ->
+                                onEvent(
+                                    CompanyDetailEvent.SendFeedback(
+                                        messageId = messageId,
+                                        status = status,
+                                        reason = reason
+                                    )
+                                )
                             },
                             onCopy = {
                                 onEvent(CompanyDetailEvent.CopyToClipboard(it))
@@ -262,6 +274,9 @@ fun CompanyDetailScreen(
                             onModelChange = { onEvent(CompanyDetailEvent.ModelChange(it)) },
                             onUpgradeModel = { showBottomSheet, modelId ->
                                 onEvent(CompanyDetailEvent.UpgradeModel(showBottomSheet, modelId))
+                            },
+                            onSignUpClick = {
+                                onEvent(CompanyDetailEvent.SignUpClicked)
                             }
                         )
                     }

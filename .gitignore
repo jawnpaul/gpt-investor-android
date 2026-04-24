@@ -3,7 +3,7 @@
 /local.properties
 .idea/
 .DS_Store
-/build
+build/
 /captures
 .externalNativeBuild
 .cxx
@@ -14,5 +14,6 @@ google-services.json
 .kotlin/
 Gemfile
 Gemfile.lock
-app/build
 /iosApp/iosApp/GoogleService-*.plist
+*.xcuserdata
+xcuserdata/

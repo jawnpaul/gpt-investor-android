@@ -76,6 +76,7 @@ fun SingleTopPickItem(pickPresentation: TopPickPresentation, onClick: (String) -
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(
+                        modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         // Text - company ticker
@@ -281,7 +282,7 @@ private fun SinglePickPreview(modifier: Modifier = Modifier) {
                 val pick = TopPickPresentation(
                     id = "1",
                     ticker = "AAPL",
-                    companyName = "Microsoft",
+                    companyName = "Microsoft is the leader of the new leader in a new era",
                     rationale = "This is the day that the Lord has made I will be glad and rejoice in it because, " +
                         "oh well it is just blah lorem ipsum ",
                     confidenceScore = 2,

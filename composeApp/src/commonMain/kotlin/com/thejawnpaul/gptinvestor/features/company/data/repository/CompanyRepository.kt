@@ -68,7 +68,7 @@ class CompanyRepository(
                 response.body?.let {
                     emit(Either.Right(it))
                     analyticsLogger.logEvent(
-                        eventName = "Company Selected",
+                        eventName = "company-selected",
                         params = mapOf(
                             "company_ticker" to ticker,
                             "company_name" to it.name.toString()
@@ -106,7 +106,7 @@ class CompanyRepository(
             val companies = companyDao.getCompaniesInSector(sector).map { it.toDomainObject() }
             emit(Either.Right(companies))
             analyticsLogger.logEvent(
-                eventName = "Industry Category Selected",
+                eventName = "industry-category-selected",
                 params = mapOf("industry_name" to sector)
             )
         }

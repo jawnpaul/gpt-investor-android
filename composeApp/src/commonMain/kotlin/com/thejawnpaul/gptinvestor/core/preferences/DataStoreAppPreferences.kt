@@ -29,6 +29,7 @@ class DataStoreAppPreferences(private val dataStore: DataStore<Preferences>) : A
         private val IS_TOKEN_SYNCED_KEY = booleanPreferencesKey("is_token_synced_preference")
         private val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token_preference")
         private val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token_preference")
+        private val IS_GUEST_LOGGED_IN_KEY = booleanPreferencesKey("is_guest_logged_in_preference")
     }
 
     override val themePreference: Flow<String?> = dataStore.data.map { preferences ->
@@ -134,6 +135,22 @@ class DataStoreAppPreferences(private val dataStore: DataStore<Preferences>) : A
     override suspend fun clearIsUserLoggedIn() {
         dataStore.edit { preferences ->
             preferences.remove(IS_USER_LOGGED_IN_KEY)
+        }
+    }
+
+    override val isGuestLoggedIn: Flow<Boolean?> = dataStore.data.map { preferences ->
+        preferences[IS_GUEST_LOGGED_IN_KEY]
+    }
+
+    override suspend fun setIsGuestLoggedIn(isLoggedIn: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[IS_GUEST_LOGGED_IN_KEY] = isLoggedIn
+        }
+    }
+
+    override suspend fun clearIsGuestLoggedIn() {
+        dataStore.edit { preferences ->
+            preferences.remove(IS_GUEST_LOGGED_IN_KEY)
         }
     }
 

@@ -10,5 +10,6 @@ data class TopPickDetailView(
     val error: String? = null,
     val companyPresentation: CompanyDetailRemoteResponse? = null,
     val showAuthenticateDialog: Boolean = false,
-    val showNewsSourcesBottomSheet: Boolean = false
+    val showNewsSourcesBottomSheet: Boolean = false,
+    val isGuestSession: Boolean = false
 )

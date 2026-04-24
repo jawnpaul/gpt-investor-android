@@ -144,6 +144,7 @@ gitlive-firebase-analytics = { group = "dev.gitlive", name = "firebase-analytics
 gitlive-firebase-auth = { group = "dev.gitlive", name = "firebase-auth", version.ref = "gitlive-firebase" }
 gitlive-firebase-config = { group = "dev.gitlive", name = "firebase-config", version.ref = "gitlive-firebase" }
 gitlive-firebase-messaging = { group = "dev.gitlive", name = "firebase-messaging", version.ref = "gitlive-firebase" }
+gitlive-firebase-installations = { group = "dev.gitlive", name = "firebase-installations", version.ref = "gitlive-firebase" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 cashapp-turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 

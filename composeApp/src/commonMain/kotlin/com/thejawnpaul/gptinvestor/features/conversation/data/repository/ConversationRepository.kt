@@ -1,7 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.conversation.data.repository
 
 import co.touchlab.kermit.Logger
-import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
@@ -44,7 +43,6 @@ import org.koin.core.annotation.Singleton
 @Singleton(binds = [IConversationRepository::class])
 class ConversationRepository(
     private val apiService: KtorApiService,
-    private val analyticsLogger: AnalyticsLogger,
     private val messageDao: MessageDao,
     private val conversationDao: ConversationDao,
     private val remoteConfig: RemoteConfigClient
@@ -87,11 +85,6 @@ class ConversationRepository(
         var structuredConversation: StructuredConversation? = null
         var messageId: Long? = null
         try {
-            analyticsLogger.logEvent(
-                eventName = "Default Prompt Selected",
-                params = mapOf("prompt_title" to prompt.title, "prompt_query" to prompt.query)
-            )
-
             // Always create a new conversation entity
             val conversationId = conversationDao.insertConversation(
                 ConversationEntity(
@@ -224,8 +217,6 @@ class ConversationRepository(
                     emit(Either.Left(mapHttpCodeToFailure(chatResponse.status.value)))
                 }
             }
-
-            analyticsLogger.logEvent(eventName = "Query Submitted", params = mapOf())
         } catch (e: Exception) {
             Logger.e(e.stackTraceToString())
             currentConversation?.let { conversation ->

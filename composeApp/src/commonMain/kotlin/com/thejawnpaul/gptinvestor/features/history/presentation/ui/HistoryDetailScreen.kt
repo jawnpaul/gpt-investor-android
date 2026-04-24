@@ -29,9 +29,7 @@ fun HistoryDetailScreen(
             }) {
                 RateLimitBottomSheetContent(
                     modifier = Modifier,
-                    onDismiss = {
-                        onEvent(HistoryDetailEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
-                    },
+                    isGuest = state.isGuest,
                     onUpgrade = onUpgradeFromRateLimit
                 )
             }
@@ -96,6 +94,9 @@ fun HistoryDetailScreen(
                     },
                     onUpgradeModel = { showBottomSheet, modelId ->
                         onEvent(HistoryDetailEvent.UpgradeModel(showBottomSheet, modelId))
+                    },
+                    onSignUpClick = {
+                        onEvent(HistoryDetailEvent.GoToSignUp)
                     }
                 )
             }

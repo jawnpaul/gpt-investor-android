@@ -7,6 +7,7 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
+import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.company.data.local.model.PriceChange
 import com.thejawnpaul.gptinvestor.features.company.data.repository.CompanyRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
@@ -21,11 +22,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
@@ -33,11 +36,21 @@ import org.koin.core.annotation.KoinViewModel
 @KoinViewModel
 class DiscoverViewModel(
     private val companyRepository: CompanyRepository,
-    private val topPickRepository: TopPickRepository
+    private val topPickRepository: TopPickRepository,
+    private val appPreferences: AppPreferences
 ) : ViewModel() {
 
     private val _discoveryScreenState = MutableStateFlow(DiscoveryScreenState())
-    val discoveryScreenState get() = _discoveryScreenState
+    val discoveryScreenState = combine(
+        _discoveryScreenState,
+        appPreferences.isGuestLoggedIn
+    ) { state, isGuestLoggedIn ->
+        state.copy(isGuestSession = isGuestLoggedIn == true)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = DiscoveryScreenState()
+    )
 
     private val _actions = MutableSharedFlow<DiscoveryAction>()
     val actions get() = _actions.asSharedFlow()
@@ -135,6 +148,10 @@ class DiscoverViewModel(
                     updateFilteredTopPicks()
                 }
             }
+
+            DiscoveryEvent.GoToSignUp -> {
+                processAction(DiscoveryAction.OnGoToSignUp)
+            }
         }
     }
 
@@ -226,7 +243,8 @@ data class DiscoveryScreenState(
     val topPicks: List<TopPickPresentation> = emptyList(),
     val sectors: List<SectorInput> = emptyList(),
     val query: String = "",
-    val selected: SectorInput? = null
+    val selected: SectorInput? = null,
+    val isGuestSession: Boolean = false
 ) {
     val showTopPicks = selected is SectorInput.CustomSector && selected.sectorKey == "top-picks"
 }
@@ -240,10 +258,12 @@ sealed interface DiscoveryEvent {
     data class ToggleSearchMode(val searchMode: Boolean) : DiscoveryEvent
     data class GoToTopPickDetail(val id: String) : DiscoveryEvent
     data class GoToCompanyDetail(val ticker: String) : DiscoveryEvent
+    data object GoToSignUp : DiscoveryEvent
 }
 
 sealed interface DiscoveryAction {
     data class OnNavigateToCompanyDetail(val ticker: String) : DiscoveryAction
     data object OnGoBack : DiscoveryAction
     data class OnGoToPickDetail(val id: String) : DiscoveryAction
+    data object OnGoToSignUp : DiscoveryAction
 }

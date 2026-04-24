@@ -45,10 +45,11 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
 
 @Singleton
-class KtorApiService(private val client: HttpClient) {
+class KtorApiService(@Provided private val client: HttpClient) {
     suspend fun getCompanies(): KtorResponse<List<CompanyRemote>> = client.get("v1/companies").toKtorResponse()
 
     suspend fun getCompanyFinancials(request: CompanyFinancialsRequest): KtorResponse<CompanyFinancialsRemote> =

@@ -16,6 +16,7 @@ import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitLikeRequest
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.model.Tidbit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
 
 interface TidbitRepository {
@@ -42,7 +43,7 @@ interface TidbitRepository {
 class TidbitRepositoryImpl(
     private val apiService: KtorApiService,
     private val remoteConfig: RemoteConfigClient,
-    private val analyticsLogger: AnalyticsLogger,
+    @Provided private val analyticsLogger: AnalyticsLogger,
     private val preferences: AppPreferences
 ) : TidbitRepository {
     override suspend fun getTodayTidbit(): Result<Tidbit> = try {

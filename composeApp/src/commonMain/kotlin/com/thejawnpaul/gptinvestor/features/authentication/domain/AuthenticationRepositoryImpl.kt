@@ -19,11 +19,12 @@ import dev.gitlive.firebase.installations.installations
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
 
 @Singleton(binds = [AuthenticationRepository::class])
 class AuthenticationRepositoryImpl(
-    private val analyticsLogger: AnalyticsLogger,
+    @Provided private val analyticsLogger: AnalyticsLogger,
     private val gptInvestorPreferences: AppPreferences,
     private val tokenSyncManager: TokenSyncManager,
     private val apiService: KtorApiService,

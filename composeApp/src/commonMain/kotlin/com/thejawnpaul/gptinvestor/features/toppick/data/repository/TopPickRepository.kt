@@ -18,13 +18,14 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
 
 @Singleton(binds = [ITopPickRepository::class])
 class TopPickRepository(
     private val apiService: KtorApiService,
     private val topPickDao: TopPickDao,
-    private val analyticsLogger: AnalyticsLogger,
+    @Provided private val analyticsLogger: AnalyticsLogger,
     private val remoteConfig: RemoteConfigClient
 ) : ITopPickRepository {
     override suspend fun getTopPicks(): Flow<Either<Failure, List<TopPick>>> = flow {

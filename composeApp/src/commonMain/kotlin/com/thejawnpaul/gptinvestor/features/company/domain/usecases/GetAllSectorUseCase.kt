@@ -9,10 +9,11 @@ import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRe
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import org.koin.core.annotation.Provided
 
 class GetAllSectorUseCase(
-    @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
-    coroutineScope: CoroutineScope,
+    @Provided @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @Provided coroutineScope: CoroutineScope,
     private val repository: ICompanyRepository
 ) : BaseUseCase<GetAllSectorUseCase.None, List<SectorInput>>(coroutineScope, dispatcher) {
     class None

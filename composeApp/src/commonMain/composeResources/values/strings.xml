@@ -136,7 +136,9 @@
     <string name="guest_limit_reached_description">Sign in to continue exploring GPT Investor with full access.</string>
     <string name="or">or</string>
     <string name="log_in_with_google">Log in with Google</string>
+    <string name="log_in_with_apple">Log in with Apple</string>
     <string name="sign_up_with_google">Sign up with Google</string>
+    <string name="sign_up_with_apple">Sign up with Apple</string>
     <string name="you_re_in_guest_mode_click_here_to_sign_in">You're in guest mode, click here to sign in</string>
 
 </resources>

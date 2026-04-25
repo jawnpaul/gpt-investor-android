@@ -6,12 +6,15 @@ import kotlinx.coroutines.flow.Flow
 
 interface AuthenticationRepository {
     val currentUser: User?
-    suspend fun signOut()
+    suspend fun signOut(): Result<Unit>
     fun getAuthState(): Flow<Boolean>
-    suspend fun deleteAccount()
+    suspend fun deleteAccount(): Result<Unit>
     suspend fun loginWithEmailAndPassword(email: String, password: String): Result<String>
     suspend fun signUpWithEmailAndPassword(email: String, password: String, name: String): Result<String>
     suspend fun loginWithGoogle(platformContext: PlatformContext): Result<Unit>
+    suspend fun loginWithApple(): Result<Unit>
     suspend fun signUpWithGoogle(platformContext: PlatformContext): Result<Unit>
+
+    suspend fun signUpWithApple(): Result<Unit>
     suspend fun guestLogin(): Result<String>
 }

@@ -55,4 +55,6 @@ interface AppPreferences {
     val userName: Flow<String?>
     suspend fun setUserName(name: String)
     suspend fun clearUserName()
+
+    suspend fun clearSessionData()
 }

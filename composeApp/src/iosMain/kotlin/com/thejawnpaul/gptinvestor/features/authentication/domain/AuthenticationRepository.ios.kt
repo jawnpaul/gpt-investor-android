@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.features.authentication.domain
 import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.platform.AppConfig
+import com.thejawnpaul.gptinvestor.core.platform.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.FirebaseLoginRequest
@@ -13,7 +14,6 @@ import dev.gitlive.firebase.auth.GoogleAuthProvider as GitLiveGoogleAuthProvider
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
-import org.koin.mp.KoinPlatform.getKoin
 
 actual suspend fun signOutPlatform() {
     // No-op for parity v1
@@ -25,11 +25,10 @@ actual suspend fun loginWithGooglePlatform(
     gptInvestorPreferences: AppPreferences,
     tokenStorage: TokenStorage,
     tokenSyncManager: TokenSyncManager,
+    googleSignInProvider: GoogleSignInProvider,
     platformContext: PlatformContext,
     appConfig: AppConfig
 ): Result<Unit> = try {
-    val googleSignInProvider: GoogleSignInProvider = getKoin().get()
-
     val details: Pair<String, String> = suspendCancellableCoroutine { continuation ->
         googleSignInProvider.signIn(
             onSuccess = { token, accessToken -> continuation.resume(Pair(token, accessToken)) },

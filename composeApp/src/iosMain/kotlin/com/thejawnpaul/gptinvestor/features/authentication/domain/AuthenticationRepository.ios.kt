@@ -14,6 +14,7 @@ import dev.gitlive.firebase.auth.GoogleAuthProvider as GitLiveGoogleAuthProvider
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.koin.mp.KoinPlatform.getKoin
 
 actual suspend fun signOutPlatform() {
     // No-op for parity v1
@@ -25,10 +26,10 @@ actual suspend fun loginWithGooglePlatform(
     gptInvestorPreferences: AppPreferences,
     tokenStorage: TokenStorage,
     tokenSyncManager: TokenSyncManager,
-    googleSignInProvider: GoogleSignInProvider,
     platformContext: PlatformContext,
     appConfig: AppConfig
 ): Result<Unit> = try {
+    val googleSignInProvider = getKoin().getOrNull<GoogleSignInProvider>() ?: NoOpGoogleSignInProvider()
     val details: Pair<String, String> = suspendCancellableCoroutine { continuation ->
         googleSignInProvider.signIn(
             onSuccess = { token, accessToken -> continuation.resume(Pair(token, accessToken)) },

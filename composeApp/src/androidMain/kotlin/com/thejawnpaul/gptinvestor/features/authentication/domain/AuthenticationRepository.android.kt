@@ -10,7 +10,6 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Co
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.platform.AndroidPlatformContext
 import com.thejawnpaul.gptinvestor.core.platform.AppConfig
-import com.thejawnpaul.gptinvestor.core.platform.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.FirebaseLoginRequest
@@ -31,7 +30,6 @@ actual suspend fun loginWithGooglePlatform(
     gptInvestorPreferences: AppPreferences,
     tokenStorage: TokenStorage,
     tokenSyncManager: TokenSyncManager,
-    googleSignInProvider: GoogleSignInProvider,
     platformContext: PlatformContext,
     appConfig: AppConfig
 ): Result<Unit> = try {

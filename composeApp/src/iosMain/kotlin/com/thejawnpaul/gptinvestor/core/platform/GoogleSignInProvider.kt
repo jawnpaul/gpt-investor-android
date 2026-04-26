@@ -14,9 +14,5 @@ package com.thejawnpaul.gptinvestor.core.platform
  * via [com.thejawnpaul.gptinvestor.features.authentication.domain.googleSignInProviderModule], mirroring the MixpanelProvider bridge pattern.
  */
 interface GoogleSignInProvider {
-    /**
-     * Triggers the Google Sign-In UI and returns the Google ID token via [onSuccess],
-     * or an error message via [onError].
-     */
     fun signIn(onSuccess: (idToken: String, accessToken: String) -> Unit, onError: (message: String) -> Unit)
 }

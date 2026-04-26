@@ -4,7 +4,6 @@ import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.platform.AppConfig
-import com.thejawnpaul.gptinvestor.core.platform.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginRequest
@@ -30,8 +29,7 @@ class AuthenticationRepositoryImpl(
     private val tokenSyncManager: TokenSyncManager,
     private val apiService: KtorApiService,
     private val tokenStorage: TokenStorage,
-    private val appConfig: AppConfig,
-    @Provided private val googleSignInProvider: GoogleSignInProvider
+    private val appConfig: AppConfig
 ) : AuthenticationRepository {
     private val auth = Firebase.auth
 
@@ -159,7 +157,6 @@ class AuthenticationRepositoryImpl(
         gptInvestorPreferences = gptInvestorPreferences,
         tokenStorage = tokenStorage,
         tokenSyncManager = tokenSyncManager,
-        googleSignInProvider = googleSignInProvider,
         platformContext = platformContext,
         appConfig = appConfig
     ).onSuccess {
@@ -184,7 +181,6 @@ class AuthenticationRepositoryImpl(
         gptInvestorPreferences = gptInvestorPreferences,
         tokenStorage = tokenStorage,
         tokenSyncManager = tokenSyncManager,
-        googleSignInProvider = googleSignInProvider,
         platformContext = platformContext,
         appConfig = appConfig
     ).onSuccess {
@@ -230,7 +226,6 @@ expect suspend fun loginWithGooglePlatform(
     gptInvestorPreferences: AppPreferences,
     tokenStorage: TokenStorage,
     tokenSyncManager: TokenSyncManager,
-    googleSignInProvider: GoogleSignInProvider,
     platformContext: PlatformContext,
     appConfig: AppConfig
 ): Result<Unit>

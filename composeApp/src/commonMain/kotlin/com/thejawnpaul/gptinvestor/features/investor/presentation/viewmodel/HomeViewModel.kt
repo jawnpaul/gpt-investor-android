@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.koin.core.annotation.Provided
 
 @KoinViewModel
 class HomeViewModel(
@@ -43,7 +44,7 @@ class HomeViewModel(
     private val getDefaultPromptsUseCase: GetDefaultPromptsUseCase,
     remoteConfig: RemoteConfigClient,
     private val preferences: AppPreferences,
-    private val analyticsLogger: AnalyticsLogger,
+    @Provided private val analyticsLogger: AnalyticsLogger,
     private val notificationRepository: NotificationRepository,
     private val modelsRepository: ModelsRepository,
     private val tidbitRepository: TidbitRepository

@@ -22,13 +22,14 @@ import com.thejawnpaul.gptinvestor.features.company.domain.model.TrendingCompany
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
 
 @Singleton(binds = [ICompanyRepository::class])
 class CompanyRepository(
     private val apiService: KtorApiService,
     private val companyDao: CompanyDao,
-    private val analyticsLogger: AnalyticsLogger
+    @Provided private val analyticsLogger: AnalyticsLogger
 ) : ICompanyRepository {
 
     override suspend fun getAllSector(): Flow<Either<Failure, List<SectorInput>>> = flow {

@@ -26,7 +26,6 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Structured
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
-import kotlin.collections.mapOf
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +35,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.koin.core.annotation.Provided
 
 @KoinViewModel
 class CompanyViewModel(
@@ -45,7 +45,7 @@ class CompanyViewModel(
     private val modelsRepository: ModelsRepository,
     private val feedbackRepository: FeedbackRepository,
     private val appPreferences: AppPreferences,
-    private val analyticsLogger: AnalyticsLogger
+    @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())

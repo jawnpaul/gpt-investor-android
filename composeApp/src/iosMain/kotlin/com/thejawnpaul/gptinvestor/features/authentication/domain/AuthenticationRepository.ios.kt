@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.features.authentication.domain
 import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.platform.AppConfig
+import com.thejawnpaul.gptinvestor.core.platform.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.FirebaseLoginRequest
@@ -28,8 +29,7 @@ actual suspend fun loginWithGooglePlatform(
     platformContext: PlatformContext,
     appConfig: AppConfig
 ): Result<Unit> = try {
-    val googleSignInProvider: GoogleSignInProvider = getKoin().get()
-
+    val googleSignInProvider = getKoin().getOrNull<GoogleSignInProvider>() ?: NoOpGoogleSignInProvider()
     val details: Pair<String, String> = suspendCancellableCoroutine { continuation ->
         googleSignInProvider.signIn(
             onSuccess = { token, accessToken -> continuation.resume(Pair(token, accessToken)) },

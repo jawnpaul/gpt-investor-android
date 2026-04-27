@@ -25,13 +25,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.koin.core.annotation.Provided
 
 @KoinViewModel
 class TidbitViewModel(
     private val repository: TidbitRepository,
     private val savedStateHandle: SavedStateHandle,
     private val appPreferences: AppPreferences,
-    private val analyticsLogger: AnalyticsLogger
+    @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
     private val tidbitId: String?

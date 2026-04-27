@@ -1,4 +1,4 @@
-package com.thejawnpaul.gptinvestor.features.authentication.domain
+package com.thejawnpaul.gptinvestor.core.platform
 
 /**
  * ObjC-visible protocol bridging Google Sign-In to Swift.
@@ -10,13 +10,9 @@ package com.thejawnpaul.gptinvestor.features.authentication.domain
  *
  * Both callbacks use [String] to keep the ObjC bridge clean (avoids KotlinThrowable).
  *
- * The default binding is [NoOpGoogleSignInProvider]. The iosApp overrides it at startup
- * via [googleSignInProviderModule], mirroring the MixpanelProvider bridge pattern.
+ * The default binding is [com.thejawnpaul.gptinvestor.features.authentication.domain.NoOpGoogleSignInProvider]. The iosApp overrides it at startup
+ * via [com.thejawnpaul.gptinvestor.features.authentication.domain.googleSignInProviderModule], mirroring the MixpanelProvider bridge pattern.
  */
 interface GoogleSignInProvider {
-    /**
-     * Triggers the Google Sign-In UI and returns the Google ID token via [onSuccess],
-     * or an error message via [onError].
-     */
     fun signIn(onSuccess: (idToken: String, accessToken: String) -> Unit, onError: (message: String) -> Unit)
 }

@@ -9,10 +9,17 @@
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
-            buildForRunning = "NO"
-            buildForProfiling = "NO"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
             buildForArchiving = "NO"
             buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "75569D2E3DDA14BAB31ED057"
+               BuildableName = "GPT Investor.app"
+               BlueprintName = "iosApp"
+               ReferencedContainer = "container:iosApp.xcodeproj">
+            </BuildableReference>
             <AutocreatedTestPlanReference>
             </AutocreatedTestPlanReference>
          </BuildActionEntry>
@@ -59,6 +66,10 @@
             ReferencedContainer = "container:iosApp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <LocationScenarioReference
+         identifier = "com.apple.dt.IDEFoundation.CurrentLocationScenarioIdentifier"
+         referenceType = "1">
+      </LocationScenarioReference>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Debug Dev"

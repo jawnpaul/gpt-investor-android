@@ -4,9 +4,9 @@ import androidx.compose.ui.window.ComposeUIViewController
 import com.thejawnpaul.gptinvestor.analytics.mixpanel.MixpanelProvider
 import com.thejawnpaul.gptinvestor.analytics.mixpanel.mixpanelProviderModule
 import com.thejawnpaul.gptinvestor.core.di.GPTKoinApp
+import com.thejawnpaul.gptinvestor.core.platform.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.core.platform.YoutubePlayerProvider
 import com.thejawnpaul.gptinvestor.core.platform.youtubePlayerProviderModule
-import com.thejawnpaul.gptinvestor.features.authentication.domain.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.features.authentication.domain.googleSignInProviderModule
 import org.koin.compose.KoinApplication
 import org.koin.plugin.module.dsl.koinConfiguration

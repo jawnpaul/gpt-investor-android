@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.authentication.domain
 
+import com.thejawnpaul.gptinvestor.core.platform.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.shared.BuildConfig
 import org.koin.core.module.Module
 import org.koin.dsl.module

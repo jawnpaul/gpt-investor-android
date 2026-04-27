@@ -26,7 +26,7 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
     val preferences: AppPreferences = koinInject()
     val tokenSyncManager: TokenSyncManager = koinInject()
 
-    val themePreference by preferences.themePreference.collectAsState(initial = "Dark")
+    val themePreference by preferences.themePreference.collectAsState(initial = "System")
     val isUserSignedIn by preferences.isUserLoggedIn.collectAsState(initial = false)
     val isGuestSignedIn by preferences.isGuestLoggedIn.collectAsState(initial = false)
 

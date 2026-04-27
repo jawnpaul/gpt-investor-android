@@ -5,8 +5,8 @@ import androidx.compose.ui.graphics.Color
 
 val md_theme_light_primary = Color(0xFF433D48)
 val md_theme_light_onPrimary = Color(0xFFFFFFFF)
-val md_theme_light_primaryContainer = Color(0xFFD4E3FF)
-val md_theme_light_onPrimaryContainer = Color(0xFF001C3A)
+val md_theme_light_primaryContainer = Color(0xFFEAE7EF)
+val md_theme_light_onPrimaryContainer = Color(0xFF1D1823)
 val md_theme_light_secondary = Color(0xFFB90C55)
 val md_theme_light_onSecondary = Color(0xFFFFFFFF)
 val md_theme_light_secondaryContainer = Color(0xFFFFD9DF)
@@ -19,19 +19,19 @@ val md_theme_light_error = Color(0xFFBA1A1A)
 val md_theme_light_errorContainer = Color(0xFFFFDAD6)
 val md_theme_light_onError = Color(0xFFFFFFFF)
 val md_theme_light_onErrorContainer = Color(0xFF410002)
-val md_theme_light_background = Color(0xFFFFFFFF)
-val md_theme_light_onBackground = Color(0xFF433D48)
-val md_theme_light_surface = Color(0xFFFAFAFA)
-val md_theme_light_onSurface = Color(0xFF433D48)
-val md_theme_light_surfaceVariant = Color(0xFF433D48)
-val md_theme_light_onSurfaceVariant = Color(0xFF43474E)
-val md_theme_light_outline = Color(0xFF74777F)
+val md_theme_light_background = Color(0xFFF5F4F7)
+val md_theme_light_onBackground = Color(0xFF1D1823)
+val md_theme_light_surface = Color(0xFFFFFFFF)
+val md_theme_light_onSurface = Color(0xFF1D1823)
+val md_theme_light_surfaceVariant = Color(0xFFEAE7EF)
+val md_theme_light_onSurfaceVariant = Color(0xFF49454F)
+val md_theme_light_outline = Color(0xFF79747E)
 val md_theme_light_inverseOnSurface = Color(0xFFD6F6FF)
 val md_theme_light_inverseSurface = Color(0xFF00363F)
 val md_theme_light_inversePrimary = Color(0xFFA5C8FF)
 val md_theme_light_shadow = Color(0xFF000000)
-val md_theme_light_surfaceTint = Color(0xFF005FAF)
-val md_theme_light_outlineVariant = Color(0xFFF3F3F4)
+val md_theme_light_surfaceTint = Color(0xFF433D48)
+val md_theme_light_outlineVariant = Color(0xFFD4D0DB)
 val md_theme_light_scrim = Color(0xFF000000)
 
 val md_theme_dark_primary = Color(0xFFFFFFFF)
@@ -130,26 +130,22 @@ val gptInvestorColorsDark = GPTInvestorColors(
 
 val gptInvestorColorsLight = GPTInvestorColors(
     textColors = TextColors(
-        secondary50 = Color(0xFF89868C),
+        secondary50 = Color(0xFF6B6770),
     ),
     greenColors = GreenColors(
-        defaultGreen = Color(0xFF05C702),
+        defaultGreen = Color(0xFF02A400),
         allGreen = Color(0xFF02A400),
         allGreen10 = Color(0xFFE6F6E5)
     ),
     utilColors = UtilColors(
-        allDark2 = Color(0xFFFBFAFD),
-        borderBright10 = Color(0xFFE7E7E8)
+        allDark2 = Color(0xFFF5F4F7),
+        borderBright10 = Color(0xFFD4D0DB)
     ),
     accentColors = AccentColors(
-        allAccent = Color(
-            0xFF3F008B
-        ),
+        allAccent = Color(0xFF3F008B),
         allAccent20 = Color(0xFFD9CCE8)
     ),
     redColors = RedColors(
         allRed = Color(0xFFDF3F3F)
     )
-
-
 )

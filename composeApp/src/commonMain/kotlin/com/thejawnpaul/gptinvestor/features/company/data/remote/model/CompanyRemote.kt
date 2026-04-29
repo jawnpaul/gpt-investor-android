@@ -59,7 +59,21 @@ data class CompanyDetailRemoteResponse(
     @SerialName("current_price") val price: Float? = null,
     @SerialName("historical_data") val historicalData: List<HistoricalData>? = null,
     @SerialName("company_name") val name: String? = null,
-    @SerialName("logo_url") val imageUrl: String? = null
+    @SerialName("logo_url") val imageUrl: String? = null,
+    @SerialName("sentiment") val sentiment: String? = null,
+    @SerialName("sentiment_summary") val sentimentSummary: String? = null,
+    @SerialName("dividend_yield") val dividendYield: Float? = null,
+    @SerialName("revenue_growth") val revenueGrowth: Float? = null,
+    @SerialName("market_cap_insight") val marketCapInsight: String? = null,
+    @SerialName("market_cap_insight_tone") val marketCapInsightTone: String? = null,
+    @SerialName("pe_ratio_insight") val peRatioInsight: String? = null,
+    @SerialName("pe_ratio_insight_tone") val peRatioInsightTone: String? = null,
+    @SerialName("revenue_growth_insight") val revenueGrowthInsight: String? = null,
+    @SerialName("revenue_growth_insight_tone") val revenueGrowthInsightTone: String? = null,
+    @SerialName("dividend_yield_insight") val dividendYieldInsight: String? = null,
+    @SerialName("dividend_yield_insight_tone") val dividendYieldInsightTone: String? = null,
+    @SerialName("risk") val risk: BriefSectionRemote? = null,
+    @SerialName("opportunity") val opportunity: BriefSectionRemote? = null
 ) {
     val newsSourcesString: String
         get() = buildString {
@@ -69,6 +83,12 @@ data class CompanyDetailRemoteResponse(
     val formattedImageUrl: String
         get() = imageUrl?.toHttpsUrl() ?: ""
 }
+
+@Serializable
+data class BriefSectionRemote(
+    @SerialName("title") val title: String? = null,
+    @SerialName("body") val body: String? = null
+)
 
 @Serializable
 data class CompanyPriceRequest(@SerialName("tickers") val tickers: List<String>)

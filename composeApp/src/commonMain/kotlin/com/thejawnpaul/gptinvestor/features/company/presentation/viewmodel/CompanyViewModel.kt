@@ -10,6 +10,7 @@ import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
+import com.thejawnpaul.gptinvestor.features.company.domain.model.toBrief
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyFinancialsView
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
@@ -112,7 +113,8 @@ class CompanyViewModel(
                                 price = company.price ?: 0.0f,
                                 percentageChange = company.change ?: 0.0f,
                                 companyName = company.name ?: ""
-                            )
+                            ),
+                            brief = company.toBrief()
                         )
                     }
                 }

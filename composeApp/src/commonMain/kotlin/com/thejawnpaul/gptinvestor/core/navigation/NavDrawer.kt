@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -37,7 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.app_name
@@ -72,16 +73,18 @@ fun NavDrawerContent(
             .fillMaxHeight()
             .width(300.dp)
             .background(MaterialTheme.colorScheme.surface)
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
         // Header
         Box(
             modifier = Modifier
+                .statusBarsPadding()
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = stringResource(Res.string.app_name),
+                color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.headlineSmall
             )
         }
@@ -175,7 +178,8 @@ fun NavDrawerContent(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = (state.user?.ifBlank { "A" }?.take(1) ?: "A").uppercase()
+                            text = (state.user?.ifBlank { "A" }?.take(1) ?: "A").uppercase(),
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
 
@@ -187,7 +191,8 @@ fun NavDrawerContent(
                         },
                         style = MaterialTheme.typography.bodyChatBody,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
@@ -201,7 +206,8 @@ fun NavDrawerContent(
                 ) {
                     Icon(
                         imageVector = if (expanded) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
-                        contentDescription = null
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -300,11 +306,13 @@ private fun DrawerItem(icon: ImageVector, label: String, onClick: () -> Unit, mo
         Icon(
             imageVector = icon,
             contentDescription = label,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.width(32.dp))
         Text(
             text = label,
+            color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodyLarge
         )
     }
@@ -322,7 +330,7 @@ sealed interface NavDrawerAction {
     data object OnGoToSavedTidbits : NavDrawerAction
 }
 
-@Preview
+@PreviewLightDark
 @Composable
 private fun NavDrawerContentPreview() {
     GPTInvestorTheme {

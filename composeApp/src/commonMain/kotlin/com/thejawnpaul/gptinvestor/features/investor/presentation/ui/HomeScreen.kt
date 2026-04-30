@@ -92,7 +92,7 @@ fun HomeScreen(state: HomeUiState, onEvent: (HomeEvent) -> Unit, modifier: Modif
         state = state,
         onEvent = onEvent,
         notificationPermissionController = notificationPermissionController,
-        modifier = modifier.statusBarsPadding()
+        modifier = modifier
     )
 }
 
@@ -206,7 +206,7 @@ private fun HomeScreenContent(
                 }
             },
             topBar = {
-                Column {
+                Column(modifier = Modifier.statusBarsPadding()) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()

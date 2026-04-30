@@ -75,10 +75,10 @@ fun DiscoverScreen(
     val companiesList = paging.collectAsLazyPagingItems()
 
     Scaffold(
-        modifier = modifier.statusBarsPadding(),
+        modifier = modifier,
         topBar = {
             Column(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.statusBarsPadding().fillMaxWidth()
             ) {
                 Row(
                     modifier = Modifier

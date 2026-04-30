@@ -167,7 +167,7 @@ fun SetUpNavGraph(
             }
 
             HomeScreen(
-                modifier = Modifier.padding(top = 20.dp),
+                modifier = Modifier,
                 state = state.value,
                 onEvent = homeViewModel::handleEvent
             )
@@ -244,7 +244,7 @@ fun SetUpNavGraph(
             }
 
             HistoryScreen(
-                modifier = Modifier.padding(top = 20.dp),
+                modifier = Modifier,
                 state = state.value,
                 onEvent = viewModel::handleEvent
             )
@@ -339,7 +339,7 @@ fun SetUpNavGraph(
             }
 
             ConversationScreen(
-                modifier = Modifier.padding(top = 20.dp),
+                modifier = Modifier,
                 state = state.value,
                 onEvent = viewModel::handleEvent,
                 onAction = viewModel::processAction,
@@ -403,7 +403,7 @@ fun SetUpNavGraph(
             }
 
             HistoryDetailScreen(
-                modifier = Modifier.padding(top = 20.dp),
+                modifier = Modifier,
                 state = state.value,
                 onEvent = viewModel::handleHistoryDetailEvent,
                 onAction = viewModel::processHistoryDetailAction,
@@ -452,7 +452,7 @@ fun SetUpNavGraph(
             }
 
             TopPickDetailScreen(
-                modifier = Modifier.padding(top = 20.dp),
+                modifier = Modifier,
                 state = state.value,
                 onEvent = viewModel::handleEvent,
                 onAction = viewModel::processAction
@@ -478,7 +478,7 @@ fun SetUpNavGraph(
             val viewModel = koinViewModel<TopPickViewModel>()
             val state = viewModel.savedTopPicks.collectAsState()
             SavedTopPicksScreen(
-                modifier = Modifier.padding(top = 20.dp),
+                modifier = Modifier,
                 state = state.value,
                 onGoBack = {
                     navController.navigateUp()
@@ -504,7 +504,7 @@ fun SetUpNavGraph(
             }
 
             SettingsScreen(
-                modifier = Modifier.padding(top = 20.dp),
+                modifier = Modifier,
                 state = state.value,
                 onEvent = viewModel::handleEvent,
                 onAction = viewModel::processAction

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -116,7 +117,7 @@ fun StructuredConversationScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            Column {
+            Column(modifier = Modifier.statusBarsPadding()) {
                 company?.let {
                     CompanyDetailHeader(
                         modifier = Modifier.fillMaxWidth(),

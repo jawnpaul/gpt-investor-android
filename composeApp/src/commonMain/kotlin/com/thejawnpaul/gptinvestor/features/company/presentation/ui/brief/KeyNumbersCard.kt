@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -21,23 +26,28 @@ import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefTone
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumber
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumberType
-import com.thejawnpaul.gptinvestor.key_dividend_yield
-import com.thejawnpaul.gptinvestor.key_pe_ratio
-import com.thejawnpaul.gptinvestor.key_revenue_growth
-import com.thejawnpaul.gptinvestor.market_cap
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
 import com.thejawnpaul.gptinvestor.section_key_numbers
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun KeyNumbersCard(keyNumbers: List<KeyNumber>, modifier: Modifier = Modifier) {
+    var selectedKeyNumber by remember { mutableStateOf<KeyNumber?>(null) }
+
     BriefCard(modifier = modifier) {
         BriefSectionTitle(text = stringResource(Res.string.section_key_numbers))
         Spacer(Modifier.height(12.dp))
         keyNumbers.forEachIndexed { index, item ->
-            KeyNumberRow(item = item)
+            KeyNumberRow(
+                item = item,
+                onClick = if (!item.insight.isNullOrBlank()) {
+                    { selectedKeyNumber = item }
+                } else {
+                    null
+                }
+            )
             if (index != keyNumbers.lastIndex) {
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 12.dp),
@@ -46,14 +56,22 @@ fun KeyNumbersCard(keyNumbers: List<KeyNumber>, modifier: Modifier = Modifier) {
             }
         }
     }
+
+    selectedKeyNumber?.let { keyNumber ->
+        GptInvestorBottomSheet(onDismiss = { selectedKeyNumber = null }) {
+            KeyNumberBottomSheet(keyNumber = keyNumber)
+        }
+    }
 }
 
 @Composable
-private fun KeyNumberRow(item: KeyNumber, modifier: Modifier = Modifier) {
+private fun KeyNumberRow(item: KeyNumber, onClick: (() -> Unit)?, modifier: Modifier = Modifier) {
     val secondary = LocalGPTInvestorColors.current.textColors.secondary50
 
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(0.3f)) {
@@ -74,13 +92,6 @@ private fun KeyNumberRow(item: KeyNumber, modifier: Modifier = Modifier) {
             }
         }
     }
-}
-
-private fun KeyNumberType.labelRes(): StringResource = when (this) {
-    KeyNumberType.MarketCap -> Res.string.market_cap
-    KeyNumberType.PeRatio -> Res.string.key_pe_ratio
-    KeyNumberType.RevenueGrowth -> Res.string.key_revenue_growth
-    KeyNumberType.DividendYield -> Res.string.key_dividend_yield
 }
 
 @PreviewLightDark

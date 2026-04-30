@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +32,12 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun SentimentBadge(sentiment: BriefSentiment, summary: String?, modifier: Modifier = Modifier) {
+fun SentimentBadge(
+    sentiment: BriefSentiment,
+    summary: String?,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
     val colors = LocalGPTInvestorColors.current
     val (bg, fg, label) = when (sentiment) {
         BriefSentiment.Bullish -> Triple(
@@ -55,6 +61,7 @@ fun SentimentBadge(sentiment: BriefSentiment, summary: String?, modifier: Modifi
         modifier = modifier
             .fillMaxWidth()
             .background(color = bg, shape = RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)

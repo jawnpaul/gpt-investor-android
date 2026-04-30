@@ -52,6 +52,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.Compan
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.KeyNumbersCard
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.RiskOpportunityCard
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.SentimentBadge
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.SentimentBottomSheet
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.WhatsHappeningCard
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailEvent
@@ -75,6 +76,7 @@ fun CompanyDetailScreen(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     var showSourcesSheet by remember { mutableStateOf(false) }
+    var showSentimentSheet by remember { mutableStateOf(false) }
 
     Box(modifier = modifier) {
         Scaffold(
@@ -123,8 +125,20 @@ fun CompanyDetailScreen(
                 contentPadding = innerPadding,
                 onEvent = onEvent,
                 onAction = onAction,
-                onShowSources = { showSourcesSheet = true }
+                onShowSources = { showSourcesSheet = true },
+                onShowSentiment = { showSentimentSheet = true }
             )
+        }
+
+        if (showSentimentSheet) {
+            state.brief?.sentiment?.let { sentiment ->
+                GptInvestorBottomSheet(onDismiss = { showSentimentSheet = false }) {
+                    SentimentBottomSheet(
+                        sentiment = sentiment,
+                        summary = state.brief.sentimentSummary
+                    )
+                }
+            }
         }
 
         if (showSourcesSheet) {
@@ -162,7 +176,8 @@ private fun CompanyDetailBody(
     contentPadding: PaddingValues,
     onEvent: (CompanyDetailEvent) -> Unit,
     onAction: (CompanyDetailAction) -> Unit,
-    onShowSources: () -> Unit
+    onShowSources: () -> Unit,
+    onShowSentiment: () -> Unit
 ) {
     val brief = state.brief
     val messages = (state.conversation as? StructuredConversation)
@@ -181,7 +196,8 @@ private fun CompanyDetailBody(
             contentPadding = contentPadding,
             onEvent = onEvent,
             onAction = onAction,
-            onShowSources = onShowSources
+            onShowSources = onShowSources,
+            onShowSentiment = onShowSentiment
         )
     }
 }
@@ -209,7 +225,8 @@ private fun CompanyDetailBriefContent(
     contentPadding: PaddingValues,
     onEvent: (CompanyDetailEvent) -> Unit,
     onAction: (CompanyDetailAction) -> Unit,
-    onShowSources: () -> Unit
+    onShowSources: () -> Unit,
+    onShowSentiment: () -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -224,7 +241,8 @@ private fun CompanyDetailBriefContent(
             item(key = "sentiment") {
                 SentimentBadge(
                     sentiment = sentiment,
-                    summary = brief.sentimentSummary
+                    summary = brief.sentimentSummary,
+                    onClick = onShowSentiment
                 )
             }
         }

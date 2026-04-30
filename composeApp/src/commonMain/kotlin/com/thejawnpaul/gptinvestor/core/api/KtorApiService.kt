@@ -7,6 +7,7 @@ import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpReq
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpResponse
 import com.thejawnpaul.gptinvestor.features.billing.data.remote.VerifyPurchaseRequest
 import com.thejawnpaul.gptinvestor.features.billing.data.remote.VerifyPurchaseResponse
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyBriefRemote
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRemote
@@ -185,6 +186,10 @@ class KtorApiService(@Provided private val client: HttpClient) {
 
     suspend fun guestLogin(request: GuestLoginRequest): KtorResponse<LoginResponse> = client.post("v1/guest-login") {
         setBody(request)
+    }.toKtorResponse()
+
+    suspend fun getCompanyBrief(ticker: String): KtorResponse<CompanyBriefRemote> = client.get("v1.1/brief") {
+        parameter("ticker", ticker)
     }.toKtorResponse()
 }
 

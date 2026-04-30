@@ -3,7 +3,10 @@ package com.thejawnpaul.gptinvestor.features.company.domain.model
 import com.thejawnpaul.gptinvestor.core.utility.relativeTime
 import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.core.utility.toReadable
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.BriefNewsItem
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.BriefOpportunityRisk
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.BriefSectionRemote
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyBriefRemote
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyNews
 import kotlin.math.roundToInt
@@ -151,4 +154,77 @@ private fun Float.formatSignedPercent(): String {
 private fun Float.formatPercent(): String {
     val rounded = (this * 100).roundToInt() / 100f
     return "$rounded%"
+}
+
+fun CompanyBriefRemote.toBrief(now: Long = Clock.System.now().epochSeconds): CompanyBrief = CompanyBrief(
+    ticker = ticker.orEmpty(),
+    name = companyName.orEmpty(),
+    logoUrl = logoUrl?.toHttpsUrl().orEmpty(),
+    price = currentPrice?.toFloat() ?: 0f,
+    change = percentageChange?.toFloat() ?: 0f,
+    sentiment = sentiment?.toSentiment(),
+    sentimentSummary = sentimentSummary,
+    summary = summary?.takeIf { it.isNotBlank() },
+    keyNumbers = buildBriefKeyNumbers(),
+    news = news.orEmpty().map { it.toBrief(now) },
+    risk = risk?.toSection(),
+    opportunity = opportunity?.toSection()
+)
+
+private fun CompanyBriefRemote.buildBriefKeyNumbers(): List<KeyNumber> = buildList {
+    marketCap?.takeIf { it > 0 }?.let {
+        add(
+            KeyNumber(
+                key = KeyNumberType.MarketCap,
+                value = "$" + it.toReadable(),
+                insight = marketCapInsight,
+                tone = marketCapInsightTone.toToneOrNeutral()
+            )
+        )
+    }
+    peRatio?.toFloat()?.let {
+        add(
+            KeyNumber(
+                key = KeyNumberType.PeRatio,
+                value = it.formatRatio(),
+                insight = peRatioInsight,
+                tone = peRatioInsightTone.toToneOrNeutral()
+            )
+        )
+    }
+    revenueGrowth?.toFloat()?.let {
+        add(
+            KeyNumber(
+                key = KeyNumberType.RevenueGrowth,
+                value = it.formatSignedPercent(),
+                insight = revenueGrowthInsight,
+                tone = revenueGrowthInsightTone?.toToneOrNeutral() ?: it.signedTone()
+            )
+        )
+    }
+    dividendYield?.toFloat()?.let {
+        add(
+            KeyNumber(
+                key = KeyNumberType.DividendYield,
+                value = it.formatPercent(),
+                insight = dividendYieldInsight,
+                tone = dividendYieldInsightTone.toToneOrNeutral()
+            )
+        )
+    }
+}
+
+private fun BriefNewsItem.toBrief(now: Long): NewsBrief = NewsBrief(
+    id = url.orEmpty(),
+    publisher = publisher.orEmpty(),
+    publishedRelative = relativeTime(epochSec = publishedAt ?: 0L, now = now),
+    title = headline.orEmpty(),
+    whatItMeans = impact?.takeIf { it.isNotBlank() },
+    tone = BriefTone.Neutral,
+    link = url.orEmpty()
+)
+
+private fun BriefOpportunityRisk.toSection(): BriefSection? {
+    val safeBody = body?.takeIf { it.isNotBlank() } ?: return null
+    return BriefSection(title = title?.takeIf { it.isNotBlank() }.orEmpty(), body = safeBody)
 }

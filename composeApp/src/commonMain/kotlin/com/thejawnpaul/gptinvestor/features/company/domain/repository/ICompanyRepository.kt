@@ -4,6 +4,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
+import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyBrief
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyFinancials
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SearchCompanyQuery
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
@@ -25,4 +26,6 @@ interface ICompanyRepository {
     suspend fun searchCompany(query: SearchCompanyQuery): Flow<Either<Failure, List<Company>>>
 
     fun searchCompaniesPaged(query: SearchCompanyQuery): Flow<androidx.paging.PagingData<Company>>
+
+    suspend fun getCompanyBrief(ticker: String): Flow<Either<Failure, CompanyBrief>>
 }

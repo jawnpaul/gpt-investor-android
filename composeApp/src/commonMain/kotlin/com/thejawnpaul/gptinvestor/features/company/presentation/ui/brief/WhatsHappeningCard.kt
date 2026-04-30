@@ -54,7 +54,7 @@ private fun NewsBriefItem(item: NewsBrief, onClick: () -> Unit, modifier: Modifi
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick, interactionSource = null, indication = null),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         val byline = if (item.publishedRelative.isBlank()) {

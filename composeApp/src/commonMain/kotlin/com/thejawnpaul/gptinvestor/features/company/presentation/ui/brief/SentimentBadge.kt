@@ -61,7 +61,7 @@ fun SentimentBadge(
         modifier = modifier
             .fillMaxWidth()
             .background(color = bg, shape = RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick, indication = null, interactionSource = null)
             .padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)

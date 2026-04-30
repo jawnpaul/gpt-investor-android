@@ -71,7 +71,15 @@ private fun KeyNumberRow(item: KeyNumber, onClick: (() -> Unit)?, modifier: Modi
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+            .then(
+                if (onClick !=
+                    null
+                ) {
+                    Modifier.clickable(onClick = onClick, interactionSource = null, indication = null)
+                } else {
+                    Modifier
+                }
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(0.3f)) {

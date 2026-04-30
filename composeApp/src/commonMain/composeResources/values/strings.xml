@@ -138,5 +138,21 @@
     <string name="log_in_with_google">Log in with Google</string>
     <string name="sign_up_with_google">Sign up with Google</string>
     <string name="you_re_in_guest_mode_click_here_to_sign_in">You're in guest mode, click here to sign in</string>
+    <string name="section_summary">Summary</string>
+    <string name="section_key_numbers">Key Numbers</string>
+    <string name="section_whats_happening">What's Happening</string>
+    <string name="section_risk_opportunity">Risk &amp; Opportunity</string>
+    <string name="key_pe_ratio">P/E ratio</string>
+    <string name="key_revenue_growth">Revenue growth</string>
+    <string name="key_dividend_yield">Dividend yield</string>
+    <string name="what_it_means">What it means</string>
+    <string name="the_risk">The Risk</string>
+    <string name="the_opportunity">The Opportunity</string>
+    <string name="sentiment_bullish">BULLISH</string>
+    <string name="sentiment_bearish">BEARISH</string>
+    <string name="sentiment_neutral">NEUTRAL</string>
+    <string name="today">today</string>
+    <string name="favorite">Favorite</string>
+    <string name="more">More</string>
 
 </resources>

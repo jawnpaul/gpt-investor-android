@@ -9,8 +9,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
-import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
-import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
+import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyFinancialsView
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCompanyView
@@ -39,7 +38,7 @@ import org.koin.core.annotation.Provided
 
 @KoinViewModel
 class CompanyViewModel(
-    private val getCompanyUseCase: GetCompanyUseCase,
+    private val getCompanyBriefUseCase: GetCompanyBriefUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val getInputPromptUseCase: GetInputPromptUseCase,
     private val modelsRepository: ModelsRepository,
@@ -88,7 +87,7 @@ class CompanyViewModel(
     private fun getCompany() {
         selectedCompanyTicker?.let { ticker ->
             _selectedCompany.update { it.copy(loading = true) }
-            getCompanyUseCase(ticker) {
+            getCompanyBriefUseCase(ticker) {
                 it.onFailure {
                     _selectedCompany.update { state ->
                         state.copy(
@@ -102,17 +101,18 @@ class CompanyViewModel(
                         view.copy(
                             conversation = CompanyDetailDefaultConversation(
                                 id = 0,
-                                response = company
+                                response = null
                             ),
                             loading = false,
-                            companyName = company.name ?: "",
+                            companyName = company.name,
                             header = CompanyHeaderPresentation(
                                 companyTicker = company.ticker,
-                                companyLogo = company.imageUrl?.toHttpsUrl() ?: "",
-                                price = company.price ?: 0.0f,
-                                percentageChange = company.change ?: 0.0f,
-                                companyName = company.name ?: ""
-                            )
+                                companyLogo = company.logoUrl,
+                                price = company.price,
+                                percentageChange = company.change,
+                                companyName = company.name
+                            ),
+                            brief = company
                         )
                     }
                 }

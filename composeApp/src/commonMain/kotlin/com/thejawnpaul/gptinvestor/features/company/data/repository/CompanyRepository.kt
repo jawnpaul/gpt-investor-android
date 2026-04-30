@@ -15,10 +15,12 @@ import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDet
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
+import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyBrief
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyFinancials
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SearchCompanyQuery
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.company.domain.model.TrendingCompany
+import com.thejawnpaul.gptinvestor.features.company.domain.model.toBrief
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -161,6 +163,20 @@ class CompanyRepository(
         } catch (e: Exception) {
             Logger.e(e.stackTraceToString())
             emit(Either.Left(Failure.DataError))
+        }
+    }
+
+    override suspend fun getCompanyBrief(ticker: String): Flow<Either<Failure, CompanyBrief>> = flow {
+        try {
+            val response = apiService.getCompanyBrief(ticker)
+            if (response.isSuccessful) {
+                response.body?.let { emit(Either.Right(it.toBrief())) }
+            } else {
+                emit(Either.Left(Failure.ServerError))
+            }
+        } catch (e: Exception) {
+            Logger.e(e.stackTraceToString())
+            emit(Either.Left(Failure.ServerError))
         }
     }
 

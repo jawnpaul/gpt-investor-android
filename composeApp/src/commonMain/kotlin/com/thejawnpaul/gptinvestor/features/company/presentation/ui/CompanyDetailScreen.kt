@@ -76,7 +76,7 @@ fun CompanyDetailScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     var showSourcesSheet by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = modifier) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
@@ -118,84 +118,13 @@ fun CompanyDetailScreen(
                 )
             }
         ) { innerPadding ->
-            val brief = state.brief
-            val messages = (state.conversation as? StructuredConversation)
-                ?.messageList
-                ?.filterIsInstance<GenAiTextMessage>()
-                .orEmpty()
-
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                if (state.loading && brief == null) {
-                    item(key = "skeleton") { CompanyBriefSkeleton(modifier = Modifier.fillMaxWidth()) }
-                } else if (brief != null) {
-                    item(key = "header") { CompanyBriefHeader(brief = brief) }
-
-                    brief.sentiment?.let { sentiment ->
-                        item(key = "sentiment") {
-                            SentimentBadge(
-                                sentiment = sentiment,
-                                summary = brief.sentimentSummary
-                            )
-                        }
-                    }
-
-                    brief.summary?.let { summary ->
-                        item(key = "summary") { BriefSummaryCard(summary = summary) }
-                    }
-
-                    if (brief.keyNumbers.isNotEmpty()) {
-                        item(key = "keyNumbers") { KeyNumbersCard(keyNumbers = brief.keyNumbers) }
-                    }
-
-                    if (brief.news.isNotEmpty()) {
-                        item(key = "news") {
-                            WhatsHappeningCard(
-                                news = brief.news,
-                                onNewsClick = { url ->
-                                    onAction(CompanyDetailAction.OnNavigateToWebView(url))
-                                }
-                            )
-                        }
-                    }
-
-                    if (brief.risk != null || brief.opportunity != null) {
-                        item(key = "riskOpportunity") {
-                            RiskOpportunityCard(
-                                risk = brief.risk,
-                                opportunity = brief.opportunity
-                            )
-                        }
-                    }
-                }
-
-                items(
-                    items = messages,
-                    key = { it.id },
-                    contentType = { "conversationMessage" }
-                ) { message ->
-                    SingleStructuredResponse(
-                        genAiMessage = message,
-                        text = state.genText,
-                        onClickNews = { url -> onAction(CompanyDetailAction.OnNavigateToWebView(url)) },
-                        onClickFeedback = { messageId, status, reason ->
-                            onEvent(CompanyDetailEvent.SendFeedback(messageId, status, reason))
-                        },
-                        onCopy = { onEvent(CompanyDetailEvent.CopyToClipboard(it)) },
-                        onClickSource = { showSourcesSheet = true },
-                        isGuest = state.isGuestSession
-                    )
-                }
-
-                item(key = "footerSpace") {
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
-            }
+            CompanyDetailBody(
+                state = state,
+                contentPadding = innerPadding,
+                onEvent = onEvent,
+                onAction = onAction,
+                onShowSources = { showSourcesSheet = true }
+            )
         }
 
         if (showSourcesSheet) {
@@ -223,6 +152,131 @@ fun CompanyDetailScreen(
                     }
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun CompanyDetailBody(
+    state: SingleCompanyView,
+    contentPadding: PaddingValues,
+    onEvent: (CompanyDetailEvent) -> Unit,
+    onAction: (CompanyDetailAction) -> Unit,
+    onShowSources: () -> Unit
+) {
+    val brief = state.brief
+    val messages = (state.conversation as? StructuredConversation)
+        ?.messageList
+        ?.filterIsInstance<GenAiTextMessage>()
+        .orEmpty()
+
+    if (state.loading && brief == null) {
+        CompanyDetailLoadingContent(contentPadding = contentPadding)
+    } else if (brief != null) {
+        CompanyDetailBriefContent(
+            brief = brief,
+            messages = messages,
+            genText = state.genText,
+            isGuestSession = state.isGuestSession,
+            contentPadding = contentPadding,
+            onEvent = onEvent,
+            onAction = onAction,
+            onShowSources = onShowSources
+        )
+    }
+}
+
+@Composable
+private fun CompanyDetailLoadingContent(contentPadding: PaddingValues) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(contentPadding),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        item(key = "skeleton") {
+            CompanyBriefSkeleton(modifier = Modifier.fillMaxWidth())
+        }
+    }
+}
+
+@Composable
+private fun CompanyDetailBriefContent(
+    brief: CompanyBrief,
+    messages: List<GenAiTextMessage>,
+    genText: String,
+    isGuestSession: Boolean,
+    contentPadding: PaddingValues,
+    onEvent: (CompanyDetailEvent) -> Unit,
+    onAction: (CompanyDetailAction) -> Unit,
+    onShowSources: () -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(contentPadding),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item(key = "header") { CompanyBriefHeader(brief = brief) }
+
+        brief.sentiment?.let { sentiment ->
+            item(key = "sentiment") {
+                SentimentBadge(
+                    sentiment = sentiment,
+                    summary = brief.sentimentSummary
+                )
+            }
+        }
+
+        brief.summary?.let { summary ->
+            item(key = "summary") { BriefSummaryCard(summary = summary) }
+        }
+
+        if (brief.keyNumbers.isNotEmpty()) {
+            item(key = "keyNumbers") { KeyNumbersCard(keyNumbers = brief.keyNumbers) }
+        }
+
+        if (brief.news.isNotEmpty()) {
+            item(key = "news") {
+                WhatsHappeningCard(
+                    news = brief.news,
+                    onNewsClick = { url ->
+                        onAction(CompanyDetailAction.OnNavigateToWebView(url))
+                    }
+                )
+            }
+        }
+
+        if (brief.risk != null || brief.opportunity != null) {
+            item(key = "riskOpportunity") {
+                RiskOpportunityCard(
+                    risk = brief.risk,
+                    opportunity = brief.opportunity
+                )
+            }
+        }
+
+        items(
+            items = messages,
+            key = { it.id },
+            contentType = { "conversationMessage" }
+        ) { message ->
+            SingleStructuredResponse(
+                genAiMessage = message,
+                text = genText,
+                onClickNews = { url -> onAction(CompanyDetailAction.OnNavigateToWebView(url)) },
+                onClickFeedback = { messageId, status, reason ->
+                    onEvent(CompanyDetailEvent.SendFeedback(messageId, status, reason))
+                },
+                onCopy = { onEvent(CompanyDetailEvent.CopyToClipboard(it)) },
+                onClickSource = onShowSources,
+                isGuest = isGuestSession
+            )
+        }
+
+        item(key = "footerSpace") {
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

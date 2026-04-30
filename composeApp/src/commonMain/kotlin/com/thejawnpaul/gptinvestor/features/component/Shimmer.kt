@@ -35,7 +35,7 @@ private class ShimmerNode(var colorOne: Color, var colorTwo: Color) :
             progress.animateTo(
                 targetValue = 1f,
                 animationSpec = infiniteRepeatable(
-                    animation = tween(1000)
+                    animation = tween(2000)
                 )
             )
         }

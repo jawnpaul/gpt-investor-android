@@ -100,7 +100,7 @@ private fun KeyNumbersCardPreview() {
                     KeyNumber(
                         key = KeyNumberType.PeRatio,
                         value = "29.4",
-                        insight = "Fairly valued",
+                        insight = "The price looks very expensive compared with what the company earns",
                         tone = BriefTone.Neutral
                     ),
                     KeyNumber(

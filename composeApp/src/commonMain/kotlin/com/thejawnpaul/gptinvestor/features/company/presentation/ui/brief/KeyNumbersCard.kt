@@ -33,7 +33,11 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun KeyNumbersCard(keyNumbers: List<KeyNumber>, modifier: Modifier = Modifier) {
+fun KeyNumbersCard(
+    keyNumbers: List<KeyNumber>,
+    modifier: Modifier = Modifier,
+    onKeyNumberExpand: (KeyNumberType) -> Unit = {}
+) {
     var selectedKeyNumber by remember { mutableStateOf<KeyNumber?>(null) }
 
     BriefCard(modifier = modifier) {
@@ -43,7 +47,10 @@ fun KeyNumbersCard(keyNumbers: List<KeyNumber>, modifier: Modifier = Modifier) {
             KeyNumberRow(
                 item = item,
                 onClick = if (!item.insight.isNullOrBlank()) {
-                    { selectedKeyNumber = item }
+                    {
+                        selectedKeyNumber = item
+                        onKeyNumberExpand(item.key)
+                    }
                 } else {
                     null
                 }

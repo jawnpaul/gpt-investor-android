@@ -126,7 +126,10 @@ fun CompanyDetailScreen(
                 onEvent = onEvent,
                 onAction = onAction,
                 onShowSources = { showSourcesSheet = true },
-                onShowSentiment = { showSentimentSheet = true }
+                onShowSentiment = { sentiment ->
+                    showSentimentSheet = true
+                    onEvent(CompanyDetailEvent.BriefSentimentViewed(sentiment))
+                }
             )
         }
 
@@ -177,7 +180,7 @@ private fun CompanyDetailBody(
     onEvent: (CompanyDetailEvent) -> Unit,
     onAction: (CompanyDetailAction) -> Unit,
     onShowSources: () -> Unit,
-    onShowSentiment: () -> Unit
+    onShowSentiment: (BriefSentiment) -> Unit
 ) {
     val brief = state.brief
     val messages = (state.conversation as? StructuredConversation)
@@ -226,7 +229,7 @@ private fun CompanyDetailBriefContent(
     onEvent: (CompanyDetailEvent) -> Unit,
     onAction: (CompanyDetailAction) -> Unit,
     onShowSources: () -> Unit,
-    onShowSentiment: () -> Unit
+    onShowSentiment: (BriefSentiment) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -242,7 +245,7 @@ private fun CompanyDetailBriefContent(
                 SentimentBadge(
                     sentiment = sentiment,
                     summary = brief.sentimentSummary,
-                    onClick = onShowSentiment
+                    onClick = { onShowSentiment(sentiment) }
                 )
             }
         }
@@ -252,7 +255,12 @@ private fun CompanyDetailBriefContent(
         }
 
         if (brief.keyNumbers.isNotEmpty()) {
-            item(key = "keyNumbers") { KeyNumbersCard(keyNumbers = brief.keyNumbers) }
+            item(key = "keyNumbers") {
+                KeyNumbersCard(
+                    keyNumbers = brief.keyNumbers,
+                    onKeyNumberExpand = { onEvent(CompanyDetailEvent.BriefKeyNumberExpanded(it)) }
+                )
+            }
         }
 
         if (brief.news.isNotEmpty()) {

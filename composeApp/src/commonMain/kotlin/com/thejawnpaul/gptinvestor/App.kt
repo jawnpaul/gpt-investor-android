@@ -29,6 +29,7 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
     val themePreference by preferences.themePreference.collectAsState(initial = "System")
     val isUserSignedIn by preferences.isUserLoggedIn.collectAsState(initial = false)
     val isGuestSignedIn by preferences.isGuestLoggedIn.collectAsState(initial = false)
+    val hasCompletedOnboarding by preferences.hasCompletedOnboarding.collectAsState(initial = null)
 
     var showSplash by remember { mutableStateOf(true) }
     var isNavGraphReady by remember { mutableStateOf(false) }
@@ -71,11 +72,12 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
                     showSplash = false
                 }
             )
-        } else {
+        } else if (hasCompletedOnboarding != null) {
             SetUpNavGraph(
                 navController = navController,
                 isUserSignedIn = isUserSignedIn == true,
-                isGuestSignedIn = isGuestSignedIn == true
+                isGuestSignedIn = isGuestSignedIn == true,
+                hasCompletedOnboarding = hasCompletedOnboarding == true
             )
 
             LaunchedEffect(Unit) {

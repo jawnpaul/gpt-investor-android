@@ -42,6 +42,9 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.Histo
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.OnboardingScreen
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.viewmodel.OnboardingAction
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.viewmodel.OnboardingViewModel
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsAction
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsScreen
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsViewModel
@@ -66,25 +69,50 @@ fun SetUpNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier,
     isUserSignedIn: Boolean = false,
-    isGuestSignedIn: Boolean = false
+    isGuestSignedIn: Boolean = false,
+    hasCompletedOnboarding: Boolean = false
 ) {
     val platformContext: PlatformContext = koinInject()
     val platformActions: PlatformActions = koinInject()
 
-    val startDestination: String =
-        if (isUserSignedIn ||
-            isGuestSignedIn
-        ) {
-            Screen.HomeTabScreen.route
-        } else {
-            Screen.DefaultAuthenticationScreen.route
-        }
+    val startDestination: String = when {
+        !isUserSignedIn && !isGuestSignedIn -> Screen.DefaultAuthenticationScreen.route
+        !hasCompletedOnboarding -> Screen.OnboardingScreen.route
+        else -> Screen.HomeTabScreen.route
+    }
 
     NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier
     ) {
+        composable(Screen.OnboardingScreen.route) {
+            val viewModel = koinViewModel<OnboardingViewModel>()
+            val state = viewModel.uiState.collectAsState()
+            val scope = rememberCoroutineScope()
+            LaunchedEffect(Unit) {
+                viewModel.actions.onEach { action ->
+                    when (action) {
+                        OnboardingAction.NavigateToHome -> {
+                            navController.navigate(Screen.HomeTabScreen.route) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    }
+                }.launchIn(scope)
+            }
+            OnboardingScreen(
+                state = state.value,
+                searchResults = viewModel.searchResults,
+                onNextScreen = viewModel::onNextScreen,
+                onSkip = viewModel::onSkip,
+                onSelectStock = viewModel::onStockSelected,
+                onSearchQueryChange = viewModel::onSearchQueryChanged,
+                onBackToStockSelection = viewModel::onBackToStockSelection,
+                onFinish = viewModel::onFinish
+            )
+        }
+
         composable(Screen.HomeTabScreen.route) {
             val homeViewModel = koinViewModel<HomeViewModel>()
             val state = homeViewModel.uiState.collectAsState()
@@ -624,7 +652,12 @@ fun SetUpNavGraph(
                 viewModel.actions.onEach { action ->
                     when (action) {
                         DefaultAuthenticationAction.OnGoToHome -> {
-                            navController.navigate(Screen.HomeTabScreen.route) {
+                            val destination = if (hasCompletedOnboarding) {
+                                Screen.HomeTabScreen.route
+                            } else {
+                                Screen.OnboardingScreen.route
+                            }
+                            navController.navigate(destination) {
                                 popUpTo(Screen.DefaultAuthenticationScreen.route) {
                                     inclusive = true
                                 }
@@ -677,7 +710,12 @@ fun SetUpNavGraph(
                         }
 
                         LoginUiAction.OnGoToHome -> {
-                            navController.navigate(route = Screen.HomeTabScreen.route) {
+                            val destination = if (hasCompletedOnboarding) {
+                                Screen.HomeTabScreen.route
+                            } else {
+                                Screen.OnboardingScreen.route
+                            }
+                            navController.navigate(route = destination) {
                                 popUpTo(Screen.LoginScreen.route) { inclusive = true }
                             }
                         }
@@ -702,7 +740,12 @@ fun SetUpNavGraph(
                         }
 
                         SignUpUiAction.OnGoToHome -> {
-                            navController.navigate(route = Screen.HomeTabScreen.route) {
+                            val destination = if (hasCompletedOnboarding) {
+                                Screen.HomeTabScreen.route
+                            } else {
+                                Screen.OnboardingScreen.route
+                            }
+                            navController.navigate(route = destination) {
                                 popUpTo(Screen.SignUpScreen.route) {
                                     inclusive = true
                                 }
@@ -730,7 +773,12 @@ fun SetUpNavGraph(
     LaunchedEffect(isUserSignedIn, isGuestSignedIn) {
         if (isUserSignedIn || isGuestSignedIn) {
             if (navController.currentDestination?.route == Screen.DefaultAuthenticationScreen.route) {
-                navController.navigate(Screen.HomeTabScreen.route) {
+                val destination = if (hasCompletedOnboarding) {
+                    Screen.HomeTabScreen.route
+                } else {
+                    Screen.OnboardingScreen.route
+                }
+                navController.navigate(destination) {
                     popUpTo(Screen.DefaultAuthenticationScreen.route) { inclusive = true }
                 }
             }

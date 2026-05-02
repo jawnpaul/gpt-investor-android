@@ -8,6 +8,7 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.features.company.data.local.dao.CompanyDao
 import com.thejawnpaul.gptinvestor.features.company.data.paging.CompanyPagingSource
@@ -22,7 +23,9 @@ import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.company.domain.model.TrendingCompany
 import com.thejawnpaul.gptinvestor.features.company.domain.model.toBrief
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
+import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
@@ -31,7 +34,8 @@ import org.koin.core.annotation.Singleton
 class CompanyRepository(
     private val apiService: KtorApiService,
     private val companyDao: CompanyDao,
-    @Provided private val analyticsLogger: AnalyticsLogger
+    @Provided private val analyticsLogger: AnalyticsLogger,
+    private val appPreferences: AppPreferences
 ) : ICompanyRepository {
 
     override suspend fun getAllSector(): Flow<Either<Failure, List<SectorInput>>> = flow {
@@ -167,15 +171,50 @@ class CompanyRepository(
     }
 
     override suspend fun getCompanyBrief(ticker: String): Flow<Either<Failure, CompanyBrief>> = flow {
+        val isGuest = appPreferences.isGuestLoggedIn.first() == true
+        val userType = if (isGuest) "guest" else "logged_in"
+
+        analyticsLogger.logEvent(
+            eventName = "brief_started",
+            params = mapOf("ticker" to ticker, "user_type" to userType)
+        )
+
+        val startMs = Clock.System.now().toEpochMilliseconds()
         try {
             val response = apiService.getCompanyBrief(ticker)
             if (response.isSuccessful) {
-                response.body?.let { emit(Either.Right(it.toBrief())) }
+                response.body?.let {
+                    analyticsLogger.logEvent(
+                        eventName = "brief_completed",
+                        params = mapOf(
+                            "ticker" to ticker,
+                            "duration_ms" to (Clock.System.now().toEpochMilliseconds() - startMs),
+                            "user_type" to userType
+                        )
+                    )
+                    emit(Either.Right(it.toBrief()))
+                }
             } else {
+                analyticsLogger.logEvent(
+                    eventName = "brief_failed",
+                    params = mapOf(
+                        "ticker" to ticker,
+                        "error_type" to response.code,
+                        "user_type" to userType
+                    )
+                )
                 emit(Either.Left(Failure.ServerError))
             }
         } catch (e: Exception) {
             Logger.e(e.stackTraceToString())
+            analyticsLogger.logEvent(
+                eventName = "brief_failed",
+                params = mapOf(
+                    "ticker" to ticker,
+                    "error_type" to e.message.toString(),
+                    "user_type" to userType
+                )
+            )
             emit(Either.Left(Failure.ServerError))
         }
     }

@@ -44,6 +44,7 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSection
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSentiment
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefTone
@@ -64,13 +65,33 @@ import com.thejawnpaul.gptinvestor.features.discover.SearchBarCustom
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.BriefView
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.OnboardingUiState
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.SuggestedStock
+import com.thejawnpaul.gptinvestor.gpt_investor
 import com.thejawnpaul.gptinvestor.ic_logo
 import com.thejawnpaul.gptinvestor.mesh_background
+import com.thejawnpaul.gptinvestor.onboarding_body_value_prop
+import com.thejawnpaul.gptinvestor.onboarding_bullet_follow_up
+import com.thejawnpaul.gptinvestor.onboarding_bullet_plain_english
+import com.thejawnpaul.gptinvestor.onboarding_bullet_real_time
+import com.thejawnpaul.gptinvestor.onboarding_cta_get_started
+import com.thejawnpaul.gptinvestor.onboarding_cta_go_to_app
+import com.thejawnpaul.gptinvestor.onboarding_cta_start_exploring
+import com.thejawnpaul.gptinvestor.onboarding_cta_try_it_now
+import com.thejawnpaul.gptinvestor.onboarding_error_message
+import com.thejawnpaul.gptinvestor.onboarding_headline_how_it_works
+import com.thejawnpaul.gptinvestor.onboarding_headline_stock_selection
+import com.thejawnpaul.gptinvestor.onboarding_headline_value_prop
+import com.thejawnpaul.gptinvestor.onboarding_loading_headline
+import com.thejawnpaul.gptinvestor.onboarding_search_placeholder
+import com.thejawnpaul.gptinvestor.onboarding_skip_for_now
+import com.thejawnpaul.gptinvestor.onboarding_subtext_stock_selection
+import com.thejawnpaul.gptinvestor.onboarding_success_body
+import com.thejawnpaul.gptinvestor.onboarding_success_headline
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.linkMedium
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun OnboardingScreen(
@@ -141,14 +162,14 @@ private fun ValuePropositionScreen(onStart: () -> Unit, onSkip: () -> Unit, modi
 
                 Image(
                     painter = painterResource(Res.drawable.ic_logo),
-                    contentDescription = "GPT Investor",
+                    contentDescription = stringResource(Res.string.gpt_investor),
                     modifier = Modifier.size(72.dp)
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = "Feel confident about every stock decision",
+                    text = stringResource(Res.string.onboarding_headline_value_prop),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
@@ -157,8 +178,7 @@ private fun ValuePropositionScreen(onStart: () -> Unit, onSkip: () -> Unit, modi
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "GPT Investor turns complex financial data into plain English " +
-                        "insights, so you always know what's going on with the stocks you care about.",
+                    text = stringResource(Res.string.onboarding_body_value_prop),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -174,7 +194,7 @@ private fun ValuePropositionScreen(onStart: () -> Unit, onSkip: () -> Unit, modi
                     onClick = onStart
                 ) {
                     Text(
-                        text = "Get Started →",
+                        text = stringResource(Res.string.onboarding_cta_get_started),
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -187,7 +207,7 @@ private fun ValuePropositionScreen(onStart: () -> Unit, onSkip: () -> Unit, modi
                         interactionSource = null,
                         onClick = onSkip
                     ),
-                    text = "Skip for now",
+                    text = stringResource(Res.string.onboarding_skip_for_now),
                     textDecoration = TextDecoration.Underline,
                     style = MaterialTheme.typography.linkMedium
                 )
@@ -215,7 +235,7 @@ private fun HowItWorksScreen(onTryItNow: () -> Unit, onSkip: () -> Unit, modifie
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "Ask about any stock.\nGet a clear breakdown in seconds.",
+                text = stringResource(Res.string.onboarding_headline_how_it_works),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
@@ -227,9 +247,9 @@ private fun HowItWorksScreen(onTryItNow: () -> Unit, onSkip: () -> Unit, modifie
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                BulletRow("Plain English — no jargon, no confusion")
-                BulletRow("Real-time data — always up to date")
-                BulletRow("Follow-up questions — dig deeper anytime")
+                BulletRow(stringResource(Res.string.onboarding_bullet_plain_english))
+                BulletRow(stringResource(Res.string.onboarding_bullet_real_time))
+                BulletRow(stringResource(Res.string.onboarding_bullet_follow_up))
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -242,7 +262,7 @@ private fun HowItWorksScreen(onTryItNow: () -> Unit, onSkip: () -> Unit, modifie
                 onClick = onTryItNow
             ) {
                 Text(
-                    text = "Try it now →",
+                    text = stringResource(Res.string.onboarding_cta_try_it_now),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -255,7 +275,7 @@ private fun HowItWorksScreen(onTryItNow: () -> Unit, onSkip: () -> Unit, modifie
                     interactionSource = null,
                     onClick = onSkip
                 ),
-                text = "Skip for now",
+                text = stringResource(Res.string.onboarding_skip_for_now),
                 textDecoration = TextDecoration.Underline,
                 style = MaterialTheme.typography.linkMedium
             )
@@ -320,7 +340,7 @@ private fun StockSelectionScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Let's analyse your first stock.",
+                text = stringResource(Res.string.onboarding_headline_stock_selection),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -328,7 +348,7 @@ private fun StockSelectionScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Pick one you've heard of:",
+                text = stringResource(Res.string.onboarding_subtext_stock_selection),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
@@ -346,7 +366,7 @@ private fun StockSelectionScreen(
 
             SearchBarCustom(
                 query = state.searchQuery,
-                placeHolder = "Or search for a stock...",
+                placeHolder = stringResource(Res.string.onboarding_search_placeholder),
                 onClose = { onSearchQueryChange("") },
                 onQueryChange = onSearchQueryChange,
                 onSearch = {},
@@ -472,7 +492,7 @@ private fun LiveBriefScreen(
             IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
+                    contentDescription = stringResource(Res.string.back)
                 )
             }
         }
@@ -488,7 +508,7 @@ private fun LiveBriefScreen(
                 ) {
                     item {
                         Text(
-                            text = "Analysing $companyName for you…",
+                            text = stringResource(Res.string.onboarding_loading_headline, companyName),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -508,7 +528,7 @@ private fun LiveBriefScreen(
                 ) {
                     item {
                         Text(
-                            text = "Here's your $companyName brief",
+                            text = stringResource(Res.string.onboarding_success_headline, companyName),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -559,8 +579,7 @@ private fun LiveBriefScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "This is what GPT Investor does for you, " +
-                                    "every time you want to analyse a stock.",
+                                text = stringResource(Res.string.onboarding_success_body),
                                 style = MaterialTheme.typography.bodyMedium,
                                 textAlign = TextAlign.Center,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -576,7 +595,7 @@ private fun LiveBriefScreen(
                                 onClick = onFinish
                             ) {
                                 Text(
-                                    text = "Start Exploring →",
+                                    text = stringResource(Res.string.onboarding_cta_start_exploring),
                                     style = MaterialTheme.typography.titleMedium
                                 )
                             }
@@ -595,7 +614,7 @@ private fun LiveBriefScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Something went wrong. Let's take you to the app.",
+                        text = stringResource(Res.string.onboarding_error_message),
                         style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Center
                     )
@@ -610,7 +629,7 @@ private fun LiveBriefScreen(
                         onClick = onFinish
                     ) {
                         Text(
-                            text = "Go to GPT Investor",
+                            text = stringResource(Res.string.onboarding_cta_go_to_app),
                             style = MaterialTheme.typography.titleMedium
                         )
                     }

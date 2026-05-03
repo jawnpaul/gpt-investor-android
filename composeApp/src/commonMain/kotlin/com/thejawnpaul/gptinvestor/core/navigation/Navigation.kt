@@ -15,6 +15,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
+import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DefaultAuthenticationAction
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DefaultAuthenticationScreen
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DefaultAuthenticationViewModel
@@ -59,6 +60,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewMode
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.AllTopPicksScreen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SavedTopPicksScreen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPickDetailScreen
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.compose.koinInject
@@ -74,12 +76,9 @@ fun SetUpNavGraph(
 ) {
     val platformContext: PlatformContext = koinInject()
     val platformActions: PlatformActions = koinInject()
+    val appPreferences: AppPreferences = koinInject()
 
-    val startDestination: String = when {
-        !isUserSignedIn && !isGuestSignedIn -> Screen.DefaultAuthenticationScreen.route
-        !hasCompletedOnboarding -> Screen.OnboardingScreen.route
-        else -> Screen.HomeTabScreen.route
-    }
+    val startDestination = initialDestination(isUserSignedIn, isGuestSignedIn, hasCompletedOnboarding)
 
     NavHost(
         navController = navController,
@@ -652,16 +651,7 @@ fun SetUpNavGraph(
                 viewModel.actions.onEach { action ->
                     when (action) {
                         DefaultAuthenticationAction.OnGoToHome -> {
-                            val destination = if (hasCompletedOnboarding) {
-                                Screen.HomeTabScreen.route
-                            } else {
-                                Screen.OnboardingScreen.route
-                            }
-                            navController.navigate(destination) {
-                                popUpTo(Screen.DefaultAuthenticationScreen.route) {
-                                    inclusive = true
-                                }
-                            }
+                            navigateToHome(navController, appPreferences, Screen.DefaultAuthenticationScreen.route)
                         }
 
                         DefaultAuthenticationAction.OnGoToSignUp -> {
@@ -710,14 +700,7 @@ fun SetUpNavGraph(
                         }
 
                         LoginUiAction.OnGoToHome -> {
-                            val destination = if (hasCompletedOnboarding) {
-                                Screen.HomeTabScreen.route
-                            } else {
-                                Screen.OnboardingScreen.route
-                            }
-                            navController.navigate(route = destination) {
-                                popUpTo(Screen.LoginScreen.route) { inclusive = true }
-                            }
+                            navigateToHome(navController, appPreferences, Screen.LoginScreen.route)
                         }
                     }
                 }.launchIn(scope)
@@ -740,16 +723,7 @@ fun SetUpNavGraph(
                         }
 
                         SignUpUiAction.OnGoToHome -> {
-                            val destination = if (hasCompletedOnboarding) {
-                                Screen.HomeTabScreen.route
-                            } else {
-                                Screen.OnboardingScreen.route
-                            }
-                            navController.navigate(route = destination) {
-                                popUpTo(Screen.SignUpScreen.route) {
-                                    inclusive = true
-                                }
-                            }
+                            navigateToHome(navController, appPreferences, Screen.SignUpScreen.route)
                         }
 
                         SignUpUiAction.OnGoToLogin -> {
@@ -773,19 +747,37 @@ fun SetUpNavGraph(
     LaunchedEffect(isUserSignedIn, isGuestSignedIn) {
         if (isUserSignedIn || isGuestSignedIn) {
             if (navController.currentDestination?.route == Screen.DefaultAuthenticationScreen.route) {
-                val destination = if (hasCompletedOnboarding) {
-                    Screen.HomeTabScreen.route
-                } else {
-                    Screen.OnboardingScreen.route
-                }
-                navController.navigate(destination) {
-                    popUpTo(Screen.DefaultAuthenticationScreen.route) { inclusive = true }
-                }
+                navigateToHome(navController, appPreferences, Screen.DefaultAuthenticationScreen.route)
             }
         } else {
             navController.navigate(Screen.DefaultAuthenticationScreen.route) {
                 popUpTo(0) { inclusive = true }
             }
         }
+    }
+}
+
+private fun initialDestination(
+    isUserSignedIn: Boolean,
+    isGuestSignedIn: Boolean,
+    hasCompletedOnboarding: Boolean
+): String = when {
+    !isUserSignedIn && !isGuestSignedIn -> Screen.DefaultAuthenticationScreen.route
+    !hasCompletedOnboarding -> Screen.OnboardingScreen.route
+    else -> Screen.HomeTabScreen.route
+}
+
+private suspend fun navigateToHome(
+    navController: NavHostController,
+    appPreferences: AppPreferences,
+    popUpToRoute: String
+) {
+    val destination = if (appPreferences.hasCompletedOnboarding.first() == true) {
+        Screen.HomeTabScreen.route
+    } else {
+        Screen.OnboardingScreen.route
+    }
+    navController.navigate(destination) {
+        popUpTo(popUpToRoute) { inclusive = true }
     }
 }

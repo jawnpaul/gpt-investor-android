@@ -72,12 +72,12 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
                     showSplash = false
                 }
             )
-        } else if (hasCompletedOnboarding != null) {
+        } else {
             SetUpNavGraph(
                 navController = navController,
                 isUserSignedIn = isUserSignedIn == true,
                 isGuestSignedIn = isGuestSignedIn == true,
-                hasCompletedOnboarding = hasCompletedOnboarding == true
+                hasCompletedOnboarding = hasCompletedOnboarding != false
             )
 
             LaunchedEffect(Unit) {

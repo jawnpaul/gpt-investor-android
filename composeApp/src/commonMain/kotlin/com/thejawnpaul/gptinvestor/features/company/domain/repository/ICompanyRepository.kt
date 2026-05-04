@@ -30,4 +30,6 @@ interface ICompanyRepository {
     suspend fun searchCompaniesFromNetwork(query: String): Flow<Either<Failure, List<Company>>>
 
     suspend fun getCompanyBrief(ticker: String): Flow<Either<Failure, CompanyBrief>>
+
+    suspend fun getCompanyLogos(tickers: List<String>): Either<Failure, Map<String, String>>
 }

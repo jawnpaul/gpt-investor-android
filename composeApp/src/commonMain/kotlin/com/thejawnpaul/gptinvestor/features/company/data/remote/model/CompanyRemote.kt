@@ -94,6 +94,15 @@ data class BriefSectionRemote(
 data class CompanyPriceRequest(@SerialName("tickers") val tickers: List<String>)
 
 @Serializable
+data class CompanyLogosRequest(@SerialName("tickers") val tickers: List<String>)
+
+@Serializable
+data class CompanyLogoRemote(
+    @SerialName("ticker") val ticker: String,
+    @SerialName("logo_url") val logoUrl: String? = null
+)
+
+@Serializable
 data class CompanyPriceResponse(
     @SerialName("change") val change: Float,
     @SerialName("price") val price: Float,

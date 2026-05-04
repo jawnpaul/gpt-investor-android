@@ -164,24 +164,16 @@ class OnboardingViewModel(
         }
     }
 
-    private fun loadSuggestedStockLogos() {
+    private suspend fun loadSuggestedStockLogos() {
         val tickers = listOf("AAPL", "TSLA", "NVDA", "MSFT", "AMZN", "GOOGL")
-        tickers.forEach { ticker ->
-            viewModelScope.launch {
-                companyRepository.searchCompaniesFromNetwork(ticker)
-                    .first()
-                    .onSuccess { companies ->
-                        val match = companies.firstOrNull { it.ticker == ticker }
-                        if (match != null) {
-                            _uiState.update { state ->
-                                state.copy(
-                                    suggestedStocks = state.suggestedStocks.map { stock ->
-                                        if (stock.ticker == ticker) stock.copy(logoUrl = match.logo) else stock
-                                    }
-                                )
-                            }
-                        }
+        companyRepository.getCompanyLogos(tickers).onSuccess { logos ->
+            _uiState.update { state ->
+                state.copy(
+                    suggestedStocks = state.suggestedStocks.map { stock ->
+                        val logoUrl = logos[stock.ticker]
+                        if (logoUrl != null) stock.copy(logoUrl = logoUrl) else stock
                     }
+                )
             }
         }
     }

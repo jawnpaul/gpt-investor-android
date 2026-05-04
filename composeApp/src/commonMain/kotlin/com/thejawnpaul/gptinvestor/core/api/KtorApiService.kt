@@ -12,6 +12,8 @@ import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDet
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRemote
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyLogoRemote
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyLogosRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyPriceRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyPriceResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyRemote
@@ -191,6 +193,11 @@ class KtorApiService(@Provided private val client: HttpClient) {
     suspend fun getCompanyBrief(ticker: String): KtorResponse<CompanyBriefRemote> = client.get("v1.1/brief") {
         parameter("ticker", ticker)
     }.toKtorResponse()
+
+    suspend fun getCompanyLogos(request: CompanyLogosRequest): KtorResponse<List<CompanyLogoRemote>> =
+        client.post("v1/company-logos") {
+            setBody(request)
+        }.toKtorResponse()
 }
 
 class KtorResponse<T>(val isSuccessful: Boolean, val body: T?, val errorBody: String?, val code: Int)

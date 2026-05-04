@@ -16,6 +16,7 @@ import com.thejawnpaul.gptinvestor.features.company.data.paging.CompanyPagingSou
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyLogosRequest
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyBrief
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyFinancials
@@ -250,6 +251,15 @@ class CompanyRepository(
             emit(Either.Right(companies))
         } else {
             emit(Either.Left(Failure.ServerError))
+        }
+    }
+
+    override suspend fun getCompanyLogos(tickers: List<String>): Either<Failure, Map<String, String>> {
+        val response = apiService.getCompanyLogos(CompanyLogosRequest(tickers))
+        return if (response.isSuccessful) {
+            Either.Right(response.body?.associate { it.ticker to (it.logoUrl?.toHttpsUrl() ?: "") } ?: emptyMap())
+        } else {
+            Either.Left(Failure.ServerError)
         }
     }
 }

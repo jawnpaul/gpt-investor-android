@@ -10,6 +10,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
+import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.company.data.repository.CompanyRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SearchCompanyQuery
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
@@ -38,6 +39,7 @@ class OnboardingViewModel(
     private val getCompanyBriefUseCase: GetCompanyBriefUseCase,
     private val companyRepository: CompanyRepository,
     private val appPreferences: AppPreferences,
+    private val authRepository: AuthenticationRepository,
     @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
@@ -65,7 +67,10 @@ class OnboardingViewModel(
 
     init {
         logOnboardingStarted()
-        loadSuggestedStockLogos()
+        viewModelScope.launch {
+            authRepository.acquireGuestToken()
+            loadSuggestedStockLogos()
+        }
     }
 
     fun onNextScreen() {
@@ -163,7 +168,7 @@ class OnboardingViewModel(
         val tickers = listOf("AAPL", "TSLA", "NVDA", "MSFT", "AMZN", "GOOGL")
         tickers.forEach { ticker ->
             viewModelScope.launch {
-                companyRepository.searchCompany(SearchCompanyQuery(query = ticker))
+                companyRepository.searchCompaniesFromNetwork(ticker)
                     .first()
                     .onSuccess { companies ->
                         val match = companies.firstOrNull { it.ticker == ticker }

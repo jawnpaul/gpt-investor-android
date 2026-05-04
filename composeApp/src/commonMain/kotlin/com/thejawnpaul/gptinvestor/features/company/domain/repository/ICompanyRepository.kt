@@ -27,5 +27,7 @@ interface ICompanyRepository {
 
     fun searchCompaniesPaged(query: SearchCompanyQuery): Flow<androidx.paging.PagingData<Company>>
 
+    suspend fun searchCompaniesFromNetwork(query: String): Flow<Either<Failure, List<Company>>>
+
     suspend fun getCompanyBrief(ticker: String): Flow<Either<Failure, CompanyBrief>>
 }

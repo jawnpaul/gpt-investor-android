@@ -216,6 +216,21 @@ class AuthenticationRepositoryImpl(
     } catch (e: Exception) {
         Result.failure(e)
     }
+
+    override suspend fun acquireGuestToken(): Result<Unit> = try {
+        val id = Firebase.installations.getId()
+        val response = apiService.guestLogin(request = GuestLoginRequest(id = id))
+        if (response.isSuccessful) {
+            response.body?.let { loginResponse ->
+                tokenStorage.saveAccessToken(loginResponse.accessToken ?: "")
+                Result.success(Unit)
+            } ?: Result.failure(Exception("Empty response"))
+        } else {
+            Result.failure(Exception(response.errorBody ?: "Failed to acquire token"))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
 }
 
 expect suspend fun signOutPlatform()

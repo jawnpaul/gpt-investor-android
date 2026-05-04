@@ -11,6 +11,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.features.company.data.local.dao.CompanyDao
+import com.thejawnpaul.gptinvestor.features.company.data.local.model.PriceChange
 import com.thejawnpaul.gptinvestor.features.company.data.paging.CompanyPagingSource
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
@@ -233,4 +234,22 @@ class CompanyRepository(
             )
         }
     ).flow
+
+    override suspend fun searchCompaniesFromNetwork(query: String): Flow<Either<Failure, List<Company>>> = flow {
+        val response = apiService.getPagedCompanies(query = query, page = 1, pageSize = 1)
+        if (response.isSuccessful) {
+            val companies = response.body?.data?.map { remote ->
+                Company(
+                    ticker = remote.ticker,
+                    summary = remote.summary,
+                    name = remote.name,
+                    logo = remote.logoUrl.toHttpsUrl(),
+                    change = PriceChange(change = 0f, date = 1L)
+                )
+            } ?: emptyList()
+            emit(Either.Right(companies))
+        } else {
+            emit(Either.Left(Failure.ServerError))
+        }
+    }
 }

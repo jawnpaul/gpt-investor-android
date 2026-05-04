@@ -14,4 +14,5 @@ interface AuthenticationRepository {
     suspend fun loginWithGoogle(platformContext: PlatformContext): Result<Unit>
     suspend fun signUpWithGoogle(platformContext: PlatformContext): Result<Unit>
     suspend fun guestLogin(): Result<String>
+    suspend fun acquireGuestToken(): Result<Unit>
 }

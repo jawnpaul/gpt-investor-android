@@ -292,9 +292,15 @@ fun DiscoverScreen(
                     ) { index ->
                         val company = companiesList[index]
                         if (company != null) {
-                            SingleCompanyItem(modifier = Modifier, company = company, onClick = {
-                                onEvent(DiscoveryEvent.GoToCompanyDetail(company.ticker))
-                            })
+                            SingleCompanyItem(
+                                modifier = Modifier.padding(
+                                    horizontal = 16.dp
+                                ),
+                                company = company,
+                                onClick = {
+                                    onEvent(DiscoveryEvent.GoToCompanyDetail(company.ticker))
+                                }
+                            )
                         }
                     }
                     if (companiesList.loadState.append is LoadState.Loading) {

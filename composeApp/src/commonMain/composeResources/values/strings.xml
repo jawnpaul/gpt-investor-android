@@ -155,7 +155,7 @@
     <string name="favorite">Favorite</string>
     <string name="more">More</string>
     <string name="onboarding_headline_value_prop">Feel confident about every stock decision</string>
-    <string name="onboarding_body_value_prop">GPT Investor turns complex financial data into plain English insights, so you always know what\'s going on with the stocks you care about.</string>
+    <string name="onboarding_body_value_prop">GPT Investor turns complex financial data into plain English insights, so you always know what's going on with the stocks you care about.</string>
     <string name="onboarding_cta_get_started">Get Started →</string>
     <string name="onboarding_skip_for_now">Skip for now</string>
     <string name="onboarding_headline_how_it_works">Ask about any stock.\nGet a clear breakdown in seconds.</string>
@@ -163,14 +163,14 @@
     <string name="onboarding_bullet_real_time">Real-time data — always up to date</string>
     <string name="onboarding_bullet_follow_up">Follow-up questions — dig deeper anytime</string>
     <string name="onboarding_cta_try_it_now">Try it now →</string>
-    <string name="onboarding_headline_stock_selection">Let\'s analyse your first stock.</string>
-    <string name="onboarding_subtext_stock_selection">Pick one you\'ve heard of:</string>
+    <string name="onboarding_headline_stock_selection">Let's analyse your first stock.</string>
+    <string name="onboarding_subtext_stock_selection">Pick one you've heard of:</string>
     <string name="onboarding_search_placeholder">Or search for a stock...</string>
     <string name="onboarding_loading_headline">Analysing %1$s for you…</string>
-    <string name="onboarding_success_headline">Here\'s your %1$s brief</string>
+    <string name="onboarding_success_headline">Here's your %1$s brief</string>
     <string name="onboarding_success_body">This is what GPT Investor does for you, every time you want to analyse a stock.</string>
     <string name="onboarding_cta_start_exploring">Start Exploring →</string>
-    <string name="onboarding_error_message">Something went wrong. Let\'s take you to the app.</string>
+    <string name="onboarding_error_message">Something went wrong. Let's take you to the app.</string>
     <string name="onboarding_cta_go_to_app">Go to GPT Investor</string>
 
 </resources>

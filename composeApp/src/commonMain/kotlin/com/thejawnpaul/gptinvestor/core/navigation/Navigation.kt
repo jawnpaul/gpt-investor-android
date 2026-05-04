@@ -93,7 +93,7 @@ fun SetUpNavGraph(
                 viewModel.actions.onEach { action ->
                     when (action) {
                         OnboardingAction.NavigateToHome -> {
-                            navController.navigate(Screen.HomeTabScreen.route) {
+                            navController.navigate(Screen.DefaultAuthenticationScreen.route) {
                                 popUpTo(0) { inclusive = true }
                             }
                         }
@@ -750,8 +750,11 @@ fun SetUpNavGraph(
                 navigateToHome(navController, appPreferences, Screen.DefaultAuthenticationScreen.route)
             }
         } else {
-            navController.navigate(Screen.DefaultAuthenticationScreen.route) {
-                popUpTo(0) { inclusive = true }
+            val currentRoute = navController.currentDestination?.route
+            if (currentRoute != Screen.OnboardingScreen.route) {
+                navController.navigate(Screen.DefaultAuthenticationScreen.route) {
+                    popUpTo(0) { inclusive = true }
+                }
             }
         }
     }
@@ -762,8 +765,8 @@ private fun initialDestination(
     isGuestSignedIn: Boolean,
     hasCompletedOnboarding: Boolean
 ): String = when {
-    !isUserSignedIn && !isGuestSignedIn -> Screen.DefaultAuthenticationScreen.route
     !hasCompletedOnboarding -> Screen.OnboardingScreen.route
+    !isUserSignedIn && !isGuestSignedIn -> Screen.DefaultAuthenticationScreen.route
     else -> Screen.HomeTabScreen.route
 }
 

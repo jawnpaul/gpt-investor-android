@@ -77,7 +77,7 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
                 navController = navController,
                 isUserSignedIn = isUserSignedIn == true,
                 isGuestSignedIn = isGuestSignedIn == true,
-                hasCompletedOnboarding = hasCompletedOnboarding != false
+                hasCompletedOnboarding = hasCompletedOnboarding ?: false
             )
 
             LaunchedEffect(Unit) {

@@ -177,7 +177,7 @@ class CompanyRepository(
         val userType = if (isGuest) "guest" else "logged_in"
 
         analyticsLogger.logEvent(
-            eventName = "brief_started",
+            eventName = "brief-started",
             params = mapOf("ticker" to ticker, "user_type" to userType)
         )
 
@@ -187,7 +187,7 @@ class CompanyRepository(
             if (response.isSuccessful) {
                 response.body?.let {
                     analyticsLogger.logEvent(
-                        eventName = "brief_completed",
+                        eventName = "brief-completed",
                         params = mapOf(
                             "ticker" to ticker,
                             "duration_ms" to (Clock.System.now().toEpochMilliseconds() - startMs),
@@ -198,7 +198,7 @@ class CompanyRepository(
                 }
             } else {
                 analyticsLogger.logEvent(
-                    eventName = "brief_failed",
+                    eventName = "brief-failed",
                     params = mapOf(
                         "ticker" to ticker,
                         "error_type" to response.code,
@@ -210,7 +210,7 @@ class CompanyRepository(
         } catch (e: Exception) {
             Logger.e(e.stackTraceToString())
             analyticsLogger.logEvent(
-                eventName = "brief_failed",
+                eventName = "brief-failed",
                 params = mapOf(
                     "ticker" to ticker,
                     "error_type" to e.message.toString(),

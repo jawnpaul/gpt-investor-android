@@ -336,7 +336,7 @@ class CompanyViewModel(
 
             is CompanyDetailEvent.BriefSentimentViewed -> {
                 analyticsLogger.logEvent(
-                    eventName = "brief_sentiment_viewed",
+                    eventName = "brief-sentiment-viewed",
                     params = mapOf(
                         "ticker" to (_selectedCompany.value.brief?.ticker ?: ""),
                         "sentiment" to event.sentiment.name.lowercase(),
@@ -347,7 +347,7 @@ class CompanyViewModel(
 
             is CompanyDetailEvent.BriefKeyNumberExpanded -> {
                 analyticsLogger.logEvent(
-                    eventName = "brief_key_number_expanded",
+                    eventName = "brief-key-number-expanded",
                     params = mapOf(
                         "ticker" to (_selectedCompany.value.brief?.ticker ?: ""),
                         "key_number_type" to event.keyNumberType.name,

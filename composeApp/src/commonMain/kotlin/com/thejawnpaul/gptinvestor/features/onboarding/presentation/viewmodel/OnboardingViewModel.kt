@@ -79,7 +79,7 @@ class OnboardingViewModel(
 
     fun onSkip(screenIndex: Int) {
         analyticsLogger.logEvent(
-            eventName = "onboarding_skipped",
+            eventName = "onboarding-skipped",
             params = mapOf("screen_index" to screenIndex)
         )
         markCompletedAndNavigateHome()
@@ -87,7 +87,7 @@ class OnboardingViewModel(
 
     fun onStockSelected(ticker: String, companyName: String, source: String) {
         analyticsLogger.logEvent(
-            eventName = "onboarding_stock_selected",
+            eventName = "onboarding-stock-selected",
             params = mapOf("ticker" to ticker, "source" to source)
         )
         _uiState.update {
@@ -115,7 +115,7 @@ class OnboardingViewModel(
         val ticker = _uiState.value.selectedTicker.orEmpty()
         val durationMs = Clock.System.now().toEpochMilliseconds() - onboardingStartTime
         analyticsLogger.logEvent(
-            eventName = "onboarding_finished",
+            eventName = "onboarding-finished",
             params = mapOf("ticker" to ticker, "total_duration_ms" to durationMs)
         )
         markCompletedAndNavigateHome()
@@ -130,7 +130,7 @@ class OnboardingViewModel(
                     else -> "unknown"
                 }
                 analyticsLogger.logEvent(
-                    eventName = "onboarding_brief_failed",
+                    eventName = "onboarding-brief-failed",
                     params = mapOf("ticker" to ticker, "error_type" to errorType)
                 )
                 _uiState.update { it.copy(briefView = BriefView.Error("Something went wrong.")) }
@@ -138,7 +138,7 @@ class OnboardingViewModel(
             result.onSuccess { brief ->
                 val durationMs = Clock.System.now().toEpochMilliseconds() - briefStartTime
                 analyticsLogger.logEvent(
-                    eventName = "onboarding_brief_completed",
+                    eventName = "onboarding-brief-completed",
                     params = mapOf("ticker" to ticker, "duration_ms" to durationMs)
                 )
                 _uiState.update { it.copy(briefView = BriefView.Success(brief)) }
@@ -158,7 +158,7 @@ class OnboardingViewModel(
             val isRegistered = appPreferences.isUserLoggedIn.first()
             val userType = if (isRegistered == true) "registered" else "guest"
             analyticsLogger.logEvent(
-                eventName = "onboarding_started",
+                eventName = "onboarding-started",
                 params = mapOf("user_type" to userType)
             )
         }

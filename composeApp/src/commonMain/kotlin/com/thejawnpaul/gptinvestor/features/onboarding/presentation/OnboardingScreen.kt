@@ -67,7 +67,7 @@ import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.BriefV
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.OnboardingUiState
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.SuggestedStock
 import com.thejawnpaul.gptinvestor.gpt_investor
-import com.thejawnpaul.gptinvestor.ic_logo
+import com.thejawnpaul.gptinvestor.input_logo
 import com.thejawnpaul.gptinvestor.mesh_background
 import com.thejawnpaul.gptinvestor.onboarding_body_value_prop
 import com.thejawnpaul.gptinvestor.onboarding_bullet_follow_up
@@ -162,7 +162,7 @@ private fun ValuePropositionScreen(onStart: () -> Unit, onSkip: () -> Unit, modi
                 Spacer(modifier = Modifier.weight(1.2f))
 
                 Image(
-                    painter = painterResource(Res.drawable.ic_logo),
+                    painter = painterResource(Res.drawable.input_logo),
                     contentDescription = stringResource(Res.string.gpt_investor),
                     modifier = Modifier.size(72.dp)
                 )

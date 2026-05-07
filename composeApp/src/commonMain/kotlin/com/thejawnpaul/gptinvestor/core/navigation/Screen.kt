@@ -69,4 +69,6 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
     data object SignUpScreen : Screen("sign_up_screen", false)
     data object LoginScreen : Screen("login_screen", false)
     data object OnboardingScreen : Screen("onboarding_screen", false)
+    data object SearchScreen : Screen("search_screen", false)
+    data object AllTrendingScreen : Screen("all_trending_screen", false)
 }

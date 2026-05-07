@@ -173,4 +173,23 @@
     <string name="onboarding_error_message">Something went wrong. Let's take you to the app.</string>
     <string name="onboarding_cta_go_to_app">Go to GPT Investor</string>
 
+    <string name="ask_me_anything_about_markets">Ask me anything about markets...</string>
+    <string name="trending_today">Trending Today</string>
+    <string name="movers_right_now">Movers right now</string>
+    <string name="top_picks_today">Top picks today</string>
+    <string name="curated_for_you">Curated for you</string>
+    <string name="daily_learn_tidbit">Daily learn · Tidbit</string>
+    <string name="couldn_t_load">Couldn't load</string>
+    <string name="live_prices_unavailable">Live prices are unavailable right now</string>
+    <string name="couldn_t_fetch_picks">We couldn't fetch today's picks</string>
+    <string name="today_s_lesson_didn_t_load">Today's lesson didn't load</string>
+    <string name="you_re_browsing_as_a_guest">You're browsing as a guest</string>
+    <string name="sign_in_to_save_stocks">Sign in to save stocks and track performance</string>
+    <string name="tidbit_min_read">Tidbit · 2 min read</string>
+    <string name="good_morning">Good morning</string>
+    <string name="good_afternoon">Good afternoon</string>
+    <string name="good_evening">Good evening</string>
+    <string name="search_a_stock_to_analyse">Search a stock to analyse</string>
+    <string name="sign_in_action">Sign in</string>
+
 </resources>

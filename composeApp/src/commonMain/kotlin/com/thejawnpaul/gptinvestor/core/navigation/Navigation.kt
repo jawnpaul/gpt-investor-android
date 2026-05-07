@@ -186,6 +186,14 @@ fun SetUpNavGraph(
                                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
                             }
                         }
+
+                        HomeAction.NavigateToSearch -> {
+                            navController.navigate(Screen.SearchScreen.route)
+                        }
+
+                        HomeAction.NavigateToAllTrending -> {
+                            navController.navigate(Screen.AllTrendingScreen.route)
+                        }
                     }
                 }.launchIn(scope)
             }
@@ -704,6 +712,14 @@ fun SetUpNavGraph(
             }
 
             LoginScreen(state = state.value, onEvent = viewModel::handleEvent)
+        }
+
+        composable(route = Screen.SearchScreen.route) {
+            // TODO: implement stock search screen
+        }
+
+        composable(route = Screen.AllTrendingScreen.route) {
+            // TODO: implement all trending screen
         }
 
         composable(

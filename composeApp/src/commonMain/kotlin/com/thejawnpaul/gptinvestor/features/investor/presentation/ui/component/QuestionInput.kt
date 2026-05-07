@@ -70,7 +70,8 @@ fun QuestionInput(
     onTextChange: (String) -> Unit = {},
     availableModels: List<AvailableModel> = emptyList(),
     selectedModel: AvailableModel = DefaultModel(),
-    onModelChange: (AvailableModel) -> Unit = {}
+    onModelChange: (AvailableModel) -> Unit = {},
+    showModelSelector: Boolean = true
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
 
@@ -128,17 +129,20 @@ fun QuestionInput(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Surface(
-                    color = gptInvestorColors.utilColors.borderBright10,
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    // Model list drop down
-                    ModelListDropDown(
-                        modifier = Modifier,
-                        options = availableModels,
-                        selectedOption = selectedModel,
-                        onOptionSelect = onModelChange
-                    )
+                if (showModelSelector) {
+                    Surface(
+                        color = gptInvestorColors.utilColors.borderBright10,
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        ModelListDropDown(
+                            modifier = Modifier,
+                            options = availableModels,
+                            selectedOption = selectedModel,
+                            onOptionSelect = onModelChange
+                        )
+                    }
+                } else {
+                    Spacer(modifier = Modifier)
                 }
 
                 IconButton(onClick = {

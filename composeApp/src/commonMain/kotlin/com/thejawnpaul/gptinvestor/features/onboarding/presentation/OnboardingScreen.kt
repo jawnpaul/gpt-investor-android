@@ -49,7 +49,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -77,6 +79,7 @@ import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyBrief
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumber
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumberType
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.SingleCompanyItem
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.BriefCard
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.BriefSummaryCard
@@ -85,6 +88,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.Compan
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.KeyNumbersCard
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.RiskOpportunityCard
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.SentimentBadge
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.SentimentBottomSheet
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.WhatsHappeningCard
 import com.thejawnpaul.gptinvestor.features.discover.SearchBarCustom
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.BriefView
@@ -574,6 +578,7 @@ private fun LiveBriefScreen(
     modifier: Modifier = Modifier
 ) {
     val companyName = state.selectedCompanyName.orEmpty()
+    var showSentimentSheet by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier,
@@ -637,7 +642,10 @@ private fun LiveBriefScreen(
                             item {
                                 SentimentBadge(
                                     sentiment = sentiment,
-                                    summary = brief.sentimentSummary
+                                    summary = brief.sentimentSummary,
+                                    onClick = {
+                                        showSentimentSheet = true
+                                    }
                                 )
                             }
                         }
@@ -730,6 +738,19 @@ private fun LiveBriefScreen(
                                 style = MaterialTheme.typography.titleMedium
                             )
                         }
+                    }
+                }
+            }
+        }
+
+        if (showSentimentSheet) {
+            if (state.briefView is BriefView.Success) {
+                state.briefView.brief.sentiment?.let { sentiment ->
+                    GptInvestorBottomSheet(onDismiss = { showSentimentSheet = false }) {
+                        SentimentBottomSheet(
+                            sentiment = sentiment,
+                            summary = state.briefView.brief.sentimentSummary
+                        )
                     }
                 }
             }

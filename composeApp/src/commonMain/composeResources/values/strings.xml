@@ -159,9 +159,9 @@
     <string name="onboarding_cta_get_started">Get Started →</string>
     <string name="onboarding_skip_for_now">Skip for now</string>
     <string name="onboarding_headline_how_it_works">Ask about any stock.\nGet a clear breakdown in seconds.</string>
-    <string name="onboarding_bullet_plain_english">Plain English — no jargon, no confusion</string>
-    <string name="onboarding_bullet_real_time">Real-time data — always up to date</string>
-    <string name="onboarding_bullet_follow_up">Follow-up questions — dig deeper anytime</string>
+    <string name="onboarding_bullet_plain_english">Plain English. No jargon, no confusion</string>
+    <string name="onboarding_bullet_real_time">Real-time data. Always up to date</string>
+    <string name="onboarding_bullet_follow_up">Follow-up questions. Dig deeper anytime</string>
     <string name="onboarding_cta_try_it_now">Try it now →</string>
     <string name="onboarding_headline_stock_selection">Let's analyse your first stock.</string>
     <string name="onboarding_subtext_stock_selection">Pick one you've heard of:</string>

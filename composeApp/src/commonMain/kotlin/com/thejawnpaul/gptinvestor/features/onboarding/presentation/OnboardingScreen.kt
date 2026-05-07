@@ -1,7 +1,25 @@
 package com.thejawnpaul.gptinvestor.features.onboarding.presentation
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,11 +48,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -43,6 +66,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import coil3.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.back
@@ -94,6 +118,9 @@ import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
+private val EaseOutQuart = CubicBezierEasing(0.25f, 1f, 0.5f, 1f)
+private val EaseInOutQuart = CubicBezierEasing(0.76f, 0f, 0.24f, 1f)
+
 @Composable
 fun OnboardingScreen(
     state: OnboardingUiState,
@@ -106,31 +133,65 @@ fun OnboardingScreen(
     onFinish: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    when (state.currentScreen) {
-        0 -> ValuePropositionScreen(
-            onStart = onNextScreen,
-            onSkip = { onSkip(0) },
-            modifier = modifier
-        )
-        1 -> HowItWorksScreen(
-            onTryItNow = onNextScreen,
-            onSkip = { onSkip(1) },
-            modifier = modifier
-        )
-        2 -> StockSelectionScreen(
-            state = state,
-            searchResults = searchResults,
-            onSelectStock = onSelectStock,
-            onSearchQueryChange = onSearchQueryChange,
-            modifier = modifier
-        )
-        3 -> LiveBriefScreen(
-            state = state,
-            onBack = onBackToStockSelection,
-            onFinish = onFinish,
-            modifier = modifier
-        )
+    AnimatedContent(
+        targetState = state.currentScreen,
+        modifier = modifier,
+        transitionSpec = {
+            if (targetState > initialState) {
+                slideInHorizontally(tween(280, easing = EaseOutQuart)) { it } +
+                    fadeIn(tween(220, easing = EaseOutQuart)) togetherWith
+                    slideOutHorizontally(tween(220)) { -it } +
+                    fadeOut(tween(150))
+            } else {
+                slideInHorizontally(tween(280, easing = EaseOutQuart)) { -it } +
+                    fadeIn(tween(220, easing = EaseOutQuart)) togetherWith
+                    slideOutHorizontally(tween(220)) { it } +
+                    fadeOut(tween(150))
+            }
+        },
+        label = "onboardingScreen"
+    ) { screen ->
+        when (screen) {
+            0 -> ValuePropositionScreen(
+                onStart = onNextScreen,
+                onSkip = { onSkip(0) }
+            )
+            1 -> HowItWorksScreen(
+                onTryItNow = onNextScreen,
+                onSkip = { onSkip(1) }
+            )
+            2 -> StockSelectionScreen(
+                state = state,
+                searchResults = searchResults,
+                onSelectStock = onSelectStock,
+                onSearchQueryChange = onSearchQueryChange
+            )
+            3 -> LiveBriefScreen(
+                state = state,
+                onBack = onBackToStockSelection,
+                onFinish = onFinish
+            )
+        }
     }
+}
+
+@Composable
+private fun SkipText(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    val skipAlpha by animateFloatAsState(
+        targetValue = if (pressed) 0.5f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
+        label = "skipAlpha"
+    )
+    Text(
+        modifier = modifier
+            .graphicsLayer { alpha = skipAlpha }
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
+        text = text,
+        textDecoration = TextDecoration.Underline,
+        style = MaterialTheme.typography.linkMedium
+    )
 }
 
 @Composable
@@ -202,15 +263,9 @@ private fun ValuePropositionScreen(onStart: () -> Unit, onSkip: () -> Unit, modi
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    modifier = Modifier.clickable(
-                        indication = null,
-                        interactionSource = null,
-                        onClick = onSkip
-                    ),
+                SkipText(
                     text = stringResource(Res.string.onboarding_skip_for_now),
-                    textDecoration = TextDecoration.Underline,
-                    style = MaterialTheme.typography.linkMedium
+                    onClick = onSkip
                 )
 
                 Spacer(modifier = Modifier.weight(0.4f))
@@ -270,15 +325,9 @@ private fun HowItWorksScreen(onTryItNow: () -> Unit, onSkip: () -> Unit, modifie
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                modifier = Modifier.clickable(
-                    indication = null,
-                    interactionSource = null,
-                    onClick = onSkip
-                ),
+            SkipText(
                 text = stringResource(Res.string.onboarding_skip_for_now),
-                textDecoration = TextDecoration.Underline,
-                style = MaterialTheme.typography.linkMedium
+                onClick = onSkip
             )
 
             Spacer(modifier = Modifier.weight(0.3f))
@@ -303,12 +352,22 @@ private fun BriefCardMock(modifier: Modifier = Modifier) {
 
 @Composable
 private fun MockPlaceholderRow(widthFraction: Float, height: Dp, modifier: Modifier = Modifier) {
+    val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
+    val shimmerAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.12f,
+        targetValue = 0.4f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 900, easing = EaseInOutQuart),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "shimmerAlpha"
+    )
     Surface(
         modifier = modifier
             .fillMaxWidth(widthFraction)
             .height(height),
         shape = RoundedCornerShape(4.dp),
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = shimmerAlpha)
     ) {}
 }
 
@@ -380,14 +439,22 @@ private fun StockSelectionScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
-                items(pagingItems.itemCount) { index ->
+                items(
+                    count = pagingItems.itemCount,
+                    key = pagingItems.itemKey { it.ticker }
+                ) { index ->
                     val company = pagingItems[index]
                     if (company != null) {
                         SingleCompanyItem(
                             company = company,
                             onClick = { ticker ->
                                 onSelectStock(ticker, company.name, "search")
-                            }
+                            },
+                            modifier = Modifier.animateItem(
+                                fadeInSpec = tween(220, easing = EaseOutQuart),
+                                placementSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                fadeOutSpec = tween(150)
+                            )
                         )
                     }
                 }
@@ -425,8 +492,29 @@ private fun SuggestedStocksGrid(
 
 @Composable
 private fun SuggestedStockChip(stock: SuggestedStock, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    val haptics = LocalHapticFeedback.current
+    val chipScale by animateFloatAsState(
+        targetValue = if (pressed) 0.95f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
+        label = "chipScale"
+    )
+
     Surface(
-        modifier = modifier.clickable(onClick = onClick),
+        modifier = modifier
+            .graphicsLayer {
+                scaleX = chipScale
+                scaleY = chipScale
+            }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = LocalIndication.current,
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onClick()
+                }
+            ),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
@@ -498,141 +586,150 @@ private fun LiveBriefScreen(
             }
         }
     ) { innerPadding ->
-        when (val briefView = state.briefView) {
-            is BriefView.Loading -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    item {
-                        Text(
-                            text = stringResource(Res.string.onboarding_loading_headline, companyName),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    item { CompanyBriefSkeleton(modifier = Modifier.fillMaxWidth()) }
-                }
-            }
-
-            is BriefView.Success -> {
-                val brief = briefView.brief
-                LazyColumn(
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    item {
-                        Text(
-                            text = stringResource(Res.string.onboarding_success_headline, companyName),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    item { CompanyBriefHeader(brief = brief) }
-
-                    brief.sentiment?.let { sentiment ->
+        AnimatedContent(
+            targetState = state.briefView,
+            transitionSpec = {
+                fadeIn(tween(300, easing = EaseOutQuart)) togetherWith fadeOut(tween(150))
+            },
+            modifier = Modifier.fillMaxSize(),
+            label = "briefView"
+        ) { briefView ->
+            when (briefView) {
+                is BriefView.Loading -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
                         item {
-                            SentimentBadge(
-                                sentiment = sentiment,
-                                summary = brief.sentimentSummary
-                            )
-                        }
-                    }
-
-                    brief.summary?.let { summary ->
-                        item { BriefSummaryCard(summary = summary) }
-                    }
-
-                    if (brief.keyNumbers.isNotEmpty()) {
-                        item { KeyNumbersCard(keyNumbers = brief.keyNumbers) }
-                    }
-
-                    if (brief.news.isNotEmpty()) {
-                        item {
-                            WhatsHappeningCard(
-                                news = brief.news,
-                                onNewsClick = {}
-                            )
-                        }
-                    }
-
-                    if (brief.risk != null || brief.opportunity != null) {
-                        item {
-                            RiskOpportunityCard(
-                                risk = brief.risk,
-                                opportunity = brief.opportunity
-                            )
-                        }
-                    }
-
-                    item {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
                             Text(
-                                text = stringResource(Res.string.onboarding_success_body),
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                text = stringResource(Res.string.onboarding_loading_headline, companyName),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
                             )
+                        }
+                        item { CompanyBriefSkeleton(modifier = Modifier.fillMaxWidth()) }
+                    }
+                }
 
-                            Spacer(modifier = Modifier.height(16.dp))
+                is BriefView.Success -> {
+                    val brief = briefView.brief
+                    LazyColumn(
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        item {
+                            Text(
+                                text = stringResource(Res.string.onboarding_success_headline, companyName),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
 
-                            Button(
+                        item { CompanyBriefHeader(brief = brief) }
+
+                        brief.sentiment?.let { sentiment ->
+                            item {
+                                SentimentBadge(
+                                    sentiment = sentiment,
+                                    summary = brief.sentimentSummary
+                                )
+                            }
+                        }
+
+                        brief.summary?.let { summary ->
+                            item { BriefSummaryCard(summary = summary) }
+                        }
+
+                        if (brief.keyNumbers.isNotEmpty()) {
+                            item { KeyNumbersCard(keyNumbers = brief.keyNumbers) }
+                        }
+
+                        if (brief.news.isNotEmpty()) {
+                            item {
+                                WhatsHappeningCard(
+                                    news = brief.news,
+                                    onNewsClick = {}
+                                )
+                            }
+                        }
+
+                        if (brief.risk != null || brief.opportunity != null) {
+                            item {
+                                RiskOpportunityCard(
+                                    risk = brief.risk,
+                                    opportunity = brief.opportunity
+                                )
+                            }
+                        }
+
+                        item {
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(52.dp),
-                                shape = RoundedCornerShape(corner = CornerSize(20.dp)),
-                                onClick = onFinish
+                                    .padding(top = 8.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = stringResource(Res.string.onboarding_cta_start_exploring),
-                                    style = MaterialTheme.typography.titleMedium
+                                    text = stringResource(Res.string.onboarding_success_body),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    textAlign = TextAlign.Center,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                 )
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                Button(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(52.dp),
+                                    shape = RoundedCornerShape(corner = CornerSize(20.dp)),
+                                    onClick = onFinish
+                                ) {
+                                    Text(
+                                        text = stringResource(Res.string.onboarding_cta_start_exploring),
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            is BriefView.Error -> {
-                Column(
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .fillMaxSize()
-                        .padding(horizontal = 24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = stringResource(Res.string.onboarding_error_message),
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Button(
+                is BriefView.Error -> {
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp),
-                        shape = RoundedCornerShape(corner = CornerSize(20.dp)),
-                        onClick = onFinish
+                            .padding(innerPadding)
+                            .fillMaxSize()
+                            .padding(horizontal = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = stringResource(Res.string.onboarding_cta_go_to_app),
-                            style = MaterialTheme.typography.titleMedium
+                            text = stringResource(Res.string.onboarding_error_message),
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center
                         )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Button(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp),
+                            shape = RoundedCornerShape(corner = CornerSize(20.dp)),
+                            onClick = onFinish
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.onboarding_cta_go_to_app),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
                     }
                 }
             }

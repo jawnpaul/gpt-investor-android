@@ -731,15 +731,18 @@ fun SetUpNavGraph(
     }
 
     LaunchedEffect(isUserSignedIn, isGuestSignedIn) {
+        val currentRoute = navController.currentDestination?.route ?: return@LaunchedEffect
         if (isUserSignedIn || isGuestSignedIn) {
-            if (navController.currentDestination?.route == Screen.DefaultAuthenticationScreen.route) {
+            if (currentRoute == Screen.DefaultAuthenticationScreen.route) {
                 navController.navigate(Screen.HomeTabScreen.route) {
                     popUpTo(Screen.DefaultAuthenticationScreen.route) { inclusive = true }
                 }
             }
         } else {
-            navController.navigate(Screen.DefaultAuthenticationScreen.route) {
-                popUpTo(0) { inclusive = true }
+            if (currentRoute != Screen.DefaultAuthenticationScreen.route) {
+                navController.navigate(Screen.DefaultAuthenticationScreen.route) {
+                    popUpTo(0) { inclusive = true }
+                }
             }
         }
     }

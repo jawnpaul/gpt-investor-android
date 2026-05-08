@@ -758,8 +758,8 @@ fun SetUpNavGraph(
     }
 
     LaunchedEffect(isUserSignedIn, isGuestSignedIn) {
+        val currentRoute = navController.currentDestination?.route ?: return@LaunchedEffect
         if (isUserSignedIn || isGuestSignedIn) {
-            val currentRoute = navController.currentDestination?.route
             if (currentRoute == Screen.DefaultAuthenticationScreen.route ||
                 currentRoute == Screen.OnboardingScreen.route
             ) {

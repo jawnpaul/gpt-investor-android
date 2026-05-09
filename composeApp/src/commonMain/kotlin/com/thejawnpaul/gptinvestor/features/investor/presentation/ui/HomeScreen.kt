@@ -45,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -82,7 +81,6 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksV
 import com.thejawnpaul.gptinvestor.gpt_investor
 import com.thejawnpaul.gptinvestor.ic_menu
 import com.thejawnpaul.gptinvestor.ic_search_status_two
-import com.thejawnpaul.gptinvestor.input_logo
 import com.thejawnpaul.gptinvestor.join_list
 import com.thejawnpaul.gptinvestor.join_the_waitlist
 import com.thejawnpaul.gptinvestor.movers_right_now
@@ -192,12 +190,6 @@ private fun HomeScreenContent(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            Image(
-                                modifier = Modifier.size(18.dp),
-                                painter = painterResource(Res.drawable.input_logo),
-                                contentDescription = null,
-                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
-                            )
                             Text(
                                 text = stringResource(Res.string.gpt_investor),
                                 textAlign = TextAlign.Center,

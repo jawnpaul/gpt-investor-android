@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.Res
@@ -30,6 +31,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingS
 import com.thejawnpaul.gptinvestor.features.component.ShimmerBox
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.live_prices_unavailable
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import org.jetbrains.compose.resources.stringResource
 
@@ -44,10 +46,11 @@ fun HomeTrendingSection(
         view.loading -> {
             LazyRow(
                 modifier = modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp)
             ) {
                 items(3) {
-                    ShimmerBox(width = 160.dp, height = 68.dp, shape = RoundedCornerShape(16.dp))
+                    HomeTrendingShimmer()
                 }
             }
         }
@@ -55,7 +58,7 @@ fun HomeTrendingSection(
             HomeErrorCard(
                 message = stringResource(Res.string.live_prices_unavailable),
                 onRetry = onRetry,
-                modifier = modifier
+                modifier = modifier.padding(horizontal = 16.dp)
             )
         }
         else -> {
@@ -160,4 +163,117 @@ private fun tickerAvatarColor(ticker: String): Color {
     )
     val index = (ticker.firstOrNull()?.code ?: 0) % colors.size
     return colors[index]
+}
+
+@Composable
+private fun HomeTrendingShimmer(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surface
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            ShimmerBox(
+                modifier = Modifier.size(36.dp),
+                shape = CircleShape
+            )
+
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                ShimmerBox(
+                    width = 40.dp,
+                    height = 14.dp,
+                    shape = RoundedCornerShape(4.dp)
+                )
+                ShimmerBox(
+                    width = 60.dp,
+                    height = 10.dp,
+                    shape = RoundedCornerShape(4.dp)
+                )
+            }
+
+            ShimmerBox(
+                width = 44.dp,
+                height = 18.dp,
+                shape = RoundedCornerShape(8.dp)
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun HomeTrendingSectionPreview() {
+    val companies = listOf(
+        TrendingStockPresentation(
+            companyName = "Apple Inc.",
+            tickerSymbol = "AAPL",
+            imageUrl = "",
+            percentageChange = 1.2f
+        ),
+        TrendingStockPresentation(
+            companyName = "Tesla, Inc.",
+            tickerSymbol = "TSLA",
+            imageUrl = "",
+            percentageChange = -2.5f
+        ),
+        TrendingStockPresentation(
+            companyName = "NVIDIA Corporation",
+            tickerSymbol = "NVDA",
+            imageUrl = "",
+            percentageChange = 0.5f
+        )
+    )
+    GPTInvestorTheme {
+        Surface {
+            HomeTrendingSection(
+                view = TrendingCompaniesView(
+                    loading = false,
+                    companies = companies,
+                    error = null
+                ),
+                onRetry = {},
+                onClick = {}
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun HomeTrendingSectionLoadingPreview() {
+    GPTInvestorTheme {
+        Surface {
+            HomeTrendingSection(
+                view = TrendingCompaniesView(
+                    loading = true,
+                    companies = emptyList(),
+                    error = null
+                ),
+                onRetry = {},
+                onClick = {}
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun HomeTrendingSectionErrorPreview() {
+    GPTInvestorTheme {
+        Surface {
+            HomeTrendingSection(
+                view = TrendingCompaniesView(
+                    loading = false,
+                    companies = emptyList(),
+                    error = "Something went wrong"
+                ),
+                onRetry = {},
+                onClick = {}
+            )
+        }
+    }
 }

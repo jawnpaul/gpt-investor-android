@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
@@ -111,9 +112,12 @@ fun HomeTopPickItem(pickPresentation: TopPickPresentation, onClick: (String) -> 
             onClick = { onClick(pickPresentation.id) },
             indication = null
         ),
+        shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surface
     ) {
-        Column {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)

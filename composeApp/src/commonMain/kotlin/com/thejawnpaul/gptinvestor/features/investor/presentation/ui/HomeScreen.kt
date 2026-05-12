@@ -159,22 +159,7 @@ private fun HomeScreenContent(
                     onSendClick = { onEvent(HomeEvent.SendClick) },
                     hint = stringResource(Res.string.ask_me_anything_about_markets),
                     onTextChange = { onEvent(HomeEvent.ChatInputChanged(it)) },
-                    text = state.chatInput ?: "",
-                    availableModels = state.availableModels,
-                    selectedModel = state.selectedModel,
-                    onModelChange = {
-                        if (it.canUpgrade) {
-                            onEvent(
-                                HomeEvent.UpgradeModel(
-                                    showBottomSheet = true,
-                                    modelId = it.modelId
-                                )
-                            )
-                            return@QuestionInput
-                        }
-                        onEvent(HomeEvent.ModelChanged(it))
-                    },
-                    showModelSelector = false
+                    text = state.chatInput ?: ""
                 )
             },
             topBar = {

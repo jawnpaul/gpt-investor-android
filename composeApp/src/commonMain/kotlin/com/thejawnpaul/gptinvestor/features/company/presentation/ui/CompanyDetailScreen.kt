@@ -107,16 +107,7 @@ fun CompanyDetailScreen(
                     },
                     hint = stringResource(Res.string.ask_anything_about, state.companyName),
                     onTextChange = { onEvent(CompanyDetailEvent.QueryInputChanged(it)) },
-                    text = state.inputQuery,
-                    availableModels = state.availableModels,
-                    selectedModel = state.selectedModel,
-                    onModelChange = { model ->
-                        if (model.canUpgrade) {
-                            onEvent(CompanyDetailEvent.UpgradeModel(showBottomSheet = true, modelId = model.modelId))
-                        } else {
-                            onEvent(CompanyDetailEvent.ModelChange(model))
-                        }
-                    }
+                    text = state.inputQuery
                 )
             }
         ) { innerPadding ->

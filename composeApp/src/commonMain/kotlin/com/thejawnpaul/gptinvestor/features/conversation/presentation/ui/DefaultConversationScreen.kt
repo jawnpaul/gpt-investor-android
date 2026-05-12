@@ -91,16 +91,7 @@ fun DefaultConversationScreen(
                 onTextChange = { input ->
                     onInputQueryChange(input)
                 },
-                text = inputQuery,
-                availableModels = availableModels,
-                selectedModel = selectedModel,
-                onModelChange = {
-                    if (it.canUpgrade) {
-                        onUpgradeModel.invoke(true, it.modelId)
-                        return@QuestionInput
-                    }
-                    onModelChange(it)
-                }
+                text = inputQuery
             )
         }
     ) { innerPadding ->

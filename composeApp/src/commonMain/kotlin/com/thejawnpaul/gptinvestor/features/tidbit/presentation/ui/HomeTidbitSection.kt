@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.features.component.ShimmerBox
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
@@ -26,7 +27,16 @@ import com.thejawnpaul.gptinvestor.tidbit_min_read
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun HomeTidbitSection(tidbit: HomeTidbitView, onClick: (String) -> Unit, modifier: Modifier = Modifier) {
+fun HomeTidbitSection(
+    tidbit: HomeTidbitView,
+    onClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    isLoading: Boolean = false
+) {
+    if (isLoading) {
+        HomeTidbitSectionShimmer(modifier = modifier)
+        return
+    }
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     Surface(
@@ -70,6 +80,40 @@ fun HomeTidbitSection(tidbit: HomeTidbitView, onClick: (String) -> Unit, modifie
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun HomeTidbitSectionShimmer(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surface
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            ShimmerBox(size = 52.dp, shape = RoundedCornerShape(12.dp))
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                ShimmerBox(width = 48.dp, height = 10.dp)
+                ShimmerBox(modifier = Modifier.fillMaxWidth(), height = 14.dp)
+                ShimmerBox(width = 120.dp, height = 14.dp)
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun HomeTidbitSectionShimmerPreview() {
+    GPTInvestorTheme {
+        HomeTidbitSectionShimmer(modifier = Modifier.padding(16.dp))
     }
 }
 

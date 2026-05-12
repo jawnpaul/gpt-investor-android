@@ -339,7 +339,7 @@ class HomeViewModel(
                 HomeEvent.RetryTopPicks -> getTopPicks()
 
                 HomeEvent.RetryTidbit -> {
-                    _uiState.update { it.copy(tidbitError = null, homeTidbitView = null) }
+                    _uiState.update { it.copy(homeTidbitView = HomeTidbitView(loading = true)) }
                     getTodayTidbit()
                 }
 
@@ -411,25 +411,28 @@ class HomeViewModel(
     }
 
     private fun getTodayTidbit() {
+        _uiState.update { it.copy(homeTidbitView = HomeTidbitView(loading = true)) }
         viewModelScope.launch {
             tidbitRepository.getTodayTidbit()
                 .onSuccess { tidbit ->
                     _uiState.update {
                         it.copy(
-                            tidbitError = null,
-                            homeTidbitView = with(tidbit) {
-                                HomeTidbitView(
-                                    id = id,
-                                    previewUrl = previewUrl,
-                                    title = title,
-                                    description = summary
-                                )
-                            }
+                            homeTidbitView = HomeTidbitView(
+                                loading = false,
+                                id = tidbit.id,
+                                previewUrl = tidbit.previewUrl,
+                                title = tidbit.title,
+                                description = tidbit.summary
+                            )
                         )
                     }
                 }
                 .onFailure {
-                    _uiState.update { state -> state.copy(tidbitError = "Something went wrong") }
+                    _uiState.update { state ->
+                        state.copy(
+                            homeTidbitView = state.homeTidbitView.copy(loading = false, error = "Something went wrong")
+                        )
+                    }
                 }
         }
     }
@@ -478,9 +481,8 @@ data class HomeUiState(
     val selectedWaitlistOptions: List<String> = emptyList(),
     val defaultPrompts: List<DefaultPrompt> = emptyList(),
     val drawerState: DrawerState = DrawerState(),
-    val homeTidbitView: HomeTidbitView? = null,
+    val homeTidbitView: HomeTidbitView = HomeTidbitView(),
     val isGuestSession: Boolean = false,
-    val tidbitError: String? = null,
     val timePeriod: TimePeriod = TimePeriod.MORNING
 )
 

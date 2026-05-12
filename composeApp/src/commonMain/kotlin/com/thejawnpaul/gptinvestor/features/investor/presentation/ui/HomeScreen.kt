@@ -275,7 +275,15 @@ private fun HomeScreenContent(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     when {
-                        state.homeTidbitView != null -> {
+                        state.homeTidbitView.error != null -> {
+                            HomeErrorCard(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                message = stringResource(Res.string.today_s_lesson_didn_t_load),
+                                onRetry = { onEvent(HomeEvent.RetryTidbit) }
+                            )
+                        }
+
+                        else -> {
                             Text(
                                 modifier = Modifier.padding(horizontal = 16.dp),
                                 text = stringResource(Res.string.daily_learn_tidbit).uppercase(),
@@ -287,15 +295,8 @@ private fun HomeScreenContent(
                             HomeTidbitSection(
                                 modifier = Modifier.padding(horizontal = 16.dp),
                                 tidbit = state.homeTidbitView,
-                                onClick = { onEvent(HomeEvent.ClickTidbit(it)) }
-                            )
-                        }
-
-                        state.tidbitError != null -> {
-                            HomeErrorCard(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                message = stringResource(Res.string.today_s_lesson_didn_t_load),
-                                onRetry = { onEvent(HomeEvent.RetryTidbit) }
+                                onClick = { onEvent(HomeEvent.ClickTidbit(it)) },
+                                isLoading = state.homeTidbitView.loading
                             )
                         }
                     }

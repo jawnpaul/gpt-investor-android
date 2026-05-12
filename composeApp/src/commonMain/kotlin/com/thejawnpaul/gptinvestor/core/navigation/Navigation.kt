@@ -1,12 +1,10 @@
 package com.thejawnpaul.gptinvestor.core.navigation
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -495,7 +493,7 @@ fun SetUpNavGraph(
             val viewModel = koinViewModel<TopPickViewModel>()
             val state = viewModel.allTopPicks.collectAsState()
             AllTopPicksScreen(
-                modifier = Modifier.padding(top = 20.dp),
+                modifier = Modifier,
                 state = state.value,
                 onGoBack = {
                     navController.navigateUp()

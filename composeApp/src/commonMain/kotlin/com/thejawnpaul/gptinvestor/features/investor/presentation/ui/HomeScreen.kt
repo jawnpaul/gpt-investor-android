@@ -63,8 +63,8 @@ import com.thejawnpaul.gptinvestor.daily_learn_tidbit
 import com.thejawnpaul.gptinvestor.discover
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
+import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
-import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.GuestBanner
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeErrorCard
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeGreeting
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeSearchBar
@@ -164,7 +164,12 @@ private fun HomeScreenContent(
                     selectedModel = state.selectedModel,
                     onModelChange = {
                         if (it.canUpgrade) {
-                            onEvent(HomeEvent.UpgradeModel(showBottomSheet = true, modelId = it.modelId))
+                            onEvent(
+                                HomeEvent.UpgradeModel(
+                                    showBottomSheet = true,
+                                    modelId = it.modelId
+                                )
+                            )
                             return@QuestionInput
                         }
                         onEvent(HomeEvent.ModelChanged(it))
@@ -234,9 +239,9 @@ private fun HomeScreenContent(
                 ) {
                     // Guest banner
                     if (state.isGuestSession) {
-                        GuestBanner(
+                        TopGuestLabel(
                             modifier = Modifier.padding(horizontal = 16.dp),
-                            onSignIn = { onEvent(HomeEvent.GoToSignUp) }
+                            onClick = { onEvent(HomeEvent.GoToSignUp) }
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                     }
@@ -284,21 +289,23 @@ private fun HomeScreenContent(
                     )
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    Text(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        text = stringResource(Res.string.daily_learn_tidbit).uppercase(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = LocalGPTInvestorColors.current.textColors.secondary50
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
                     when {
                         state.homeTidbitView != null -> {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                text = stringResource(Res.string.daily_learn_tidbit).uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = LocalGPTInvestorColors.current.textColors.secondary50
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
                             HomeTidbitSection(
                                 modifier = Modifier.padding(horizontal = 16.dp),
                                 tidbit = state.homeTidbitView,
                                 onClick = { onEvent(HomeEvent.ClickTidbit(it)) }
                             )
                         }
+
                         state.tidbitError != null -> {
                             HomeErrorCard(
                                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -534,7 +541,8 @@ private fun HomeScreenPreview() {
                     shouldRequest: Boolean,
                     onGrant: () -> Unit,
                     onDeny: () -> Unit
-                ) {}
+                ) {
+                }
             }
         )
     }

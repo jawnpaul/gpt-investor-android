@@ -40,7 +40,7 @@ fun HomeTopPicksSection(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 repeat(2) {
-                    HomeTopPickShimmer(modifier = Modifier.padding(horizontal = 16.dp))
+                    HomeTopPickShimmer(modifier = Modifier.padding(horizontal = 0.dp))
                 }
             }
         }
@@ -114,12 +114,12 @@ private fun HomeTopPickShimmer(modifier: Modifier = Modifier) {
                     shape = RoundedCornerShape(4.dp)
                 )
                 ShimmerBox(
-                    modifier = Modifier.fillMaxWidth(0.6f),
+                    modifier = Modifier.fillMaxWidth(0.8f),
                     height = 12.dp,
                     shape = RoundedCornerShape(4.dp)
                 )
                 ShimmerBox(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(0.6f),
                     height = 12.dp,
                     shape = RoundedCornerShape(4.dp)
                 )

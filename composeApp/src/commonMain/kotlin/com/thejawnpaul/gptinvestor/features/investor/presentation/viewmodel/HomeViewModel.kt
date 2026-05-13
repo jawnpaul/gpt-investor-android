@@ -8,6 +8,7 @@ import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfigClient
+import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.User
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DrawerState
@@ -165,7 +166,7 @@ class HomeViewModel(
                                     companyName = company.companyName,
                                     tickerSymbol = company.tickerSymbol,
                                     imageUrl = company.imageUrl,
-                                    percentageChange = company.percentageChange
+                                    percentageChange = company.percentageChange.toTwoDecimalPlaces()
                                 )
                             }
                         )

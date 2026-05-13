@@ -61,7 +61,7 @@ class KtorApiService(@Provided private val client: HttpClient) {
         }.toKtorResponse()
 
     suspend fun getTrendingTickers(): KtorResponse<List<TrendingRemote>> =
-        client.get("v1/trending-tickers").toKtorResponse()
+        client.get("v1.1/trending-tickers").toKtorResponse()
 
     suspend fun getDefaultPrompts(): KtorResponse<List<DefaultPromptRemote>> =
         client.get("v1/default-prompts").toKtorResponse()

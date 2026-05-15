@@ -1,5 +1,10 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,9 +38,19 @@ fun HomeTopPicksSection(
     onClickPick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    when {
-        view.loading -> {
-            Column(
+    val displayState = when {
+        view.loading -> 0
+        view.showError -> 1
+        else -> 2
+    }
+
+    AnimatedContent(
+        targetState = displayState,
+        transitionSpec = { fadeIn(tween(220)) togetherWith fadeOut(tween(150)) },
+        label = "TopPicksSection"
+    ) { state ->
+        when (state) {
+            0 -> Column(
                 modifier = modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -43,25 +58,21 @@ fun HomeTopPicksSection(
                     HomeTopPickShimmer(modifier = Modifier.padding(horizontal = 0.dp))
                 }
             }
-        }
-
-        view.showError -> {
-            HomeErrorCard(
+            1 -> HomeErrorCard(
                 message = stringResource(Res.string.couldn_t_fetch_picks),
                 onRetry = onRetry,
                 modifier = modifier
             )
-        }
-
-        else -> {
-            view.topPicks.take(2).forEachIndexed { index, pick ->
-                HomeTopPickItem(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    pickPresentation = pick,
-                    onClick = onClickPick
-                )
-                if (index != 1) {
-                    Spacer(modifier = Modifier.height(16.dp))
+            else -> Column {
+                view.topPicks.take(2).forEachIndexed { index, pick ->
+                    HomeTopPickItem(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        pickPresentation = pick,
+                        onClick = onClickPick
+                    )
+                    if (index != 1) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             }
         }

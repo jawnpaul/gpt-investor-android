@@ -1,6 +1,11 @@
 package com.thejawnpaul.gptinvestor.features.toppick.presentation.ui
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,8 +23,11 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -32,20 +40,25 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 @Composable
 fun SingleTopPickItem(pickPresentation: TopPickPresentation, onClick: (String) -> Unit, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.97f else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "pressScale"
+    )
 
     OutlinedCard(
-        modifier = modifier.padding(horizontal = 16.dp),
+        modifier = modifier
+            .padding(horizontal = 16.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            },
+        interactionSource = interactionSource,
         onClick = { onClick(pickPresentation.id) }
     ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .clickable(
-                    interactionSource = null,
-                    onClick = { onClick(pickPresentation.id) },
-                    indication = null
-                )
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -106,12 +119,23 @@ fun SingleTopPickItem(pickPresentation: TopPickPresentation, onClick: (String) -
 @Composable
 fun HomeTopPickItem(pickPresentation: TopPickPresentation, onClick: (String) -> Unit, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.97f else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "pressScale"
+    )
+
     Surface(
-        modifier = modifier.clickable(
-            interactionSource = null,
-            onClick = { onClick(pickPresentation.id) },
-            indication = null
-        ),
+        modifier = modifier
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clickable(interactionSource = interactionSource, indication = null, onClick = {
+                onClick(pickPresentation.id)
+            }),
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surface
     ) {

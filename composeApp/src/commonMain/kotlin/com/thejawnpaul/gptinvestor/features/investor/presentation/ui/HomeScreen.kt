@@ -1,8 +1,13 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.ui
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -187,12 +193,24 @@ private fun HomeScreenContent(
                             )
                         }
 
+                        val discoverInteractionSource = remember { MutableInteractionSource() }
+                        val isDiscoverPressed by discoverInteractionSource.collectIsPressedAsState()
+                        val discoverScale by animateFloatAsState(
+                            targetValue = if (isDiscoverPressed) 0.97f else 1f,
+                            animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                            label = "pressScale"
+                        )
                         Row(
-                            modifier = Modifier.clickable(
-                                indication = null,
-                                interactionSource = null,
-                                onClick = { onEvent(HomeEvent.GoToDiscover) }
-                            ),
+                            modifier = Modifier
+                                .graphicsLayer {
+                                    scaleX = discoverScale
+                                    scaleY = discoverScale
+                                }
+                                .clickable(
+                                    interactionSource = discoverInteractionSource,
+                                    indication = null,
+                                    onClick = { onEvent(HomeEvent.GoToDiscover) }
+                                ),
                             horizontalArrangement = Arrangement.spacedBy(0.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -200,12 +218,11 @@ private fun HomeScreenContent(
                                 text = stringResource(Res.string.discover),
                                 style = MaterialTheme.typography.titleMedium
                             )
-                            IconButton(onClick = { onEvent(HomeEvent.GoToDiscover) }) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_search_status_two),
-                                    contentDescription = null
-                                )
-                            }
+                            Icon(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp),
+                                painter = painterResource(Res.drawable.ic_search_status_two),
+                                contentDescription = null
+                            )
                         }
                     }
                 }
@@ -333,6 +350,14 @@ fun WaitlistBottomSheetContent(
     onSelectOption: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val joinInteractionSource = remember { MutableInteractionSource() }
+    val isJoinPressed by joinInteractionSource.collectIsPressedAsState()
+    val joinScale by animateFloatAsState(
+        targetValue = if (isJoinPressed) 0.97f else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "pressScale"
+    )
+
     Column(
         modifier = modifier.padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -376,7 +401,11 @@ fun WaitlistBottomSheetContent(
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp),
+                        .height(52.dp)
+                        .graphicsLayer {
+                            scaleX = joinScale
+                            scaleY = joinScale
+                        },
                     shape = RoundedCornerShape(corner = CornerSize(20.dp)),
                     border = BorderStroke(
                         width = 1.dp,
@@ -385,6 +414,7 @@ fun WaitlistBottomSheetContent(
                         )
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
+                    interactionSource = joinInteractionSource,
                     onClick = {
                         onJoinWaitList()
                         content = 1
@@ -451,11 +481,23 @@ fun WaitlistBottomSheetContent(
 @Composable
 fun SingleWaitlistOption(isSelected: Boolean, text: String, onSelectOption: () -> Unit, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.97f else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "pressScale"
+    )
+
     if (isSelected) {
         Surface(
-            modifier = modifier,
+            modifier = modifier.graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            },
             shape = RoundedCornerShape(corner = CornerSize(20.dp)),
             border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onSurface),
+            interactionSource = interactionSource,
             onClick = onSelectOption
         ) {
             Text(
@@ -467,9 +509,13 @@ fun SingleWaitlistOption(isSelected: Boolean, text: String, onSelectOption: () -
         }
     } else {
         Surface(
-            modifier = modifier,
+            modifier = modifier.graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            },
             shape = RoundedCornerShape(corner = CornerSize(20.dp)),
             border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant),
+            interactionSource = interactionSource,
             onClick = onSelectOption
         ) {
             Text(

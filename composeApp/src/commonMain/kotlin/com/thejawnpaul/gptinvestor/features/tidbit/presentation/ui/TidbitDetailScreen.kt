@@ -1,5 +1,9 @@
+@file:OptIn(ExperimentalSharedTransitionApi::class)
+
 package com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,6 +45,8 @@ import coil3.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.bookmark
+import com.thejawnpaul.gptinvestor.core.navigation.LocalAnimatedVisibilityScope
+import com.thejawnpaul.gptinvestor.core.navigation.LocalSharedTransitionScope
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CustomRichText
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.model.TidbitPresentation
@@ -77,8 +83,28 @@ fun TidbitDetailScreen(state: TidbitDetailState, onEvent: (TidbitDetailEvent) ->
             }
         }
     ) { paddingValues ->
+        val sharedScope = LocalSharedTransitionScope.current
+        val animatedScope = LocalAnimatedVisibilityScope.current
+
         Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
             if (state.isLoading) {
+                val imagePlaceholderMod = if (sharedScope != null && animatedScope != null) {
+                    with(sharedScope) {
+                        Modifier.sharedBounds(
+                            sharedContentState = rememberSharedContentState("tidbit-image-${state.id}"),
+                            animatedVisibilityScope = animatedScope,
+                            boundsTransform = { _, _ -> spring(dampingRatio = 0.9f, stiffness = 380f) }
+                        )
+                    }
+                } else {
+                    Modifier
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(193.dp)
+                        .then(imagePlaceholderMod)
+                )
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
             state.presentation?.let { presentation ->
@@ -87,7 +113,9 @@ fun TidbitDetailScreen(state: TidbitDetailState, onEvent: (TidbitDetailEvent) ->
                         TidbitArticleDetail(
                             presentation = presentation,
                             onEvent = onEvent,
-                            isGuest = state.isGuestSession
+                            isGuest = state.isGuestSession,
+                            sharedImageKey = "tidbit-image-${state.id}",
+                            sharedTitleKey = "tidbit-title-${state.id}"
                         )
                     }
 
@@ -233,10 +261,37 @@ private fun TidbitArticleDetail(
     presentation: TidbitPresentation.ArticlePresentation,
     onEvent: (TidbitDetailEvent) -> Unit,
     modifier: Modifier = Modifier,
-    isGuest: Boolean = false
+    isGuest: Boolean = false,
+    sharedImageKey: String? = null,
+    sharedTitleKey: String? = null
 ) {
     val isLiked = remember { mutableStateOf(presentation.isLiked) }
-    val isBookmarked = remember { mutableStateOf(presentation.isBookmarked) } // State managed here
+    val isBookmarked = remember { mutableStateOf(presentation.isBookmarked) }
+    val sharedScope = LocalSharedTransitionScope.current
+    val animatedScope = LocalAnimatedVisibilityScope.current
+
+    val imageSharedMod = if (sharedImageKey != null && sharedScope != null && animatedScope != null) {
+        with(sharedScope) {
+            Modifier.sharedBounds(
+                sharedContentState = rememberSharedContentState(sharedImageKey),
+                animatedVisibilityScope = animatedScope,
+                boundsTransform = { _, _ -> spring(dampingRatio = 0.9f, stiffness = 380f) }
+            )
+        }
+    } else {
+        Modifier
+    }
+
+    val titleSharedMod = if (sharedTitleKey != null && sharedScope != null && animatedScope != null) {
+        with(sharedScope) {
+            Modifier.sharedBounds(
+                sharedContentState = rememberSharedContentState(sharedTitleKey),
+                animatedVisibilityScope = animatedScope
+            ).skipToLookaheadSize()
+        }
+    } else {
+        Modifier
+    }
 
     Column(
         modifier = modifier
@@ -249,7 +304,8 @@ private fun TidbitArticleDetail(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(193.dp),
+                .height(193.dp)
+                .then(imageSharedMod),
             shape = RoundedCornerShape(corner = CornerSize(20.dp))
         ) {
             AsyncImage(
@@ -266,7 +322,7 @@ private fun TidbitArticleDetail(
             category = presentation.category
         )
 
-        Text(text = presentation.title, style = MaterialTheme.typography.titleLarge)
+        Text(text = presentation.title, modifier = titleSharedMod, style = MaterialTheme.typography.titleLarge)
         CustomRichText(
             modifier = Modifier.padding(horizontal = 4.dp),
             text = presentation.content

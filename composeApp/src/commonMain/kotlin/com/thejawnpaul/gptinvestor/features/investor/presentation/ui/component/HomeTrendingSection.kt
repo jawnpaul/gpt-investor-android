@@ -1,5 +1,15 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,10 +27,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -42,10 +54,21 @@ fun HomeTrendingSection(
     onClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    when {
-        view.loading -> {
-            LazyRow(
-                modifier = modifier.fillMaxWidth(),
+    val displayState = when {
+        view.loading -> 0
+        view.showError -> 1
+        else -> 2
+    }
+
+    AnimatedContent(
+        targetState = displayState,
+        transitionSpec = { fadeIn(tween(220)) togetherWith fadeOut(tween(150)) },
+        label = "TrendingSection",
+        modifier = modifier
+    ) { state ->
+        when (state) {
+            0 -> LazyRow(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp)
             ) {
@@ -53,22 +76,26 @@ fun HomeTrendingSection(
                     HomeTrendingShimmer()
                 }
             }
-        }
-        view.showError -> {
-            HomeErrorCard(
+            1 -> HomeErrorCard(
                 message = stringResource(Res.string.live_prices_unavailable),
                 onRetry = onRetry,
-                modifier = modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
-        }
-        else -> {
-            LazyRow(
-                modifier = modifier.fillMaxWidth(),
+            else -> LazyRow(
+                modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(view.companies) { stock ->
-                    HomeTrendingMoverItem(stock = stock, onClick = onClick)
+                items(view.companies, key = { it.tickerSymbol }) { stock ->
+                    HomeTrendingMoverItem(
+                        stock = stock,
+                        onClick = onClick,
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = tween(220),
+                            placementSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                            fadeOutSpec = tween(150)
+                        )
+                    )
                 }
             }
         }
@@ -79,11 +106,22 @@ fun HomeTrendingSection(
 fun HomeTrendingMoverItem(stock: TrendingStockPresentation, onClick: (String) -> Unit, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     val avatarColor = remember(stock.tickerSymbol) { tickerAvatarColor(stock.tickerSymbol) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.97f else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "pressScale"
+    )
 
     Surface(
-        modifier = modifier,
+        modifier = modifier.graphicsLayer {
+            scaleX = scale
+            scaleY = scale
+        },
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surface,
+        interactionSource = interactionSource,
         onClick = { onClick(stock.tickerSymbol) }
     ) {
         Row(

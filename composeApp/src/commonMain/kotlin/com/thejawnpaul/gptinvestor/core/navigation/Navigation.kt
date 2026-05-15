@@ -48,6 +48,9 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.Home
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.OnboardingScreen
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.viewmodel.OnboardingAction
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.viewmodel.OnboardingViewModel
+import com.thejawnpaul.gptinvestor.features.search.presentation.state.SearchAction
+import com.thejawnpaul.gptinvestor.features.search.presentation.ui.SearchScreen
+import com.thejawnpaul.gptinvestor.features.search.presentation.viewmodel.SearchViewModel
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsAction
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsScreen
 import com.thejawnpaul.gptinvestor.features.settings.presentation.SettingsViewModel
@@ -151,7 +154,7 @@ fun SetUpNavGraph(
                                 }
 
                                 HomeAction.OnGoToDiscover -> {
-                                    navController.navigate(Screen.DiscoverTabScreen.route)
+                                    navController.navigate(Screen.DiscoverTabScreen.createRoute())
                                 }
 
                                 HomeAction.OnGoToHistory -> {
@@ -213,7 +216,13 @@ fun SetUpNavGraph(
                 }
                 composable(
                     route = Screen.DiscoverTabScreen.route,
-                    deepLinks = listOf(navDeepLink { uriPattern = Screen.DiscoverTabScreen.DEEP_LINK })
+                    deepLinks = listOf(navDeepLink { uriPattern = Screen.DiscoverTabScreen.DEEP_LINK }),
+                    arguments = listOf(
+                        navArgument("sector") {
+                            nullable = true
+                            defaultValue = null
+                        }
+                    )
                 ) {
                     val viewModel = koinViewModel<DiscoverViewModel>()
                     val state = viewModel.discoveryScreenState.collectAsState()
@@ -724,7 +733,23 @@ fun SetUpNavGraph(
                 }
 
                 composable(route = Screen.SearchScreen.route) {
-                    // TODO: implement stock search screen
+                    val viewModel = koinViewModel<SearchViewModel>()
+                    val state = viewModel.uiState.collectAsState()
+                    val scope = rememberCoroutineScope()
+                    LaunchedEffect(Unit) {
+                        viewModel.actions.onEach { action ->
+                            when (action) {
+                                SearchAction.OnGoBack -> navController.popBackStack()
+                                is SearchAction.OnNavigateToCompany ->
+                                    navController.navigate(Screen.CompanyDetailScreen.createRoute(action.ticker))
+                                is SearchAction.OnNavigateToConversation ->
+                                    navController.navigate(Screen.ConversationScreen.createRoute(action.query))
+                                is SearchAction.OnNavigateToSector ->
+                                    navController.navigate(Screen.DiscoverTabScreen.createRoute(action.sectorKey))
+                            }
+                        }.launchIn(scope)
+                    }
+                    SearchScreen(state = state.value, onEvent = viewModel::handleEvent)
                 }
 
                 composable(route = Screen.AllTrendingScreen.route) {

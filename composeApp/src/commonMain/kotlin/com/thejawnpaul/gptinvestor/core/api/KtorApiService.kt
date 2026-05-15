@@ -27,6 +27,8 @@ import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityRe
 import com.thejawnpaul.gptinvestor.features.guest.data.remote.GuestLoginRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenResponse
+import com.thejawnpaul.gptinvestor.features.search.data.remote.ClearHistoryResponse
+import com.thejawnpaul.gptinvestor.features.search.data.remote.SearchResponse
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.AllTidbitResponse
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitBookmarkRequest
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitBookmarkResponse
@@ -37,6 +39,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.data.remote.TopPickRemote
 import com.thejawnpaul.gptinvestor.remote.TokenResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
@@ -198,6 +201,13 @@ class KtorApiService(@Provided private val client: HttpClient) {
         client.post("v1/company-logos") {
             setBody(request)
         }.toKtorResponse()
+
+    suspend fun getSearchResults(query: String? = null): KtorResponse<SearchResponse> = client.get("v1.1/search") {
+        if (!query.isNullOrBlank()) parameter("q", query)
+    }.toKtorResponse()
+
+    suspend fun clearSearchHistory(): KtorResponse<ClearHistoryResponse> =
+        client.delete("v1.1/search/history").toKtorResponse()
 }
 
 class KtorResponse<T>(val isSuccessful: Boolean, val body: T?, val errorBody: String?, val code: Int)

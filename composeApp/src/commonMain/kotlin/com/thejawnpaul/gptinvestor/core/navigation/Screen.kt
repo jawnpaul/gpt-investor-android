@@ -53,8 +53,10 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
     }
 
     data object HomeTabScreen : Screen("home_tab_screen", true)
-    data object DiscoverTabScreen : Screen("discover_tab_screen", true) {
+    data object DiscoverTabScreen : Screen("discover_tab_screen?sector={sector}", true) {
         const val DEEP_LINK = "app://gpt-investor/discover_tab_screen"
+        fun createRoute(sectorKey: String? = null) =
+            if (sectorKey != null) "discover_tab_screen?sector=$sectorKey" else "discover_tab_screen"
     }
     data object HistoryTabScreen : Screen("history_tab_screen", true)
 

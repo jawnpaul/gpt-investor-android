@@ -28,6 +28,7 @@
     <string name="synthesize_key_findings">Synthesize key findings into an actionable investment strategy</string>
     <string name="let_s_go">Let's go!</string>
     <string name="retry">Retry</string>
+    <string name="clear">Clear</string>
     <string name="something_went_wrong">Something went wrong</string>
     <string name="download_report">Download report</string>
     <string name="save_the_full_analysis">Save the full analysis as a PDF for offline reference</string>

@@ -90,6 +90,7 @@ class HomeViewModel(
         getAvailableModels()
         getDefaultPrompts()
         getTodayTidbit()
+        logHomeScreenViewed()
 
         viewModelScope.launch {
             preferences.themePreference.collect { theme ->
@@ -344,17 +345,37 @@ class HomeViewModel(
                     getTodayTidbit()
                 }
 
-                HomeEvent.GoToSearch -> _actions.emit(HomeAction.NavigateToSearch)
+                HomeEvent.GoToSearch -> {
+                    analyticsLogger.logEvent(
+                        eventName = "home-search-tapped",
+                        params = mapOf("user_type" to if (uiState.value.isGuestSession) "guest" else "authenticated")
+                    )
+                    _actions.emit(HomeAction.NavigateToSearch)
+                }
 
                 HomeEvent.GoToAllTrending -> _actions.emit(HomeAction.NavigateToAllTrending)
 
                 HomeEvent.GoToAllTopPicks -> _actions.emit(HomeAction.OnGoToAllTopPicks)
 
                 is HomeEvent.ClickTrendingCompany -> {
+                    analyticsLogger.logEvent(
+                        eventName = "trending-stock-tapped",
+                        params = mapOf(
+                            "ticker" to event.ticker,
+                            "user_type" to if (uiState.value.isGuestSession) "guest" else "authenticated"
+                        )
+                    )
                     _actions.emit(HomeAction.OnGoToCompanyDetail(event.ticker))
                 }
 
                 is HomeEvent.ClickTopPick -> {
+                    analyticsLogger.logEvent(
+                        eventName = "home-top-pick-tapped",
+                        params = mapOf(
+                            "top_pick_id" to event.id,
+                            "user_type" to if (uiState.value.isGuestSession) "guest" else "authenticated"
+                        )
+                    )
                     _actions.emit(HomeAction.OnGoToTopPickDetail(event.id))
                 }
             }
@@ -435,6 +456,20 @@ class HomeViewModel(
                         )
                     }
                 }
+        }
+    }
+
+    private fun logHomeScreenViewed() {
+        viewModelScope.launch {
+            val isGuest = preferences.isGuestLoggedIn.first() == true
+            val isFirstInstall = preferences.isFirstInstall.first() == true
+            analyticsLogger.logEvent(
+                eventName = "home-screen-viewed",
+                params = mapOf(
+                    "user_type" to if (isGuest) "guest" else "authenticated",
+                    "is_returning_user" to !isFirstInstall
+                )
+            )
         }
     }
 

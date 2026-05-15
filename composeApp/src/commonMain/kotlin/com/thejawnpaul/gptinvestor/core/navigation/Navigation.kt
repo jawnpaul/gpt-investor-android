@@ -743,7 +743,9 @@ fun SetUpNavGraph(
                                 is SearchAction.OnNavigateToCompany ->
                                     navController.navigate(Screen.CompanyDetailScreen.createRoute(action.ticker))
                                 is SearchAction.OnNavigateToConversation ->
-                                    navController.navigate(Screen.ConversationScreen.createRoute(action.query))
+                                    navController.navigate(
+                                        Screen.ConversationScreen.createRoute(chatInput = action.query)
+                                    )
                                 is SearchAction.OnNavigateToSector ->
                                     navController.navigate(Screen.DiscoverTabScreen.createRoute(action.sectorKey))
                             }
@@ -790,8 +792,8 @@ fun SetUpNavGraph(
                     )
                 }
             }
-        } // end CompositionLocalProvider
-    } // end SharedTransitionLayout
+        }
+    }
 
     LaunchedEffect(isUserSignedIn, isGuestSignedIn) {
         val currentRoute = navController.currentDestination?.route ?: return@LaunchedEffect

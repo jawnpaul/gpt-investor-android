@@ -265,7 +265,7 @@ private fun HomeScreenContent(
                         emoji = "🔥",
                         label = stringResource(Res.string.trending_today),
                         title = stringResource(Res.string.movers_right_now),
-                        onSeeAll = { onEvent(HomeEvent.GoToAllTrending) }
+                        onSeeAll = null
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     HomeTrendingSection(

@@ -206,13 +206,11 @@ fun SetUpNavGraph(
                         }.launchIn(scope)
                     }
 
-                    CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
-                        HomeScreen(
-                            modifier = Modifier,
-                            state = state.value,
-                            onEvent = homeViewModel::handleEvent
-                        )
-                    }
+                    HomeScreen(
+                        modifier = Modifier,
+                        state = state.value,
+                        onEvent = homeViewModel::handleEvent
+                    )
                 }
                 composable(
                     route = Screen.DiscoverTabScreen.route,
@@ -590,13 +588,11 @@ fun SetUpNavGraph(
                         }.launchIn(scope)
                     }
 
-                    CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
-                        TidbitDetailScreen(
-                            modifier = Modifier,
-                            onEvent = viewModel::handleDetailEvent,
-                            state = state.value
-                        )
-                    }
+                    TidbitDetailScreen(
+                        modifier = Modifier,
+                        onEvent = viewModel::handleDetailEvent,
+                        state = state.value
+                    )
                 }
 
                 composable(route = Screen.TidbitScreen.route) {

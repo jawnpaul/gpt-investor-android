@@ -35,8 +35,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.core.navigation.LocalAnimatedVisibilityScope
-import com.thejawnpaul.gptinvestor.core.navigation.LocalSharedTransitionScope
 import com.thejawnpaul.gptinvestor.features.component.ShimmerBox
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
@@ -52,8 +50,6 @@ fun HomeTidbitSection(
     isLoading: Boolean = false
 ) {
     val gptInvestorColors = LocalGPTInvestorColors.current
-    val sharedScope = LocalSharedTransitionScope.current
-    val animatedScope = LocalAnimatedVisibilityScope.current
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
@@ -88,20 +84,8 @@ fun HomeTidbitSection(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    val imageSharedMod = if (sharedScope != null && animatedScope != null) {
-                        with(sharedScope) {
-                            Modifier.sharedBounds(
-                                sharedContentState = rememberSharedContentState("tidbit-image-${tidbit.id}"),
-                                animatedVisibilityScope = animatedScope,
-                                boundsTransform = { _, _ -> spring(dampingRatio = 0.9f, stiffness = 380f) }
-                            )
-                        }
-                    } else {
-                        Modifier
-                    }
-
                     Surface(
-                        modifier = Modifier.size(52.dp).then(imageSharedMod),
+                        modifier = Modifier.size(52.dp),
                         shape = RoundedCornerShape(12.dp),
                         color = MaterialTheme.colorScheme.surface
                     ) {
@@ -122,19 +106,8 @@ fun HomeTidbitSection(
                             style = MaterialTheme.typography.labelSmall,
                             color = gptInvestorColors.textColors.secondary50
                         )
-                        val titleSharedMod = if (sharedScope != null && animatedScope != null) {
-                            with(sharedScope) {
-                                Modifier.sharedBounds(
-                                    sharedContentState = rememberSharedContentState("tidbit-title-${tidbit.id}"),
-                                    animatedVisibilityScope = animatedScope
-                                ).skipToLookaheadSize()
-                            }
-                        } else {
-                            Modifier
-                        }
                         Text(
                             text = tidbit.title,
-                            modifier = titleSharedMod,
                             style = MaterialTheme.typography.bodyLarge,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis

@@ -71,6 +71,8 @@ class TopPickRepository(
                     }
                     emit(Either.Right(picks))
                 } ?: emit(Either.Left(Failure.DataError))
+            } else {
+                emit(Either.Left(Failure.ServerError))
             }
         } catch (e: Exception) {
             Logger.e(e.stackTraceToString())

@@ -87,8 +87,6 @@ class HomeViewModel(
         getTopPicks()
         getTrendingCompanies()
         getCurrentUser()
-        getAvailableModels()
-        getDefaultPrompts()
         getTodayTidbit()
         logHomeScreenViewed()
 

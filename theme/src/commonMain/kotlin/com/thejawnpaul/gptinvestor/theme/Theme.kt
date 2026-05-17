@@ -92,7 +92,7 @@ fun GPTInvestorTheme(
         "Light" -> false
         "Dark" -> true
         "System" -> darkTheme
-        else -> true
+        else -> darkTheme
     }
 
     val dynamicColorScheme = rememberDynamicColorScheme(useDarkTheme, dynamicColor)

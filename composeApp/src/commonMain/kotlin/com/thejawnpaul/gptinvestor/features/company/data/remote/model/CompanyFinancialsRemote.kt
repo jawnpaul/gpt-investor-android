@@ -43,7 +43,9 @@ data class CompanyNews(
     @SerialName("thumbnail") val thumbNail: NewsThumbNail?,
     @SerialName("title") val title: String,
     @SerialName("type") val type: String,
-    @SerialName("uuid") val id: String
+    @SerialName("uuid") val id: String,
+    @SerialName("what_it_means") val whatItMeans: String? = null,
+    @SerialName("what_it_means_sentiment") val whatItMeansSentiment: String? = null
 ) {
     fun toPresentation() = NewsPresentation(
         title = title,

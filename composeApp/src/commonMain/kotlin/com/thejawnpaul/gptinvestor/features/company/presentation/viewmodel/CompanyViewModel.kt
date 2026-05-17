@@ -9,8 +9,9 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
-import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
-import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
+import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSentiment
+import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumberType
+import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyFinancialsView
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCompanyView
@@ -39,7 +40,7 @@ import org.koin.core.annotation.Provided
 
 @KoinViewModel
 class CompanyViewModel(
-    private val getCompanyUseCase: GetCompanyUseCase,
+    private val getCompanyBriefUseCase: GetCompanyBriefUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val getInputPromptUseCase: GetInputPromptUseCase,
     private val modelsRepository: ModelsRepository,
@@ -88,7 +89,7 @@ class CompanyViewModel(
     private fun getCompany() {
         selectedCompanyTicker?.let { ticker ->
             _selectedCompany.update { it.copy(loading = true) }
-            getCompanyUseCase(ticker) {
+            getCompanyBriefUseCase(ticker) {
                 it.onFailure {
                     _selectedCompany.update { state ->
                         state.copy(
@@ -102,17 +103,18 @@ class CompanyViewModel(
                         view.copy(
                             conversation = CompanyDetailDefaultConversation(
                                 id = 0,
-                                response = company
+                                response = null
                             ),
                             loading = false,
-                            companyName = company.name ?: "",
+                            companyName = company.name,
                             header = CompanyHeaderPresentation(
                                 companyTicker = company.ticker,
-                                companyLogo = company.imageUrl?.toHttpsUrl() ?: "",
-                                price = company.price ?: 0.0f,
-                                percentageChange = company.change ?: 0.0f,
-                                companyName = company.name ?: ""
-                            )
+                                companyLogo = company.logoUrl,
+                                price = company.price,
+                                percentageChange = company.change,
+                                companyName = company.name
+                            ),
+                            brief = company
                         )
                     }
                 }
@@ -331,6 +333,28 @@ class CompanyViewModel(
             is CompanyDetailEvent.SendFeedback -> {
                 sendFeedback(event.messageId, event.status, event.reason)
             }
+
+            is CompanyDetailEvent.BriefSentimentViewed -> {
+                analyticsLogger.logEvent(
+                    eventName = "brief-sentiment-viewed",
+                    params = mapOf(
+                        "ticker" to (_selectedCompany.value.brief?.ticker ?: ""),
+                        "sentiment" to event.sentiment.name.lowercase(),
+                        "user_type" to if (_selectedCompany.value.isGuestSession) "guest" else "logged_in"
+                    )
+                )
+            }
+
+            is CompanyDetailEvent.BriefKeyNumberExpanded -> {
+                analyticsLogger.logEvent(
+                    eventName = "brief-key-number-expanded",
+                    params = mapOf(
+                        "ticker" to (_selectedCompany.value.brief?.ticker ?: ""),
+                        "key_number_type" to event.keyNumberType.name,
+                        "user_type" to if (_selectedCompany.value.isGuestSession) "guest" else "logged_in"
+                    )
+                )
+            }
         }
     }
 
@@ -424,6 +448,8 @@ sealed interface CompanyDetailEvent {
     data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : CompanyDetailEvent
 
     data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) : CompanyDetailEvent
+    data class BriefSentimentViewed(val sentiment: BriefSentiment) : CompanyDetailEvent
+    data class BriefKeyNumberExpanded(val keyNumberType: KeyNumberType) : CompanyDetailEvent
 }
 
 sealed interface CompanyDetailAction {

@@ -29,16 +29,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.financial_clarity_powered_by_ai
 import com.thejawnpaul.gptinvestor.gpt_investor
-import com.thejawnpaul.gptinvestor.ic_logo
+import com.thejawnpaul.gptinvestor.input_logo
 import com.thejawnpaul.gptinvestor.mesh_background
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import kotlinx.coroutines.delay
@@ -91,76 +90,71 @@ fun AnimatedSplashScreen(onSplashFinish: () -> Unit, modifier: Modifier = Modifi
         delay(SPLASH_DURATION_MS - FADE_IN_DURATION_MS) // Wait for the remaining duration
         onSplashFinish()
     }
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Wavy Background Image (Bottom)
+        Image(
+            painter = painterResource(Res.drawable.mesh_background),
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 160.dp)
+                .fillMaxHeight(0.4f) // Adjust height as needed
+                .align(Alignment.BottomCenter)
+                .alpha(0.4f) // Make it subtle
 
-    Surface(
-        modifier = modifier
-            .fillMaxSize(),
-        contentColor = Color.White
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Wavy Background Image (Bottom)
-            Image(
-                painter = painterResource(Res.drawable.mesh_background),
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 160.dp)
-                    .fillMaxHeight(0.4f) // Adjust height as needed
-                    .align(Alignment.BottomCenter)
-                    .alpha(0.4f) // Make it subtle
+        )
 
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.weight(1.3f)) // Pushes content down a bit
+
+            // Glowing Logo
+            Box(contentAlignment = Alignment.Center) {
+                // Main Logo
+                Image(
+                    painter = painterResource(Res.drawable.input_logo),
+                    contentDescription = "GPT Investor Logo",
+                    modifier = Modifier
+                        .size(60.dp)
+                        .graphicsLayer(
+                            scaleX = glowScale,
+                            scaleY = glowScale,
+                            alpha = glowAlpha
+                        )
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = stringResource(Res.string.gpt_investor),
+                style = MaterialTheme.typography.titleLarge
             )
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.weight(1.3f)) // Pushes content down a bit
+            Spacer(modifier = Modifier.weight(1f)) // Pushes the bottom text down
 
-                // Glowing Logo
-                Box(contentAlignment = Alignment.Center) {
-                    // Main Logo
-                    Image(
-                        painter = painterResource(Res.drawable.ic_logo),
-                        contentDescription = "GPT Investor Logo",
-                        modifier = Modifier
-                            .size(60.dp)
-                            .graphicsLayer(
-                                scaleX = glowScale,
-                                scaleY = glowScale,
-                                alpha = glowAlpha
-                            )
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = stringResource(Res.string.gpt_investor),
-                    style = MaterialTheme.typography.titleLarge
-                )
-
-                Spacer(modifier = Modifier.weight(1f)) // Pushes the bottom text down
-
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(Res.string.financial_clarity_powered_by_ai),
-                    style = MaterialTheme.typography.titleLarge,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.weight(0.5f))
-            }
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(Res.string.financial_clarity_powered_by_ai),
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.weight(0.5f))
         }
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@PreviewLightDark
 @Composable
 private fun AnimatedSplashScreenPreview() {
     GPTInvestorTheme {
-        AnimatedSplashScreen(onSplashFinish = { })
+        Surface {
+            AnimatedSplashScreen(onSplashFinish = { })
+        }
     }
 }

@@ -8,19 +8,26 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.features.company.data.local.dao.CompanyDao
+import com.thejawnpaul.gptinvestor.features.company.data.local.model.PriceChange
 import com.thejawnpaul.gptinvestor.features.company.data.paging.CompanyPagingSource
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyLogosRequest
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
+import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyBrief
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyFinancials
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SearchCompanyQuery
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.company.domain.model.TrendingCompany
+import com.thejawnpaul.gptinvestor.features.company.domain.model.toBrief
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
+import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
@@ -29,7 +36,8 @@ import org.koin.core.annotation.Singleton
 class CompanyRepository(
     private val apiService: KtorApiService,
     private val companyDao: CompanyDao,
-    @Provided private val analyticsLogger: AnalyticsLogger
+    @Provided private val analyticsLogger: AnalyticsLogger,
+    private val appPreferences: AppPreferences
 ) : ICompanyRepository {
 
     override suspend fun getAllSector(): Flow<Either<Failure, List<SectorInput>>> = flow {
@@ -164,6 +172,55 @@ class CompanyRepository(
         }
     }
 
+    override suspend fun getCompanyBrief(ticker: String): Flow<Either<Failure, CompanyBrief>> = flow {
+        val isGuest = appPreferences.isGuestLoggedIn.first() == true
+        val userType = if (isGuest) "guest" else "logged_in"
+
+        analyticsLogger.logEvent(
+            eventName = "brief-started",
+            params = mapOf("ticker" to ticker, "user_type" to userType)
+        )
+
+        val startMs = Clock.System.now().toEpochMilliseconds()
+        try {
+            val response = apiService.getCompanyBrief(ticker)
+            if (response.isSuccessful) {
+                response.body?.let {
+                    analyticsLogger.logEvent(
+                        eventName = "brief-completed",
+                        params = mapOf(
+                            "ticker" to ticker,
+                            "duration_ms" to (Clock.System.now().toEpochMilliseconds() - startMs),
+                            "user_type" to userType
+                        )
+                    )
+                    emit(Either.Right(it.toBrief()))
+                }
+            } else {
+                analyticsLogger.logEvent(
+                    eventName = "brief-failed",
+                    params = mapOf(
+                        "ticker" to ticker,
+                        "error_type" to response.code,
+                        "user_type" to userType
+                    )
+                )
+                emit(Either.Left(Failure.ServerError))
+            }
+        } catch (e: Exception) {
+            Logger.e(e.stackTraceToString())
+            analyticsLogger.logEvent(
+                eventName = "brief-failed",
+                params = mapOf(
+                    "ticker" to ticker,
+                    "error_type" to e.message.toString(),
+                    "user_type" to userType
+                )
+            )
+            emit(Either.Left(Failure.ServerError))
+        }
+    }
+
     override fun searchCompaniesPaged(query: SearchCompanyQuery): Flow<PagingData<Company>> = Pager(
         config = PagingConfig(
             pageSize = CompanyPagingSource.PAGE_SIZE,
@@ -178,4 +235,31 @@ class CompanyRepository(
             )
         }
     ).flow
+
+    override suspend fun searchCompaniesFromNetwork(query: String): Flow<Either<Failure, List<Company>>> = flow {
+        val response = apiService.getPagedCompanies(query = query, page = 1, pageSize = 1)
+        if (response.isSuccessful) {
+            val companies = response.body?.data?.map { remote ->
+                Company(
+                    ticker = remote.ticker,
+                    summary = remote.summary,
+                    name = remote.name,
+                    logo = remote.logoUrl.toHttpsUrl(),
+                    change = PriceChange(change = 0f, date = 1L)
+                )
+            } ?: emptyList()
+            emit(Either.Right(companies))
+        } else {
+            emit(Either.Left(Failure.ServerError))
+        }
+    }
+
+    override suspend fun getCompanyLogos(tickers: List<String>): Either<Failure, Map<String, String>> {
+        val response = apiService.getCompanyLogos(CompanyLogosRequest(tickers))
+        return if (response.isSuccessful) {
+            Either.Right(response.body?.associate { it.ticker to (it.logoUrl?.toHttpsUrl() ?: "") } ?: emptyMap())
+        } else {
+            Either.Left(Failure.ServerError)
+        }
+    }
 }

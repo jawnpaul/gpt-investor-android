@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,52 +39,54 @@ fun AllTopPicksScreen(
     onGoToDetail: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
-        Column(modifier = Modifier) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onGoBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = stringResource(Res.string.back)
-                    )
-                }
-                Text(
-                    text = stringResource(Res.string.all_top_picks),
-                    style = MaterialTheme.typography.headlineSmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center
-                )
-            }
-
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(horizontal = 0.dp)
-            ) {
-                if (state.loading) {
-                    item {
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+    Scaffold(modifier) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
+            Column(modifier = Modifier) {
+                Row(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onGoBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = stringResource(Res.string.back)
+                        )
                     }
+                    Text(
+                        text = stringResource(Res.string.all_top_picks),
+                        style = MaterialTheme.typography.headlineSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
                 }
 
-                items(
-                    items = state.topPicks,
-                    key = { topPickPresentation -> topPickPresentation.id }
-                ) { pickPresentation ->
-                    SingleTopPickItem(
-                        modifier = Modifier,
-                        pickPresentation = pickPresentation,
-                        onClick = {
-                            onGoToDetail(pickPresentation.id)
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(horizontal = 0.dp)
+                ) {
+                    if (state.loading) {
+                        item {
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                         }
-                    )
-                    Spacer(modifier = Modifier.size(16.dp))
+                    }
+
+                    items(
+                        items = state.topPicks,
+                        key = { topPickPresentation -> topPickPresentation.id }
+                    ) { pickPresentation ->
+                        SingleTopPickItem(
+                            modifier = Modifier,
+                            pickPresentation = pickPresentation,
+                            onClick = {
+                                onGoToDetail(pickPresentation.id)
+                            }
+                        )
+                        Spacer(modifier = Modifier.size(16.dp))
+                    }
                 }
             }
         }

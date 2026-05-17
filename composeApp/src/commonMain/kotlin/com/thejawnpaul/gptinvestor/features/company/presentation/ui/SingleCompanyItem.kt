@@ -41,7 +41,7 @@ fun SingleCompanyItem(company: CompanyPresentation, onClick: (String) -> Unit, m
     val gptInvestorColors = LocalGPTInvestorColors.current
 
     OutlinedCard(
-        modifier = modifier.padding(horizontal = 16.dp),
+        modifier = modifier,
         onClick = { onClick(company.ticker) }
     ) {
         Column(

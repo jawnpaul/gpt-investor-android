@@ -8,9 +8,12 @@ import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfigClient
+import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.User
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DrawerState
+import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetTrendingCompaniesUseCase
+import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
@@ -24,7 +27,9 @@ import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepo
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
+import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -34,12 +39,15 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.koin.core.annotation.KoinViewModel
 import org.koin.core.annotation.Provided
 
 @KoinViewModel
 class HomeViewModel(
     private val getTopPicksUseCase: GetTopPicksUseCase,
+    private val getTrendingCompaniesUseCase: GetTrendingCompaniesUseCase,
     private val authenticationRepository: AuthenticationRepository,
     private val getDefaultPromptsUseCase: GetDefaultPromptsUseCase,
     remoteConfig: RemoteConfigClient,
@@ -50,7 +58,7 @@ class HomeViewModel(
     private val tidbitRepository: TidbitRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(HomeUiState())
+    private val _uiState = MutableStateFlow(HomeUiState(timePeriod = computeTimePeriod()))
     val uiState = combine(
         _uiState.asStateFlow(),
         preferences.userName,
@@ -77,10 +85,10 @@ class HomeViewModel(
     init {
         remoteConfig.init()
         getTopPicks()
+        getTrendingCompanies()
         getCurrentUser()
-        getAvailableModels()
-        getDefaultPrompts()
         getTodayTidbit()
+        logHomeScreenViewed()
 
         viewModelScope.launch {
             preferences.themePreference.collect { theme ->
@@ -98,10 +106,71 @@ class HomeViewModel(
     }
 
     private fun getTopPicks() {
-        getTopPicksUseCase(GetTopPicksUseCase.None()) {
-            it.onFailure {
+        _uiState.update { it.copy(topPicksView = it.topPicksView.copy(loading = true, error = null)) }
+        getTopPicksUseCase(GetTopPicksUseCase.None()) { result ->
+            result.onFailure {
+                _uiState.update { state ->
+                    state.copy(topPicksView = state.topPicksView.copy(loading = false, error = "Something went wrong"))
+                }
             }
-            it.onSuccess {
+            result.onSuccess { picks ->
+                _uiState.update { state ->
+                    state.copy(
+                        topPicksView = state.topPicksView.copy(
+                            loading = false,
+                            error = null,
+                            topPicks = picks.map { pick ->
+                                TopPickPresentation(
+                                    id = pick.id,
+                                    companyName = pick.companyName,
+                                    ticker = pick.ticker,
+                                    rationale = pick.rationale,
+                                    metrics = pick.metrics,
+                                    risks = pick.risks,
+                                    confidenceScore = pick.confidenceScore,
+                                    isSaved = pick.isSaved,
+                                    percentageChange = pick.percentageChange,
+                                    imageUrl = pick.imageUrl,
+                                    currentPrice = pick.currentPrice
+                                )
+                            }
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun getTrendingCompanies() {
+        _uiState.update { it.copy(trendingCompaniesView = it.trendingCompaniesView.copy(loading = true, error = null)) }
+        getTrendingCompaniesUseCase(GetTrendingCompaniesUseCase.None()) { result ->
+            result.onFailure {
+                _uiState.update { state ->
+                    state.copy(
+                        trendingCompaniesView = state.trendingCompaniesView.copy(
+                            loading = false,
+                            error = "Something went wrong"
+                        )
+                    )
+                }
+            }
+            result.onSuccess { companies ->
+                _uiState.update { state ->
+                    state.copy(
+                        trendingCompaniesView = state.trendingCompaniesView.copy(
+                            loading = false,
+                            error = null,
+                            companies = companies.map { company ->
+                                TrendingStockPresentation(
+                                    companyName = company.companyName,
+                                    tickerSymbol = company.tickerSymbol,
+                                    imageUrl = company.imageUrl,
+                                    percentageChange = company.percentageChange.toTwoDecimalPlaces()
+                                )
+                            }
+                        )
+                    )
+                }
             }
         }
     }
@@ -264,6 +333,49 @@ class HomeViewModel(
                 HomeEvent.GoToSignUp -> {
                     _actions.emit(HomeAction.OnGoToSignUp)
                 }
+
+                HomeEvent.RetryTrendingCompanies -> getTrendingCompanies()
+
+                HomeEvent.RetryTopPicks -> getTopPicks()
+
+                HomeEvent.RetryTidbit -> {
+                    _uiState.update { it.copy(homeTidbitView = HomeTidbitView(loading = true)) }
+                    getTodayTidbit()
+                }
+
+                HomeEvent.GoToSearch -> {
+                    analyticsLogger.logEvent(
+                        eventName = "home-search-tapped",
+                        params = mapOf("user_type" to if (uiState.value.isGuestSession) "guest" else "authenticated")
+                    )
+                    _actions.emit(HomeAction.NavigateToSearch)
+                }
+
+                HomeEvent.GoToAllTrending -> _actions.emit(HomeAction.NavigateToAllTrending)
+
+                HomeEvent.GoToAllTopPicks -> _actions.emit(HomeAction.OnGoToAllTopPicks)
+
+                is HomeEvent.ClickTrendingCompany -> {
+                    analyticsLogger.logEvent(
+                        eventName = "trending-stock-tapped",
+                        params = mapOf(
+                            "ticker" to event.ticker,
+                            "user_type" to if (uiState.value.isGuestSession) "guest" else "authenticated"
+                        )
+                    )
+                    _actions.emit(HomeAction.OnGoToCompanyDetail(event.ticker))
+                }
+
+                is HomeEvent.ClickTopPick -> {
+                    analyticsLogger.logEvent(
+                        eventName = "home-top-pick-tapped",
+                        params = mapOf(
+                            "top_pick_id" to event.id,
+                            "user_type" to if (uiState.value.isGuestSession) "guest" else "authenticated"
+                        )
+                    )
+                    _actions.emit(HomeAction.OnGoToTopPickDetail(event.id))
+                }
             }
         }
     }
@@ -319,21 +431,43 @@ class HomeViewModel(
     }
 
     private fun getTodayTidbit() {
+        _uiState.update { it.copy(homeTidbitView = HomeTidbitView(loading = true)) }
         viewModelScope.launch {
-            tidbitRepository.getTodayTidbit().onSuccess { tidbit ->
-                _uiState.update {
-                    it.copy(
-                        homeTidbitView = with(tidbit) {
-                            HomeTidbitView(
-                                id = id,
-                                previewUrl = previewUrl,
-                                title = title,
-                                description = summary
+            tidbitRepository.getTodayTidbit()
+                .onSuccess { tidbit ->
+                    _uiState.update {
+                        it.copy(
+                            homeTidbitView = HomeTidbitView(
+                                loading = false,
+                                id = tidbit.id,
+                                previewUrl = tidbit.previewUrl,
+                                title = tidbit.title,
+                                description = tidbit.summary
                             )
-                        }
-                    )
+                        )
+                    }
                 }
-            }
+                .onFailure {
+                    _uiState.update { state ->
+                        state.copy(
+                            homeTidbitView = state.homeTidbitView.copy(loading = false, error = "Something went wrong")
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun logHomeScreenViewed() {
+        viewModelScope.launch {
+            val isGuest = preferences.isGuestLoggedIn.first() == true
+            val isFirstInstall = preferences.isFirstInstall.first() == true
+            analyticsLogger.logEvent(
+                eventName = "home-screen-viewed",
+                params = mapOf(
+                    "user_type" to if (isGuest) "guest" else "authenticated",
+                    "is_returning_user" to !isFirstInstall
+                )
+            )
         }
     }
 
@@ -346,6 +480,17 @@ class HomeViewModel(
             eventName = "navigation-clicked",
             params = params
         )
+    }
+}
+
+enum class TimePeriod { MORNING, AFTERNOON, EVENING }
+
+private fun computeTimePeriod(): TimePeriod {
+    val hour = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
+    return when {
+        hour < 12 -> TimePeriod.MORNING
+        hour < 17 -> TimePeriod.AFTERNOON
+        else -> TimePeriod.EVENING
     }
 }
 
@@ -370,8 +515,9 @@ data class HomeUiState(
     val selectedWaitlistOptions: List<String> = emptyList(),
     val defaultPrompts: List<DefaultPrompt> = emptyList(),
     val drawerState: DrawerState = DrawerState(),
-    val homeTidbitView: HomeTidbitView? = null,
-    val isGuestSession: Boolean = false
+    val homeTidbitView: HomeTidbitView = HomeTidbitView(),
+    val isGuestSession: Boolean = false,
+    val timePeriod: TimePeriod = TimePeriod.MORNING
 )
 
 sealed interface HomeEvent {
@@ -394,6 +540,14 @@ sealed interface HomeEvent {
     data object GoToSettings : HomeEvent
     data object GoToHistory : HomeEvent
     data object GoToSignUp : HomeEvent
+    data object RetryTrendingCompanies : HomeEvent
+    data object RetryTopPicks : HomeEvent
+    data object RetryTidbit : HomeEvent
+    data object GoToSearch : HomeEvent
+    data object GoToAllTrending : HomeEvent
+    data object GoToAllTopPicks : HomeEvent
+    data class ClickTrendingCompany(val ticker: String) : HomeEvent
+    data class ClickTopPick(val id: String) : HomeEvent
 }
 
 sealed interface HomeAction {
@@ -411,4 +565,6 @@ sealed interface HomeAction {
     data object OnGoToSavedTidbits : HomeAction
     data class ShowToast(val message: String) : HomeAction
     data object OnGoToSignUp : HomeAction
+    data object NavigateToSearch : HomeAction
+    data object NavigateToAllTrending : HomeAction
 }

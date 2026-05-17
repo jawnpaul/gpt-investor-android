@@ -49,6 +49,12 @@ class SearchViewModel(
                 _uiState.update { it.copy(query = event.query) }
                 scheduleSearch(event.query)
             }
+            SearchEvent.OnQuerySubmit -> {
+                val query = _uiState.value.query
+                if (query.isNotBlank()) {
+                    analyticsLogger.logEvent("search-query-submitted", mapOf("query" to query))
+                }
+            }
             is SearchEvent.OnStockClick -> {
                 analyticsLogger.logEvent("search-stock-tapped", mapOf("ticker" to event.ticker))
                 emitAction(SearchAction.OnNavigateToCompany(event.ticker))
@@ -89,9 +95,6 @@ class SearchViewModel(
 
     private suspend fun performSearch(query: String?) {
         _uiState.update { it.copy(isLoading = true, error = null) }
-        if (!query.isNullOrBlank()) {
-            analyticsLogger.logEvent("search-query-submitted", mapOf("query" to query))
-        }
         searchRepository.search(query).collect { result ->
             result.onSuccess { sections ->
                 _uiState.update { it.copy(isLoading = false, sections = sections) }

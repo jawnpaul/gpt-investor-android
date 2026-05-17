@@ -42,6 +42,7 @@ fun SearchScreen(state: SearchUiState, onEvent: (SearchEvent) -> Unit, modifier:
                 query = state.query,
                 focusRequester = focusRequester,
                 onQueryChange = { onEvent(SearchEvent.OnQueryChange(it)) },
+                onSearch = { onEvent(SearchEvent.OnQuerySubmit) },
                 onBack = { onEvent(SearchEvent.OnBack) }
             )
         }

@@ -15,6 +15,7 @@ sealed interface SearchEvent {
     data class OnSectorClick(val key: String) : SearchEvent
     data class OnPromptClick(val query: String) : SearchEvent
     data class OnAskGptClick(val query: String) : SearchEvent
+    data object OnQuerySubmit : SearchEvent
     data object OnClearHistory : SearchEvent
     data object OnRetry : SearchEvent
     data object OnBack : SearchEvent

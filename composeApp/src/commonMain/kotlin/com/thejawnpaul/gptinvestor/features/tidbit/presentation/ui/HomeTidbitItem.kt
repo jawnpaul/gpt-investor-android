@@ -18,11 +18,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.see_all
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.tidbit
 import org.jetbrains.compose.resources.stringResource
@@ -103,16 +104,19 @@ fun HomeTidbitItem(
     }
 }
 
-@Preview
+@PreviewLightDark
 @Composable
 private fun HomeTidbitItemPreview() {
-    HomeTidbitItem(
-        tidbitId = "1",
-        imageUrl = "https://www.example.com/image.jpg",
-        title = "Understanding Compound Interest",
-        description = "Compound interest is the interest on a loan or deposit calculated based on both the initial " +
-            "principal and the accumulated interest from previous periods.",
-        onTidbitClick = {},
-        onClickSeeAll = {}
-    )
+    GPTInvestorTheme {
+        HomeTidbitItem(
+            tidbitId = "1",
+            imageUrl = "https://www.example.com/image.jpg",
+            title = "Understanding Compound Interest",
+            description =
+            "Compound interest is the interest on a loan or deposit calculated based on both the initial " +
+                "principal and the accumulated interest from previous periods.",
+            onTidbitClick = {},
+            onClickSeeAll = {}
+        )
+    }
 }

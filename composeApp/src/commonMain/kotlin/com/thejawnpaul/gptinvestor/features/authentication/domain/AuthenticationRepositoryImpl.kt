@@ -19,11 +19,12 @@ import dev.gitlive.firebase.installations.installations
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
 
 @Singleton(binds = [AuthenticationRepository::class])
 class AuthenticationRepositoryImpl(
-    private val analyticsLogger: AnalyticsLogger,
+    @Provided private val analyticsLogger: AnalyticsLogger,
     private val gptInvestorPreferences: AppPreferences,
     private val tokenSyncManager: TokenSyncManager,
     private val apiService: KtorApiService,
@@ -211,6 +212,21 @@ class AuthenticationRepositoryImpl(
         } else {
             val errorMessage = response.errorBody ?: "Guest login failed"
             return Result.failure(Exception(errorMessage))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    override suspend fun acquireGuestToken(): Result<Unit> = try {
+        val id = Firebase.installations.getId()
+        val response = apiService.guestLogin(request = GuestLoginRequest(id = id))
+        if (response.isSuccessful) {
+            response.body?.let { loginResponse ->
+                tokenStorage.saveAccessToken(loginResponse.accessToken ?: "")
+                Result.success(Unit)
+            } ?: Result.failure(Exception("Empty response"))
+        } else {
+            Result.failure(Exception(response.errorBody ?: "Failed to acquire token"))
         }
     } catch (e: Exception) {
         Result.failure(e)

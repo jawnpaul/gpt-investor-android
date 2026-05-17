@@ -28,8 +28,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     private val notificationRepository: NotificationRepository by inject()
 
-    private val imageLoader: ImageLoader by inject()
-
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)
 
@@ -140,7 +138,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 .allowHardware(false) // Disable hardware bitmaps for notifications
                 .build()
 
-            when (val result = imageLoader.execute(request)) {
+            when (val result = ImageLoader(this).execute(request)) {
                 is SuccessResult -> {
                     val bitmap = (result.image.asDrawable(resources) as? BitmapDrawable)?.bitmap
 
@@ -160,7 +158,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
                 else -> showFallbackNotification(notificationBuilder, notificationManager)
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             showFallbackNotification(notificationBuilder, notificationManager)
         }
     }

@@ -189,7 +189,8 @@ ktlint {
         mapOf(
             "ktlint_code_style" to "android_studio",
             "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
-            "max_line_length" to "120"
+            "max_line_length" to "120",
+            "compose_allowed_composition_locals" to "LocalSharedTransitionScope,LocalAnimatedVisibilityScope"
         )
     )
 }

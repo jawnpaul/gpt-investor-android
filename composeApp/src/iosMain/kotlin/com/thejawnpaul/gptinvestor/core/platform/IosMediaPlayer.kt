@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.UIKitView
 import androidx.compose.ui.viewinterop.UIKitViewController
 import kotlinx.cinterop.ExperimentalForeignApi
-import org.koin.compose.koinInject
+import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
 import platform.AVFoundation.AVPlayer
 import platform.AVFoundation.AVPlayerItem
@@ -22,7 +22,7 @@ import platform.Foundation.NSOperationQueue
 import platform.Foundation.NSURL
 
 @Singleton(binds = [MediaPlayer::class])
-class IosMediaPlayer : MediaPlayer {
+class IosMediaPlayer(@Provided private val youtubeProvider: YoutubePlayerProvider) : MediaPlayer {
 
     @OptIn(ExperimentalForeignApi::class)
     @Composable
@@ -36,7 +36,6 @@ class IosMediaPlayer : MediaPlayer {
         modifier: Modifier
     ) {
         if (isYoutube && youtubeVideoId != null) {
-            val youtubeProvider = koinInject<YoutubePlayerProvider>()
             val playerView = remember(youtubeVideoId, autoplay, showControls) {
                 youtubeProvider.createPlayerView(youtubeVideoId, autoplay, showControls)
             }

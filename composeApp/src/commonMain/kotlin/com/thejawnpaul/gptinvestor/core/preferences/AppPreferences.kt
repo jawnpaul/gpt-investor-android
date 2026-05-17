@@ -55,4 +55,7 @@ interface AppPreferences {
     val userName: Flow<String?>
     suspend fun setUserName(name: String)
     suspend fun clearUserName()
+
+    val hasCompletedOnboarding: Flow<Boolean?>
+    suspend fun setHasCompletedOnboarding(completed: Boolean)
 }

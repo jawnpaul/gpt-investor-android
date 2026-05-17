@@ -10,11 +10,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.koin.core.annotation.Provided
 
 @KoinViewModel
 class DefaultAuthenticationViewModel(
     private val authRepository: AuthenticationRepository,
-    private val analyticsLogger: AnalyticsLogger
+    @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
     private val _loading: MutableStateFlow<Boolean> = MutableStateFlow(false)

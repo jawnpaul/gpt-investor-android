@@ -18,7 +18,6 @@ final class SwiftYoutubePlayerProvider: NSObject, YoutubePlayerProvider {
         let delegate = PlayerDelegate()
         playerView.delegate = delegate
 
-        // Retain the delegate for the lifetime of the player view.
         objc_setAssociatedObject(
             playerView,
             &AssociatedKeys.delegateKey,
@@ -36,8 +35,6 @@ final class SwiftYoutubePlayerProvider: NSObject, YoutubePlayerProvider {
         return playerView
     }
 }
-
-// MARK: - Private
 
 private struct AssociatedKeys {
     static var delegateKey: UInt8 = 0

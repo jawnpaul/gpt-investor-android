@@ -34,7 +34,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
@@ -308,7 +308,7 @@ class TidbitPreviewParameterProvider : PreviewParameterProvider<TidbitPresentati
     )
 }
 
-@Preview(showBackground = true, name = "Single Tidbit Item Preview")
+@PreviewLightDark
 @Composable
 private fun SingleTidbitItemPreview(
     @PreviewParameter(TidbitPreviewParameterProvider::class) tidbit: TidbitPresentation

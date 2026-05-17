@@ -12,5 +12,5 @@ import org.koin.core.annotation.Module
         RemoteConfigModule::class
     ]
 )
-@ComponentScan("com.thejawnpaul.gptinvestor")
+@ComponentScan("com.thejawnpaul.gptinvestor.features", "com.thejawnpaul.gptinvestor.core")
 class AppModule

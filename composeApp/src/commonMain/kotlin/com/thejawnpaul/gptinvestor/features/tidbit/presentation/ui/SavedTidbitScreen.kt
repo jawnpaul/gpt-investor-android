@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -55,6 +56,7 @@ fun SavedTidbitScreen(
         topBar = {
             Row(
                 modifier = Modifier
+                    .statusBarsPadding()
                     .fillMaxWidth()
                     .padding(end = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),

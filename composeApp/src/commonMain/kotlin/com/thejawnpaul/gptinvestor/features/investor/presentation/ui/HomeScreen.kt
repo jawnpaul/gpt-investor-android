@@ -1,8 +1,13 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.ui
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
@@ -44,12 +50,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.arrow_right_gradient
-import com.thejawnpaul.gptinvestor.ask_me_a_question
+import com.thejawnpaul.gptinvestor.ask_me_anything_about_markets
 import com.thejawnpaul.gptinvestor.choose_the_capabilities_you_d_love_in_the_advanced_ai_model
 import com.thejawnpaul.gptinvestor.continue_
 import com.thejawnpaul.gptinvestor.copy_success
@@ -57,24 +64,37 @@ import com.thejawnpaul.gptinvestor.core.navigation.NavDrawerAction
 import com.thejawnpaul.gptinvestor.core.navigation.NavDrawerContent
 import com.thejawnpaul.gptinvestor.core.navigation.NavDrawerEvent
 import com.thejawnpaul.gptinvestor.core.platform.NotificationPermissionController
+import com.thejawnpaul.gptinvestor.curated_for_you
+import com.thejawnpaul.gptinvestor.daily_learn_tidbit
 import com.thejawnpaul.gptinvestor.discover
+import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
-import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultModel
-import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
-import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.HomeDefaultPrompts
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
+import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeErrorCard
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeGreeting
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeSearchBar
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeSectionHeader
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeTopPicksSection
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeTrendingSection
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.QuestionInput
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeUiState
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
-import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.HomeTidbitItem
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.HomeTidbitSection
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 import com.thejawnpaul.gptinvestor.gpt_investor
 import com.thejawnpaul.gptinvestor.ic_menu
 import com.thejawnpaul.gptinvestor.ic_search_status_two
 import com.thejawnpaul.gptinvestor.join_list
 import com.thejawnpaul.gptinvestor.join_the_waitlist
+import com.thejawnpaul.gptinvestor.movers_right_now
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import com.thejawnpaul.gptinvestor.today_s_lesson_didn_t_load
+import com.thejawnpaul.gptinvestor.top_picks_today
+import com.thejawnpaul.gptinvestor.trending_today
 import com.thejawnpaul.gptinvestor.you_re_on_the_list
 import com.thejawnpaul.gptinvestor.you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge
 import kotlinx.coroutines.launch
@@ -116,40 +136,19 @@ private fun HomeScreenContent(
         drawerState = drawerState,
         drawerContent = {
             NavDrawerContent(
-                onCloseDrawer = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                },
+                onCloseDrawer = { scope.launch { drawerState.close() } },
                 onEvent = { event ->
                     when (event) {
-                        NavDrawerEvent.SignOut -> {
-                            onEvent(HomeEvent.SignOut)
-                        }
-
-                        is NavDrawerEvent.ChangeTheme -> {
-                            // Change theme
-                            onEvent(HomeEvent.ChangeTheme(event.theme))
-                        }
+                        NavDrawerEvent.SignOut -> onEvent(HomeEvent.SignOut)
+                        is NavDrawerEvent.ChangeTheme -> onEvent(HomeEvent.ChangeTheme(event.theme))
                     }
                 },
                 onAction = { action ->
                     when (action) {
-                        NavDrawerAction.OnGoToSavedPicks -> {
-                            onEvent(HomeEvent.GoToSavedPicks)
-                        }
-
-                        NavDrawerAction.OnGoToSettings -> {
-                            onEvent(HomeEvent.GoToSettings)
-                        }
-
-                        NavDrawerAction.OnGoToHistory -> {
-                            onEvent(HomeEvent.GoToHistory)
-                        }
-
-                        NavDrawerAction.OnGoToSavedTidbits -> {
-                            onEvent(HomeEvent.GoToSavedTidbits)
-                        }
+                        NavDrawerAction.OnGoToSavedPicks -> onEvent(HomeEvent.GoToSavedPicks)
+                        NavDrawerAction.OnGoToSettings -> onEvent(HomeEvent.GoToSettings)
+                        NavDrawerAction.OnGoToHistory -> onEvent(HomeEvent.GoToHistory)
+                        NavDrawerAction.OnGoToSavedTidbits -> onEvent(HomeEvent.GoToSavedTidbits)
                     }
                 },
                 state = state.drawerState
@@ -159,84 +158,59 @@ private fun HomeScreenContent(
         Scaffold(
             modifier = modifier,
             bottomBar = {
-                Column(
+                QuestionInput(
                     modifier = Modifier
-
-                ) {
-                    if (state.defaultPrompts.isNotEmpty()) {
-                        HomeDefaultPrompts(
-                            modifier = Modifier,
-                            prompts = state.defaultPrompts,
-                            onClick = {
-                                onEvent(HomeEvent.DefaultPromptClicked(it))
-                            }
-                        )
-                    }
-
-                    QuestionInput(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .windowInsetsPadding(
-                                insets = WindowInsets.ime
-                            ),
-                        onSendClick = {
-                            onEvent(HomeEvent.SendClick)
-                        },
-                        hint = stringResource(Res.string.ask_me_a_question),
-                        onTextChange = {
-                            onEvent(HomeEvent.ChatInputChanged(it))
-                        },
-                        text = state.chatInput ?: "",
-                        availableModels = state.availableModels,
-                        selectedModel = state.selectedModel,
-                        onModelChange = {
-                            if (it.canUpgrade) {
-                                onEvent(
-                                    HomeEvent.UpgradeModel(
-                                        showBottomSheet = true,
-                                        modelId = it.modelId
-                                    )
-                                )
-                                return@QuestionInput
-                            }
-                            onEvent(HomeEvent.ModelChanged(it))
-                        }
-                    )
-                }
+                        .fillMaxWidth()
+                        .windowInsetsPadding(insets = WindowInsets.ime),
+                    onSendClick = { onEvent(HomeEvent.SendClick) },
+                    hint = stringResource(Res.string.ask_me_anything_about_markets),
+                    onTextChange = { onEvent(HomeEvent.ChatInputChanged(it)) },
+                    text = state.chatInput ?: ""
+                )
             },
             topBar = {
-                Column {
+                Column(modifier = Modifier.statusBarsPadding()) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 0.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(onClick = {
-                            scope.launch {
-                                drawerState.open()
-                            }
-                        }) {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(
                                 imageVector = vectorResource(Res.drawable.ic_menu),
                                 contentDescription = null
                             )
                         }
 
-                        Text(
-                            text = stringResource(Res.string.gpt_investor),
-                            modifier = Modifier,
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
                         Row(
-                            modifier = Modifier.clickable(
-                                indication = null,
-                                interactionSource = null,
-                                onClick = { onEvent(HomeEvent.GoToDiscover) }
-                            ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.gpt_investor),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+
+                        val discoverInteractionSource = remember { MutableInteractionSource() }
+                        val isDiscoverPressed by discoverInteractionSource.collectIsPressedAsState()
+                        val discoverScale by animateFloatAsState(
+                            targetValue = if (isDiscoverPressed) 0.97f else 1f,
+                            animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                            label = "pressScale"
+                        )
+                        Row(
+                            modifier = Modifier
+                                .graphicsLayer {
+                                    scaleX = discoverScale
+                                    scaleY = discoverScale
+                                }
+                                .clickable(
+                                    interactionSource = discoverInteractionSource,
+                                    indication = null,
+                                    onClick = { onEvent(HomeEvent.GoToDiscover) }
+                                ),
                             horizontalArrangement = Arrangement.spacedBy(0.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -244,35 +218,109 @@ private fun HomeScreenContent(
                                 text = stringResource(Res.string.discover),
                                 style = MaterialTheme.typography.titleMedium
                             )
-
-                            IconButton(modifier = Modifier, onClick = {
-                                onEvent(HomeEvent.GoToDiscover)
-                            }) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_search_status_two),
-                                    contentDescription = null
-                                )
-                            }
+                            Icon(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp),
+                                painter = painterResource(Res.drawable.ic_search_status_two),
+                                contentDescription = null
+                            )
                         }
-                    }
-                    if (state.isGuestSession) {
-                        TopGuestLabel(
-                            modifier = Modifier,
-                            onClick = {
-                                onEvent(HomeEvent.GoToSignUp)
-                            }
-                        )
                     }
                 }
             }
         ) { innerPadding ->
-            // Home Screen
             Box(
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
             ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 0.dp, vertical = 8.dp)
+                ) {
+                    // Guest banner
+                    if (state.isGuestSession) {
+                        TopGuestLabel(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            onClick = { onEvent(HomeEvent.GoToSignUp) }
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    HomeGreeting(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        timePeriod = state.timePeriod,
+                        name = state.currentUser?.name
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    HomeSearchBar(modifier = Modifier.padding(horizontal = 16.dp), onClick = {
+                        onEvent(HomeEvent.GoToSearch)
+                    })
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    HomeSectionHeader(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        emoji = "🔥",
+                        label = stringResource(Res.string.trending_today),
+                        title = stringResource(Res.string.movers_right_now),
+                        onSeeAll = null
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HomeTrendingSection(
+                        view = state.trendingCompaniesView,
+                        onRetry = { onEvent(HomeEvent.RetryTrendingCompanies) },
+                        onClick = { onEvent(HomeEvent.ClickTrendingCompany(it)) }
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    HomeSectionHeader(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        emoji = "🔖",
+                        label = stringResource(Res.string.top_picks_today),
+                        title = stringResource(Res.string.curated_for_you),
+                        onSeeAll = { onEvent(HomeEvent.GoToAllTopPicks) }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HomeTopPicksSection(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        view = state.topPicksView,
+                        onRetry = { onEvent(HomeEvent.RetryTopPicks) },
+                        onClickPick = { onEvent(HomeEvent.ClickTopPick(it)) }
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    when {
+                        state.homeTidbitView.error != null -> {
+                            HomeErrorCard(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                message = stringResource(Res.string.today_s_lesson_didn_t_load),
+                                onRetry = { onEvent(HomeEvent.RetryTidbit) }
+                            )
+                        }
+
+                        else -> {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                text = stringResource(Res.string.daily_learn_tidbit).uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = LocalGPTInvestorColors.current.textColors.secondary50
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+                            HomeTidbitSection(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                tidbit = state.homeTidbitView,
+                                onClick = { onEvent(HomeEvent.ClickTidbit(it)) },
+                                isLoading = state.homeTidbitView.loading
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
                 if (state.showWaitlistBottomSheet) {
                     GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
                         onEvent(HomeEvent.UpgradeModel(showBottomSheet = false))
@@ -281,33 +329,11 @@ private fun HomeScreenContent(
                             modifier = Modifier,
                             options = state.waitlistAvailableOptions,
                             selectedOptions = state.selectedWaitlistOptions,
-                            onSelectOption = {
-                                onEvent(HomeEvent.SelectWaitListOption(it))
-                            },
-                            onJoinWaitList = {
-                                onEvent(HomeEvent.JoinWaitlist)
-                            },
-                            onDismiss = {
-                                onEvent(HomeEvent.UpgradeModel(showBottomSheet = false))
-                            }
+                            onSelectOption = { onEvent(HomeEvent.SelectWaitListOption(it)) },
+                            onJoinWaitList = { onEvent(HomeEvent.JoinWaitlist) },
+                            onDismiss = { onEvent(HomeEvent.UpgradeModel(showBottomSheet = false)) }
                         )
                     }
-                }
-
-                state.homeTidbitView?.let { item ->
-                    HomeTidbitItem(
-                        modifier = Modifier.align(Alignment.Center),
-                        imageUrl = item.previewUrl,
-                        title = item.title,
-                        description = item.description,
-                        tidbitId = item.id,
-                        onTidbitClick = {
-                            onEvent(HomeEvent.ClickTidbit(it))
-                        },
-                        onClickSeeAll = {
-                            onEvent(HomeEvent.GoToAllTidbits)
-                        }
-                    )
                 }
             }
         }
@@ -324,6 +350,14 @@ fun WaitlistBottomSheetContent(
     onSelectOption: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val joinInteractionSource = remember { MutableInteractionSource() }
+    val isJoinPressed by joinInteractionSource.collectIsPressedAsState()
+    val joinScale by animateFloatAsState(
+        targetValue = if (isJoinPressed) 0.97f else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "pressScale"
+    )
+
     Column(
         modifier = modifier.padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -333,7 +367,6 @@ fun WaitlistBottomSheetContent(
 
         when (content) {
             0 -> {
-                // Text
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = stringResource(Res.string.join_the_waitlist).uppercase(),
@@ -341,7 +374,6 @@ fun WaitlistBottomSheetContent(
                     style = MaterialTheme.typography.titleLarge
                 )
 
-                // Text
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = stringResource(
@@ -351,7 +383,6 @@ fun WaitlistBottomSheetContent(
                     style = MaterialTheme.typography.bodyMedium
                 )
 
-                // Flow row
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -361,38 +392,35 @@ fun WaitlistBottomSheetContent(
                         SingleWaitlistOption(
                             modifier = Modifier,
                             isSelected = selectedOptions.contains(it),
-                            onSelectOption = {
-                                onSelectOption(it)
-                            },
+                            onSelectOption = { onSelectOption(it) },
                             text = it
                         )
                     }
                 }
 
-                // Button
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp),
+                        .height(52.dp)
+                        .graphicsLayer {
+                            scaleX = joinScale
+                            scaleY = joinScale
+                        },
                     shape = RoundedCornerShape(corner = CornerSize(20.dp)),
                     border = BorderStroke(
                         width = 1.dp,
                         brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                Color(0xFFF947F6),
-                                Color(0xFF0095FF)
-                            )
+                            colors = listOf(Color(0xFFF947F6), Color(0xFF0095FF))
                         )
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
+                    interactionSource = joinInteractionSource,
                     onClick = {
                         onJoinWaitList()
                         content = 1
                     }
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center
-                    ) {
+                    Box(contentAlignment = Alignment.Center) {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -401,10 +429,7 @@ fun WaitlistBottomSheetContent(
                                 text = stringResource(Res.string.join_list).uppercase(),
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     brush = Brush.horizontalGradient(
-                                        colors = listOf(
-                                            Color(0xFFF947F6),
-                                            Color(0xFF0095FF)
-                                        )
+                                        colors = listOf(Color(0xFFF947F6), Color(0xFF0095FF))
                                     )
                                 )
                             )
@@ -420,18 +445,14 @@ fun WaitlistBottomSheetContent(
 
             1 -> {
                 Spacer(modifier = Modifier.height(16.dp))
-                // Image
                 Image(
                     painter = painterResource(Res.drawable.copy_success),
                     contentDescription = null
                 )
-
                 Text(
                     text = stringResource(Res.string.you_re_on_the_list),
                     style = MaterialTheme.typography.titleLarge
                 )
-
-                // Text
                 Text(
                     text = stringResource(
                         Res.string.you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge
@@ -439,17 +460,12 @@ fun WaitlistBottomSheetContent(
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )
-
                 Spacer(modifier = Modifier.height(16.dp))
-
-                // Button
                 Button(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),
-                    onClick = {
-                        onDismiss()
-                    },
+                    onClick = { onDismiss() },
                     colors = ButtonDefaults.buttonColors()
                         .copy(containerColor = MaterialTheme.colorScheme.onSurface)
                 ) {
@@ -465,11 +481,23 @@ fun WaitlistBottomSheetContent(
 @Composable
 fun SingleWaitlistOption(isSelected: Boolean, text: String, onSelectOption: () -> Unit, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.97f else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "pressScale"
+    )
+
     if (isSelected) {
         Surface(
-            modifier = modifier,
+            modifier = modifier.graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            },
             shape = RoundedCornerShape(corner = CornerSize(20.dp)),
             border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onSurface),
+            interactionSource = interactionSource,
             onClick = onSelectOption
         ) {
             Text(
@@ -481,9 +509,13 @@ fun SingleWaitlistOption(isSelected: Boolean, text: String, onSelectOption: () -
         }
     } else {
         Surface(
-            modifier = modifier,
+            modifier = modifier.graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            },
             shape = RoundedCornerShape(corner = CornerSize(20.dp)),
             border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant),
+            interactionSource = interactionSource,
             onClick = onSelectOption
         ) {
             Text(
@@ -496,30 +528,42 @@ fun SingleWaitlistOption(isSelected: Boolean, text: String, onSelectOption: () -
     }
 }
 
-@Preview
+@PreviewLightDark
 @Composable
 private fun HomeScreenPreview() {
     GPTInvestorTheme {
         HomeScreenContent(
             state = HomeUiState(
                 isGuestSession = true,
-                defaultPrompts = listOf(
-                    DefaultPrompt(
-                        title = "What is the best way to invest in stocks?",
-                        query = "What is the best way to invest in stocks?"
-                    ),
-                    DefaultPrompt(
-                        title = "How to save for retirement?",
-                        query = "How to save for retirement?"
+                topPicksView = TopPicksView(
+                    topPicks = listOf(
+                        TopPickPresentation(
+                            id = "1",
+                            ticker = "JPM",
+                            companyName = "JP Morgan Chase & Co.",
+                            rationale = "JPM is leveraging its massive scale to lead the " +
+                                "banking sector's digital revolution.",
+                            metrics = emptyList(),
+                            risks = emptyList(),
+                            confidenceScore = 80,
+                            isSaved = false,
+                            percentageChange = 1.2f,
+                            imageUrl = "",
+                            currentPrice = 185.0f
+                        )
                     )
                 ),
-                availableModels = listOf(DefaultModel()),
-                selectedModel = DefaultModel(),
+                trendingCompaniesView = TrendingCompaniesView(
+                    companies = listOf(
+                        TrendingStockPresentation("NVIDIA Corporation", "NVDA", "", 2.84f),
+                        TrendingStockPresentation("Apple", "AAPL", "", 0.62f)
+                    )
+                ),
                 homeTidbitView = HomeTidbitView(
                     id = "1",
                     previewUrl = "",
-                    title = "The Power of Compounding",
-                    description = "Learn how compounding works and why it is the key to wealth creation."
+                    title = "When good traits lead to bad outcomes",
+                    description = "Learn how compounding works."
                 )
             ),
             onEvent = {},

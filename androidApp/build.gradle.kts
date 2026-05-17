@@ -46,14 +46,14 @@ android {
     localProperties.load(project.rootProject.file("local.properties").reader())
 
     namespace = "com.thejawnpaul.gptinvestor"
-    compileSdk = 36
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "com.thejawnpaul.gptinvestor"
-        minSdk = 24
-        targetSdk = 36
-        versionCode = 34
-        versionName = "1.1.11"
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        targetSdk = libs.versions.android.targetSdk.get().toInt()
+        versionCode = 35
+        versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

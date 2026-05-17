@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.koin.core.annotation.Provided
 
 @KoinViewModel
 class HistoryViewModel(
@@ -41,7 +42,7 @@ class HistoryViewModel(
     private val feedBackRepository: FeedbackRepository,
     private val modelsRepository: ModelsRepository,
     private val billingRepository: IBillingRepository,
-    private val analyticsLogger: AnalyticsLogger
+    @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
     private val _historyScreenViewState = MutableStateFlow(HistoryScreenView())

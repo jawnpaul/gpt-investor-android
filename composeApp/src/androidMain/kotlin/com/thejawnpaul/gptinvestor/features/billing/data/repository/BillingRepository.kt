@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
 import timber.log.Timber
 
@@ -37,7 +38,7 @@ class BillingRepository(
     private val context: Context,
     private val apiService: KtorApiService,
     private val tokenStorage: TokenStorage,
-    private val scope: CoroutineScope
+    @Provided private val scope: CoroutineScope
 ) : IBillingRepository,
     PurchasesUpdatedListener {
 

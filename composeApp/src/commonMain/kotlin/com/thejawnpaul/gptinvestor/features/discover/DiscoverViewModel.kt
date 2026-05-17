@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.discover
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -37,7 +38,8 @@ import org.koin.core.annotation.KoinViewModel
 class DiscoverViewModel(
     private val companyRepository: CompanyRepository,
     private val topPickRepository: TopPickRepository,
-    private val appPreferences: AppPreferences
+    private val appPreferences: AppPreferences,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _discoveryScreenState = MutableStateFlow(DiscoveryScreenState())
@@ -156,13 +158,20 @@ class DiscoverViewModel(
     }
 
     private fun getAllSector() {
+        val initialSectorKey: String? = savedStateHandle["sector"]
         viewModelScope.launch {
             companyRepository.getAllSector().collect { result ->
                 result.onSuccess { sectors ->
+                    val preSelected = if (initialSectorKey != null) {
+                        sectors.filterIsInstance<SectorInput.CustomSector>()
+                            .firstOrNull { it.sectorKey == initialSectorKey }
+                    } else {
+                        null
+                    }
                     _discoveryScreenState.update { currentState ->
                         currentState.copy(
                             sectors = sectors,
-                            selected = currentState.selected ?: sectors.firstOrNull()
+                            selected = preSelected ?: currentState.selected ?: sectors.firstOrNull()
                         )
                     }
                 }

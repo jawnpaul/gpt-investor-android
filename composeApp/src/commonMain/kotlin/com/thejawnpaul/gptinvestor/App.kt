@@ -26,9 +26,10 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
     val preferences: AppPreferences = koinInject()
     val tokenSyncManager: TokenSyncManager = koinInject()
 
-    val themePreference by preferences.themePreference.collectAsState(initial = "Dark")
+    val themePreference by preferences.themePreference.collectAsState(initial = "System")
     val isUserSignedIn by preferences.isUserLoggedIn.collectAsState(initial = false)
     val isGuestSignedIn by preferences.isGuestLoggedIn.collectAsState(initial = false)
+    val hasCompletedOnboarding by preferences.hasCompletedOnboarding.collectAsState(initial = null)
 
     var showSplash by remember { mutableStateOf(true) }
     var isNavGraphReady by remember { mutableStateOf(false) }
@@ -75,7 +76,8 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
             SetUpNavGraph(
                 navController = navController,
                 isUserSignedIn = isUserSignedIn == true,
-                isGuestSignedIn = isGuestSignedIn == true
+                isGuestSignedIn = isGuestSignedIn == true,
+                hasCompletedOnboarding = hasCompletedOnboarding ?: false
             )
 
             LaunchedEffect(Unit) {

@@ -11,11 +11,12 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Provided
 
 @Factory
 class GetDefaultPromptResponseUseCase(
-    @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
-    coroutineScope: CoroutineScope,
+    @Provided @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @Provided coroutineScope: CoroutineScope,
     private val repository: IConversationRepository
 ) : BaseUseCase<DefaultPrompt, Conversation>(coroutineScope, dispatcher) {
 

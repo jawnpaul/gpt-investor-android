@@ -7,10 +7,13 @@ import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpReq
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpResponse
 import com.thejawnpaul.gptinvestor.features.billing.data.remote.VerifyPurchaseRequest
 import com.thejawnpaul.gptinvestor.features.billing.data.remote.VerifyPurchaseResponse
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyBriefRemote
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRemote
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyFinancialsRequest
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyLogoRemote
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyLogosRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyPriceRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyPriceResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyRemote
@@ -24,6 +27,8 @@ import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityRe
 import com.thejawnpaul.gptinvestor.features.guest.data.remote.GuestLoginRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenResponse
+import com.thejawnpaul.gptinvestor.features.search.data.remote.ClearHistoryResponse
+import com.thejawnpaul.gptinvestor.features.search.data.remote.SearchResponse
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.AllTidbitResponse
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitBookmarkRequest
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitBookmarkResponse
@@ -34,6 +39,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.data.remote.TopPickRemote
 import com.thejawnpaul.gptinvestor.remote.TokenResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
@@ -45,10 +51,11 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
 
 @Singleton
-class KtorApiService(private val client: HttpClient) {
+class KtorApiService(@Provided private val client: HttpClient) {
     suspend fun getCompanies(): KtorResponse<List<CompanyRemote>> = client.get("v1/companies").toKtorResponse()
 
     suspend fun getCompanyFinancials(request: CompanyFinancialsRequest): KtorResponse<CompanyFinancialsRemote> =
@@ -57,7 +64,7 @@ class KtorApiService(private val client: HttpClient) {
         }.toKtorResponse()
 
     suspend fun getTrendingTickers(): KtorResponse<List<TrendingRemote>> =
-        client.get("v1/trending-tickers").toKtorResponse()
+        client.get("v1.1/trending-tickers").toKtorResponse()
 
     suspend fun getDefaultPrompts(): KtorResponse<List<DefaultPromptRemote>> =
         client.get("v1/default-prompts").toKtorResponse()
@@ -185,6 +192,22 @@ class KtorApiService(private val client: HttpClient) {
     suspend fun guestLogin(request: GuestLoginRequest): KtorResponse<LoginResponse> = client.post("v1/guest-login") {
         setBody(request)
     }.toKtorResponse()
+
+    suspend fun getCompanyBrief(ticker: String): KtorResponse<CompanyBriefRemote> = client.get("v1.1/brief") {
+        parameter("ticker", ticker)
+    }.toKtorResponse()
+
+    suspend fun getCompanyLogos(request: CompanyLogosRequest): KtorResponse<List<CompanyLogoRemote>> =
+        client.post("v1/company-logos") {
+            setBody(request)
+        }.toKtorResponse()
+
+    suspend fun getSearchResults(query: String? = null): KtorResponse<SearchResponse> = client.get("v1.1/search") {
+        if (!query.isNullOrBlank()) parameter("q", query)
+    }.toKtorResponse()
+
+    suspend fun clearSearchHistory(): KtorResponse<ClearHistoryResponse> =
+        client.delete("v1.1/search/history").toKtorResponse()
 }
 
 class KtorResponse<T>(val isSuccessful: Boolean, val body: T?, val errorBody: String?, val code: Int)

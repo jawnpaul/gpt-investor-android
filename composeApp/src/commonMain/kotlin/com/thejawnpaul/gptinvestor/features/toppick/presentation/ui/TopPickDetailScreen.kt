@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -86,7 +87,9 @@ fun TopPickDetailScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            Column {
+            Column(
+                modifier = Modifier.statusBarsPadding()
+            ) {
                 state.companyPresentation?.let { company ->
                     CompanyDetailHeader(
                         modifier = Modifier,

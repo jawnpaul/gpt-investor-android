@@ -21,18 +21,11 @@ final class SwiftMixpanelProvider: NSObject, MixpanelProvider {
 
     private let mixpanel: MixpanelInstance
 
-    /// Initialises the Mixpanel SDK and retains the main instance.
-    ///
-    /// - Parameter token: Project token from your Mixpanel dashboard.
-    ///   Use `MIXPANEL_DEV_TOKEN` (local.properties) for debug builds and
-    ///   `MIXPANEL_PROD_TOKEN` for release builds.
     init(token: String) {
         Mixpanel.initialize(token: token, trackAutomaticEvents: false)
         self.mixpanel = Mixpanel.mainInstance()
         super.init()
     }
-
-    // MARK: - MixpanelProvider
 
     func logEvent(eventName: String, params: [String: Any]) {
         mixpanel.track(event: eventName, properties: mixpanelProperties(from: params))
@@ -42,7 +35,6 @@ final class SwiftMixpanelProvider: NSObject, MixpanelProvider {
         mixpanel.track(event: "Screen View", properties: ["screen_name": screenName])
     }
 
-    /// Maps to Mixpanel's `identify` + optional people profile update.
     func identifyUser(userId: String, params: [String: Any]) {
         mixpanel.identify(distinctId: userId)
         let peopleProps = mixpanelProperties(from: params)
@@ -55,12 +47,6 @@ final class SwiftMixpanelProvider: NSObject, MixpanelProvider {
         mixpanel.reset()
     }
 
-    // MARK: - Private helpers
-
-    /// Filters `[String: Any]` values coming across the ObjC bridge down to only
-    /// those that conform to `MixpanelType` (String, NSNumber, NSNull, NSDate, NSURL,
-    /// and their array/dictionary equivalents). Any Kotlin-boxed type that does not
-    /// bridge cleanly is silently dropped rather than causing a runtime crash.
     private func mixpanelProperties(from map: [String: Any]) -> [String: MixpanelType] {
         map.compactMapValues { $0 as? MixpanelType }
     }

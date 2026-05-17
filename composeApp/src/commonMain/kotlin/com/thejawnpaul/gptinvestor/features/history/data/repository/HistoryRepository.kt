@@ -11,11 +11,14 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Structured
 import com.thejawnpaul.gptinvestor.features.history.domain.repository.IHistoryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
 
 @Singleton(binds = [IHistoryRepository::class])
-class HistoryRepository(private val conversationDao: ConversationDao, private val analyticsLogger: AnalyticsLogger) :
-    IHistoryRepository {
+class HistoryRepository(
+    private val conversationDao: ConversationDao,
+    @Provided private val analyticsLogger: AnalyticsLogger
+) : IHistoryRepository {
     override suspend fun getAllHistory(): Flow<Either<Failure, Map<String, List<StructuredConversation>>>> = flow {
         try {
             val separated = conversationDao.getConversationsWithMessages()

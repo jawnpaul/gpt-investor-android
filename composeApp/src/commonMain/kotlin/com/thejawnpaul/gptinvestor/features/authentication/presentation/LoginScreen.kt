@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -66,7 +67,7 @@ fun LoginScreen(state: LoginUiState, onEvent: (LoginUiEvent) -> Unit, modifier: 
 
     Scaffold(modifier = modifier, topBar = {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.statusBarsPadding().fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { onEvent(LoginUiEvent.GoBack) }) {

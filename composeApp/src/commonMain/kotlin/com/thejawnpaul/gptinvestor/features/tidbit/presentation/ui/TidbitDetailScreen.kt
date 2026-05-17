@@ -1,5 +1,8 @@
+@file:OptIn(ExperimentalSharedTransitionApi::class)
+
 package com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -66,7 +70,7 @@ fun TidbitDetailScreen(state: TidbitDetailState, onEvent: (TidbitDetailEvent) ->
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            Column {
+            Column(modifier = Modifier.statusBarsPadding()) {
                 DetailTopAppBar(onBackClick = { onEvent(TidbitDetailEvent.GoBack) })
                 if (state.isGuestSession) {
                     TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {
@@ -78,6 +82,11 @@ fun TidbitDetailScreen(state: TidbitDetailState, onEvent: (TidbitDetailEvent) ->
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
             if (state.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(193.dp)
+                )
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
             state.presentation?.let { presentation ->
@@ -235,7 +244,7 @@ private fun TidbitArticleDetail(
     isGuest: Boolean = false
 ) {
     val isLiked = remember { mutableStateOf(presentation.isLiked) }
-    val isBookmarked = remember { mutableStateOf(presentation.isBookmarked) } // State managed here
+    val isBookmarked = remember { mutableStateOf(presentation.isBookmarked) }
 
     Column(
         modifier = modifier

@@ -8,6 +8,13 @@ if [ -z "$STAGED_FILES" ]; then
     exit 0
 fi
 
+# Skip if it's a merge commit
+GIT_DIR=$(git rev-parse --git-dir)
+if [ -f "$GIT_DIR/MERGE_HEAD" ]; then
+    echo "Merge in progress. Skipping ktlint."
+    exit 0
+fi
+
 echo "............Starting ktlint check......................................"
 echo "Started Formatting...."
 

@@ -1,19 +1,17 @@
 package com.thejawnpaul.gptinvestor.features.authentication.domain
 
 import co.touchlab.kermit.Logger
-import com.thejawnpaul.gptinvestor.core.api.KtorApiService
-import com.thejawnpaul.gptinvestor.core.platform.AppConfig
+import com.thejawnpaul.gptinvestor.bridges.AppleAuthProvider
 import com.thejawnpaul.gptinvestor.core.platform.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
-import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.FirebaseLoginRequest
 import dev.gitlive.firebase.auth.AuthCredential
+import dev.gitlive.firebase.auth.GoogleAuthProvider as GitLiveGoogleAuthProvider
 import dev.gitlive.firebase.auth.OAuthProvider
-import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import dev.gitlive.firebase.auth.GoogleAuthProvider as GitLiveGoogleAuthProvider
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 actual suspend fun signOutPlatform() {
     // No-op for parity v1

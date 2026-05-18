@@ -15,6 +15,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -45,6 +47,7 @@ import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.don_t_have_an_account
 import com.thejawnpaul.gptinvestor.email_address
 import com.thejawnpaul.gptinvestor.google_icon
+import com.thejawnpaul.gptinvestor.ic_email
 import com.thejawnpaul.gptinvestor.ic_lock
 import com.thejawnpaul.gptinvestor.ic_profile
 import com.thejawnpaul.gptinvestor.log_in_with_google
@@ -55,6 +58,8 @@ import com.thejawnpaul.gptinvestor.password
 import com.thejawnpaul.gptinvestor.sign_up
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.linkMedium
+import com.thejawnpaul.gptinvestor.verify_email_body
+import com.thejawnpaul.gptinvestor.verify_email_title
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -154,6 +159,39 @@ fun LoginScreen(state: LoginUiState, onEvent: (LoginUiEvent) -> Unit, modifier: 
                         )
                     }
                 )
+
+                if (state.showVerifyEmailPrompt) {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_email),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(
+                                    text = stringResource(Res.string.verify_email_title),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                                Text(
+                                    text = stringResource(Res.string.verify_email_body),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            }
+                        }
+                    }
+                }
 
                 Button(
                     modifier = Modifier

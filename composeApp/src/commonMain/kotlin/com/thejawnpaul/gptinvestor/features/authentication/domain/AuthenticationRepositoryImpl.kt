@@ -103,8 +103,11 @@ class AuthenticationRepositoryImpl(
                 Result.success(loginResponse.message ?: "Login successful")
             } ?: Result.failure(Exception(response.body?.message ?: "Login failed"))
         } else {
-            val errorMessage = response.errorBody ?: "Login failed"
-            Result.failure(Exception(errorMessage))
+            if (response.code == 403) {
+                Result.failure(EmailNotVerifiedException())
+            } else {
+                Result.failure(Exception(response.errorBody ?: "Login failed"))
+            }
         }
     } catch (e: Exception) {
         Result.failure(e)

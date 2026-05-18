@@ -50,6 +50,7 @@ lifecyle-compose = "2.10.0"
 lifecycle = "2.10.0"
 gitlive-firebase = "2.4.0"
 turbine = "1.2.1"
+swiftklib = "0.6.4"
 kotlinxDatetime = "0.7.1"
 browser = "1.10.0"
 
@@ -169,4 +170,5 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 ktLint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktLint" }
+swiftklib = { id = "io.github.ttypic.swiftklib", version.ref = "swiftklib" }
 

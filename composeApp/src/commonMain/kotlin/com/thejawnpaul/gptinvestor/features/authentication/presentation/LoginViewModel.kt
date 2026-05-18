@@ -45,6 +45,11 @@ class LoginViewModel(
                 loginWithGoogle(event.platformContext)
             }
 
+            LoginUiEvent.LoginWithApple -> {
+                analyticsLogger.logEvent(eventName = "apple-login-button-clicked", params = mapOf())
+                loginWithApple()
+            }
+
             LoginUiEvent.GoBack -> {
                 handleAction(action = LoginUiAction.OnGoBack)
             }
@@ -98,6 +103,24 @@ class LoginViewModel(
             }
         }
     }
+
+    private fun loginWithApple() {
+        _loginUiState.update {
+            it.copy(
+                loading = true
+            )
+        }
+        viewModelScope.launch {
+            authRepository.loginWithApple().onSuccess {
+                _loginUiState.update { it.copy(loading = false) }
+                handleAction(action = LoginUiAction.OnShowToast("Login Success"))
+                handleAction(action = LoginUiAction.OnGoToHome)
+            }.onFailure { failure ->
+                _loginUiState.update { it.copy(loading = false) }
+                handleAction(action = LoginUiAction.OnShowToast(failure.message.toString()))
+            }
+        }
+    }
 }
 
 data class LoginUiState(val email: String = "", val password: String = "", val loading: Boolean = false) {
@@ -109,6 +132,7 @@ sealed interface LoginUiEvent {
     data class PasswordChanged(val password: String) : LoginUiEvent
     data object LoginClick : LoginUiEvent
     data class LoginWithGoogle(val platformContext: PlatformContext) : LoginUiEvent
+    data object LoginWithApple : LoginUiEvent
     data object GoBack : LoginUiEvent
     data object GoToSignUp : LoginUiEvent
 }

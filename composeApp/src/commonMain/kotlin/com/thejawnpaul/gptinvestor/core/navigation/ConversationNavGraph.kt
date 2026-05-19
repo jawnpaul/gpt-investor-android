@@ -21,8 +21,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun NavGraphBuilder.conversationNavGraph(
     navController: NavHostController,
     platformActions: PlatformActions,
-    platformContext: PlatformContext,
-    isGuestSignedIn: Boolean
+    platformContext: PlatformContext
 ) {
     composable(
         route = Screen.ConversationScreen.route,
@@ -76,13 +75,7 @@ fun NavGraphBuilder.conversationNavGraph(
             onEvent = viewModel::handleEvent,
             onAction = viewModel::processAction,
             onUpgradeFromRateLimit = {
-                if (isGuestSignedIn) {
-                    navController.navigate(Screen.SignUpScreen.route) {
-                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                    }
-                } else {
-                    viewModel.launchPurchaseFlow(platformContext)
-                }
+                viewModel.launchPurchaseFlow(platformContext)
             }
         )
     }

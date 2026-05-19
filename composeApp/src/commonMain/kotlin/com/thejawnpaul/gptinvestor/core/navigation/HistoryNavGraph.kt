@@ -23,8 +23,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun NavGraphBuilder.historyNavGraph(
     navController: NavHostController,
     platformActions: PlatformActions,
-    platformContext: PlatformContext,
-    isGuestSignedIn: Boolean
+    platformContext: PlatformContext
 ) {
     composable(Screen.HistoryTabScreen.route) {
         val viewModel = koinViewModel<HistoryViewModel>()
@@ -98,13 +97,7 @@ fun NavGraphBuilder.historyNavGraph(
             onEvent = viewModel::handleHistoryDetailEvent,
             onAction = viewModel::processHistoryDetailAction,
             onUpgradeFromRateLimit = {
-                if (isGuestSignedIn) {
-                    navController.navigate(Screen.SignUpScreen.route) {
-                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                    }
-                } else {
-                    viewModel.launchPurchaseFlow(platformContext)
-                }
+                viewModel.launchPurchaseFlow(platformContext)
             }
         )
     }

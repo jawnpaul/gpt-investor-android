@@ -12,6 +12,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
+import com.thejawnpaul.gptinvestor.features.guest.presentation.GuestScreen
 import org.koin.compose.koinInject
 
 @Composable
@@ -35,17 +36,18 @@ fun SetUpNavGraph(
                 modifier = modifier
             ) {
                 onboardingNavGraph(navController)
-                authenticationNavGraph(navController, platformActions, isGuestSignedIn)
+                authenticationNavGraph(navController, platformActions)
                 investorNavGraph(navController, platformActions)
                 discoverNavGraph(navController)
                 companyNavGraph(navController, platformActions)
-                conversationNavGraph(navController, platformActions, platformContext, isGuestSignedIn)
-                historyNavGraph(navController, platformActions, platformContext, isGuestSignedIn)
+                conversationNavGraph(navController, platformActions, platformContext)
+                historyNavGraph(navController, platformActions, platformContext)
                 topPickNavGraph(navController, platformActions)
                 tidbitNavGraph(navController, platformActions)
                 settingsNavGraph(navController)
                 searchNavGraph(navController)
                 trendingNavGraph(navController)
+                guestNavGraph(navController, platformActions, platformContext)
             }
         }
     }
@@ -56,7 +58,13 @@ fun SetUpNavGraph(
             if (currentRoute == Screen.DefaultAuthenticationScreen.route ||
                 currentRoute == Screen.OnboardingScreen.route
             ) {
-                navigateToHome(navController, currentRoute!!)
+                if (isGuestSignedIn) {
+                    navController.navigate(GuestScreen.GuestHomeTab.route) {
+                        popUpTo(currentRoute) { inclusive = true }
+                    }
+                } else {
+                    navigateToHome(navController, currentRoute)
+                }
             }
         } else {
             val currentRoute = navController.currentDestination?.route
@@ -74,7 +82,8 @@ private fun initialDestination(
     isGuestSignedIn: Boolean,
     hasCompletedOnboarding: Boolean
 ): String = when {
-    isUserSignedIn || isGuestSignedIn -> Screen.HomeTabScreen.route
+    isUserSignedIn -> Screen.HomeTabScreen.route
+    isGuestSignedIn -> GuestScreen.GuestHomeTab.route
     !hasCompletedOnboarding -> Screen.OnboardingScreen.route
     else -> Screen.DefaultAuthenticationScreen.route
 }

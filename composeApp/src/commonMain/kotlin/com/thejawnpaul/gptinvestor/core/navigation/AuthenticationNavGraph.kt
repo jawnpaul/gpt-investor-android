@@ -21,11 +21,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.compose.viewmodel.koinViewModel
 
-fun NavGraphBuilder.authenticationNavGraph(
-    navController: NavHostController,
-    platformActions: PlatformActions,
-    isGuestSignedIn: Boolean
-) {
+fun NavGraphBuilder.authenticationNavGraph(navController: NavHostController, platformActions: PlatformActions) {
     composable(route = Screen.DefaultAuthenticationScreen.route) {
         val viewModel = koinViewModel<DefaultAuthenticationViewModel>()
         val state = viewModel.loading.collectAsState()
@@ -38,11 +34,7 @@ fun NavGraphBuilder.authenticationNavGraph(
                     }
 
                     DefaultAuthenticationAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            if (isGuestSignedIn) {
-                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                            }
-                        }
+                        navController.navigate(Screen.SignUpScreen.route)
                     }
 
                     is DefaultAuthenticationAction.ShowToast -> {
@@ -71,11 +63,7 @@ fun NavGraphBuilder.authenticationNavGraph(
                     }
 
                     LoginUiAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            if (isGuestSignedIn) {
-                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                            }
-                        }
+                        navController.navigate(Screen.SignUpScreen.route)
                     }
 
                     is LoginUiAction.OnShowToast -> {

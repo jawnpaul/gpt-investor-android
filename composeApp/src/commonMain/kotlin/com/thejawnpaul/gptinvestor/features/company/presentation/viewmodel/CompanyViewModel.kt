@@ -9,6 +9,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
+import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSentiment
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumberType
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
@@ -46,7 +47,8 @@ class CompanyViewModel(
     private val modelsRepository: ModelsRepository,
     private val feedbackRepository: FeedbackRepository,
     private val appPreferences: AppPreferences,
-    @Provided private val analyticsLogger: AnalyticsLogger
+    @Provided private val analyticsLogger: AnalyticsLogger,
+    private val guestRateLimitNotifier: GuestRateLimitNotifier
 ) : ViewModel() {
 
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
@@ -195,15 +197,18 @@ class CompanyViewModel(
         Logger.e(failure.toString())
         when (failure) {
             is Failure.RateLimitExceeded -> {
+                val isGuest = _selectedCompany.value.isGuestSession
                 analyticsLogger.logEvent(
                     eventName = "rate-limit-hit",
-                    params = mapOf(
-                        "user_type" to if (_selectedCompany.value.isGuestSession) "guest" else "logged_in"
+                    params = mapOf("user_type" to if (isGuest) "guest" else "authenticated")
+                )
+                if (isGuest) {
+                    guestRateLimitNotifier.notifyRateLimit()
+                } else {
+                    processCompanyDetailAction(
+                        CompanyDetailAction.ShowToast("Rate limit exceeded. Please try again later.")
                     )
-                )
-                processCompanyDetailAction(
-                    CompanyDetailAction.ShowToast("Rate limit exceeded. Please try again later.")
-                )
+                }
             }
 
             is GenAIException -> {
@@ -342,7 +347,7 @@ class CompanyViewModel(
                     params = mapOf(
                         "ticker" to (_selectedCompany.value.brief?.ticker ?: ""),
                         "sentiment" to event.sentiment.name.lowercase(),
-                        "user_type" to if (_selectedCompany.value.isGuestSession) "guest" else "logged_in"
+                        "user_type" to if (_selectedCompany.value.isGuestSession) "guest" else "authenticated"
                     )
                 )
             }
@@ -353,7 +358,7 @@ class CompanyViewModel(
                     params = mapOf(
                         "ticker" to (_selectedCompany.value.brief?.ticker ?: ""),
                         "key_number_type" to event.keyNumberType.name,
-                        "user_type" to if (_selectedCompany.value.isGuestSession) "guest" else "logged_in"
+                        "user_type" to if (_selectedCompany.value.isGuestSession) "guest" else "authenticated"
                     )
                 )
             }

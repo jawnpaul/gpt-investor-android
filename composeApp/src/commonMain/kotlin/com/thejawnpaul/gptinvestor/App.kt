@@ -16,6 +16,9 @@ import coil3.request.crossfade
 import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.core.navigation.SetUpNavGraph
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
+import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.RateLimitBottomSheetContent
 import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
 import com.thejawnpaul.gptinvestor.features.splash.AnimatedSplashScreen
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
@@ -25,6 +28,7 @@ import org.koin.compose.koinInject
 fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLinkConsume: () -> Unit = {}) {
     val preferences: AppPreferences = koinInject()
     val tokenSyncManager: TokenSyncManager = koinInject()
+    val guestRateLimitNotifier: GuestRateLimitNotifier = koinInject()
 
     val themePreference by preferences.themePreference.collectAsState(initial = "System")
     val isUserSignedIn by preferences.isUserLoggedIn.collectAsState(initial = false)
@@ -33,6 +37,7 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
 
     var showSplash by remember { mutableStateOf(true) }
     var isNavGraphReady by remember { mutableStateOf(false) }
+    var showGuestRateLimitSheet by remember { mutableStateOf(false) }
 
     val navController = rememberNavController()
 
@@ -40,6 +45,10 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
 
     LaunchedEffect(Unit) {
         tokenSyncManager.syncToken()
+    }
+
+    LaunchedEffect(Unit) {
+        guestRateLimitNotifier.signal.collect { showGuestRateLimitSheet = true }
     }
 
     LaunchedEffect(deepLinkRoute, isNavGraphReady, isUserSignedIn, isGuestSignedIn) {
@@ -79,6 +88,20 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
                 isGuestSignedIn = isGuestSignedIn == true,
                 hasCompletedOnboarding = hasCompletedOnboarding ?: false
             )
+
+            if (showGuestRateLimitSheet) {
+                GptInvestorBottomSheet(onDismiss = { showGuestRateLimitSheet = false }) {
+                    RateLimitBottomSheetContent(
+                        isGuest = true,
+                        onUpgrade = {
+                            showGuestRateLimitSheet = false
+                            navController.navigate(Screen.SignUpScreen.route) {
+                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+            }
 
             LaunchedEffect(Unit) {
                 isNavGraphReady = true

@@ -263,11 +263,7 @@ fun NavGraphBuilder.guestNavGraph(
             state = state.value,
             onEvent = viewModel::handleEvent,
             onAction = viewModel::processAction,
-            onUpgradeFromRateLimit = {
-                navController.navigate(Screen.SignUpScreen.route) {
-                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                }
-            }
+            onUpgradeFromRateLimit = {}
         )
     }
 
@@ -312,11 +308,7 @@ fun NavGraphBuilder.guestNavGraph(
             state = state.value,
             onEvent = viewModel::handleHistoryDetailEvent,
             onAction = viewModel::processHistoryDetailAction,
-            onUpgradeFromRateLimit = {
-                navController.navigate(Screen.SignUpScreen.route) {
-                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                }
-            }
+            onUpgradeFromRateLimit = {}
         )
     }
 

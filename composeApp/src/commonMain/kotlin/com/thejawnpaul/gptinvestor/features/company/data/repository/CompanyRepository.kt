@@ -140,7 +140,7 @@ class CompanyRepository(
                     emit(Either.Right(trendingCompanies))
                 }
             } else {
-                emit(Either.Left(Failure.ServerError))
+                emit(Either.Left(if (response.code == 429) Failure.RateLimitExceeded else Failure.ServerError))
             }
         } catch (e: Exception) {
             Logger.e(e.stackTraceToString())
@@ -205,7 +205,7 @@ class CompanyRepository(
                         "user_type" to userType
                     )
                 )
-                emit(Either.Left(Failure.ServerError))
+                emit(Either.Left(if (response.code == 429) Failure.RateLimitExceeded else Failure.ServerError))
             }
         } catch (e: Exception) {
             Logger.e(e.stackTraceToString())
@@ -250,7 +250,7 @@ class CompanyRepository(
             } ?: emptyList()
             emit(Either.Right(companies))
         } else {
-            emit(Either.Left(Failure.ServerError))
+            emit(Either.Left(if (response.code == 429) Failure.RateLimitExceeded else Failure.ServerError))
         }
     }
 
@@ -259,7 +259,7 @@ class CompanyRepository(
         return if (response.isSuccessful) {
             Either.Right(response.body?.associate { it.ticker to (it.logoUrl?.toHttpsUrl() ?: "") } ?: emptyMap())
         } else {
-            Either.Left(Failure.ServerError)
+            Either.Left(if (response.code == 429) Failure.RateLimitExceeded else Failure.ServerError)
         }
     }
 }

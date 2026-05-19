@@ -7,6 +7,7 @@ import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
+import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
 import com.thejawnpaul.gptinvestor.features.billing.domain.BillingConstants
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
@@ -42,7 +43,8 @@ class HistoryViewModel(
     private val feedBackRepository: FeedbackRepository,
     private val modelsRepository: ModelsRepository,
     private val billingRepository: IBillingRepository,
-    @Provided private val analyticsLogger: AnalyticsLogger
+    @Provided private val analyticsLogger: AnalyticsLogger,
+    private val guestRateLimitNotifier: GuestRateLimitNotifier
 ) : ViewModel() {
 
     private val _historyScreenViewState = MutableStateFlow(HistoryScreenView())
@@ -180,17 +182,20 @@ class HistoryViewModel(
             }
 
             is Failure.RateLimitExceeded -> {
+                val isGuest = conversation.value.isGuest
                 analyticsLogger.logEvent(
                     eventName = "rate-limit-hit",
-                    params = mapOf(
-                        "user_type" to if (conversation.value.isGuest) "guest" else "logged_in"
-                    )
+                    params = mapOf("user_type" to if (isGuest) "guest" else "authenticated")
                 )
                 Logger.e("Rate limit exceeded")
                 conversationView.update { it.copy(showRateLimitBottomSheet = false) }
-                processHistoryDetailAction(
-                    HistoryDetailAction.ShowToast("Rate limit exceeded. Please try again later.")
-                )
+                if (isGuest) {
+                    guestRateLimitNotifier.notifyRateLimit()
+                } else {
+                    processHistoryDetailAction(
+                        HistoryDetailAction.ShowToast("Rate limit exceeded. Please try again later.")
+                    )
+                }
             }
 
             is Failure.ContextLimitReached -> {
@@ -440,7 +445,7 @@ class HistoryViewModel(
             if (conversation.value.isGuest) {
                 put("user_type", "guest")
             } else {
-                put("user_type", "logged_in")
+                put("user_type", "authenticated")
             }
         }
         analyticsLogger.logEvent(eventName = "message-sent", params = params)

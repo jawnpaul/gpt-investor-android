@@ -274,14 +274,16 @@ class ConversationViewModel(
             conversation.id
         }
 
-        val duration = Clock.System.now().toEpochMilliseconds() - requestStartTime
-        analyticsLogger.logEvent(
-            eventName = "response-received",
-            params = mapOf(
-                "duration_ms" to duration,
-                "status" to "success"
+        if (conversation.streamComplete) {
+            val duration = Clock.System.now().toEpochMilliseconds() - requestStartTime
+            analyticsLogger.logEvent(
+                eventName = "response-received",
+                params = mapOf(
+                    "duration_ms" to duration,
+                    "status" to "success"
+                )
             )
-        )
+        }
 
         conversationViewMutableStateFlow.update { state ->
             state.copy(

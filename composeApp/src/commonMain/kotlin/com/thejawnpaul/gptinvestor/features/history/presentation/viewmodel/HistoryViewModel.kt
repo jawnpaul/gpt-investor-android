@@ -219,14 +219,16 @@ class HistoryViewModel(
     private fun handleInputResponseSuccess(conversation: Conversation) {
         conversation as StructuredConversation
 
-        val duration = Clock.System.now().toEpochMilliseconds() - requestStartTime
-        analyticsLogger.logEvent(
-            eventName = "response-received",
-            params = mapOf(
-                "duration_ms" to duration,
-                "status" to "success"
+        if (conversation.streamComplete) {
+            val duration = Clock.System.now().toEpochMilliseconds() - requestStartTime
+            analyticsLogger.logEvent(
+                eventName = "response-received",
+                params = mapOf(
+                    "duration_ms" to duration,
+                    "status" to "success"
+                )
             )
-        )
+        }
 
         conversationView.update { state ->
             state.copy(

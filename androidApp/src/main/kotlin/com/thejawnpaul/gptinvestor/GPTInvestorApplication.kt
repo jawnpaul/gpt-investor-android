@@ -19,6 +19,7 @@ class GPTInvestorApplication : Application() {
 
         startKoin(
             koinConfiguration<GPTKoinApp> {
+                printLogger()
                 androidContext(this@GPTInvestorApplication)
             }
         )

@@ -8,7 +8,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let fileName: String
         
-        #if DEBUG
+        #if DEV
             fileName = "GoogleService-Info-Dev"
         #else
             fileName = "GoogleService-Info-Prod"

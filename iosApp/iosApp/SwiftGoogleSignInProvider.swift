@@ -18,8 +18,9 @@ import UIKit
 ///
 /// Registration:
 ///   This instance is passed to `MainViewControllerKt.mainViewController(googleSignInProvider:)`,
-///   which includes it in the Koin graph via `googleSignInProviderModule(provider)`,
-///   overriding the default `NoOpGoogleSignInProvider` registered by @ComponentScan.
+///   which includes it in the Koin graph via `googleSignInProviderModule(provider)`.
+///   The default `NoOpGoogleSignInProvider` is NOT registered by @ComponentScan to avoid
+///   conflicts on iOS.
 final class SwiftGoogleSignInProvider: NSObject, GoogleSignInProvider {
 
     private let webClientId: String

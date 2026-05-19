@@ -10,8 +10,8 @@ package com.thejawnpaul.gptinvestor.core.platform
  *
  * Both callbacks use [String] to keep the ObjC bridge clean (avoids KotlinThrowable).
  *
- * The default binding is [com.thejawnpaul.gptinvestor.features.authentication.domain.NoOpGoogleSignInProvider]. The iosApp overrides it at startup
- * via [com.thejawnpaul.gptinvestor.features.authentication.domain.googleSignInProviderModule], mirroring the MixpanelProvider bridge pattern.
+ * The iOS app provides a real implementation at startup.
+ * The Android app uses [com.thejawnpaul.gptinvestor.features.authentication.domain.AndroidGoogleSignInProvider] as a default.
  */
 interface GoogleSignInProvider {
     /**

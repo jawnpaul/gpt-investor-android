@@ -4,14 +4,6 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
-	<key>UIViewControllerBasedStatusBarAppearance</key>
-	<false/>
-	<key>UIAppFonts</key>
-	<array>
-		<string>space_grotesk_regular.ttf</string>
-	</array>
-	<key>UILaunchStoryboardName</key>
-	<string>Launch Screen.storyboard</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -25,5 +17,11 @@
 			</array>
 		</dict>
 	</array>
+	<key>UIAppFonts</key>
+	<array>
+		<string>space_grotesk_regular.ttf</string>
+	</array>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
 </dict>
 </plist>

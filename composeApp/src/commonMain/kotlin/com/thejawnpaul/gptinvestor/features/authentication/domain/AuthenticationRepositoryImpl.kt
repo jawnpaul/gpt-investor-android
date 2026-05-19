@@ -6,6 +6,7 @@ import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.platform.AppConfig
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
+import com.thejawnpaul.gptinvestor.core.utility.extractApiErrorMessage
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.User
@@ -106,7 +107,7 @@ class AuthenticationRepositoryImpl(
             if (response.code == 403) {
                 Result.failure(EmailNotVerifiedException())
             } else {
-                Result.failure(Exception(response.errorBody ?: "Login failed"))
+                Result.failure(Exception(extractApiErrorMessage(response.errorBody, "Login failed")))
             }
         }
     } catch (e: Exception) {
@@ -147,8 +148,7 @@ class AuthenticationRepositoryImpl(
                     Result.success(signUpResponse.message ?: "Signup successful")
                 } ?: Result.failure(Exception(response.body?.message ?: "Sign up failed"))
             } else {
-                val errorMessage = response.errorBody ?: "Sign up failed"
-                Result.failure(Exception(errorMessage))
+                Result.failure(Exception(extractApiErrorMessage(response.errorBody, "Sign up failed")))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -213,8 +213,7 @@ class AuthenticationRepositoryImpl(
                 Result.success(guestLoginResponse.message ?: "Guest login successful")
             } ?: Result.failure(Exception(response.body?.message ?: "Guest login failed"))
         } else {
-            val errorMessage = response.errorBody ?: "Guest login failed"
-            return Result.failure(Exception(errorMessage))
+            return Result.failure(Exception(extractApiErrorMessage(response.errorBody, "Guest login failed")))
         }
     } catch (e: Exception) {
         Result.failure(e)
@@ -229,7 +228,7 @@ class AuthenticationRepositoryImpl(
                 Result.success(Unit)
             } ?: Result.failure(Exception("Empty response"))
         } else {
-            Result.failure(Exception(response.errorBody ?: "Failed to acquire token"))
+            Result.failure(Exception(extractApiErrorMessage(response.errorBody, "Failed to acquire token")))
         }
     } catch (e: Exception) {
         Result.failure(e)

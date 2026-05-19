@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
+import com.thejawnpaul.gptinvestor.features.authentication.domain.EmailNotVerifiedException
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -66,7 +67,8 @@ class LoginViewModel(
         val password = _loginUiState.value.password
         _loginUiState.update {
             it.copy(
-                loading = true
+                loading = true,
+                showVerifyEmailPrompt = false
             )
         }
         viewModelScope.launch {
@@ -76,7 +78,11 @@ class LoginViewModel(
                 handleAction(action = LoginUiAction.OnGoToHome)
             }.onFailure { failure ->
                 _loginUiState.update { it.copy(loading = false) }
-                handleAction(action = LoginUiAction.OnShowToast(failure.message.toString()))
+                if (failure is EmailNotVerifiedException) {
+                    _loginUiState.update { it.copy(showVerifyEmailPrompt = true) }
+                } else {
+                    handleAction(action = LoginUiAction.OnShowToast(failure.message.toString()))
+                }
             }
         }
     }
@@ -100,7 +106,12 @@ class LoginViewModel(
     }
 }
 
-data class LoginUiState(val email: String = "", val password: String = "", val loading: Boolean = false) {
+data class LoginUiState(
+    val email: String = "",
+    val password: String = "",
+    val loading: Boolean = false,
+    val showVerifyEmailPrompt: Boolean = false
+) {
     val enableButton = email.trim().isNotEmpty() && password.trim().isNotEmpty() && !loading
 }
 

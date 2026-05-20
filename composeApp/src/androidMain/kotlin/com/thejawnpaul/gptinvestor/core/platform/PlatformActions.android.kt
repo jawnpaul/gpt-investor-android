@@ -25,6 +25,7 @@ actual class PlatformActions(private val context: Context) {
         val parsedUri = runCatching { url.toUri() }.getOrNull() ?: return
 
         val customTabsIntent = CustomTabsIntent.Builder().build()
+        customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         customTabsIntent.launchUrl(context, parsedUri)
     }
 

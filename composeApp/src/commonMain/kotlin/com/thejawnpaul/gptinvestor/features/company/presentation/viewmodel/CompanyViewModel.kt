@@ -248,14 +248,16 @@ class CompanyViewModel(
     private fun handleCompanyInputResponseSuccess(conversation: Conversation) {
         val s = conversation as StructuredConversation
         Logger.e(s.toString())
-        val duration = Clock.System.now().toEpochMilliseconds() - requestStartTime
-        analyticsLogger.logEvent(
-            eventName = "response-received",
-            params = mapOf(
-                "duration_ms" to duration,
-                "status" to "success"
+        if (s.streamComplete) {
+            val duration = Clock.System.now().toEpochMilliseconds() - requestStartTime
+            analyticsLogger.logEvent(
+                eventName = "response-received",
+                params = mapOf(
+                    "duration_ms" to duration,
+                    "status" to "success"
+                )
             )
-        )
+        }
         _selectedCompany.update {
             it.copy(
                 conversation = conversation,

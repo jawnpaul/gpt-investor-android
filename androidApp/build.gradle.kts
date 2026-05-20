@@ -52,8 +52,8 @@ android {
         applicationId = "com.thejawnpaul.gptinvestor"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 35
-        versionName = "1.2.0"
+        versionCode = 36
+        versionName = "1.2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

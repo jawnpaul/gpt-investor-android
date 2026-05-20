@@ -1,6 +1,22 @@
 package com.thejawnpaul.gptinvestor.core.utility
 
 import kotlin.math.abs
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+
+@Serializable
+private data class ErrorBody(val message: String? = null)
+
+private val lenientJson = Json { ignoreUnknownKeys = true }
+
+fun extractApiErrorMessage(errorBody: String?, fallback: String): String {
+    if (errorBody == null) return fallback
+    return try {
+        lenientJson.decodeFromString<ErrorBody>(errorBody).message ?: fallback
+    } catch (e: Exception) {
+        fallback
+    }
+}
 
 expect fun Float.toCurrency(currencySymbol: String): String
 

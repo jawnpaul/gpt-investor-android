@@ -127,7 +127,7 @@ private fun HomeScreenContent(
     val scope = rememberCoroutineScope()
 
     notificationPermissionController.RequestPermissionIfNeeded(
-        shouldRequest = state.requestForNotificationPermission == null,
+        shouldRequest = state.requestForNotificationPermission == null && !state.isGuestSession,
         onGrant = { onEvent(HomeEvent.NotificationPermissionGranted) },
         onDeny = { onEvent(HomeEvent.NotificationPermissionDenied) }
     )

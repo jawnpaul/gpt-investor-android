@@ -8,6 +8,7 @@ import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
+import com.thejawnpaul.gptinvestor.core.platform.ActivityContextHolder
 import com.thejawnpaul.gptinvestor.core.platform.AndroidPlatformContext
 import com.thejawnpaul.gptinvestor.core.platform.AppConfig
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
@@ -33,10 +34,10 @@ actual suspend fun loginWithGooglePlatform(
     platformContext: PlatformContext,
     appConfig: AppConfig
 ): Result<Unit> = try {
-    val androidContext = (platformContext as? AndroidPlatformContext)?.context
+    val appContext = (platformContext as? AndroidPlatformContext)?.context
         ?: throw IllegalArgumentException("Invalid platform context")
 
-    val credentialManager = CredentialManager.create(androidContext)
+    val credentialManager = CredentialManager.create(appContext)
     val googleIdOption = GetSignInWithGoogleOption.Builder(
         serverClientId = appConfig.webClientId
     ).build()
@@ -45,7 +46,8 @@ actual suspend fun loginWithGooglePlatform(
         .addCredentialOption(googleIdOption)
         .build()
 
-    val result = credentialManager.getCredential(androidContext, request)
+    val activityContext = ActivityContextHolder.get() ?: appContext
+    val result = credentialManager.getCredential(activityContext, request)
     val credential = result.credential
 
     if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {

@@ -15,6 +15,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -44,6 +46,8 @@ import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.baseline_visibility_off_24
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.email_address
+import com.thejawnpaul.gptinvestor.email_conflict_body
+import com.thejawnpaul.gptinvestor.email_conflict_title
 import com.thejawnpaul.gptinvestor.features.component.GPTInvestorButton
 import com.thejawnpaul.gptinvestor.google_icon
 import com.thejawnpaul.gptinvestor.ic_email
@@ -177,6 +181,39 @@ fun SignUpScreen(state: SignUpUiState, onEvent: (SignUpUiEvent) -> Unit, modifie
                         )
                     }
                 )
+
+                if (state.showEmailConflictPrompt) {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_email),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(
+                                    text = stringResource(Res.string.email_conflict_title),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                                Text(
+                                    text = stringResource(Res.string.email_conflict_body),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            }
+                        }
+                    }
+                }
 
                 // Done button
                 GPTInvestorButton(

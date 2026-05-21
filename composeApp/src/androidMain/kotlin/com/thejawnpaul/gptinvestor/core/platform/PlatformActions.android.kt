@@ -24,9 +24,13 @@ actual class PlatformActions(private val context: Context) {
     actual fun openUrl(url: String) {
         val parsedUri = runCatching { url.toUri() }.getOrNull() ?: return
 
-        val customTabsIntent = CustomTabsIntent.Builder().build()
-        customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        customTabsIntent.launchUrl(context, parsedUri)
+        runCatching {
+            val customTabsIntent = CustomTabsIntent.Builder().build()
+            customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            customTabsIntent.launchUrl(context, parsedUri)
+        }.onFailure {
+            Toast.makeText(context, "No browser available to open this link", Toast.LENGTH_SHORT).show()
+        }
     }
 
     actual fun shareText(text: String) {

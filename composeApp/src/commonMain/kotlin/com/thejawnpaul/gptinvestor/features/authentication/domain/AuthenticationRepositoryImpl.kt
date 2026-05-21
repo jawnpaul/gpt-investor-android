@@ -12,6 +12,7 @@ import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpReq
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.User
 import com.thejawnpaul.gptinvestor.features.guest.data.remote.GuestLoginRequest
 import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
+import com.thejawnpaul.gptinvestor.remote.BearerTokenManager
 import com.thejawnpaul.gptinvestor.remote.TokenStorage
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.FirebaseAuth
@@ -30,9 +31,10 @@ class AuthenticationRepositoryImpl(
     private val tokenSyncManager: TokenSyncManager,
     private val apiService: KtorApiService,
     private val tokenStorage: TokenStorage,
+    @Provided private val bearerTokenManager: BearerTokenManager,
     private val appConfig: AppConfig
 ) : AuthenticationRepository {
-    private val auth = Firebase.auth
+    private val auth by lazy { Firebase.auth }
 
     override val currentUser: User?
         get() = auth.currentUser?.let { firebaseUser ->
@@ -92,6 +94,7 @@ class AuthenticationRepositoryImpl(
                 tokenSyncManager.syncToken()
                 tokenStorage.saveAccessToken(loginResponse.accessToken ?: "")
                 tokenStorage.saveRefreshToken(loginResponse.refreshToken ?: "")
+                bearerTokenManager.clearCache()
                 gptInvestorPreferences.clearIsGuestLoggedIn()
 
                 analyticsLogger.identifyUser(
@@ -148,7 +151,11 @@ class AuthenticationRepositoryImpl(
                     Result.success(signUpResponse.message ?: "Signup successful")
                 } ?: Result.failure(Exception(response.body?.message ?: "Sign up failed"))
             } else {
-                Result.failure(Exception(extractApiErrorMessage(response.errorBody, "Sign up failed")))
+                if (response.code == 409) {
+                    Result.failure(EmailAlreadyExistsException())
+                } else {
+                    Result.failure(Exception(extractApiErrorMessage(response.errorBody, "Sign up failed")))
+                }
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -163,6 +170,7 @@ class AuthenticationRepositoryImpl(
         platformContext = platformContext,
         appConfig = appConfig
     ).onSuccess {
+        bearerTokenManager.clearCache()
         val isGuest = gptInvestorPreferences.isGuestLoggedIn.first() == true
         val params = buildMap {
             put("user_id", auth.currentUser?.uid ?: "")
@@ -187,6 +195,7 @@ class AuthenticationRepositoryImpl(
         platformContext = platformContext,
         appConfig = appConfig
     ).onSuccess {
+        bearerTokenManager.clearCache()
         val isGuest = gptInvestorPreferences.isGuestLoggedIn.first() == true
         val params = buildMap {
             put("user_id", auth.currentUser?.uid ?: "")

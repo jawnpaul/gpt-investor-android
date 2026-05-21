@@ -16,6 +16,7 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
+import com.thejawnpaul.gptinvestor.core.platform.ActivityContextHolder
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -35,6 +36,7 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        ActivityContextHolder.set(this)
         appUpdateManager = AppUpdateManagerFactory.create(this)
         checkForUpdates()
 
@@ -95,6 +97,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        ActivityContextHolder.set(this)
         appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
             if (appUpdateInfo.updateAvailability() ==
                 UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
@@ -106,5 +109,10 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        ActivityContextHolder.clear()
     }
 }

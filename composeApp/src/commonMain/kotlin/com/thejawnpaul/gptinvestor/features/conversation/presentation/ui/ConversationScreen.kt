@@ -48,7 +48,6 @@ fun ConversationScreen(
             }) {
                 RateLimitBottomSheetContent(
                     modifier = Modifier,
-                    isGuest = state.isGuest,
                     onUpgrade = onUpgradeFromRateLimit
                 )
             }

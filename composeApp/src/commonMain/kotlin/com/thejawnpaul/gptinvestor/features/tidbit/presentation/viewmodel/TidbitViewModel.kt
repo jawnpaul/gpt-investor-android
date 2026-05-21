@@ -8,6 +8,7 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
+import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.model.Tidbit
@@ -32,6 +33,7 @@ class TidbitViewModel(
     private val repository: TidbitRepository,
     private val savedStateHandle: SavedStateHandle,
     private val appPreferences: AppPreferences,
+    private val guestRateLimitNotifier: GuestRateLimitNotifier,
     @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
@@ -166,7 +168,10 @@ class TidbitViewModel(
             }
 
             is TidbitDetailEvent.OnClickBookmark -> {
-                if (_tidbitDetailState.value.isGuestSession) return@handleDetailEvent
+                if (_tidbitDetailState.value.isGuestSession) {
+                    guestRateLimitNotifier.notifyRateLimit()
+                    return@handleDetailEvent
+                }
 
                 val action = if (event.newValue) "bookmark" else "remove_bookmark"
                 logTidbitActionEvent(action = action, tidbitId = event.id)
@@ -180,7 +185,10 @@ class TidbitViewModel(
             }
 
             is TidbitDetailEvent.OnClickLike -> {
-                if (_tidbitDetailState.value.isGuestSession) return@handleDetailEvent
+                if (_tidbitDetailState.value.isGuestSession) {
+                    guestRateLimitNotifier.notifyRateLimit()
+                    return@handleDetailEvent
+                }
 
                 val action = if (event.newValue) "like" else "unlike"
                 logTidbitActionEvent(action = action, tidbitId = event.id)
@@ -303,7 +311,10 @@ class TidbitViewModel(
             }
 
             is TidbitScreenEvent.OnTidbitLikeClick -> {
-                if (_tidbitMainScreenState.value.isGuest) return@handleMainScreenEvent
+                if (_tidbitMainScreenState.value.isGuest) {
+                    guestRateLimitNotifier.notifyRateLimit()
+                    return@handleMainScreenEvent
+                }
 
                 val action = if (event.newValue) "like" else "unlike"
                 logTidbitActionEvent(action = action, tidbitId = event.tidbitId)
@@ -317,7 +328,10 @@ class TidbitViewModel(
             }
 
             is TidbitScreenEvent.OnTidbitSaveClick -> {
-                if (_tidbitMainScreenState.value.isGuest) return@handleMainScreenEvent
+                if (_tidbitMainScreenState.value.isGuest) {
+                    guestRateLimitNotifier.notifyRateLimit()
+                    return@handleMainScreenEvent
+                }
                 val action = if (event.newValue) "bookmark" else "remove_bookmark"
                 logTidbitActionEvent(action = action, tidbitId = event.tidbitId)
                 viewModelScope.launch {

@@ -95,6 +95,8 @@
     <string name="don_t_have_an_account">Don't have an account?</string>
     <string name="verify_email_title">Check your email</string>
     <string name="verify_email_body">Please verify your email address before logging in. Check your inbox for a verification link.</string>
+    <string name="email_conflict_title">Account already exists</string>
+    <string name="email_conflict_body">An account with this email address already exists. Try logging in instead.</string>
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
     <string name="continue_with_google">Continue with Google</string>
     <string name="continue_with_email">Continue with email</string>

@@ -17,8 +17,7 @@ import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.core.navigation.SetUpNavGraph
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
-import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.RateLimitBottomSheetContent
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.GuestRateLimitBottomSheet
 import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
 import com.thejawnpaul.gptinvestor.features.splash.AnimatedSplashScreen
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
@@ -48,7 +47,7 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
     }
 
     LaunchedEffect(Unit) {
-        guestRateLimitNotifier.signal.collect { showGuestRateLimitSheet = true }
+        guestRateLimitNotifier.signal.collect { if (!showGuestRateLimitSheet) showGuestRateLimitSheet = true }
     }
 
     LaunchedEffect(deepLinkRoute, isNavGraphReady, isUserSignedIn, isGuestSignedIn) {
@@ -90,17 +89,15 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
             )
 
             if (showGuestRateLimitSheet) {
-                GptInvestorBottomSheet(onDismiss = { showGuestRateLimitSheet = false }) {
-                    RateLimitBottomSheetContent(
-                        isGuest = true,
-                        onUpgrade = {
-                            showGuestRateLimitSheet = false
-                            navController.navigate(Screen.SignUpScreen.route) {
-                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                            }
+                GuestRateLimitBottomSheet(
+                    onDismiss = { showGuestRateLimitSheet = false },
+                    onSignIn = {
+                        showGuestRateLimitSheet = false
+                        navController.navigate(Screen.SignUpScreen.route) {
+                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
-                    )
-                }
+                    }
+                )
             }
 
             LaunchedEffect(Unit) {

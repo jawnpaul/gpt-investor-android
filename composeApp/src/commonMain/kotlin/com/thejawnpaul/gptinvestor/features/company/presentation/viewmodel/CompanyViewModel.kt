@@ -100,6 +100,9 @@ class CompanyViewModel(
                             error = "Something went wrong."
                         )
                     }
+                    if (isGuestSession.value) {
+                        guestRateLimitNotifier.notifyRateLimit()
+                    }
                 }
                 it.onSuccess { company ->
                     _selectedCompany.update { view ->

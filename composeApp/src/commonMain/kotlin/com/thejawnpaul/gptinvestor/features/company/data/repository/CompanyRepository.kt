@@ -254,12 +254,14 @@ class CompanyRepository(
         }
     }
 
-    override suspend fun getCompanyLogos(tickers: List<String>): Either<Failure, Map<String, String>> {
+    override suspend fun getCompanyLogos(tickers: List<String>): Either<Failure, Map<String, String>> = try {
         val response = apiService.getCompanyLogos(CompanyLogosRequest(tickers))
-        return if (response.isSuccessful) {
+        if (response.isSuccessful) {
             Either.Right(response.body?.associate { it.ticker to (it.logoUrl?.toHttpsUrl() ?: "") } ?: emptyMap())
         } else {
             Either.Left(if (response.code == 429) Failure.RateLimitExceeded else Failure.ServerError)
         }
+    } catch (e: Exception) {
+        Either.Left(Failure.NetworkConnection)
     }
 }

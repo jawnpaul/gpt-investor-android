@@ -52,6 +52,7 @@ class CompanyViewModel(
 ) : ViewModel() {
 
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
+    private val isGuestSession = MutableStateFlow(false)
     val selectedCompany =
         combine(_selectedCompany, appPreferences.isGuestLoggedIn) { company, isGuest ->
             company.copy(isGuestSession = isGuest == true)
@@ -79,6 +80,11 @@ class CompanyViewModel(
         get() = savedStateHandle.get<String>("ticker")
 
     init {
+        viewModelScope.launch {
+            appPreferences.isGuestLoggedIn.collect { isGuest ->
+                isGuestSession.value = isGuest == true
+            }
+        }
         getAvailableModels()
         getCompany()
     }
@@ -197,7 +203,7 @@ class CompanyViewModel(
         Logger.e(failure.toString())
         when (failure) {
             is Failure.RateLimitExceeded -> {
-                val isGuest = _selectedCompany.value.isGuestSession
+                val isGuest = isGuestSession.value
                 analyticsLogger.logEvent(
                     eventName = "rate-limit-hit",
                     params = mapOf("user_type" to if (isGuest) "guest" else "authenticated")
@@ -347,7 +353,7 @@ class CompanyViewModel(
                     params = mapOf(
                         "ticker" to (_selectedCompany.value.brief?.ticker ?: ""),
                         "sentiment" to event.sentiment.name.lowercase(),
-                        "user_type" to if (_selectedCompany.value.isGuestSession) "guest" else "authenticated"
+                        "user_type" to if (isGuestSession.value) "guest" else "authenticated"
                     )
                 )
             }
@@ -358,7 +364,7 @@ class CompanyViewModel(
                     params = mapOf(
                         "ticker" to (_selectedCompany.value.brief?.ticker ?: ""),
                         "key_number_type" to event.keyNumberType.name,
-                        "user_type" to if (_selectedCompany.value.isGuestSession) "guest" else "authenticated"
+                        "user_type" to if (isGuestSession.value) "guest" else "authenticated"
                     )
                 )
             }

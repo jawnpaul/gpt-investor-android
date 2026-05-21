@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
+import com.thejawnpaul.gptinvestor.features.authentication.domain.EmailAlreadyExistsException
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -70,7 +71,8 @@ class SignUpViewModel(
         val name = _signUpUiState.value.name
         _signUpUiState.update {
             it.copy(
-                loading = true
+                loading = true,
+                showEmailConflictPrompt = false
             )
         }
 
@@ -97,7 +99,11 @@ class SignUpViewModel(
                         loading = false
                     )
                 }
-                handleAction(action = SignUpUiAction.OnShowToast(failure.message.toString()))
+                if (failure is EmailAlreadyExistsException) {
+                    _signUpUiState.update { it.copy(showEmailConflictPrompt = true) }
+                } else {
+                    handleAction(action = SignUpUiAction.OnShowToast(failure.message.toString()))
+                }
             }
         }
     }
@@ -139,7 +145,8 @@ data class SignUpUiState(
     val email: String = "",
     val password: String = "",
     val name: String = "",
-    val loading: Boolean = false
+    val loading: Boolean = false,
+    val showEmailConflictPrompt: Boolean = false
 ) {
     val enableButton = email.trim().isNotEmpty() &&
         password.trim().isNotEmpty() &&

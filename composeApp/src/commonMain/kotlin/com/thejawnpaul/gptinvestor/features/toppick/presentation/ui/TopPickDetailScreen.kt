@@ -116,9 +116,16 @@ fun TopPickDetailScreen(
                     Text(text = stringResource(Res.string.top_pick_details))
                 }
                 if (state.isGuestSession) {
-                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {
-                        onEvent(TopPickEvent.GoToSignUp)
-                    })
+                    TopGuestLabel(
+                        modifier = Modifier.fillMaxWidth().padding(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 16.dp
+                        ),
+                        onClick = {
+                            onEvent(TopPickEvent.GoToSignUp)
+                        }
+                    )
                 }
             }
         },

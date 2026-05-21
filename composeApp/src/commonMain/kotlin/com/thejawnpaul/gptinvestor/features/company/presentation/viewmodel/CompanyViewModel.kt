@@ -9,6 +9,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
+import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSentiment
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumberType
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
@@ -46,10 +47,12 @@ class CompanyViewModel(
     private val modelsRepository: ModelsRepository,
     private val feedbackRepository: FeedbackRepository,
     private val appPreferences: AppPreferences,
-    @Provided private val analyticsLogger: AnalyticsLogger
+    @Provided private val analyticsLogger: AnalyticsLogger,
+    private val guestRateLimitNotifier: GuestRateLimitNotifier
 ) : ViewModel() {
 
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
+    private val isGuestSession = MutableStateFlow(false)
     val selectedCompany =
         combine(_selectedCompany, appPreferences.isGuestLoggedIn) { company, isGuest ->
             company.copy(isGuestSession = isGuest == true)
@@ -77,12 +80,12 @@ class CompanyViewModel(
         get() = savedStateHandle.get<String>("ticker")
 
     init {
+        viewModelScope.launch {
+            appPreferences.isGuestLoggedIn.collect { isGuest ->
+                isGuestSession.value = isGuest == true
+            }
+        }
         getAvailableModels()
-        getCompany()
-    }
-
-    fun updateTicker(ticker: String) {
-        savedStateHandle["ticker"] = ticker
         getCompany()
     }
 
@@ -96,6 +99,9 @@ class CompanyViewModel(
                             loading = false,
                             error = "Something went wrong."
                         )
+                    }
+                    if (isGuestSession.value) {
+                        guestRateLimitNotifier.notifyRateLimit()
                     }
                 }
                 it.onSuccess { company ->
@@ -195,15 +201,18 @@ class CompanyViewModel(
         Logger.e(failure.toString())
         when (failure) {
             is Failure.RateLimitExceeded -> {
+                val isGuest = isGuestSession.value
                 analyticsLogger.logEvent(
                     eventName = "rate-limit-hit",
-                    params = mapOf(
-                        "user_type" to if (_selectedCompany.value.isGuestSession) "guest" else "logged_in"
+                    params = mapOf("user_type" to if (isGuest) "guest" else "authenticated")
+                )
+                if (isGuest) {
+                    guestRateLimitNotifier.notifyRateLimit()
+                } else {
+                    processCompanyDetailAction(
+                        CompanyDetailAction.ShowToast("Rate limit exceeded. Please try again later.")
                     )
-                )
-                processCompanyDetailAction(
-                    CompanyDetailAction.ShowToast("Rate limit exceeded. Please try again later.")
-                )
+                }
             }
 
             is GenAIException -> {
@@ -283,10 +292,6 @@ class CompanyViewModel(
                 getInputResponse()
             }
 
-            is CompanyDetailEvent.UpdateTicker -> {
-                updateTicker(event.ticker)
-            }
-
             is CompanyDetailEvent.SuggestedPromptClicked -> {
                 getSuggestedPromptResponse(event.query)
             }
@@ -342,7 +347,7 @@ class CompanyViewModel(
                     params = mapOf(
                         "ticker" to (_selectedCompany.value.brief?.ticker ?: ""),
                         "sentiment" to event.sentiment.name.lowercase(),
-                        "user_type" to if (_selectedCompany.value.isGuestSession) "guest" else "logged_in"
+                        "user_type" to if (isGuestSession.value) "guest" else "authenticated"
                     )
                 )
             }
@@ -353,7 +358,7 @@ class CompanyViewModel(
                     params = mapOf(
                         "ticker" to (_selectedCompany.value.brief?.ticker ?: ""),
                         "key_number_type" to event.keyNumberType.name,
-                        "user_type" to if (_selectedCompany.value.isGuestSession) "guest" else "logged_in"
+                        "user_type" to if (isGuestSession.value) "guest" else "authenticated"
                     )
                 )
             }
@@ -437,7 +442,6 @@ class CompanyViewModel(
 }
 
 sealed interface CompanyDetailEvent {
-    data class UpdateTicker(val ticker: String) : CompanyDetailEvent
     data class QueryInputChanged(val query: String) : CompanyDetailEvent
     data object GoBack : CompanyDetailEvent
     data object SendClick : CompanyDetailEvent

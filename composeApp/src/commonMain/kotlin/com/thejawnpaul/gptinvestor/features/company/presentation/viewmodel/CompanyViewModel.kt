@@ -83,11 +83,6 @@ class CompanyViewModel(
         getCompany()
     }
 
-    fun updateTicker(ticker: String) {
-        savedStateHandle["ticker"] = ticker
-        getCompany()
-    }
-
     private fun getCompany() {
         selectedCompanyTicker?.let { ticker ->
             _selectedCompany.update { it.copy(loading = true) }
@@ -288,10 +283,6 @@ class CompanyViewModel(
                 getInputResponse()
             }
 
-            is CompanyDetailEvent.UpdateTicker -> {
-                updateTicker(event.ticker)
-            }
-
             is CompanyDetailEvent.SuggestedPromptClicked -> {
                 getSuggestedPromptResponse(event.query)
             }
@@ -442,7 +433,6 @@ class CompanyViewModel(
 }
 
 sealed interface CompanyDetailEvent {
-    data class UpdateTicker(val ticker: String) : CompanyDetailEvent
     data class QueryInputChanged(val query: String) : CompanyDetailEvent
     data object GoBack : CompanyDetailEvent
     data object SendClick : CompanyDetailEvent

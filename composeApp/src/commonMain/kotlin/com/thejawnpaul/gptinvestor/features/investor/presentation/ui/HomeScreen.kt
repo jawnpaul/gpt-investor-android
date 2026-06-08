@@ -127,7 +127,7 @@ private fun HomeScreenContent(
     val scope = rememberCoroutineScope()
 
     notificationPermissionController.RequestPermissionIfNeeded(
-        shouldRequest = state.requestForNotificationPermission == null,
+        shouldRequest = state.requestForNotificationPermission == null && !state.isGuestSession,
         onGrant = { onEvent(HomeEvent.NotificationPermissionGranted) },
         onDeny = { onEvent(HomeEvent.NotificationPermissionDenied) }
     )
@@ -251,7 +251,7 @@ private fun HomeScreenContent(
                     HomeGreeting(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         timePeriod = state.timePeriod,
-                        name = state.currentUser?.name
+                        name = state.firstName
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 

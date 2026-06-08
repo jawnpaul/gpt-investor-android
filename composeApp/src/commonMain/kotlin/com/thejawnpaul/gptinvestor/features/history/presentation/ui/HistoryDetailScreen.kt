@@ -29,7 +29,6 @@ fun HistoryDetailScreen(
             }) {
                 RateLimitBottomSheetContent(
                     modifier = Modifier,
-                    isGuest = state.isGuest,
                     onUpgrade = onUpgradeFromRateLimit
                 )
             }

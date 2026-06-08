@@ -475,7 +475,10 @@ class ConversationRepository(
                                 updatedMessages[index] =
                                     original.copy(response = finalResponseText, loading = false)
                                 currentConversation =
-                                    currentConversation.copy(messageList = updatedMessages)
+                                    currentConversation.copy(
+                                        messageList = updatedMessages,
+                                        streamComplete = true
+                                    )
                                 emit(Either.Right(currentConversation))
                             }
                         }

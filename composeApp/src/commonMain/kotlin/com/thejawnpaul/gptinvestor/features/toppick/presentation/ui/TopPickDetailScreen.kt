@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -115,9 +116,16 @@ fun TopPickDetailScreen(
                     Text(text = stringResource(Res.string.top_pick_details))
                 }
                 if (state.isGuestSession) {
-                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {
-                        onEvent(TopPickEvent.GoToSignUp)
-                    })
+                    TopGuestLabel(
+                        modifier = Modifier.fillMaxWidth().padding(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 16.dp
+                        ),
+                        onClick = {
+                            onEvent(TopPickEvent.GoToSignUp)
+                        }
+                    )
                 }
             }
         },
@@ -125,6 +133,7 @@ fun TopPickDetailScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .navigationBarsPadding()
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically

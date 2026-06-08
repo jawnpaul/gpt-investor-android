@@ -10,6 +10,7 @@ import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
+import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
 import com.thejawnpaul.gptinvestor.features.billing.domain.BillingConstants
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
@@ -28,7 +29,6 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInpu
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.state.ConversationView
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction.OnCopy
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
-import io.ktor.http.decodeURLQueryComponent
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,7 +47,8 @@ class ConversationViewModel(
     private val modelsRepository: ModelsRepository,
     private val billingRepository: IBillingRepository,
     private val appPreferences: AppPreferences,
-    @Provided private val analyticsLogger: AnalyticsLogger
+    @Provided private val analyticsLogger: AnalyticsLogger,
+    private val guestRateLimitNotifier: GuestRateLimitNotifier
 ) : ViewModel() {
 
     private val conversationViewMutableStateFlow = MutableStateFlow(ConversationView())
@@ -224,23 +225,20 @@ class ConversationViewModel(
             }
 
             is Failure.RateLimitExceeded -> {
+                val isGuest = conversationViewMutableStateFlow.value.isGuest
                 analyticsLogger.logEvent(
                     eventName = "rate-limit-hit",
-                    params = mapOf(
-                        "user_type" to if (conversationViewMutableStateFlow.value.isGuest) "guest" else "logged_in"
-                    )
+                    params = mapOf("user_type" to if (isGuest) "guest" else "authenticated")
                 )
-                conversationViewMutableStateFlow.update { state ->
-                    state.copy(
-                        showRateLimitBottomSheet = state.isGuest
-                    )
-                }
                 Logger.e("Rate limit exceeded")
-                if (!conversationViewMutableStateFlow.value.isGuest) {
+                if (isGuest) {
+                    guestRateLimitNotifier.notifyRateLimit()
+                } else {
                     processAction(
                         ConversationAction.ShowToast("Rate limit exceeded. Please try again later.")
                     )
                 }
+                conversationViewMutableStateFlow.update { it.copy(showRateLimitBottomSheet = false) }
             }
 
             is Failure.ContextLimitReached -> {
@@ -275,14 +273,16 @@ class ConversationViewModel(
             conversation.id
         }
 
-        val duration = Clock.System.now().toEpochMilliseconds() - requestStartTime
-        analyticsLogger.logEvent(
-            eventName = "response-received",
-            params = mapOf(
-                "duration_ms" to duration,
-                "status" to "success"
+        if (conversation.streamComplete) {
+            val duration = Clock.System.now().toEpochMilliseconds() - requestStartTime
+            analyticsLogger.logEvent(
+                eventName = "response-received",
+                params = mapOf(
+                    "duration_ms" to duration,
+                    "status" to "success"
+                )
             )
-        )
+        }
 
         conversationViewMutableStateFlow.update { state ->
             state.copy(
@@ -462,23 +462,18 @@ class ConversationViewModel(
     }
 
     private fun startConversation(title: String?, chatInput: String?) {
-        if (chatInput != null) {
-            val decodedChatInput =
-                chatInput.decodeURLQueryComponent()
-            if (title != null) {
-                val decodedTitle =
-                    title.decodeURLQueryComponent()
-                handleEvent(
-                    ConversationEvent.DefaultPromptClicked(
-                        prompt = DefaultPrompt(
-                            title = decodedTitle,
-                            query = decodedChatInput
-                        )
+        val resolved = resolveConversationStart(title, chatInput) ?: return
+        if (resolved.first != null) {
+            handleEvent(
+                ConversationEvent.DefaultPromptClicked(
+                    prompt = DefaultPrompt(
+                        title = resolved.first!!,
+                        query = resolved.second
                     )
                 )
-            } else {
-                handleEvent(ConversationEvent.SendPrompt(query = decodedChatInput))
-            }
+            )
+        } else {
+            handleEvent(ConversationEvent.SendPrompt(query = resolved.second))
         }
     }
 
@@ -489,7 +484,7 @@ class ConversationViewModel(
             if (conversation.value.isGuest) {
                 put("user_type", "guest")
             } else {
-                put("user_type", "logged_in")
+                put("user_type", "authenticated")
             }
         }
         analyticsLogger.logEvent(eventName = "message-sent", params = params)
@@ -527,3 +522,8 @@ sealed interface ConversationAction {
 }
 
 data class HomeChatInput(val title: String? = null, val input: String? = null)
+
+internal fun resolveConversationStart(title: String?, chatInput: String?): Pair<String?, String>? {
+    if (chatInput == null) return null
+    return Pair(title, chatInput)
+}

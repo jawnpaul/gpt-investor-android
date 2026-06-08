@@ -8,6 +8,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
+import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
@@ -39,11 +40,14 @@ class TopPickViewModel(
     private val removeTopPickFromSavedUseCase: RemoveTopPickFromSavedUseCase,
     private val shareTopPickUseCase: ShareTopPickUseCase,
     private val getCompanyUseCase: GetCompanyUseCase,
-    private val appPreferences: AppPreferences
+    private val appPreferences: AppPreferences,
+    private val guestRateLimitNotifier: GuestRateLimitNotifier
 ) : ViewModel() {
 
     private val topPickId: String?
         get() = savedStateHandle.get<String>("topPickId")
+
+    private val isGuestSession = MutableStateFlow(false)
 
     private val _topPickView = MutableStateFlow(TopPickDetailView())
     val topPickView =
@@ -70,6 +74,11 @@ class TopPickViewModel(
                 _topPickView.update { it.copy(isLoggedIn = isSignedIn) }
             }
         }
+        viewModelScope.launch {
+            appPreferences.isGuestLoggedIn.collect { isGuest ->
+                isGuestSession.value = isGuest == true
+            }
+        }
         getAllTopPicks()
         getTopPick()
     }
@@ -93,6 +102,9 @@ class TopPickViewModel(
 
     private fun handleGetTopPickFailure(failure: Failure) {
         _topPickView.update { it.copy(loading = false) }
+        if (failure is Failure.RateLimitExceeded && isGuestSession.value) {
+            guestRateLimitNotifier.notifyRateLimit()
+        }
         Logger.e(failure.toString())
     }
 

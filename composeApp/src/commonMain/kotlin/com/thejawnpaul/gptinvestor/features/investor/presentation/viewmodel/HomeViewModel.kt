@@ -66,7 +66,8 @@ class HomeViewModel(
     ) { state, userName, isGuestLoggedIn ->
         state.copy(
             drawerState = state.drawerState.copy(user = userName),
-            isGuestSession = isGuestLoggedIn == true
+            isGuestSession = isGuestLoggedIn == true,
+            firstName = extractFirstName(userName)
         )
     }.stateIn(
         scope = viewModelScope,
@@ -485,6 +486,9 @@ class HomeViewModel(
 
 enum class TimePeriod { MORNING, AFTERNOON, EVENING }
 
+internal fun extractFirstName(userName: String?): String? =
+    userName?.trim()?.split("\\s+".toRegex())?.firstOrNull()?.takeIf { it.isNotBlank() }
+
 private fun computeTimePeriod(): TimePeriod {
     val hour = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
     return when {
@@ -517,7 +521,8 @@ data class HomeUiState(
     val drawerState: DrawerState = DrawerState(),
     val homeTidbitView: HomeTidbitView = HomeTidbitView(),
     val isGuestSession: Boolean = false,
-    val timePeriod: TimePeriod = TimePeriod.MORNING
+    val timePeriod: TimePeriod = TimePeriod.MORNING,
+    val firstName: String? = null
 )
 
 sealed interface HomeEvent {

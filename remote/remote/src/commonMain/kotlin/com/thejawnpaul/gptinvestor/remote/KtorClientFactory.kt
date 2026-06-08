@@ -60,7 +60,10 @@ object KtorClientFactory {
                     }
 
                     refreshTokens {
-                        val refreshToken = tokenStorage.getRefreshToken() ?: return@refreshTokens null
+                        val refreshToken = tokenStorage.getRefreshToken() ?: run {
+                            unauthorizedCallback.onUnauthorized()
+                            return@refreshTokens null
+                        }
 
                         try {
                             val response = client.post("v1.1/refresh") {

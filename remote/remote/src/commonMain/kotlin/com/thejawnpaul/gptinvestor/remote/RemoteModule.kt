@@ -15,4 +15,7 @@ object RemoteModule {
         @Provided tokenStorage: TokenStorage,
         @Provided unauthorizedCallback: UnauthorizedCallback
     ): HttpClient = KtorClientFactory.create(tokenStorage, unauthorizedCallback)
+
+    @Singleton
+    fun provideBearerTokenManager(client: HttpClient): BearerTokenManager = BearerTokenManager(client)
 }

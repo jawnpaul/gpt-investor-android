@@ -3,16 +3,17 @@ package com.thejawnpaul.gptinvestor.features.authentication.domain
 import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
-import com.thejawnpaul.gptinvestor.core.api.KtorResponse
 import com.thejawnpaul.gptinvestor.core.platform.AppConfig
 import com.thejawnpaul.gptinvestor.core.platform.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
+import com.thejawnpaul.gptinvestor.core.utility.extractApiErrorMessage
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.User
 import com.thejawnpaul.gptinvestor.features.guest.data.remote.GuestLoginRequest
 import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
+import com.thejawnpaul.gptinvestor.remote.BearerTokenManager
 import com.thejawnpaul.gptinvestor.remote.TokenStorage
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.FirebaseAuth
@@ -20,7 +21,7 @@ import dev.gitlive.firebase.auth.auth
 import dev.gitlive.firebase.installations.installations
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flow
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
 
@@ -51,10 +52,11 @@ class AuthenticationRepositoryImpl(
     private val tokenSyncManager: TokenSyncManager,
     private val apiService: KtorApiService,
     private val tokenStorage: TokenStorage,
+    @Provided private val bearerTokenManager: BearerTokenManager,
     private val appConfig: AppConfig,
     @Provided private val googleSignInProvider: GoogleSignInProvider
 ) : AuthenticationRepository {
-    private val auth = Firebase.auth
+    private val auth by lazy { Firebase.auth }
 
     private val authDependencies: PlatformAuthDependencies
         get() = PlatformAuthDependencies(
@@ -67,11 +69,23 @@ class AuthenticationRepositoryImpl(
         )
 
     override val currentUser: User?
-        get() = auth.currentUser?.toUser()
+        get() = auth.currentUser?.let { firebaseUser ->
+            User(
+                uid = firebaseUser.uid,
+                email = firebaseUser.email,
+                name = firebaseUser.displayName
+            )
+        }
 
     override suspend fun signOut(): Result<Unit> = try {
         auth.signOut()
-        gptInvestorPreferences.clearSessionData()
+        gptInvestorPreferences.clearUserId()
+        gptInvestorPreferences.clearIsUserLoggedIn()
+        gptInvestorPreferences.clearThemePreference()
+        gptInvestorPreferences.clearIsUserOnModelWaitlist()
+        gptInvestorPreferences.clearAccessToken()
+        gptInvestorPreferences.clearRefreshToken()
+        gptInvestorPreferences.clearIsGuestLoggedIn()
         analyticsLogger.resetUser(eventName = EVENT_LOG_OUT)
         signOutPlatform()
         Result.success(Unit)
@@ -80,14 +94,20 @@ class AuthenticationRepositoryImpl(
         Result.failure(e)
     }
 
-    override fun getAuthState(): Flow<Boolean> = gptInvestorPreferences.accessToken.map {
-        it != null
+    override fun getAuthState(): Flow<Boolean> = flow {
+        emit(tokenStorage.getAccessToken() != null)
     }
 
     override suspend fun deleteAccount(): Result<Unit> = try {
         auth.currentUser?.delete()
         analyticsLogger.resetUser(eventName = EVENT_DELETE_ACCOUNT)
-        gptInvestorPreferences.clearSessionData()
+        gptInvestorPreferences.clearUserId()
+        gptInvestorPreferences.clearIsUserLoggedIn()
+        gptInvestorPreferences.clearThemePreference()
+        gptInvestorPreferences.clearIsFirstInstall()
+        gptInvestorPreferences.clearIsUserOnModelWaitlist()
+        gptInvestorPreferences.clearAccessToken()
+        gptInvestorPreferences.clearRefreshToken()
         Result.success(Unit)
     } catch (e: Exception) {
         Logger.e(e) { "Delete account failed" }
@@ -95,41 +115,62 @@ class AuthenticationRepositoryImpl(
     }
 
     override suspend fun loginWithEmailAndPassword(email: String, password: String): Result<String> = try {
-        apiService.loginWithEmailAndPassword(
+        val response = apiService.loginWithEmailAndPassword(
             request = LoginRequest(email, password)
-        ).toResult("Login failed").onSuccess { loginResponse ->
-            gptInvestorPreferences.setUserId(loginResponse.user?.uid.toString())
-            gptInvestorPreferences.setIsUserLoggedIn(true)
-            gptInvestorPreferences.setUserName(loginResponse.user?.name.toString())
-            tokenSyncManager.syncToken()
-            tokenStorage.saveAccessToken(loginResponse.accessToken ?: "")
-            tokenStorage.saveRefreshToken(loginResponse.refreshToken ?: "")
-            gptInvestorPreferences.clearIsGuestLoggedIn()
+        )
+        if (response.isSuccessful) {
+            response.body?.let { loginResponse ->
+                gptInvestorPreferences.setUserId(loginResponse.user?.uid.toString())
+                gptInvestorPreferences.setIsUserLoggedIn(true)
+                gptInvestorPreferences.setUserName(loginResponse.user?.name.toString())
+                tokenSyncManager.syncToken()
+                tokenStorage.saveAccessToken(loginResponse.accessToken ?: "")
+                tokenStorage.saveRefreshToken(loginResponse.refreshToken ?: "")
+                bearerTokenManager.clearCache()
+                gptInvestorPreferences.clearIsGuestLoggedIn()
 
-            trackAuthEvent(
-                isSignUp = false,
-                method = METHOD_EMAIL,
-                userId = loginResponse.user?.uid.toString(),
-                email = loginResponse.user?.email.toString()
-            )
-        }.map { it.message ?: "Login successful" }
+                trackAuthEvent(
+                    isSignUp = false,
+                    method = METHOD_EMAIL,
+                    userId = loginResponse.user?.uid.toString(),
+                    email = loginResponse.user?.email.toString()
+                )
+                Result.success(loginResponse.message ?: "Login successful")
+            } ?: Result.failure(Exception(response.body?.message ?: "Login failed"))
+        } else {
+            if (response.code == 403) {
+                Result.failure(EmailNotVerifiedException())
+            } else {
+                Result.failure(Exception(extractApiErrorMessage(response.errorBody, "Login failed")))
+            }
+        }
     } catch (e: Exception) {
         Result.failure(e)
     }
 
     override suspend fun signUpWithEmailAndPassword(email: String, password: String, name: String): Result<String> =
         try {
-            apiService.signUpWithEmailAndPassword(
+            val response = apiService.signUpWithEmailAndPassword(
                 SignUpRequest(email = email, password = password, name = name)
-            ).toResult("Sign up failed").onSuccess { signUpResponse ->
-                trackAuthEvent(
-                    isSignUp = true,
-                    method = METHOD_EMAIL,
-                    userId = signUpResponse.userId.toString(),
-                    email = email
-                )
-                gptInvestorPreferences.clearIsGuestLoggedIn()
-            }.map { it.message ?: "Signup successful" }
+            )
+            if (response.isSuccessful) {
+                response.body?.let { signUpResponse ->
+                    trackAuthEvent(
+                        isSignUp = true,
+                        method = METHOD_EMAIL,
+                        userId = signUpResponse.userId.toString(),
+                        email = email
+                    )
+                    gptInvestorPreferences.clearIsGuestLoggedIn()
+                    Result.success(signUpResponse.message ?: "Signup successful")
+                } ?: Result.failure(Exception(response.body?.message ?: "Sign up failed"))
+            } else {
+                if (response.code == 409) {
+                    Result.failure(EmailAlreadyExistsException())
+                } else {
+                    Result.failure(Exception(extractApiErrorMessage(response.errorBody, "Sign up failed")))
+                }
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -139,12 +180,14 @@ class AuthenticationRepositoryImpl(
         googleSignInProvider = googleSignInProvider,
         platformContext = platformContext
     ).onSuccess {
+        bearerTokenManager.clearCache()
         trackAuthEvent(isSignUp = false, method = METHOD_GOOGLE)
     }
 
     override suspend fun loginWithApple(): Result<Unit> = loginWithApplePlatform(
         dependencies = authDependencies
     ).onSuccess {
+        bearerTokenManager.clearCache()
         trackAuthEvent(isSignUp = false, method = METHOD_APPLE)
     }
 
@@ -153,24 +196,30 @@ class AuthenticationRepositoryImpl(
         googleSignInProvider = googleSignInProvider,
         platformContext = platformContext
     ).onSuccess {
+        bearerTokenManager.clearCache()
         trackAuthEvent(isSignUp = true, method = METHOD_GOOGLE)
     }
 
     override suspend fun signUpWithApple(): Result<Unit> = loginWithApplePlatform(
         dependencies = authDependencies
     ).onSuccess {
+        bearerTokenManager.clearCache()
         trackAuthEvent(isSignUp = true, method = METHOD_APPLE)
     }
 
     override suspend fun guestLogin(): Result<String> = try {
         val id = Firebase.installations.getId()
-        apiService.guestLogin(request = GuestLoginRequest(id = id))
-            .toResult("Guest login failed")
-            .onSuccess { guestLoginResponse ->
+        val response = apiService.guestLogin(request = GuestLoginRequest(id = id))
+        if (response.isSuccessful) {
+            response.body?.let { guestLoginResponse ->
                 tokenStorage.saveAccessToken(guestLoginResponse.accessToken ?: "")
                 gptInvestorPreferences.setIsGuestLoggedIn(true)
                 analyticsLogger.logEvent(eventName = EVENT_GUEST_SESSION_START, params = mapOf())
-            }.map { it.message ?: "Guest login successful" }
+                Result.success(guestLoginResponse.message ?: "Guest login successful")
+            } ?: Result.failure(Exception(response.body?.message ?: "Guest login failed"))
+        } else {
+            Result.failure(Exception(extractApiErrorMessage(response.errorBody, "Guest login failed")))
+        }
     } catch (e: Exception) {
         Result.failure(e)
     }
@@ -184,7 +233,7 @@ class AuthenticationRepositoryImpl(
                 Result.success(Unit)
             } ?: Result.failure(Exception("Empty response"))
         } else {
-            Result.failure(Exception(response.errorBody ?: "Failed to acquire token"))
+            Result.failure(Exception(extractApiErrorMessage(response.errorBody, "Failed to acquire token")))
         }
     } catch (e: Exception) {
         Result.failure(e)
@@ -238,15 +287,3 @@ data class PlatformAuthDependencies(
     val tokenSyncManager: TokenSyncManager,
     val appConfig: AppConfig
 )
-
-private fun dev.gitlive.firebase.auth.FirebaseUser.toUser(): User = User(
-    uid = uid,
-    email = email,
-    name = displayName
-)
-
-private fun <T> KtorResponse<T>.toResult(defaultErrorMessage: String): Result<T> = if (isSuccessful) {
-    body?.let { Result.success(it) } ?: Result.failure(Exception(defaultErrorMessage))
-} else {
-    Result.failure(Exception(errorBody ?: defaultErrorMessage))
-}

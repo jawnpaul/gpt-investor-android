@@ -7,6 +7,7 @@ import co.touchlab.kermit.Logger
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+import com.thejawnpaul.gptinvestor.core.platform.ActivityContextHolder
 import com.thejawnpaul.gptinvestor.core.platform.AndroidPlatformContext
 import com.thejawnpaul.gptinvestor.core.platform.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
@@ -25,6 +26,7 @@ actual suspend fun loginWithGooglePlatform(
     platformContext: PlatformContext
 ): Result<Unit> = try {
     val (auth, apiService, gptInvestorPreferences, tokenStorage, tokenSyncManager, appConfig) = dependencies
+
     val androidContext = (platformContext as? AndroidPlatformContext)?.context
         ?: throw IllegalArgumentException("Invalid platform context")
 
@@ -37,23 +39,21 @@ actual suspend fun loginWithGooglePlatform(
         .addCredentialOption(googleIdOption)
         .build()
 
-    val result = credentialManager.getCredential(androidContext, request)
+    val activityContext = ActivityContextHolder.get() ?: androidContext
+    val result = credentialManager.getCredential(activityContext, request)
     val credential = result.credential
 
     if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
         val idToken = googleIdTokenCredential.idToken
 
-        // Use GitLive to sign in
         auth.signInWithCredential(GitLiveGoogleAuthProvider.credential(idToken, null))
 
         val currentUser = auth.currentUser
         currentUser?.let {
             val firebaseIdToken = it.getIdToken(true)
             val loginResponse = apiService.loginWithFirebase(
-                FirebaseLoginRequest(
-                    firebaseIdToken ?: ""
-                )
+                FirebaseLoginRequest(firebaseIdToken ?: "")
             )
             gptInvestorPreferences.setUserName(currentUser.displayName ?: "null")
             if (loginResponse.isSuccessful) {

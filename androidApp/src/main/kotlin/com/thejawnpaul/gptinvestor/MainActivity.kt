@@ -16,11 +16,8 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
-import com.thejawnpaul.gptinvestor.core.di.GPTKoinApp
+import com.thejawnpaul.gptinvestor.core.platform.ActivityContextHolder
 import kotlinx.coroutines.launch
-import org.koin.android.ext.koin.androidContext
-import org.koin.compose.KoinApplication
-import org.koin.plugin.module.dsl.koinConfiguration
 
 class MainActivity : ComponentActivity() {
 
@@ -39,6 +36,7 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        ActivityContextHolder.set(this)
         appUpdateManager = AppUpdateManagerFactory.create(this)
         checkForUpdates()
 
@@ -48,15 +46,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             var deepLinkRoute by deepLinkRouteState
-            KoinApplication(configuration = koinConfiguration<GPTKoinApp> {
-                printLogger()
-                androidContext(this@MainActivity)
-            }) {
-                App(
-                    deepLinkRoute = deepLinkRoute,
-                    onDeepLinkConsume = { deepLinkRoute = null }
-                )
-            }
+            App(
+                deepLinkRoute = deepLinkRoute,
+                onDeepLinkConsume = { deepLinkRoute = null }
+            )
         }
     }
 
@@ -104,6 +97,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        ActivityContextHolder.set(this)
         appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
             if (appUpdateInfo.updateAvailability() ==
                 UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
@@ -115,5 +109,10 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        ActivityContextHolder.clear()
     }
 }

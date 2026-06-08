@@ -15,16 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.guest_limit_reached_description
-import com.thejawnpaul.gptinvestor.guest_limit_reached_title
 import com.thejawnpaul.gptinvestor.rate_limit_bottom_sheet_description
 import com.thejawnpaul.gptinvestor.rate_limit_bottom_sheet_title
-import com.thejawnpaul.gptinvestor.sign_in
 import com.thejawnpaul.gptinvestor.upgrade
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun RateLimitBottomSheetContent(isGuest: Boolean, onUpgrade: () -> Unit, modifier: Modifier = Modifier) {
+fun RateLimitBottomSheetContent(onUpgrade: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -34,24 +31,12 @@ fun RateLimitBottomSheetContent(isGuest: Boolean, onUpgrade: () -> Unit, modifie
     ) {
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = if (isGuest) {
-                stringResource(Res.string.guest_limit_reached_title)
-            } else {
-                stringResource(
-                    Res.string.rate_limit_bottom_sheet_title
-                )
-            },
+            text = stringResource(Res.string.rate_limit_bottom_sheet_title),
             style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center
         )
         Text(
-            text = if (isGuest) {
-                stringResource(Res.string.guest_limit_reached_description)
-            } else {
-                stringResource(
-                    Res.string.rate_limit_bottom_sheet_description
-                )
-            },
+            text = stringResource(Res.string.rate_limit_bottom_sheet_description),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center
         )
@@ -61,15 +46,7 @@ fun RateLimitBottomSheetContent(isGuest: Boolean, onUpgrade: () -> Unit, modifie
                 .height(52.dp),
             onClick = onUpgrade
         ) {
-            Text(
-                text = if (isGuest) {
-                    stringResource(Res.string.sign_in)
-                } else {
-                    stringResource(
-                        Res.string.upgrade
-                    )
-                }
-            )
+            Text(text = stringResource(Res.string.upgrade))
         }
         Spacer(modifier = Modifier.height(24.dp))
     }

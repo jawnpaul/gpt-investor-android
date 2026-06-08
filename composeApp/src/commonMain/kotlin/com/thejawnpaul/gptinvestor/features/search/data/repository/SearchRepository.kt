@@ -20,7 +20,7 @@ class SearchRepository(private val apiService: KtorApiService) : ISearchReposito
                 val sections = response.body?.sections?.mapNotNull { it.toDomain() } ?: emptyList()
                 emit(Either.Right(sections))
             } else {
-                emit(Either.Left(Failure.ServerError))
+                emit(Either.Left(if (response.code == 429) Failure.RateLimitExceeded else Failure.ServerError))
             }
         } catch (e: Exception) {
             emit(Either.Left(Failure.NetworkConnection))
@@ -33,7 +33,7 @@ class SearchRepository(private val apiService: KtorApiService) : ISearchReposito
             if (response.isSuccessful) {
                 emit(Either.Right(Unit))
             } else {
-                emit(Either.Left(Failure.ServerError))
+                emit(Either.Left(if (response.code == 429) Failure.RateLimitExceeded else Failure.ServerError))
             }
         } catch (e: Exception) {
             emit(Either.Left(Failure.NetworkConnection))

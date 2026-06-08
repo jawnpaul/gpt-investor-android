@@ -8,10 +8,9 @@ if [ -z "$STAGED_FILES" ]; then
     exit 0
 fi
 
-# Skip if it's a merge commit
-GIT_DIR=$(git rev-parse --git-dir)
-if [ -f "$GIT_DIR/MERGE_HEAD" ]; then
-    echo "Merge in progress. Skipping ktlint."
+# Skip if it's a merge, rebase, or cherry-pick commit
+if git rev-parse -q --verify MERGE_HEAD >/dev/null || git rev-parse -q --verify REBASE_HEAD >/dev/null || git rev-parse -q --verify CHERRY_PICK_HEAD >/dev/null; then
+    echo "Merge, rebase, or cherry-pick in progress. Skipping ktlint."
     exit 0
 fi
 

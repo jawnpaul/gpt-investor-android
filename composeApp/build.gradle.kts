@@ -242,6 +242,11 @@ buildkonfig {
         )
         buildConfigField(
             FieldSpec.Type.STRING,
+            "BASE_URL",
+            localProperties.getProperty("BASE_URL_DEV") ?: ""
+        )
+        buildConfigField(
+            FieldSpec.Type.STRING,
             "WEB_CLIENT_ID",
             localProperties.getProperty("WEB_CLIENT_ID_DEV") ?: ""
         )

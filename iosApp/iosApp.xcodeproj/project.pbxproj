@@ -15,6 +15,7 @@
 		517D80EF2F65B1D8003EC92D /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 517D80EE2F65B1D8003EC92D /* FirebaseRemoteConfig */; };
 		517D81032F65C411003EC92D /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = 517D81022F65C411003EC92D /* Mixpanel */; };
 		51996E722F6FF11100976C18 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 51996E712F6FF11100976C18 /* GoogleSignIn */; };
+		FF7D82E52FD7790000086065 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = FF7D82E42FD7790000086065 /* FirebaseCrashlytics */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -59,6 +60,7 @@
 				517D80ED2F65B1D8003EC92D /* FirebaseMessaging in Frameworks */,
 				517D80E72F65B1D8003EC92D /* FirebaseAnalytics in Frameworks */,
 				517D80EB2F65B1D8003EC92D /* FirebaseCore in Frameworks */,
+				FF7D82E52FD7790000086065 /* FirebaseCrashlytics in Frameworks */,
 				517D80E92F65B1D8003EC92D /* FirebaseAuth in Frameworks */,
 				517D80EF2F65B1D8003EC92D /* FirebaseRemoteConfig in Frameworks */,
 			);
@@ -72,6 +74,7 @@
 			children = (
 				D8A3197734984FB05145E741 /* Configuration */,
 				52EFE54A5C0E54258D6286B1 /* iosApp */,
+				FF7D82E32FD7790000086065 /* Frameworks */,
 				ECEFFE98EDAF09A63182EEB4 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -82,6 +85,13 @@
 				BE15D34BA5370888110A187D /* GPT Investor.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		FF7D82E32FD7790000086065 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -96,6 +106,7 @@
 				1F32BE1B034A986D7BE77E23 /* Sources */,
 				7A61C14314F7917BAF3BE9FD /* Frameworks */,
 				F2028D1B33A9ECE4CED73523 /* Resources */,
+				FF7D82E22FD776D600086065 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -114,6 +125,7 @@
 				517D81022F65C411003EC92D /* Mixpanel */,
 				5179A5222F68C55300CC9BA2 /* YouTubeiOSPlayerHelper */,
 				51996E712F6FF11100976C18 /* GoogleSignIn */,
+				FF7D82E42FD7790000086065 /* FirebaseCrashlytics */,
 			);
 			productName = iosApp;
 			productReference = BE15D34BA5370888110A187D /* GPT Investor.app */;
@@ -207,6 +219,25 @@
 			shellPath = /bin/sh;
 			shellScript = "
 ";
+		};
+		FF7D82E22FD776D600086065 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n# Copy the correct GoogleService-Info.plist based on build configuration\nif [ \"${CONFIGURATION}\" = \"Debug Dev\" ] || [ \"${CONFIGURATION}\" = \"Release Dev\" ]; then\n  PLIST_SOURCE=\"${PROJECT_DIR}/iosApp/GoogleService-Info-Dev.plist\"\nelse\n  PLIST_SOURCE=\"${PROJECT_DIR}/iosApp/GoogleService-Info-Prod.plist\"\nfi\n\nPLIST_DEST=\"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\"\ncp \"${PLIST_SOURCE}\" \"${PLIST_DEST}\"\n\n# Upload dSYMs to Crashlytics\n${BUILD_DIR%Build/*}SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -372,6 +403,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = UM8BL5F8A2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				GOOGLE_APP_ID = "1:1017247757694:ios:50640c46237db3233a6f2f";
 				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.1017247757694-o8n6f7jrr5iblk53i2uv14aa0pbd1kkn";
 				INFOPLIST_FILE = iosApp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -408,6 +440,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = UM8BL5F8A2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				GOOGLE_APP_ID = "1:959018592951:ios:750b2ee248ada93081fb32";
 				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.959018592951-eq89l0c2h171cmd569ko2m91kao0ht52";
 				INFOPLIST_FILE = iosApp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -444,6 +477,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = UM8BL5F8A2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				GOOGLE_APP_ID = "1:959018592951:ios:750b2ee248ada93081fb32";
 				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.959018592951-eq89l0c2h171cmd569ko2m91kao0ht52";
 				INFOPLIST_FILE = iosApp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -603,6 +637,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = UM8BL5F8A2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				GOOGLE_APP_ID = "1:1017247757694:ios:50640c46237db3233a6f2f";
 				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.1017247757694-o8n6f7jrr5iblk53i2uv14aa0pbd1kkn";
 				INFOPLIST_FILE = iosApp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -727,6 +762,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 51996E702F6FF11100976C18 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignIn;
+		};
+		FF7D82E42FD7790000086065 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 517D80E52F65B1D8003EC92D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

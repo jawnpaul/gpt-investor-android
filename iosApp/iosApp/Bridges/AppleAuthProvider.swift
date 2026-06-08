@@ -9,13 +9,13 @@ import UIKit
 @objc public class AppleAuthProvider: NSObject {
     
     @objc public static let shared = AppleAuthProvider()
-    private var currentOnSuccess: ((String, String) -> Void)?
+    private var currentOnSuccess: ((String, String, String?, String?) -> Void)?
     private var currentOnError: ((String) -> Void)?
     private var currentNonce: String?
     
     @available(iOS 13, *)
     @objc public func signInWithApple(
-        _ onSuccess: @escaping (String, String) -> Void,
+        _ onSuccess: @escaping (String, String, String?, String?) -> Void,
         onError error: @escaping (String) -> Void
     ) {
         self.currentNonce = randomNonceString()
@@ -77,7 +77,10 @@ extension AppleAuthProvider: ASAuthorizationControllerDelegate {
             return
         }
         
-        currentOnSuccess?(tokenString, nonce)
+        let givenName = appleIDCredential.fullName?.givenName
+        let familyName = appleIDCredential.fullName?.familyName
+        
+        currentOnSuccess?(tokenString, nonce, givenName, familyName)
     }
     
     public func authorizationController(

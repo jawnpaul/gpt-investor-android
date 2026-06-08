@@ -69,18 +69,18 @@ actual suspend fun loginWithApplePlatform(dependencies: PlatformAuthDependencies
     val (auth, apiService, gptInvestorPreferences, tokenStorage, tokenSyncManager, appConfig) = dependencies
     val appleAuthProvider = AppleAuthProvider.shared()
 
-    val details: AuthCredential = suspendCancellableCoroutine { continuation ->
+    val (details, appleName) = suspendCancellableCoroutine { continuation ->
         appleAuthProvider.signInWithApple(
-            onSuccess = { token, nonce ->
+            onSuccess = { token: String?, nonce: String?, givenName: String?, familyName: String? ->
                 if (token != null && nonce != null) {
-                    OAuthProvider.credential(
+                    val name = listOfNotNull(givenName, familyName).joinToString(" ").ifBlank { null }
+                    val credential = OAuthProvider.credential(
                         providerId = "apple.com",
                         idToken = token,
                         rawNonce = nonce,
                         accessToken = null
-                    ).let { credential ->
-                        continuation.resume(credential)
-                    }
+                    )
+                    continuation.resume(Pair(credential, name))
                 } else {
                     continuation.resumeWithException(Exception("Unknown Apple Sign In failure"))
                 }
@@ -89,14 +89,18 @@ actual suspend fun loginWithApplePlatform(dependencies: PlatformAuthDependencies
         )
     }
 
-    auth.signInWithCredential(details)
+    auth.signInWithCredential(details as AuthCredential)
     val currentUser = auth.currentUser
     currentUser?.let {
         val firebaseIdToken = it.getIdToken(true)
         val loginResponse = apiService.loginWithFirebase(
             FirebaseLoginRequest(firebaseIdToken ?: "")
         )
-        gptInvestorPreferences.setUserName(currentUser.displayName ?: "null")
+        if (appleName != null) {
+            currentUser.updateProfile(displayName = appleName)
+        }
+        val nameToSet = appleName ?: currentUser.displayName ?: "null"
+        gptInvestorPreferences.setUserName(nameToSet)
         if (loginResponse.isSuccessful) {
             loginResponse.body?.let { response ->
                 gptInvestorPreferences.setUserId(response.user?.uid.toString())

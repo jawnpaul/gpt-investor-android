@@ -2,6 +2,7 @@ import SwiftUI
 import ComposeApp
 import Mixpanel
 import FirebaseCore
+import FirebaseCrashlytics
 import FirebaseMessaging
 
 class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNotificationCenterDelegate {

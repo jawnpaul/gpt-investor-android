@@ -56,21 +56,16 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
         print(userInfo)
     }
 
-    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        print("Firebase registration token: \(String(describing: fcmToken))")
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
     }
 
-    func logFCMToken() {
-        let token = Messaging.messaging().fcmToken
-        print("FCM token: \(token ?? "")")
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("Failed to register for remote notifications: \(error)")
+    }
 
-        Messaging.messaging().token { token, error in
-            if let error = error {
-                print("Error retrieving FCM token: \(error)")
-            } else if let token = token {
-                print("Remote instance ID token: \(token)")
-            }
-        }
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        print("Firebase registration token: \(String(describing: fcmToken))")
     }
 }
 

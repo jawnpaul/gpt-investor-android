@@ -4,13 +4,7 @@ import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
-import dev.gitlive.firebase.Firebase
-import dev.gitlive.firebase.messaging.messaging
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import org.koin.core.annotation.Singleton
 
 @Singleton(binds = [NotificationRepository::class])
@@ -32,22 +26,7 @@ class NotificationRepositoryImpl(private val apiService: KtorApiService, private
             Logger.e { "Attempting to sync token for user: $userId" }
             registerToken(token)
         } else {
-            if (token == null) {
-                Logger.e { "FCM token is null" }
-                try {
-                    val newToken = Firebase.messaging.getToken()
-                    CoroutineScope(Dispatchers.IO).launch {
-                        userId?.let {
-                            preferences.setFcmToken(newToken)
-                            registerToken(newToken)
-                        }
-                    }
-                } catch (e: Exception) {
-                    Logger.e(e) { "Failed to get FCM token" }
-                }
-            } else {
-                Logger.e { "Token sync not needed. UserID: $userId, Synced: $isTokenSynced" }
-            }
+            Logger.e { "Token sync skipped. UserID: $userId, Token present: ${token != null}, Synced: $isTokenSynced" }
         }
     }
 

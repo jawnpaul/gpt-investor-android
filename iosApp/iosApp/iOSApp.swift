@@ -61,6 +61,8 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
 
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         print("Firebase registration token: \(String(describing: fcmToken))")
+        guard let token = fcmToken else { return }
+        IosNotificationBridgeKt.onFcmTokenReceived(token: token)
     }
 }
 

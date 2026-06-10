@@ -17,7 +17,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
         
         if let filePath = Bundle.main.path(forResource: fileName, ofType: "plist"),
            let options = FirebaseOptions(contentsOfFile: filePath) {
-            print("FIR Options: Bundle ID: \(options.bundleID) Client ID: \(options.clientID)")
+            print("FIR Options: Bundle ID: \(options.bundleID) Client ID: \(options.clientID ?? "nil")")
             FirebaseApp.configure(options: options)
         }
         Messaging.messaging().delegate = self

@@ -2,13 +2,14 @@ import SwiftUI
 import ComposeApp
 import Mixpanel
 import FirebaseCore
+import FirebaseCrashlytics
 import FirebaseMessaging
 
 class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let fileName: String
         
-        #if DEBUG
+        #if DEV
             fileName = "GoogleService-Info-Dev"
         #else
             fileName = "GoogleService-Info-Prod"
@@ -16,17 +17,12 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
         
         if let filePath = Bundle.main.path(forResource: fileName, ofType: "plist"),
            let options = FirebaseOptions(contentsOfFile: filePath) {
-            print("FIR Options: Bundle ID: \(options.bundleID) Client ID: \(options.clientID)")
+            print("FIR Options: Bundle ID: \(options.bundleID) Client ID: \(options.clientID ?? "nil")")
             FirebaseApp.configure(options: options)
         }
         Messaging.messaging().delegate = self
 
         UNUserNotificationCenter.current().delegate = self
-
-        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-        UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { _, _ in }
-
-        application.registerForRemoteNotifications()
 
         return true
     }
@@ -55,21 +51,18 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
         print(userInfo)
     }
 
-    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        print("Firebase registration token: \(String(describing: fcmToken))")
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
     }
 
-    func logFCMToken() {
-        let token = Messaging.messaging().fcmToken
-        print("FCM token: \(token ?? "")")
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("Failed to register for remote notifications: \(error)")
+    }
 
-        Messaging.messaging().token { token, error in
-            if let error = error {
-                print("Error retrieving FCM token: \(error)")
-            } else if let token = token {
-                print("Remote instance ID token: \(token)")
-            }
-        }
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        print("Firebase registration token: \(String(describing: fcmToken))")
+        guard let token = fcmToken else { return }
+        IosNotificationBridgeKt.onFcmTokenReceived(token: token)
     }
 }
 

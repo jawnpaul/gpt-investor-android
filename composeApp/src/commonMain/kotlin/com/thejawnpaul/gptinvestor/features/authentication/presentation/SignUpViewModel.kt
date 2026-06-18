@@ -62,6 +62,10 @@ class SignUpViewModel(
                 analyticsLogger.logEvent(eventName = "google-sign-up-button-clicked", params = mapOf())
                 signUpWithGoogle(event.platformContext)
             }
+            SignUpUiEvent.SingUpWithApple -> {
+                analyticsLogger.logEvent(eventName = "apple-sign-up-button-clicked", params = mapOf())
+                signUpWithApple()
+            }
         }
     }
 
@@ -134,6 +138,32 @@ class SignUpViewModel(
         }
     }
 
+    private fun signUpWithApple() {
+        _signUpUiState.update {
+            it.copy(
+                loading = true
+            )
+        }
+        viewModelScope.launch {
+            authRepository.signUpWithApple().onSuccess {
+                _signUpUiState.update {
+                    it.copy(
+                        loading = false
+                    )
+                }
+                handleAction(action = SignUpUiAction.OnShowToast("Sign up Success"))
+                handleAction(action = SignUpUiAction.OnGoToHome)
+            }.onFailure { failure ->
+                _signUpUiState.update {
+                    it.copy(
+                        loading = false
+                    )
+                }
+                handleAction(action = SignUpUiAction.OnShowToast(failure.message.toString()))
+            }
+        }
+    }
+
     private fun handleAction(action: SignUpUiAction) {
         viewModelScope.launch {
             _actions.emit(action)
@@ -163,6 +193,7 @@ sealed interface SignUpUiEvent {
     data object GoBack : SignUpUiEvent
     data object GoToLogin : SignUpUiEvent
     data class SignUpWithGoogle(val platformContext: PlatformContext) : SignUpUiEvent
+    data object SingUpWithApple : SignUpUiEvent
 }
 
 sealed interface SignUpUiAction {

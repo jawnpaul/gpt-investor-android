@@ -15,6 +15,7 @@ plugins {
     alias(libs.plugins.ktLint)
     alias(libs.plugins.buildkonfig)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.swiftklib)
 }
 
 kotlin {
@@ -50,6 +51,14 @@ kotlin {
             baseName = "ComposeApp"
             isStatic = true
             export(project(":analytics"))
+            linkerOpts("-dead_strip")
+        }
+        iosTarget.compilations {
+            val main by getting {
+                cinterops {
+                    create("bridges")
+                }
+            }
         }
     }
 
@@ -195,6 +204,7 @@ ktlint {
     )
 }
 
+
 dependencies {
     ktlintRuleset(libs.ktlint.compose.rules)
     add("kspAndroid", libs.androidx.room.compiler)
@@ -232,8 +242,20 @@ buildkonfig {
         )
         buildConfigField(
             FieldSpec.Type.STRING,
+            "BASE_URL",
+            localProperties.getProperty("BASE_URL_DEV") ?: ""
+        )
+        buildConfigField(
+            FieldSpec.Type.STRING,
             "WEB_CLIENT_ID",
             localProperties.getProperty("WEB_CLIENT_ID_DEV") ?: ""
         )
+    }
+}
+
+swiftklib {
+    create("bridges") {
+        path = file("../iosApp/iosApp/Bridges")
+        packageName("com.thejawnpaul.gptinvestor.bridges")
     }
 }

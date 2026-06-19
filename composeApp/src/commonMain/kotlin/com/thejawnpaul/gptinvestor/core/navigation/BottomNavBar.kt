@@ -24,9 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.history_icon_2
 import com.thejawnpaul.gptinvestor.ic_home_trend_up
+import com.thejawnpaul.gptinvestor.ic_profile
 import com.thejawnpaul.gptinvestor.ic_search_status
+import com.thejawnpaul.gptinvestor.ic_watchlist
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import org.jetbrains.compose.resources.vectorResource
 
@@ -37,7 +38,8 @@ fun BottomNavBar(navController: NavController, modifier: Modifier = Modifier) {
     val items: List<Pair<Screen, ImageVector>> = listOf(
         Screen.HomeTabScreen to vectorResource(Res.drawable.ic_home_trend_up),
         Screen.DiscoverTabScreen to vectorResource(Res.drawable.ic_search_status),
-        Screen.HistoryTabScreen to vectorResource(Res.drawable.history_icon_2)
+        Screen.WatchlistTabScreen to vectorResource(Res.drawable.ic_watchlist),
+        Screen.ProfileTabScreen to vectorResource(Res.drawable.ic_profile)
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()

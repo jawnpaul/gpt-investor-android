@@ -4,6 +4,8 @@ package com.thejawnpaul.gptinvestor.core.navigation
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -28,26 +30,32 @@ fun SetUpNavGraph(
 
     val startDestination = initialDestination(isUserSignedIn, isGuestSignedIn, hasCompletedOnboarding)
 
-    SharedTransitionLayout {
-        CompositionLocalProvider(LocalSharedTransitionScope provides this) {
-            NavHost(
-                navController = navController,
-                startDestination = startDestination,
-                modifier = modifier
-            ) {
-                onboardingNavGraph(navController)
-                authenticationNavGraph(navController, platformActions)
-                investorNavGraph(navController, platformActions)
-                discoverNavGraph(navController)
-                companyNavGraph(navController, platformActions)
-                conversationNavGraph(navController, platformActions, platformContext)
-                historyNavGraph(navController, platformActions, platformContext)
-                topPickNavGraph(navController, platformActions)
-                tidbitNavGraph(navController, platformActions)
-                settingsNavGraph(navController)
-                searchNavGraph(navController)
-                trendingNavGraph(navController)
-                guestNavGraph(navController, platformActions, platformContext)
+    Scaffold(
+        bottomBar = { BottomNavBar(navController) }
+    ) { innerPadding ->
+        SharedTransitionLayout {
+            CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+                NavHost(
+                    navController = navController,
+                    startDestination = startDestination,
+                    modifier = Modifier.padding(innerPadding).then(modifier)
+                ) {
+                    onboardingNavGraph(navController)
+                    authenticationNavGraph(navController, platformActions)
+                    investorNavGraph(navController, platformActions)
+                    discoverNavGraph(navController)
+                    companyNavGraph(navController, platformActions)
+                    conversationNavGraph(navController, platformActions, platformContext)
+                    historyNavGraph(navController, platformActions, platformContext)
+                    topPickNavGraph(navController, platformActions)
+                    tidbitNavGraph(navController, platformActions)
+                    settingsNavGraph(navController)
+                    searchNavGraph(navController)
+                    trendingNavGraph(navController)
+                    watchlistNavGraph(navController)
+                    profileNavGraph(navController)
+                    guestNavGraph(navController, platformActions, platformContext)
+                }
             }
         }
     }

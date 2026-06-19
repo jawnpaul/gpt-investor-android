@@ -29,6 +29,7 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.Histo
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
+import com.thejawnpaul.gptinvestor.features.profile.presentation.ui.ProfileScreen
 import com.thejawnpaul.gptinvestor.features.search.presentation.state.SearchAction
 import com.thejawnpaul.gptinvestor.features.search.presentation.ui.SearchScreen
 import com.thejawnpaul.gptinvestor.features.search.presentation.viewmodel.SearchViewModel
@@ -43,6 +44,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewMode
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.AllTopPicksScreen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SavedTopPicksScreen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPickDetailScreen
+import com.thejawnpaul.gptinvestor.features.watchlist.presentation.ui.WatchlistScreen
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.compose.viewmodel.koinViewModel
@@ -515,6 +517,14 @@ fun NavGraphBuilder.guestNavGraph(
             tidbitsPagingData = viewModel.tidbitsPagingData,
             onEvent = viewModel::handleMainScreenEvent
         )
+    }
+
+    composable(route = GuestScreen.GuestWatchlistTab.route) {
+        WatchlistScreen()
+    }
+
+    composable(route = GuestScreen.GuestProfileTab.route) {
+        ProfileScreen()
     }
 
     composable(route = GuestScreen.GuestSearch.route) {

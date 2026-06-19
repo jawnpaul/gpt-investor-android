@@ -50,6 +50,8 @@ class ConversationRepository(
 
     private val json = Json { ignoreUnknownKeys = true }
 
+    override fun getQueryCount(): Flow<Int> = messageDao.getMessageCount()
+
     override suspend fun getDefaultPrompts(): Flow<Either<Failure, List<DefaultPrompt>>> = flow {
         try {
             /*val response = apiService.getDefaultPrompts()

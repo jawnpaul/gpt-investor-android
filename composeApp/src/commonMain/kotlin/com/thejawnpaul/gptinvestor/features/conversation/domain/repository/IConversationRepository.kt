@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface IConversationRepository {
 
+    fun getQueryCount(): Flow<Int>
+
     suspend fun getDefaultPrompts(): Flow<Either<Failure, List<DefaultPrompt>>>
 
     suspend fun getDefaultPromptResponse(prompt: DefaultPrompt): Flow<Either<Failure, Conversation>>

@@ -2,6 +2,7 @@ package com.thejawnpaul.gptinvestor.core.navigation
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
@@ -30,6 +31,7 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 import com.thejawnpaul.gptinvestor.features.profile.presentation.ui.ProfileScreen
+import com.thejawnpaul.gptinvestor.features.profile.presentation.viewmodel.ProfileViewModel
 import com.thejawnpaul.gptinvestor.features.search.presentation.state.SearchAction
 import com.thejawnpaul.gptinvestor.features.search.presentation.ui.SearchScreen
 import com.thejawnpaul.gptinvestor.features.search.presentation.viewmodel.SearchViewModel
@@ -524,7 +526,12 @@ fun NavGraphBuilder.guestNavGraph(
     }
 
     composable(route = GuestScreen.GuestProfileTab.route) {
-        ProfileScreen()
+        val viewModel: ProfileViewModel = koinViewModel()
+        val state by viewModel.state.collectAsState()
+        ProfileScreen(
+            state = state,
+            onEvent = viewModel::handleEvent
+        )
     }
 
     composable(route = GuestScreen.GuestSearch.route) {

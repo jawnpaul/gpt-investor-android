@@ -4,6 +4,7 @@ package com.thejawnpaul.gptinvestor.core.navigation
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -31,7 +32,8 @@ fun SetUpNavGraph(
     val startDestination = initialDestination(isUserSignedIn, isGuestSignedIn, hasCompletedOnboarding)
 
     Scaffold(
-        bottomBar = { BottomNavBar(navController) }
+        bottomBar = { BottomNavBar(navController) },
+        contentWindowInsets = WindowInsets(0)
     ) { innerPadding ->
         SharedTransitionLayout {
             CompositionLocalProvider(LocalSharedTransitionScope provides this) {

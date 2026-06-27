@@ -43,17 +43,36 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.activity
+import com.thejawnpaul.gptinvestor.appearance
+import com.thejawnpaul.gptinvestor.are_you_sure_you_want_to_sign_out
+import com.thejawnpaul.gptinvestor.cancel
 import com.thejawnpaul.gptinvestor.features.profile.presentation.state.ProfileUiState
 import com.thejawnpaul.gptinvestor.features.profile.presentation.viewmodel.ProfileEvent
+import com.thejawnpaul.gptinvestor.history
+import com.thejawnpaul.gptinvestor.more
+import com.thejawnpaul.gptinvestor.notifications
+import com.thejawnpaul.gptinvestor.preferences
+import com.thejawnpaul.gptinvestor.privacy
+import com.thejawnpaul.gptinvestor.profile
+import com.thejawnpaul.gptinvestor.queries
+import com.thejawnpaul.gptinvestor.questions_count
+import com.thejawnpaul.gptinvestor.saved
+import com.thejawnpaul.gptinvestor.saved_picks
+import com.thejawnpaul.gptinvestor.saved_tidbits
+import com.thejawnpaul.gptinvestor.sign_out
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import com.thejawnpaul.gptinvestor.upgrade_cta_subtitle
+import com.thejawnpaul.gptinvestor.upgrade_to_premium
+import com.thejawnpaul.gptinvestor.watching
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun ProfileScreen(
-    state: ProfileUiState,
-    onEvent: (ProfileEvent) -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, modifier: Modifier = Modifier) {
     val customColors = LocalGPTInvestorColors.current
 
     Scaffold(modifier = modifier) { innerPadding ->
@@ -68,7 +87,7 @@ fun ProfileScreen(
 
             item {
                 Text(
-                    text = "Profile",
+                    text = stringResource(Res.string.profile),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.fillMaxWidth()
@@ -83,17 +102,19 @@ fun ProfileScreen(
                 )
             }
 
-            item {
-                UpgradeToPremiumCard(
-                    accentColor = customColors.accentColors.allAccent,
-                    onClick = { onEvent(ProfileEvent.UpgradeToPremiumClicked) }
-                )
+            if (!state.isPremiumUser) {
+                item {
+                    UpgradeToPremiumCard(
+                        accentColor = customColors.accentColors.allAccent,
+                        onClick = { onEvent(ProfileEvent.UpgradeToPremiumClicked) }
+                    )
+                }
             }
 
             item {
                 StatsRow(
-                    watchingCount = 0,
-                    savedCount = 0,
+                    watchingCount = state.watchingCount,
+                    savedCount = state.savedTidbitsCount,
                     queryCount = state.queryCount,
                     borderColor = customColors.utilColors.borderBright10,
                     secondaryTextColor = customColors.textColors.secondary50
@@ -102,7 +123,7 @@ fun ProfileScreen(
 
             item {
                 SectionHeader(
-                    title = "ACTIVITY",
+                    title = stringResource(Res.string.activity).uppercase(),
                     color = customColors.textColors.secondary50
                 )
             }
@@ -116,22 +137,22 @@ fun ProfileScreen(
                     Column {
                         ProfileMenuRow(
                             icon = Icons.Filled.History,
-                            label = "History",
-                            trailingText = "${state.queryCount} questions",
+                            label = stringResource(Res.string.history),
+                            trailingText = stringResource(Res.string.questions_count, state.queryCount),
                             onClick = { onEvent(ProfileEvent.HistoryClicked) }
                         )
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        HorizontalDivider(modifier = Modifier)
                         ProfileMenuRow(
                             icon = Icons.Filled.Bookmark,
-                            label = "Saved picks",
-                            trailingText = "0",
+                            label = stringResource(Res.string.saved_picks),
+                            trailingText = state.savedPicksCountString,
                             onClick = { onEvent(ProfileEvent.SavedPicksClicked) }
                         )
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        HorizontalDivider(modifier = Modifier)
                         ProfileMenuRow(
                             icon = Icons.Filled.Description,
-                            label = "Saved tidbits",
-                            trailingText = "0",
+                            label = stringResource(Res.string.saved_tidbits),
+                            trailingText = state.savedTidbitsCountString,
                             onClick = { onEvent(ProfileEvent.SavedTidbitsClicked) }
                         )
                     }
@@ -140,7 +161,7 @@ fun ProfileScreen(
 
             item {
                 SectionHeader(
-                    title = "PREFERENCES",
+                    title = stringResource(Res.string.preferences).uppercase(),
                     color = customColors.textColors.secondary50
                 )
             }
@@ -154,21 +175,21 @@ fun ProfileScreen(
                     Column {
                         ProfileMenuRow(
                             icon = Icons.Filled.Notifications,
-                            label = "Notifications",
-                            trailingText = "On",
+                            label = stringResource(Res.string.notifications),
+                            trailingText = if (state.isNotificationsEnabled) "On" else "Off",
                             onClick = { onEvent(ProfileEvent.NotificationsClicked) }
                         )
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        HorizontalDivider(modifier = Modifier)
                         ProfileMenuRow(
                             icon = Icons.Filled.Palette,
-                            label = "Appearance",
-                            trailingText = "Light",
+                            label = stringResource(Res.string.appearance),
+                            trailingText = state.currentTheme,
                             onClick = { onEvent(ProfileEvent.AppearanceClicked) }
                         )
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        HorizontalDivider(modifier = Modifier)
                         ProfileMenuRow(
                             icon = Icons.Filled.PrivacyTip,
-                            label = "Privacy",
+                            label = stringResource(Res.string.privacy),
                             onClick = { onEvent(ProfileEvent.PrivacyClicked) }
                         )
                     }
@@ -177,7 +198,7 @@ fun ProfileScreen(
 
             item {
                 SectionHeader(
-                    title = "MORE",
+                    title = stringResource(Res.string.more).uppercase(),
                     color = customColors.textColors.secondary50
                 )
             }
@@ -190,7 +211,7 @@ fun ProfileScreen(
                 ) {
                     ProfileMenuRow(
                         icon = Icons.AutoMirrored.Filled.Logout,
-                        label = "Sign out",
+                        label = stringResource(Res.string.sign_out),
                         iconBgColor = MaterialTheme.colorScheme.errorContainer,
                         iconTint = MaterialTheme.colorScheme.error,
                         labelColor = MaterialTheme.colorScheme.error,
@@ -219,16 +240,16 @@ fun ProfileScreen(
     if (state.showSignOutConfirmation) {
         AlertDialog(
             onDismissRequest = { onEvent(ProfileEvent.DismissSignOutDialog) },
-            title = { Text("Sign out") },
-            text = { Text("Are you sure you want to sign out?") },
+            title = { Text(stringResource(Res.string.sign_out)) },
+            text = { Text(stringResource(Res.string.are_you_sure_you_want_to_sign_out)) },
             confirmButton = {
                 TextButton(onClick = { onEvent(ProfileEvent.ConfirmSignOut) }) {
-                    Text("Sign out", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(Res.string.sign_out), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { onEvent(ProfileEvent.DismissSignOutDialog) }) {
-                    Text("Cancel")
+                    Text(stringResource(Res.string.cancel))
                 }
             }
         )
@@ -236,12 +257,7 @@ fun ProfileScreen(
 }
 
 @Composable
-private fun UserHeader(
-    userName: String,
-    accentColor: Color,
-    accentBgColor: Color,
-    modifier: Modifier = Modifier
-) {
+private fun UserHeader(userName: String, accentColor: Color, accentBgColor: Color, modifier: Modifier = Modifier) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier.fillMaxWidth()
@@ -270,11 +286,7 @@ private fun UserHeader(
 }
 
 @Composable
-private fun UpgradeToPremiumCard(
-    accentColor: Color,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+private fun UpgradeToPremiumCard(accentColor: Color, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = accentColor,
@@ -303,13 +315,13 @@ private fun UpgradeToPremiumCard(
             Spacer(Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Upgrade to Premium",
+                    text = stringResource(Res.string.upgrade_to_premium),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
                 Text(
-                    text = "Unlimited watchlist, Thesis Tracker, and more",
+                    text = stringResource(Res.string.upgrade_cta_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White.copy(alpha = 0.85f)
                 )
@@ -344,20 +356,27 @@ private fun StatsRow(
                 .fillMaxWidth()
                 .padding(vertical = 20.dp)
         ) {
-            StatItem(count = watchingCount, label = "WATCHING", secondaryTextColor = secondaryTextColor)
-            StatItem(count = savedCount, label = "SAVED", secondaryTextColor = secondaryTextColor)
-            StatItem(count = queryCount, label = "QUERIES", secondaryTextColor = secondaryTextColor)
+            StatItem(
+                count = watchingCount,
+                label = stringResource(Res.string.watching).uppercase(),
+                secondaryTextColor = secondaryTextColor
+            )
+            StatItem(
+                count = savedCount,
+                label = stringResource(Res.string.saved).uppercase(),
+                secondaryTextColor = secondaryTextColor
+            )
+            StatItem(
+                count = queryCount,
+                label = stringResource(Res.string.queries).uppercase(),
+                secondaryTextColor = secondaryTextColor
+            )
         }
     }
 }
 
 @Composable
-private fun StatItem(
-    count: Int,
-    label: String,
-    secondaryTextColor: Color,
-    modifier: Modifier = Modifier
-) {
+private fun StatItem(count: Int, label: String, secondaryTextColor: Color, modifier: Modifier = Modifier) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
@@ -376,11 +395,7 @@ private fun StatItem(
 }
 
 @Composable
-private fun SectionHeader(
-    title: String,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
+private fun SectionHeader(title: String, color: Color, modifier: Modifier = Modifier) {
     Text(
         text = title,
         style = MaterialTheme.typography.labelSmall,
@@ -413,7 +428,7 @@ private fun ProfileMenuRow(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(40.dp)
-                .clip(CircleShape)
+                .clip(RoundedCornerShape(size = 12.dp))
                 .background(iconBgColor)
         ) {
             Icon(
@@ -445,5 +460,35 @@ private fun ProfileMenuRow(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun ProfileScreenPreview() {
+    GPTInvestorTheme {
+        ProfileScreen(
+            state = ProfileUiState(
+                userName = "John Doe",
+                queryCount = 42,
+                showSignOutConfirmation = false
+            ),
+            onEvent = {}
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun ProfileScreenSignOutConfirmationPreview() {
+    GPTInvestorTheme {
+        ProfileScreen(
+            state = ProfileUiState(
+                userName = "John Doe",
+                queryCount = 42,
+                showSignOutConfirmation = true
+            ),
+            onEvent = {}
+        )
     }
 }

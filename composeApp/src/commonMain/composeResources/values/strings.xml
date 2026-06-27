@@ -198,5 +198,17 @@
     <string name="good_evening">Good evening</string>
     <string name="search_a_stock_to_analyse">Search a stock to analyse</string>
     <string name="sign_in_action">Sign in</string>
-
+    <string name="profile">Profile</string>
+    <string name="activity">Activity</string>
+    <string name="questions_count">%1$d questions</string>
+    <string name="preferences">Preferences</string>
+    <string name="notifications">Notifications</string>
+    <string name="appearance">Appearance</string>
+    <string name="privacy">Privacy</string>
+    <string name="are_you_sure_you_want_to_sign_out">Are you sure you want to sign out?</string>
+    <string name="watching">Watching</string>
+    <string name="saved">Saved</string>
+    <string name="queries">Queries</string>
+    <string name="upgrade_to_premium">Upgrade to premium</string>
+    <string name="upgrade_cta_subtitle">Unlimited watchlist, Thesis Tracker, and more</string>
 </resources>

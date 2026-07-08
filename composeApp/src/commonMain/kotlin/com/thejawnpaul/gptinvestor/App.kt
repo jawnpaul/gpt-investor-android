@@ -24,7 +24,14 @@ import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import org.koin.compose.koinInject
 
 @Composable
-fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLinkConsume: () -> Unit = {}) {
+fun App(
+    modifier: Modifier = Modifier,
+    deepLinkRoute: String? = null,
+    onDeepLinkConsume: () -> Unit = {},
+    useNativeNavigation: Boolean = false,
+    startRoute: String? = null,
+    onSwitchNativeTab: ((String) -> Unit)? = null
+) {
     val preferences: AppPreferences = koinInject()
     val tokenSyncManager: TokenSyncManager = koinInject()
     val guestRateLimitNotifier: GuestRateLimitNotifier = koinInject()
@@ -73,7 +80,7 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
     }
 
     GPTInvestorTheme(userThemePreference = themePreference) {
-        if (showSplash) {
+        if (showSplash && !useNativeNavigation) {
             AnimatedSplashScreen(
                 modifier = modifier,
                 onSplashFinish = {
@@ -85,7 +92,10 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
                 navController = navController,
                 isUserSignedIn = isUserSignedIn == true,
                 isGuestSignedIn = isGuestSignedIn == true,
-                hasCompletedOnboarding = hasCompletedOnboarding ?: false
+                hasCompletedOnboarding = hasCompletedOnboarding ?: false,
+                startRoute = startRoute,
+                useNativeNavigation = useNativeNavigation,
+                onSwitchNativeTab = onSwitchNativeTab
             )
 
             if (showGuestRateLimitSheet) {

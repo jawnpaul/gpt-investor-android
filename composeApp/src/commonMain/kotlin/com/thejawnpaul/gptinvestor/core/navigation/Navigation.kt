@@ -23,22 +23,30 @@ fun SetUpNavGraph(
     modifier: Modifier = Modifier,
     isUserSignedIn: Boolean = false,
     isGuestSignedIn: Boolean = false,
-    hasCompletedOnboarding: Boolean = false
+    hasCompletedOnboarding: Boolean = false,
+    startRoute: String? = null,
+    useNativeNavigation: Boolean = false,
+    onSwitchNativeTab: ((String) -> Unit)? = null
 ) {
     val platformContext: PlatformContext = koinInject()
     val platformActions: PlatformActions = koinInject()
 
-    val startDestination = initialDestination(isUserSignedIn, isGuestSignedIn, hasCompletedOnboarding)
+    val startDestination = if (startRoute != null && (isUserSignedIn || isGuestSignedIn)) {
+        startRoute
+    } else {
+        initialDestination(isUserSignedIn, isGuestSignedIn, hasCompletedOnboarding)
+    }
 
-    Scaffold(
-        bottomBar = { BottomNavBar(navController) }
-    ) { innerPadding ->
+    val navContent: @Composable (Modifier) -> Unit = { contentModifier ->
         SharedTransitionLayout {
-            CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+            CompositionLocalProvider(
+                LocalSharedTransitionScope provides this,
+                LocalTabSwitcher provides onSwitchNativeTab
+            ) {
                 NavHost(
                     navController = navController,
                     startDestination = startDestination,
-                    modifier = Modifier.padding(innerPadding).then(modifier)
+                    modifier = contentModifier
                 ) {
                     onboardingNavGraph(navController)
                     authenticationNavGraph(navController, platformActions)
@@ -57,6 +65,14 @@ fun SetUpNavGraph(
                     guestNavGraph(navController, platformActions, platformContext)
                 }
             }
+        }
+    }
+
+    if (useNativeNavigation) {
+        navContent(Modifier.then(modifier))
+    } else {
+        Scaffold(bottomBar = { BottomNavBar(navController) }) { innerPadding ->
+            navContent(Modifier.padding(innerPadding).then(modifier))
         }
     }
 

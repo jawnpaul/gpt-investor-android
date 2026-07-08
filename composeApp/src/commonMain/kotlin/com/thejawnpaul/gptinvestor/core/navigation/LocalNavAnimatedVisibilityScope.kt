@@ -9,3 +9,5 @@ import androidx.compose.runtime.compositionLocalOf
 
 val LocalSharedTransitionScope = compositionLocalOf<SharedTransitionScope?> { null }
 val LocalAnimatedVisibilityScope = compositionLocalOf<AnimatedVisibilityScope?> { null }
+
+val LocalTabSwitcher = compositionLocalOf<((String) -> Unit)?> { null }

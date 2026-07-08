@@ -2,43 +2,38 @@ package com.thejawnpaul.gptinvestor
 
 import androidx.compose.ui.window.ComposeUIViewController
 import com.thejawnpaul.gptinvestor.analytics.mixpanel.MixpanelProvider
-import com.thejawnpaul.gptinvestor.analytics.mixpanel.mixpanelProviderModule
-import com.thejawnpaul.gptinvestor.core.di.GPTKoinApp
+import com.thejawnpaul.gptinvestor.core.navigation.NativeTabSwitcherRegistry
 import com.thejawnpaul.gptinvestor.core.platform.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.core.platform.YoutubePlayerProvider
-import com.thejawnpaul.gptinvestor.core.platform.youtubePlayerProviderModule
-import com.thejawnpaul.gptinvestor.features.authentication.domain.googleSignInProviderModule
-import org.koin.compose.KoinApplication
-import org.koin.plugin.module.dsl.koinConfiguration
 import platform.UIKit.UIViewController
 
 /**
- * Entry point called by the Swift iosApp.
+ * Entry point called by the Swift iosApp for iOS < 26.
  *
- * [mixpanelProvider], [youtubePlayerProvider], and [googleSignInProvider] are Swift-side
- * implementations of their respective KMP interfaces, injected into the Koin graph here
- * so they override the default no-op bindings registered by @ComponentScan.
- *
- * Passing providers as constructor arguments (rather than calling loadKoinModules()
- * from Swift) avoids the race condition where the Koin context does not exist until
- * the first composition.
+ * Koin is started globally by [initKoin] before this is called, so provider
+ * params are kept only to preserve the Swift call-site signature — they are
+ * not used here.
  */
 fun mainViewController(
     mixpanelProvider: MixpanelProvider,
     youtubePlayerProvider: YoutubePlayerProvider,
     googleSignInProvider: GoogleSignInProvider
 ): UIViewController = ComposeUIViewController {
-    KoinApplication(
-        configuration = koinConfiguration<GPTKoinApp> {
-            printLogger()
-            allowOverride(true)
-            modules(
-                mixpanelProviderModule(mixpanelProvider),
-                youtubePlayerProviderModule(youtubePlayerProvider),
-                googleSignInProviderModule(googleSignInProvider)
-            )
-        }
-    ) {
-        App()
-    }
+    App()
 }
+
+/**
+ * Per-tab entry point for the iOS 26 native TabView / liquid glass architecture.
+ *
+ * [startRoute] is the nav-graph route that this tab's NavHost should begin at
+ * (e.g. "home_tab_screen"). Koin must already be running via [initKoin] before
+ * this is called.
+ */
+fun tabViewController(startRoute: String): UIViewController =
+    ComposeUIViewController(configure = { onFocusBehavior = OnFocusBehavior.DoNothing }) {
+        App(
+            useNativeNavigation = true,
+            startRoute = startRoute,
+            onSwitchNativeTab = { NativeTabSwitcherRegistry.switchTo(it) }
+        )
+    }

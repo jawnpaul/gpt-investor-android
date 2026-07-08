@@ -8,13 +8,13 @@ import FirebaseMessaging
 class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let fileName: String
-        
+
         #if DEV
             fileName = "GoogleService-Info-Dev"
         #else
             fileName = "GoogleService-Info-Prod"
         #endif
-        
+
         if let filePath = Bundle.main.path(forResource: fileName, ofType: "plist"),
            let options = FirebaseOptions(contentsOfFile: filePath) {
             print("FIR Options: Bundle ID: \(options.bundleID) Client ID: \(options.clientID ?? "nil")")
@@ -79,17 +79,25 @@ struct iOSApp: App {
     /// (MIXPANEL_DEV_TOKEN for dev flavour, MIXPANEL_PROD_TOKEN for prod). The `internal`
     /// BuildConfig object is re-exported as the public `mixpanelToken` property in
     /// MixpanelProviderModule.kt so it is visible here via `import ComposeApp`.
-    private let mixpanelProvider = SwiftMixpanelProvider(token: MixpanelProviderModuleKt.mixpanelToken)
-    private let youtubePlayerProvider = SwiftYoutubePlayerProvider()
+    let mixpanelProvider = SwiftMixpanelProvider(token: MixpanelProviderModuleKt.mixpanelToken)
+    let youtubePlayerProvider = SwiftYoutubePlayerProvider()
 
     /// Google Sign-In bridge. The web client ID is the OAuth2 server client ID used by
     /// Firebase; it is sourced from BuildConfig (WEB_CLIENT_ID in local.properties) and
     /// re-exported via `googleSignInWebClientId` in GoogleSignInProviderModule.kt.
-    private let googleSignInProvider = SwiftGoogleSignInProvider(
+    let googleSignInProvider = SwiftGoogleSignInProvider(
         webClientId: GoogleSignInProviderModuleKt.googleSignInWebClientId
     )
 
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+
+    init() {
+        KoinInitKt.initKoin(
+            mixpanelProvider: mixpanelProvider,
+            youtubePlayerProvider: youtubePlayerProvider,
+            googleSignInProvider: googleSignInProvider
+        )
+    }
 
     var body: some Scene {
         WindowGroup {

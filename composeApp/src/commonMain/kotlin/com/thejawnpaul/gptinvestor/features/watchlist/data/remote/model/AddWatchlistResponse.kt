@@ -8,5 +8,5 @@ data class AddWatchlistResponse(
     @SerialName("ticker") val ticker: String? = null,
     @SerialName("company_name") val companyName: String? = null,
     @SerialName("date_added") val dateAdded: String? = null,
-    @SerialName("logo_url") val logoUrl: String? = null,
+    @SerialName("logo_url") val logoUrl: String? = null
 )

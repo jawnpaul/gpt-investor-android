@@ -4,6 +4,4 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AppleVerifyRequest(
-    @SerialName("original_transaction_id") val originalTransactionId: String
-)
+data class AppleVerifyRequest(@SerialName("original_transaction_id") val originalTransactionId: String)

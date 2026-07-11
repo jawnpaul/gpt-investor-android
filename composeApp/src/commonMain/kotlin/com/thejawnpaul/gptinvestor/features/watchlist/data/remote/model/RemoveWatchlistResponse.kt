@@ -4,6 +4,4 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RemoveWatchlistResponse(
-    @SerialName("success") val success: Boolean? = null
-)
+data class RemoveWatchlistResponse(@SerialName("success") val success: Boolean? = null)

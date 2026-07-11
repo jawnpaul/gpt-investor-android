@@ -71,7 +71,9 @@ fun BottomNavBar(navController: NavController, modifier: Modifier = Modifier) {
 
     Column(modifier = modifier.fillMaxWidth()) {
         if (items.any { it.screen.route == currentRoute }) {
-            NavigationBar {
+            NavigationBar(
+                containerColor = Color.Transparent
+            ) {
                 items.forEach { item ->
                     val selected = currentRoute == item.screen.route
                     NavigationBarItem(

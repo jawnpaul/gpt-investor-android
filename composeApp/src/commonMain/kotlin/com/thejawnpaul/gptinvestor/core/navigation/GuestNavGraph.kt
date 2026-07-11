@@ -63,16 +63,8 @@ fun NavGraphBuilder.guestNavGraph(
         LaunchedEffect(Unit) {
             viewModel.actions.onEach { action ->
                 when (action) {
-                    HomeAction.OnGoToAllTopPicks -> {
-                        navController.navigate(GuestScreen.GuestAllTopPicks.route)
-                    }
-
                     is HomeAction.OnGoToCompanyDetail -> {
                         navController.navigate(GuestScreen.GuestCompanyDetail.createRoute(action.ticker))
-                    }
-
-                    is HomeAction.OnGoToTopPickDetail -> {
-                        navController.navigate(GuestScreen.GuestTopPickDetail.createRoute(action.id))
                     }
 
                     is HomeAction.OnStartConversation -> {
@@ -84,36 +76,6 @@ fun NavGraphBuilder.guestNavGraph(
                         )
                     }
 
-                    HomeAction.OnGoToDiscover -> {
-                        navController.navigate(GuestScreen.GuestDiscoverTab.createRoute())
-                    }
-
-                    HomeAction.OnGoToHistory -> {
-                        navController.navigate(GuestScreen.GuestHistoryTab.route)
-                    }
-
-                    HomeAction.OnGoToSavedPicks -> {
-                        navController.navigate(GuestScreen.GuestSavedTopPicks.route)
-                    }
-
-                    HomeAction.OnGoToSettings -> {
-                        navController.navigate(Screen.SettingsScreen.route)
-                    }
-
-                    HomeAction.OnGoToAllTidbits -> {
-                        navController.navigate(GuestScreen.GuestTidbitScreen.route)
-                    }
-
-                    is HomeAction.OnGoToTidbitDetail -> {
-                        navController.navigate(
-                            GuestScreen.GuestTidbitDetail.createRoute(tidbitId = action.id)
-                        )
-                    }
-
-                    HomeAction.OnGoToSavedTidbits -> {
-                        navController.navigate(GuestScreen.GuestSavedTidbitScreen.route)
-                    }
-
                     is HomeAction.ShowToast -> {
                         platformActions.showMessage(action.message)
                     }
@@ -122,10 +84,6 @@ fun NavGraphBuilder.guestNavGraph(
                         navController.navigate(Screen.SignUpScreen.route) {
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
-                    }
-
-                    HomeAction.NavigateToSearch -> {
-                        navController.navigate(GuestScreen.GuestSearch.route)
                     }
 
                     HomeAction.NavigateToAllTrending -> {
@@ -174,6 +132,13 @@ fun NavGraphBuilder.guestNavGraph(
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
                     }
+
+                    DiscoveryAction.OnGoToSearch -> {
+                    }
+
+                    is DiscoveryAction.OnGoToTidbitDetail -> {
+                        navController.navigate(route = GuestScreen.GuestTidbitDetail.createRoute(action.id))
+                    }
                 }
             }.launchIn(scope)
         }
@@ -181,7 +146,6 @@ fun NavGraphBuilder.guestNavGraph(
         DiscoverScreen(
             modifier = Modifier,
             state = state.value,
-            paging = viewModel.companiesPagingData,
             onEvent = viewModel::handleEvent
         )
     }

@@ -52,6 +52,14 @@ fun NavGraphBuilder.discoverNavGraph(navController: NavHostController) {
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
                     }
+
+                    DiscoveryAction.OnGoToSearch -> {
+                        navController.navigate(route = Screen.SearchScreen.route)
+                    }
+
+                    is DiscoveryAction.OnGoToTidbitDetail -> {
+                        navController.navigate(route = Screen.TidbitDetailScreen.createRoute(tidbitId = action.id))
+                    }
                 }
             }.launchIn(scope)
         }
@@ -59,7 +67,6 @@ fun NavGraphBuilder.discoverNavGraph(navController: NavHostController) {
         DiscoverScreen(
             modifier = Modifier,
             state = state.value,
-            paging = viewModel.companiesPagingData,
             onEvent = viewModel::handleEvent
         )
     }

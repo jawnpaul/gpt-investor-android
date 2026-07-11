@@ -53,6 +53,9 @@ fun NavGraphBuilder.profileNavGraph(navController: NavHostController, platformAc
                     ProfileAction.NavigateToSettings -> {
                         navController.navigate(route = Screen.SettingsScreen.route)
                     }
+
+                    is ProfileAction.ShowToast -> {
+                    }
                 }
             }.launchIn(scope)
         }

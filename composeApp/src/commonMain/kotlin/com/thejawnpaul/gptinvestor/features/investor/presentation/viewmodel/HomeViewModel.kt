@@ -20,8 +20,6 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPro
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefaultPromptsUseCase
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
-import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.OnGoToAllTidbits
-import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.OnGoToTidbitDetail
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.OnStartConversation
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
@@ -88,7 +86,6 @@ class HomeViewModel(
         getTopPicks()
         getTrendingCompanies()
         getCurrentUser()
-        getTodayTidbit()
         logHomeScreenViewed()
 
         viewModelScope.launch {
@@ -277,84 +274,13 @@ class HomeViewModel(
                     }
                 }
 
-                is HomeEvent.ClickTidbit -> {
-                    logNavigationEvent(destination = "tidbit_detail", tidbitId = event.id)
-                    _actions.emit(OnGoToTidbitDetail(event.id))
-                }
-
-                HomeEvent.GoToAllTidbits -> {
-                    logNavigationEvent(destination = "all_tidbits")
-
-                    _actions.emit(OnGoToAllTidbits)
-                }
-
-                HomeEvent.GoToDiscover -> {
-                    logNavigationEvent(destination = "discover")
-                    _actions.emit(HomeAction.OnGoToDiscover)
-                }
-
-                HomeEvent.GoToHistory -> {
-                    if (uiState.value.isGuestSession) {
-                        _actions.emit(HomeAction.ShowToast(message = "You can only see history after signing in"))
-                    } else {
-                        logNavigationEvent(destination = "history")
-                        _actions.emit(HomeAction.OnGoToHistory)
-                    }
-                }
-
-                HomeEvent.GoToSavedPicks -> {
-                    if (uiState.value.isGuestSession) {
-                        _actions.emit(HomeAction.ShowToast(message = "You can only see saved picks after signing in"))
-                    } else {
-                        logNavigationEvent(destination = "saved_picks")
-                        _actions.emit(HomeAction.OnGoToSavedPicks)
-                    }
-                }
-
-                HomeEvent.GoToSavedTidbits -> {
-                    if (uiState.value.isGuestSession) {
-                        _actions.emit(HomeAction.ShowToast(message = "You can only see saved tidbits after signing in"))
-                    } else {
-                        logNavigationEvent(destination = "saved_tidbits")
-
-                        _actions.emit(HomeAction.OnGoToSavedTidbits)
-                    }
-                }
-
-                HomeEvent.GoToSettings -> {
-                    if (uiState.value.isGuestSession) {
-                        _actions.emit(HomeAction.ShowToast(message = "You can only see settings after signing in"))
-                    } else {
-                        logNavigationEvent(destination = "settings")
-
-                        _actions.emit(HomeAction.OnGoToSettings)
-                    }
-                }
-
                 HomeEvent.GoToSignUp -> {
                     _actions.emit(HomeAction.OnGoToSignUp)
                 }
 
                 HomeEvent.RetryTrendingCompanies -> getTrendingCompanies()
 
-                HomeEvent.RetryTopPicks -> getTopPicks()
-
-                HomeEvent.RetryTidbit -> {
-                    _uiState.update { it.copy(homeTidbitView = HomeTidbitView(loading = true)) }
-                    getTodayTidbit()
-                }
-
-                HomeEvent.GoToSearch -> {
-                    analyticsLogger.logEvent(
-                        eventName = "home-search-tapped",
-                        params = mapOf("user_type" to if (uiState.value.isGuestSession) "guest" else "authenticated")
-                    )
-                    _actions.emit(HomeAction.NavigateToSearch)
-                }
-
                 HomeEvent.GoToAllTrending -> _actions.emit(HomeAction.NavigateToAllTrending)
-
-                HomeEvent.GoToAllTopPicks -> _actions.emit(HomeAction.OnGoToAllTopPicks)
 
                 is HomeEvent.ClickTrendingCompany -> {
                     analyticsLogger.logEvent(
@@ -365,17 +291,6 @@ class HomeViewModel(
                         )
                     )
                     _actions.emit(HomeAction.OnGoToCompanyDetail(event.ticker))
-                }
-
-                is HomeEvent.ClickTopPick -> {
-                    analyticsLogger.logEvent(
-                        eventName = "home-top-pick-tapped",
-                        params = mapOf(
-                            "top_pick_id" to event.id,
-                            "user_type" to if (uiState.value.isGuestSession) "guest" else "authenticated"
-                        )
-                    )
-                    _actions.emit(HomeAction.OnGoToTopPickDetail(event.id))
                 }
             }
         }
@@ -428,33 +343,6 @@ class HomeViewModel(
             it.onSuccess { result ->
                 _uiState.update { state -> state.copy(defaultPrompts = result) }
             }
-        }
-    }
-
-    private fun getTodayTidbit() {
-        _uiState.update { it.copy(homeTidbitView = HomeTidbitView(loading = true)) }
-        viewModelScope.launch {
-            tidbitRepository.getTodayTidbit()
-                .onSuccess { tidbit ->
-                    _uiState.update {
-                        it.copy(
-                            homeTidbitView = HomeTidbitView(
-                                loading = false,
-                                id = tidbit.id,
-                                previewUrl = tidbit.previewUrl,
-                                title = tidbit.title,
-                                description = tidbit.summary
-                            )
-                        )
-                    }
-                }
-                .onFailure {
-                    _uiState.update { state ->
-                        state.copy(
-                            homeTidbitView = state.homeTidbitView.copy(loading = false, error = "Something went wrong")
-                        )
-                    }
-                }
         }
     }
 
@@ -537,39 +425,17 @@ sealed interface HomeEvent {
     data object JoinWaitlist : HomeEvent
     data class DefaultPromptClicked(val prompt: DefaultPrompt) : HomeEvent
     data object SignOut : HomeEvent
-    data class ClickTidbit(val id: String) : HomeEvent
-    data object GoToAllTidbits : HomeEvent
-    data object GoToSavedPicks : HomeEvent
-    data object GoToSavedTidbits : HomeEvent
-    data object GoToDiscover : HomeEvent
-    data object GoToSettings : HomeEvent
-    data object GoToHistory : HomeEvent
     data object GoToSignUp : HomeEvent
     data object RetryTrendingCompanies : HomeEvent
-    data object RetryTopPicks : HomeEvent
-    data object RetryTidbit : HomeEvent
-    data object GoToSearch : HomeEvent
     data object GoToAllTrending : HomeEvent
-    data object GoToAllTopPicks : HomeEvent
     data class ClickTrendingCompany(val ticker: String) : HomeEvent
-    data class ClickTopPick(val id: String) : HomeEvent
 }
 
 sealed interface HomeAction {
     data class OnStartConversation(val input: String? = null, val title: String? = null) : HomeAction
 
-    data object OnGoToAllTopPicks : HomeAction
-    data class OnGoToTopPickDetail(val id: String) : HomeAction
     data class OnGoToCompanyDetail(val ticker: String) : HomeAction
-    data object OnGoToDiscover : HomeAction
-    data object OnGoToSettings : HomeAction
-    data object OnGoToHistory : HomeAction
-    data object OnGoToSavedPicks : HomeAction
-    data class OnGoToTidbitDetail(val id: String) : HomeAction
-    data object OnGoToAllTidbits : HomeAction
-    data object OnGoToSavedTidbits : HomeAction
     data class ShowToast(val message: String) : HomeAction
     data object OnGoToSignUp : HomeAction
-    data object NavigateToSearch : HomeAction
     data object NavigateToAllTrending : HomeAction
 }

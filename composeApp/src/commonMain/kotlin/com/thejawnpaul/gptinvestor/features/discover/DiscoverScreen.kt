@@ -1,173 +1,55 @@
 package com.thejawnpaul.gptinvestor.features.discover
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
-import androidx.paging.PagingData
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.back
+import com.thejawnpaul.gptinvestor.curated_for_you
+import com.thejawnpaul.gptinvestor.daily_learn_tidbit
 import com.thejawnpaul.gptinvestor.discover
-import com.thejawnpaul.gptinvestor.empty
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
-import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.SingleCompanyItem
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
-import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.SectorChoiceQuestion
-import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SingleTopPickItem
-import com.thejawnpaul.gptinvestor.ic_search
-import com.thejawnpaul.gptinvestor.no_search_result
-import com.thejawnpaul.gptinvestor.retry
-import com.thejawnpaul.gptinvestor.search
-import com.thejawnpaul.gptinvestor.search_all_companies
-import com.thejawnpaul.gptinvestor.search_companies_in
-import com.thejawnpaul.gptinvestor.server_down
-import com.thejawnpaul.gptinvestor.something_went_wrong
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeErrorCard
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeSearchBar
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeSectionHeader
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeTopPicksSection
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.HomeTidbitSection
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
-import kotlinx.coroutines.flow.Flow
-import org.jetbrains.compose.resources.painterResource
+import com.thejawnpaul.gptinvestor.today_s_lesson_didn_t_load
+import com.thejawnpaul.gptinvestor.top_picks_today
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun DiscoverScreen(
-    state: DiscoveryScreenState,
-    paging: Flow<PagingData<CompanyPresentation>>,
-    onEvent: (DiscoveryEvent) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    // Discover Screen
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val gptInvestorColors = LocalGPTInvestorColors.current
-
-    val companiesList = paging.collectAsLazyPagingItems()
-
+fun DiscoverScreen(state: DiscoveryScreenState, onEvent: (DiscoveryEvent) -> Unit, modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier,
         topBar = {
             Column(
-                modifier = Modifier.statusBarsPadding().fillMaxWidth()
+                modifier = Modifier.statusBarsPadding().fillMaxWidth().padding(16.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { onEvent(DiscoveryEvent.GoBack) }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = stringResource(Res.string.back)
-                        )
-                    }
-
-                    if (state.searchMode) {
-                        SearchBarCustom(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            query = state.query,
-                            placeHolder = state.selected?.let {
-                                when (it) {
-                                    SectorInput.AllSector -> stringResource(
-                                        Res.string.search_all_companies
-                                    )
-                                    is SectorInput.CustomSector -> {
-                                        stringResource(Res.string.search_companies_in, it.sectorName)
-                                    }
-                                }
-                            } ?: stringResource(Res.string.search),
-                            onQueryChange = { newQuery ->
-                                onEvent(DiscoveryEvent.SearchQueryChanged(newQuery))
-                            },
-                            onSearch = {
-                                keyboardController?.hide()
-                                onEvent(DiscoveryEvent.PerformSearch)
-                            },
-                            onClose = {
-                                keyboardController?.hide()
-                                onEvent(DiscoveryEvent.ToggleSearchMode(false))
-                            }
-                        )
-                    } else {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.discover),
-                                style = MaterialTheme.typography.titleLarge
-                            )
-
-                            Surface(
-                                modifier = Modifier,
-                                shape = RoundedCornerShape(corner = CornerSize(20.dp)),
-                                border = BorderStroke(
-                                    2.dp,
-                                    MaterialTheme.colorScheme.outlineVariant
-                                ),
-                                onClick = {
-                                    onEvent(DiscoveryEvent.ToggleSearchMode(true))
-                                }
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(
-                                        horizontal = 8.dp,
-                                        vertical = 12.dp
-                                    ),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        modifier = Modifier.size(16.dp),
-                                        painter = painterResource(Res.drawable.ic_search),
-                                        contentDescription = null
-                                    )
-                                    Text(
-                                        text = stringResource(Res.string.search),
-                                        style = MaterialTheme.typography.titleSmall,
-                                        color = gptInvestorColors.textColors.secondary50
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                HorizontalDivider(modifier = Modifier.padding(top = 12.dp))
+                Text(
+                    text = stringResource(Res.string.discover),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.statusBarsPadding().fillMaxWidth()
+                )
                 if (state.isGuestSession) {
                     TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {
                         onEvent(DiscoveryEvent.GoToSignUp)
@@ -189,127 +71,114 @@ fun DiscoverScreen(
                 contentPadding = PaddingValues(vertical = 12.dp)
             ) {
                 item {
-                    // row of sectors
-                    SectorChoiceQuestion(
-                        possibleAnswers = state.sectors,
-                        selectedAnswer = state.selected,
-                        onSelectOption = {
-                            onEvent(DiscoveryEvent.SelectSector(it))
+                    // Search
+                    HomeSearchBar(modifier = Modifier.padding(horizontal = 16.dp), onClick = {
+                        onEvent(DiscoveryEvent.GoToSearch)
+                    })
+                }
+
+                item {
+                    // Top picks
+                    HomeSectionHeader(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        emoji = "🔖",
+                        label = stringResource(Res.string.top_picks_today),
+                        title = stringResource(Res.string.curated_for_you),
+                        onSeeAll = {
                         }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HomeTopPicksSection(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        view = state.topPicksView,
+                        onRetry = { onEvent(DiscoveryEvent.RetryTopPicks) },
+                        onClickPick = { onEvent(DiscoveryEvent.ClickTopPick(id = it)) }
                     )
                 }
 
-                if (state.showTopPicks) {
-                    items(
-                        items = state.topPicks,
-                        key = { topPickPresentation -> topPickPresentation.id }
-                    ) { pickPresentation ->
-                        SingleTopPickItem(
-                            modifier = Modifier,
-                            pickPresentation = pickPresentation,
-                            onClick = { topPickId ->
-                                onEvent(DiscoveryEvent.GoToTopPickDetail(topPickId))
-                            }
-                        )
-                    }
-                } else {
-                    if (companiesList.loadState.refresh is LoadState.Loading) {
-                        item {
-                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                        }
-                    }
-
-                    if (companiesList.loadState.refresh is LoadState.Error) {
-                        item {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                Column(modifier = Modifier.align(Alignment.Center)) {
-                                    Image(
-                                        painter = painterResource(Res.drawable.server_down),
-                                        contentDescription = "Server down",
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(
-                                                start = 8.dp,
-                                                end = 8.dp,
-                                                bottom = 8.dp,
-                                                top = 8.dp
-                                            )
-                                    )
-
-                                    Text(
-                                        text = stringResource(Res.string.something_went_wrong),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-
-                                    Spacer(modifier = Modifier.padding(8.dp))
-                                    OutlinedButton(onClick = {
-                                        companiesList.retry()
-                                        onEvent(DiscoveryEvent.RetryCompanies)
-                                    }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                                        Text(text = stringResource(Res.string.retry))
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (companiesList.loadState.refresh is LoadState.NotLoading &&
-                        companiesList.itemCount == 0 &&
-                        state.query.isNotBlank()
-                    ) {
-                        item {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                Column(modifier = Modifier.align(Alignment.Center)) {
-                                    Image(
-                                        painter = painterResource(Res.drawable.empty),
-                                        contentDescription = "Empty",
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(
-                                                start = 8.dp,
-                                                end = 8.dp,
-                                                bottom = 8.dp,
-                                                top = 8.dp
-                                            )
-                                    )
-
-                                    Text(
-                                        text = stringResource(Res.string.no_search_result),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    items(
-                        count = companiesList.itemCount,
-                        key = companiesList.itemKey { it.ticker }
-                    ) { index ->
-                        val company = companiesList[index]
-                        if (company != null) {
-                            SingleCompanyItem(
-                                modifier = Modifier.padding(
-                                    horizontal = 16.dp
-                                ),
-                                company = company,
-                                onClick = {
-                                    onEvent(DiscoveryEvent.GoToCompanyDetail(company.ticker))
-                                }
+                item {
+                    // Tidbit
+                    Spacer(modifier = Modifier.height(12.dp))
+                    when {
+                        state.homeTidbitView.error != null -> {
+                            HomeErrorCard(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                message = stringResource(Res.string.today_s_lesson_didn_t_load),
+                                onRetry = { onEvent(DiscoveryEvent.RetryTidbit) }
                             )
                         }
-                    }
-                    if (companiesList.loadState.append is LoadState.Loading) {
-                        item {
-                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+
+                        else -> {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                text = stringResource(Res.string.daily_learn_tidbit).uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = LocalGPTInvestorColors.current.textColors.secondary50
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+                            HomeTidbitSection(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                tidbit = state.homeTidbitView,
+                                onClick = { onEvent(DiscoveryEvent.ClickTidbit(id = it)) },
+                                isLoading = state.homeTidbitView.loading
+                            )
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun DiscoverScreenTopPicksPreview() {
+    GPTInvestorTheme {
+        DiscoverScreen(
+            state = DiscoveryScreenState(
+                sectors = listOf(
+                    SectorInput.AllSector,
+                    SectorInput.CustomSector("Top Picks", "top-picks"),
+                    SectorInput.CustomSector("Technology", "technology")
+                ),
+                topPicks = listOf(
+                    TopPickPresentation(
+                        id = "1",
+                        ticker = "JPM",
+                        companyName = "JP Morgan Chase & Co.",
+                        rationale = "JPM is leveraging its massive scale to lead the banking " +
+                            "sector's digital revolution.",
+                        metrics = emptyList(),
+                        risks = emptyList(),
+                        confidenceScore = 80,
+                        isSaved = false,
+                        percentageChange = 1.2f,
+                        imageUrl = "",
+                        currentPrice = 185.0f
+                    )
+                ),
+                selected = SectorInput.CustomSector("Top Picks", "top-picks")
+            ),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun DiscoverScreenCompaniesPreview() {
+    GPTInvestorTheme {
+        DiscoverScreen(
+            state = DiscoveryScreenState(
+                sectors = listOf(
+                    SectorInput.AllSector,
+                    SectorInput.CustomSector("Top Picks", "top-picks"),
+                    SectorInput.CustomSector("Technology", "technology")
+                ),
+                selected = SectorInput.AllSector
+            ),
+            onEvent = {}
+        )
     }
 }

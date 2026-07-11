@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.features.profile.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.dark
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.koin.core.annotation.Provided
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @KoinViewModel
@@ -33,7 +35,8 @@ class ProfileViewModel(
     private val conversationRepository: IConversationRepository,
     private val topPickRepository: ITopPickRepository,
     private val tidbitRepository: TidbitRepository,
-    private val billingRepository: IBillingRepository
+    private val billingRepository: IBillingRepository,
+    @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
     val themeMap =
@@ -88,36 +91,84 @@ class ProfileViewModel(
                 viewModelScope.launch { authenticationRepository.signOut() }
             }
 
-            ProfileEvent.AppearanceClicked -> viewModelScope.launch {
-                _actions.emit(ProfileAction.NavigateToAppearance)
+            ProfileEvent.AppearanceClicked -> {
+                analyticsLogger.logEvent(
+                    eventName = "appearance-clicked",
+                    params = mapOf("source" to "profile_screen")
+                )
+                processAction(ProfileAction.NavigateToAppearance)
             }
 
-            ProfileEvent.HistoryClicked -> viewModelScope.launch { _actions.emit(ProfileAction.NavigateToHistory) }
-            ProfileEvent.NotificationsClicked -> viewModelScope.launch {
-                _actions.emit(ProfileAction.NavigateToNotifications)
+            ProfileEvent.HistoryClicked -> {
+                analyticsLogger.logEvent(
+                    eventName = "history-clicked",
+                    params = mapOf("source" to "profile_screen")
+                )
+                processAction(ProfileAction.NavigateToHistory)
             }
 
-            ProfileEvent.PrivacyClicked -> viewModelScope.launch { _actions.emit(ProfileAction.NavigateToPrivacy) }
-            ProfileEvent.SavedPicksClicked -> viewModelScope.launch {
-                _actions.emit(ProfileAction.NavigateToSavedPicks)
+            ProfileEvent.NotificationsClicked -> {
+                analyticsLogger.logEvent(
+                    eventName = "notifications-clicked",
+                    params = mapOf("source" to "profile_screen")
+                )
+                processAction(ProfileAction.NavigateToNotifications)
             }
 
-            ProfileEvent.SavedTidbitsClicked -> viewModelScope.launch {
-                _actions.emit(ProfileAction.NavigateToSavedTidbits)
+            ProfileEvent.PrivacyClicked -> {
+                analyticsLogger.logEvent(
+                    eventName = "privacy-clicked",
+                    params = mapOf("source" to "profile_screen")
+                )
+                processAction(ProfileAction.NavigateToPrivacy)
             }
 
-            ProfileEvent.UpgradeToPremiumClicked -> viewModelScope.launch {
-                _actions.emit(ProfileAction.NavigateToUpgrade)
+            ProfileEvent.SavedPicksClicked -> {
+                analyticsLogger.logEvent(
+                    eventName = "saved-top-picks-clicked",
+                    params = mapOf("source" to "profile_screen")
+                )
+                processAction(ProfileAction.NavigateToSavedPicks)
+            }
+
+            ProfileEvent.SavedTidbitsClicked -> {
+                analyticsLogger.logEvent(
+                    eventName = "saved-tidbits-clicked",
+                    params = mapOf("source" to "profile_screen")
+                )
+                processAction(ProfileAction.NavigateToSavedTidbits)
+            }
+
+            ProfileEvent.UpgradeToPremiumClicked -> {
+                analyticsLogger.logEvent(
+                    eventName = "upgrade-clicked",
+                    params = mapOf("source" to "profile_screen")
+                )
+                processAction(ProfileAction.NavigateToUpgrade)
             }
 
             is ProfileEvent.ChangeTheme -> viewModelScope.launch {
                 val theme: String = themeMap.get(event.theme) ?: "System"
                 appPreferences.setThemePreference(theme)
+                analyticsLogger.logEvent(
+                    eventName = "theme-changed",
+                    params = mapOf("theme" to event.theme)
+                )
             }
 
-            ProfileEvent.SettingsClicked -> viewModelScope.launch {
-                _actions.emit(ProfileAction.NavigateToSettings)
+            ProfileEvent.SettingsClicked -> {
+                analyticsLogger.logEvent(
+                    eventName = "settings-clicked",
+                    params = mapOf("source" to "profile_screen")
+                )
+                processAction(ProfileAction.NavigateToSettings)
             }
+        }
+    }
+
+    private fun processAction(action: ProfileAction) {
+        viewModelScope.launch {
+            _actions.emit(action)
         }
     }
 

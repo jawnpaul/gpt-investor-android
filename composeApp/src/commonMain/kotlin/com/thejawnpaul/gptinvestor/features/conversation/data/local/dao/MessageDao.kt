@@ -7,9 +7,13 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.MessageEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MessageDao {
+
+    @Query("SELECT COUNT(*) FROM message_table")
+    fun getMessageCount(): Flow<Int>
 
     @Query(
         "SELECT * FROM message_table WHERE conversationId = :conversationId ORDER BY createdAt ASC"

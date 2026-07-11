@@ -8,14 +8,6 @@ import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpRes
 import com.thejawnpaul.gptinvestor.features.billing.data.remote.AppleVerifyRequest
 import com.thejawnpaul.gptinvestor.features.billing.data.remote.VerifyPurchaseRequest
 import com.thejawnpaul.gptinvestor.features.billing.data.remote.VerifyPurchaseResponse
-import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.DigestResponse
-import com.thejawnpaul.gptinvestor.features.settings.data.remote.model.UpdateUserSettingsRequest
-import com.thejawnpaul.gptinvestor.features.settings.data.remote.model.UserSettingsResponse
-import com.thejawnpaul.gptinvestor.features.trial.data.remote.model.StartTrialResponse
-import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistRequest
-import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistResponse
-import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.RemoveWatchlistResponse
-import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.WatchlistResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyBriefRemote
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
@@ -33,11 +25,14 @@ import com.thejawnpaul.gptinvestor.features.conversation.data.remote.AiChatReque
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.DefaultPromptRemote
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityRequest
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityResponse
+import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.DigestResponse
 import com.thejawnpaul.gptinvestor.features.guest.data.remote.GuestLoginRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenResponse
 import com.thejawnpaul.gptinvestor.features.search.data.remote.ClearHistoryResponse
 import com.thejawnpaul.gptinvestor.features.search.data.remote.SearchResponse
+import com.thejawnpaul.gptinvestor.features.settings.data.remote.model.UpdateUserSettingsRequest
+import com.thejawnpaul.gptinvestor.features.settings.data.remote.model.UserSettingsResponse
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.AllTidbitResponse
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitBookmarkRequest
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitBookmarkResponse
@@ -45,6 +40,11 @@ import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitLikeRequest
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitLikeResponse
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitRemote
 import com.thejawnpaul.gptinvestor.features.toppick.data.remote.TopPickRemote
+import com.thejawnpaul.gptinvestor.features.trial.data.remote.model.StartTrialResponse
+import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistRequest
+import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistResponse
+import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.RemoveWatchlistResponse
+import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.WatchlistResponse
 import com.thejawnpaul.gptinvestor.remote.TokenResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -233,14 +233,11 @@ class KtorApiService(@Provided private val client: HttpClient) {
     suspend fun removeFromWatchlist(ticker: String): KtorResponse<RemoveWatchlistResponse> =
         client.delete("v1/watchlist/$ticker").toKtorResponse()
 
-    suspend fun getDailyDigest(): KtorResponse<DigestResponse> =
-        client.get("v1/digest").toKtorResponse()
+    suspend fun getDailyDigest(): KtorResponse<DigestResponse> = client.get("v1/digest").toKtorResponse()
 
-    suspend fun startFreeTrial(): KtorResponse<StartTrialResponse> =
-        client.post("v1/trial/start").toKtorResponse()
+    suspend fun startFreeTrial(): KtorResponse<StartTrialResponse> = client.post("v1/trial/start").toKtorResponse()
 
-    suspend fun getUserSettings(): KtorResponse<UserSettingsResponse> =
-        client.get("v1/user/settings").toKtorResponse()
+    suspend fun getUserSettings(): KtorResponse<UserSettingsResponse> = client.get("v1/user/settings").toKtorResponse()
 
     suspend fun updateUserSettings(request: UpdateUserSettingsRequest): KtorResponse<UserSettingsResponse> =
         client.put("v1/user/settings") {

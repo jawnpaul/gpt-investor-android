@@ -4,6 +4,4 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AddWatchlistRequest(
-    @SerialName("ticker") val ticker: String
-)
+data class AddWatchlistRequest(@SerialName("ticker") val ticker: String)

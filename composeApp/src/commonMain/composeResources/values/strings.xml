@@ -211,4 +211,7 @@
     <string name="queries">Queries</string>
     <string name="upgrade_to_premium">Upgrade to premium</string>
     <string name="upgrade_cta_subtitle">Unlimited watchlist, Thesis Tracker, and more</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+    <string name="system">System</string>
 </resources>

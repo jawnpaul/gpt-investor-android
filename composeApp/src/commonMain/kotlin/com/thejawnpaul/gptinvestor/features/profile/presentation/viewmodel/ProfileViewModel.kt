@@ -2,13 +2,17 @@ package com.thejawnpaul.gptinvestor.features.profile.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
+import com.thejawnpaul.gptinvestor.dark
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
 import com.thejawnpaul.gptinvestor.features.profile.presentation.state.ProfileUiState
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
+import com.thejawnpaul.gptinvestor.light
+import com.thejawnpaul.gptinvestor.system
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +36,10 @@ class ProfileViewModel(
     private val billingRepository: IBillingRepository
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(ProfileUiState())
+    val themeMap =
+        mapOf(Res.string.light to "Light", Res.string.dark to "Dark", Res.string.system to "System")
+
+    private val _state = MutableStateFlow(ProfileUiState(themeList = themeMap.keys.toList()))
 
     private val _actions = MutableSharedFlow<ProfileAction>()
     val actions = _actions.asSharedFlow()
@@ -84,19 +91,32 @@ class ProfileViewModel(
             ProfileEvent.AppearanceClicked -> viewModelScope.launch {
                 _actions.emit(ProfileAction.NavigateToAppearance)
             }
+
             ProfileEvent.HistoryClicked -> viewModelScope.launch { _actions.emit(ProfileAction.NavigateToHistory) }
             ProfileEvent.NotificationsClicked -> viewModelScope.launch {
                 _actions.emit(ProfileAction.NavigateToNotifications)
             }
+
             ProfileEvent.PrivacyClicked -> viewModelScope.launch { _actions.emit(ProfileAction.NavigateToPrivacy) }
             ProfileEvent.SavedPicksClicked -> viewModelScope.launch {
                 _actions.emit(ProfileAction.NavigateToSavedPicks)
             }
+
             ProfileEvent.SavedTidbitsClicked -> viewModelScope.launch {
                 _actions.emit(ProfileAction.NavigateToSavedTidbits)
             }
+
             ProfileEvent.UpgradeToPremiumClicked -> viewModelScope.launch {
                 _actions.emit(ProfileAction.NavigateToUpgrade)
+            }
+
+            is ProfileEvent.ChangeTheme -> viewModelScope.launch {
+                val theme: String = themeMap.get(event.theme) ?: "System"
+                appPreferences.setThemePreference(theme)
+            }
+
+            ProfileEvent.SettingsClicked -> viewModelScope.launch {
+                _actions.emit(ProfileAction.NavigateToSettings)
             }
         }
     }
@@ -104,8 +124,9 @@ class ProfileViewModel(
     fun getTheme() {
         viewModelScope.launch {
             appPreferences.themePreference.collect { theme ->
-                _state.update {
-                    it.copy(currentTheme = theme ?: "System")
+                _state.update { state ->
+                    val theme = themeMap.filterValues { it == theme }.keys.firstOrNull()
+                    state.copy(currentTheme = theme ?: Res.string.system)
                 }
             }
         }

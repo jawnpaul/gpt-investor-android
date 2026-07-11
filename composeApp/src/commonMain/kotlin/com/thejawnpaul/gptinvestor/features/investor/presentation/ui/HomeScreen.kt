@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -32,10 +31,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -60,13 +56,9 @@ import com.thejawnpaul.gptinvestor.ask_me_anything_about_markets
 import com.thejawnpaul.gptinvestor.choose_the_capabilities_you_d_love_in_the_advanced_ai_model
 import com.thejawnpaul.gptinvestor.continue_
 import com.thejawnpaul.gptinvestor.copy_success
-import com.thejawnpaul.gptinvestor.core.navigation.NavDrawerAction
-import com.thejawnpaul.gptinvestor.core.navigation.NavDrawerContent
-import com.thejawnpaul.gptinvestor.core.navigation.NavDrawerEvent
 import com.thejawnpaul.gptinvestor.core.platform.NotificationPermissionController
 import com.thejawnpaul.gptinvestor.curated_for_you
 import com.thejawnpaul.gptinvestor.daily_learn_tidbit
-import com.thejawnpaul.gptinvestor.discover
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
@@ -85,8 +77,6 @@ import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.HomeTidbitSec
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 import com.thejawnpaul.gptinvestor.gpt_investor
-import com.thejawnpaul.gptinvestor.ic_menu
-import com.thejawnpaul.gptinvestor.ic_search_status_two
 import com.thejawnpaul.gptinvestor.join_list
 import com.thejawnpaul.gptinvestor.join_the_waitlist
 import com.thejawnpaul.gptinvestor.movers_right_now
@@ -97,10 +87,8 @@ import com.thejawnpaul.gptinvestor.top_picks_today
 import com.thejawnpaul.gptinvestor.trending_today
 import com.thejawnpaul.gptinvestor.you_re_on_the_list
 import com.thejawnpaul.gptinvestor.you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.koinInject
 
 @Composable
@@ -131,209 +119,141 @@ private fun HomeScreenContent(
         onGrant = { onEvent(HomeEvent.NotificationPermissionGranted) },
         onDeny = { onEvent(HomeEvent.NotificationPermissionDenied) }
     )
-
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            NavDrawerContent(
-                onCloseDrawer = { scope.launch { drawerState.close() } },
-                onEvent = { event ->
-                    when (event) {
-                        NavDrawerEvent.SignOut -> onEvent(HomeEvent.SignOut)
-                        is NavDrawerEvent.ChangeTheme -> onEvent(HomeEvent.ChangeTheme(event.theme))
-                    }
-                },
-                onAction = { action ->
-                    when (action) {
-                        NavDrawerAction.OnGoToSavedPicks -> onEvent(HomeEvent.GoToSavedPicks)
-                        NavDrawerAction.OnGoToSettings -> onEvent(HomeEvent.GoToSettings)
-                        NavDrawerAction.OnGoToHistory -> onEvent(HomeEvent.GoToHistory)
-                        NavDrawerAction.OnGoToSavedTidbits -> onEvent(HomeEvent.GoToSavedTidbits)
-                    }
-                },
-                state = state.drawerState
+    Scaffold(
+        modifier = modifier,
+        bottomBar = {
+            QuestionInput(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .windowInsetsPadding(insets = WindowInsets.ime),
+                onSendClick = { onEvent(HomeEvent.SendClick) },
+                hint = stringResource(Res.string.ask_me_anything_about_markets),
+                onTextChange = { onEvent(HomeEvent.ChatInputChanged(it)) },
+                text = state.chatInput ?: ""
             )
-        }
-    ) {
-        Scaffold(
-            modifier = modifier,
-            bottomBar = {
-                QuestionInput(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .windowInsetsPadding(insets = WindowInsets.ime),
-                    onSendClick = { onEvent(HomeEvent.SendClick) },
-                    hint = stringResource(Res.string.ask_me_anything_about_markets),
-                    onTextChange = { onEvent(HomeEvent.ChatInputChanged(it)) },
-                    text = state.chatInput ?: ""
-                )
-            },
-            topBar = {
-                Column(modifier = Modifier.statusBarsPadding()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(
-                                imageVector = vectorResource(Res.drawable.ic_menu),
-                                contentDescription = null
-                            )
-                        }
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.gpt_investor),
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
-
-                        val discoverInteractionSource = remember { MutableInteractionSource() }
-                        val isDiscoverPressed by discoverInteractionSource.collectIsPressedAsState()
-                        val discoverScale by animateFloatAsState(
-                            targetValue = if (isDiscoverPressed) 0.97f else 1f,
-                            animationSpec = spring(stiffness = Spring.StiffnessMedium),
-                            label = "pressScale"
-                        )
-                        Row(
-                            modifier = Modifier
-                                .graphicsLayer {
-                                    scaleX = discoverScale
-                                    scaleY = discoverScale
-                                }
-                                .clickable(
-                                    interactionSource = discoverInteractionSource,
-                                    indication = null,
-                                    onClick = { onEvent(HomeEvent.GoToDiscover) }
-                                ),
-                            horizontalArrangement = Arrangement.spacedBy(0.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.discover),
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Icon(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp),
-                                painter = painterResource(Res.drawable.ic_search_status_two),
-                                contentDescription = null
-                            )
-                        }
-                    }
+        },
+        topBar = {
+            Column(modifier = Modifier.statusBarsPadding()) {
+                Row(
+                    modifier = Modifier,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        text = stringResource(Res.string.gpt_investor),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.titleMedium
+                    )
                 }
             }
-        ) { innerPadding ->
-            Box(
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        ) {
+            Column(
                 modifier = Modifier
-                    .padding(innerPadding)
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 0.dp, vertical = 8.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 0.dp, vertical = 8.dp)
-                ) {
-                    // Guest banner
-                    if (state.isGuestSession) {
-                        TopGuestLabel(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            onClick = { onEvent(HomeEvent.GoToSignUp) }
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-
-                    HomeGreeting(
+                // Guest banner
+                if (state.isGuestSession) {
+                    TopGuestLabel(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        timePeriod = state.timePeriod,
-                        name = state.firstName
+                        onClick = { onEvent(HomeEvent.GoToSignUp) }
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    HomeSearchBar(modifier = Modifier.padding(horizontal = 16.dp), onClick = {
-                        onEvent(HomeEvent.GoToSearch)
-                    })
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    HomeSectionHeader(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        emoji = "🔥",
-                        label = stringResource(Res.string.trending_today),
-                        title = stringResource(Res.string.movers_right_now),
-                        onSeeAll = null
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    HomeTrendingSection(
-                        view = state.trendingCompaniesView,
-                        onRetry = { onEvent(HomeEvent.RetryTrendingCompanies) },
-                        onClick = { onEvent(HomeEvent.ClickTrendingCompany(it)) }
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    HomeSectionHeader(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        emoji = "🔖",
-                        label = stringResource(Res.string.top_picks_today),
-                        title = stringResource(Res.string.curated_for_you),
-                        onSeeAll = { onEvent(HomeEvent.GoToAllTopPicks) }
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    HomeTopPicksSection(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        view = state.topPicksView,
-                        onRetry = { onEvent(HomeEvent.RetryTopPicks) },
-                        onClickPick = { onEvent(HomeEvent.ClickTopPick(it)) }
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    when {
-                        state.homeTidbitView.error != null -> {
-                            HomeErrorCard(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                message = stringResource(Res.string.today_s_lesson_didn_t_load),
-                                onRetry = { onEvent(HomeEvent.RetryTidbit) }
-                            )
-                        }
-
-                        else -> {
-                            Text(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                text = stringResource(Res.string.daily_learn_tidbit).uppercase(),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = LocalGPTInvestorColors.current.textColors.secondary50
-                            )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-                            HomeTidbitSection(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                tidbit = state.homeTidbitView,
-                                onClick = { onEvent(HomeEvent.ClickTidbit(it)) },
-                                isLoading = state.homeTidbitView.loading
-                            )
-                        }
-                    }
-
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                if (state.showWaitlistBottomSheet) {
-                    GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
-                        onEvent(HomeEvent.UpgradeModel(showBottomSheet = false))
-                    }) {
-                        WaitlistBottomSheetContent(
-                            modifier = Modifier,
-                            options = state.waitlistAvailableOptions,
-                            selectedOptions = state.selectedWaitlistOptions,
-                            onSelectOption = { onEvent(HomeEvent.SelectWaitListOption(it)) },
-                            onJoinWaitList = { onEvent(HomeEvent.JoinWaitlist) },
-                            onDismiss = { onEvent(HomeEvent.UpgradeModel(showBottomSheet = false)) }
+                HomeGreeting(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    timePeriod = state.timePeriod,
+                    name = state.firstName
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                HomeSearchBar(modifier = Modifier.padding(horizontal = 16.dp), onClick = {
+                    onEvent(HomeEvent.GoToSearch)
+                })
+                Spacer(modifier = Modifier.height(24.dp))
+
+                HomeSectionHeader(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    emoji = "🔥",
+                    label = stringResource(Res.string.trending_today),
+                    title = stringResource(Res.string.movers_right_now),
+                    onSeeAll = null
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                HomeTrendingSection(
+                    view = state.trendingCompaniesView,
+                    onRetry = { onEvent(HomeEvent.RetryTrendingCompanies) },
+                    onClick = { onEvent(HomeEvent.ClickTrendingCompany(it)) }
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                HomeSectionHeader(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    emoji = "🔖",
+                    label = stringResource(Res.string.top_picks_today),
+                    title = stringResource(Res.string.curated_for_you),
+                    onSeeAll = { onEvent(HomeEvent.GoToAllTopPicks) }
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                HomeTopPicksSection(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    view = state.topPicksView,
+                    onRetry = { onEvent(HomeEvent.RetryTopPicks) },
+                    onClickPick = { onEvent(HomeEvent.ClickTopPick(it)) }
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                when {
+                    state.homeTidbitView.error != null -> {
+                        HomeErrorCard(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            message = stringResource(Res.string.today_s_lesson_didn_t_load),
+                            onRetry = { onEvent(HomeEvent.RetryTidbit) }
                         )
                     }
+
+                    else -> {
+                        Text(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            text = stringResource(Res.string.daily_learn_tidbit).uppercase(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = LocalGPTInvestorColors.current.textColors.secondary50
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        HomeTidbitSection(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            tidbit = state.homeTidbitView,
+                            onClick = { onEvent(HomeEvent.ClickTidbit(it)) },
+                            isLoading = state.homeTidbitView.loading
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            if (state.showWaitlistBottomSheet) {
+                GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
+                    onEvent(HomeEvent.UpgradeModel(showBottomSheet = false))
+                }) {
+                    WaitlistBottomSheetContent(
+                        modifier = Modifier,
+                        options = state.waitlistAvailableOptions,
+                        selectedOptions = state.selectedWaitlistOptions,
+                        onSelectOption = { onEvent(HomeEvent.SelectWaitListOption(it)) },
+                        onJoinWaitList = { onEvent(HomeEvent.JoinWaitlist) },
+                        onDismiss = { onEvent(HomeEvent.UpgradeModel(showBottomSheet = false)) }
+                    )
                 }
             }
         }

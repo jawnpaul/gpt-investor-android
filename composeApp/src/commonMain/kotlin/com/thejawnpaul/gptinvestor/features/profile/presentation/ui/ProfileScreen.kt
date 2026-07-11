@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -36,13 +37,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
@@ -50,6 +54,7 @@ import com.thejawnpaul.gptinvestor.activity
 import com.thejawnpaul.gptinvestor.appearance
 import com.thejawnpaul.gptinvestor.are_you_sure_you_want_to_sign_out
 import com.thejawnpaul.gptinvestor.cancel
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.ThemeDropdown
 import com.thejawnpaul.gptinvestor.features.profile.presentation.state.ProfileUiState
 import com.thejawnpaul.gptinvestor.features.profile.presentation.viewmodel.ProfileEvent
 import com.thejawnpaul.gptinvestor.history
@@ -63,6 +68,7 @@ import com.thejawnpaul.gptinvestor.questions_count
 import com.thejawnpaul.gptinvestor.saved
 import com.thejawnpaul.gptinvestor.saved_picks
 import com.thejawnpaul.gptinvestor.saved_tidbits
+import com.thejawnpaul.gptinvestor.settings
 import com.thejawnpaul.gptinvestor.sign_out
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
@@ -180,12 +186,24 @@ fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, modifi
                             onClick = { onEvent(ProfileEvent.NotificationsClicked) }
                         )
                         HorizontalDivider(modifier = Modifier)
-                        ProfileMenuRow(
-                            icon = Icons.Filled.Palette,
-                            label = stringResource(Res.string.appearance),
-                            trailingText = state.currentTheme,
-                            onClick = { onEvent(ProfileEvent.AppearanceClicked) }
-                        )
+                        var expanded by remember { mutableStateOf(false) }
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            ProfileMenuRow(
+                                icon = Icons.Filled.Palette,
+                                label = stringResource(Res.string.appearance),
+                                trailingText = stringResource(state.currentTheme),
+                                onClick = { expanded = true },
+                                showChevron = true
+                            )
+                            ThemeDropdown(
+                                modifier = Modifier.align(Alignment.CenterEnd),
+                                expanded = expanded,
+                                onExpandedChange = { expanded = it },
+                                onClick = { onEvent(ProfileEvent.ChangeTheme(it)) },
+                                options = state.themeList,
+                                selectedOption = state.currentTheme
+                            )
+                        }
                         HorizontalDivider(modifier = Modifier)
                         ProfileMenuRow(
                             icon = Icons.Filled.PrivacyTip,
@@ -193,6 +211,28 @@ fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, modifi
                             onClick = { onEvent(ProfileEvent.PrivacyClicked) }
                         )
                     }
+                }
+            }
+
+            item {
+                SectionHeader(
+                    title = stringResource(Res.string.settings).uppercase(),
+                    color = customColors.textColors.secondary50
+                )
+            }
+
+            item {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    tonalElevation = 0.dp,
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    ProfileMenuRow(
+                        icon = Icons.AutoMirrored.Filled.Help,
+                        label = stringResource(Res.string.settings),
+                        showChevron = true,
+                        onClick = { onEvent(ProfileEvent.SettingsClicked) }
+                    )
                 }
             }
 
@@ -219,18 +259,6 @@ fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, modifi
                         onClick = { onEvent(ProfileEvent.SignOutClicked) }
                     )
                 }
-            }
-
-            item {
-                Text(
-                    text = "GPT Investor · v2.4.0",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = customColors.textColors.secondary50,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                )
             }
 
             item { Spacer(Modifier.height(8.dp)) }
@@ -412,7 +440,7 @@ private fun ProfileMenuRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     trailingText: String? = null,
-    iconBgColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+    iconBgColor: Color = LocalGPTInvestorColors.current.utilColors.borderBright10,
     iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     labelColor: Color = MaterialTheme.colorScheme.onSurface,
     showChevron: Boolean = true

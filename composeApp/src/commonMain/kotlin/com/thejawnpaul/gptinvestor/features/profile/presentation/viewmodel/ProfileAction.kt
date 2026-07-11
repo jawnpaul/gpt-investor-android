@@ -8,4 +8,5 @@ sealed interface ProfileAction {
     data object NavigateToAppearance : ProfileAction
     data object NavigateToPrivacy : ProfileAction
     data object NavigateToUpgrade : ProfileAction
+    data object NavigateToSettings : ProfileAction
 }

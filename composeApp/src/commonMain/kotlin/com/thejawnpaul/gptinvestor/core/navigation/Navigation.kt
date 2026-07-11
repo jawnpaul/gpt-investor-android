@@ -55,7 +55,7 @@ fun SetUpNavGraph(
                     searchNavGraph(navController)
                     trendingNavGraph(navController)
                     watchlistNavGraph(navController)
-                    profileNavGraph(navController)
+                    profileNavGraph(navController, platformActions)
                     guestNavGraph(navController, platformActions, platformContext)
                 }
             }

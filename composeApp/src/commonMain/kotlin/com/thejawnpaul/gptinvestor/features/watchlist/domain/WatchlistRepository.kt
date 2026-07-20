@@ -3,7 +3,6 @@ package com.thejawnpaul.gptinvestor.features.watchlist.domain
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
-import com.thejawnpaul.gptinvestor.features.conversation.data.remote.ErrorResponse
 import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistRequest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
@@ -21,34 +20,34 @@ class WatchlistRepositoryImpl(private val apiService: KtorApiService) : Watchlis
         if (response.isSuccessful) {
             Either.Right(Unit)
         } else {
-            val errorBody = response.errorBody
-            if (errorBody != null) {
-                try {
-                    val errorResponse = Json.decodeFromString<ErrorResponse>(errorBody)
-                    val errorCode = errorResponse.error
-                    when (errorCode) {
-                        "sign_up_required" -> Either.Left(WatchlistFailure.SignUpRequired)
-                        "watchlist_full" -> {
-                            val json = Json.parseToJsonElement(errorBody).jsonObject
-                            val cap = json["cap"]?.jsonPrimitive?.content?.toIntOrNull() ?: 0
-                            Either.Left(WatchlistFailure.WatchlistFull(cap))
-                        }
-                        "ticker_not_found" -> Either.Left(WatchlistFailure.TickerNotFound)
-                        else -> {
-                            val json = Json.parseToJsonElement(errorBody).jsonObject
-                            val message = json["message"]?.jsonPrimitive?.content
-                                ?: errorCode
-                            Either.Left(WatchlistFailure.GeneralError(message))
-                        }
-                    }
-                } catch (e: Exception) {
-                    Either.Left(Failure.ServerError)
-                }
-            } else {
-                Either.Left(Failure.ServerError)
-            }
+            mapErrorResponse(response.code, response.errorBody)
         }
     } catch (e: Exception) {
         Either.Left(Failure.NetworkConnection)
+    }
+
+    private fun mapErrorResponse(code: Int, errorBody: String?): Either.Left<Failure> {
+        return when (code) {
+            401 -> Either.Left(Failure.ServerError)
+            403 -> Either.Left(WatchlistFailure.SignUpRequired)
+            404 -> Either.Left(WatchlistFailure.TickerNotFound)
+            409 -> {
+                val cap = errorBody?.let {
+                    runCatching {
+                        Json.parseToJsonElement(it).jsonObject["cap"]?.jsonPrimitive?.content?.toIntOrNull()
+                    }.getOrNull()
+                } ?: 0
+                Either.Left(WatchlistFailure.WatchlistFull(cap))
+            }
+            400 -> {
+                val message = errorBody?.let {
+                    runCatching {
+                        Json.parseToJsonElement(it).jsonObject["error"]?.jsonPrimitive?.content
+                    }.getOrNull()
+                } ?: errorBody
+                Either.Left(WatchlistFailure.GeneralError(message ?: "Bad request"))
+            }
+            else -> Either.Left(Failure.ServerError)
+        }
     }
 }

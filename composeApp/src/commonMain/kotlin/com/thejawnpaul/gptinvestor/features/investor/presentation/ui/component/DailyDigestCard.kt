@@ -1,7 +1,10 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -9,7 +12,8 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,23 +34,26 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -54,37 +61,37 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.add
-import com.thejawnpaul.gptinvestor.analyzing_sentiment_shifts
 import com.thejawnpaul.gptinvestor.browse_all_companies
 import com.thejawnpaul.gptinvestor.build_your_digest
-import com.thejawnpaul.gptinvestor.comparing_against_yesterday_s_read
+import com.thejawnpaul.gptinvestor.digest_pending_description
+import com.thejawnpaul.gptinvestor.digest_pending_description_premium
+import com.thejawnpaul.gptinvestor.digest_pending_notify_subtitle
+import com.thejawnpaul.gptinvestor.digest_pending_notify_title
+import com.thejawnpaul.gptinvestor.digest_pending_title
+import com.thejawnpaul.gptinvestor.upgrade_to_premium
 import com.thejawnpaul.gptinvestor.done
 import com.thejawnpaul.gptinvestor.features.component.ShimmerBox
 import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.RecommendedDigestCompany
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestStatus
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestView
-import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DigestProgressStep
-import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.StepStatus
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.StockDigestPresentation
-import com.thejawnpaul.gptinvestor.gathered_overnight_data
 import com.thejawnpaul.gptinvestor.generated_at
 import com.thejawnpaul.gptinvestor.improved
 import com.thejawnpaul.gptinvestor.key_event
 import com.thejawnpaul.gptinvestor.locked_stock_premium_upsell
 import com.thejawnpaul.gptinvestor.morning_brief
-import com.thejawnpaul.gptinvestor.plain_english_brief_per_company
-import com.thejawnpaul.gptinvestor.prices_filings_global_news
-import com.thejawnpaul.gptinvestor.ready_in_about_x_minutes
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.today_s_digest
 import com.thejawnpaul.gptinvestor.unlock
-import com.thejawnpaul.gptinvestor.writing_your_summaries
 import com.thejawnpaul.gptinvestor.x_more_stocks_are_locked
 import com.thejawnpaul.gptinvestor.x_more_stocks_in_your_digest
 import com.thejawnpaul.gptinvestor.yesterday_s_digest_today_s_is_on_the_way
 import com.thejawnpaul.gptinvestor.you_re_not_tracking_any_companies_yet
 import org.jetbrains.compose.resources.stringResource
+
+private val EaseOutQuart = CubicBezierEasing(0.25f, 1f, 0.5f, 1f)
+private val EaseInOutQuart = CubicBezierEasing(0.76f, 0f, 0.24f, 1f)
 
 @Composable
 fun DailyDigestCard(
@@ -131,20 +138,12 @@ fun DailyDigestCard(
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
-            if (view.status == DailyDigestStatus.LOADING && !view.loading) {
-                Text(
-                    text = "${(view.progress * 100).toInt()}%",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = customColors.accentColors.allAccent,
-                    fontWeight = FontWeight.Bold
-                )
-            }
         }
 
         if (view.isStale && view.status == DailyDigestStatus.READY) {
             Spacer(Modifier.height(8.dp))
             Surface(
-                color = Color(0xFFFFF9E6), // A light yellow for stale warning
+                color = MaterialTheme.colorScheme.tertiaryContainer,
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -155,14 +154,14 @@ fun DailyDigestCard(
                     Icon(
                         imageVector = Icons.Default.AccessTime,
                         contentDescription = null,
-                        tint = Color(0xFFB38600),
+                        tint = MaterialTheme.colorScheme.onTertiaryContainer,
                         modifier = Modifier.size(14.dp)
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = stringResource(Res.string.yesterday_s_digest_today_s_is_on_the_way),
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFFB38600),
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -179,13 +178,13 @@ fun DailyDigestCard(
             val displayState = when {
                 view.loading -> 0
                 view.status == DailyDigestStatus.EMPTY -> 1
-                view.status == DailyDigestStatus.LOADING -> 2
+                view.status == DailyDigestStatus.PENDING -> 2
                 view.status == DailyDigestStatus.READY -> 3
                 else -> 1
             }
             AnimatedContent(
                 targetState = displayState,
-                transitionSpec = { fadeIn(tween(220)) togetherWith fadeOut(tween(150)) },
+                transitionSpec = { fadeIn(tween(220, easing = EaseOutQuart)) togetherWith fadeOut(tween(150, easing = EaseInOutQuart)) },
                 label = "DailyDigestContent"
             ) { state ->
                 when (state) {
@@ -195,10 +194,10 @@ fun DailyDigestCard(
                         onAddStock = onAddStock,
                         onBrowseAll = onBrowseAll
                     )
-                    2 -> LoadingDigestContent(
-                        progress = view.progress,
-                        steps = view.progressSteps,
-                        timeRemaining = view.timeRemainingMinutes
+                    2 -> PendingDigestContent(
+                        isPremium = view.isPremium,
+                        nextHourLabel = view.nextHourLabel,
+                        onUnlockPremium = onUnlockPremium
                     )
                     3 -> ReadyDigestContent(
                         stocks = view.stocks,
@@ -252,15 +251,27 @@ private fun EmptyDigestContent(view: DailyDigestView, onAddStock: (String) -> Un
 
                     val isAdding = view.addingTickers.contains(stock.ticker)
                     val isAdded = view.addedTickers.contains(stock.ticker)
+                    val addInteractionSource = remember { MutableInteractionSource() }
+                    val addPressed by addInteractionSource.collectIsPressedAsState()
+                    val addScale by animateFloatAsState(
+                        targetValue = if (addPressed) 0.95f else 1f,
+                        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                        label = "addButtonScale"
+                    )
 
                     Surface(
+                        onClick = { onAddStock(stock.ticker) },
+                        enabled = !isAdding && !isAdded,
                         shape = RoundedCornerShape(20.dp),
                         color = when {
                             isAdded -> customColors.greenColors.allGreen10
                             isAdding -> Color.Transparent
                             else -> customColors.accentColors.allAccent20
                         },
-                        modifier = Modifier.clickable(enabled = !isAdding && !isAdded) { onAddStock(stock.ticker) }
+                        interactionSource = addInteractionSource,
+                        modifier = Modifier
+                            .minimumInteractiveComponentSize()
+                            .graphicsLayer { scaleX = addScale; scaleY = addScale }
                     ) {
                         AnimatedContent(
                             targetState = when {
@@ -268,7 +279,7 @@ private fun EmptyDigestContent(view: DailyDigestView, onAddStock: (String) -> Un
                                 isAdded -> 1
                                 else -> 2
                             },
-                            transitionSpec = { fadeIn(tween(200)) togetherWith fadeOut(tween(150)) },
+                            transitionSpec = { fadeIn(tween(200, easing = EaseOutQuart)) togetherWith fadeOut(tween(150, easing = EaseInOutQuart)) },
                             label = "AddButtonState"
                         ) { state ->
                             Row(
@@ -324,11 +335,21 @@ private fun EmptyDigestContent(view: DailyDigestView, onAddStock: (String) -> Un
             }
         }
         Spacer(Modifier.height(16.dp))
+        val browseAllInteractionSource = remember { MutableInteractionSource() }
+        val browseAllPressed by browseAllInteractionSource.collectIsPressedAsState()
+        val browseAllScale by animateFloatAsState(
+            targetValue = if (browseAllPressed) 0.97f else 1f,
+            animationSpec = spring(stiffness = Spring.StiffnessMedium),
+            label = "browseAllScale"
+        )
         Surface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer { scaleX = browseAllScale; scaleY = browseAllScale },
             shape = RoundedCornerShape(16.dp),
             border = BorderStroke(1.dp, customColors.utilColors.borderBright10),
-            onClick = onBrowseAll
+            onClick = onBrowseAll,
+            interactionSource = browseAllInteractionSource
         ) {
             Row(
                 modifier = Modifier.padding(vertical = 12.dp),
@@ -352,121 +373,92 @@ private fun EmptyDigestContent(view: DailyDigestView, onAddStock: (String) -> Un
 }
 
 @Composable
-private fun LoadingDigestContent(progress: Float, steps: List<DigestProgressStep>, timeRemaining: Int) {
+private fun PendingDigestContent(isPremium: Boolean, nextHourLabel: String, onUnlockPremium: () -> Unit) {
     val customColors = LocalGPTInvestorColors.current
 
-    Column(modifier = Modifier.padding(24.dp)) {
-        steps.forEachIndexed { index, step ->
-            Row(verticalAlignment = Alignment.Top) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    val iconColor = when (step.status) {
-                        StepStatus.COMPLETED -> customColors.greenColors.defaultGreen
-                        StepStatus.IN_PROGRESS -> customColors.accentColors.allAccent
-                        StepStatus.PENDING -> customColors.utilColors.borderBright10
-                    }
-                    if (step.status == StepStatus.COMPLETED) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = null,
-                            tint = iconColor,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .size(20.dp)
-                                .border(
-                                    2.dp,
-                                    if (step.status ==
-                                        StepStatus.IN_PROGRESS
-                                    ) {
-                                        iconColor
-                                    } else {
-                                        customColors.utilColors.borderBright10
-                                    },
-                                    CircleShape
-                                )
-                                .padding(4.dp)
-                        ) {
-                            if (step.status == StepStatus.IN_PROGRESS) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(iconColor, CircleShape)
-                                )
-                            }
-                        }
-                    }
-
-                    if (index < steps.size - 1) {
-                        Box(
-                            modifier = Modifier
-                                .width(2.dp)
-                                .height(32.dp)
-                                .background(
-                                    if (step.status ==
-                                        StepStatus.COMPLETED
-                                    ) {
-                                        customColors.greenColors.defaultGreen
-                                    } else {
-                                        customColors.utilColors.borderBright10
-                                    }
-                                )
-                        )
-                    }
-                }
-                Spacer(Modifier.width(16.dp))
-                Column {
-                    Text(
-                        text = step.title,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = if (step.status ==
-                            StepStatus.PENDING
-                        ) {
-                            customColors.textColors.secondary50
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        }
-                    )
-                    Text(
-                        text = step.subtitle,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = customColors.textColors.secondary50
-                    )
-                }
-            }
-            if (index < steps.size - 1) {
-                Spacer(Modifier.height(8.dp))
-            }
-        }
-
-        Spacer(Modifier.height(24.dp))
-        val animatedProgress by animateFloatAsState(targetValue = progress)
-        LinearProgressIndicator(
-            progress = { animatedProgress },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .clip(CircleShape),
-            color = customColors.accentColors.allAccent,
-            trackColor = customColors.accentColors.allAccent20,
-            strokeCap = StrokeCap.Round
+    Column(
+        modifier = Modifier.padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector = Icons.Default.AccessTime,
+            contentDescription = null,
+            tint = customColors.accentColors.allAccent,
+            modifier = Modifier.size(32.dp)
         )
         Spacer(Modifier.height(12.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Default.AccessTime,
-                contentDescription = null,
-                tint = customColors.textColors.secondary50,
-                modifier = Modifier.size(14.dp)
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = stringResource(Res.string.ready_in_about_x_minutes, timeRemaining),
-                style = MaterialTheme.typography.labelSmall,
-                color = customColors.textColors.secondary50
-            )
+        Text(
+            text = stringResource(Res.string.digest_pending_title),
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = stringResource(
+                if (isPremium) Res.string.digest_pending_description_premium
+                else Res.string.digest_pending_description,
+                nextHourLabel
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = customColors.textColors.secondary50,
+            textAlign = TextAlign.Center
+        )
+        if (!isPremium) {
+            Spacer(Modifier.height(20.dp))
+            Surface(
+                color = MaterialTheme.colorScheme.tertiaryContainer,
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Notifications,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(Res.string.digest_pending_notify_title),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                        Text(
+                            text = stringResource(Res.string.digest_pending_notify_subtitle),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Button(
+                        onClick = onUnlockPremium,
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.height(36.dp)
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.upgrade_to_premium),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -497,10 +489,20 @@ private fun ReadyDigestContent(
             Spacer(Modifier.height(16.dp))
         }
 
+        val seeFullInteractionSource = remember { MutableInteractionSource() }
+        val seeFullPressed by seeFullInteractionSource.collectIsPressedAsState()
+        val seeFullScale by animateFloatAsState(
+            targetValue = if (seeFullPressed) 0.97f else 1f,
+            animationSpec = spring(stiffness = Spring.StiffnessMedium),
+            label = "seeFullDigestScale"
+        )
         Surface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer { scaleX = seeFullScale; scaleY = seeFullScale },
             shape = RoundedCornerShape(12.dp),
-            onClick = onSeeFullDigest
+            onClick = onSeeFullDigest,
+            interactionSource = seeFullInteractionSource
         ) {
             Row(
                 modifier = Modifier.padding(vertical = 8.dp),
@@ -525,7 +527,7 @@ private fun ReadyDigestContent(
         if (lockedStocksCount > 0) {
             Spacer(Modifier.height(12.dp))
             Surface(
-                color = Color(0xFFFFF2E6),
+                color = MaterialTheme.colorScheme.tertiaryContainer,
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -537,13 +539,13 @@ private fun ReadyDigestContent(
                         modifier = Modifier
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.5f)),
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Lock,
                             contentDescription = null,
-                            tint = Color(0xFFB35900),
+                            tint = MaterialTheme.colorScheme.tertiary,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -553,19 +555,19 @@ private fun ReadyDigestContent(
                             text = stringResource(Res.string.x_more_stocks_are_locked, lockedStocksCount),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF4D2600)
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
                         )
                         if (lockedStocksSummary != null) {
                             Text(
                                 text = stringResource(Res.string.locked_stock_premium_upsell, lockedStocksSummary),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFF804000)
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
                             )
                         }
                     }
                     Button(
                         onClick = onUnlockPremium,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB35900)),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.height(36.dp)
                     ) {
@@ -737,32 +739,28 @@ private fun EmptyDigestPreview() {
 
 @PreviewLightDark
 @Composable
-private fun LoadingDigestPreview() {
+private fun PendingDigestPreview() {
     GPTInvestorTheme {
         Surface {
             DailyDigestCard(
-                view = DailyDigestView(
-                    status = DailyDigestStatus.LOADING,
-                    progress = 0.58f,
-                    progressSteps = listOf(
-                        DigestProgressStep(
-                            stringResource(Res.string.gathered_overnight_data),
-                            stringResource(Res.string.prices_filings_global_news),
-                            StepStatus.COMPLETED
-                        ),
-                        DigestProgressStep(
-                            stringResource(Res.string.analyzing_sentiment_shifts),
-                            stringResource(Res.string.comparing_against_yesterday_s_read),
-                            StepStatus.IN_PROGRESS
-                        ),
-                        DigestProgressStep(
-                            stringResource(Res.string.writing_your_summaries),
-                            stringResource(Res.string.plain_english_brief_per_company),
-                            StepStatus.PENDING
-                        )
-                    ),
-                    timeRemainingMinutes = 4
-                ),
+                view = DailyDigestView(status = DailyDigestStatus.PENDING, isPremium = false),
+                onAddStock = {},
+                onBrowseAll = {},
+                onSeeFullDigest = {},
+                onUnlockPremium = {},
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun PendingDigestPremiumPreview() {
+    GPTInvestorTheme {
+        Surface {
+            DailyDigestCard(
+                view = DailyDigestView(status = DailyDigestStatus.PENDING, isPremium = true),
                 onAddStock = {},
                 onBrowseAll = {},
                 onSeeFullDigest = {},

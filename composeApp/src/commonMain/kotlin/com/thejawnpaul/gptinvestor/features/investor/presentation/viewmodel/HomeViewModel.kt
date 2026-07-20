@@ -453,15 +453,23 @@ class HomeViewModel(
                 val unlockedItems = digest.items?.filter { !it.locked } ?: emptyList()
                 val lockedItems = digest.items?.filter { it.locked } ?: emptyList()
 
+                val digestStatus = when {
+                    digest.status?.lowercase() == "pending" -> DailyDigestStatus.PENDING
+                    digest.items.isNullOrEmpty() -> DailyDigestStatus.EMPTY
+                    else -> DailyDigestStatus.READY
+                }
+
+                val nextHourLabel = if (digestStatus == DailyDigestStatus.PENDING) {
+                    val currentHour = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
+                    computeNextHourLabel(currentHour)
+                } else ""
+
                 _uiState.update { state ->
                     state.copy(
                         dailyDigestView = state.dailyDigestView.copy(
                             loading = false,
-                            status = if (digest.items.isNullOrEmpty()) {
-                                DailyDigestStatus.EMPTY
-                            } else {
-                                DailyDigestStatus.READY
-                            },
+                            status = digestStatus,
+                            nextHourLabel = nextHourLabel,
                             stocks = unlockedItems.map { item ->
                                 StockDigestPresentation(
                                     ticker = item.ticker,
@@ -499,6 +507,17 @@ enum class TimePeriod { MORNING, AFTERNOON, EVENING }
 internal fun extractFirstName(userName: String?): String? =
     userName?.trim()?.split("\\s+".toRegex())?.firstOrNull()?.takeIf { it.isNotBlank() }
 
+internal fun computeNextHourLabel(currentHour: Int): String {
+    val nextHour = (currentHour + 1) % 24
+    val period = if (nextHour < 12) "AM" else "PM"
+    val displayHour = when {
+        nextHour == 0 -> 12
+        nextHour > 12 -> nextHour - 12
+        else -> nextHour
+    }
+    return "$displayHour $period"
+}
+
 private fun computeTimePeriod(): TimePeriod {
     val hour = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
     return when {
@@ -533,10 +552,7 @@ data class HomeUiState(
     val isGuestSession: Boolean = false,
     val timePeriod: TimePeriod = TimePeriod.MORNING,
     val firstName: String? = null,
-    val dailyDigestView: DailyDigestView = DailyDigestView(
-        loading = true,
-        status = DailyDigestStatus.LOADING
-    )
+    val dailyDigestView: DailyDigestView = DailyDigestView(loading = true)
 )
 
 sealed interface HomeEvent {

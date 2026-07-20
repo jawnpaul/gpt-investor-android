@@ -89,6 +89,17 @@ fun NavGraphBuilder.guestNavGraph(
                     HomeAction.NavigateToAllTrending -> {
                         navController.navigate(Screen.AllTrendingScreen.route)
                     }
+
+                    HomeAction.NavigateToDiscover -> {
+                        navController.navigate(GuestScreen.GuestDiscoverTab.route)
+                    }
+
+                    HomeAction.NavigateToProfile -> {
+                        navController.navigate(GuestScreen.GuestProfileTab.route)
+                    }
+
+                    HomeAction.NavigateToDigestDetail -> {
+                    }
                 }
             }.launchIn(scope)
         }

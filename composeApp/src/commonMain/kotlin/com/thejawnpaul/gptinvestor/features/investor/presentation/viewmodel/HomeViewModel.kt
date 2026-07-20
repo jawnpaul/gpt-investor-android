@@ -18,15 +18,19 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableM
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
-import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefaultPromptsUseCase
+import com.thejawnpaul.gptinvestor.features.digest.domain.DigestRepository
+import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestStatus
+import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestView
+import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.StockDigestPresentation
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.OnStartConversation
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
-import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistFailure
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,13 +51,13 @@ class HomeViewModel(
     private val getTopPicksUseCase: GetTopPicksUseCase,
     private val getTrendingCompaniesUseCase: GetTrendingCompaniesUseCase,
     private val authenticationRepository: AuthenticationRepository,
-    private val getDefaultPromptsUseCase: GetDefaultPromptsUseCase,
     remoteConfig: RemoteConfigClient,
     private val preferences: AppPreferences,
     @Provided private val analyticsLogger: AnalyticsLogger,
     private val notificationRepository: NotificationRepository,
     private val modelsRepository: ModelsRepository,
-    private val tidbitRepository: TidbitRepository
+    private val digestRepository: DigestRepository,
+    private val watchlistRepository: WatchlistRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState(timePeriod = computeTimePeriod()))
@@ -87,6 +91,7 @@ class HomeViewModel(
         getTrendingCompanies()
         getCurrentUser()
         logHomeScreenViewed()
+        getDailyDigest()
 
         viewModelScope.launch {
             preferences.themePreference.collect { theme ->
@@ -104,11 +109,23 @@ class HomeViewModel(
     }
 
     private fun getTopPicks() {
-        _uiState.update { it.copy(topPicksView = it.topPicksView.copy(loading = true, error = null)) }
+        _uiState.update {
+            it.copy(
+                topPicksView = it.topPicksView.copy(
+                    loading = true,
+                    error = null
+                )
+            )
+        }
         getTopPicksUseCase(GetTopPicksUseCase.None()) { result ->
             result.onFailure {
                 _uiState.update { state ->
-                    state.copy(topPicksView = state.topPicksView.copy(loading = false, error = "Something went wrong"))
+                    state.copy(
+                        topPicksView = state.topPicksView.copy(
+                            loading = false,
+                            error = "Something went wrong"
+                        )
+                    )
                 }
             }
             result.onSuccess { picks ->
@@ -140,7 +157,14 @@ class HomeViewModel(
     }
 
     private fun getTrendingCompanies() {
-        _uiState.update { it.copy(trendingCompaniesView = it.trendingCompaniesView.copy(loading = true, error = null)) }
+        _uiState.update {
+            it.copy(
+                trendingCompaniesView = it.trendingCompaniesView.copy(
+                    loading = true,
+                    error = null
+                )
+            )
+        }
         getTrendingCompaniesUseCase(GetTrendingCompaniesUseCase.None()) { result ->
             result.onFailure {
                 _uiState.update { state ->
@@ -292,6 +316,77 @@ class HomeViewModel(
                     )
                     _actions.emit(HomeAction.OnGoToCompanyDetail(event.ticker))
                 }
+
+                is HomeEvent.AddStockToDigest -> {
+                    _uiState.update { state ->
+                        state.copy(
+                            dailyDigestView = state.dailyDigestView.copy(
+                                addingTickers = state.dailyDigestView.addingTickers + event.ticker
+                            )
+                        )
+                    }
+                    viewModelScope.launch {
+                        watchlistRepository.addStockToWatchList(event.ticker).onSuccess {
+                            _uiState.update { state ->
+                                state.copy(
+                                    dailyDigestView = state.dailyDigestView.copy(
+                                        addingTickers = state.dailyDigestView.addingTickers - event.ticker,
+                                        addedTickers = state.dailyDigestView.addedTickers + event.ticker
+                                    )
+                                )
+                            }
+                            getDailyDigest()
+                            _uiState.update { state ->
+                                state.copy(
+                                    dailyDigestView = state.dailyDigestView.copy(
+                                        addedTickers = state.dailyDigestView.addedTickers - event.ticker
+                                    )
+                                )
+                            }
+                        }.onFailure { failure ->
+                            _uiState.update { state ->
+                                state.copy(
+                                    dailyDigestView = state.dailyDigestView.copy(
+                                        addingTickers = state.dailyDigestView.addingTickers - event.ticker
+                                    )
+                                )
+                            }
+                            when (failure) {
+                                is WatchlistFailure.SignUpRequired -> {
+                                    processAction(HomeAction.OnGoToSignUp)
+                                }
+
+                                is WatchlistFailure.WatchlistFull -> {
+                                    processAction(HomeAction.ShowToast("Watchlist full. Upgrade to Premium!"))
+                                }
+
+                                is WatchlistFailure.TickerNotFound -> {
+                                    processAction(HomeAction.ShowToast("Ticker not found"))
+                                }
+
+                                is WatchlistFailure.GeneralError -> {
+                                    processAction(HomeAction.ShowToast(failure.message))
+                                }
+
+                                else -> {
+                                    processAction(HomeAction.ShowToast("Failed to add to watchlist"))
+                                }
+                            }
+                        }
+                    }
+                }
+
+                HomeEvent.BrowseAllCompanies -> {
+                    _actions.emit(HomeAction.NavigateToDiscover)
+                }
+
+                HomeEvent.UnlockPremium -> {
+                    _actions.emit(HomeAction.NavigateToProfile)
+                }
+
+                HomeEvent.SeeFullDigest -> {
+                    _actions.emit(HomeAction.NavigateToDigestDetail)
+                }
             }
         }
     }
@@ -335,17 +430,6 @@ class HomeViewModel(
         }
     }
 
-    private fun getDefaultPrompts() {
-        getDefaultPromptsUseCase(GetDefaultPromptsUseCase.None()) {
-            it.onFailure {
-            }
-
-            it.onSuccess { result ->
-                _uiState.update { state -> state.copy(defaultPrompts = result) }
-            }
-        }
-    }
-
     private fun logHomeScreenViewed() {
         viewModelScope.launch {
             val isGuest = preferences.isGuestLoggedIn.first() == true
@@ -360,15 +444,53 @@ class HomeViewModel(
         }
     }
 
-    private fun logNavigationEvent(destination: String, tidbitId: String? = null) {
-        val params = buildMap {
-            tidbitId?.let { put("tidbit_id", it) }
-            put("destination", destination)
+    private fun getDailyDigest() {
+        _uiState.update { state ->
+            state.copy(dailyDigestView = state.dailyDigestView.copy(loading = true))
         }
-        analyticsLogger.logEvent(
-            eventName = "navigation-clicked",
-            params = params
-        )
+        viewModelScope.launch {
+            digestRepository.getDailyDigest().onSuccess { digest ->
+                val unlockedItems = digest.items?.filter { !it.locked } ?: emptyList()
+                val lockedItems = digest.items?.filter { it.locked } ?: emptyList()
+
+                _uiState.update { state ->
+                    state.copy(
+                        dailyDigestView = state.dailyDigestView.copy(
+                            loading = false,
+                            status = if (digest.items.isNullOrEmpty()) {
+                                DailyDigestStatus.EMPTY
+                            } else {
+                                DailyDigestStatus.READY
+                            },
+                            stocks = unlockedItems.map { item ->
+                                StockDigestPresentation(
+                                    ticker = item.ticker,
+                                    name = item.companyName,
+                                    summary = item.summary ?: "",
+                                    isImproved = item.sentimentChange.lowercase() == "improved",
+                                    keyEvent = item.keyEvent
+                                )
+                            },
+                            suggestedStocks = digest.recommendations ?: emptyList(),
+                            isStale = digest.isStale == true,
+                            lastUpdated = digest.digestDate,
+                            lockedStocksCount = lockedItems.size,
+                            lockedStocksSummary = lockedItems.joinToString(" · ") { it.ticker }
+                        )
+                    )
+                }
+            }.onFailure { failure ->
+                Logger.e(failure.stackTraceToString())
+                _uiState.update { state ->
+                    state.copy(
+                        dailyDigestView = state.dailyDigestView.copy(
+                            loading = false,
+                            status = DailyDigestStatus.EMPTY
+                        )
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -410,7 +532,11 @@ data class HomeUiState(
     val homeTidbitView: HomeTidbitView = HomeTidbitView(),
     val isGuestSession: Boolean = false,
     val timePeriod: TimePeriod = TimePeriod.MORNING,
-    val firstName: String? = null
+    val firstName: String? = null,
+    val dailyDigestView: DailyDigestView = DailyDigestView(
+        loading = true,
+        status = DailyDigestStatus.LOADING
+    )
 )
 
 sealed interface HomeEvent {
@@ -429,6 +555,10 @@ sealed interface HomeEvent {
     data object RetryTrendingCompanies : HomeEvent
     data object GoToAllTrending : HomeEvent
     data class ClickTrendingCompany(val ticker: String) : HomeEvent
+    data class AddStockToDigest(val ticker: String) : HomeEvent
+    data object BrowseAllCompanies : HomeEvent
+    data object UnlockPremium : HomeEvent
+    data object SeeFullDigest : HomeEvent
 }
 
 sealed interface HomeAction {
@@ -438,4 +568,7 @@ sealed interface HomeAction {
     data class ShowToast(val message: String) : HomeAction
     data object OnGoToSignUp : HomeAction
     data object NavigateToAllTrending : HomeAction
+    data object NavigateToDiscover : HomeAction
+    data object NavigateToProfile : HomeAction
+    data object NavigateToDigestDetail : HomeAction
 }

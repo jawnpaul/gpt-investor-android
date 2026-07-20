@@ -49,6 +49,17 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
                     HomeAction.NavigateToAllTrending -> {
                         navController.navigate(Screen.AllTrendingScreen.route)
                     }
+
+                    HomeAction.NavigateToDiscover -> {
+                        navController.navigate(Screen.DiscoverTabScreen.route)
+                    }
+
+                    HomeAction.NavigateToProfile -> {
+                        navController.navigate(Screen.ProfileTabScreen.route)
+                    }
+
+                    HomeAction.NavigateToDigestDetail -> {
+                    }
                 }
             }.launchIn(scope)
         }

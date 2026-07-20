@@ -87,7 +87,7 @@ fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, modifi
             text = stringResource(Res.string.profile),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.statusBarsPadding().fillMaxWidth().padding(16.dp)
+            modifier = Modifier.statusBarsPadding().fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
         )
     }) { innerPadding ->
         LazyColumn(

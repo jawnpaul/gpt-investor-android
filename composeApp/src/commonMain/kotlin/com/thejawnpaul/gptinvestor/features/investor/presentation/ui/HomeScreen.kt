@@ -59,6 +59,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingS
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.DailyDigestCard
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeGreeting
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeSectionHeader
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeTrendingSection
@@ -124,7 +125,11 @@ private fun HomeScreenContent(
                 Text(
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.statusBarsPadding().fillMaxWidth().padding(16.dp),
+                    modifier = Modifier.statusBarsPadding().fillMaxWidth().padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = 16.dp
+                    ),
                     text = stringResource(Res.string.gpt_investor),
                     textAlign = TextAlign.Center
                 )
@@ -156,7 +161,17 @@ private fun HomeScreenContent(
                     timePeriod = state.timePeriod,
                     name = state.firstName
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+
+                DailyDigestCard(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    view = state.dailyDigestView,
+                    onAddStock = { onEvent(HomeEvent.AddStockToDigest(it)) },
+                    onBrowseAll = { onEvent(HomeEvent.BrowseAllCompanies) },
+                    onSeeFullDigest = { onEvent(HomeEvent.SeeFullDigest) },
+                    onUnlockPremium = { onEvent(HomeEvent.UnlockPremium) }
+                )
+                Spacer(modifier = Modifier.height(24.dp))
 
                 HomeSectionHeader(
                     modifier = Modifier.padding(horizontal = 16.dp),

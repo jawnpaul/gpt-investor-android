@@ -18,6 +18,12 @@ class NotificationRepositoryImpl(private val apiService: KtorApiService, private
     }
 
     override suspend fun syncTokenIfNeeded() {
+        val isGuest = preferences.isGuestLoggedIn.first() == true
+        if (isGuest) {
+            Logger.e { "Token sync skipped: guest session." }
+            return
+        }
+
         val userId = preferences.userId.first()
         val token = preferences.fcmToken.first()
         val isTokenSynced = preferences.isTokenSynced.first()

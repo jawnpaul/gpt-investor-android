@@ -38,9 +38,13 @@ class NotificationRepositoryImpl(private val apiService: KtorApiService, private
 
     private suspend fun registerToken(token: String) {
         try {
-            apiService.registerToken(RegisterTokenRequest(token = token))
-            preferences.setIsTokenSynced(true)
-            Logger.e { "FCM token successfully registered" }
+            val response = apiService.registerToken(RegisterTokenRequest(token = token))
+            if (response.isSuccessful) {
+                preferences.setIsTokenSynced(true)
+                Logger.e { "FCM token successfully registered" }
+            } else {
+                Logger.e { "Failed to register FCM token: HTTP ${response.code}" }
+            }
         } catch (e: Exception) {
             Logger.e(e) { "Failed to register FCM token" }
         }

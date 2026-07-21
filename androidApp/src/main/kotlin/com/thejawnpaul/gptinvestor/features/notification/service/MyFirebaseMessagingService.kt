@@ -60,6 +60,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         scope.launch {
             notificationRepository.saveToken(token)
+            notificationRepository.syncTokenIfNeeded()
         }
     }
 

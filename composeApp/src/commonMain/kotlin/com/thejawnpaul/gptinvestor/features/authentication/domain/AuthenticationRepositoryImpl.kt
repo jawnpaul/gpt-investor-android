@@ -123,11 +123,11 @@ class AuthenticationRepositoryImpl(
                 gptInvestorPreferences.setUserId(loginResponse.user?.uid.toString())
                 gptInvestorPreferences.setIsUserLoggedIn(true)
                 gptInvestorPreferences.setUserName(loginResponse.user?.name.toString())
-                tokenSyncManager.syncToken()
+                gptInvestorPreferences.clearIsGuestLoggedIn()
                 tokenStorage.saveAccessToken(loginResponse.accessToken ?: "")
                 tokenStorage.saveRefreshToken(loginResponse.refreshToken ?: "")
                 bearerTokenManager.clearCache()
-                gptInvestorPreferences.clearIsGuestLoggedIn()
+                tokenSyncManager.syncToken()
 
                 trackAuthEvent(
                     isSignUp = false,

@@ -223,8 +223,8 @@
     <string name="today_s_digest">Today's digest</string>
     <string name="digest_pending_title">Your digest is on its way</string>
     <string name="digest_pending_description">Expect it by %1$s. Check back soon.</string>
-    <string name="digest_pending_description_premium">Expect it by %1$s — we\'ll notify you when it\'s ready.</string>
-    <string name="digest_pending_notify_title">Get notified when it\'s ready</string>
+    <string name="digest_pending_description_premium">Expect it by %1$s — we'll notify you when it's ready.</string>
+    <string name="digest_pending_notify_title">Get notified when it's ready</string>
     <string name="digest_pending_notify_subtitle">Plus, set your preferred delivery time</string>
     <string name="improved">Improved</string>
     <string name="key_event">KEY EVENT</string>

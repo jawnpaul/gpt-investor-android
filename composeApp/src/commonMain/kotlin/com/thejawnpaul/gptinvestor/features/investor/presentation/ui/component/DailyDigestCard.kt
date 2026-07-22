@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -53,8 +52,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -68,7 +67,6 @@ import com.thejawnpaul.gptinvestor.digest_pending_description_premium
 import com.thejawnpaul.gptinvestor.digest_pending_notify_subtitle
 import com.thejawnpaul.gptinvestor.digest_pending_notify_title
 import com.thejawnpaul.gptinvestor.digest_pending_title
-import com.thejawnpaul.gptinvestor.upgrade_to_premium
 import com.thejawnpaul.gptinvestor.done
 import com.thejawnpaul.gptinvestor.features.component.ShimmerBox
 import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.RecommendedDigestCompany
@@ -184,7 +182,11 @@ fun DailyDigestCard(
             }
             AnimatedContent(
                 targetState = displayState,
-                transitionSpec = { fadeIn(tween(220, easing = EaseOutQuart)) togetherWith fadeOut(tween(150, easing = EaseInOutQuart)) },
+                transitionSpec = {
+                    fadeIn(tween(220, easing = EaseOutQuart)) togetherWith fadeOut(
+                        tween(150, easing = EaseInOutQuart)
+                    )
+                },
                 label = "DailyDigestContent"
             ) { state ->
                 when (state) {
@@ -194,11 +196,13 @@ fun DailyDigestCard(
                         onAddStock = onAddStock,
                         onBrowseAll = onBrowseAll
                     )
+
                     2 -> PendingDigestContent(
                         isPremium = view.isPremium,
                         nextHourLabel = view.nextHourLabel,
                         onUnlockPremium = onUnlockPremium
                     )
+
                     3 -> ReadyDigestContent(
                         stocks = view.stocks,
                         lockedStocksCount = view.lockedStocksCount,
@@ -271,7 +275,10 @@ private fun EmptyDigestContent(view: DailyDigestView, onAddStock: (String) -> Un
                         interactionSource = addInteractionSource,
                         modifier = Modifier
                             .minimumInteractiveComponentSize()
-                            .graphicsLayer { scaleX = addScale; scaleY = addScale }
+                            .graphicsLayer {
+                                scaleX = addScale
+                                scaleY = addScale
+                            }
                     ) {
                         AnimatedContent(
                             targetState = when {
@@ -279,7 +286,14 @@ private fun EmptyDigestContent(view: DailyDigestView, onAddStock: (String) -> Un
                                 isAdded -> 1
                                 else -> 2
                             },
-                            transitionSpec = { fadeIn(tween(200, easing = EaseOutQuart)) togetherWith fadeOut(tween(150, easing = EaseInOutQuart)) },
+                            transitionSpec = {
+                                fadeIn(
+                                    tween(
+                                        200,
+                                        easing = EaseOutQuart
+                                    )
+                                ) togetherWith fadeOut(tween(150, easing = EaseInOutQuart))
+                            },
                             label = "AddButtonState"
                         ) { state ->
                             Row(
@@ -294,6 +308,7 @@ private fun EmptyDigestContent(view: DailyDigestView, onAddStock: (String) -> Un
                                             color = customColors.accentColors.allAccent
                                         )
                                     }
+
                                     1 -> {
                                         Icon(
                                             imageVector = Icons.Default.CheckCircle,
@@ -309,6 +324,7 @@ private fun EmptyDigestContent(view: DailyDigestView, onAddStock: (String) -> Un
                                             fontWeight = FontWeight.Bold
                                         )
                                     }
+
                                     2 -> {
                                         Icon(
                                             imageVector = Icons.Default.Add,
@@ -345,7 +361,10 @@ private fun EmptyDigestContent(view: DailyDigestView, onAddStock: (String) -> Un
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .graphicsLayer { scaleX = browseAllScale; scaleY = browseAllScale },
+                .graphicsLayer {
+                    scaleX = browseAllScale
+                    scaleY = browseAllScale
+                },
             shape = RoundedCornerShape(16.dp),
             border = BorderStroke(1.dp, customColors.utilColors.borderBright10),
             onClick = onBrowseAll,
@@ -383,7 +402,6 @@ private fun PendingDigestContent(isPremium: Boolean, nextHourLabel: String, onUn
         Icon(
             imageVector = Icons.Default.AccessTime,
             contentDescription = null,
-            tint = customColors.accentColors.allAccent,
             modifier = Modifier.size(32.dp)
         )
         Spacer(Modifier.height(12.dp))
@@ -397,8 +415,11 @@ private fun PendingDigestContent(isPremium: Boolean, nextHourLabel: String, onUn
         Spacer(Modifier.height(8.dp))
         Text(
             text = stringResource(
-                if (isPremium) Res.string.digest_pending_description_premium
-                else Res.string.digest_pending_description,
+                if (isPremium) {
+                    Res.string.digest_pending_description_premium
+                } else {
+                    Res.string.digest_pending_description
+                },
                 nextHourLabel
             ),
             style = MaterialTheme.typography.bodySmall,
@@ -410,6 +431,7 @@ private fun PendingDigestContent(isPremium: Boolean, nextHourLabel: String, onUn
             Surface(
                 color = MaterialTheme.colorScheme.tertiaryContainer,
                 shape = RoundedCornerShape(16.dp),
+                onClick = onUnlockPremium,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -443,19 +465,20 @@ private fun PendingDigestContent(isPremium: Boolean, nextHourLabel: String, onUn
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onTertiaryContainer
                         )
-                    }
-                    Spacer(Modifier.width(8.dp))
-                    Button(
-                        onClick = onUnlockPremium,
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.height(36.dp)
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.upgrade_to_premium),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold
-                        )
+
+                        // Spacer(Modifier.width(8.dp))
+                        /*Button(
+                            onClick = onUnlockPremium,
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.height(36.dp)
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.upgrade_to_premium),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }*/
                     }
                 }
             }
@@ -486,41 +509,49 @@ private fun ReadyDigestContent(
                 style = MaterialTheme.typography.labelSmall,
                 color = customColors.textColors.secondary50
             )
-            Spacer(Modifier.height(16.dp))
         }
 
-        val seeFullInteractionSource = remember { MutableInteractionSource() }
-        val seeFullPressed by seeFullInteractionSource.collectIsPressedAsState()
-        val seeFullScale by animateFloatAsState(
-            targetValue = if (seeFullPressed) 0.97f else 1f,
-            animationSpec = spring(stiffness = Spring.StiffnessMedium),
-            label = "seeFullDigestScale"
-        )
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .graphicsLayer { scaleX = seeFullScale; scaleY = seeFullScale },
-            shape = RoundedCornerShape(12.dp),
-            onClick = onSeeFullDigest,
-            interactionSource = seeFullInteractionSource
-        ) {
-            Row(
-                modifier = Modifier.padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+        val remainingStocks = (stocks.size + lockedStocksCount).minus(1)
+
+        if (remainingStocks > 0) {
+            Spacer(Modifier.height(16.dp))
+
+            val seeFullInteractionSource = remember { MutableInteractionSource() }
+            val seeFullPressed by seeFullInteractionSource.collectIsPressedAsState()
+            val seeFullScale by animateFloatAsState(
+                targetValue = if (seeFullPressed) 0.97f else 1f,
+                animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                label = "seeFullDigestScale"
+            )
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer {
+                        scaleX = seeFullScale
+                        scaleY = seeFullScale
+                    },
+                shape = RoundedCornerShape(12.dp),
+                onClick = onSeeFullDigest,
+                interactionSource = seeFullInteractionSource
             ) {
-                val totalCount = stocks.size + lockedStocksCount
-                Text(
-                    text = stringResource(Res.string.x_more_stocks_in_your_digest, totalCount),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = customColors.accentColors.allAccent
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = customColors.accentColors.allAccent
-                )
+                Row(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = stringResource(
+                            Res.string.x_more_stocks_in_your_digest,
+                            remainingStocks
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null
+                    )
+                }
             }
         }
 
@@ -552,14 +583,20 @@ private fun ReadyDigestContent(
                     Spacer(Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = stringResource(Res.string.x_more_stocks_are_locked, lockedStocksCount),
+                            text = stringResource(
+                                Res.string.x_more_stocks_are_locked,
+                                lockedStocksCount
+                            ),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onTertiaryContainer
                         )
                         if (lockedStocksSummary != null) {
                             Text(
-                                text = stringResource(Res.string.locked_stock_premium_upsell, lockedStocksSummary),
+                                text = stringResource(
+                                    Res.string.locked_stock_premium_upsell,
+                                    lockedStocksSummary
+                                ),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onTertiaryContainer
                             )
@@ -650,7 +687,7 @@ private fun StockDigestCard(stock: StockDigestPresentation) {
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
+                    Column(modifier = Modifier.padding(vertical = 12.dp)) {
                         Text(
                             text = stringResource(Res.string.key_event),
                             style = MaterialTheme.typography.labelSmall,
@@ -708,7 +745,11 @@ private fun StockDigestShimmer() {
             ShimmerBox(modifier = Modifier.fillMaxWidth(0.7f), height = 14.dp)
 
             Spacer(Modifier.height(16.dp))
-            ShimmerBox(modifier = Modifier.fillMaxWidth(), height = 48.dp, shape = RoundedCornerShape(12.dp))
+            ShimmerBox(
+                modifier = Modifier.fillMaxWidth(),
+                height = 48.dp,
+                shape = RoundedCornerShape(12.dp)
+            )
         }
     }
 }

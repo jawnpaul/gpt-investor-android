@@ -462,7 +462,9 @@ class HomeViewModel(
                 val nextHourLabel = if (digestStatus == DailyDigestStatus.PENDING) {
                     val currentHour = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
                     computeNextHourLabel(currentHour)
-                } else ""
+                } else {
+                    ""
+                }
 
                 _uiState.update { state ->
                     state.copy(

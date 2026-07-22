@@ -8,6 +8,7 @@ import com.thejawnpaul.gptinvestor.core.platform.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.utility.extractApiErrorMessage
+import com.thejawnpaul.gptinvestor.features.authentication.data.remote.FirebaseLoginRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.User
@@ -16,6 +17,7 @@ import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
 import com.thejawnpaul.gptinvestor.remote.BearerTokenManager
 import com.thejawnpaul.gptinvestor.remote.TokenStorage
 import dev.gitlive.firebase.Firebase
+import dev.gitlive.firebase.auth.AuthCredential
 import dev.gitlive.firebase.auth.FirebaseAuth
 import dev.gitlive.firebase.auth.auth
 import dev.gitlive.firebase.installations.installations
@@ -287,3 +289,38 @@ data class PlatformAuthDependencies(
     val tokenSyncManager: TokenSyncManager,
     val appConfig: AppConfig
 )
+
+internal suspend fun completeLogin(
+    dependencies: PlatformAuthDependencies,
+    credential: AuthCredential,
+    providerName: String,
+    displayName: String? = null
+) {
+    val (auth, apiService, gptInvestorPreferences, tokenStorage, tokenSyncManager, _) = dependencies
+
+    auth.signInWithCredential(authCredential = credential)
+
+    val currentUser = auth.currentUser
+        ?: throw Exception("No current user after $providerName sign-in")
+
+    if (displayName != null) {
+        currentUser.updateProfile(displayName = displayName)
+    }
+
+    val firebaseIdToken = currentUser.getIdToken(forceRefresh = true)
+    val loginResponse = apiService.loginWithFirebase(
+        request = FirebaseLoginRequest(idToken = firebaseIdToken ?: "")
+    )
+    if (!loginResponse.isSuccessful) throw Exception("Backend login failed: ${loginResponse.code}")
+
+    val body = loginResponse.body ?: throw Exception("Empty response body")
+
+    val nameToSet = body.user?.name ?: displayName ?: currentUser.displayName ?: "null"
+    gptInvestorPreferences.setUserName(name = nameToSet)
+    gptInvestorPreferences.setUserId(id = body.user?.uid.toString())
+    gptInvestorPreferences.setIsUserLoggedIn(isLoggedIn = true)
+    tokenStorage.saveAccessToken(token = body.accessToken ?: "")
+    tokenStorage.saveRefreshToken(token = body.refreshToken ?: "")
+    gptInvestorPreferences.clearIsGuestLoggedIn()
+    tokenSyncManager.syncToken()
+}

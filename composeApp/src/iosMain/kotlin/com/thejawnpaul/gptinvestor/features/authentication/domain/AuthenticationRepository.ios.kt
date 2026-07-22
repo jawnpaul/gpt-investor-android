@@ -4,7 +4,6 @@ import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.bridges.AppleAuthProvider
 import com.thejawnpaul.gptinvestor.core.platform.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
-import com.thejawnpaul.gptinvestor.features.authentication.data.remote.FirebaseLoginRequest
 import dev.gitlive.firebase.auth.AuthCredential
 import dev.gitlive.firebase.auth.GoogleAuthProvider as GitLiveGoogleAuthProvider
 import dev.gitlive.firebase.auth.OAuthProvider
@@ -22,8 +21,6 @@ actual suspend fun loginWithGooglePlatform(
     googleSignInProvider: GoogleSignInProvider,
     platformContext: PlatformContext
 ): Result<Unit> = try {
-    val (auth, apiService, gptInvestorPreferences, tokenStorage, tokenSyncManager, appConfig) = dependencies
-
     val details: Pair<String, String> = suspendCancellableCoroutine { continuation ->
         googleSignInProvider.signIn(
             onSuccess = { token, accessToken -> continuation.resume(Pair(token, accessToken)) },
@@ -31,27 +28,16 @@ actual suspend fun loginWithGooglePlatform(
         )
     }
 
-    auth.signInWithCredential(
-        GitLiveGoogleAuthProvider.credential(
-            details.first,
-            details.second
-        )
+    val credential = GitLiveGoogleAuthProvider.credential(
+        idToken = details.first,
+        accessToken = details.second
     )
 
-    val currentUser = auth.currentUser
-        ?: return@try Result.failure(Exception("No current user after Google sign-in"))
-    val firebaseIdToken = currentUser.getIdToken(true)
-    val loginResponse = apiService.loginWithFirebase(FirebaseLoginRequest(firebaseIdToken ?: ""))
-    if (!loginResponse.isSuccessful) return@try Result.failure(Exception("Backend login failed: ${loginResponse.code}"))
-    val body = loginResponse.body ?: return@try Result.failure(Exception("Empty response body"))
-
-    gptInvestorPreferences.setUserName(body.user?.name ?: currentUser.displayName ?: "null")
-    gptInvestorPreferences.setUserId(body.user?.uid.toString())
-    gptInvestorPreferences.setIsUserLoggedIn(true)
-    tokenStorage.saveAccessToken(body.accessToken ?: "")
-    tokenStorage.saveRefreshToken(body.refreshToken ?: "")
-    gptInvestorPreferences.clearIsGuestLoggedIn()
-    tokenSyncManager.syncToken()
+    completeLogin(
+        dependencies = dependencies,
+        credential = credential,
+        providerName = "Google"
+    )
     Result.success(Unit)
 } catch (e: Exception) {
     Logger.e(e) { "Google login failed on iOS" }
@@ -60,10 +46,9 @@ actual suspend fun loginWithGooglePlatform(
 
 @OptIn(ExperimentalForeignApi::class)
 actual suspend fun loginWithApplePlatform(dependencies: PlatformAuthDependencies): Result<Unit> = try {
-    val (auth, apiService, gptInvestorPreferences, tokenStorage, tokenSyncManager, appConfig) = dependencies
     val appleAuthProvider = AppleAuthProvider.shared()
 
-    val (details, appleName) = suspendCancellableCoroutine { continuation ->
+    val (credential, appleName) = suspendCancellableCoroutine { continuation ->
         appleAuthProvider.signInWithApple(
             onSuccess = { token: String?, nonce: String?, givenName: String?, familyName: String? ->
                 if (token != null && nonce != null) {
@@ -83,25 +68,12 @@ actual suspend fun loginWithApplePlatform(dependencies: PlatformAuthDependencies
         )
     }
 
-    auth.signInWithCredential(details as AuthCredential)
-    val currentUser = auth.currentUser
-        ?: return@try Result.failure(Exception("No current user after Apple sign-in"))
-    if (appleName != null) {
-        currentUser.updateProfile(displayName = appleName)
-    }
-    val firebaseIdToken = currentUser.getIdToken(true)
-    val loginResponse = apiService.loginWithFirebase(FirebaseLoginRequest(firebaseIdToken ?: ""))
-    if (!loginResponse.isSuccessful) return@try Result.failure(Exception("Backend login failed: ${loginResponse.code}"))
-    val body = loginResponse.body ?: return@try Result.failure(Exception("Empty response body"))
-
-    val nameToSet = body.user?.name ?: appleName ?: currentUser.displayName ?: "null"
-    gptInvestorPreferences.setUserName(nameToSet)
-    gptInvestorPreferences.setUserId(body.user?.uid.toString())
-    gptInvestorPreferences.setIsUserLoggedIn(true)
-    tokenStorage.saveAccessToken(body.accessToken ?: "")
-    tokenStorage.saveRefreshToken(body.refreshToken ?: "")
-    gptInvestorPreferences.clearIsGuestLoggedIn()
-    tokenSyncManager.syncToken()
+    completeLogin(
+        dependencies = dependencies,
+        credential = credential as AuthCredential,
+        providerName = "Apple",
+        displayName = appleName
+    )
     Result.success(Unit)
 } catch (e: Exception) {
     Logger.e("Error during Apple Sign-In: ${e.message}", e)

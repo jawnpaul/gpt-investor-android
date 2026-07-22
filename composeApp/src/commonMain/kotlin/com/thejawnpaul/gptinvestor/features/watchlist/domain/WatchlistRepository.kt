@@ -26,28 +26,26 @@ class WatchlistRepositoryImpl(private val apiService: KtorApiService) : Watchlis
         Either.Left(Failure.NetworkConnection)
     }
 
-    private fun mapErrorResponse(code: Int, errorBody: String?): Either.Left<Failure> {
-        return when (code) {
-            401 -> Either.Left(Failure.ServerError)
-            403 -> Either.Left(WatchlistFailure.SignUpRequired)
-            404 -> Either.Left(WatchlistFailure.TickerNotFound)
-            409 -> {
-                val cap = errorBody?.let {
-                    runCatching {
-                        Json.parseToJsonElement(it).jsonObject["cap"]?.jsonPrimitive?.content?.toIntOrNull()
-                    }.getOrNull()
-                } ?: 0
-                Either.Left(WatchlistFailure.WatchlistFull(cap))
-            }
-            400 -> {
-                val message = errorBody?.let {
-                    runCatching {
-                        Json.parseToJsonElement(it).jsonObject["error"]?.jsonPrimitive?.content
-                    }.getOrNull()
-                } ?: errorBody
-                Either.Left(WatchlistFailure.GeneralError(message ?: "Bad request"))
-            }
-            else -> Either.Left(Failure.ServerError)
+    private fun mapErrorResponse(code: Int, errorBody: String?): Either.Left<Failure> = when (code) {
+        401 -> Either.Left(Failure.ServerError)
+        403 -> Either.Left(WatchlistFailure.SignUpRequired)
+        404 -> Either.Left(WatchlistFailure.TickerNotFound)
+        409 -> {
+            val cap = errorBody?.let {
+                runCatching {
+                    Json.parseToJsonElement(it).jsonObject["cap"]?.jsonPrimitive?.content?.toIntOrNull()
+                }.getOrNull()
+            } ?: 0
+            Either.Left(WatchlistFailure.WatchlistFull(cap))
         }
+        400 -> {
+            val message = errorBody?.let {
+                runCatching {
+                    Json.parseToJsonElement(it).jsonObject["error"]?.jsonPrimitive?.content
+                }.getOrNull()
+            } ?: errorBody
+            Either.Left(WatchlistFailure.GeneralError(message ?: "Bad request"))
+        }
+        else -> Either.Left(Failure.ServerError)
     }
 }

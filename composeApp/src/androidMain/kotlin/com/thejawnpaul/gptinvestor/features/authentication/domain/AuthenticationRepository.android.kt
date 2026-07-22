@@ -11,7 +11,6 @@ import com.thejawnpaul.gptinvestor.core.platform.ActivityContextHolder
 import com.thejawnpaul.gptinvestor.core.platform.AndroidPlatformContext
 import com.thejawnpaul.gptinvestor.core.platform.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
-import com.thejawnpaul.gptinvestor.features.authentication.data.remote.FirebaseLoginRequest
 import dev.gitlive.firebase.auth.GoogleAuthProvider as GitLiveGoogleAuthProvider
 
 actual suspend fun signOutPlatform() {
@@ -25,14 +24,12 @@ actual suspend fun loginWithGooglePlatform(
     googleSignInProvider: GoogleSignInProvider,
     platformContext: PlatformContext
 ): Result<Unit> = try {
-    val (auth, apiService, gptInvestorPreferences, tokenStorage, tokenSyncManager, appConfig) = dependencies
-
     val androidContext = (platformContext as? AndroidPlatformContext)?.context
         ?: throw IllegalArgumentException("Invalid platform context")
 
     val credentialManager = CredentialManager.create(androidContext)
     val googleIdOption = GetSignInWithGoogleOption.Builder(
-        serverClientId = appConfig.webClientId
+        serverClientId = dependencies.appConfig.webClientId
     ).build()
 
     val request = GetCredentialRequest.Builder()
@@ -47,29 +44,15 @@ actual suspend fun loginWithGooglePlatform(
         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
         val idToken = googleIdTokenCredential.idToken
 
-        auth.signInWithCredential(GitLiveGoogleAuthProvider.credential(idToken, null))
-
-        val currentUser = auth.currentUser
-        currentUser?.let {
-            val firebaseIdToken = it.getIdToken(true)
-            val loginResponse = apiService.loginWithFirebase(
-                FirebaseLoginRequest(firebaseIdToken ?: "")
-            )
-            gptInvestorPreferences.setUserName(currentUser.displayName ?: "null")
-            if (loginResponse.isSuccessful) {
-                loginResponse.body?.let { response ->
-                    gptInvestorPreferences.setUserId(response.user?.uid.toString())
-                    gptInvestorPreferences.setIsUserLoggedIn(true)
-                    response.user?.name?.let {
-                        gptInvestorPreferences.setUserName(response.user.name)
-                    }
-                    tokenStorage.saveAccessToken(response.accessToken ?: "")
-                    tokenStorage.saveRefreshToken(response.refreshToken ?: "")
-                    gptInvestorPreferences.clearIsGuestLoggedIn()
-                    tokenSyncManager.syncToken()
-                }
-            }
-        }
+        val firebaseCredential = GitLiveGoogleAuthProvider.credential(
+            idToken = idToken,
+            accessToken = null
+        )
+        completeLogin(
+            dependencies = dependencies,
+            credential = firebaseCredential,
+            providerName = "Google"
+        )
         Result.success(Unit)
     } else {
         Result.failure(Exception("Credential is not of type Google ID!"))

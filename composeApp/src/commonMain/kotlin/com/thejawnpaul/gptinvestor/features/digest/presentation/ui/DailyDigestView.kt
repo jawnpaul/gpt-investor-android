@@ -14,7 +14,8 @@ data class DailyDigestView(
     val isPremium: Boolean = false,
     val addingTickers: Set<String> = emptySet(),
     val addedTickers: Set<String> = emptySet(),
-    val nextHourLabel: String = ""
+    val nextHourLabel: String = "",
+    val lockedStocks: List<LockedStockDigestPresentation> = emptyList()
 )
 
 enum class DailyDigestStatus { EMPTY, PENDING, READY }
@@ -24,5 +25,13 @@ data class StockDigestPresentation(
     val name: String,
     val summary: String,
     val isImproved: Boolean = false,
-    val keyEvent: String? = null
+    val keyEvent: String? = null,
+    val sentimentChange: String = "",
+    val generatedAt: String? = null
+)
+
+data class LockedStockDigestPresentation(
+    val ticker: String,
+    val name: String,
+    val sentimentChange: String
 )

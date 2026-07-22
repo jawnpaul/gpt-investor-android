@@ -21,6 +21,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.Model
 import com.thejawnpaul.gptinvestor.features.digest.domain.DigestRepository
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestStatus
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestView
+import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.LockedStockDigestPresentation
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.StockDigestPresentation
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.OnStartConversation
@@ -478,7 +479,16 @@ class HomeViewModel(
                                     name = item.companyName,
                                     summary = item.summary ?: "",
                                     isImproved = item.sentimentChange.lowercase() == "improved",
-                                    keyEvent = item.keyEvent
+                                    keyEvent = item.keyEvent,
+                                    sentimentChange = item.sentimentChange,
+                                    generatedAt = item.generatedAt
+                                )
+                            },
+                            lockedStocks = lockedItems.map { item ->
+                                LockedStockDigestPresentation(
+                                    ticker = item.ticker,
+                                    name = item.companyName,
+                                    sentimentChange = item.sentimentChange
                                 )
                             },
                             suggestedStocks = digest.recommendations ?: emptyList(),

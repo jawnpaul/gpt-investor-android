@@ -239,4 +239,11 @@
     <string name="tap_to_unlock_full_summaries">Tap to unlock full summaries</string>
     <string name="x_of_y">%1$d of %2$d</string>
     <string name="x_companies">%1$d companies</string>
+    <string name="watchlist_title">Watchlist</string>
+    <string name="build_your_watchlist">Build your watchlist</string>
+    <string name="watchlist_empty_description">Track stocks you care about. We’ll keep you posted on the moments that matter — earnings, news, thesis-breaking events.</string>
+    <string name="browse_top_picks">Browse top picks</string>
+    <string name="or_search_for_any_stock">Or search for any stock</string>
+    <string name="popular_this_week">POPULAR THIS WEEK</string>
+    <string name="watch">Watch</string>
 </resources>

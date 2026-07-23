@@ -4,6 +4,7 @@ import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistRequest
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistItem
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -11,6 +12,7 @@ import org.koin.core.annotation.Singleton
 
 interface WatchlistRepository {
     suspend fun addStockToWatchList(ticker: String): Either<Failure, Unit>
+    suspend fun getWatchlist(): Either<Failure, List<WatchlistItem>>
 }
 
 @Singleton(binds = [WatchlistRepository::class])
@@ -21,6 +23,26 @@ class WatchlistRepositoryImpl(private val apiService: KtorApiService) : Watchlis
             Either.Right(Unit)
         } else {
             mapErrorResponse(response.code, response.errorBody)
+        }
+    } catch (e: Exception) {
+        Either.Left(Failure.NetworkConnection)
+    }
+
+    override suspend fun getWatchlist(): Either<Failure, List<WatchlistItem>> = try {
+        val response = apiService.getWatchlist()
+        if (response.isSuccessful) {
+            val items = response.body?.items?.map {
+                WatchlistItem(
+                    ticker = it.ticker,
+                    companyName = it.companyName,
+                    dateAdded = it.dateAdded,
+                    locked = it.locked,
+                    logoUrl = it.logoUrl
+                )
+            } ?: emptyList()
+            Either.Right(items)
+        } else {
+            Either.Left(Failure.ServerError)
         }
     } catch (e: Exception) {
         Either.Left(Failure.NetworkConnection)

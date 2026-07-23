@@ -47,6 +47,8 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.AllTopPicksS
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SavedTopPicksScreen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPickDetailScreen
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.ui.WatchlistScreen
+import com.thejawnpaul.gptinvestor.features.watchlist.presentation.viewmodel.WatchlistAction
+import com.thejawnpaul.gptinvestor.features.watchlist.presentation.viewmodel.WatchlistViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.compose.viewmodel.koinViewModel
@@ -497,7 +499,31 @@ fun NavGraphBuilder.guestNavGraph(
     }
 
     composable(route = GuestScreen.GuestWatchlistTab.route) {
-        WatchlistScreen()
+        val viewModel = koinViewModel<WatchlistViewModel>()
+        val state = viewModel.uiState.collectAsState()
+        val scope = rememberCoroutineScope()
+
+        LaunchedEffect(Unit) {
+            viewModel.actions.onEach { action ->
+                when (action) {
+                    WatchlistAction.NavigateToSearch -> {
+                        navController.navigate(GuestScreen.GuestSearch.route)
+                    }
+
+                    WatchlistAction.NavigateToTopPicks -> {
+                        navController.navigate(GuestScreen.GuestAllTopPicks.route)
+                    }
+
+                    is WatchlistAction.ShowMessage -> {
+                        platformActions.showMessage(action.message)
+                    }
+                }
+            }.launchIn(scope)
+        }
+        WatchlistScreen(
+            state = state.value,
+            onEvent = viewModel::onEvent
+        )
     }
 
     composable(route = GuestScreen.GuestProfileTab.route) {

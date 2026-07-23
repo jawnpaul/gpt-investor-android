@@ -100,8 +100,6 @@ fun DailyDigestCard(
     onUnlockPremium: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val customColors = LocalGPTInvestorColors.current
-
     Column(modifier = modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
@@ -465,20 +463,6 @@ private fun PendingDigestContent(isPremium: Boolean, nextHourLabel: String, onUn
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onTertiaryContainer
                         )
-
-                        // Spacer(Modifier.width(8.dp))
-                        /*Button(
-                            onClick = onUnlockPremium,
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.height(36.dp)
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.upgrade_to_premium),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }*/
                     }
                 }
             }

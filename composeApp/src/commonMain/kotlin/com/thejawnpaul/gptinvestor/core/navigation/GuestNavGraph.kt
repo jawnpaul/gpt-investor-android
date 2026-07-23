@@ -342,6 +342,16 @@ fun NavGraphBuilder.guestNavGraph(
                     CompanyDetailAction.WatchlistAddFailed -> {
                         platformActions.showMessage(getString(Res.string.added_to_watchlist_error))
                     }
+
+                    is CompanyDetailAction.WatchlistRemoved -> {
+                        platformActions.showMessage(getString(Res.string.removed_from_watchlist, action.ticker))
+                    }
+
+                    is CompanyDetailAction.WatchlistRemoveFailed -> {
+                        platformActions.showMessage(
+                            getString(Res.string.failed_to_remove_from_watchlist, action.ticker)
+                        )
+                    }
                 }
             }
         }

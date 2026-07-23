@@ -12,10 +12,12 @@ import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.added_to_watchlist_error
 import com.thejawnpaul.gptinvestor.added_to_watchlist_success
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
+import com.thejawnpaul.gptinvestor.failed_to_remove_from_watchlist
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.WebViewScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
+import com.thejawnpaul.gptinvestor.removed_from_watchlist
 import com.thejawnpaul.gptinvestor.share_brief_text
 import org.jetbrains.compose.resources.getString
 import org.koin.compose.viewmodel.koinViewModel
@@ -62,6 +64,16 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
 
                     CompanyDetailAction.WatchlistAddFailed -> {
                         platformActions.showMessage(getString(Res.string.added_to_watchlist_error))
+                    }
+
+                    is CompanyDetailAction.WatchlistRemoved -> {
+                        platformActions.showMessage(getString(Res.string.removed_from_watchlist, action.ticker))
+                    }
+
+                    is CompanyDetailAction.WatchlistRemoveFailed -> {
+                        platformActions.showMessage(
+                            getString(Res.string.failed_to_remove_from_watchlist, action.ticker)
+                        )
                     }
                 }
             }

@@ -1,11 +1,12 @@
 package com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.BookmarkAdd
+import androidx.compose.material.icons.outlined.BookmarkAdded
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,7 +30,8 @@ fun CompanyBriefTopBar(
     onBack: () -> Unit,
     onShare: () -> Unit,
     onWatchlist: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isWatched: Boolean = false
 ) {
     TopAppBar(
         modifier = modifier,
@@ -52,7 +54,7 @@ fun CompanyBriefTopBar(
                 }
                 IconButton(onClick = onWatchlist) {
                     Icon(
-                        imageVector = Icons.Outlined.BookmarkAdd,
+                        imageVector = if (isWatched) Icons.Outlined.BookmarkAdded else Icons.Outlined.BookmarkAdd,
                         contentDescription = stringResource(Res.string.add_to_watchlist)
                     )
                 }
@@ -69,11 +71,20 @@ fun CompanyBriefTopBar(
 private fun CompanyBriefTopBarPreview() {
     GPTInvestorTheme {
         Surface {
-            CompanyBriefTopBar(
-                onBack = {},
-                onShare = {},
-                onWatchlist = {}
-            )
+            Column {
+                CompanyBriefTopBar(
+                    onBack = {},
+                    onShare = {},
+                    isWatched = true,
+                    onWatchlist = {}
+                )
+                CompanyBriefTopBar(
+                    onBack = {},
+                    onShare = {},
+                    isWatched = false,
+                    onWatchlist = {}
+                )
+            }
         }
     }
 }

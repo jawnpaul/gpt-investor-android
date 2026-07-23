@@ -27,7 +27,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,7 +38,6 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -62,7 +60,6 @@ import coil3.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.browse_top_picks
 import com.thejawnpaul.gptinvestor.build_your_watchlist
-import com.thejawnpaul.gptinvestor.cancel
 import com.thejawnpaul.gptinvestor.features.component.ShimmerBox
 import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.RecommendedDigestCompany
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeErrorCard
@@ -76,9 +73,7 @@ import com.thejawnpaul.gptinvestor.ic_trash
 import com.thejawnpaul.gptinvestor.or_search_for_any_stock
 import com.thejawnpaul.gptinvestor.outline_visibility_24
 import com.thejawnpaul.gptinvestor.popular_this_week
-import com.thejawnpaul.gptinvestor.remove
 import com.thejawnpaul.gptinvestor.remove_from_watchlist
-import com.thejawnpaul.gptinvestor.remove_from_watchlist_confirmation
 import com.thejawnpaul.gptinvestor.search
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
@@ -349,25 +344,13 @@ private fun WatchlistItemRow(
     var showConfirmDialog by remember { mutableStateOf(false) }
 
     if (showConfirmDialog) {
-        AlertDialog(
-            onDismissRequest = { showConfirmDialog = false },
-            title = { Text(text = stringResource(Res.string.remove_from_watchlist)) },
-            text = { Text(text = stringResource(Res.string.remove_from_watchlist_confirmation, item.ticker)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showConfirmDialog = false
-                        onRemove()
-                    }
-                ) {
-                    Text(text = stringResource(Res.string.remove))
-                }
+        RemoveFromWatchlistDialog(
+            ticker = item.ticker,
+            onConfirm = {
+                showConfirmDialog = false
+                onRemove()
             },
-            dismissButton = {
-                TextButton(onClick = { showConfirmDialog = false }) {
-                    Text(text = stringResource(Res.string.cancel))
-                }
-            }
+            onDismiss = { showConfirmDialog = false }
         )
     }
 

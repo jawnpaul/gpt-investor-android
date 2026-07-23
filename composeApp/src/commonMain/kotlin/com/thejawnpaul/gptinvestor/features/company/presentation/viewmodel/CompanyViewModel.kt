@@ -387,7 +387,26 @@ class CompanyViewModel(
                                 eventName = "stock-added-to-watchlist",
                                 params = mapOf("ticker" to ticker, "source" to "company_brief")
                             )
+                            _selectedCompany.update { it.copy(brief = it.brief?.copy(isWatched = true)) }
                             processCompanyDetailAction(CompanyDetailAction.WatchlistAdded)
+                        }
+                    )
+                }
+            }
+
+            CompanyDetailEvent.RemoveFromWatchlist -> {
+                val ticker = _selectedCompany.value.brief?.ticker
+                    ?: _selectedCompany.value.header.companyTicker.ifEmpty { selectedCompanyTicker.orEmpty() }
+                viewModelScope.launch {
+                    watchlistRepository.removeFromWatchlist(ticker).fold(
+                        { processCompanyDetailAction(CompanyDetailAction.WatchlistRemoveFailed(ticker)) },
+                        {
+                            analyticsLogger.logEvent(
+                                eventName = "stock-removed-from-watchlist",
+                                params = mapOf("ticker" to ticker, "source" to "company_brief")
+                            )
+                            _selectedCompany.update { it.copy(brief = it.brief?.copy(isWatched = false)) }
+                            processCompanyDetailAction(CompanyDetailAction.WatchlistRemoved(ticker))
                         }
                     )
                 }
@@ -494,6 +513,7 @@ sealed interface CompanyDetailEvent {
     data class BriefKeyNumberExpanded(val keyNumberType: KeyNumberType) : CompanyDetailEvent
     data object ShareBrief : CompanyDetailEvent
     data object AddToWatchlist : CompanyDetailEvent
+    data object RemoveFromWatchlist : CompanyDetailEvent
     data object DismissSpotlight : CompanyDetailEvent
 }
 
@@ -506,4 +526,6 @@ sealed interface CompanyDetailAction {
     data class OnShare(val name: String, val ticker: String, val id: String) : CompanyDetailAction
     data object WatchlistAdded : CompanyDetailAction
     data object WatchlistAddFailed : CompanyDetailAction
+    data class WatchlistRemoved(val ticker: String) : CompanyDetailAction
+    data class WatchlistRemoveFailed(val ticker: String) : CompanyDetailAction
 }

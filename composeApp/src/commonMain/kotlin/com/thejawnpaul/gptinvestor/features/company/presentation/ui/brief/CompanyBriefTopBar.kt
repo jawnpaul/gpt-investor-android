@@ -3,8 +3,8 @@ package com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -17,14 +17,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.back
-import com.thejawnpaul.gptinvestor.favorite
-import com.thejawnpaul.gptinvestor.more
+import com.thejawnpaul.gptinvestor.add_to_watchlist
+import com.thejawnpaul.gptinvestor.share
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CompanyBriefTopBar(onBack: () -> Unit, onFavorite: () -> Unit, onMore: () -> Unit, modifier: Modifier = Modifier) {
+fun CompanyBriefTopBar(onBack: () -> Unit, onShare: () -> Unit, onWatchlist: () -> Unit, modifier: Modifier = Modifier) {
     TopAppBar(
         modifier = modifier,
         title = {},
@@ -38,16 +38,16 @@ fun CompanyBriefTopBar(onBack: () -> Unit, onFavorite: () -> Unit, onMore: () ->
         },
         actions = {
             Row {
-                IconButton(onClick = onFavorite) {
+                IconButton(onClick = onShare) {
                     Icon(
-                        imageVector = Icons.Outlined.FavoriteBorder,
-                        contentDescription = stringResource(Res.string.favorite)
+                        imageVector = Icons.Default.Share,
+                        contentDescription = stringResource(Res.string.share)
                     )
                 }
-                IconButton(onClick = onMore) {
+                IconButton(onClick = onWatchlist) {
                     Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = stringResource(Res.string.more)
+                        imageVector = Icons.Outlined.BookmarkBorder,
+                        contentDescription = stringResource(Res.string.add_to_watchlist)
                     )
                 }
             }
@@ -65,8 +65,8 @@ private fun CompanyBriefTopBarPreview() {
         Surface {
             CompanyBriefTopBar(
                 onBack = {},
-                onFavorite = {},
-                onMore = {}
+                onShare = {},
+                onWatchlist = {}
             )
         }
     }

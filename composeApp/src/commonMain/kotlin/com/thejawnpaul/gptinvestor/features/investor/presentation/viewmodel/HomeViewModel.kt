@@ -328,6 +328,10 @@ class HomeViewModel(
                     }
                     viewModelScope.launch {
                         watchlistRepository.addStockToWatchList(event.ticker).onSuccess {
+                            analyticsLogger.logEvent(
+                                eventName = "stock-added-to-watchlist",
+                                params = mapOf("ticker" to event.ticker, "source" to "digest_card")
+                            )
                             _uiState.update { state ->
                                 state.copy(
                                     dailyDigestView = state.dailyDigestView.copy(
@@ -378,15 +382,46 @@ class HomeViewModel(
                 }
 
                 HomeEvent.BrowseAllCompanies -> {
+                    analyticsLogger.logEvent("digest-browse-all-companies-tapped", emptyMap())
                     _actions.emit(HomeAction.NavigateToDiscover)
                 }
 
-                HomeEvent.UnlockPremium -> {
+                is HomeEvent.UnlockPremium -> {
+                    analyticsLogger.logEvent(
+                        eventName = "unlock-premium-tapped",
+                        params = mapOf("source" to event.source)
+                    )
                     _actions.emit(HomeAction.NavigateToProfile)
                 }
 
                 HomeEvent.SeeFullDigest -> {
+                    val digest = _uiState.value.dailyDigestView
+                    analyticsLogger.logEvent(
+                        eventName = "digest-see-full-tapped",
+                        params = mapOf(
+                            "visible_stocks" to digest.stocks.size,
+                            "locked_stocks" to digest.lockedStocksCount
+                        )
+                    )
                     _actions.emit(HomeAction.NavigateToDigestDetail)
+                }
+
+                HomeEvent.DigestDetailViewed -> {
+                    val digest = _uiState.value.dailyDigestView
+                    analyticsLogger.logEvent(
+                        eventName = "digest-detail-screen-viewed",
+                        params = mapOf(
+                            "total_stocks" to digest.stocks.size,
+                            "locked_stocks" to digest.lockedStocksCount
+                        )
+                    )
+                }
+
+                HomeEvent.DigestDetailUnlockPremium -> {
+                    analyticsLogger.logEvent(
+                        eventName = "unlock-premium-tapped",
+                        params = mapOf("source" to "digest_detail_screen")
+                    )
                 }
             }
         }
@@ -585,8 +620,10 @@ sealed interface HomeEvent {
     data class ClickTrendingCompany(val ticker: String) : HomeEvent
     data class AddStockToDigest(val ticker: String) : HomeEvent
     data object BrowseAllCompanies : HomeEvent
-    data object UnlockPremium : HomeEvent
+    data class UnlockPremium(val source: String) : HomeEvent
     data object SeeFullDigest : HomeEvent
+    data object DigestDetailViewed : HomeEvent
+    data object DigestDetailUnlockPremium : HomeEvent
 }
 
 sealed interface HomeAction {

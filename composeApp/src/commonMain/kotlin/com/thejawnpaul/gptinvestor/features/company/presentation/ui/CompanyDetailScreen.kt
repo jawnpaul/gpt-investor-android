@@ -48,6 +48,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCom
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.BriefSummaryCard
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefHeader
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefSkeleton
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.BriefSpotlightOverlay
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefTopBar
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.KeyNumbersCard
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.RiskOpportunityCard
@@ -85,8 +86,8 @@ fun CompanyDetailScreen(
                 Column {
                     CompanyBriefTopBar(
                         onBack = { onAction(CompanyDetailAction.OnGoBack) },
-                        onFavorite = {},
-                        onMore = {}
+                        onShare = { onEvent(CompanyDetailEvent.ShareBrief) },
+                        onWatchlist = { onEvent(CompanyDetailEvent.AddToWatchlist) }
                     )
                     if (state.isGuestSession) {
                         TopGuestLabel(
@@ -160,6 +161,10 @@ fun CompanyDetailScreen(
                     }
                 )
             }
+        }
+
+        if (state.showSpotlight && state.brief != null) {
+            BriefSpotlightOverlay(onDismiss = { onEvent(CompanyDetailEvent.DismissSpotlight) })
         }
     }
 }
@@ -345,6 +350,7 @@ private fun CompanyDetailScreenPreview() {
             state = SingleCompanyView(
                 companyName = "Apple Inc.",
                 brief = CompanyBrief(
+                    id = "",
                     ticker = "AAPL",
                     name = "Apple Inc.",
                     logoUrl = "",

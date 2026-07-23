@@ -169,7 +169,8 @@ private fun HomeScreenContent(
                     onAddStock = { onEvent(HomeEvent.AddStockToDigest(it)) },
                     onBrowseAll = { onEvent(HomeEvent.BrowseAllCompanies) },
                     onSeeFullDigest = { onEvent(HomeEvent.SeeFullDigest) },
-                    onUnlockPremium = { onEvent(HomeEvent.UnlockPremium) }
+                    onUnlockPremiumPending = { onEvent(HomeEvent.UnlockPremium("digest_pending_card")) },
+                    onUnlockPremiumReady = { onEvent(HomeEvent.UnlockPremium("digest_ready_card")) }
                 )
                 Spacer(modifier = Modifier.height(24.dp))
 

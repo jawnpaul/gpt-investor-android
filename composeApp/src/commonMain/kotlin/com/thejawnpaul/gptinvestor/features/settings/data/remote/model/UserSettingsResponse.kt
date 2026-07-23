@@ -3,6 +3,8 @@ package com.thejawnpaul.gptinvestor.features.settings.data.remote.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+const val TIER_PREMIUM = "premium"
+
 @Serializable
 data class UserSettingsResponse(
     @SerialName("digest_delivery_hour") val digestDeliveryHour: Int? = null,
@@ -10,5 +12,8 @@ data class UserSettingsResponse(
     @SerialName("notif_digest_enabled") val notifDigestEnabled: Boolean? = null,
     @SerialName("timezone_iana") val timezoneIana: String? = null,
     @SerialName("updated_at") val updatedAt: String? = null,
-    @SerialName("utc_offset_minutes") val utcOffsetMinutes: Int? = null
+    @SerialName("utc_offset_minutes") val utcOffsetMinutes: Int? = null,
+    @SerialName("tier") val tier: String? = null,
+    @SerialName("is_trial") val isTrial: Boolean? = null,
+    @SerialName("trial_expires_at") val trialExpiresAt: String? = null
 )

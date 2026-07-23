@@ -12,6 +12,7 @@ import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DigestDetailScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
+import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -81,10 +82,17 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
         val homeViewModel = koinViewModel<HomeViewModel>(viewModelStoreOwner = parentEntry)
         val state = homeViewModel.uiState.collectAsState()
 
+        LaunchedEffect(Unit) {
+            homeViewModel.handleEvent(HomeEvent.DigestDetailViewed)
+        }
+
         DigestDetailScreen(
             digestView = state.value.dailyDigestView,
             onBack = { navController.popBackStack() },
-            onUnlockPremium = { navController.navigate(Screen.ProfileTabScreen.route) }
+            onUnlockPremium = {
+                homeViewModel.handleEvent(HomeEvent.DigestDetailUnlockPremium)
+                navController.navigate(Screen.ProfileTabScreen.route)
+            }
         )
     }
 }

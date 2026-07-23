@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.profile.presentation.viewmodel
 
 import com.google.common.truth.Truth.assertThat
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
@@ -36,6 +37,7 @@ class ProfileViewModelTest {
     private val topPickRepository: ITopPickRepository = mockk()
     private val tidbitRepository: TidbitRepository = mockk()
     private val billingRepository: IBillingRepository = mockk()
+    private val analyticsLogger: AnalyticsLogger = mockk(relaxed = true)
 
     @Before
     fun setUp() {
@@ -62,7 +64,8 @@ class ProfileViewModelTest {
         conversationRepository,
         topPickRepository,
         tidbitRepository,
-        billingRepository
+        billingRepository,
+        analyticsLogger
     )
 
     @Test

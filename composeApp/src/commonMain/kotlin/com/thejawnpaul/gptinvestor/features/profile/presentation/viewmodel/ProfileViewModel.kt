@@ -141,8 +141,8 @@ class ProfileViewModel(
 
             ProfileEvent.UpgradeToPremiumClicked -> {
                 analyticsLogger.logEvent(
-                    eventName = "upgrade-clicked",
-                    params = mapOf("source" to "profile_screen")
+                    eventName = "unlock-premium-tapped",
+                    params = mapOf("source" to "settings")
                 )
                 processAction(ProfileAction.NavigateToUpgrade)
             }

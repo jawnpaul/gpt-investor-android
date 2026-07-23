@@ -4,6 +4,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.added_to_watchlist_error
+import com.thejawnpaul.gptinvestor.added_to_watchlist_success
+import com.thejawnpaul.gptinvestor.share_brief_text
+import org.jetbrains.compose.resources.stringResource
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -23,6 +28,9 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
         val parentViewModel = koinViewModel<CompanyViewModel>()
         val state = parentViewModel.selectedCompany.collectAsState()
         val scope = rememberCoroutineScope()
+        val shareBriefTemplate = stringResource(Res.string.share_brief_text)
+        val watchlistAddedMessage = stringResource(Res.string.added_to_watchlist_success)
+        val watchlistAddFailedMessage = stringResource(Res.string.added_to_watchlist_error)
 
         LaunchedEffect(Unit) {
             parentViewModel.companyDetailAction.onEach { action ->
@@ -48,6 +56,18 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
 
                     is CompanyDetailAction.ShowToast -> {
                         platformActions.showMessage(action.message)
+                    }
+
+                    is CompanyDetailAction.OnShare -> {
+                        platformActions.shareText(shareBriefTemplate.format(action.name, action.ticker, action.id))
+                    }
+
+                    CompanyDetailAction.WatchlistAdded -> {
+                        platformActions.showMessage(watchlistAddedMessage)
+                    }
+
+                    CompanyDetailAction.WatchlistAddFailed -> {
+                        platformActions.showMessage(watchlistAddFailedMessage)
                     }
                 }
             }.launchIn(scope)

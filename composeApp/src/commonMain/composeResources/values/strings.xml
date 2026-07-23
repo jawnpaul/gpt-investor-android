@@ -161,6 +161,14 @@
     <string name="today">today</string>
     <string name="favorite">Favorite</string>
     <string name="more">More</string>
+    <string name="add_to_watchlist">Add to watchlist</string>
+    <string name="added_to_watchlist_success">Added to watchlist</string>
+    <string name="added_to_watchlist_error">Could not add to watchlist</string>
+    <string name="share_brief_text">Check out the %1$s (%2$s) brief on GPTInvestor:\nhttps://gptinvestorapp.com/brief/%3$s</string>
+    <string name="brief_spotlight_title">New in Brief</string>
+    <string name="brief_spotlight_share_desc">Share this brief with anyone</string>
+    <string name="brief_spotlight_watchlist_desc">Save this company to your Watchlist</string>
+    <string name="got_it">Got it</string>
     <string name="onboarding_headline_value_prop">Feel confident about every stock decision</string>
     <string name="onboarding_body_value_prop">GPT Investor turns complex financial data into plain English insights, so you always know what's going on with the stocks you care about.</string>
     <string name="onboarding_cta_get_started">Get Started →</string>
@@ -246,4 +254,10 @@
     <string name="or_search_for_any_stock">Or search for any stock</string>
     <string name="popular_this_week">POPULAR THIS WEEK</string>
     <string name="watch">Watch</string>
+    <string name="remove_from_watchlist">Remove from Watchlist</string>
+    <string name="remove_from_watchlist_confirmation">Remove %1$s from your watchlist?</string>
+    <string name="remove">Remove</string>
+    <string name="added_to_watchlist">%1$s added to watchlist</string>
+    <string name="removed_from_watchlist">%1$s removed from watchlist</string>
+    <string name="failed_to_remove_from_watchlist">Couldn\'t remove %1$s</string>
 </resources>

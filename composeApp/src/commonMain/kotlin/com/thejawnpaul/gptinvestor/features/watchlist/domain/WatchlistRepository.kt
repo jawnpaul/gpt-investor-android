@@ -4,6 +4,7 @@ import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistRequest
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistData
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistItem
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
@@ -12,7 +13,8 @@ import org.koin.core.annotation.Singleton
 
 interface WatchlistRepository {
     suspend fun addStockToWatchList(ticker: String): Either<Failure, Unit>
-    suspend fun getWatchlist(): Either<Failure, List<WatchlistItem>>
+    suspend fun getWatchlist(): Either<Failure, WatchlistData>
+    suspend fun removeFromWatchlist(ticker: String): Either<Failure, Unit>
 }
 
 @Singleton(binds = [WatchlistRepository::class])
@@ -28,7 +30,7 @@ class WatchlistRepositoryImpl(private val apiService: KtorApiService) : Watchlis
         Either.Left(Failure.NetworkConnection)
     }
 
-    override suspend fun getWatchlist(): Either<Failure, List<WatchlistItem>> = try {
+    override suspend fun getWatchlist(): Either<Failure, WatchlistData> = try {
         val response = apiService.getWatchlist()
         if (response.isSuccessful) {
             val items = response.body?.items?.map {
@@ -40,9 +42,24 @@ class WatchlistRepositoryImpl(private val apiService: KtorApiService) : Watchlis
                     logoUrl = it.logoUrl
                 )
             } ?: emptyList()
-            Either.Right(items)
+            val recommendations = response.body?.recommendedDigestCompany ?: emptyList()
+            Either.Right(WatchlistData(items = items, recommendations = recommendations))
         } else {
             Either.Left(Failure.ServerError)
+        }
+    } catch (e: Exception) {
+        Either.Left(Failure.NetworkConnection)
+    }
+
+    override suspend fun removeFromWatchlist(ticker: String): Either<Failure, Unit> = try {
+        val response = apiService.removeFromWatchlist(ticker)
+        if (response.isSuccessful) {
+            Either.Right(Unit)
+        } else {
+            when (response.code) {
+                404 -> Either.Left(WatchlistFailure.TickerNotFound)
+                else -> Either.Left(Failure.ServerError)
+            }
         }
     } catch (e: Exception) {
         Either.Left(Failure.NetworkConnection)

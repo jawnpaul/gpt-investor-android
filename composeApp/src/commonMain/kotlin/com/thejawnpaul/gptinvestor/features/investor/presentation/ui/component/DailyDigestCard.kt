@@ -97,7 +97,8 @@ fun DailyDigestCard(
     onAddStock: (String) -> Unit,
     onBrowseAll: () -> Unit,
     onSeeFullDigest: () -> Unit,
-    onUnlockPremium: () -> Unit,
+    onUnlockPremiumPending: () -> Unit,
+    onUnlockPremiumReady: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -166,18 +167,19 @@ fun DailyDigestCard(
 
         Spacer(Modifier.height(12.dp))
 
+        val displayState = when {
+            view.loading -> 0
+            view.status == DailyDigestStatus.EMPTY -> 1
+            view.status == DailyDigestStatus.PENDING -> 2
+            view.status == DailyDigestStatus.READY -> 3
+            else -> 1
+        }
         Surface(
+            onClick = { if (displayState == 3) onSeeFullDigest() },
             shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.surface,
             modifier = Modifier.fillMaxWidth()
         ) {
-            val displayState = when {
-                view.loading -> 0
-                view.status == DailyDigestStatus.EMPTY -> 1
-                view.status == DailyDigestStatus.PENDING -> 2
-                view.status == DailyDigestStatus.READY -> 3
-                else -> 1
-            }
             AnimatedContent(
                 targetState = displayState,
                 transitionSpec = {
@@ -198,7 +200,7 @@ fun DailyDigestCard(
                     2 -> PendingDigestContent(
                         isPremium = view.isPremium,
                         nextHourLabel = view.nextHourLabel,
-                        onUnlockPremium = onUnlockPremium
+                        onUnlockPremium = onUnlockPremiumPending
                     )
 
                     3 -> ReadyDigestContent(
@@ -207,7 +209,7 @@ fun DailyDigestCard(
                         lockedStocksSummary = view.lockedStocksSummary,
                         lastUpdated = view.lastUpdated,
                         onSeeFullDigest = onSeeFullDigest,
-                        onUnlockPremium = onUnlockPremium
+                        onUnlockPremium = onUnlockPremiumReady
                     )
                 }
             }
@@ -755,7 +757,8 @@ private fun EmptyDigestPreview() {
                 onAddStock = {},
                 onBrowseAll = {},
                 onSeeFullDigest = {},
-                onUnlockPremium = {},
+                onUnlockPremiumPending = {},
+                onUnlockPremiumReady = {},
                 modifier = Modifier.padding(16.dp)
             )
         }
@@ -772,7 +775,8 @@ private fun PendingDigestPreview() {
                 onAddStock = {},
                 onBrowseAll = {},
                 onSeeFullDigest = {},
-                onUnlockPremium = {},
+                onUnlockPremiumPending = {},
+                onUnlockPremiumReady = {},
                 modifier = Modifier.padding(16.dp)
             )
         }
@@ -789,7 +793,8 @@ private fun PendingDigestPremiumPreview() {
                 onAddStock = {},
                 onBrowseAll = {},
                 onSeeFullDigest = {},
-                onUnlockPremium = {},
+                onUnlockPremiumPending = {},
+                onUnlockPremiumReady = {},
                 modifier = Modifier.padding(16.dp)
             )
         }
@@ -822,7 +827,8 @@ private fun ReadyDigestPreview() {
                 onAddStock = {},
                 onBrowseAll = {},
                 onSeeFullDigest = {},
-                onUnlockPremium = {},
+                onUnlockPremiumPending = {},
+                onUnlockPremiumReady = {},
                 modifier = Modifier.padding(16.dp)
             )
         }
@@ -853,7 +859,8 @@ private fun StaleDigestPreview() {
                 onAddStock = {},
                 onBrowseAll = {},
                 onSeeFullDigest = {},
-                onUnlockPremium = {},
+                onUnlockPremiumPending = {},
+                onUnlockPremiumReady = {},
                 modifier = Modifier.padding(16.dp)
             )
         }

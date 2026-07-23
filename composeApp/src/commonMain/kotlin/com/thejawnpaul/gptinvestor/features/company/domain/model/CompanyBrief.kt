@@ -10,6 +10,7 @@ import kotlin.math.roundToInt
 import kotlin.time.Clock
 
 data class CompanyBrief(
+    val id: String,
     val ticker: String,
     val name: String,
     val logoUrl: String,
@@ -81,6 +82,7 @@ private fun Float.formatPercent(): String {
 }
 
 fun CompanyBriefRemote.toBrief(now: Long = Clock.System.now().epochSeconds): CompanyBrief = CompanyBrief(
+    id = id.orEmpty(),
     ticker = ticker.orEmpty(),
     name = companyName.orEmpty(),
     logoUrl = logoUrl?.toHttpsUrl().orEmpty(),

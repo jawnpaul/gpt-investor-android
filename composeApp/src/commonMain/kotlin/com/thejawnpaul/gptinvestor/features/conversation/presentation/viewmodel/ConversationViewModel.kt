@@ -11,7 +11,6 @@ import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
-import com.thejawnpaul.gptinvestor.features.billing.domain.BillingConstants
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
@@ -29,6 +28,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInpu
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.state.ConversationView
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction.OnCopy
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
+import com.thejawnpaul.gptinvestor.shared.BuildConfig
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -451,7 +451,7 @@ class ConversationViewModel(
             } else {
                 val result = billingRepository.launchPurchaseFlow(
                     platformContext = platformContext,
-                    productId = BillingConstants.PRO_SUBSCRIPTION_PRODUCT_ID
+                    productId = BuildConfig.BILLING_PRODUCT_ID
                 )
                 handleEvent(ConversationEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
                 if (result is BillingResult.Error) {

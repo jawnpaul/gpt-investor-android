@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.dark
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
@@ -13,6 +14,7 @@ import com.thejawnpaul.gptinvestor.features.profile.presentation.state.ProfileUi
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
 import com.thejawnpaul.gptinvestor.light
+import com.thejawnpaul.gptinvestor.shared.BuildConfig
 import com.thejawnpaul.gptinvestor.system
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -36,6 +38,7 @@ class ProfileViewModel(
     private val topPickRepository: ITopPickRepository,
     private val tidbitRepository: TidbitRepository,
     private val billingRepository: IBillingRepository,
+    private val platformContext: PlatformContext,
     @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
@@ -144,7 +147,12 @@ class ProfileViewModel(
                     eventName = "unlock-premium-tapped",
                     params = mapOf("source" to "settings")
                 )
-                processAction(ProfileAction.NavigateToUpgrade)
+                viewModelScope.launch {
+                    billingRepository.launchPurchaseFlow(
+                        platformContext,
+                        BuildConfig.BILLING_PRODUCT_ID
+                    )
+                }
             }
 
             is ProfileEvent.ChangeTheme -> viewModelScope.launch {

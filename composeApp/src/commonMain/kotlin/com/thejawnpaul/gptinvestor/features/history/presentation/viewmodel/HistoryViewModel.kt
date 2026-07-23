@@ -8,7 +8,6 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
-import com.thejawnpaul.gptinvestor.features.billing.domain.BillingConstants
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
@@ -26,6 +25,7 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryCo
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryScreenView
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction.OnCopy
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenAction.OnGoToHistoryDetail
+import com.thejawnpaul.gptinvestor.shared.BuildConfig
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -408,7 +408,7 @@ class HistoryViewModel(
         viewModelScope.launch {
             val result = billingRepository.launchPurchaseFlow(
                 platformContext = platformContext,
-                productId = BillingConstants.PRO_SUBSCRIPTION_PRODUCT_ID
+                productId = BuildConfig.BILLING_PRODUCT_ID
             )
             handleHistoryDetailEvent(
                 HistoryDetailEvent.ShowRateLimitBottomSheet(showBottomSheet = false)

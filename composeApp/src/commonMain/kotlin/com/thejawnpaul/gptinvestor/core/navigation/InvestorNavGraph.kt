@@ -9,13 +9,18 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
+import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
+import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DigestDetailScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
+import com.thejawnpaul.gptinvestor.shared.BuildConfig
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformActions: PlatformActions) {
@@ -23,6 +28,8 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
         val homeViewModel = koinViewModel<HomeViewModel>()
         val state = homeViewModel.uiState.collectAsState()
         val scope = rememberCoroutineScope()
+        val billingRepository: IBillingRepository = koinInject()
+        val platformContext: PlatformContext = koinInject()
         LaunchedEffect(Unit) {
             homeViewModel.actions.onEach { action ->
                 when (action) {
@@ -58,7 +65,12 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
                     }
 
                     HomeAction.NavigateToProfile -> {
-                        navController.navigate(Screen.ProfileTabScreen.route)
+                        scope.launch {
+                            billingRepository.launchPurchaseFlow(
+                                platformContext,
+                                BuildConfig.BILLING_PRODUCT_ID
+                            )
+                        }
                     }
 
                     HomeAction.NavigateToDigestDetail -> {
@@ -81,6 +93,9 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
         }
         val homeViewModel = koinViewModel<HomeViewModel>(viewModelStoreOwner = parentEntry)
         val state = homeViewModel.uiState.collectAsState()
+        val billingRepository: IBillingRepository = koinInject()
+        val platformContext: PlatformContext = koinInject()
+        val scope = rememberCoroutineScope()
 
         LaunchedEffect(Unit) {
             homeViewModel.handleEvent(HomeEvent.DigestDetailViewed)
@@ -91,7 +106,12 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
             onBack = { navController.popBackStack() },
             onUnlockPremium = {
                 homeViewModel.handleEvent(HomeEvent.DigestDetailUnlockPremium)
-                navController.navigate(Screen.ProfileTabScreen.route)
+                scope.launch {
+                    billingRepository.launchPurchaseFlow(
+                        platformContext,
+                        BuildConfig.BILLING_PRODUCT_ID
+                    )
+                }
             }
         )
     }

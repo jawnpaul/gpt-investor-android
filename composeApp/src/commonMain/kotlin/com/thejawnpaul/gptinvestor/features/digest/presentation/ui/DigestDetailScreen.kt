@@ -1,7 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.digest.presentation.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,13 +17,11 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -43,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.declined
+import com.thejawnpaul.gptinvestor.ic_lock
 import com.thejawnpaul.gptinvestor.improved
 import com.thejawnpaul.gptinvestor.key_event
 import com.thejawnpaul.gptinvestor.tap_to_unlock_full_summaries
@@ -51,8 +49,7 @@ import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.today_s_digest
 import com.thejawnpaul.gptinvestor.unchanged
 import com.thejawnpaul.gptinvestor.unlock
-import com.thejawnpaul.gptinvestor.x_companies
-import com.thejawnpaul.gptinvestor.x_of_y
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -62,9 +59,6 @@ fun DigestDetailScreen(
     onUnlockPremium: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val totalCount = digestView.stocks.size + digestView.lockedStocks.size
-    val unlockedCount = digestView.stocks.size
-
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -72,9 +66,6 @@ fun DigestDetailScreen(
             .navigationBarsPadding()
     ) {
         DigestDetailTopBar(
-            date = digestView.lastUpdated,
-            totalCount = totalCount,
-            unlockedCount = unlockedCount,
             onBack = onBack
         )
 
@@ -99,34 +90,18 @@ fun DigestDetailScreen(
 }
 
 @Composable
-private fun DigestDetailTopBar(
-    date: String?,
-    totalCount: Int,
-    unlockedCount: Int,
-    onBack: () -> Unit
-) {
-    val customColors = LocalGPTInvestorColors.current
-
+private fun DigestDetailTopBar(onBack: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Surface(
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.surface,
-            modifier = Modifier
-                .size(40.dp)
-                .border(1.dp, customColors.utilColors.borderBright10, CircleShape)
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+        IconButton(onClick = onBack) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                contentDescription = null
+            )
         }
 
         Column(
@@ -136,38 +111,9 @@ private fun DigestDetailTopBar(
         ) {
             Text(
                 text = stringResource(Res.string.today_s_digest),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
-            if (totalCount > 0) {
-                val subtitle = buildString {
-                    if (date != null) {
-                        append(date)
-                        append(" · ")
-                    }
-                    append(stringResource(Res.string.x_companies, totalCount))
-                }
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = customColors.textColors.secondary50
-                )
-            }
-        }
-
-        if (totalCount > 0) {
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.tertiaryContainer
-            ) {
-                Text(
-                    text = stringResource(Res.string.x_of_y, unlockedCount, totalCount),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                )
-            }
         }
     }
 }
@@ -244,10 +190,7 @@ private fun DigestFullStockCard(stock: StockDigestPresentation, modifier: Modifi
 }
 
 @Composable
-private fun DigestLockedStocksCard(
-    lockedStocks: List<LockedStockDigestPresentation>,
-    modifier: Modifier = Modifier
-) {
+private fun DigestLockedStocksCard(lockedStocks: List<LockedStockDigestPresentation>, modifier: Modifier = Modifier) {
     val customColors = LocalGPTInvestorColors.current
 
     Surface(
@@ -264,9 +207,8 @@ private fun DigestLockedStocksCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Lock,
+                        painter = painterResource(Res.drawable.ic_lock),
                         contentDescription = null,
-                        tint = customColors.textColors.secondary50,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(Modifier.width(10.dp))

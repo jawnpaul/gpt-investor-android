@@ -2,38 +2,31 @@ package com.thejawnpaul.gptinvestor.core.navigation
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.added_to_watchlist_error
-import com.thejawnpaul.gptinvestor.added_to_watchlist_success
-import com.thejawnpaul.gptinvestor.share_brief_text
-import org.jetbrains.compose.resources.stringResource
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.added_to_watchlist_error
+import com.thejawnpaul.gptinvestor.added_to_watchlist_success
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.WebViewScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import com.thejawnpaul.gptinvestor.share_brief_text
+import org.jetbrains.compose.resources.getString
 import org.koin.compose.viewmodel.koinViewModel
 
 fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformActions: PlatformActions) {
     composable(route = Screen.CompanyDetailScreen.route) {
         val parentViewModel = koinViewModel<CompanyViewModel>()
         val state = parentViewModel.selectedCompany.collectAsState()
-        val scope = rememberCoroutineScope()
-        val shareBriefTemplate = stringResource(Res.string.share_brief_text)
-        val watchlistAddedMessage = stringResource(Res.string.added_to_watchlist_success)
-        val watchlistAddFailedMessage = stringResource(Res.string.added_to_watchlist_error)
 
         LaunchedEffect(Unit) {
-            parentViewModel.companyDetailAction.onEach { action ->
+            parentViewModel.companyDetailAction.collect { action ->
                 when (action) {
                     CompanyDetailAction.OnGoBack -> {
                         navController.navigateUp()
@@ -59,18 +52,19 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
                     }
 
                     is CompanyDetailAction.OnShare -> {
-                        platformActions.shareText(shareBriefTemplate.format(action.name, action.ticker, action.id))
+                        val message = getString(Res.string.share_brief_text, action.name, action.ticker, action.id)
+                        platformActions.shareText(message)
                     }
 
                     CompanyDetailAction.WatchlistAdded -> {
-                        platformActions.showMessage(watchlistAddedMessage)
+                        platformActions.showMessage(getString(Res.string.added_to_watchlist_success))
                     }
 
                     CompanyDetailAction.WatchlistAddFailed -> {
-                        platformActions.showMessage(watchlistAddFailedMessage)
+                        platformActions.showMessage(getString(Res.string.added_to_watchlist_error))
                     }
                 }
-            }.launchIn(scope)
+            }
         }
 
         CompanyDetailScreen(

@@ -30,8 +30,4 @@ data class StockDigestPresentation(
     val generatedAt: String? = null
 )
 
-data class LockedStockDigestPresentation(
-    val ticker: String,
-    val name: String,
-    val sentimentChange: String
-)
+data class LockedStockDigestPresentation(val ticker: String, val name: String, val sentimentChange: String)

@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.BookmarkAdd
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -76,7 +76,7 @@ fun BriefSpotlightOverlay(onDismiss: () -> Unit, modifier: Modifier = Modifier) 
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 SpotlightRow(
-                    icon = Icons.Outlined.BookmarkBorder,
+                    icon = Icons.Outlined.BookmarkAdd,
                     iconDescription = stringResource(Res.string.add_to_watchlist),
                     description = stringResource(Res.string.brief_spotlight_watchlist_desc)
                 )

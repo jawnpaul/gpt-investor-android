@@ -1,9 +1,9 @@
 package com.thejawnpaul.gptinvestor.features.watchlist.presentation.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,9 +26,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -73,6 +71,8 @@ import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.Popular
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.WatchlistUiState
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.viewmodel.WatchlistEvent
 import com.thejawnpaul.gptinvestor.ic_lock
+import com.thejawnpaul.gptinvestor.ic_search
+import com.thejawnpaul.gptinvestor.ic_trash
 import com.thejawnpaul.gptinvestor.or_search_for_any_stock
 import com.thejawnpaul.gptinvestor.outline_visibility_24
 import com.thejawnpaul.gptinvestor.popular_this_week
@@ -108,7 +108,7 @@ fun WatchlistScreen(state: WatchlistUiState, onEvent: (WatchlistEvent) -> Unit, 
                 actions = {
                     IconButton(onClick = { onEvent(WatchlistEvent.OnSearchClick) }) {
                         Icon(
-                            imageVector = Icons.Default.Search,
+                            painter = painterResource(Res.drawable.ic_search),
                             contentDescription = stringResource(Res.string.search)
                         )
                     }
@@ -230,8 +230,7 @@ private fun WatchlistEmptyState(
                 Icon(
                     painter = painterResource(Res.drawable.outline_visibility_24),
                     contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                    tint = gptInvestorColors.accentColors.allAccent
+                    modifier = Modifier.size(32.dp)
                 )
             }
         }
@@ -316,11 +315,7 @@ private fun WatchlistEmptyState(
 }
 
 @Composable
-private fun WatchlistContent(
-    state: WatchlistUiState,
-    onEvent: (WatchlistEvent) -> Unit,
-    innerPadding: PaddingValues
-) {
+private fun WatchlistContent(state: WatchlistUiState, onEvent: (WatchlistEvent) -> Unit, innerPadding: PaddingValues) {
     LazyColumn(
         modifier = Modifier
             .padding(innerPadding)
@@ -422,7 +417,7 @@ private fun WatchlistItemRow(
         } else {
             IconButton(onClick = { showConfirmDialog = true }) {
                 Icon(
-                    imageVector = Icons.Outlined.Delete,
+                    painter = painterResource(Res.drawable.ic_trash),
                     contentDescription = stringResource(Res.string.remove_from_watchlist),
                     modifier = Modifier.size(18.dp),
                     tint = gptInvestorColors.textColors.secondary50

@@ -45,10 +45,10 @@ import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumber
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumberType
 import com.thejawnpaul.gptinvestor.features.company.domain.model.NewsBrief
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCompanyView
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.BriefSpotlightOverlay
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.BriefSummaryCard
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefHeader
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefSkeleton
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.BriefSpotlightOverlay
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefTopBar
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.KeyNumbersCard
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.RiskOpportunityCard

@@ -28,13 +28,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -74,6 +69,11 @@ import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestSt
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestView
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.StockDigestPresentation
 import com.thejawnpaul.gptinvestor.generated_at
+import com.thejawnpaul.gptinvestor.ic_calendar
+import com.thejawnpaul.gptinvestor.ic_clock
+import com.thejawnpaul.gptinvestor.ic_lock
+import com.thejawnpaul.gptinvestor.ic_notification_bell
+import com.thejawnpaul.gptinvestor.ic_search
 import com.thejawnpaul.gptinvestor.improved
 import com.thejawnpaul.gptinvestor.key_event
 import com.thejawnpaul.gptinvestor.locked_stock_premium_upsell
@@ -86,6 +86,7 @@ import com.thejawnpaul.gptinvestor.x_more_stocks_are_locked
 import com.thejawnpaul.gptinvestor.x_more_stocks_in_your_digest
 import com.thejawnpaul.gptinvestor.yesterday_s_digest_today_s_is_on_the_way
 import com.thejawnpaul.gptinvestor.you_re_not_tracking_any_companies_yet
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 private val EaseOutQuart = CubicBezierEasing(0.25f, 1f, 0.5f, 1f)
@@ -104,7 +105,7 @@ fun DailyDigestCard(
     Column(modifier = modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                imageVector = Icons.Default.CalendarToday,
+                painter = painterResource(Res.drawable.ic_calendar),
                 contentDescription = null,
                 modifier = Modifier.size(16.dp)
             )
@@ -149,7 +150,7 @@ fun DailyDigestCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.AccessTime,
+                        painter = painterResource(Res.drawable.ic_clock),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onTertiaryContainer,
                         modifier = Modifier.size(14.dp)
@@ -376,7 +377,7 @@ private fun EmptyDigestContent(view: DailyDigestView, onAddStock: (String) -> Un
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Default.Search,
+                    painter = painterResource(Res.drawable.ic_search),
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
@@ -400,7 +401,7 @@ private fun PendingDigestContent(isPremium: Boolean, nextHourLabel: String, onUn
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            imageVector = Icons.Default.AccessTime,
+            painter = painterResource(Res.drawable.ic_search),
             contentDescription = null,
             modifier = Modifier.size(32.dp)
         )
@@ -446,7 +447,7 @@ private fun PendingDigestContent(isPremium: Boolean, nextHourLabel: String, onUn
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Notifications,
+                            painter = painterResource(Res.drawable.ic_notification_bell),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.tertiary,
                             modifier = Modifier.size(16.dp)
@@ -560,7 +561,7 @@ private fun ReadyDigestContent(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Lock,
+                            painter = painterResource(Res.drawable.ic_lock),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.tertiary,
                             modifier = Modifier.size(16.dp)

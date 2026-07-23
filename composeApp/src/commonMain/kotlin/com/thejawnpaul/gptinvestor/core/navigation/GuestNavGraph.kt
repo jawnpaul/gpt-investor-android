@@ -10,8 +10,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.added_to_watchlist
+import com.thejawnpaul.gptinvestor.added_to_watchlist_error
+import com.thejawnpaul.gptinvestor.added_to_watchlist_success
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
+import com.thejawnpaul.gptinvestor.failed_to_remove_from_watchlist
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
@@ -46,19 +51,14 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewMode
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.AllTopPicksScreen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SavedTopPicksScreen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPickDetailScreen
-import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.added_to_watchlist
-import com.thejawnpaul.gptinvestor.added_to_watchlist_error
-import com.thejawnpaul.gptinvestor.added_to_watchlist_success
-import com.thejawnpaul.gptinvestor.share_brief_text
-import com.thejawnpaul.gptinvestor.failed_to_remove_from_watchlist
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.ui.WatchlistScreen
-import com.thejawnpaul.gptinvestor.removed_from_watchlist
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.viewmodel.WatchlistAction
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.viewmodel.WatchlistViewModel
+import com.thejawnpaul.gptinvestor.removed_from_watchlist
+import com.thejawnpaul.gptinvestor.share_brief_text
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.getString
 import org.koin.compose.viewmodel.koinViewModel
 
 fun NavGraphBuilder.guestNavGraph(
@@ -304,13 +304,8 @@ fun NavGraphBuilder.guestNavGraph(
     composable(route = GuestScreen.GuestCompanyDetail.route) {
         val viewModel = koinViewModel<CompanyViewModel>()
         val state = viewModel.selectedCompany.collectAsState()
-        val scope = rememberCoroutineScope()
-        val shareBriefTemplate = stringResource(Res.string.share_brief_text)
-        val watchlistAddedMessage = stringResource(Res.string.added_to_watchlist_success)
-        val watchlistAddFailedMessage = stringResource(Res.string.added_to_watchlist_error)
-
         LaunchedEffect(Unit) {
-            viewModel.companyDetailAction.onEach { action ->
+            viewModel.companyDetailAction.collect { action ->
                 when (action) {
                     CompanyDetailAction.OnGoBack -> {
                         navController.navigateUp()
@@ -336,18 +331,19 @@ fun NavGraphBuilder.guestNavGraph(
                     }
 
                     is CompanyDetailAction.OnShare -> {
-                        platformActions.shareText(shareBriefTemplate.format(action.name, action.ticker, action.id))
+                        val message = getString(Res.string.share_brief_text, action.name, action.ticker, action.id)
+                        platformActions.shareText(message)
                     }
 
                     CompanyDetailAction.WatchlistAdded -> {
-                        platformActions.showMessage(watchlistAddedMessage)
+                        platformActions.showMessage(getString(Res.string.added_to_watchlist_success))
                     }
 
                     CompanyDetailAction.WatchlistAddFailed -> {
-                        platformActions.showMessage(watchlistAddFailedMessage)
+                        platformActions.showMessage(getString(Res.string.added_to_watchlist_error))
                     }
                 }
-            }.launchIn(scope)
+            }
         }
 
         CompanyDetailScreen(
@@ -526,21 +522,25 @@ fun NavGraphBuilder.guestNavGraph(
         val state = viewModel.uiState.collectAsState()
         val scope = rememberCoroutineScope()
 
-        val addedTemplate = stringResource(Res.string.added_to_watchlist)
-        val removedTemplate = stringResource(Res.string.removed_from_watchlist)
-        val removeErrorTemplate = stringResource(Res.string.failed_to_remove_from_watchlist)
-
         LaunchedEffect(Unit) {
-            viewModel.actions.onEach { action ->
+            viewModel.actions.collect { action ->
                 when (action) {
                     WatchlistAction.NavigateToSearch -> navController.navigate(GuestScreen.GuestSearch.route)
                     WatchlistAction.NavigateToTopPicks -> navController.navigate(GuestScreen.GuestAllTopPicks.route)
-                    is WatchlistAction.NavigateToCompanyDetail -> navController.navigate(GuestScreen.GuestCompanyDetail.createRoute(action.ticker))
-                    is WatchlistAction.ShowAddedMessage -> platformActions.showMessage(addedTemplate.format(action.ticker))
-                    is WatchlistAction.ShowRemovedMessage -> platformActions.showMessage(removedTemplate.format(action.ticker))
-                    is WatchlistAction.ShowRemoveErrorMessage -> platformActions.showMessage(removeErrorTemplate.format(action.ticker))
+                    is WatchlistAction.NavigateToCompanyDetail -> navController.navigate(
+                        GuestScreen.GuestCompanyDetail.createRoute(action.ticker)
+                    )
+                    is WatchlistAction.ShowAddedMessage -> platformActions.showMessage(
+                        getString(Res.string.added_to_watchlist, action.ticker)
+                    )
+                    is WatchlistAction.ShowRemovedMessage -> platformActions.showMessage(
+                        getString(Res.string.removed_from_watchlist, action.ticker)
+                    )
+                    is WatchlistAction.ShowRemoveErrorMessage -> platformActions.showMessage(
+                        getString(Res.string.failed_to_remove_from_watchlist, action.ticker)
+                    )
                 }
-            }.launchIn(scope)
+            }
         }
         WatchlistScreen(
             state = state.value,

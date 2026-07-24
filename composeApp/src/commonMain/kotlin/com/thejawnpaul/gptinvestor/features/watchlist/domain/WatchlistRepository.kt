@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.features.watchlist.domain
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistRequest
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistData
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistItem
@@ -39,7 +40,7 @@ class WatchlistRepositoryImpl(private val apiService: KtorApiService) : Watchlis
                     companyName = it.companyName,
                     dateAdded = it.dateAdded,
                     locked = it.locked,
-                    logoUrl = it.logoUrl
+                    logoUrl = it.logoUrl.toHttpsUrl()
                 )
             } ?: emptyList()
             val recommendations = response.body?.recommendedDigestCompany ?: emptyList()

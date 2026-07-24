@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -82,7 +83,7 @@ import org.jetbrains.compose.resources.stringResource
 fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, modifier: Modifier = Modifier) {
     val customColors = LocalGPTInvestorColors.current
 
-    Scaffold(modifier = modifier, topBar = {
+    Scaffold(modifier = modifier, contentWindowInsets = WindowInsets(0), topBar = {
         Text(
             text = stringResource(Res.string.profile),
             style = MaterialTheme.typography.headlineSmall,

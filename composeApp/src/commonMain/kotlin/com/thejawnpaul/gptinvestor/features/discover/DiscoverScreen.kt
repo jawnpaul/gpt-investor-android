@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,6 +41,7 @@ import org.jetbrains.compose.resources.stringResource
 fun DiscoverScreen(state: DiscoveryScreenState, onEvent: (DiscoveryEvent) -> Unit, modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier,
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             Column(
                 modifier = Modifier.statusBarsPadding().fillMaxWidth().padding(16.dp)

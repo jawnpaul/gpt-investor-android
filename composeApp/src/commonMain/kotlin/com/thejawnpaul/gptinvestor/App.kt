@@ -33,6 +33,7 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
     val isUserSignedIn by preferences.isUserLoggedIn.collectAsState(initial = false)
     val isGuestSignedIn by preferences.isGuestLoggedIn.collectAsState(initial = false)
     val hasCompletedOnboarding by preferences.hasCompletedOnboarding.collectAsState(initial = null)
+    val hasCompletedPostAuthOnboarding by preferences.hasCompletedPostAuthOnboarding.collectAsState(initial = null)
 
     var showSplash by remember { mutableStateOf(true) }
     var isNavGraphReady by remember { mutableStateOf(false) }
@@ -87,7 +88,8 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
                 navController = navController,
                 isUserSignedIn = isUserSignedIn == true,
                 isGuestSignedIn = isGuestSignedIn == true,
-                hasCompletedOnboarding = hasCompletedOnboarding ?: false
+                hasCompletedOnboarding = hasCompletedOnboarding ?: false,
+                hasCompletedPostAuthOnboarding = hasCompletedPostAuthOnboarding ?: false
             )
 
             if (showGuestRateLimitSheet) {

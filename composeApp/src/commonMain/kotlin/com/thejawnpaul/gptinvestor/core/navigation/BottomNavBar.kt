@@ -116,5 +116,4 @@ private data class BottomNavItem(val screen: Screen, val label: String, val icon
 
 private data class NavigationIcons(val selected: ImageVector, val unselected: ImageVector)
 
-private fun BottomNavItem.navigationRoute(): String =
-    if (screen == Screen.DiscoverTabScreen) Screen.DiscoverTabScreen.createRoute() else screen.route
+private fun BottomNavItem.navigationRoute(): String = screen.route

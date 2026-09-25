@@ -4,17 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
-import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.dark
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
+import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.profile.presentation.state.ProfileUiState
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
 import com.thejawnpaul.gptinvestor.light
-import com.thejawnpaul.gptinvestor.shared.BuildConfig
 import com.thejawnpaul.gptinvestor.system
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -38,7 +37,7 @@ class ProfileViewModel(
     private val topPickRepository: ITopPickRepository,
     private val tidbitRepository: TidbitRepository,
     private val billingRepository: IBillingRepository,
-    private val platformContext: PlatformContext,
+    private val premiumEventBus: PremiumEventBus,
     @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
@@ -145,14 +144,9 @@ class ProfileViewModel(
             ProfileEvent.UpgradeToPremiumClicked -> {
                 analyticsLogger.logEvent(
                     eventName = "unlock-premium-tapped",
-                    params = mapOf("source" to "settings")
+                    params = mapOf("source" to "profile")
                 )
-                viewModelScope.launch {
-                    billingRepository.launchPurchaseFlow(
-                        platformContext,
-                        BuildConfig.BILLING_PRODUCT_ID
-                    )
-                }
+                premiumEventBus.requestPremium(source = "profile")
             }
 
             is ProfileEvent.ChangeTheme -> viewModelScope.launch {

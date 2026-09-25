@@ -6,6 +6,7 @@ import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
+import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
 import io.mockk.coEvery
@@ -37,6 +38,7 @@ class ProfileViewModelTest {
     private val topPickRepository: ITopPickRepository = mockk()
     private val tidbitRepository: TidbitRepository = mockk()
     private val billingRepository: IBillingRepository = mockk()
+    private val premiumEventBus: PremiumEventBus = mockk(relaxed = true)
     private val analyticsLogger: AnalyticsLogger = mockk(relaxed = true)
 
     @Before
@@ -65,6 +67,7 @@ class ProfileViewModelTest {
         topPickRepository,
         tidbitRepository,
         billingRepository,
+        premiumEventBus,
         analyticsLogger
     )
 

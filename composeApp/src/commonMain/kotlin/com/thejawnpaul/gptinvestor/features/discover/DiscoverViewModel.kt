@@ -83,6 +83,7 @@ class DiscoverViewModel(
                 processAction(DiscoveryAction.OnGoToSearch)
             }
 
+            DiscoveryEvent.GoToBrowse -> processAction(DiscoveryAction.OnGoToBrowse)
             DiscoveryEvent.RetryTidbit -> getTodayTidbit()
             DiscoveryEvent.RetryTopPicks -> getTopPicks()
             is DiscoveryEvent.ClickTidbit -> {
@@ -199,6 +200,7 @@ sealed interface DiscoveryEvent {
     data class GoToCompanyDetail(val ticker: String) : DiscoveryEvent
     data object GoToSignUp : DiscoveryEvent
     data object GoToSearch : DiscoveryEvent
+    data object GoToBrowse : DiscoveryEvent
     data object RetryTopPicks : DiscoveryEvent
     data object RetryTidbit : DiscoveryEvent
 }
@@ -209,5 +211,6 @@ sealed interface DiscoveryAction {
     data class OnGoToPickDetail(val id: String) : DiscoveryAction
     data object OnGoToSignUp : DiscoveryAction
     data object OnGoToSearch : DiscoveryAction
+    data object OnGoToBrowse : DiscoveryAction
     data class OnGoToTidbitDetail(val id: String) : DiscoveryAction
 }

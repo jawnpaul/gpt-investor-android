@@ -3,23 +3,33 @@ package com.thejawnpaul.gptinvestor.features.discover
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.browse_all_companies
+import com.thejawnpaul.gptinvestor.browse_stocks_filter_by_sector
 import com.thejawnpaul.gptinvestor.curated_for_you
 import com.thejawnpaul.gptinvestor.daily_learn_tidbit
 import com.thejawnpaul.gptinvestor.discover
@@ -80,6 +90,13 @@ fun DiscoverScreen(state: DiscoveryScreenState, onEvent: (DiscoveryEvent) -> Uni
                 }
 
                 item {
+                    BrowseStocksEntryCard(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        onClick = { onEvent(DiscoveryEvent.GoToBrowse) }
+                    )
+                }
+
+                item {
                     // Top picks
                     HomeSectionHeader(
                         modifier = Modifier.padding(horizontal = 16.dp),
@@ -129,6 +146,43 @@ fun DiscoverScreen(state: DiscoveryScreenState, onEvent: (DiscoveryEvent) -> Uni
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun BrowseStocksEntryCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    OutlinedCard(modifier = modifier, onClick = onClick) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.List,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(Res.string.browse_all_companies),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = stringResource(Res.string.browse_stocks_filter_by_sector),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

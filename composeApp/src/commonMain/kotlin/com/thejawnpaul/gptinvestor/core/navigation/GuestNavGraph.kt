@@ -104,10 +104,6 @@ fun NavGraphBuilder.guestNavGraph(
                         navController.navigate(GuestScreen.GuestDiscoverTab.route)
                     }
 
-                    HomeAction.NavigateToProfile -> {
-                        navController.navigate(GuestScreen.GuestProfileTab.route)
-                    }
-
                     HomeAction.NavigateToDigestDetail -> {
                     }
                 }
@@ -159,6 +155,10 @@ fun NavGraphBuilder.guestNavGraph(
 
                     is DiscoveryAction.OnGoToTidbitDetail -> {
                         navController.navigate(route = GuestScreen.GuestTidbitDetail.createRoute(action.id))
+                    }
+
+                    DiscoveryAction.OnGoToBrowse -> {
+                        navController.navigate(Screen.BrowseStocksScreen.route)
                     }
                 }
             }.launchIn(scope)

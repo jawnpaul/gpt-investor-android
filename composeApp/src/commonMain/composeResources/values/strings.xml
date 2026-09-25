@@ -259,5 +259,23 @@
     <string name="remove">Remove</string>
     <string name="added_to_watchlist">%1$s added to watchlist</string>
     <string name="removed_from_watchlist">%1$s removed from watchlist</string>
-    <string name="failed_to_remove_from_watchlist">Couldn\'t remove %1$s</string>
+    <string name="failed_to_remove_from_watchlist">Couldn't remove %1$s</string>
+    <string name="browse_stocks_search_placeholder">Search stocks, companies…</string>
+    <string name="browse_stocks_empty">No stocks found</string>
+    <string name="browse_stocks_filter_by_sector">Filter by sector</string>
+    <string name="browse_stocks_error">Couldn't load stocks</string>
+
+    <string name="premium_sheet_title">Go Premium</string>
+    <string name="premium_sheet_subtitle">Unlock the full GPTInvestor experience</string>
+    <string name="premium_feature_digest_title">Daily Market Brief</string>
+    <string name="premium_feature_digest_desc">Personalized stock briefings every morning</string>
+    <string name="premium_feature_queries_title">Unlimited AI Queries</string>
+    <string name="premium_feature_queries_desc">Ask anything, as many times as you want</string>
+    <string name="premium_feature_coverage_title">Full Digest Coverage</string>
+    <string name="premium_feature_coverage_desc">Every stock in your watchlist, unlocked</string>
+    <string name="premium_feature_research_title">Premium Research</string>
+    <string name="premium_feature_research_desc">Top picks, tidbits, and curated insights</string>
+    <string name="subscribe_now">Subscribe Now</string>
+    <string name="premium_billed_info">Billed monthly · Cancel anytime</string>
+    <string name="premium_ios_coming_soon">In-app purchases coming soon on iOS</string>
 </resources>

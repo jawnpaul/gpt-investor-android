@@ -26,6 +26,7 @@ import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.StockDigestPr
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.OnStartConversation
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
+import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
@@ -58,7 +59,8 @@ class HomeViewModel(
     private val notificationRepository: NotificationRepository,
     private val modelsRepository: ModelsRepository,
     private val digestRepository: DigestRepository,
-    private val watchlistRepository: WatchlistRepository
+    private val watchlistRepository: WatchlistRepository,
+    private val premiumEventBus: PremiumEventBus
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState(timePeriod = computeTimePeriod()))
@@ -391,7 +393,7 @@ class HomeViewModel(
                         eventName = "unlock-premium-tapped",
                         params = mapOf("source" to event.source)
                     )
-                    _actions.emit(HomeAction.NavigateToProfile)
+                    premiumEventBus.requestPremium(source = event.source)
                 }
 
                 HomeEvent.SeeFullDigest -> {
@@ -422,6 +424,7 @@ class HomeViewModel(
                         eventName = "unlock-premium-tapped",
                         params = mapOf("source" to "digest_detail_screen")
                     )
+                    premiumEventBus.requestPremium(source = "digest_detail_screen")
                 }
             }
         }
@@ -634,6 +637,5 @@ sealed interface HomeAction {
     data object OnGoToSignUp : HomeAction
     data object NavigateToAllTrending : HomeAction
     data object NavigateToDiscover : HomeAction
-    data object NavigateToProfile : HomeAction
     data object NavigateToDigestDetail : HomeAction
 }

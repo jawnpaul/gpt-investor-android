@@ -10,13 +10,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.features.guest.presentation.GuestScreen
+import com.thejawnpaul.gptinvestor.features.premium.presentation.ui.PremiumSheet
+import com.thejawnpaul.gptinvestor.features.premium.presentation.viewmodel.PremiumViewModel
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun SetUpNavGraph(
@@ -28,8 +33,18 @@ fun SetUpNavGraph(
 ) {
     val platformContext: PlatformContext = koinInject()
     val platformActions: PlatformActions = koinInject()
+    val premiumViewModel = koinViewModel<PremiumViewModel>()
+    val premiumState by premiumViewModel.state.collectAsState()
 
     val startDestination = initialDestination(isUserSignedIn, isGuestSignedIn, hasCompletedOnboarding)
+
+    if (premiumState.isVisible) {
+        PremiumSheet(
+            state = premiumState,
+            onDismiss = premiumViewModel::dismiss,
+            onPurchase = premiumViewModel::purchase
+        )
+    }
 
     Scaffold(
         bottomBar = { BottomNavBar(navController) },
@@ -46,9 +61,10 @@ fun SetUpNavGraph(
                     authenticationNavGraph(navController, platformActions)
                     investorNavGraph(navController, platformActions)
                     discoverNavGraph(navController)
+                    browseStocksNavGraph(navController)
                     companyNavGraph(navController, platformActions)
-                    conversationNavGraph(navController, platformActions, platformContext)
-                    historyNavGraph(navController, platformActions, platformContext)
+                    conversationNavGraph(navController, platformActions)
+                    historyNavGraph(navController, platformActions)
                     topPickNavGraph(navController, platformActions)
                     tidbitNavGraph(navController, platformActions)
                     settingsNavGraph(navController)

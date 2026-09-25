@@ -47,7 +47,9 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
     }
 
     LaunchedEffect(Unit) {
-        guestRateLimitNotifier.signal.collect { if (!showGuestRateLimitSheet) showGuestRateLimitSheet = true }
+        guestRateLimitNotifier.signal.collect {
+            if (!showGuestRateLimitSheet && isGuestSignedIn == true) showGuestRateLimitSheet = true
+        }
     }
 
     LaunchedEffect(deepLinkRoute, isNavGraphReady, isUserSignedIn, isGuestSignedIn) {

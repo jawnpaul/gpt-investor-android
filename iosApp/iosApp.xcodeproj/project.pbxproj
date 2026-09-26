@@ -22,7 +22,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		0753A4F4D5D7D2BA956FAD93 /* Exceptions for "iosApp" folder in "iosApp" target */ = {
+		0753A4F4D5D7D2BA956FAD93 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -35,13 +35,21 @@
 		52EFE54A5C0E54258D6286B1 /* iosApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				0753A4F4D5D7D2BA956FAD93 /* Exceptions for "iosApp" folder in "iosApp" target */,
+				0753A4F4D5D7D2BA956FAD93 /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
 			);
 			path = iosApp;
 			sourceTree = "<group>";
 		};
 		D8A3197734984FB05145E741 /* Configuration */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
 			path = Configuration;
 			sourceTree = "<group>";
 		};

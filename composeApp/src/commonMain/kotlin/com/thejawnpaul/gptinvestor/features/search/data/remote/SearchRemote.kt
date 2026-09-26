@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.search.data.remote
 
+import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.features.search.domain.model.ChipItem
 import com.thejawnpaul.gptinvestor.features.search.domain.model.PromptItem
 import com.thejawnpaul.gptinvestor.features.search.domain.model.SearchSection
@@ -83,5 +84,5 @@ fun SearchSectionRemote.toDomain(): SearchSection? = when (type) {
 private fun SearchItemRemote.toStockItem(): StockItem? {
     val ticker = ticker ?: return null
     val name = name ?: return null
-    return StockItem(ticker = ticker, name = name, logoUrl = logoUrl ?: "")
+    return StockItem(ticker = ticker, name = name, logoUrl = logoUrl?.toHttpsUrl() ?: "")
 }

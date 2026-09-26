@@ -43,7 +43,7 @@ fun SetUpNavGraph(
             ) {
                 onboardingNavGraph(navController)
                 postAuthOnboardingNavGraph(navController)
-                authenticationNavGraph(navController, platformActions)
+                authenticationNavGraph(navController, platformActions, hasCompletedPostAuthOnboarding)
                 investorNavGraph(navController, platformActions)
                 discoverNavGraph(navController)
                 companyNavGraph(navController, platformActions)

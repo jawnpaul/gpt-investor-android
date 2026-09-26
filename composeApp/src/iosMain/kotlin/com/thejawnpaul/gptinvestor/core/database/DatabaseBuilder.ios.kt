@@ -3,10 +3,25 @@ package com.thejawnpaul.gptinvestor.core.database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import platform.Foundation.NSHomeDirectory
+import kotlinx.cinterop.ExperimentalForeignApi
+import platform.Foundation.NSDocumentDirectory
+import platform.Foundation.NSFileManager
+import platform.Foundation.NSURL
+import platform.Foundation.NSURLIsExcludedFromBackupKey
+import platform.Foundation.NSUserDomainMask
 
+@OptIn(ExperimentalForeignApi::class)
 actual fun getDatabaseBuilder(context: Any?): RoomDatabase.Builder<GPTInvestorDatabase> {
-    val dbFile = NSHomeDirectory() + "/${GPTInvestorDatabase.DB_NAME}.db"
+    val documentDirectory = NSFileManager.defaultManager.URLForDirectory(
+        directory = NSDocumentDirectory,
+        inDomain = NSUserDomainMask,
+        appropriateForURL = null,
+        create = false,
+        error = null
+    )
+    val dbFile = requireNotNull(documentDirectory).path + "/${GPTInvestorDatabase.DB_NAME}.db"
+    NSURL.fileURLWithPath(dbFile)
+        .setResourceValue(value = true, forKey = NSURLIsExcludedFromBackupKey, error = null)
     return Room.databaseBuilder<GPTInvestorDatabase>(
         name = dbFile,
         factory = { GPTInvestorDatabaseConstructor.initialize() }

@@ -21,7 +21,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.compose.viewmodel.koinViewModel
 
-fun NavGraphBuilder.authenticationNavGraph(navController: NavHostController, platformActions: PlatformActions) {
+fun NavGraphBuilder.authenticationNavGraph(
+    navController: NavHostController,
+    platformActions: PlatformActions,
+    hasCompletedPostAuthOnboarding: Boolean
+) {
     composable(route = Screen.DefaultAuthenticationScreen.route) {
         val viewModel = koinViewModel<DefaultAuthenticationViewModel>()
         val state = viewModel.loading.collectAsState()
@@ -30,7 +34,11 @@ fun NavGraphBuilder.authenticationNavGraph(navController: NavHostController, pla
             viewModel.actions.onEach { action ->
                 when (action) {
                     DefaultAuthenticationAction.OnGoToHome -> {
-                        navigateToHome(navController, Screen.DefaultAuthenticationScreen.route)
+                        navigateAfterAuth(
+                            navController,
+                            Screen.DefaultAuthenticationScreen.route,
+                            hasCompletedPostAuthOnboarding
+                        )
                     }
 
                     DefaultAuthenticationAction.OnGoToSignUp -> {
@@ -71,7 +79,7 @@ fun NavGraphBuilder.authenticationNavGraph(navController: NavHostController, pla
                     }
 
                     LoginUiAction.OnGoToHome -> {
-                        navigateToHome(navController, Screen.LoginScreen.route)
+                        navigateAfterAuth(navController, Screen.LoginScreen.route, hasCompletedPostAuthOnboarding)
                     }
                 }
             }.launchIn(scope)
@@ -92,7 +100,7 @@ fun NavGraphBuilder.authenticationNavGraph(navController: NavHostController, pla
                     }
 
                     SignUpUiAction.OnGoToHome -> {
-                        navigateToHome(navController, Screen.SignUpScreen.route)
+                        navigateAfterAuth(navController, Screen.SignUpScreen.route, hasCompletedPostAuthOnboarding)
                     }
 
                     SignUpUiAction.OnGoToLogin -> {
@@ -110,5 +118,19 @@ fun NavGraphBuilder.authenticationNavGraph(navController: NavHostController, pla
             state = state.value,
             onEvent = viewModel::handleEvent
         )
+    }
+}
+
+private fun navigateAfterAuth(
+    navController: androidx.navigation.NavHostController,
+    popUpToRoute: String,
+    hasCompletedPostAuthOnboarding: Boolean
+) {
+    if (!hasCompletedPostAuthOnboarding) {
+        navController.navigate(Screen.PostAuthOnboardingScreen.route) {
+            popUpTo(popUpToRoute) { inclusive = true }
+        }
+    } else {
+        navigateToHome(navController, popUpToRoute)
     }
 }

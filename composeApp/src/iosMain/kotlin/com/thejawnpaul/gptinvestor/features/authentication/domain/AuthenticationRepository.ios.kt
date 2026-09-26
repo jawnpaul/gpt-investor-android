@@ -45,25 +45,20 @@ actual suspend fun loginWithGooglePlatform(
     )
 
     val currentUser = auth.currentUser
-    currentUser?.let {
-        val firebaseIdToken = it.getIdToken(true)
-        val loginResponse = apiService.loginWithFirebase(
-            FirebaseLoginRequest(firebaseIdToken ?: "")
-        )
-        gptInvestorPreferences.setUserName(currentUser.displayName ?: "null")
-        if (loginResponse.isSuccessful) {
-            loginResponse.body?.let { response ->
-                gptInvestorPreferences.setUserId(response.user?.uid.toString())
-                gptInvestorPreferences.setIsUserLoggedIn(true)
-                response.user?.name?.let {
-                    gptInvestorPreferences.setUserName(response.user.name)
-                }
-                tokenStorage.saveAccessToken(response.accessToken ?: "")
-                tokenStorage.saveRefreshToken(response.refreshToken ?: "")
-                tokenSyncManager.syncToken()
-            }
-        }
-    }
+        ?: throw Exception("No current user after Google sign-in")
+
+    val firebaseIdToken = currentUser.getIdToken(true)
+    val loginResponse = apiService.loginWithFirebase(FirebaseLoginRequest(firebaseIdToken ?: ""))
+    if (!loginResponse.isSuccessful) throw Exception("Backend login failed: ${loginResponse.code}")
+    val body = loginResponse.body ?: throw Exception("Empty response body")
+
+    gptInvestorPreferences.setUserName(body.user?.name ?: currentUser.displayName ?: "null")
+    gptInvestorPreferences.setUserId(body.user?.uid.toString())
+    gptInvestorPreferences.setIsUserLoggedIn(true)
+    tokenStorage.saveAccessToken(body.accessToken ?: "")
+    tokenStorage.saveRefreshToken(body.refreshToken ?: "")
+    gptInvestorPreferences.clearIsGuestLoggedIn()
+    tokenSyncManager.syncToken()
     Result.success(Unit)
 } catch (e: Exception) {
     Logger.e(e) { "Google login failed on iOS" }

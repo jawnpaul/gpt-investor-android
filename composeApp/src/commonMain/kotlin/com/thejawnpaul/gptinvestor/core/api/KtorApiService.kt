@@ -27,6 +27,8 @@ import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityRe
 import com.thejawnpaul.gptinvestor.features.guest.data.remote.GuestLoginRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenResponse
+import com.thejawnpaul.gptinvestor.features.postauthonboarding.data.remote.SaveOnboardingAnswersRequest
+import com.thejawnpaul.gptinvestor.features.postauthonboarding.data.remote.SaveOnboardingAnswersResponse
 import com.thejawnpaul.gptinvestor.features.search.data.remote.ClearHistoryResponse
 import com.thejawnpaul.gptinvestor.features.search.data.remote.SearchResponse
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.AllTidbitResponse
@@ -208,6 +210,12 @@ class KtorApiService(@Provided private val client: HttpClient) {
 
     suspend fun clearSearchHistory(): KtorResponse<ClearHistoryResponse> =
         client.delete("v1.1/search/history").toKtorResponse()
+
+    suspend fun saveOnboardingAnswers(
+        request: SaveOnboardingAnswersRequest
+    ): KtorResponse<SaveOnboardingAnswersResponse> = client.post("v1/user/onboarding") {
+        setBody(request)
+    }.toKtorResponse()
 }
 
 class KtorResponse<T>(val isSuccessful: Boolean, val body: T?, val errorBody: String?, val code: Int)

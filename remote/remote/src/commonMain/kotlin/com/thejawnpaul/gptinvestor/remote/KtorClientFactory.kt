@@ -98,6 +98,7 @@ object KtorClientFactory {
                 url(BuildConfig.BASE_URL)
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
+                header("Accept-Language", getCurrentLocale())
             }
         }
     }

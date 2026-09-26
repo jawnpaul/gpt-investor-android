@@ -197,4 +197,20 @@
     <string name="search_a_stock_to_analyse">Search a stock to analyse</string>
     <string name="sign_in_action">Sign in</string>
 
+    <string name="post_auth_onboarding_title">Help us personalize your experience</string>
+    <string name="post_auth_onboarding_subtitle">Your answers shape the insights and picks we show you.</string>
+    <string name="post_auth_onboarding_experience_label">How would you describe your investing experience?</string>
+    <string name="post_auth_onboarding_experience_beginner">I'm new to investing</string>
+    <string name="post_auth_onboarding_experience_intermediate">Some experience</string>
+    <string name="post_auth_onboarding_experience_experienced">Experienced investor</string>
+    <string name="post_auth_onboarding_goal_label">What's your primary investing goal?</string>
+    <string name="post_auth_onboarding_goal_grow_wealth">Grow wealth long-term</string>
+    <string name="post_auth_onboarding_goal_generate_income">Generate income</string>
+    <string name="post_auth_onboarding_goal_learn_basics">Learn the basics</string>
+    <string name="post_auth_onboarding_goal_just_curious">Just curious</string>
+    <string name="post_auth_onboarding_risk_label">How do you approach risk?</string>
+    <string name="post_auth_onboarding_risk_conservative">Play it safe</string>
+    <string name="post_auth_onboarding_risk_balanced">Balanced approach</string>
+    <string name="post_auth_onboarding_risk_aggressive">Comfortable with volatility</string>
+
 </resources>

@@ -2,8 +2,10 @@ package com.thejawnpaul.gptinvestor.features.conversation.data.repository
 
 import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
+import com.thejawnpaul.gptinvestor.core.api.parseApiError
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfigClient
 import com.thejawnpaul.gptinvestor.core.utility.Constants
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
@@ -28,6 +30,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Structured
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
+import io.ktor.client.statement.bodyAsText
 import io.ktor.utils.io.readUTF8Line
 import kotlin.time.Clock
 import kotlin.time.Clock.System
@@ -35,6 +38,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.serialization.json.Json
@@ -45,7 +49,8 @@ class ConversationRepository(
     private val apiService: KtorApiService,
     private val messageDao: MessageDao,
     private val conversationDao: ConversationDao,
-    private val remoteConfig: RemoteConfigClient
+    private val remoteConfig: RemoteConfigClient,
+    private val appPreferences: AppPreferences
 ) : IConversationRepository {
 
     private val json = Json { ignoreUnknownKeys = true }
@@ -116,6 +121,7 @@ class ConversationRepository(
             emit(Either.Right(structuredConversation))
 
             val aiChatRequest = AiChatRequest(prompt = prompt.query)
+            val isGuest = appPreferences.isGuestLoggedIn.first() == true
             apiService.chatAiResponse(aiChatRequest) { chatResponse ->
                 if (chatResponse.status.value in 200..299) {
                     handleSseStream(
@@ -125,6 +131,11 @@ class ConversationRepository(
                         messageId = messageId
                     )
                 } else {
+                    val errorBody = try {
+                        chatResponse.bodyAsText()
+                    } catch (_: Exception) {
+                        null
+                    }
                     structuredConversation.let { conversation ->
                         val updatedMessages = ArrayList(conversation.messageList)
                         val index = updatedMessages.indexOfFirst { it.id == messageId }
@@ -137,7 +148,7 @@ class ConversationRepository(
                             emit(Either.Right(conversation.copy(messageList = updatedMessages)))
                         }
                     }
-                    emit(Either.Left(mapHttpCodeToFailure(chatResponse.status.value)))
+                    emit(Either.Left(mapHttpCodeToFailure(chatResponse.status.value, errorBody, isGuest)))
                 }
             }
         } catch (e: Exception) {
@@ -195,6 +206,7 @@ class ConversationRepository(
                 conversationId = entity?.remoteId,
                 tickerSymbol = prompt.tickerSymbol
             )
+            val isGuestInput = appPreferences.isGuestLoggedIn.first() == true
             apiService.chatAiResponse(aiChatRequest) { chatResponse ->
                 if (chatResponse.status.value in 200..299) {
                     handleSseStream(
@@ -204,6 +216,11 @@ class ConversationRepository(
                         newMessageId
                     )
                 } else {
+                    val errorBody = try {
+                        chatResponse.bodyAsText()
+                    } catch (_: Exception) {
+                        null
+                    }
                     val updatedMessages = ArrayList(conversation.messageList)
                     val index = updatedMessages.indexOfFirst { it.id == newMessageId }
                     if (index != -1) {
@@ -214,7 +231,7 @@ class ConversationRepository(
                         )
                         emit(Either.Right(conversation.copy(messageList = updatedMessages)))
                     }
-                    emit(Either.Left(mapHttpCodeToFailure(chatResponse.status.value)))
+                    emit(Either.Left(mapHttpCodeToFailure(chatResponse.status.value, errorBody, isGuestInput)))
                 }
             }
         } catch (e: Exception) {
@@ -505,25 +522,42 @@ class ConversationRepository(
         }
     }
 
-    private fun mapHttpCodeToFailure(code: Int): Failure = when (code) {
-        429 -> Failure.RateLimitExceeded
-        413 -> Failure.ContextLimitReached
-        else -> Failure.ServerError
+    private fun mapHttpCodeToFailure(code: Int, errorBody: String?, isGuest: Boolean): Failure {
+        val apiError = parseApiError(errorBody)
+        return when {
+            apiError.code == "guest_session_expired" || apiError.code == "invalid_guest_token" ->
+                Failure.GuestSessionExpired
+
+            apiError.code == "guest_limit_reached" -> Failure.GuestLimitReached
+
+            apiError.code == "rate_limited" -> Failure.RateLimitExceeded
+
+            code == 401 && isGuest && apiError.code == null -> Failure.GuestSessionExpired
+
+            code == 429 -> Failure.RateLimitExceeded
+
+            code == 413 -> Failure.ContextLimitReached
+
+            else -> Failure.ServerError
+        }
     }
 
-    private fun mapSseErrorToFailure(error: String): Failure {
-        val normalized = error.lowercase()
+    private fun mapSseErrorToFailure(data: String): Failure {
+        // Try new structured format {"code":"...","message":"..."} first
+        val apiError = parseApiError(data)
+        if (apiError.code != null) {
+            return when (apiError.code) {
+                "guest_session_expired", "invalid_guest_token" -> Failure.GuestSessionExpired
+                "guest_limit_reached" -> Failure.GuestLimitReached
+                "rate_limited" -> Failure.RateLimitExceeded
+                else -> Failure.ServerError
+            }
+        }
+        // Fall back to old {"error":"<message>"} string matching
+        val normalized = data.lowercase()
         return when {
-            normalized.contains(
-                "429"
-            ) ||
-                normalized.contains("rate_limit") -> Failure.RateLimitExceeded
-
-            normalized.contains(
-                "413"
-            ) ||
-                normalized.contains("context_limit") -> Failure.ContextLimitReached
-
+            normalized.contains("429") || normalized.contains("rate_limit") -> Failure.RateLimitExceeded
+            normalized.contains("413") || normalized.contains("context_limit") -> Failure.ContextLimitReached
             else -> Failure.ServerError
         }
     }

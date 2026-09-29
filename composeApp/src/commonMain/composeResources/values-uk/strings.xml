@@ -214,4 +214,11 @@
     <string name="email_conflict_title">Обліковий запис уже існує</string>
     <string name="email_conflict_body">Обліковий запис із цією електронною адресою вже існує. Спробуйте натомість увійти.</string>
 
+    <string name="guest_session_expired_title_expired">Ваш гостьовий сеанс завершено</string>
+    <string name="guest_session_expired_body_expired">Зареєструйтеся безкоштовно, щоб продовжити читати огляди та зберігати історію.</string>
+    <string name="guest_session_expired_title_limit">Ви використали безкоштовні гостьові огляди</string>
+    <string name="guest_session_expired_body_limit">Зареєструйтеся безкоштовно, щоб продовжити.</string>
+    <string name="guest_session_expired_sign_up">Зареєструватися</string>
+    <string name="guest_session_expired_have_account">У мене є обліковий запис</string>
+
 </resources>

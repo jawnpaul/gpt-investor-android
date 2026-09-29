@@ -33,6 +33,10 @@ sealed class Failure {
 
     data object ContextLimitReached : Failure()
 
+    data object GuestSessionExpired : Failure()
+
+    data object GuestLimitReached : Failure()
+
     /** * Extend this class for feature specific failures.*/
     abstract class FeatureFailure : Failure()
 }

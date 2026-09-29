@@ -214,11 +214,11 @@
     <string name="email_conflict_title">Konto existiert bereits</string>
     <string name="email_conflict_body">Mit dieser E-Mail-Adresse existiert bereits ein Konto. Versuchen Sie stattdessen, sich anzumelden.</string>
 
-    <string name="guest_session_expired_title_expired">Your guest session ended</string>
-    <string name="guest_session_expired_body_expired">Sign up free to keep reading briefs and save your history.</string>
-    <string name="guest_session_expired_title_limit">You\'ve used your free guest briefs</string>
-    <string name="guest_session_expired_body_limit">Sign up free to keep going.</string>
-    <string name="guest_session_expired_sign_up">Sign up</string>
-    <string name="guest_session_expired_have_account">I have an account</string>
+    <string name="guest_session_expired_title_expired">Ihre Gastsitzung ist abgelaufen</string>
+    <string name="guest_session_expired_body_expired">Jetzt kostenlos registrieren, um weiter Analysen zu lesen und Ihren Verlauf zu speichern.</string>
+    <string name="guest_session_expired_title_limit">Sie haben Ihre kostenlosen Gastzusammenfassungen aufgebraucht</string>
+    <string name="guest_session_expired_body_limit">Jetzt kostenlos registrieren, um weiterzumachen.</string>
+    <string name="guest_session_expired_sign_up">Registrieren</string>
+    <string name="guest_session_expired_have_account">Ich habe bereits ein Konto</string>
 
 </resources>

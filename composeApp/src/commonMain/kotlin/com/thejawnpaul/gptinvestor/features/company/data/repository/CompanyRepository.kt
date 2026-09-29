@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
+import com.thejawnpaul.gptinvestor.core.api.parseApiError
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
@@ -148,30 +149,6 @@ class CompanyRepository(
         }
     }
 
-    override suspend fun searchCompany(query: SearchCompanyQuery): Flow<Either<Failure, List<Company>>> = flow {
-        try {
-            if (query.sector == null) {
-                // search entire table
-                val companies =
-                    companyDao.searchAllCompanies(query = query.query)
-                        .map { it.toDomainObject() }
-                emit(Either.Right(companies))
-            } else {
-                // filter by column name
-                val companies =
-                    companyDao.searchCompaniesInSector(
-                        query = query.query.trim(),
-                        sectorKey = query.sector
-                    )
-                        .map { it.toDomainObject() }
-                emit(Either.Right(companies))
-            }
-        } catch (e: Exception) {
-            Logger.e(e.stackTraceToString())
-            emit(Either.Left(Failure.DataError))
-        }
-    }
-
     override suspend fun getCompanyBrief(ticker: String): Flow<Either<Failure, CompanyBrief>> = flow {
         val isGuest = appPreferences.isGuestLoggedIn.first() == true
         val userType = if (isGuest) "guest" else "logged_in"
@@ -197,15 +174,8 @@ class CompanyRepository(
                     emit(Either.Right(it.toBrief()))
                 }
             } else {
-                analyticsLogger.logEvent(
-                    eventName = "brief-failed",
-                    params = mapOf(
-                        "ticker" to ticker,
-                        "error_type" to response.code,
-                        "user_type" to userType
-                    )
-                )
-                emit(Either.Left(if (response.code == 429) Failure.RateLimitExceeded else Failure.ServerError))
+                val failure = mapBriefError(response.code, response.errorBody, isGuest, ticker, userType)
+                emit(Either.Left(failure))
             }
         } catch (e: Exception) {
             Logger.e(e.stackTraceToString())
@@ -217,7 +187,112 @@ class CompanyRepository(
                     "user_type" to userType
                 )
             )
-            emit(Either.Left(Failure.ServerError))
+            emit(Either.Left(Failure.NetworkConnection))
+        }
+    }
+
+    private fun mapBriefError(
+        code: Int,
+        errorBody: String?,
+        isGuest: Boolean,
+        ticker: String,
+        userType: String
+    ): Failure {
+        val apiError = parseApiError(errorBody)
+        val errorCode = apiError.code
+
+        return when {
+            errorCode == "guest_session_expired" || errorCode == "invalid_guest_token" -> {
+                analyticsLogger.logEvent(
+                    eventName = "guest-session-expired",
+                    params = mapOf(
+                        "reason" to "expired",
+                        "source" to "request",
+                        "ticker" to ticker,
+                        "user_type" to userType
+                    )
+                )
+                Failure.GuestSessionExpired
+            }
+
+            errorCode == "guest_limit_reached" -> {
+                analyticsLogger.logEvent(
+                    eventName = "guest-session-expired",
+                    params = mapOf(
+                        "reason" to "limit",
+                        "source" to "request",
+                        "ticker" to ticker,
+                        "user_type" to userType
+                    )
+                )
+                Failure.GuestLimitReached
+            }
+
+            errorCode == "rate_limited" -> {
+                analyticsLogger.logEvent(
+                    eventName = "rate-limit-hit",
+                    params = mapOf(
+                        "ticker" to ticker,
+                        "source" to "brief",
+                        "user_type" to userType
+                    )
+                )
+                analyticsLogger.logEvent(
+                    eventName = "brief-failed",
+                    params = mapOf(
+                        "ticker" to ticker,
+                        "error_type" to code,
+                        "user_type" to userType
+                    )
+                )
+                Failure.RateLimitExceeded
+            }
+
+            code == 401 && isGuest && errorCode == null -> {
+                // No code field: treat as session expired for guests
+                analyticsLogger.logEvent(
+                    eventName = "guest-session-expired",
+                    params = mapOf(
+                        "reason" to "expired",
+                        "source" to "request",
+                        "ticker" to ticker,
+                        "user_type" to userType
+                    )
+                )
+                Failure.GuestSessionExpired
+            }
+
+            code == 429 -> {
+                analyticsLogger.logEvent(
+                    eventName = "rate-limit-hit",
+                    params = mapOf(
+                        "ticker" to ticker,
+                        "source" to "brief",
+                        "user_type" to userType
+                    )
+                )
+                analyticsLogger.logEvent(
+                    eventName = "brief-failed",
+                    params = mapOf(
+                        "ticker" to ticker,
+                        "error_type" to code,
+                        "user_type" to userType
+                    )
+                )
+                Failure.RateLimitExceeded
+            }
+
+            else -> {
+                analyticsLogger.logEvent(
+                    eventName = "brief-failed",
+                    params = mapOf(
+                        "ticker" to ticker,
+                        "error_type" to code,
+                        "user_type" to userType
+                    )
+                )
+                Failure.ServerError
+            }
         }
     }
 
@@ -235,6 +310,28 @@ class CompanyRepository(
             )
         }
     ).flow
+
+    override suspend fun searchCompany(query: SearchCompanyQuery): Flow<Either<Failure, List<Company>>> = flow {
+        try {
+            if (query.sector == null) {
+                val companies =
+                    companyDao.searchAllCompanies(query = query.query)
+                        .map { it.toDomainObject() }
+                emit(Either.Right(companies))
+            } else {
+                val companies =
+                    companyDao.searchCompaniesInSector(
+                        query = query.query.trim(),
+                        sectorKey = query.sector
+                    )
+                        .map { it.toDomainObject() }
+                emit(Either.Right(companies))
+            }
+        } catch (e: Exception) {
+            Logger.e(e.stackTraceToString())
+            emit(Either.Left(Failure.DataError))
+        }
+    }
 
     override suspend fun searchCompaniesFromNetwork(query: String): Flow<Either<Failure, List<Company>>> = flow {
         val response = apiService.getPagedCompanies(query = query, page = 1, pageSize = 1)

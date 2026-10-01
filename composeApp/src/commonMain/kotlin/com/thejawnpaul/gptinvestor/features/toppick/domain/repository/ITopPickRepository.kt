@@ -17,11 +17,13 @@ interface ITopPickRepository {
 
     suspend fun shareTopPick(id: String): Flow<Either<Failure, String>>
 
-    suspend fun getSavedTopPicks(): Flow<Either<Failure, List<TopPick>>>
+    fun getSavedTopPicks(): Flow<Either<Failure, List<TopPick>>>
 
-    suspend fun getLocalTopPicks(): Flow<Either<Failure, List<TopPick>>>
+    fun getSavedTopPicksCount(): Flow<Int>
 
-    suspend fun getTopPicksByDate(): Flow<List<TopPick>>
+    fun getLocalTopPicks(): Flow<Either<Failure, List<TopPick>>>
 
-    suspend fun searchTopPicks(query: String): Flow<List<TopPick>>
+    fun getTopPicksByDate(): Flow<List<TopPick>>
+
+    fun searchTopPicks(query: String): Flow<List<TopPick>>
 }

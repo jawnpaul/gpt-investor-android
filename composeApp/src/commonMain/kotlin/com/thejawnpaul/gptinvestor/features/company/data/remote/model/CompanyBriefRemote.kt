@@ -29,7 +29,9 @@ data class CompanyBriefRemote(
     @SerialName("sentiment") val sentiment: String? = null,
     @SerialName("sentiment_summary") val sentimentSummary: String? = null,
     @SerialName("summary") val summary: String? = null,
-    @SerialName("ticker") val ticker: String? = null
+    @SerialName("ticker") val ticker: String? = null,
+    @SerialName("id") val id: String? = null,
+    @SerialName("is_watched") val isWatched: Boolean? = null
 )
 
 @Serializable

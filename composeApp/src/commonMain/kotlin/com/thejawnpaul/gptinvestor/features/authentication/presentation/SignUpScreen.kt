@@ -42,9 +42,12 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.already_have_an_account
+import com.thejawnpaul.gptinvestor.apple_icon
 import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.baseline_visibility_off_24
+import com.thejawnpaul.gptinvestor.core.platform.Platform
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
+import com.thejawnpaul.gptinvestor.core.platform.PlatformType
 import com.thejawnpaul.gptinvestor.email_address
 import com.thejawnpaul.gptinvestor.email_conflict_body
 import com.thejawnpaul.gptinvestor.email_conflict_title
@@ -59,6 +62,7 @@ import com.thejawnpaul.gptinvestor.or
 import com.thejawnpaul.gptinvestor.outline_visibility_24
 import com.thejawnpaul.gptinvestor.password
 import com.thejawnpaul.gptinvestor.sign_up
+import com.thejawnpaul.gptinvestor.sign_up_with_apple
 import com.thejawnpaul.gptinvestor.sign_up_with_google
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.linkMedium
@@ -228,6 +232,26 @@ fun SignUpScreen(state: SignUpUiState, onEvent: (SignUpUiEvent) -> Unit, modifie
                     text = stringResource(Res.string.or).uppercase(),
                     textAlign = TextAlign.Center
                 )
+
+                if (Platform.type == PlatformType.IOS) {
+                    Button(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { onEvent(SignUpUiEvent.SingUpWithApple) },
+                        enabled = !state.loading
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Image(
+                                modifier = Modifier.size(20.dp),
+                                painter = painterResource(Res.drawable.apple_icon),
+                                contentDescription = null
+                            )
+                            Text(text = stringResource(Res.string.sign_up_with_apple))
+                        }
+                    }
+                }
 
                 Button(
                     modifier = Modifier.fillMaxWidth(),

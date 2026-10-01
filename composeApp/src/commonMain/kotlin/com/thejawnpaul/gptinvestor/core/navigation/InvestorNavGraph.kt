@@ -2,14 +2,16 @@ package com.thejawnpaul.gptinvestor.core.navigation
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
+import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DigestDetailScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
+import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -19,20 +21,11 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
     composable(Screen.HomeTabScreen.route) {
         val homeViewModel = koinViewModel<HomeViewModel>()
         val state = homeViewModel.uiState.collectAsState()
-        val scope = rememberCoroutineScope()
         LaunchedEffect(Unit) {
             homeViewModel.actions.onEach { action ->
                 when (action) {
-                    HomeAction.OnGoToAllTopPicks -> {
-                        navController.navigate(Screen.AllTopPicksScreen.route)
-                    }
-
                     is HomeAction.OnGoToCompanyDetail -> {
                         navController.navigate(Screen.CompanyDetailScreen.createRoute(action.ticker))
-                    }
-
-                    is HomeAction.OnGoToTopPickDetail -> {
-                        navController.navigate(Screen.TopPickDetailScreen.createRoute(action.id))
                     }
 
                     is HomeAction.OnStartConversation -> {
@@ -42,36 +35,6 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
                                 title = action.title
                             )
                         )
-                    }
-
-                    HomeAction.OnGoToDiscover -> {
-                        navController.navigate(Screen.DiscoverTabScreen.createRoute())
-                    }
-
-                    HomeAction.OnGoToHistory -> {
-                        navController.navigate(Screen.HistoryTabScreen.route)
-                    }
-
-                    HomeAction.OnGoToSavedPicks -> {
-                        navController.navigate(Screen.SavedTopPicksScreen.route)
-                    }
-
-                    HomeAction.OnGoToSettings -> {
-                        navController.navigate(Screen.SettingsScreen.route)
-                    }
-
-                    HomeAction.OnGoToAllTidbits -> {
-                        navController.navigate(route = Screen.TidbitScreen.route)
-                    }
-
-                    is HomeAction.OnGoToTidbitDetail -> {
-                        navController.navigate(
-                            route = Screen.TidbitDetailScreen.createRoute(tidbitId = action.id)
-                        )
-                    }
-
-                    HomeAction.OnGoToSavedTidbits -> {
-                        navController.navigate(route = Screen.SavedTidbitScreen.route)
                     }
 
                     is HomeAction.ShowToast -> {
@@ -84,21 +47,45 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
                         }
                     }
 
-                    HomeAction.NavigateToSearch -> {
-                        navController.navigate(Screen.SearchScreen.route)
-                    }
-
                     HomeAction.NavigateToAllTrending -> {
                         navController.navigate(Screen.AllTrendingScreen.route)
                     }
+
+                    HomeAction.NavigateToDiscover -> {
+                        navController.navigate(Screen.DiscoverTabScreen.route)
+                    }
+
+                    HomeAction.NavigateToDigestDetail -> {
+                        navController.navigate(Screen.DigestDetailScreen.route)
+                    }
                 }
-            }.launchIn(scope)
+            }.launchIn(this)
         }
 
         HomeScreen(
             modifier = Modifier,
             state = state.value,
             onEvent = homeViewModel::handleEvent
+        )
+    }
+
+    composable(Screen.DigestDetailScreen.route) {
+        val parentEntry = remember(navController) {
+            navController.getBackStackEntry(Screen.HomeTabScreen.route)
+        }
+        val homeViewModel = koinViewModel<HomeViewModel>(viewModelStoreOwner = parentEntry)
+        val state = homeViewModel.uiState.collectAsState()
+
+        LaunchedEffect(Unit) {
+            homeViewModel.handleEvent(HomeEvent.DigestDetailViewed)
+        }
+
+        DigestDetailScreen(
+            digestView = state.value.dailyDigestView,
+            onBack = { navController.popBackStack() },
+            onUnlockPremium = {
+                homeViewModel.handleEvent(HomeEvent.DigestDetailUnlockPremium)
+            }
         )
     }
 }

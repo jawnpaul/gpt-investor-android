@@ -44,7 +44,6 @@ import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.app_name
 import com.thejawnpaul.gptinvestor.baseline_bookmarks_24
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DrawerState
-import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.ThemeDropdown
 import com.thejawnpaul.gptinvestor.history
 import com.thejawnpaul.gptinvestor.ic_logout
 import com.thejawnpaul.gptinvestor.ic_saved_tidbit
@@ -233,15 +232,6 @@ fun NavDrawerContent(
                                 text = stringResource(Res.string.theme),
                                 style = MaterialTheme.typography.labelLarge
                             )
-
-                            ThemeDropdown(
-                                modifier = Modifier,
-                                onClick = {
-                                    onEvent(NavDrawerEvent.ChangeTheme(it))
-                                },
-                                options = listOf("Light", "Dark", "System"),
-                                selectedOption = state.theme ?: "Dark"
-                            )
                         }
 
                         Row(
@@ -265,28 +255,6 @@ fun NavDrawerContent(
                         }
 
                         HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
-
-                        /*Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = null,
-                                    onClick = {}
-                                ),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.delete_account),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = gptInvestorColors.redColors.allRed
-                            )
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_delete_profile),
-                                contentDescription = null,
-                                tint = gptInvestorColors.redColors.allRed
-                            )
-                        }*/
                     }
                 }
             }

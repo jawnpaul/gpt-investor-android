@@ -31,6 +31,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Structured
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,6 +51,7 @@ class CompanyViewModel(
     private val modelsRepository: ModelsRepository,
     private val feedbackRepository: FeedbackRepository,
     private val appPreferences: AppPreferences,
+    private val watchlistRepository: WatchlistRepository,
     @Provided private val analyticsLogger: AnalyticsLogger,
     private val guestSessionNotifier: GuestSessionNotifier
 ) : ViewModel() {
@@ -57,8 +59,15 @@ class CompanyViewModel(
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
     private val isGuestSession = MutableStateFlow(false)
     val selectedCompany =
-        combine(_selectedCompany, appPreferences.isGuestLoggedIn) { company, isGuest ->
-            company.copy(isGuestSession = isGuest == true)
+        combine(
+            _selectedCompany,
+            appPreferences.isGuestLoggedIn,
+            appPreferences.hasBriefSpotlightSeen
+        ) { company, isGuest, spotlightSeen ->
+            company.copy(
+                isGuestSession = isGuest == true,
+                showSpotlight = spotlightSeen != true
+            )
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -405,6 +414,52 @@ class CompanyViewModel(
                     )
                 )
             }
+
+            CompanyDetailEvent.ShareBrief -> {
+                val brief = _selectedCompany.value.brief ?: return
+                processCompanyDetailAction(CompanyDetailAction.OnShare(brief.name, brief.ticker, brief.id))
+            }
+
+            CompanyDetailEvent.AddToWatchlist -> {
+                val ticker = _selectedCompany.value.header.companyTicker.ifEmpty { selectedCompanyTicker.orEmpty() }
+                viewModelScope.launch {
+                    watchlistRepository.addStockToWatchList(ticker).fold(
+                        { processCompanyDetailAction(CompanyDetailAction.WatchlistAddFailed) },
+                        {
+                            analyticsLogger.logEvent(
+                                eventName = "stock-added-to-watchlist",
+                                params = mapOf("ticker" to ticker, "source" to "company_brief")
+                            )
+                            _selectedCompany.update { it.copy(brief = it.brief?.copy(isWatched = true)) }
+                            processCompanyDetailAction(CompanyDetailAction.WatchlistAdded)
+                        }
+                    )
+                }
+            }
+
+            CompanyDetailEvent.RemoveFromWatchlist -> {
+                val ticker = _selectedCompany.value.brief?.ticker
+                    ?: _selectedCompany.value.header.companyTicker.ifEmpty { selectedCompanyTicker.orEmpty() }
+                viewModelScope.launch {
+                    watchlistRepository.removeFromWatchlist(ticker).fold(
+                        { processCompanyDetailAction(CompanyDetailAction.WatchlistRemoveFailed(ticker)) },
+                        {
+                            analyticsLogger.logEvent(
+                                eventName = "stock-removed-from-watchlist",
+                                params = mapOf("ticker" to ticker, "source" to "company_brief")
+                            )
+                            _selectedCompany.update { it.copy(brief = it.brief?.copy(isWatched = false)) }
+                            processCompanyDetailAction(CompanyDetailAction.WatchlistRemoved(ticker))
+                        }
+                    )
+                }
+            }
+
+            CompanyDetailEvent.DismissSpotlight -> {
+                viewModelScope.launch {
+                    appPreferences.setHasBriefSpotlightSeen(true)
+                }
+            }
         }
     }
 
@@ -499,6 +554,10 @@ sealed interface CompanyDetailEvent {
     data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) : CompanyDetailEvent
     data class BriefSentimentViewed(val sentiment: BriefSentiment) : CompanyDetailEvent
     data class BriefKeyNumberExpanded(val keyNumberType: KeyNumberType) : CompanyDetailEvent
+    data object ShareBrief : CompanyDetailEvent
+    data object AddToWatchlist : CompanyDetailEvent
+    data object RemoveFromWatchlist : CompanyDetailEvent
+    data object DismissSpotlight : CompanyDetailEvent
 }
 
 sealed interface CompanyDetailAction {
@@ -507,4 +566,9 @@ sealed interface CompanyDetailAction {
     data class OnCopy(val text: String) : CompanyDetailAction
     data object OnGoToSignUp : CompanyDetailAction
     data class ShowToast(val message: String) : CompanyDetailAction
+    data class OnShare(val name: String, val ticker: String, val id: String) : CompanyDetailAction
+    data object WatchlistAdded : CompanyDetailAction
+    data object WatchlistAddFailed : CompanyDetailAction
+    data class WatchlistRemoved(val ticker: String) : CompanyDetailAction
+    data class WatchlistRemoveFailed(val ticker: String) : CompanyDetailAction
 }

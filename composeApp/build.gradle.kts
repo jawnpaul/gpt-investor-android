@@ -15,6 +15,7 @@ plugins {
     alias(libs.plugins.ktLint)
     alias(libs.plugins.buildkonfig)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.swiftklib)
 }
 
 kotlin {
@@ -50,6 +51,14 @@ kotlin {
             baseName = "ComposeApp"
             isStatic = true
             export(project(":analytics"))
+            linkerOpts("-dead_strip")
+        }
+        iosTarget.compilations {
+            val main by getting {
+                cinterops {
+                    create("bridges")
+                }
+            }
         }
     }
 
@@ -195,6 +204,7 @@ ktlint {
     )
 }
 
+
 dependencies {
     ktlintRuleset(libs.ktlint.compose.rules)
     add("kspAndroid", libs.androidx.room.compiler)
@@ -217,6 +227,7 @@ buildkonfig {
         buildConfigField(FieldSpec.Type.BOOLEAN, "DEBUG", "false")
         buildConfigField(FieldSpec.Type.STRING, "BASE_URL", localProperties.getProperty("BASE_URL") ?: "")
         buildConfigField(FieldSpec.Type.STRING, "GEMINI_API_KEY", localProperties.getProperty("GEMINI_API_KEY") ?: "")
+        buildConfigField(FieldSpec.Type.STRING, "BILLING_PRODUCT_ID", localProperties.getProperty("BILLING_PRODUCT_ID") ?: "")
         buildConfigField(
             FieldSpec.Type.STRING,
             "WEB_CLIENT_ID",
@@ -232,8 +243,20 @@ buildkonfig {
         )
         buildConfigField(
             FieldSpec.Type.STRING,
+            "BASE_URL",
+            localProperties.getProperty("BASE_URL_DEV") ?: ""
+        )
+        buildConfigField(
+            FieldSpec.Type.STRING,
             "WEB_CLIENT_ID",
             localProperties.getProperty("WEB_CLIENT_ID_DEV") ?: ""
         )
+    }
+}
+
+swiftklib {
+    create("bridges") {
+        path = file("../iosApp/iosApp/Bridges")
+        packageName("com.thejawnpaul.gptinvestor.bridges")
     }
 }

@@ -13,7 +13,7 @@ import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
-import com.thejawnpaul.gptinvestor.core.platform.AndroidPlatformContext
+import com.thejawnpaul.gptinvestor.core.platform.ActivityContextHolder
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.features.billing.data.remote.VerifyPurchaseRequest
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingPurchase
@@ -106,7 +106,7 @@ class BillingRepository(
     }
 
     override suspend fun launchPurchaseFlow(platformContext: PlatformContext, productId: String): DomainBillingResult {
-        val activity = (platformContext as? AndroidPlatformContext)?.context as? android.app.Activity
+        val activity = ActivityContextHolder.get()
             ?: return DomainBillingResult.Error("Billing requires an Android Activity context")
         Timber.d("Launching purchase flow for: $productId")
         return withContext(Dispatchers.Main) {

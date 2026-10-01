@@ -7,8 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
-import androidx.navigation.navDeepLink
 import com.thejawnpaul.gptinvestor.features.discover.DiscoverScreen
 import com.thejawnpaul.gptinvestor.features.discover.DiscoverViewModel
 import com.thejawnpaul.gptinvestor.features.discover.DiscoveryAction
@@ -17,16 +15,7 @@ import kotlinx.coroutines.flow.onEach
 import org.koin.compose.viewmodel.koinViewModel
 
 fun NavGraphBuilder.discoverNavGraph(navController: NavHostController) {
-    composable(
-        route = Screen.DiscoverTabScreen.route,
-        deepLinks = listOf(navDeepLink { uriPattern = Screen.DiscoverTabScreen.DEEP_LINK }),
-        arguments = listOf(
-            navArgument("sector") {
-                nullable = true
-                defaultValue = null
-            }
-        )
-    ) {
+    composable(route = Screen.DiscoverTabScreen.route) {
         val viewModel = koinViewModel<DiscoverViewModel>()
         val state = viewModel.discoveryScreenState.collectAsState()
         val scope = rememberCoroutineScope()
@@ -52,6 +41,18 @@ fun NavGraphBuilder.discoverNavGraph(navController: NavHostController) {
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
                     }
+
+                    DiscoveryAction.OnGoToSearch -> {
+                        navController.navigate(route = Screen.SearchScreen.route)
+                    }
+
+                    is DiscoveryAction.OnGoToTidbitDetail -> {
+                        navController.navigate(route = Screen.TidbitDetailScreen.createRoute(tidbitId = action.id))
+                    }
+
+                    DiscoveryAction.OnGoToBrowse -> {
+                        navController.navigate(Screen.BrowseStocksScreen.route)
+                    }
                 }
             }.launchIn(scope)
         }
@@ -59,7 +60,6 @@ fun NavGraphBuilder.discoverNavGraph(navController: NavHostController) {
         DiscoverScreen(
             modifier = Modifier,
             state = state.value,
-            paging = viewModel.companiesPagingData,
             onEvent = viewModel::handleEvent
         )
     }

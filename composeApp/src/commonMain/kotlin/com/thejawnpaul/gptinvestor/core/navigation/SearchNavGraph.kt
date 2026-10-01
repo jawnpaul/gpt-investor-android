@@ -27,7 +27,7 @@ fun NavGraphBuilder.searchNavGraph(navController: NavHostController) {
                     is SearchAction.OnNavigateToConversation ->
                         navController.navigate(Screen.ConversationScreen.createRoute(chatInput = action.query))
                     is SearchAction.OnNavigateToSector ->
-                        navController.navigate(Screen.DiscoverTabScreen.createRoute(action.sectorKey))
+                        navController.navigate(Screen.BrowseStocksScreen.createRoute(action.sectorKey))
                 }
             }.launchIn(scope)
         }

@@ -819,6 +819,7 @@ private fun OnboardingScreen_StockSelection_Preview() {
 @Composable
 private fun OnboardingScreen_LiveBrief_Preview() {
     val sampleBrief = CompanyBrief(
+        id = "",
         ticker = "AAPL",
         name = "Apple Inc.",
         logoUrl = "",

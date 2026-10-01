@@ -17,7 +17,8 @@ data class CompanyRemote(
     @SerialName("name") val name: String,
     @SerialName("logo_url") val logoUrl: String,
     @SerialName("website") val website: String,
-    @SerialName("date") val date: String
+    @SerialName("date") val date: String,
+    @SerialName("is_watched") val isWatched: Boolean? = null
 ) {
     fun toEntity() = CompanyEntity(
         ticker = ticker,

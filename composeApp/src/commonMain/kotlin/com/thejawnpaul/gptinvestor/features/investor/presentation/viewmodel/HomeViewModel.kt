@@ -364,7 +364,7 @@ class HomeViewModel(
                                 }
 
                                 is WatchlistFailure.WatchlistFull -> {
-                                    processAction(HomeAction.ShowToast("Watchlist full. Upgrade to Premium!"))
+                                    processAction(HomeAction.ShowToast("Watchlist is full"))
                                 }
 
                                 is WatchlistFailure.TickerNotFound -> {

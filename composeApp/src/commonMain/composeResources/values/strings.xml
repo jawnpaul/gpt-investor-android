@@ -62,6 +62,7 @@
     <string name="retry_sign_in">Retry Sign in</string>
     <string name="sign_out">Sign out</string>
     <string name="settings">Settings</string>
+    <string name="digest_delivery_time">Digest delivery time</string>
     <string name="saved_picks">Saved picks</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>

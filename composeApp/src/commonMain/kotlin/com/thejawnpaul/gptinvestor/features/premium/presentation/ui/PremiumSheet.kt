@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AllInclusive
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Unarchive
 import androidx.compose.material3.Button
@@ -43,8 +42,6 @@ import com.thejawnpaul.gptinvestor.features.premium.presentation.state.PremiumSh
 import com.thejawnpaul.gptinvestor.premium_billed_info
 import com.thejawnpaul.gptinvestor.premium_feature_coverage_desc
 import com.thejawnpaul.gptinvestor.premium_feature_coverage_title
-import com.thejawnpaul.gptinvestor.premium_feature_digest_desc
-import com.thejawnpaul.gptinvestor.premium_feature_digest_title
 import com.thejawnpaul.gptinvestor.premium_feature_queries_desc
 import com.thejawnpaul.gptinvestor.premium_feature_queries_title
 import com.thejawnpaul.gptinvestor.premium_feature_research_desc
@@ -121,12 +118,6 @@ private fun PremiumSheetContent(state: PremiumSheetState, onPurchase: () -> Unit
 
         Spacer(Modifier.height(28.dp))
 
-        PremiumFeatureRow(
-            icon = Icons.Filled.DateRange,
-            title = stringResource(Res.string.premium_feature_digest_title),
-            description = stringResource(Res.string.premium_feature_digest_desc)
-        )
-        Spacer(Modifier.height(16.dp))
         PremiumFeatureRow(
             icon = Icons.Filled.AllInclusive,
             title = stringResource(Res.string.premium_feature_queries_title),

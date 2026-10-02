@@ -62,6 +62,7 @@
     <string name="retry_sign_in">Повторити вхід</string>
     <string name="sign_out">Вийти</string>
     <string name="settings">Налаштування</string>
+    <string name="digest_delivery_time">Час доставки дайджесту</string>
     <string name="saved_picks">Збережені вибори</string>
     <string name="delete">Видалити</string>
     <string name="cancel">Скасувати</string>

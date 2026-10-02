@@ -62,6 +62,7 @@
     <string name="retry_sign_in">سائن اِن دوبارہ کریں</string>
     <string name="sign_out">سائن آؤٹ</string>
     <string name="settings">ترتیبات</string>
+    <string name="digest_delivery_time">ڈائجسٹ کی ترسیل کا وقت</string>
     <string name="saved_picks">محفوظ کردہ انتخاب</string>
     <string name="delete">حذف کریں</string>
     <string name="cancel">منسوخ کریں</string>

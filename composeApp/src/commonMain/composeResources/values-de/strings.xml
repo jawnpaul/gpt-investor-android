@@ -62,6 +62,7 @@
     <string name="retry_sign_in">Erneut anmelden</string>
     <string name="sign_out">Abmelden</string>
     <string name="settings">Einstellungen</string>
+    <string name="digest_delivery_time">Lieferzeit der Zusammenfassung</string>
     <string name="saved_picks">Gespeicherte Empfehlungen</string>
     <string name="delete">Löschen</string>
     <string name="cancel">Abbrechen</string>

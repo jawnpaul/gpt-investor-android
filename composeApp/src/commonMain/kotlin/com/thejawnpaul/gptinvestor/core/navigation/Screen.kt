@@ -58,7 +58,8 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
         fun createRoute(sectorKey: String? = null) =
             if (sectorKey != null) "discover_tab_screen?sector=$sectorKey" else "discover_tab_screen"
     }
-    data object HistoryTabScreen : Screen("history_tab_screen", true)
+    data object HistoryTabScreen : Screen("history_tab_screen", false)
+    data object ProfileTabScreen : Screen("profile_tab_screen", true)
 
     data object TidbitDetailScreen : Screen("tidbit_detail_screen/{tidbitId}", false) {
         fun createRoute(tidbitId: String) = "tidbit_detail_screen/$tidbitId"

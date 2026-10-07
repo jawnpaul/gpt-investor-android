@@ -11,7 +11,6 @@ import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfigClient
 import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.User
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
-import com.thejawnpaul.gptinvestor.features.authentication.presentation.DrawerState
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetTrendingCompaniesUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
@@ -65,7 +64,6 @@ class HomeViewModel(
         preferences.isGuestLoggedIn
     ) { state, userName, isGuestLoggedIn ->
         state.copy(
-            drawerState = state.drawerState.copy(user = userName),
             isGuestSession = isGuestLoggedIn == true,
             firstName = extractFirstName(userName)
         )
@@ -93,12 +91,7 @@ class HomeViewModel(
 
         viewModelScope.launch {
             preferences.themePreference.collect { theme ->
-                _uiState.update {
-                    it.copy(
-                        theme = theme,
-                        drawerState = it.drawerState.copy(theme = theme)
-                    )
-                }
+                _uiState.update { it.copy(theme = theme) }
             }
             preferences.notificationPermission.collect { permission ->
                 _uiState.update { it.copy(requestForNotificationPermission = permission) }
@@ -200,14 +193,6 @@ class HomeViewModel(
                     _uiState.update { it.copy(chatInput = null) }
                 }
 
-                is HomeEvent.ChangeTheme -> {
-                    preferences.setThemePreference(event.theme)
-                    analyticsLogger.logEvent(
-                        eventName = "theme-changed",
-                        params = mapOf("theme" to event.theme)
-                    )
-                }
-
                 HomeEvent.NotificationPermissionDenied -> {
                     preferences.setNotificationPermission(false)
                 }
@@ -271,12 +256,6 @@ class HomeViewModel(
                     _uiState.update { it.copy(chatInput = null) }
                 }
 
-                HomeEvent.SignOut -> {
-                    viewModelScope.launch {
-                        authenticationRepository.signOut()
-                    }
-                }
-
                 is HomeEvent.ClickTidbit -> {
                     logNavigationEvent(destination = "tidbit_detail", tidbitId = event.id)
                     _actions.emit(OnGoToTidbitDetail(event.id))
@@ -286,49 +265,6 @@ class HomeViewModel(
                     logNavigationEvent(destination = "all_tidbits")
 
                     _actions.emit(OnGoToAllTidbits)
-                }
-
-                HomeEvent.GoToDiscover -> {
-                    logNavigationEvent(destination = "discover")
-                    _actions.emit(HomeAction.OnGoToDiscover)
-                }
-
-                HomeEvent.GoToHistory -> {
-                    if (uiState.value.isGuestSession) {
-                        _actions.emit(HomeAction.ShowToast(message = "You can only see history after signing in"))
-                    } else {
-                        logNavigationEvent(destination = "history")
-                        _actions.emit(HomeAction.OnGoToHistory)
-                    }
-                }
-
-                HomeEvent.GoToSavedPicks -> {
-                    if (uiState.value.isGuestSession) {
-                        _actions.emit(HomeAction.ShowToast(message = "You can only see saved picks after signing in"))
-                    } else {
-                        logNavigationEvent(destination = "saved_picks")
-                        _actions.emit(HomeAction.OnGoToSavedPicks)
-                    }
-                }
-
-                HomeEvent.GoToSavedTidbits -> {
-                    if (uiState.value.isGuestSession) {
-                        _actions.emit(HomeAction.ShowToast(message = "You can only see saved tidbits after signing in"))
-                    } else {
-                        logNavigationEvent(destination = "saved_tidbits")
-
-                        _actions.emit(HomeAction.OnGoToSavedTidbits)
-                    }
-                }
-
-                HomeEvent.GoToSettings -> {
-                    if (uiState.value.isGuestSession) {
-                        _actions.emit(HomeAction.ShowToast(message = "You can only see settings after signing in"))
-                    } else {
-                        logNavigationEvent(destination = "settings")
-
-                        _actions.emit(HomeAction.OnGoToSettings)
-                    }
                 }
 
                 HomeEvent.GoToSignUp -> {
@@ -518,7 +454,6 @@ data class HomeUiState(
     ),
     val selectedWaitlistOptions: List<String> = emptyList(),
     val defaultPrompts: List<DefaultPrompt> = emptyList(),
-    val drawerState: DrawerState = DrawerState(),
     val homeTidbitView: HomeTidbitView = HomeTidbitView(),
     val isGuestSession: Boolean = false,
     val timePeriod: TimePeriod = TimePeriod.MORNING,
@@ -528,7 +463,6 @@ data class HomeUiState(
 sealed interface HomeEvent {
     data class ChatInputChanged(val input: String) : HomeEvent
     data object SendClick : HomeEvent
-    data class ChangeTheme(val theme: String) : HomeEvent
     data object NotificationPermissionGranted : HomeEvent
     data object NotificationPermissionDenied : HomeEvent
     data class ModelChanged(val model: AvailableModel) : HomeEvent
@@ -536,14 +470,8 @@ sealed interface HomeEvent {
     data class SelectWaitListOption(val option: String) : HomeEvent
     data object JoinWaitlist : HomeEvent
     data class DefaultPromptClicked(val prompt: DefaultPrompt) : HomeEvent
-    data object SignOut : HomeEvent
     data class ClickTidbit(val id: String) : HomeEvent
     data object GoToAllTidbits : HomeEvent
-    data object GoToSavedPicks : HomeEvent
-    data object GoToSavedTidbits : HomeEvent
-    data object GoToDiscover : HomeEvent
-    data object GoToSettings : HomeEvent
-    data object GoToHistory : HomeEvent
     data object GoToSignUp : HomeEvent
     data object RetryTrendingCompanies : HomeEvent
     data object RetryTopPicks : HomeEvent
@@ -561,13 +489,8 @@ sealed interface HomeAction {
     data object OnGoToAllTopPicks : HomeAction
     data class OnGoToTopPickDetail(val id: String) : HomeAction
     data class OnGoToCompanyDetail(val ticker: String) : HomeAction
-    data object OnGoToDiscover : HomeAction
-    data object OnGoToSettings : HomeAction
-    data object OnGoToHistory : HomeAction
-    data object OnGoToSavedPicks : HomeAction
     data class OnGoToTidbitDetail(val id: String) : HomeAction
     data object OnGoToAllTidbits : HomeAction
-    data object OnGoToSavedTidbits : HomeAction
     data class ShowToast(val message: String) : HomeAction
     data object OnGoToSignUp : HomeAction
     data object NavigateToSearch : HomeAction

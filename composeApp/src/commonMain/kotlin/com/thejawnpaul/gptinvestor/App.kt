@@ -18,6 +18,7 @@ import com.thejawnpaul.gptinvestor.core.navigation.SetUpNavGraph
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.GuestRateLimitBottomSheet
+import com.thejawnpaul.gptinvestor.features.guest.presentation.GuestScreen
 import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
 import com.thejawnpaul.gptinvestor.features.splash.AnimatedSplashScreen
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
@@ -59,7 +60,7 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
             (isUserSignedIn == true || isGuestSignedIn == true)
         ) {
             try {
-                val navigationRoute = getNavigationRouteFromDeepLink(deepLinkRoute)
+                val navigationRoute = getNavigationRouteFromDeepLink(deepLinkRoute, isGuest = isGuestSignedIn == true)
                 navController.navigate(route = navigationRoute) {
                     popUpTo(navController.graph.startDestinationId) { inclusive = false }
                 }
@@ -111,7 +112,7 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
     }
 }
 
-private fun getNavigationRouteFromDeepLink(deepLink: String): String = when {
+private fun getNavigationRouteFromDeepLink(deepLink: String, isGuest: Boolean): String = when {
     deepLink.contains("tidbit_detail_screen") -> {
         val tidbitId = extractTidbitIdFromDeepLink(deepLink)
         tidbitId?.let {
@@ -120,11 +121,11 @@ private fun getNavigationRouteFromDeepLink(deepLink: String): String = when {
     }
 
     deepLink.contains("discover") -> {
-        Screen.DiscoverTabScreen.route
+        if (isGuest) GuestScreen.GuestDiscoverTab.createRoute() else Screen.DiscoverTabScreen.createRoute()
     }
 
     else -> {
-        Screen.HomeScreen.route
+        if (isGuest) GuestScreen.GuestHomeTab.route else Screen.HomeTabScreen.route
     }
 }
 

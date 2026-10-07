@@ -213,5 +213,6 @@
     <string name="verify_email_body">Підтвердьте свою електронну адресу перед входом. Перевірте вхідні повідомлення на наявність посилання для підтвердження.</string>
     <string name="email_conflict_title">Обліковий запис уже існує</string>
     <string name="email_conflict_body">Обліковий запис із цією електронною адресою вже існує. Спробуйте натомість увійти.</string>
-
+    <string name="home">Головна</string>
+    <string name="profile">Профіль</string>
 </resources>

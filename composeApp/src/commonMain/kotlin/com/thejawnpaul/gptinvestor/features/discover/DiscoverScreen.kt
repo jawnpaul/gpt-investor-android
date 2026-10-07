@@ -17,11 +17,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -39,7 +36,6 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.discover
 import com.thejawnpaul.gptinvestor.empty
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
@@ -83,17 +79,10 @@ fun DiscoverScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(end = 16.dp),
+                        .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { onEvent(DiscoveryEvent.GoBack) }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = stringResource(Res.string.back)
-                        )
-                    }
-
                     if (state.searchMode) {
                         SearchBarCustom(
                             modifier = Modifier

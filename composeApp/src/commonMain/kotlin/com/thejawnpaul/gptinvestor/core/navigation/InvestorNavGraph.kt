@@ -44,22 +44,6 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
                         )
                     }
 
-                    HomeAction.OnGoToDiscover -> {
-                        navController.navigate(Screen.DiscoverTabScreen.createRoute())
-                    }
-
-                    HomeAction.OnGoToHistory -> {
-                        navController.navigate(Screen.HistoryTabScreen.route)
-                    }
-
-                    HomeAction.OnGoToSavedPicks -> {
-                        navController.navigate(Screen.SavedTopPicksScreen.route)
-                    }
-
-                    HomeAction.OnGoToSettings -> {
-                        navController.navigate(Screen.SettingsScreen.route)
-                    }
-
                     HomeAction.OnGoToAllTidbits -> {
                         navController.navigate(route = Screen.TidbitScreen.route)
                     }
@@ -68,10 +52,6 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
                         navController.navigate(
                             route = Screen.TidbitDetailScreen.createRoute(tidbitId = action.id)
                         )
-                    }
-
-                    HomeAction.OnGoToSavedTidbits -> {
-                        navController.navigate(route = Screen.SavedTidbitScreen.route)
                     }
 
                     is HomeAction.ShowToast -> {

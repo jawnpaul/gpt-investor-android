@@ -80,22 +80,6 @@ fun NavGraphBuilder.guestNavGraph(
                         )
                     }
 
-                    HomeAction.OnGoToDiscover -> {
-                        navController.navigate(GuestScreen.GuestDiscoverTab.createRoute())
-                    }
-
-                    HomeAction.OnGoToHistory -> {
-                        navController.navigate(GuestScreen.GuestHistoryTab.route)
-                    }
-
-                    HomeAction.OnGoToSavedPicks -> {
-                        navController.navigate(GuestScreen.GuestSavedTopPicks.route)
-                    }
-
-                    HomeAction.OnGoToSettings -> {
-                        navController.navigate(Screen.SettingsScreen.route)
-                    }
-
                     HomeAction.OnGoToAllTidbits -> {
                         navController.navigate(GuestScreen.GuestTidbitScreen.route)
                     }
@@ -104,10 +88,6 @@ fun NavGraphBuilder.guestNavGraph(
                         navController.navigate(
                             GuestScreen.GuestTidbitDetail.createRoute(tidbitId = action.id)
                         )
-                    }
-
-                    HomeAction.OnGoToSavedTidbits -> {
-                        navController.navigate(GuestScreen.GuestSavedTidbitScreen.route)
                     }
 
                     is HomeAction.ShowToast -> {

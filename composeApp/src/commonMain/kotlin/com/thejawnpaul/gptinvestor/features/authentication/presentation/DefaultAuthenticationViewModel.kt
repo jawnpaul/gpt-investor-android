@@ -69,5 +69,3 @@ sealed interface DefaultAuthenticationAction {
     data object OnGoToHome : DefaultAuthenticationAction
     data object OnGoToSignUp : DefaultAuthenticationAction
 }
-
-data class DrawerState(val user: String? = null, val theme: String? = "Dark")

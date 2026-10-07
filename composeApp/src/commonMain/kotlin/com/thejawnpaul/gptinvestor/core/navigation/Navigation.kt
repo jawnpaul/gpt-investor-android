@@ -4,6 +4,11 @@ package com.thejawnpaul.gptinvestor.core.navigation
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -34,27 +39,34 @@ fun SetUpNavGraph(
         hasCompletedPostAuthOnboarding
     )
 
-    SharedTransitionLayout {
-        CompositionLocalProvider(LocalSharedTransitionScope provides this) {
-            NavHost(
-                navController = navController,
-                startDestination = startDestination,
-                modifier = modifier
-            ) {
-                onboardingNavGraph(navController)
-                postAuthOnboardingNavGraph(navController)
-                authenticationNavGraph(navController, platformActions, hasCompletedPostAuthOnboarding)
-                investorNavGraph(navController, platformActions)
-                discoverNavGraph(navController)
-                companyNavGraph(navController, platformActions)
-                conversationNavGraph(navController, platformActions, platformContext)
-                historyNavGraph(navController, platformActions, platformContext)
-                topPickNavGraph(navController, platformActions)
-                tidbitNavGraph(navController, platformActions)
-                settingsNavGraph(navController)
-                searchNavGraph(navController)
-                trendingNavGraph(navController)
-                guestNavGraph(navController, platformActions, platformContext)
+    Scaffold(
+        modifier = modifier,
+        contentWindowInsets = WindowInsets(0),
+        bottomBar = { BottomNavBar(navController) }
+    ) { innerPadding ->
+        SharedTransitionLayout {
+            CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+                NavHost(
+                    navController = navController,
+                    startDestination = startDestination,
+                    modifier = Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding)
+                ) {
+                    onboardingNavGraph(navController)
+                    postAuthOnboardingNavGraph(navController)
+                    authenticationNavGraph(navController, platformActions, hasCompletedPostAuthOnboarding)
+                    investorNavGraph(navController, platformActions)
+                    discoverNavGraph(navController)
+                    companyNavGraph(navController, platformActions)
+                    conversationNavGraph(navController, platformActions, platformContext)
+                    historyNavGraph(navController, platformActions, platformContext)
+                    topPickNavGraph(navController, platformActions)
+                    tidbitNavGraph(navController, platformActions)
+                    settingsNavGraph(navController)
+                    searchNavGraph(navController)
+                    trendingNavGraph(navController)
+                    guestNavGraph(navController, platformActions, platformContext)
+                    profileNavGraph(navController, platformActions)
+                }
             }
         }
     }

@@ -213,5 +213,6 @@
     <string name="verify_email_body">Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich anmelden. Prüfen Sie Ihren Posteingang auf den Bestätigungslink.</string>
     <string name="email_conflict_title">Konto existiert bereits</string>
     <string name="email_conflict_body">Mit dieser E-Mail-Adresse existiert bereits ein Konto. Versuchen Sie stattdessen, sich anzumelden.</string>
-
+    <string name="home">Start</string>
+    <string name="profile">Profil</string>
 </resources>

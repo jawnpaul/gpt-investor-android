@@ -1,11 +1,5 @@
 package com.thejawnpaul.gptinvestor.core.navigation
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -14,11 +8,8 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -26,9 +17,12 @@ import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.discover
 import com.thejawnpaul.gptinvestor.features.guest.presentation.GuestScreen
 import com.thejawnpaul.gptinvestor.home
+import com.thejawnpaul.gptinvestor.ic_discover
+import com.thejawnpaul.gptinvestor.ic_discover_filled
+import com.thejawnpaul.gptinvestor.ic_home_filled
 import com.thejawnpaul.gptinvestor.ic_home_trend_up
 import com.thejawnpaul.gptinvestor.ic_profile
-import com.thejawnpaul.gptinvestor.ic_search_status
+import com.thejawnpaul.gptinvestor.ic_profile_filled
 import com.thejawnpaul.gptinvestor.profile
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import org.jetbrains.compose.resources.DrawableResource
@@ -39,6 +33,7 @@ import org.jetbrains.compose.resources.vectorResource
 private data class BottomNavItem(
     val label: StringResource,
     val icon: DrawableResource,
+    val selectedIcon: DrawableResource,
     val route: String,
     val guestRoute: String,
     val matchingRoutes: Set<String>
@@ -48,13 +43,15 @@ private val bottomNavItems = listOf(
     BottomNavItem(
         label = Res.string.home,
         icon = Res.drawable.ic_home_trend_up,
+        selectedIcon = Res.drawable.ic_home_filled,
         route = Screen.HomeTabScreen.route,
         guestRoute = GuestScreen.GuestHomeTab.route,
         matchingRoutes = setOf(Screen.HomeTabScreen.route, GuestScreen.GuestHomeTab.route)
     ),
     BottomNavItem(
         label = Res.string.discover,
-        icon = Res.drawable.ic_search_status,
+        icon = Res.drawable.ic_discover,
+        selectedIcon = Res.drawable.ic_discover_filled,
         route = Screen.DiscoverTabScreen.createRoute(),
         guestRoute = GuestScreen.GuestDiscoverTab.createRoute(),
         matchingRoutes = setOf(Screen.DiscoverTabScreen.route, GuestScreen.GuestDiscoverTab.route)
@@ -62,6 +59,7 @@ private val bottomNavItems = listOf(
     BottomNavItem(
         label = Res.string.profile,
         icon = Res.drawable.ic_profile,
+        selectedIcon = Res.drawable.ic_profile_filled,
         route = Screen.ProfileTabScreen.route,
         guestRoute = GuestScreen.GuestProfileTab.route,
         matchingRoutes = setOf(Screen.ProfileTabScreen.route, GuestScreen.GuestProfileTab.route)
@@ -85,23 +83,16 @@ fun BottomNavBar(navController: NavController, modifier: Modifier = Modifier) {
             val label = stringResource(item.label)
             NavigationBarItem(
                 icon = {
-                    Icon(vectorResource(item.icon), contentDescription = label)
+                    Icon(
+                        vectorResource(if (selected) item.selectedIcon else item.icon),
+                        contentDescription = label
+                    )
                 },
                 label = {
-                    Column {
-                        Text(
-                            text = label,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .padding(top = 4.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(if (selected) MaterialTheme.colorScheme.onSurface else Color.Transparent)
-                                .size(24.dp, 4.dp)
-                        )
-                    }
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 },
                 selected = selected,
                 onClick = {

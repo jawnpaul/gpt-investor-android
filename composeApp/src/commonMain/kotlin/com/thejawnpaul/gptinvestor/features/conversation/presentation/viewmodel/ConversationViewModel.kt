@@ -10,7 +10,10 @@ import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
-import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionEvent
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionNotifier
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionReason
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionSource
 import com.thejawnpaul.gptinvestor.features.billing.domain.BillingConstants
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
@@ -48,7 +51,7 @@ class ConversationViewModel(
     private val billingRepository: IBillingRepository,
     private val appPreferences: AppPreferences,
     @Provided private val analyticsLogger: AnalyticsLogger,
-    private val guestRateLimitNotifier: GuestRateLimitNotifier
+    private val guestSessionNotifier: GuestSessionNotifier
 ) : ViewModel() {
 
     private val conversationViewMutableStateFlow = MutableStateFlow(ConversationView())
@@ -224,6 +227,21 @@ class ConversationViewModel(
                 processAction(ConversationAction.ShowToast("An error occurred"))
             }
 
+            is Failure.GuestSessionExpired -> {
+                guestSessionNotifier.notify(
+                    GuestSessionEvent(reason = GuestSessionReason.Expired, source = GuestSessionSource.Stream)
+                )
+            }
+
+            is Failure.GuestLimitReached -> {
+                val isGuest = conversationViewMutableStateFlow.value.isGuest
+                if (isGuest) {
+                    guestSessionNotifier.notify(
+                        GuestSessionEvent(reason = GuestSessionReason.Limit, source = GuestSessionSource.Stream)
+                    )
+                }
+            }
+
             is Failure.RateLimitExceeded -> {
                 val isGuest = conversationViewMutableStateFlow.value.isGuest
                 analyticsLogger.logEvent(
@@ -232,7 +250,9 @@ class ConversationViewModel(
                 )
                 Logger.e("Rate limit exceeded")
                 if (isGuest) {
-                    guestRateLimitNotifier.notifyRateLimit()
+                    guestSessionNotifier.notify(
+                        GuestSessionEvent(reason = GuestSessionReason.Limit, source = GuestSessionSource.Stream)
+                    )
                 } else {
                     processAction(
                         ConversationAction.ShowToast("Rate limit exceeded. Please try again later.")

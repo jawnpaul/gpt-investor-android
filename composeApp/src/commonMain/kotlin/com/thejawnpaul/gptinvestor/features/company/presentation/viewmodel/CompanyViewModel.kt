@@ -9,7 +9,10 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
-import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionEvent
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionNotifier
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionReason
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionSource
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSentiment
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumberType
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
@@ -48,7 +51,7 @@ class CompanyViewModel(
     private val feedbackRepository: FeedbackRepository,
     private val appPreferences: AppPreferences,
     @Provided private val analyticsLogger: AnalyticsLogger,
-    private val guestRateLimitNotifier: GuestRateLimitNotifier
+    private val guestSessionNotifier: GuestSessionNotifier
 ) : ViewModel() {
 
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
@@ -93,15 +96,32 @@ class CompanyViewModel(
         selectedCompanyTicker?.let { ticker ->
             _selectedCompany.update { it.copy(loading = true) }
             getCompanyBriefUseCase(ticker) {
-                it.onFailure {
+                it.onFailure { failure ->
                     _selectedCompany.update { state ->
-                        state.copy(
-                            loading = false,
-                            error = "Something went wrong."
-                        )
+                        state.copy(loading = false, error = "Something went wrong.")
                     }
-                    if (isGuestSession.value) {
-                        guestRateLimitNotifier.notifyRateLimit()
+                    when (failure) {
+                        is Failure.GuestSessionExpired -> {
+                            // UnauthorizedCallbackImpl already emitted the notifier for 401 path;
+                            // emit here too to cover cases where the auth plugin did not intercept
+                            guestSessionNotifier.notify(
+                                GuestSessionEvent(
+                                    reason = GuestSessionReason.Expired,
+                                    source = GuestSessionSource.Request,
+                                    ticker = ticker
+                                )
+                            )
+                        }
+                        is Failure.GuestLimitReached -> {
+                            guestSessionNotifier.notify(
+                                GuestSessionEvent(
+                                    reason = GuestSessionReason.Limit,
+                                    source = GuestSessionSource.Request,
+                                    ticker = ticker
+                                )
+                            )
+                        }
+                        else -> { }
                     }
                 }
                 it.onSuccess { company ->
@@ -200,6 +220,24 @@ class CompanyViewModel(
     private fun handleCompanyInputResponseFailure(failure: Failure) {
         Logger.e(failure.toString())
         when (failure) {
+            is Failure.GuestSessionExpired -> {
+                guestSessionNotifier.notify(
+                    GuestSessionEvent(
+                        reason = GuestSessionReason.Expired,
+                        source = GuestSessionSource.Request
+                    )
+                )
+            }
+
+            is Failure.GuestLimitReached -> {
+                guestSessionNotifier.notify(
+                    GuestSessionEvent(
+                        reason = GuestSessionReason.Limit,
+                        source = GuestSessionSource.Request
+                    )
+                )
+            }
+
             is Failure.RateLimitExceeded -> {
                 val isGuest = isGuestSession.value
                 analyticsLogger.logEvent(
@@ -207,7 +245,12 @@ class CompanyViewModel(
                     params = mapOf("user_type" to if (isGuest) "guest" else "authenticated")
                 )
                 if (isGuest) {
-                    guestRateLimitNotifier.notifyRateLimit()
+                    guestSessionNotifier.notify(
+                        GuestSessionEvent(
+                            reason = GuestSessionReason.Limit,
+                            source = GuestSessionSource.Request
+                        )
+                    )
                 } else {
                     processCompanyDetailAction(
                         CompanyDetailAction.ShowToast("Rate limit exceeded. Please try again later.")

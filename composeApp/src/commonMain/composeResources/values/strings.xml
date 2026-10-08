@@ -216,4 +216,12 @@
     <string name="profile">Profile</string>
     <string name="log_in_with_apple">Log in with Apple</string>
     <string name="sign_up_with_apple">Sign up with Apple</string>
+
+    <string name="guest_session_expired_title_expired">Your guest session ended</string>
+    <string name="guest_session_expired_body_expired">Sign up free to keep reading briefs and save your history.</string>
+    <string name="guest_session_expired_title_limit">You\'ve used your free guest briefs</string>
+    <string name="guest_session_expired_body_limit">Sign up free to keep going.</string>
+    <string name="guest_session_expired_sign_up">Sign up</string>
+    <string name="guest_session_expired_have_account">I have an account</string>
+
 </resources>

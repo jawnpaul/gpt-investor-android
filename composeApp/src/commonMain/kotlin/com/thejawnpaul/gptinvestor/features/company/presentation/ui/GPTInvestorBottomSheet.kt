@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mohamedrejeb.calf.ui.sheet.AdaptiveBottomSheet
 import com.mohamedrejeb.calf.ui.sheet.rememberAdaptiveSheetState
+import com.thejawnpaul.gptinvestor.core.platform.isIos
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -21,11 +22,12 @@ fun GptInvestorBottomSheet(
     skipPartiallyExpanded: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val sheetState = rememberAdaptiveSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
+    val sheetState =
+        rememberAdaptiveSheetState(skipPartiallyExpanded = if (isIos) isFullScreen else skipPartiallyExpanded)
     AdaptiveBottomSheet(
         containerColor = MaterialTheme.colorScheme.background,
         adaptiveSheetState = sheetState,
-        modifier = modifier then if (isFullScreen) {
+        modifier = modifier then if (isFullScreen || isIos) {
             Modifier.fillMaxSize()
         } else {
             Modifier

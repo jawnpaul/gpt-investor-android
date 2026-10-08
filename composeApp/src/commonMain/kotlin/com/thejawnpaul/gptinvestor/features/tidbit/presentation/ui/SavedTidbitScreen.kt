@@ -10,12 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,7 +26,7 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.back
+import com.thejawnpaul.gptinvestor.core.navigation.BackButton
 import com.thejawnpaul.gptinvestor.error_loading_tidbits
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.model.TidbitPresentation
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitScreenEvent
@@ -62,14 +58,9 @@ fun SavedTidbitScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = {
+                BackButton(onClick = {
                     onEvent(TidbitScreenEvent.OnBackClick)
-                }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = stringResource(Res.string.back)
-                    )
-                }
+                })
 
                 Text(
                     text = stringResource(Res.string.saved_tidbits),

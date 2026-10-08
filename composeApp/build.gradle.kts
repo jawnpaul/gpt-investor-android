@@ -17,6 +17,10 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+koinCompiler {
+    compileSafety.set(false)
+}
+
 kotlin {
     android {
         namespace = "com.thejawnpaul.gptinvestor.shared"
@@ -97,6 +101,7 @@ kotlin {
         implementation(libs.androidx.paging.compose)
         implementation(libs.markdown.renderer.m3)
         implementation(libs.markdown.renderer)
+        implementation(libs.calf.ui)
     }
 
     sourceSets {

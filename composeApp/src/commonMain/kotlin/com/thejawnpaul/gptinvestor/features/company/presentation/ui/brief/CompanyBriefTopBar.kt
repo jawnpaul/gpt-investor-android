@@ -2,7 +2,6 @@ package com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -16,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.back
+import com.thejawnpaul.gptinvestor.core.navigation.BackButton
 import com.thejawnpaul.gptinvestor.favorite
 import com.thejawnpaul.gptinvestor.more
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
@@ -29,12 +28,7 @@ fun CompanyBriefTopBar(onBack: () -> Unit, onFavorite: () -> Unit, onMore: () ->
         modifier = modifier,
         title = {},
         navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(Res.string.back)
-                )
-            }
+            BackButton(onClick = onBack)
         },
         actions = {
             Row {

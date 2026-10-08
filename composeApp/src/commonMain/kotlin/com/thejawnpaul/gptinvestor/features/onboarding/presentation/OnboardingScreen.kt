@@ -38,11 +38,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -71,7 +67,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil3.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.back
+import com.thejawnpaul.gptinvestor.core.navigation.BackButton
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSection
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSentiment
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefTone
@@ -583,12 +579,7 @@ private fun LiveBriefScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            IconButton(modifier = Modifier.statusBarsPadding(), onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(Res.string.back)
-                )
-            }
+            BackButton(modifier = Modifier.statusBarsPadding(), onClick = onBack)
         }
     ) { innerPadding ->
         AnimatedContent(

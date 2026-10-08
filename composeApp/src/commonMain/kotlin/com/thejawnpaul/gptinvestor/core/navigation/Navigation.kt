@@ -49,6 +49,10 @@ fun SetUpNavGraph(
                 NavHost(
                     navController = navController,
                     startDestination = startDestination,
+                    enterTransition = navEnterTransition,
+                    exitTransition = navExitTransition,
+                    popEnterTransition = navPopEnterTransition,
+                    popExitTransition = navPopExitTransition,
                     modifier = Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding)
                 ) {
                     onboardingNavGraph(navController)

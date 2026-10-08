@@ -66,6 +66,8 @@ private val bottomNavItems = listOf(
     )
 )
 
+fun isBottomTabRoute(route: String?) = bottomNavItems.any { route in it.matchingRoutes }
+
 @Composable
 fun BottomNavBar(navController: NavController, modifier: Modifier = Modifier) {
     val gptInvestorColors = LocalGPTInvestorColors.current

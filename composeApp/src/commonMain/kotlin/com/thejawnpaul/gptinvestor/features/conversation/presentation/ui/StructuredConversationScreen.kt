@@ -21,8 +21,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -54,6 +52,7 @@ import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.analysing_response
 import com.thejawnpaul.gptinvestor.ask_anything_about
 import com.thejawnpaul.gptinvestor.copy
+import com.thejawnpaul.gptinvestor.core.navigation.BackButton
 import com.thejawnpaul.gptinvestor.dislike
 import com.thejawnpaul.gptinvestor.dislike_chosen
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
@@ -135,12 +134,7 @@ fun StructuredConversationScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    IconButton(onClick = onNavigateUp) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null
-                        )
-                    }
+                    BackButton(onClick = onNavigateUp)
                     Text(
                         text = conversation.title,
                         style = MaterialTheme.typography.titleLarge,

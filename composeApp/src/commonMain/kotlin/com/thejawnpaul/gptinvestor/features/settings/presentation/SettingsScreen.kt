@@ -5,13 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,10 +20,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.mohamedrejeb.calf.ui.dialog.AdaptiveAlertDialog
+import com.mohamedrejeb.calf.ui.dialog.uikit.AlertDialogIosActionStyle
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.are_you_sure_you_want_to_delete_your_account
-import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.cancel
+import com.thejawnpaul.gptinvestor.core.navigation.BackButton
 import com.thejawnpaul.gptinvestor.delete
 import com.thejawnpaul.gptinvestor.delete_account
 import com.thejawnpaul.gptinvestor.features.settings.presentation.state.SettingsView
@@ -55,12 +52,7 @@ fun SettingsScreen(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { onAction(SettingsAction.OnGoBack) }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = stringResource(Res.string.back)
-                        )
-                    }
+                    BackButton(onClick = { onAction(SettingsAction.OnGoBack) })
 
                     Text(
                         text = stringResource(Res.string.settings),
@@ -89,22 +81,19 @@ fun SettingsScreen(
 
                 // Delete Account Confirmation Dialog
                 if (showDeleteDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showDeleteDialog = false },
-                        title = {
-                            Text(text = stringResource(Res.string.delete_account))
+                    AdaptiveAlertDialog(
+                        onConfirm = {
+                            onEvent(SettingsEvent.DeleteAccount)
+                            showDeleteDialog = false
                         },
-                        text = {
-                            Text(
-                                text = stringResource(
-                                    Res.string.are_you_sure_you_want_to_delete_your_account
-                                )
-                            )
-                        },
-                        confirmButton = {
+                        onDismiss = { showDeleteDialog = false },
+                        confirmText = stringResource(Res.string.delete),
+                        dismissText = stringResource(Res.string.cancel),
+                        title = stringResource(Res.string.delete_account),
+                        text = stringResource(Res.string.are_you_sure_you_want_to_delete_your_account),
+                        materialConfirmButton = {
                             TextButton(
                                 onClick = {
-                                    // Handle account deletion here
                                     onEvent(SettingsEvent.DeleteAccount)
                                     showDeleteDialog = false
                                 },
@@ -115,13 +104,13 @@ fun SettingsScreen(
                                 Text(stringResource(Res.string.delete))
                             }
                         },
-                        dismissButton = {
-                            TextButton(
-                                onClick = { showDeleteDialog = false }
-                            ) {
+                        materialDismissButton = {
+                            TextButton(onClick = { showDeleteDialog = false }) {
                                 Text(stringResource(Res.string.cancel))
                             }
-                        }
+                        },
+                        iosConfirmButtonStyle = AlertDialogIosActionStyle.Destructive,
+                        iosDismissButtonStyle = AlertDialogIosActionStyle.Cancel
                     )
                 }
             }

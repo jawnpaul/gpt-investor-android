@@ -5,6 +5,7 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.api.KtorResponse
 import com.thejawnpaul.gptinvestor.core.platform.AppConfig
+import com.thejawnpaul.gptinvestor.core.platform.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginResponse
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.User
@@ -45,6 +46,9 @@ class AuthenticationRepositoryImplTest {
     @MockK
     lateinit var appConfig: AppConfig
 
+    @MockK
+    lateinit var googleSignInProvider: GoogleSignInProvider
+
     private lateinit var repository: AuthenticationRepositoryImpl
 
     private val loginResponse = LoginResponse(
@@ -64,7 +68,8 @@ class AuthenticationRepositoryImplTest {
             apiService = apiService,
             tokenStorage = tokenStorage,
             bearerTokenManager = bearerTokenManager,
-            appConfig = appConfig
+            appConfig = appConfig,
+            googleSignInProvider = googleSignInProvider
         )
     }
 

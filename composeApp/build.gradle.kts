@@ -15,6 +15,7 @@ plugins {
     alias(libs.plugins.ktLint)
     alias(libs.plugins.buildkonfig)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.swiftklib)
 }
 
 koinCompiler {
@@ -54,6 +55,19 @@ kotlin {
             baseName = "ComposeApp"
             isStatic = true
             export(project(":analytics"))
+        }
+        iosTarget.compilations {
+            val main by getting {
+                cinterops {
+                    create("bridges") {
+                        includeDirs(
+                            layout.buildDirectory.dir(
+                                "swiftklib/bridges/${iosTarget.name}/swiftBuild/.build/arm64-apple-macosx/release/bridges.build/include"
+                            )
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -240,5 +254,12 @@ buildkonfig {
             "WEB_CLIENT_ID",
             localProperties.getProperty("WEB_CLIENT_ID_DEV") ?: ""
         )
+    }
+}
+
+swiftklib {
+    create("bridges") {
+        path = file("../iosApp/iosApp/Bridges")
+        packageName("com.thejawnpaul.gptinvestor.bridges")
     }
 }

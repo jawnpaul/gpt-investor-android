@@ -260,4 +260,19 @@ class DataStoreAppPreferences(private val dataStore: DataStore<Preferences>) : A
             preferences[HAS_COMPLETED_POST_AUTH_ONBOARDING_KEY] = completed
         }
     }
+
+    override suspend fun clearSessionData() {
+        dataStore.edit { preferences ->
+            preferences.remove(USER_ID_KEY)
+            preferences.remove(IS_USER_LOGGED_IN_KEY)
+            preferences.remove(THEME_KEY)
+            preferences.remove(IS_USER_ON_MODEL_WAITLIST_KEY)
+            preferences.remove(ACCESS_TOKEN_KEY)
+            preferences.remove(REFRESH_TOKEN_KEY)
+            preferences.remove(IS_GUEST_LOGGED_IN_KEY)
+            preferences.remove(USER_NAME_KEY)
+            preferences.remove(IS_FIRST_INSTALL_KEY)
+            preferences.remove(HAS_COMPLETED_ONBOARDING_KEY)
+        }
+    }
 }

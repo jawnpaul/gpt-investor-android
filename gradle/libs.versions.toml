@@ -53,6 +53,7 @@ turbine = "1.2.1"
 kotlinxDatetime = "0.7.1"
 browser = "1.10.0"
 calf = "0.14.0"
+swiftklib = "0.6.4"
 
 
 
@@ -164,6 +165,7 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
 googleServices = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+swiftklib = { id = "io.github.ttypic.swiftklib", version.ref = "swiftklib" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 koin-compiler = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-plugin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

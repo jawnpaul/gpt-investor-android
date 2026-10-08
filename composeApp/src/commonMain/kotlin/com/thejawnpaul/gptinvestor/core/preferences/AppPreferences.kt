@@ -61,4 +61,6 @@ interface AppPreferences {
 
     val hasCompletedPostAuthOnboarding: Flow<Boolean?>
     suspend fun setHasCompletedPostAuthOnboarding(completed: Boolean)
+
+    suspend fun clearSessionData()
 }

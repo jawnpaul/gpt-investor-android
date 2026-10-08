@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -39,15 +41,19 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.apple_icon
+import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.baseline_visibility_off_24
-import com.thejawnpaul.gptinvestor.core.navigation.BackButton
+import com.thejawnpaul.gptinvestor.core.platform.Platform
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
+import com.thejawnpaul.gptinvestor.core.platform.PlatformType
 import com.thejawnpaul.gptinvestor.don_t_have_an_account
 import com.thejawnpaul.gptinvestor.email_address
 import com.thejawnpaul.gptinvestor.google_icon
 import com.thejawnpaul.gptinvestor.ic_email
 import com.thejawnpaul.gptinvestor.ic_lock
 import com.thejawnpaul.gptinvestor.ic_profile
+import com.thejawnpaul.gptinvestor.log_in_with_apple
 import com.thejawnpaul.gptinvestor.log_in_with_google
 import com.thejawnpaul.gptinvestor.login
 import com.thejawnpaul.gptinvestor.or
@@ -73,7 +79,12 @@ fun LoginScreen(state: LoginUiState, onEvent: (LoginUiEvent) -> Unit, modifier: 
             modifier = Modifier.statusBarsPadding().fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            BackButton(onClick = { onEvent(LoginUiEvent.GoBack) })
+            IconButton(onClick = { onEvent(LoginUiEvent.GoBack) }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                    contentDescription = stringResource(Res.string.back)
+                )
+            }
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(Res.string.login),
@@ -201,6 +212,26 @@ fun LoginScreen(state: LoginUiState, onEvent: (LoginUiEvent) -> Unit, modifier: 
                     text = stringResource(Res.string.or).uppercase(),
                     textAlign = TextAlign.Center
                 )
+
+                if (Platform.type == PlatformType.IOS) {
+                    Button(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { onEvent(LoginUiEvent.LoginWithApple) },
+                        enabled = !state.loading
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Image(
+                                modifier = Modifier.size(20.dp),
+                                painter = painterResource(Res.drawable.apple_icon),
+                                contentDescription = null
+                            )
+                            Text(text = stringResource(Res.string.log_in_with_apple))
+                        }
+                    }
+                }
 
                 Button(
                     modifier = Modifier.fillMaxWidth(),

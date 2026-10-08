@@ -214,4 +214,6 @@
     <string name="post_auth_onboarding_risk_aggressive">Comfortable with volatility</string>
     <string name="home">Home</string>
     <string name="profile">Profile</string>
+    <string name="log_in_with_apple">Log in with Apple</string>
+    <string name="sign_up_with_apple">Sign up with Apple</string>
 </resources>

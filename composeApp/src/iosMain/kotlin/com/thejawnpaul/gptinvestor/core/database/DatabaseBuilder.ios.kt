@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.core.database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.thejawnpaul.gptinvestor.core.platform.excludeDocumentsFromBackup
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
@@ -12,6 +13,7 @@ import platform.Foundation.NSUserDomainMask
 
 @OptIn(ExperimentalForeignApi::class)
 actual fun getDatabaseBuilder(context: Any?): RoomDatabase.Builder<GPTInvestorDatabase> {
+    excludeDocumentsFromBackup()
     val documentDirectory = NSFileManager.defaultManager.URLForDirectory(
         directory = NSDocumentDirectory,
         inDomain = NSUserDomainMask,

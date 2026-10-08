@@ -1,3 +1,3 @@
 package com.thejawnpaul.gptinvestor.core.platform
 
-expect val isIos: Boolean
+val isIos: Boolean get() = Platform.type == PlatformType.IOS

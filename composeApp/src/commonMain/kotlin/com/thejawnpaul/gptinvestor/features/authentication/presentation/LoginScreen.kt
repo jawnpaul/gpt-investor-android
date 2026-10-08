@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,8 +40,8 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.apple_icon
-import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.baseline_visibility_off_24
+import com.thejawnpaul.gptinvestor.core.navigation.BackButton
 import com.thejawnpaul.gptinvestor.core.platform.Platform
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.core.platform.PlatformType
@@ -79,12 +77,7 @@ fun LoginScreen(state: LoginUiState, onEvent: (LoginUiEvent) -> Unit, modifier: 
             modifier = Modifier.statusBarsPadding().fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { onEvent(LoginUiEvent.GoBack) }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                    contentDescription = stringResource(Res.string.back)
-                )
-            }
+            BackButton(onClick = { onEvent(LoginUiEvent.GoBack) })
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(Res.string.login),

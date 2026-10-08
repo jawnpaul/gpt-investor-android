@@ -19,6 +19,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.justRun
 import io.mockk.verify
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -88,6 +89,7 @@ class AuthenticationRepositoryImplTest {
         justRun { tokenStorage.saveRefreshToken(any()) }
         justRun { bearerTokenManager.clearCache() }
         coJustRun { gptInvestorPreferences.clearIsGuestLoggedIn() }
+        every { gptInvestorPreferences.isGuestLoggedIn } returns flowOf(false)
         justRun { analyticsLogger.identifyUser(any(), any()) }
     }
 
@@ -143,6 +145,7 @@ class AuthenticationRepositoryImplTest {
         justRun { tokenStorage.saveRefreshToken(any()) }
         every { bearerTokenManager.clearCache() } answers { callOrder.add("clearCache") }
         coEvery { gptInvestorPreferences.clearIsGuestLoggedIn() } coAnswers { callOrder.add("clearGuest") }
+        every { gptInvestorPreferences.isGuestLoggedIn } returns flowOf(false)
         justRun { analyticsLogger.identifyUser(any(), any()) }
 
         repository.loginWithEmailAndPassword("user@test.com", "password")

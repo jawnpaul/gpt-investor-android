@@ -483,19 +483,11 @@ class HomeViewModel(
                     else -> DailyDigestStatus.READY
                 }
 
-                val nextHourLabel = if (digestStatus == DailyDigestStatus.PENDING) {
-                    val currentHour = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
-                    computeNextHourLabel(currentHour)
-                } else {
-                    ""
-                }
-
                 _uiState.update { state ->
                     state.copy(
                         dailyDigestView = state.dailyDigestView.copy(
                             loading = false,
                             status = digestStatus,
-                            nextHourLabel = nextHourLabel,
                             stocks = unlockedItems.map { item ->
                                 StockDigestPresentation(
                                     ticker = item.ticker,
@@ -541,17 +533,6 @@ enum class TimePeriod { MORNING, AFTERNOON, EVENING }
 
 internal fun extractFirstName(userName: String?): String? =
     userName?.trim()?.split("\\s+".toRegex())?.firstOrNull()?.takeIf { it.isNotBlank() }
-
-internal fun computeNextHourLabel(currentHour: Int): String {
-    val nextHour = (currentHour + 1) % 24
-    val period = if (nextHour < 12) "AM" else "PM"
-    val displayHour = when {
-        nextHour == 0 -> 12
-        nextHour > 12 -> nextHour - 12
-        else -> nextHour
-    }
-    return "$displayHour $period"
-}
 
 private fun computeTimePeriod(): TimePeriod {
     val hour = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour

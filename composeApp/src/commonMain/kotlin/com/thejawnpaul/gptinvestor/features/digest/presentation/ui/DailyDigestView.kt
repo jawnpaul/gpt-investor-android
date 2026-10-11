@@ -14,7 +14,6 @@ data class DailyDigestView(
     val isPremium: Boolean = true,
     val addingTickers: Set<String> = emptySet(),
     val addedTickers: Set<String> = emptySet(),
-    val nextHourLabel: String = "",
     val lockedStocks: List<LockedStockDigestPresentation> = emptyList()
 )
 

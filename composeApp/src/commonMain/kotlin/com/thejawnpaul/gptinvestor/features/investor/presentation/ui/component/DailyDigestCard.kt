@@ -200,7 +200,6 @@ fun DailyDigestCard(
 
                     2 -> PendingDigestContent(
                         isPremium = view.isPremium,
-                        nextHourLabel = view.nextHourLabel,
                         onUnlockPremium = onUnlockPremiumPending
                     )
 
@@ -393,7 +392,7 @@ private fun EmptyDigestContent(view: DailyDigestView, onAddStock: (String) -> Un
 }
 
 @Composable
-private fun PendingDigestContent(isPremium: Boolean, nextHourLabel: String, onUnlockPremium: () -> Unit) {
+private fun PendingDigestContent(isPremium: Boolean, onUnlockPremium: () -> Unit) {
     val customColors = LocalGPTInvestorColors.current
 
     Column(
@@ -420,8 +419,7 @@ private fun PendingDigestContent(isPremium: Boolean, nextHourLabel: String, onUn
                     Res.string.digest_pending_description_premium
                 } else {
                     Res.string.digest_pending_description
-                },
-                nextHourLabel
+                }
             ),
             style = MaterialTheme.typography.bodySmall,
             color = customColors.textColors.secondary50,

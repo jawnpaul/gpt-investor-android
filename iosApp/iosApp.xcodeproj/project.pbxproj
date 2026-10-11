@@ -14,8 +14,8 @@
 		517D80ED2F65B1D8003EC92D /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 517D80EC2F65B1D8003EC92D /* FirebaseMessaging */; };
 		517D80EF2F65B1D8003EC92D /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 517D80EE2F65B1D8003EC92D /* FirebaseRemoteConfig */; };
 		517D81032F65C411003EC92D /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = 517D81022F65C411003EC92D /* Mixpanel */; };
-		51996E722F6FF11100976C18 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 51996E712F6FF11100976C18 /* GoogleSignIn */; };
 		FF7D82E52FD7790000086065 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = FF7D82E42FD7790000086065 /* FirebaseCrashlytics */; };
+		51996E722F6FF11100976C18 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 51996E712F6FF11100976C18 /* GoogleSignIn */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -390,8 +390,8 @@
 			buildSettings = {
 				ARCHS = arm64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-Dev";
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "iosApp/iosAppDebug Dev.entitlements";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
@@ -420,8 +420,8 @@
 			buildSettings = {
 				ARCHS = arm64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = iosApp/iosApp.entitlements;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
@@ -460,8 +460,8 @@
 			buildSettings = {
 				ARCHS = arm64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "iosApp/iosAppDebug Prod.entitlements";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
@@ -612,8 +612,8 @@
 			buildSettings = {
 				ARCHS = arm64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-Dev";
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "iosApp/iosAppRelease Dev.entitlements";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;

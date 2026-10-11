@@ -30,6 +30,9 @@ interface TopPickDao {
     @Query("SELECT * FROM top_picks_table WHERE isSaved = 1")
     suspend fun getSavedTopPicks(): List<TopPickEntity>
 
+    @Query("SELECT COUNT(*) FROM top_picks_table WHERE isSaved = 1")
+    fun getSavedTopPicksCountFlow(): Flow<Int>
+
     @Query("SELECT * FROM top_picks_table WHERE date =:date ORDER BY confidenceScore DESC")
     fun getTopPicksFlow(date: String): Flow<List<TopPickEntity>>
 

@@ -15,10 +15,12 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -44,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -54,23 +57,18 @@ import com.thejawnpaul.gptinvestor.choose_the_capabilities_you_d_love_in_the_adv
 import com.thejawnpaul.gptinvestor.continue_
 import com.thejawnpaul.gptinvestor.copy_success
 import com.thejawnpaul.gptinvestor.core.platform.NotificationPermissionController
-import com.thejawnpaul.gptinvestor.curated_for_you
-import com.thejawnpaul.gptinvestor.daily_learn_tidbit
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
-import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeErrorCard
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.DailyDigestCard
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeGreeting
-import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeSearchBar
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeSectionHeader
-import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeTopPicksSection
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeTrendingSection
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.QuestionInput
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeUiState
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
-import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.HomeTidbitSection
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 import com.thejawnpaul.gptinvestor.gpt_investor
@@ -79,8 +77,6 @@ import com.thejawnpaul.gptinvestor.join_the_waitlist
 import com.thejawnpaul.gptinvestor.movers_right_now
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
-import com.thejawnpaul.gptinvestor.today_s_lesson_didn_t_load
-import com.thejawnpaul.gptinvestor.top_picks_today
 import com.thejawnpaul.gptinvestor.trending_today
 import com.thejawnpaul.gptinvestor.you_re_on_the_list
 import com.thejawnpaul.gptinvestor.you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge
@@ -113,13 +109,14 @@ private fun HomeScreenContent(
         onGrant = { onEvent(HomeEvent.NotificationPermissionGranted) },
         onDeny = { onEvent(HomeEvent.NotificationPermissionDenied) }
     )
-
     Scaffold(
         modifier = modifier,
+        contentWindowInsets = WindowInsets(0),
         bottomBar = {
             QuestionInput(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .consumeWindowInsets(WindowInsets.navigationBars)
                     .windowInsetsPadding(insets = WindowInsets.ime),
                 onSendClick = { onEvent(HomeEvent.SendClick) },
                 hint = stringResource(Res.string.ask_me_anything_about_markets),
@@ -128,15 +125,19 @@ private fun HomeScreenContent(
             )
         },
         topBar = {
-            Text(
-                text = stringResource(Res.string.gpt_investor),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding()
-                    .padding(vertical = 16.dp)
-            )
+            Column(modifier = Modifier.statusBarsPadding()) {
+                Text(
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.statusBarsPadding().fillMaxWidth().padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = 16.dp
+                    ),
+                    text = stringResource(Res.string.gpt_investor),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     ) { innerPadding ->
         Box(
@@ -164,11 +165,17 @@ private fun HomeScreenContent(
                     timePeriod = state.timePeriod,
                     name = state.firstName
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                HomeSearchBar(modifier = Modifier.padding(horizontal = 16.dp), onClick = {
-                    onEvent(HomeEvent.GoToSearch)
-                })
+                DailyDigestCard(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    view = state.dailyDigestView,
+                    onAddStock = { onEvent(HomeEvent.AddStockToDigest(it)) },
+                    onBrowseAll = { onEvent(HomeEvent.BrowseAllCompanies) },
+                    onSeeFullDigest = { onEvent(HomeEvent.SeeFullDigest) },
+                    onUnlockPremiumPending = { onEvent(HomeEvent.UnlockPremium("digest_pending_card")) },
+                    onUnlockPremiumReady = { onEvent(HomeEvent.UnlockPremium("digest_ready_card")) }
+                )
                 Spacer(modifier = Modifier.height(24.dp))
 
                 HomeSectionHeader(
@@ -185,51 +192,6 @@ private fun HomeScreenContent(
                     onClick = { onEvent(HomeEvent.ClickTrendingCompany(it)) }
                 )
                 Spacer(modifier = Modifier.height(24.dp))
-
-                HomeSectionHeader(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    emoji = "🔖",
-                    label = stringResource(Res.string.top_picks_today),
-                    title = stringResource(Res.string.curated_for_you),
-                    onSeeAll = { onEvent(HomeEvent.GoToAllTopPicks) }
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                HomeTopPicksSection(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    view = state.topPicksView,
-                    onRetry = { onEvent(HomeEvent.RetryTopPicks) },
-                    onClickPick = { onEvent(HomeEvent.ClickTopPick(it)) }
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-
-                when {
-                    state.homeTidbitView.error != null -> {
-                        HomeErrorCard(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            message = stringResource(Res.string.today_s_lesson_didn_t_load),
-                            onRetry = { onEvent(HomeEvent.RetryTidbit) }
-                        )
-                    }
-
-                    else -> {
-                        Text(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            text = stringResource(Res.string.daily_learn_tidbit).uppercase(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = LocalGPTInvestorColors.current.textColors.secondary50
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-                        HomeTidbitSection(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            tidbit = state.homeTidbitView,
-                            onClick = { onEvent(HomeEvent.ClickTidbit(it)) },
-                            isLoading = state.homeTidbitView.loading
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
             }
 
             if (state.showWaitlistBottomSheet) {

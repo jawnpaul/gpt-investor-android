@@ -2,96 +2,186 @@ package com.thejawnpaul.gptinvestor.features.profile.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
+import com.thejawnpaul.gptinvestor.dark
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
+import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
+import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
+import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
+import com.thejawnpaul.gptinvestor.features.profile.presentation.state.ProfileUiState
+import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
+import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
+import com.thejawnpaul.gptinvestor.light
+import com.thejawnpaul.gptinvestor.system
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.koin.core.annotation.Provided
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @KoinViewModel
 class ProfileViewModel(
+    private val appPreferences: AppPreferences,
     private val authenticationRepository: AuthenticationRepository,
-    private val preferences: AppPreferences,
+    private val conversationRepository: IConversationRepository,
+    private val topPickRepository: ITopPickRepository,
+    private val tidbitRepository: TidbitRepository,
+    private val billingRepository: IBillingRepository,
+    private val premiumEventBus: PremiumEventBus,
     @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
-    val uiState = combine(
-        preferences.userName,
-        preferences.themePreference,
-        preferences.isGuestLoggedIn
-    ) { userName, theme, isGuestLoggedIn ->
-        ProfileUiState(user = userName, theme = theme, isGuestSession = isGuestLoggedIn == true)
+    val themeMap =
+        mapOf(Res.string.light to "Light", Res.string.dark to "Dark", Res.string.system to "System")
+
+    private val _state = MutableStateFlow(ProfileUiState(themeList = themeMap.keys.toList()))
+
+    private val _actions = MutableSharedFlow<ProfileAction>()
+    val actions = _actions.asSharedFlow()
+
+    val state = combine(
+        appPreferences.userName,
+        conversationRepository.getQueryCount(),
+        appPreferences.notificationPermission,
+        billingRepository.currentPurchases(),
+        topPickRepository.getSavedTopPicksCount(),
+        tidbitRepository.getSavedTidbitsCount().onStart { emit(0) },
+        _state
+    ) { args ->
+        val userName = args[0] as String?
+        val queryCount = args[1] as Int
+        val notificationPermission = args[2] as Boolean?
+        val purchases = args[3] as List<*>
+        val savedPicksCount = args[4] as Int
+        val savedTidbitsCount = args[5] as Int
+        val currentState = args[6] as ProfileUiState
+
+        currentState.copy(
+            userName = userName.orEmpty(),
+            queryCount = queryCount,
+            isNotificationsEnabled = notificationPermission ?: false,
+            isPremiumUser = purchases.isNotEmpty(),
+            savedPicksCount = savedPicksCount,
+            savedTidbitsCount = savedTidbitsCount
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = ProfileUiState()
     )
 
-    private val _actions = MutableSharedFlow<ProfileAction>()
-    val actions get() = _actions
+    init {
+        getTheme()
+    }
 
     fun handleEvent(event: ProfileEvent) {
-        viewModelScope.launch {
-            when (event) {
-                is ProfileEvent.ChangeTheme -> {
-                    preferences.setThemePreference(event.theme)
-                    analyticsLogger.logEvent(
-                        eventName = "theme-changed",
-                        params = mapOf("theme" to event.theme)
-                    )
-                }
+        when (event) {
+            ProfileEvent.SignOutClicked -> _state.update { it.copy(showSignOutConfirmation = true) }
+            ProfileEvent.DismissSignOutDialog -> _state.update { it.copy(showSignOutConfirmation = false) }
+            ProfileEvent.ConfirmSignOut -> {
+                _state.update { it.copy(showSignOutConfirmation = false) }
+                viewModelScope.launch { authenticationRepository.signOut() }
+            }
 
-                ProfileEvent.SignOut -> authenticationRepository.signOut()
+            ProfileEvent.AppearanceClicked -> {
+                analyticsLogger.logEvent(
+                    eventName = "appearance-clicked",
+                    params = mapOf("source" to "profile_screen")
+                )
+                processAction(ProfileAction.NavigateToAppearance)
+            }
 
-                ProfileEvent.GoToSignUp -> _actions.emit(ProfileAction.OnGoToSignUp)
+            ProfileEvent.HistoryClicked -> {
+                analyticsLogger.logEvent(
+                    eventName = "history-clicked",
+                    params = mapOf("source" to "profile_screen")
+                )
+                processAction(ProfileAction.NavigateToHistory)
+            }
 
-                ProfileEvent.GoToHistory -> navigate("history", "history", ProfileAction.OnGoToHistory)
+            ProfileEvent.NotificationsClicked -> {
+                analyticsLogger.logEvent(
+                    eventName = "notifications-clicked",
+                    params = mapOf("source" to "profile_screen")
+                )
+                processAction(ProfileAction.NavigateToNotifications)
+            }
 
-                ProfileEvent.GoToSavedPicks -> navigate("saved_picks", "saved picks", ProfileAction.OnGoToSavedPicks)
+            ProfileEvent.PrivacyClicked -> {
+                analyticsLogger.logEvent(
+                    eventName = "privacy-clicked",
+                    params = mapOf("source" to "profile_screen")
+                )
+                processAction(ProfileAction.NavigateToPrivacy)
+            }
 
-                ProfileEvent.GoToSavedTidbits ->
-                    navigate("saved_tidbits", "saved tidbits", ProfileAction.OnGoToSavedTidbits)
+            ProfileEvent.SavedPicksClicked -> {
+                analyticsLogger.logEvent(
+                    eventName = "saved-top-picks-clicked",
+                    params = mapOf("source" to "profile_screen")
+                )
+                processAction(ProfileAction.NavigateToSavedPicks)
+            }
 
-                ProfileEvent.GoToSettings -> navigate("settings", "settings", ProfileAction.OnGoToSettings)
+            ProfileEvent.SavedTidbitsClicked -> {
+                analyticsLogger.logEvent(
+                    eventName = "saved-tidbits-clicked",
+                    params = mapOf("source" to "profile_screen")
+                )
+                processAction(ProfileAction.NavigateToSavedTidbits)
+            }
+
+            ProfileEvent.UpgradeToPremiumClicked -> {
+                analyticsLogger.logEvent(
+                    eventName = "unlock-premium-tapped",
+                    params = mapOf("source" to "profile")
+                )
+                premiumEventBus.requestPremium(source = "profile")
+            }
+
+            is ProfileEvent.ChangeTheme -> viewModelScope.launch {
+                val theme: String = themeMap.get(event.theme) ?: "System"
+                appPreferences.setThemePreference(theme)
+                analyticsLogger.logEvent(
+                    eventName = "theme-changed",
+                    params = mapOf("theme" to event.theme)
+                )
+            }
+
+            ProfileEvent.SettingsClicked -> {
+                analyticsLogger.logEvent(
+                    eventName = "settings-clicked",
+                    params = mapOf("source" to "profile_screen")
+                )
+                processAction(ProfileAction.NavigateToSettings)
             }
         }
     }
 
-    private suspend fun navigate(destination: String, label: String, action: ProfileAction) {
-        if (uiState.value.isGuestSession) {
-            _actions.emit(ProfileAction.ShowToast("You can only see $label after signing in"))
-        } else {
-            analyticsLogger.logEvent(
-                eventName = "navigation-clicked",
-                params = mapOf("destination" to destination)
-            )
+    private fun processAction(action: ProfileAction) {
+        viewModelScope.launch {
             _actions.emit(action)
         }
     }
-}
 
-data class ProfileUiState(val user: String? = null, val theme: String? = "Dark", val isGuestSession: Boolean = false)
-
-sealed interface ProfileEvent {
-    data class ChangeTheme(val theme: String) : ProfileEvent
-    data object SignOut : ProfileEvent
-    data object GoToSignUp : ProfileEvent
-    data object GoToHistory : ProfileEvent
-    data object GoToSavedPicks : ProfileEvent
-    data object GoToSavedTidbits : ProfileEvent
-    data object GoToSettings : ProfileEvent
-}
-
-sealed interface ProfileAction {
-    data object OnGoToSignUp : ProfileAction
-    data object OnGoToHistory : ProfileAction
-    data object OnGoToSavedPicks : ProfileAction
-    data object OnGoToSavedTidbits : ProfileAction
-    data object OnGoToSettings : ProfileAction
-    data class ShowToast(val message: String) : ProfileAction
+    fun getTheme() {
+        viewModelScope.launch {
+            appPreferences.themePreference.collect { theme ->
+                _state.update { state ->
+                    val theme = themeMap.filterValues { it == theme }.keys.firstOrNull()
+                    state.copy(currentTheme = theme ?: Res.string.system)
+                }
+            }
+        }
+    }
 }

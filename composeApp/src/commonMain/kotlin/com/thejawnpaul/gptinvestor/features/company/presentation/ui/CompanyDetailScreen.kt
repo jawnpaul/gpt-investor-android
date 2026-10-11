@@ -45,6 +45,7 @@ import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumber
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumberType
 import com.thejawnpaul.gptinvestor.features.company.domain.model.NewsBrief
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCompanyView
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.BriefSpotlightOverlay
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.BriefSummaryCard
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefHeader
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefSkeleton
@@ -62,6 +63,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.SingleS
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.WaitlistBottomSheetContent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.QuestionInput
+import com.thejawnpaul.gptinvestor.features.watchlist.presentation.ui.RemoveFromWatchlistDialog
 import com.thejawnpaul.gptinvestor.sources
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import org.jetbrains.compose.resources.stringResource
@@ -77,6 +79,7 @@ fun CompanyDetailScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     var showSourcesSheet by remember { mutableStateOf(false) }
     var showSentimentSheet by remember { mutableStateOf(false) }
+    var showRemoveFromWatchlistDialog by remember { mutableStateOf(false) }
 
     Box(modifier = modifier) {
         Scaffold(
@@ -85,8 +88,15 @@ fun CompanyDetailScreen(
                 Column {
                     CompanyBriefTopBar(
                         onBack = { onAction(CompanyDetailAction.OnGoBack) },
-                        onFavorite = {},
-                        onMore = {}
+                        onShare = { onEvent(CompanyDetailEvent.ShareBrief) },
+                        onWatchlist = {
+                            if (state.brief?.isWatched == true) {
+                                showRemoveFromWatchlistDialog = true
+                            } else {
+                                onEvent(CompanyDetailEvent.AddToWatchlist)
+                            }
+                        },
+                        isWatched = state.brief?.isWatched ?: false
                     )
                     if (state.isGuestSession) {
                         TopGuestLabel(
@@ -160,6 +170,23 @@ fun CompanyDetailScreen(
                     }
                 )
             }
+        }
+
+        if (showRemoveFromWatchlistDialog) {
+            state.brief?.let { brief ->
+                RemoveFromWatchlistDialog(
+                    ticker = brief.ticker,
+                    onConfirm = {
+                        showRemoveFromWatchlistDialog = false
+                        onEvent(CompanyDetailEvent.RemoveFromWatchlist)
+                    },
+                    onDismiss = { showRemoveFromWatchlistDialog = false }
+                )
+            }
+        }
+
+        if (state.showSpotlight && state.brief != null) {
+            BriefSpotlightOverlay(onDismiss = { onEvent(CompanyDetailEvent.DismissSpotlight) })
         }
     }
 }
@@ -345,6 +372,7 @@ private fun CompanyDetailScreenPreview() {
             state = SingleCompanyView(
                 companyName = "Apple Inc.",
                 brief = CompanyBrief(
+                    id = "",
                     ticker = "AAPL",
                     name = "Apple Inc.",
                     logoUrl = "",

@@ -196,7 +196,7 @@ private fun getNavigationRouteFromDeepLink(deepLink: String, isGuest: Boolean): 
     }
 
     deepLink.contains("discover") -> {
-        if (isGuest) GuestScreen.GuestDiscoverTab.createRoute() else Screen.DiscoverTabScreen.createRoute()
+        if (isGuest) GuestScreen.GuestDiscoverTab.createRoute() else Screen.DiscoverTabScreen.route
     }
 
     else -> {

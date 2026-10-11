@@ -8,6 +8,12 @@ if [ -z "$STAGED_FILES" ]; then
     exit 0
 fi
 
+# Skip if it's a merge, rebase, or cherry-pick commit
+if git rev-parse -q --verify MERGE_HEAD >/dev/null || git rev-parse -q --verify REBASE_HEAD >/dev/null || git rev-parse -q --verify CHERRY_PICK_HEAD >/dev/null; then
+    echo "Merge, rebase, or cherry-pick in progress. Skipping ktlint."
+    exit 0
+fi
+
 echo "............Starting ktlint check......................................"
 echo "Started Formatting...."
 

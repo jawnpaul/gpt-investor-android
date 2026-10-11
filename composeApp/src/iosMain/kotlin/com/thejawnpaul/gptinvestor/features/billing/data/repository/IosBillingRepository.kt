@@ -13,7 +13,7 @@ class IosBillingRepository : IBillingRepository {
     override suspend fun connect(): Result<Unit> = Result.success(Unit)
 
     override suspend fun launchPurchaseFlow(platformContext: PlatformContext, productId: String): BillingResult =
-        BillingResult.Error("Billing not supported on iOS")
+        BillingResult.NotSupported
 
     override fun currentPurchases(): Flow<List<BillingPurchase>> = flowOf(emptyList())
 

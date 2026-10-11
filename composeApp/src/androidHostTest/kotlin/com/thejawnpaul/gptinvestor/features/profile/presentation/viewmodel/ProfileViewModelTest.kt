@@ -1,17 +1,23 @@
 package com.thejawnpaul.gptinvestor.features.profile.presentation.viewmodel
 
-import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
+import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
+import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
+import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
+import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
+import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -25,13 +31,28 @@ import org.junit.Test
 class ProfileViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
-    private val authenticationRepository = mockk<AuthenticationRepository>(relaxed = true)
-    private val preferences = mockk<AppPreferences>(relaxed = true)
-    private val analyticsLogger = mockk<AnalyticsLogger>(relaxed = true)
+
+    private val appPreferences: AppPreferences = mockk()
+    private val authRepository: AuthenticationRepository = mockk()
+    private val conversationRepository: IConversationRepository = mockk()
+    private val topPickRepository: ITopPickRepository = mockk()
+    private val tidbitRepository: TidbitRepository = mockk()
+    private val billingRepository: IBillingRepository = mockk()
+    private val premiumEventBus: PremiumEventBus = mockk(relaxed = true)
+    private val analyticsLogger: AnalyticsLogger = mockk(relaxed = true)
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+
+        // Default mocks for state flows
+        every { appPreferences.userName } returns flowOf("")
+        every { conversationRepository.getQueryCount() } returns flowOf(0)
+        every { appPreferences.notificationPermission } returns flowOf(false)
+        every { billingRepository.currentPurchases() } returns flowOf(emptyList())
+        every { topPickRepository.getSavedTopPicksCount() } returns flowOf(0)
+        every { tidbitRepository.getSavedTidbitsCount() } returns flowOf(0)
+        every { appPreferences.themePreference } returns flowOf("System")
     }
 
     @After
@@ -39,61 +60,114 @@ class ProfileViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel(isGuest: Boolean): ProfileViewModel {
-        every { preferences.userName } returns flowOf("John Doe")
-        every { preferences.themePreference } returns flowOf("Light")
-        every { preferences.isGuestLoggedIn } returns flowOf(isGuest)
-        return ProfileViewModel(authenticationRepository, preferences, analyticsLogger)
+    private fun buildViewModel() = ProfileViewModel(
+        appPreferences,
+        authRepository,
+        conversationRepository,
+        topPickRepository,
+        tidbitRepository,
+        billingRepository,
+        premiumEventBus,
+        analyticsLogger
+    )
+
+    @Test
+    fun `state reflects userName and queryCount from their sources`() = runTest(testDispatcher) {
+        every { appPreferences.userName } returns flowOf("Alice")
+        every { conversationRepository.getQueryCount() } returns flowOf(7)
+
+        val vm = buildViewModel()
+        backgroundScope.launch { vm.state.collect { } }
+        advanceUntilIdle()
+
+        assertThat(vm.state.value.userName).isEqualTo("Alice")
+        assertThat(vm.state.value.queryCount).isEqualTo(7)
+        assertThat(vm.state.value.showSignOutConfirmation).isFalse()
     }
 
     @Test
-    fun `should show toast instead of navigating when guest opens history`() = runTest {
-        val viewModel = viewModel(isGuest = true)
+    fun `SignOutClicked sets showSignOutConfirmation to true`() = runTest(testDispatcher) {
+        val vm = buildViewModel()
+        backgroundScope.launch { vm.state.collect { } }
+        advanceUntilIdle()
 
-        viewModel.uiState.test {
-            skipItems(1)
-            awaitItem()
-            viewModel.actions.test {
-                viewModel.handleEvent(ProfileEvent.GoToHistory)
-                testDispatcher.scheduler.advanceUntilIdle()
-                assertThat(awaitItem()).isInstanceOf(ProfileAction.ShowToast::class.java)
-            }
-        }
+        vm.handleEvent(ProfileEvent.SignOutClicked)
+        advanceUntilIdle()
+
+        assertThat(vm.state.value.showSignOutConfirmation).isTrue()
     }
 
     @Test
-    fun `should navigate to settings when signed in user opens settings`() = runTest {
-        val viewModel = viewModel(isGuest = false)
+    fun `DismissSignOutDialog resets showSignOutConfirmation to false`() = runTest(testDispatcher) {
+        val vm = buildViewModel()
+        backgroundScope.launch { vm.state.collect { } }
+        advanceUntilIdle()
 
-        viewModel.uiState.test {
-            skipItems(1)
-            awaitItem()
-            viewModel.actions.test {
-                viewModel.handleEvent(ProfileEvent.GoToSettings)
-                testDispatcher.scheduler.advanceUntilIdle()
-                assertThat(awaitItem()).isEqualTo(ProfileAction.OnGoToSettings)
-            }
-        }
+        vm.handleEvent(ProfileEvent.SignOutClicked)
+        advanceUntilIdle()
+        assertThat(vm.state.value.showSignOutConfirmation).isTrue()
+
+        vm.handleEvent(ProfileEvent.DismissSignOutDialog)
+        advanceUntilIdle()
+        assertThat(vm.state.value.showSignOutConfirmation).isFalse()
     }
 
     @Test
-    fun `should persist theme and log event when theme changed`() = runTest {
-        val viewModel = viewModel(isGuest = false)
+    fun `ConfirmSignOut dismisses dialog and calls signOut on repository`() = runTest(testDispatcher) {
+        coEvery { authRepository.signOut() } returns Result.success(Unit)
 
-        viewModel.handleEvent(ProfileEvent.ChangeTheme("Dark"))
-        testDispatcher.scheduler.advanceUntilIdle()
+        val vm = buildViewModel()
+        backgroundScope.launch { vm.state.collect { } }
+        advanceUntilIdle()
 
-        coVerify { preferences.setThemePreference("Dark") }
-        verify { analyticsLogger.logEvent("theme-changed", mapOf("theme" to "Dark")) }
+        vm.handleEvent(ProfileEvent.SignOutClicked)
+        advanceUntilIdle()
+
+        vm.handleEvent(ProfileEvent.ConfirmSignOut)
+        advanceUntilIdle()
+
+        assertThat(vm.state.value.showSignOutConfirmation).isFalse()
+        coVerify { authRepository.signOut() }
     }
 
     @Test
-    fun `should sign out when sign out clicked`() = runTest {
-        val viewModel = viewModel(isGuest = false)
+    fun `queryCount updates when repository emits a new value`() = runTest(testDispatcher) {
+        val countFlow = MutableStateFlow(3)
+        every { conversationRepository.getQueryCount() } returns countFlow
 
-        viewModel.handleEvent(ProfileEvent.SignOut)
-        testDispatcher.scheduler.advanceUntilIdle()
+        val vm = buildViewModel()
+        backgroundScope.launch { vm.state.collect { } }
+        advanceUntilIdle()
 
-        coVerify { authenticationRepository.signOut() }
+        assertThat(vm.state.value.queryCount).isEqualTo(3)
+
+        countFlow.value = 10
+        advanceUntilIdle()
+
+        assertThat(vm.state.value.queryCount).isEqualTo(10)
+    }
+
+    @Test
+    fun `state reflects premium status when purchases are present`() = runTest(testDispatcher) {
+        every { billingRepository.currentPurchases() } returns flowOf(listOf(mockk()))
+
+        val vm = buildViewModel()
+        backgroundScope.launch { vm.state.collect { } }
+        advanceUntilIdle()
+
+        assertThat(vm.state.value.isPremiumUser).isTrue()
+    }
+
+    @Test
+    fun `state reflects saved items counts`() = runTest(testDispatcher) {
+        every { topPickRepository.getSavedTopPicksCount() } returns flowOf(5)
+        every { tidbitRepository.getSavedTidbitsCount() } returns flowOf(12)
+
+        val vm = buildViewModel()
+        backgroundScope.launch { vm.state.collect { } }
+        advanceUntilIdle()
+
+        assertThat(vm.state.value.savedPicksCount).isEqualTo(5)
+        assertThat(vm.state.value.savedTidbitsCount).isEqualTo(12)
     }
 }

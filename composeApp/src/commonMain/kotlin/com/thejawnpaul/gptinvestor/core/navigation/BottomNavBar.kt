@@ -22,6 +22,8 @@ import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.discover
 import com.thejawnpaul.gptinvestor.features.guest.presentation.GuestScreen
 import com.thejawnpaul.gptinvestor.home
+import com.thejawnpaul.gptinvestor.ic_book
+import com.thejawnpaul.gptinvestor.ic_book_filled
 import com.thejawnpaul.gptinvestor.ic_discover
 import com.thejawnpaul.gptinvestor.ic_discover_filled
 import com.thejawnpaul.gptinvestor.ic_home_filled
@@ -30,6 +32,7 @@ import com.thejawnpaul.gptinvestor.ic_profile
 import com.thejawnpaul.gptinvestor.ic_profile_filled
 import com.thejawnpaul.gptinvestor.profile
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import com.thejawnpaul.gptinvestor.watchlist_title
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -63,9 +66,19 @@ private val bottomNavItems = listOf(
         selectedIcon = Res.drawable.ic_discover_filled,
         iosSymbol = SFSymbol.safari,
         iosSelectedSymbol = SFSymbol.safariFill,
-        route = Screen.DiscoverTabScreen.createRoute(),
+        route = Screen.DiscoverTabScreen.route,
         guestRoute = GuestScreen.GuestDiscoverTab.createRoute(),
         matchingRoutes = setOf(Screen.DiscoverTabScreen.route, GuestScreen.GuestDiscoverTab.route)
+    ),
+    BottomNavItem(
+        label = Res.string.watchlist_title,
+        icon = Res.drawable.ic_book,
+        selectedIcon = Res.drawable.ic_book_filled,
+        iosSymbol = SFSymbol.book,
+        iosSelectedSymbol = SFSymbol.bookFill,
+        route = Screen.WatchlistTabScreen.route,
+        guestRoute = GuestScreen.GuestWatchlistTab.route,
+        matchingRoutes = setOf(Screen.WatchlistTabScreen.route, GuestScreen.GuestWatchlistTab.route)
     ),
     BottomNavItem(
         label = Res.string.profile,

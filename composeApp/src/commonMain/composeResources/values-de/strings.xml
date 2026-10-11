@@ -249,6 +249,13 @@
     <string name="full_summaries_with_premium">Vollständige Zusammenfassungen mit Premium</string>
     <string name="tracking_stocks">Sie verfolgen %1$s</string>
     <string name="add_more_stocks">Weitere Aktien hinzufügen</string>
+    <string name="in_your_brief">In Ihrem Briefing</string>
+    <string name="summary_with_premium">Zusammenfassung mit Premium</string>
+    <string name="joins_your_next_brief">Kommt in Ihr nächstes Briefing</string>
+    <string name="couldn_t_load_your_watchlist">Ihre Watchlist konnte nicht geladen werden</string>
+    <string name="watchlist_error_server">Bei uns ist etwas schiefgelaufen. Ihre Aktien sind gespeichert.</string>
+    <string name="watchlist_error_network">Prüfen Sie Ihre Verbindung und versuchen Sie es erneut. Ihre Aktien sind gespeichert.</string>
+    <string name="search_stocks">Aktien suchen</string>
     <string name="digest_pending_notify_title">Benachrichtigt werden, wenn er bereit ist</string>
     <string name="digest_pending_notify_subtitle">Außerdem Ihre bevorzugte Lieferzeit festlegen</string>
     <string name="key_event">WICHTIGES EREIGNIS</string>
@@ -261,9 +268,8 @@
     <string name="x_companies">%1$d Unternehmen</string>
     <string name="watchlist_title">Watchlist</string>
     <string name="build_your_watchlist">Watchlist erstellen</string>
-    <string name="watchlist_empty_description">Verfolgen Sie Aktien, die Ihnen wichtig sind. Wir halten Sie über wichtige Momente auf dem Laufenden – Ergebnisse, Nachrichten, relevante Ereignisse.</string>
+    <string name="watchlist_empty_description">Verfolgen Sie die Aktien, die Ihnen wichtig sind. Wir melden Quartalszahlen, wichtige Nachrichten und alles, was Ihre These ändern könnte.</string>
     <string name="browse_top_picks">Top-Empfehlungen durchsuchen</string>
-    <string name="or_search_for_any_stock">Oder nach einer Aktie suchen</string>
     <string name="popular_this_week">DIESE WOCHE BELIEBT</string>
     <string name="watch">Beobachten</string>
     <string name="remove_from_watchlist">Aus Watchlist entfernen</string>

@@ -31,7 +31,12 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun HomeErrorCard(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
+fun HomeErrorCard(
+    message: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+    title: String = stringResource(Res.string.couldn_t_load)
+) {
     val gptInvestorColors = LocalGPTInvestorColors.current
     val errorColor = gptInvestorColors.redColors.allRed
 
@@ -64,7 +69,7 @@ fun HomeErrorCard(message: String, onRetry: () -> Unit, modifier: Modifier = Mod
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
-                    text = stringResource(Res.string.couldn_t_load),
+                    text = title,
                     style = MaterialTheme.typography.labelLarge
                 )
                 Text(

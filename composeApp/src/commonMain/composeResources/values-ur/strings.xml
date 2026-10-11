@@ -249,6 +249,13 @@
     <string name="full_summaries_with_premium">پریمیم کے ساتھ مکمل خلاصے</string>
     <string name="tracking_stocks">زیرِ نگرانی: %1$s</string>
     <string name="add_more_stocks">مزید اسٹاک شامل کریں</string>
+    <string name="in_your_brief">آپ کے خلاصے میں</string>
+    <string name="summary_with_premium">پریمیم کے ساتھ خلاصہ</string>
+    <string name="joins_your_next_brief">اگلے خلاصے میں شامل ہوگا</string>
+    <string name="couldn_t_load_your_watchlist">آپ کی واچ لسٹ لوڈ نہیں ہو سکی</string>
+    <string name="watchlist_error_server">ہماری طرف کچھ خرابی ہے۔ آپ کے اسٹاکس محفوظ ہیں۔</string>
+    <string name="watchlist_error_network">اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔ آپ کے اسٹاکس محفوظ ہیں۔</string>
+    <string name="search_stocks">اسٹاکس تلاش کریں</string>
     <string name="digest_pending_notify_title">تیار ہونے پر اطلاع پائیں</string>
     <string name="digest_pending_notify_subtitle">اور اپنی پسندیدہ ترسیل کا وقت مقرر کریں</string>
     <string name="key_event">اہم واقعہ</string>
@@ -261,9 +268,8 @@
     <string name="x_companies">%1$d کمپنیاں</string>
     <string name="watchlist_title">واچ لسٹ</string>
     <string name="build_your_watchlist">اپنی واچ لسٹ بنائیں</string>
-    <string name="watchlist_empty_description">اپنی پسند کے اسٹاک ٹریک کریں۔ ہم آپ کو اہم لمحات پر مطلع کریں گے — آمدنی، خبریں، اہم واقعات۔</string>
+    <string name="watchlist_empty_description">جن اسٹاکس کی آپ کو پروا ہے انہیں ٹریک کریں۔ ہم آمدنی کے نتائج، بڑی خبروں اور ہر اس چیز کی نشاندہی کریں گے جو آپ کا تجزیہ بدل سکتی ہے۔</string>
     <string name="browse_top_picks">بہترین انتخاب دیکھیں</string>
-    <string name="or_search_for_any_stock">یا کوئی بھی اسٹاک تلاش کریں</string>
     <string name="popular_this_week">اس ہفتے مقبول</string>
     <string name="watch">دیکھیں</string>
     <string name="remove_from_watchlist">واچ لسٹ سے ہٹائیں</string>

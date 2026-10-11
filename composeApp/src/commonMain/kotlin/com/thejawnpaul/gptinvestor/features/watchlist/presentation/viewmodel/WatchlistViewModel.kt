@@ -4,9 +4,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.core.functional.onSuccess
+import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistFailure
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.PopularStockUiModel
+import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.WatchlistLoadError
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.WatchlistUiState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -37,6 +41,7 @@ private val recommendationColors = listOf(
 @KoinViewModel
 class WatchlistViewModel(
     private val watchlistRepository: WatchlistRepository,
+    private val companyRepository: ICompanyRepository,
     @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(WatchlistUiState(isLoading = true))
@@ -98,7 +103,12 @@ class WatchlistViewModel(
                     if (failure == WatchlistFailure.SignUpRequired) {
                         it.copy(isLoading = false, requiresSignUp = true)
                     } else {
-                        it.copy(isLoading = false, error = "failed")
+                        val error = if (failure == Failure.NetworkConnection) {
+                            WatchlistLoadError.NETWORK
+                        } else {
+                            WatchlistLoadError.SERVER
+                        }
+                        it.copy(isLoading = false, error = error)
                     }
                 }
             },
@@ -117,8 +127,24 @@ class WatchlistViewModel(
                         error = null
                     )
                 }
+                if (data.items.isEmpty() && popularStocks.isNotEmpty()) {
+                    viewModelScope.launch { loadPopularStockLogos(popularStocks.map { it.company.ticker }) }
+                }
             }
         )
+    }
+
+    // The API's suggestions carry no logos; fetch them so the empty state matches the list's real logos.
+    private suspend fun loadPopularStockLogos(tickers: List<String>) {
+        companyRepository.getCompanyLogos(tickers).onSuccess { logos ->
+            _uiState.update { state ->
+                state.copy(
+                    popularStocks = state.popularStocks.map { stock ->
+                        stock.copy(logoUrl = logos[stock.company.ticker] ?: stock.logoUrl)
+                    }
+                )
+            }
+        }
     }
 
     private fun addToWatchlist(ticker: String) {

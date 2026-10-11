@@ -249,6 +249,13 @@
     <string name="full_summaries_with_premium">Повні огляди з Premium</string>
     <string name="tracking_stocks">Відстежується: %1$s</string>
     <string name="add_more_stocks">Додати ще акції</string>
+    <string name="in_your_brief">У вашому огляді</string>
+    <string name="summary_with_premium">Огляд із Premium</string>
+    <string name="joins_your_next_brief">Увійде в наступний огляд</string>
+    <string name="couldn_t_load_your_watchlist">Не вдалося завантажити список спостереження</string>
+    <string name="watchlist_error_server">Щось пішло не так на нашому боці. Ваші акції збережено.</string>
+    <string name="watchlist_error_network">Перевірте з’єднання та спробуйте ще раз. Ваші акції збережено.</string>
+    <string name="search_stocks">Шукати акції</string>
     <string name="digest_pending_notify_title">Отримати сповіщення, коли буде готово</string>
     <string name="digest_pending_notify_subtitle">А також встановити бажаний час доставки</string>
     <string name="key_event">КЛЮЧОВА ПОДІЯ</string>
@@ -261,9 +268,8 @@
     <string name="x_companies">%1$d компаній</string>
     <string name="watchlist_title">Список спостереження</string>
     <string name="build_your_watchlist">Створіть список спостереження</string>
-    <string name="watchlist_empty_description">Відстежуйте акції, які вас цікавлять. Ми повідомлятимемо вас про важливі події — звітність, новини, ключові зміни.</string>
+    <string name="watchlist_empty_description">Відстежуйте акції, які вас цікавлять. Ми повідомимо про звіти, важливі новини та все, що може змінити вашу тезу.</string>
     <string name="browse_top_picks">Переглянути топ-підбірки</string>
-    <string name="or_search_for_any_stock">Або знайти будь-яку акцію</string>
     <string name="popular_this_week">ПОПУЛЯРНЕ ЦЕЙ ТИЖДЕНЬ</string>
     <string name="watch">Спостерігати</string>
     <string name="remove_from_watchlist">Видалити зі списку спостереження</string>

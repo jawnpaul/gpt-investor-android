@@ -273,6 +273,13 @@
     <string name="full_summaries_with_premium">Full summaries with Premium</string>
     <string name="tracking_stocks">Tracking %1$s</string>
     <string name="add_more_stocks">Add more stocks</string>
+    <string name="in_your_brief">In your brief</string>
+    <string name="summary_with_premium">Summary with Premium</string>
+    <string name="joins_your_next_brief">Joins your next brief</string>
+    <string name="couldn_t_load_your_watchlist">Couldn’t load your watchlist</string>
+    <string name="watchlist_error_server">Something’s wrong on our end. Your stocks are saved.</string>
+    <string name="watchlist_error_network">Check your connection and try again. Your stocks are saved.</string>
+    <string name="search_stocks">Search stocks</string>
     <string name="digest_pending_notify_title">Get notified when it’s ready</string>
     <string name="digest_pending_notify_subtitle">Plus, set your preferred delivery time</string>
     <string name="key_event">KEY EVENT</string>
@@ -285,9 +292,8 @@
     <string name="x_companies">%1$d companies</string>
     <string name="watchlist_title">Watchlist</string>
     <string name="build_your_watchlist">Build your watchlist</string>
-    <string name="watchlist_empty_description">Track stocks you care about. We’ll keep you posted on the moments that matter — earnings, news, thesis-breaking events.</string>
+    <string name="watchlist_empty_description">Track the stocks you care about. We’ll flag earnings, big news and anything that could change your thesis.</string>
     <string name="browse_top_picks">Browse top picks</string>
-    <string name="or_search_for_any_stock">Or search for any stock</string>
     <string name="popular_this_week">POPULAR THIS WEEK</string>
     <string name="watch">Watch</string>
     <string name="remove_from_watchlist">Remove from Watchlist</string>

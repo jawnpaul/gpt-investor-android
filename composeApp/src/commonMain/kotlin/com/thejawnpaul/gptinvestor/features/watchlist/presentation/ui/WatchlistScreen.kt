@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,6 +40,7 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -53,6 +55,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -61,27 +64,37 @@ import coil3.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.browse_top_picks
 import com.thejawnpaul.gptinvestor.build_your_watchlist
+import com.thejawnpaul.gptinvestor.couldn_t_load_your_watchlist
 import com.thejawnpaul.gptinvestor.features.component.ShimmerBox
 import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.RecommendedDigestCompany
+import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.PriceChangeChip
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeErrorCard
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistBriefStatus
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistItem
+import com.thejawnpaul.gptinvestor.features.watchlist.presentation.formatUsdPrice
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.PopularStockUiModel
+import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.WatchlistLoadError
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.WatchlistUiState
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.viewmodel.WatchlistEvent
 import com.thejawnpaul.gptinvestor.ic_lock
 import com.thejawnpaul.gptinvestor.ic_search
 import com.thejawnpaul.gptinvestor.ic_trash
-import com.thejawnpaul.gptinvestor.or_search_for_any_stock
+import com.thejawnpaul.gptinvestor.in_your_brief
+import com.thejawnpaul.gptinvestor.joins_your_next_brief
 import com.thejawnpaul.gptinvestor.outline_visibility_24
 import com.thejawnpaul.gptinvestor.popular_this_week
 import com.thejawnpaul.gptinvestor.remove_from_watchlist
 import com.thejawnpaul.gptinvestor.search
+import com.thejawnpaul.gptinvestor.search_stocks
 import com.thejawnpaul.gptinvestor.sign_in_action
 import com.thejawnpaul.gptinvestor.sign_in_to_save_stocks
+import com.thejawnpaul.gptinvestor.summary_with_premium
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.watch
 import com.thejawnpaul.gptinvestor.watchlist_empty_description
+import com.thejawnpaul.gptinvestor.watchlist_error_network
+import com.thejawnpaul.gptinvestor.watchlist_error_server
 import com.thejawnpaul.gptinvestor.watchlist_title
 import com.thejawnpaul.gptinvestor.you_re_browsing_as_a_guest
 import org.jetbrains.compose.resources.painterResource
@@ -146,7 +159,14 @@ fun WatchlistScreen(state: WatchlistUiState, onEvent: (WatchlistEvent) -> Unit, 
                     contentAlignment = Alignment.Center
                 ) {
                     HomeErrorCard(
-                        message = state.error ?: "",
+                        title = stringResource(Res.string.couldn_t_load_your_watchlist),
+                        message = stringResource(
+                            if (state.error == WatchlistLoadError.NETWORK) {
+                                Res.string.watchlist_error_network
+                            } else {
+                                Res.string.watchlist_error_server
+                            }
+                        ),
                         onRetry = { onEvent(WatchlistEvent.RetryWatchlist) }
                     )
                 }
@@ -309,11 +329,13 @@ private fun WatchlistEmptyState(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = stringResource(Res.string.or_search_for_any_stock),
-            style = MaterialTheme.typography.bodyMedium,
-            color = gptInvestorColors.textColors.secondary50
-        )
+        TextButton(onClick = { onEvent(WatchlistEvent.OnSearchClick) }) {
+            Text(
+                text = stringResource(Res.string.search_stocks),
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                textDecoration = TextDecoration.Underline
+            )
+        }
 
         Spacer(modifier = Modifier.height(64.dp))
 
@@ -430,25 +452,79 @@ private fun WatchlistItemRow(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-        }
-
-        if (item.locked) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_lock),
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
-                tint = gptInvestorColors.textColors.secondary50
-            )
-        } else {
-            IconButton(onClick = { showConfirmDialog = true }) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_trash),
-                    contentDescription = stringResource(Res.string.remove_from_watchlist),
-                    modifier = Modifier.size(18.dp),
-                    tint = gptInvestorColors.textColors.secondary50
-                )
+            item.briefStatus?.let { status ->
+                Spacer(modifier = Modifier.height(2.dp))
+                BriefStatusLine(status = status)
             }
         }
+
+        if (item.currentPrice != null || item.priceChange != null) {
+            Spacer(modifier = Modifier.width(8.dp))
+            Column(horizontalAlignment = Alignment.End) {
+                item.currentPrice?.let { price ->
+                    Text(
+                        text = formatUsdPrice(price),
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold)
+                    )
+                }
+                item.priceChange?.let { change ->
+                    Spacer(modifier = Modifier.height(3.dp))
+                    PriceChangeChip(percent = change)
+                }
+            }
+        }
+
+        // Locked stocks can be removed too: "locked" also covers free-plan stocks whose summary is locked.
+        IconButton(onClick = { showConfirmDialog = true }) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_trash),
+                contentDescription = stringResource(Res.string.remove_from_watchlist),
+                modifier = Modifier.size(18.dp),
+                tint = gptInvestorColors.textColors.secondary50
+            )
+        }
+    }
+}
+
+@Composable
+private fun BriefStatusLine(status: WatchlistBriefStatus) {
+    val gptInvestorColors = LocalGPTInvestorColors.current
+    val color = when (status) {
+        WatchlistBriefStatus.IN_BRIEF -> gptInvestorColors.greenColors.allGreen
+        WatchlistBriefStatus.LOCKED -> MaterialTheme.colorScheme.tertiary
+        WatchlistBriefStatus.PENDING_NEXT_BRIEF -> gptInvestorColors.textColors.secondary50
+    }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        when (status) {
+            WatchlistBriefStatus.IN_BRIEF -> Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .background(color, CircleShape)
+            )
+            WatchlistBriefStatus.LOCKED -> Icon(
+                painter = painterResource(Res.drawable.ic_lock),
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(11.dp)
+            )
+            WatchlistBriefStatus.PENDING_NEXT_BRIEF -> Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .border(1.5.dp, color, CircleShape)
+            )
+        }
+        Spacer(modifier = Modifier.width(5.dp))
+        Text(
+            text = stringResource(
+                when (status) {
+                    WatchlistBriefStatus.IN_BRIEF -> Res.string.in_your_brief
+                    WatchlistBriefStatus.LOCKED -> Res.string.summary_with_premium
+                    WatchlistBriefStatus.PENDING_NEXT_BRIEF -> Res.string.joins_your_next_brief
+                }
+            ),
+            style = MaterialTheme.typography.labelSmall,
+            color = color
+        )
     }
 }
 
@@ -473,14 +549,29 @@ private fun PopularStockItem(
             Surface(
                 modifier = Modifier.size(40.dp),
                 shape = CircleShape,
-                color = stock.color.copy(alpha = 0.8f)
+                color = if (stock.logoUrl !=
+                    null
+                ) {
+                    MaterialTheme.colorScheme.surfaceVariant
+                } else {
+                    stock.color.copy(alpha = 0.8f)
+                }
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stock.company.ticker.take(1),
-                        color = Color.White,
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                if (stock.logoUrl != null) {
+                    AsyncImage(
+                        model = stock.logoUrl,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
                     )
+                } else {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = stock.company.ticker.take(1),
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                    }
                 }
             }
 

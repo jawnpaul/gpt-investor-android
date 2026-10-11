@@ -5,10 +5,13 @@ import com.google.common.truth.Truth.assertThat
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
+import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.RecommendedDigestCompany
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistFailure
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistData
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistItem
+import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.WatchlistLoadError
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -34,6 +37,7 @@ class WatchlistViewModelTest {
 
     private val watchlistRepository: WatchlistRepository = mockk()
     private val analyticsLogger: AnalyticsLogger = mockk(relaxed = true)
+    private val companyRepository: ICompanyRepository = mockk()
     private val changes = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     @Before
@@ -48,7 +52,7 @@ class WatchlistViewModelTest {
     }
 
     private fun TestScope.subscribedViewModel(): WatchlistViewModel {
-        val vm = WatchlistViewModel(watchlistRepository, analyticsLogger)
+        val vm = WatchlistViewModel(watchlistRepository, companyRepository, analyticsLogger)
         backgroundScope.launch { vm.uiState.collect { } }
         advanceUntilIdle()
         return vm
@@ -56,7 +60,7 @@ class WatchlistViewModelTest {
 
     @Test
     fun `does not load until the screen subscribes`() = runTest(testDispatcher) {
-        WatchlistViewModel(watchlistRepository, analyticsLogger)
+        WatchlistViewModel(watchlistRepository, companyRepository, analyticsLogger)
         advanceUntilIdle()
 
         coVerify(exactly = 0) { watchlistRepository.getWatchlist() }
@@ -115,12 +119,47 @@ class WatchlistViewModelTest {
 
     @Test
     fun `OnSignInClick emits NavigateToSignUp`() = runTest(testDispatcher) {
-        val vm = WatchlistViewModel(watchlistRepository, analyticsLogger)
+        val vm = WatchlistViewModel(watchlistRepository, companyRepository, analyticsLogger)
 
         vm.actions.test {
             vm.onEvent(WatchlistEvent.OnSignInClick)
             assertThat(awaitItem()).isEqualTo(WatchlistAction.NavigateToSignUp)
         }
+    }
+
+    @Test
+    fun `network and server failures show different errors`() = runTest(testDispatcher) {
+        coEvery { watchlistRepository.getWatchlist() } returnsMany listOf(
+            Either.Left(Failure.NetworkConnection),
+            Either.Left(Failure.ServerError)
+        )
+        val vm = subscribedViewModel()
+        assertThat(vm.uiState.value.error).isEqualTo(WatchlistLoadError.NETWORK)
+
+        vm.onEvent(WatchlistEvent.RetryWatchlist)
+        advanceUntilIdle()
+
+        assertThat(vm.uiState.value.error).isEqualTo(WatchlistLoadError.SERVER)
+    }
+
+    @Test
+    fun `empty watchlist shows popular stocks with fetched logos`() = runTest(testDispatcher) {
+        coEvery { watchlistRepository.getWatchlist() } returns Either.Right(
+            WatchlistData(
+                items = emptyList(),
+                recommendations = listOf(
+                    RecommendedDigestCompany("AAPL", "Apple Inc."),
+                    RecommendedDigestCompany("TSLA", "Tesla")
+                )
+            )
+        )
+        coEvery { companyRepository.getCompanyLogos(listOf("AAPL", "TSLA")) } returns
+            Either.Right(mapOf("AAPL" to "https://logo/aapl.png"))
+
+        val vm = subscribedViewModel()
+
+        val logos = vm.uiState.value.popularStocks.associate { it.company.ticker to it.logoUrl }
+        assertThat(logos).containsExactly("AAPL", "https://logo/aapl.png", "TSLA", null)
     }
 
     private fun loaded(vararg tickers: String): Either<Failure, WatchlistData> = Either.Right(

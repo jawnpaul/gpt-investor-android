@@ -7,6 +7,7 @@ import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistRequest
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistData
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistItem
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.watchlistBriefStatusOf
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -51,7 +52,10 @@ class WatchlistRepositoryImpl(private val apiService: KtorApiService) : Watchlis
                     companyName = it.companyName,
                     dateAdded = it.dateAdded,
                     locked = it.locked,
-                    logoUrl = it.logoUrl.toHttpsUrl()
+                    logoUrl = it.logoUrl.toHttpsUrl(),
+                    currentPrice = it.currentPrice,
+                    priceChange = it.priceChange,
+                    briefStatus = watchlistBriefStatusOf(it.digestStatus, it.locked)
                 )
             } ?: emptyList()
             val recommendations = response.body?.recommendedDigestCompany ?: emptyList()

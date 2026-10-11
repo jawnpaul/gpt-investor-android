@@ -9,7 +9,9 @@ data class WatchlistUiState(
     val watchlistItems: List<WatchlistItem> = emptyList(),
     val isLoading: Boolean = false,
     val requiresSignUp: Boolean = false,
-    val error: String? = null
+    val error: WatchlistLoadError? = null
 )
 
-data class PopularStockUiModel(val company: RecommendedDigestCompany, val color: Color)
+enum class WatchlistLoadError { NETWORK, SERVER }
+
+data class PopularStockUiModel(val company: RecommendedDigestCompany, val color: Color, val logoUrl: String? = null)

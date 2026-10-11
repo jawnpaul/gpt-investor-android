@@ -128,8 +128,17 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
         ) {
             try {
                 val navigationRoute = getNavigationRouteFromDeepLink(deepLinkRoute, isGuest = isGuestSignedIn == true)
-                navController.navigate(route = navigationRoute) {
-                    popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                if (navigationRoute == Screen.DigestDetailScreen.route) {
+                    // Digest detail reads its state from the Home tab's ViewModel, so Home must be on the stack.
+                    navController.navigate(route = Screen.HomeTabScreen.route) {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                    navController.navigate(route = navigationRoute)
+                } else {
+                    navController.navigate(route = navigationRoute) {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                    }
                 }
             } finally {
                 currentOnDeepLinkConsume()
@@ -206,30 +215,39 @@ private fun currentTimezoneSettings(): UpdateUserSettingsRequest {
     )
 }
 
-private fun getNavigationRouteFromDeepLink(deepLink: String, isGuest: Boolean): String = when {
+internal fun getNavigationRouteFromDeepLink(deepLink: String, isGuest: Boolean): String = when {
     deepLink.contains("tidbit_detail_screen") -> {
-        val tidbitId = extractTidbitIdFromDeepLink(deepLink)
+        val tidbitId = extractIdFromDeepLink(deepLink, screen = "tidbit_detail_screen")
         tidbitId?.let {
             Screen.TidbitDetailScreen.createRoute(tidbitId = it)
         } ?: Screen.TidbitScreen.route
+    }
+
+    deepLink.contains("company_detail_screen") -> {
+        val ticker = extractIdFromDeepLink(deepLink, screen = "company_detail_screen")
+        when {
+            ticker == null -> homeRoute(isGuest)
+            isGuest -> GuestScreen.GuestCompanyDetail.createRoute(ticker)
+            else -> Screen.CompanyDetailScreen.createRoute(ticker)
+        }
+    }
+
+    deepLink.contains("digest_detail_screen") -> {
+        if (isGuest) homeRoute(isGuest = true) else Screen.DigestDetailScreen.route
     }
 
     deepLink.contains("discover") -> {
         if (isGuest) GuestScreen.GuestDiscoverTab.createRoute() else Screen.DiscoverTabScreen.route
     }
 
-    else -> {
-        if (isGuest) GuestScreen.GuestHomeTab.route else Screen.HomeTabScreen.route
-    }
+    else -> homeRoute(isGuest)
 }
 
-private fun extractTidbitIdFromDeepLink(deepLink: String): String? = try {
+private fun homeRoute(isGuest: Boolean): String =
+    if (isGuest) GuestScreen.GuestHomeTab.route else Screen.HomeTabScreen.route
+
+// Deep links look like app://gpt-investor/<screen>/<id>.
+private fun extractIdFromDeepLink(deepLink: String, screen: String): String? {
     val parts = deepLink.split("/")
-    if (parts.size >= 4 && parts[3] == "tidbit_detail_screen") {
-        parts[4]
-    } else {
-        null
-    }
-} catch (_: Exception) {
-    null
+    return if (parts.size >= 5 && parts[3] == screen) parts[4].takeIf { it.isNotBlank() } else null
 }

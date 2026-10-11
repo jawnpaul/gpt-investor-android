@@ -49,6 +49,10 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
         let userInfo = response.notification.request.content.userInfo
 
         print(userInfo)
+
+        if let deepLink = userInfo["deep_link"] as? String {
+            IosNotificationBridgeKt.onNotificationTapped(deepLink: deepLink)
+        }
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {

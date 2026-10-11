@@ -26,11 +26,15 @@ import com.thejawnpaul.gptinvestor.features.authentication.presentation.GuestSes
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.GuestRateLimitBottomSheet
 import com.thejawnpaul.gptinvestor.features.guest.presentation.GuestScreen
 import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
+import com.thejawnpaul.gptinvestor.features.settings.data.remote.model.UpdateUserSettingsRequest
+import com.thejawnpaul.gptinvestor.features.settings.domain.SettingsRepository
 import com.thejawnpaul.gptinvestor.features.splash.AnimatedSplashScreen
 import com.thejawnpaul.gptinvestor.remote.TokenStorage
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.first
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.offsetAt
 import org.koin.compose.koinInject
 
 @Composable
@@ -40,6 +44,7 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
     val guestRateLimitNotifier: GuestRateLimitNotifier = koinInject()
     val guestSessionNotifier: GuestSessionNotifier = koinInject()
     val tokenStorage: TokenStorage = koinInject()
+    val settingsRepository: SettingsRepository = koinInject()
 
     val themePreference by preferences.themePreference.collectAsState(initial = "System")
     val isUserSignedIn by preferences.isUserLoggedIn.collectAsState(initial = false)
@@ -60,6 +65,12 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
 
     LaunchedEffect(Unit) {
         tokenSyncManager.syncToken()
+    }
+
+    LaunchedEffect(isUserSignedIn) {
+        if (isUserSignedIn == true) {
+            settingsRepository.updateUserSettings(currentTimezoneSettings())
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -185,6 +196,14 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
             }
         }
     }
+}
+
+private fun currentTimezoneSettings(): UpdateUserSettingsRequest {
+    val timeZone = TimeZone.currentSystemDefault()
+    return UpdateUserSettingsRequest(
+        timezoneIana = timeZone.id,
+        utcOffsetMinutes = timeZone.offsetAt(Clock.System.now()).totalSeconds / 60
+    )
 }
 
 private fun getNavigationRouteFromDeepLink(deepLink: String, isGuest: Boolean): String = when {

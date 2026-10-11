@@ -9,6 +9,7 @@ data class DailyDigestView(
     val suggestedStocks: List<RecommendedDigestCompany> = emptyList(),
     val isStale: Boolean = false,
     val lastUpdated: String? = null,
+    val nextDigestLabel: String? = null,
     val lockedStocksCount: Int = 0,
     val lockedStocksSummary: String? = null,
     val isPremium: Boolean = true,

@@ -9,7 +9,8 @@ data class DigestResponse(
     @SerialName("digest_date") val digestDate: String?,
     @SerialName("is_stale") val isStale: Boolean? = null,
     @SerialName("items") val items: List<DigestItemRemote>? = null,
-    @SerialName("recommendations") val recommendations: List<RecommendedDigestCompany>? = null
+    @SerialName("recommendations") val recommendations: List<RecommendedDigestCompany>? = null,
+    @SerialName("next_digest_at") val nextDigestAt: String? = null
 )
 
 @Serializable

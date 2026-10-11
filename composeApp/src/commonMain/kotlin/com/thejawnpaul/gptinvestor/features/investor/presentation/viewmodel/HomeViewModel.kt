@@ -33,6 +33,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksV
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistFailure
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -488,6 +489,11 @@ class HomeViewModel(
                         dailyDigestView = state.dailyDigestView.copy(
                             loading = false,
                             status = digestStatus,
+                            nextDigestLabel = if (digestStatus == DailyDigestStatus.PENDING) {
+                                formatNextDigestTime(digest.nextDigestAt, TimeZone.currentSystemDefault())
+                            } else {
+                                null
+                            },
                             stocks = unlockedItems.map { item ->
                                 StockDigestPresentation(
                                     ticker = item.ticker,
@@ -533,6 +539,20 @@ enum class TimePeriod { MORNING, AFTERNOON, EVENING }
 
 internal fun extractFirstName(userName: String?): String? =
     userName?.trim()?.split("\\s+".toRegex())?.firstOrNull()?.takeIf { it.isNotBlank() }
+
+// next_digest_at is an ISO-8601 UTC instant; show it as a local clock time, e.g. "8 AM" or "8:30 AM".
+internal fun formatNextDigestTime(nextDigestAt: String?, timeZone: TimeZone): String? {
+    val instant = nextDigestAt?.let { runCatching { Instant.parse(it) }.getOrNull() } ?: return null
+    val local = instant.toLocalDateTime(timeZone)
+    val period = if (local.hour < 12) "AM" else "PM"
+    val hour = when {
+        local.hour == 0 -> 12
+        local.hour > 12 -> local.hour - 12
+        else -> local.hour
+    }
+    val minutes = if (local.minute == 0) "" else ":" + local.minute.toString().padStart(2, '0')
+    return "$hour$minutes $period"
+}
 
 private fun computeTimePeriod(): TimePeriod {
     val hour = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour

@@ -234,6 +234,8 @@
     <string name="digest_pending_title">Ваш дайджест у дорозі</string>
     <string name="digest_pending_description">Очікуйте протягом години. Перевірте пізніше.</string>
     <string name="digest_pending_description_premium">Очікуйте протягом години — ми сповістимо вас, коли він буде готовий.</string>
+    <string name="digest_pending_description_at">Очікуйте до %1$s. Перевірте пізніше.</string>
+    <string name="digest_pending_description_premium_at">Очікуйте до %1$s — ми сповістимо вас, коли він буде готовий.</string>
     <string name="digest_pending_notify_title">Отримати сповіщення, коли буде готово</string>
     <string name="digest_pending_notify_subtitle">А також встановити бажаний час доставки</string>
     <string name="improved">Покращено</string>

@@ -58,7 +58,9 @@ import com.thejawnpaul.gptinvestor.add
 import com.thejawnpaul.gptinvestor.browse_all_companies
 import com.thejawnpaul.gptinvestor.build_your_digest
 import com.thejawnpaul.gptinvestor.digest_pending_description
+import com.thejawnpaul.gptinvestor.digest_pending_description_at
 import com.thejawnpaul.gptinvestor.digest_pending_description_premium
+import com.thejawnpaul.gptinvestor.digest_pending_description_premium_at
 import com.thejawnpaul.gptinvestor.digest_pending_notify_subtitle
 import com.thejawnpaul.gptinvestor.digest_pending_notify_title
 import com.thejawnpaul.gptinvestor.digest_pending_title
@@ -200,6 +202,7 @@ fun DailyDigestCard(
 
                     2 -> PendingDigestContent(
                         isPremium = view.isPremium,
+                        nextDigestLabel = view.nextDigestLabel,
                         onUnlockPremium = onUnlockPremiumPending
                     )
 
@@ -392,7 +395,7 @@ private fun EmptyDigestContent(view: DailyDigestView, onAddStock: (String) -> Un
 }
 
 @Composable
-private fun PendingDigestContent(isPremium: Boolean, onUnlockPremium: () -> Unit) {
+private fun PendingDigestContent(isPremium: Boolean, nextDigestLabel: String?, onUnlockPremium: () -> Unit) {
     val customColors = LocalGPTInvestorColors.current
 
     Column(
@@ -414,13 +417,12 @@ private fun PendingDigestContent(isPremium: Boolean, onUnlockPremium: () -> Unit
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = stringResource(
-                if (isPremium) {
-                    Res.string.digest_pending_description_premium
-                } else {
-                    Res.string.digest_pending_description
-                }
-            ),
+            text = when {
+                nextDigestLabel == null && isPremium -> stringResource(Res.string.digest_pending_description_premium)
+                nextDigestLabel == null -> stringResource(Res.string.digest_pending_description)
+                isPremium -> stringResource(Res.string.digest_pending_description_premium_at, nextDigestLabel)
+                else -> stringResource(Res.string.digest_pending_description_at, nextDigestLabel)
+            },
             style = MaterialTheme.typography.bodySmall,
             color = customColors.textColors.secondary50,
             textAlign = TextAlign.Center

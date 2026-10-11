@@ -234,6 +234,8 @@
     <string name="digest_pending_title">Ihr Digest ist unterwegs</string>
     <string name="digest_pending_description">Erwartet innerhalb der nächsten Stunde. Schauen Sie bald wieder vorbei.</string>
     <string name="digest_pending_description_premium">Erwartet innerhalb der nächsten Stunde – wir benachrichtigen Sie, wenn er bereit ist.</string>
+    <string name="digest_pending_description_at">Erwartet bis %1$s. Schauen Sie bald wieder vorbei.</string>
+    <string name="digest_pending_description_premium_at">Erwartet bis %1$s – wir benachrichtigen Sie, wenn er bereit ist.</string>
     <string name="digest_pending_notify_title">Benachrichtigt werden, wenn er bereit ist</string>
     <string name="digest_pending_notify_subtitle">Außerdem Ihre bevorzugte Lieferzeit festlegen</string>
     <string name="improved">Verbessert</string>

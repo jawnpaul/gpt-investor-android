@@ -7,12 +7,18 @@ import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistRequest
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistData
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistItem
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.koin.core.annotation.Singleton
 
 interface WatchlistRepository {
+    /** Emits after every successful add or remove, from any screen. */
+    val changes: Flow<Unit>
     suspend fun addStockToWatchList(ticker: String): Either<Failure, Unit>
     suspend fun getWatchlist(): Either<Failure, WatchlistData>
     suspend fun removeFromWatchlist(ticker: String): Either<Failure, Unit>
@@ -20,9 +26,14 @@ interface WatchlistRepository {
 
 @Singleton(binds = [WatchlistRepository::class])
 class WatchlistRepositoryImpl(private val apiService: KtorApiService) : WatchlistRepository {
+    private val _changes =
+        MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    override val changes: Flow<Unit> = _changes.asSharedFlow()
+
     override suspend fun addStockToWatchList(ticker: String): Either<Failure, Unit> = try {
         val response = apiService.addToWatchlist(AddWatchlistRequest(ticker = ticker))
         if (response.isSuccessful) {
+            _changes.tryEmit(Unit)
             Either.Right(Unit)
         } else {
             mapErrorResponse(response.code, response.errorBody)
@@ -57,6 +68,7 @@ class WatchlistRepositoryImpl(private val apiService: KtorApiService) : Watchlis
     override suspend fun removeFromWatchlist(ticker: String): Either<Failure, Unit> = try {
         val response = apiService.removeFromWatchlist(ticker)
         if (response.isSuccessful) {
+            _changes.tryEmit(Unit)
             Either.Right(Unit)
         } else {
             when (response.code) {

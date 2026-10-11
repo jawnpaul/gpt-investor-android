@@ -8,10 +8,17 @@ import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistFailure
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.PopularStockUiModel
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.WatchlistUiState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
@@ -26,20 +33,33 @@ private val recommendationColors = listOf(
     Color(0xFF8B5CF6)
 )
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @KoinViewModel
 class WatchlistViewModel(
     private val watchlistRepository: WatchlistRepository,
     @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(WatchlistUiState())
-    val uiState = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(WatchlistUiState(isLoading = true))
+    private val retryRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
+    // Loads when the screen starts collecting, and again after any add/remove anywhere in the app
+    // (e.g. company detail) or a retry, so the tab never shows a stale list.
+    private val reloads = merge(watchlistRepository.changes, retryRequests)
+        .onStart { emit(Unit) }
+        .mapLatest { loadWatchlist() }
+
+    val uiState: StateFlow<WatchlistUiState> = combine(_uiState, reloads) { state, _ -> state }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = WatchlistUiState(isLoading = true)
+        )
 
     private val _actions = MutableSharedFlow<WatchlistAction>()
     val actions = _actions.asSharedFlow()
 
     init {
         analyticsLogger.logEvent("watchlist-screen-viewed", emptyMap())
-        getWatchlist()
     }
 
     fun onEvent(event: WatchlistEvent) {
@@ -53,7 +73,7 @@ class WatchlistViewModel(
                 )
                 emitAction(WatchlistAction.NavigateToCompanyDetail(event.ticker))
             }
-            WatchlistEvent.RetryWatchlist -> getWatchlist()
+            WatchlistEvent.RetryWatchlist -> retryRequests.tryEmit(Unit)
             WatchlistEvent.OnSearchClick -> {
                 val triggerState = if (_uiState.value.watchlistItems.isEmpty()) "empty" else "content"
                 analyticsLogger.logEvent(
@@ -70,37 +90,35 @@ class WatchlistViewModel(
         }
     }
 
-    private fun getWatchlist() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
-            watchlistRepository.getWatchlist().fold(
-                { failure ->
-                    _uiState.update {
-                        if (failure == WatchlistFailure.SignUpRequired) {
-                            it.copy(isLoading = false, requiresSignUp = true)
-                        } else {
-                            it.copy(isLoading = false, error = "failed")
-                        }
-                    }
-                },
-                { data ->
-                    val popularStocks = data.recommendations.mapIndexed { index, company ->
-                        PopularStockUiModel(
-                            company = company,
-                            color = recommendationColors[index % recommendationColors.size]
-                        )
-                    }
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            watchlistItems = data.items,
-                            popularStocks = popularStocks,
-                            error = null
-                        )
+    private suspend fun loadWatchlist() {
+        _uiState.update { it.copy(isLoading = true, error = null) }
+        watchlistRepository.getWatchlist().fold(
+            { failure ->
+                _uiState.update {
+                    if (failure == WatchlistFailure.SignUpRequired) {
+                        it.copy(isLoading = false, requiresSignUp = true)
+                    } else {
+                        it.copy(isLoading = false, error = "failed")
                     }
                 }
-            )
-        }
+            },
+            { data ->
+                val popularStocks = data.recommendations.mapIndexed { index, company ->
+                    PopularStockUiModel(
+                        company = company,
+                        color = recommendationColors[index % recommendationColors.size]
+                    )
+                }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        watchlistItems = data.items,
+                        popularStocks = popularStocks,
+                        error = null
+                    )
+                }
+            }
+        )
     }
 
     private fun addToWatchlist(ticker: String) {
@@ -115,7 +133,6 @@ class WatchlistViewModel(
                     )
                     _uiState.update { it.copy(isLoading = false) }
                     emitAction(WatchlistAction.ShowAddedMessage(ticker))
-                    getWatchlist()
                 }
             )
         }
@@ -131,7 +148,6 @@ class WatchlistViewModel(
                         params = mapOf("ticker" to ticker)
                     )
                     emitAction(WatchlistAction.ShowRemovedMessage(ticker))
-                    getWatchlist()
                 }
             )
         }

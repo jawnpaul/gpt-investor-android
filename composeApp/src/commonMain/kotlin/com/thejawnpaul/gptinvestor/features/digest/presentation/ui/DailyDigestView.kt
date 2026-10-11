@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.digest.presentation.ui
 
 import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.RecommendedDigestCompany
+import com.thejawnpaul.gptinvestor.features.digest.presentation.DigestSentiment
 
 data class DailyDigestView(
     val loading: Boolean = false,
@@ -8,7 +9,8 @@ data class DailyDigestView(
     val stocks: List<StockDigestPresentation> = emptyList(),
     val suggestedStocks: List<RecommendedDigestCompany> = emptyList(),
     val isStale: Boolean = false,
-    val lastUpdated: String? = null,
+    val briefDateLabel: String? = null,
+    val updatedLabel: String? = null,
     val nextDigestLabel: String? = null,
     val lockedStocksCount: Int = 0,
     val lockedStocksSummary: String? = null,
@@ -24,10 +26,15 @@ data class StockDigestPresentation(
     val ticker: String,
     val name: String,
     val summary: String,
-    val isImproved: Boolean = false,
     val keyEvent: String? = null,
-    val sentimentChange: String = "",
-    val generatedAt: String? = null
+    val sentiment: DigestSentiment? = null,
+    val priceChange: Double? = null,
+    val updatedLabel: String? = null
 )
 
-data class LockedStockDigestPresentation(val ticker: String, val name: String, val sentimentChange: String)
+data class LockedStockDigestPresentation(
+    val ticker: String,
+    val name: String,
+    val sentiment: DigestSentiment? = null,
+    val priceChange: Double? = null
+)

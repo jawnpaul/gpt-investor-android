@@ -11,5 +11,8 @@ data class DigestItemRemote(
     @SerialName("locked") val locked: Boolean,
     @SerialName("summary") val summary: String? = null,
     @SerialName("key_event") val keyEvent: String? = null,
-    @SerialName("generated_at") val generatedAt: String? = null
+    @SerialName("generated_at") val generatedAt: String? = null,
+    @SerialName("sentiment") val sentiment: String? = null,
+    @SerialName("price_change") val priceChange: Double? = null,
+    @SerialName("market_date") val marketDate: String? = null
 )

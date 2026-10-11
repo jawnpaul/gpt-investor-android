@@ -67,27 +67,32 @@ import com.thejawnpaul.gptinvestor.digest_pending_title
 import com.thejawnpaul.gptinvestor.done
 import com.thejawnpaul.gptinvestor.features.component.ShimmerBox
 import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.RecommendedDigestCompany
+import com.thejawnpaul.gptinvestor.features.digest.presentation.DigestSentiment
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestStatus
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestView
+import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.PriceChangeChip
+import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.SentimentLabel
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.StockDigestPresentation
-import com.thejawnpaul.gptinvestor.generated_at
 import com.thejawnpaul.gptinvestor.ic_calendar
 import com.thejawnpaul.gptinvestor.ic_clock
 import com.thejawnpaul.gptinvestor.ic_lock
 import com.thejawnpaul.gptinvestor.ic_notification_bell
 import com.thejawnpaul.gptinvestor.ic_search
-import com.thejawnpaul.gptinvestor.improved
 import com.thejawnpaul.gptinvestor.key_event
+import com.thejawnpaul.gptinvestor.latest_digest
 import com.thejawnpaul.gptinvestor.locked_stock_premium_upsell
 import com.thejawnpaul.gptinvestor.morning_brief
+import com.thejawnpaul.gptinvestor.new_digest_on_the_way
+import com.thejawnpaul.gptinvestor.next_digest_by
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.today_s_digest
 import com.thejawnpaul.gptinvestor.unlock
+import com.thejawnpaul.gptinvestor.updated_at
 import com.thejawnpaul.gptinvestor.x_more_stocks_are_locked
 import com.thejawnpaul.gptinvestor.x_more_stocks_in_your_digest
-import com.thejawnpaul.gptinvestor.yesterday_s_digest_today_s_is_on_the_way
 import com.thejawnpaul.gptinvestor.you_re_not_tracking_any_companies_yet
+import com.thejawnpaul.gptinvestor.your_digest
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -127,17 +132,23 @@ fun DailyDigestCard(
         ) {
             Text(
                 text = stringResource(
-                    if (view.status ==
-                        DailyDigestStatus.EMPTY
-                    ) {
-                        Res.string.build_your_digest
-                    } else {
-                        Res.string.today_s_digest
+                    when {
+                        view.status == DailyDigestStatus.EMPTY -> Res.string.build_your_digest
+                        view.status == DailyDigestStatus.PENDING -> Res.string.your_digest
+                        view.isStale -> Res.string.latest_digest
+                        else -> Res.string.today_s_digest
                     }
                 ),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
+            if (view.status == DailyDigestStatus.READY && view.briefDateLabel != null) {
+                Text(
+                    text = view.briefDateLabel,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = LocalGPTInvestorColors.current.textColors.secondary50
+                )
+            }
         }
 
         if (view.isStale && view.status == DailyDigestStatus.READY) {
@@ -159,7 +170,8 @@ fun DailyDigestCard(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = stringResource(Res.string.yesterday_s_digest_today_s_is_on_the_way),
+                        text = view.nextDigestLabel?.let { stringResource(Res.string.next_digest_by, it) }
+                            ?: stringResource(Res.string.new_digest_on_the_way),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
                         fontWeight = FontWeight.Medium
@@ -210,7 +222,7 @@ fun DailyDigestCard(
                         stocks = view.stocks,
                         lockedStocksCount = view.lockedStocksCount,
                         lockedStocksSummary = view.lockedStocksSummary,
-                        lastUpdated = view.lastUpdated,
+                        updatedLabel = view.updatedLabel,
                         onSeeFullDigest = onSeeFullDigest,
                         onUnlockPremium = onUnlockPremiumReady
                     )
@@ -478,27 +490,29 @@ private fun ReadyDigestContent(
     stocks: List<StockDigestPresentation>,
     lockedStocksCount: Int,
     lockedStocksSummary: String?,
-    lastUpdated: String?,
+    updatedLabel: String?,
     onSeeFullDigest: () -> Unit,
     onUnlockPremium: () -> Unit
 ) {
     val customColors = LocalGPTInvestorColors.current
 
     Column(modifier = Modifier.padding(16.dp)) {
-        stocks.forEach { stock ->
+        // Home previews the first stock; the rest are one tap away in Digest Detail.
+        stocks.firstOrNull()?.let { stock ->
             StockDigestCard(stock = stock)
             Spacer(Modifier.height(16.dp))
         }
 
-        if (lastUpdated != null) {
+        if (updatedLabel != null) {
             Text(
-                text = stringResource(Res.string.generated_at, lastUpdated),
+                text = stringResource(Res.string.updated_at, updatedLabel),
                 style = MaterialTheme.typography.labelSmall,
                 color = customColors.textColors.secondary50
             )
         }
 
-        val remainingStocks = (stocks.size + lockedStocksCount).minus(1)
+        // Only unlocked stocks: locked ones get their own upsell card below, so they aren't counted twice.
+        val remainingStocks = stocks.size - 1
 
         if (remainingStocks > 0) {
             Spacer(Modifier.height(16.dp))
@@ -622,7 +636,7 @@ private fun StockDigestCard(stock: StockDigestPresentation) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
                     Text(
                         text = stock.ticker,
                         style = MaterialTheme.typography.titleMedium,
@@ -632,33 +646,19 @@ private fun StockDigestCard(stock: StockDigestPresentation) {
                     Text(
                         text = stock.name,
                         style = MaterialTheme.typography.bodySmall,
-                        color = customColors.textColors.secondary50
+                        color = customColors.textColors.secondary50,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
-                if (stock.isImproved) {
-                    Surface(
-                        color = customColors.greenColors.allGreen10,
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(6.dp)
-                                    .background(customColors.greenColors.allGreen, CircleShape)
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text(
-                                text = stringResource(Res.string.improved),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = customColors.greenColors.allGreen,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
+                if (stock.priceChange != null) {
+                    Spacer(Modifier.width(8.dp))
+                    PriceChangeChip(percent = stock.priceChange)
                 }
+            }
+            if (stock.sentiment != null) {
+                Spacer(Modifier.height(6.dp))
+                SentimentLabel(sentiment = stock.sentiment)
             }
             Spacer(Modifier.height(12.dp))
             Text(
@@ -817,13 +817,15 @@ private fun ReadyDigestPreview() {
                             summary = "Apple firmed up overnight after an upbeat services read and" +
                                 " constructive supplier commentary out of Asia. Analyst notes " +
                                 "turned more positive into next week's print.",
-                            isImproved = true,
-                            keyEvent = "iPhone 17 pre-orders beat Street estimates by roughly 12%."
+                            keyEvent = "iPhone 17 pre-orders beat Street estimates by roughly 12%.",
+                            sentiment = DigestSentiment.POSITIVE,
+                            priceChange = 1.5
                         )
                     ),
                     lockedStocksCount = 2,
                     lockedStocksSummary = "NVDA · TSLA",
-                    lastUpdated = "6:42 AM ET"
+                    briefDateLabel = "Fri, Oct 9",
+                    updatedLabel = "Sat 7:01 AM"
                 ),
                 onAddStock = {},
                 onBrowseAll = {},
@@ -851,11 +853,14 @@ private fun StaleDigestPreview() {
                             name = "Apple Inc.",
                             summary = "Apple firmed up overnight after an upbeat services read and constructive " +
                                 "supplier commentary out of Asia. Analyst notes turned more positive into the print.",
-                            isImproved = true,
-                            keyEvent = "iPhone 17 pre-orders beat Street estimates by roughly 12%."
+                            keyEvent = "iPhone 17 pre-orders beat Street estimates by roughly 12%.",
+                            sentiment = DigestSentiment.NEUTRAL,
+                            priceChange = -1.1
                         )
                     ),
-                    lastUpdated = "Yesterday, 6:40 AM ET"
+                    briefDateLabel = "Thu, Oct 8",
+                    updatedLabel = "Fri 7:01 AM",
+                    nextDigestLabel = "8 AM"
                 ),
                 onAddStock = {},
                 onBrowseAll = {},

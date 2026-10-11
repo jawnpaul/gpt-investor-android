@@ -18,6 +18,9 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultMod
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.digest.domain.DigestRepository
+import com.thejawnpaul.gptinvestor.features.digest.presentation.digestSentimentOf
+import com.thejawnpaul.gptinvestor.features.digest.presentation.formatMarketDate
+import com.thejawnpaul.gptinvestor.features.digest.presentation.formatUpdatedAt
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestStatus
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestView
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.LockedStockDigestPresentation
@@ -478,6 +481,7 @@ class HomeViewModel(
                 val unlockedItems = digest.items?.filter { !it.locked } ?: emptyList()
                 val lockedItems = digest.items?.filter { it.locked } ?: emptyList()
 
+                val timeZone = TimeZone.currentSystemDefault()
                 val digestStatus = when {
                     digest.status?.lowercase() == "pending" -> DailyDigestStatus.PENDING
                     digest.items.isNullOrEmpty() -> DailyDigestStatus.EMPTY
@@ -489,32 +493,32 @@ class HomeViewModel(
                         dailyDigestView = state.dailyDigestView.copy(
                             loading = false,
                             status = digestStatus,
-                            nextDigestLabel = if (digestStatus == DailyDigestStatus.PENDING) {
-                                formatNextDigestTime(digest.nextDigestAt, TimeZone.currentSystemDefault())
-                            } else {
-                                null
-                            },
+                            // Sent in every state now: the pending card's ETA and the stale banner's next time.
+                            nextDigestLabel = formatNextDigestTime(digest.nextDigestAt, timeZone),
                             stocks = unlockedItems.map { item ->
                                 StockDigestPresentation(
                                     ticker = item.ticker,
                                     name = item.companyName,
                                     summary = item.summary ?: "",
-                                    isImproved = item.sentimentChange.lowercase() == "improved",
                                     keyEvent = item.keyEvent,
-                                    sentimentChange = item.sentimentChange,
-                                    generatedAt = item.generatedAt
+                                    sentiment = digestSentimentOf(item.sentiment),
+                                    priceChange = item.priceChange,
+                                    updatedLabel = formatUpdatedAt(item.generatedAt, timeZone)
                                 )
                             },
                             lockedStocks = lockedItems.map { item ->
                                 LockedStockDigestPresentation(
                                     ticker = item.ticker,
                                     name = item.companyName,
-                                    sentimentChange = item.sentimentChange
+                                    sentiment = digestSentimentOf(item.sentiment),
+                                    priceChange = item.priceChange
                                 )
                             },
                             suggestedStocks = digest.recommendations ?: emptyList(),
                             isStale = digest.isStale == true,
-                            lastUpdated = digest.digestDate,
+                            // Older backends only send digest_date (the UTC generation date); close enough as a label.
+                            briefDateLabel = formatMarketDate(digest.marketDate ?: digest.digestDate),
+                            updatedLabel = formatUpdatedAt(digest.generatedAt, timeZone),
                             lockedStocksCount = lockedItems.size,
                             lockedStocksSummary = lockedItems.joinToString(" · ") { it.ticker }
                         )

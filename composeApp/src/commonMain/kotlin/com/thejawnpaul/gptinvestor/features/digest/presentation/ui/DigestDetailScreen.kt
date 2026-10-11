@@ -20,8 +20,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.TrendingDown
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -35,20 +33,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.declined
+import com.thejawnpaul.gptinvestor.features.digest.presentation.DigestSentiment
 import com.thejawnpaul.gptinvestor.ic_lock
-import com.thejawnpaul.gptinvestor.improved
 import com.thejawnpaul.gptinvestor.key_event
+import com.thejawnpaul.gptinvestor.latest_digest
 import com.thejawnpaul.gptinvestor.tap_to_unlock_full_summaries
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.today_s_digest
-import com.thejawnpaul.gptinvestor.unchanged
 import com.thejawnpaul.gptinvestor.unlock
+import com.thejawnpaul.gptinvestor.updated_at
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -66,6 +65,8 @@ fun DigestDetailScreen(
             .navigationBarsPadding()
     ) {
         DigestDetailTopBar(
+            isStale = digestView.isStale,
+            briefDateLabel = digestView.briefDateLabel,
             onBack = onBack
         )
 
@@ -90,7 +91,7 @@ fun DigestDetailScreen(
 }
 
 @Composable
-private fun DigestDetailTopBar(onBack: () -> Unit) {
+private fun DigestDetailTopBar(isStale: Boolean, briefDateLabel: String?, onBack: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -110,10 +111,17 @@ private fun DigestDetailTopBar(onBack: () -> Unit) {
                 .padding(horizontal = 12.dp)
         ) {
             Text(
-                text = stringResource(Res.string.today_s_digest),
+                text = stringResource(if (isStale) Res.string.latest_digest else Res.string.today_s_digest),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
+            if (briefDateLabel != null) {
+                Text(
+                    text = briefDateLabel,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = LocalGPTInvestorColors.current.textColors.secondary50
+                )
+            }
         }
     }
 }
@@ -133,17 +141,27 @@ private fun DigestFullStockCard(stock: StockDigestPresentation, modifier: Modifi
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
                     TickerBadge(ticker = stock.ticker)
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = stock.name,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
-                        color = customColors.textColors.secondary50
+                        color = customColors.textColors.secondary50,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
-                SentimentBadge(sentimentChange = stock.sentimentChange)
+                if (stock.priceChange != null) {
+                    Spacer(Modifier.width(8.dp))
+                    PriceChangeChip(percent = stock.priceChange)
+                }
+            }
+
+            if (stock.sentiment != null) {
+                Spacer(Modifier.height(6.dp))
+                SentimentLabel(sentiment = stock.sentiment)
             }
 
             Spacer(Modifier.height(12.dp))
@@ -178,10 +196,10 @@ private fun DigestFullStockCard(stock: StockDigestPresentation, modifier: Modifi
                 }
             }
 
-            val timeLabel = stock.generatedAt ?: return@Column
+            val updatedLabel = stock.updatedLabel ?: return@Column
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "Generated $timeLabel",
+                text = stringResource(Res.string.updated_at, updatedLabel),
                 style = MaterialTheme.typography.labelSmall,
                 color = customColors.textColors.secondary50
             )
@@ -214,13 +232,23 @@ private fun DigestLockedStocksCard(lockedStocks: List<LockedStockDigestPresentat
                     Spacer(Modifier.width(10.dp))
                     TickerBadge(ticker = stock.ticker)
                     Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = stock.name,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = customColors.textColors.secondary50,
-                        modifier = Modifier.weight(1f)
-                    )
-                    SentimentBadge(sentimentChange = stock.sentimentChange)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stock.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = customColors.textColors.secondary50,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        if (stock.sentiment != null) {
+                            Spacer(Modifier.height(2.dp))
+                            SentimentLabel(sentiment = stock.sentiment)
+                        }
+                    }
+                    if (stock.priceChange != null) {
+                        Spacer(Modifier.width(8.dp))
+                        PriceChangeChip(percent = stock.priceChange)
+                    }
                 }
                 if (index < lockedStocks.size - 1) {
                     HorizontalDivider(color = customColors.utilColors.borderBright10)
@@ -282,74 +310,6 @@ private fun TickerBadge(ticker: String) {
     }
 }
 
-@Composable
-private fun SentimentBadge(sentimentChange: String) {
-    val customColors = LocalGPTInvestorColors.current
-    val sentiment = sentimentChange.lowercase()
-
-    when (sentiment) {
-        "improved" -> {
-            Surface(
-                color = customColors.greenColors.allGreen10,
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.TrendingUp,
-                        contentDescription = null,
-                        tint = customColors.greenColors.allGreen,
-                        modifier = Modifier.size(12.dp)
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        text = stringResource(Res.string.improved),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = customColors.greenColors.allGreen,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
-
-        "declined" -> {
-            Surface(
-                color = MaterialTheme.colorScheme.errorContainer,
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.TrendingDown,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(12.dp)
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        text = stringResource(Res.string.declined),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.error,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
-
-        else -> {
-            Text(
-                text = stringResource(Res.string.unchanged),
-                style = MaterialTheme.typography.labelSmall,
-                color = customColors.textColors.secondary50
-            )
-        }
-    }
-}
-
 @PreviewLightDark
 @Composable
 private fun DigestDetailScreenPreview() {
@@ -358,22 +318,22 @@ private fun DigestDetailScreenPreview() {
             DigestDetailScreen(
                 digestView = DailyDigestView(
                     status = DailyDigestStatus.READY,
-                    lastUpdated = "Tue, Jul 14",
+                    briefDateLabel = "Fri, Oct 9",
                     stocks = listOf(
                         StockDigestPresentation(
                             ticker = "AAPL",
                             name = "Apple Inc.",
                             summary = "Apple firmed up overnight after an upbeat services read and constructive " +
                                 "supplier commentary out of Asia. Analyst notes turned more positive into next week's print.",
-                            isImproved = true,
-                            sentimentChange = "improved",
                             keyEvent = "iPhone 17 pre-orders beat Street estimates by roughly 12%.",
-                            generatedAt = "6:42 AM ET"
+                            sentiment = DigestSentiment.POSITIVE,
+                            priceChange = 1.5,
+                            updatedLabel = "Sat 7:01 AM"
                         )
                     ),
                     lockedStocks = listOf(
-                        LockedStockDigestPresentation("NVDA", "NVIDIA Corp.", "declined"),
-                        LockedStockDigestPresentation("TSLA", "Tesla, Inc.", "unchanged")
+                        LockedStockDigestPresentation("NVDA", "NVIDIA Corp.", DigestSentiment.NEGATIVE, -2.3),
+                        LockedStockDigestPresentation("TSLA", "Tesla, Inc.", DigestSentiment.NEUTRAL, 0.4)
                     ),
                     lockedStocksCount = 2
                 ),

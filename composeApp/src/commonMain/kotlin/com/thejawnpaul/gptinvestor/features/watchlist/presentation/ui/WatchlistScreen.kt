@@ -76,15 +76,18 @@ import com.thejawnpaul.gptinvestor.outline_visibility_24
 import com.thejawnpaul.gptinvestor.popular_this_week
 import com.thejawnpaul.gptinvestor.remove_from_watchlist
 import com.thejawnpaul.gptinvestor.search
+import com.thejawnpaul.gptinvestor.sign_in_action
+import com.thejawnpaul.gptinvestor.sign_in_to_save_stocks
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.watch
 import com.thejawnpaul.gptinvestor.watchlist_empty_description
 import com.thejawnpaul.gptinvestor.watchlist_title
+import com.thejawnpaul.gptinvestor.you_re_browsing_as_a_guest
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-private enum class WatchlistScreenState { Loading, Error, Empty, Content }
+private enum class WatchlistScreenState { Loading, SignUpRequired, Error, Empty, Content }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,6 +121,7 @@ fun WatchlistScreen(state: WatchlistUiState, onEvent: (WatchlistEvent) -> Unit, 
     ) { innerPadding ->
         val screenState = when {
             state.isLoading && state.watchlistItems.isEmpty() -> WatchlistScreenState.Loading
+            state.requiresSignUp -> WatchlistScreenState.SignUpRequired
             state.error != null && state.watchlistItems.isEmpty() -> WatchlistScreenState.Error
             state.watchlistItems.isEmpty() -> WatchlistScreenState.Empty
             else -> WatchlistScreenState.Content
@@ -130,6 +134,10 @@ fun WatchlistScreen(state: WatchlistUiState, onEvent: (WatchlistEvent) -> Unit, 
         ) { target ->
             when (target) {
                 WatchlistScreenState.Loading -> WatchlistLoadingState(innerPadding = innerPadding)
+                WatchlistScreenState.SignUpRequired -> WatchlistSignUpState(
+                    onSignIn = { onEvent(WatchlistEvent.OnSignInClick) },
+                    innerPadding = innerPadding
+                )
                 WatchlistScreenState.Error -> Box(
                     modifier = Modifier
                         .padding(innerPadding)
@@ -153,6 +161,38 @@ fun WatchlistScreen(state: WatchlistUiState, onEvent: (WatchlistEvent) -> Unit, 
                     innerPadding = innerPadding
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun WatchlistSignUpState(onSignIn: () -> Unit, innerPadding: PaddingValues) {
+    Column(
+        modifier = Modifier
+            .padding(innerPadding)
+            .fillMaxSize()
+            .padding(horizontal = 48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(Res.string.you_re_browsing_as_a_guest),
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = stringResource(Res.string.sign_in_to_save_stocks),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = LocalGPTInvestorColors.current.textColors.secondary50
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        Button(
+            onClick = onSignIn,
+            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+        ) {
+            Text(text = stringResource(Res.string.sign_in_action))
         }
     }
 }

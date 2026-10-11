@@ -28,6 +28,7 @@ fun NavGraphBuilder.watchlistNavGraph(navController: NavHostController, platform
                 when (action) {
                     WatchlistAction.NavigateToSearch -> navController.navigate(Screen.SearchScreen.route)
                     WatchlistAction.NavigateToTopPicks -> navController.navigate(Screen.AllTopPicksScreen.route)
+                    WatchlistAction.NavigateToSignUp -> {}
                     is WatchlistAction.NavigateToCompanyDetail -> navController.navigate(
                         Screen.CompanyDetailScreen.createRoute(action.ticker)
                     )

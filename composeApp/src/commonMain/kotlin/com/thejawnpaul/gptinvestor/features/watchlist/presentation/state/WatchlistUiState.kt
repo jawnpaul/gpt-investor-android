@@ -8,6 +8,7 @@ data class WatchlistUiState(
     val popularStocks: List<PopularStockUiModel> = emptyList(),
     val watchlistItems: List<WatchlistItem> = emptyList(),
     val isLoading: Boolean = false,
+    val requiresSignUp: Boolean = false,
     val error: String? = null
 )
 

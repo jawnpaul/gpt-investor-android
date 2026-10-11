@@ -45,6 +45,8 @@ class WatchlistRepositoryImpl(private val apiService: KtorApiService) : Watchlis
             } ?: emptyList()
             val recommendations = response.body?.recommendedDigestCompany ?: emptyList()
             Either.Right(WatchlistData(items = items, recommendations = recommendations))
+        } else if (response.code == 403) {
+            Either.Left(WatchlistFailure.SignUpRequired)
         } else {
             Either.Left(Failure.ServerError)
         }

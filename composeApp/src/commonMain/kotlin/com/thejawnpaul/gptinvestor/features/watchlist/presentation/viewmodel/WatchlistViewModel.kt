@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistFailure
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.PopularStockUiModel
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.WatchlistUiState
@@ -61,6 +62,7 @@ class WatchlistViewModel(
                 )
                 emitAction(WatchlistAction.NavigateToSearch)
             }
+            WatchlistEvent.OnSignInClick -> emitAction(WatchlistAction.NavigateToSignUp)
             WatchlistEvent.OnBrowseTopPicksClick -> {
                 analyticsLogger.logEvent("watchlist-browse-top-picks-tapped", emptyMap())
                 emitAction(WatchlistAction.NavigateToTopPicks)
@@ -72,7 +74,15 @@ class WatchlistViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             watchlistRepository.getWatchlist().fold(
-                { _uiState.update { it.copy(isLoading = false, error = "failed") } },
+                { failure ->
+                    _uiState.update {
+                        if (failure == WatchlistFailure.SignUpRequired) {
+                            it.copy(isLoading = false, requiresSignUp = true)
+                        } else {
+                            it.copy(isLoading = false, error = "failed")
+                        }
+                    }
+                },
                 { data ->
                     val popularStocks = data.recommendations.mapIndexed { index, company ->
                         PopularStockUiModel(
@@ -141,11 +151,13 @@ sealed interface WatchlistEvent {
     data object RetryWatchlist : WatchlistEvent
     data object OnSearchClick : WatchlistEvent
     data object OnBrowseTopPicksClick : WatchlistEvent
+    data object OnSignInClick : WatchlistEvent
 }
 
 sealed interface WatchlistAction {
     data object NavigateToSearch : WatchlistAction
     data object NavigateToTopPicks : WatchlistAction
+    data object NavigateToSignUp : WatchlistAction
     data class NavigateToCompanyDetail(val ticker: String) : WatchlistAction
     data class ShowAddedMessage(val ticker: String) : WatchlistAction
     data class ShowRemovedMessage(val ticker: String) : WatchlistAction

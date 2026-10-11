@@ -538,6 +538,9 @@ fun NavGraphBuilder.guestNavGraph(
                 when (action) {
                     WatchlistAction.NavigateToSearch -> navController.navigate(GuestScreen.GuestSearch.route)
                     WatchlistAction.NavigateToTopPicks -> navController.navigate(GuestScreen.GuestAllTopPicks.route)
+                    WatchlistAction.NavigateToSignUp -> navController.navigate(Screen.SignUpScreen.route) {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    }
                     is WatchlistAction.NavigateToCompanyDetail -> navController.navigate(
                         GuestScreen.GuestCompanyDetail.createRoute(action.ticker)
                     )

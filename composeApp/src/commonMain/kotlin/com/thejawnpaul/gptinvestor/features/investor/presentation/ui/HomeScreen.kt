@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -26,12 +27,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -43,9 +49,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -71,10 +81,10 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.Home
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
-import com.thejawnpaul.gptinvestor.gpt_investor
 import com.thejawnpaul.gptinvestor.join_list
 import com.thejawnpaul.gptinvestor.join_the_waitlist
 import com.thejawnpaul.gptinvestor.movers_right_now
+import com.thejawnpaul.gptinvestor.profile
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.trending_today
@@ -125,18 +135,20 @@ private fun HomeScreenContent(
             )
         },
         topBar = {
-            Column(modifier = Modifier.statusBarsPadding()) {
-                Text(
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.statusBarsPadding().fillMaxWidth().padding(
-                        start = 16.dp,
-                        end = 16.dp,
-                        bottom = 16.dp
-                    ),
-                    text = stringResource(Res.string.gpt_investor),
-                    textAlign = TextAlign.Center
+            // The greeting is the page title; the app name lives on splash and onboarding, not Home.
+            Row(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                HomeGreeting(
+                    modifier = Modifier.weight(1f),
+                    timePeriod = state.timePeriod,
+                    name = state.firstName
                 )
+                ProfileAvatarButton(name = state.firstName, onClick = { onEvent(HomeEvent.GoToProfile) })
             }
         }
     ) { innerPadding ->
@@ -159,13 +171,6 @@ private fun HomeScreenContent(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
-
-                HomeGreeting(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    timePeriod = state.timePeriod,
-                    name = state.firstName
-                )
-                Spacer(modifier = Modifier.height(16.dp))
 
                 DailyDigestCard(
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -207,6 +212,38 @@ private fun HomeScreenContent(
                         onDismiss = { onEvent(HomeEvent.UpgradeModel(showBottomSheet = false)) }
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProfileAvatarButton(name: String?, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val label = stringResource(Res.string.profile)
+    IconButton(onClick = onClick, modifier = modifier.semantics { contentDescription = label }) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.inverseSurface),
+            contentAlignment = Alignment.Center
+        ) {
+            val initial = name?.firstOrNull()?.uppercaseChar()
+            if (initial != null) {
+                Text(
+                    text = initial.toString(),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                    modifier = Modifier.clearAndSetSemantics { }
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.inverseOnSurface,
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
     }

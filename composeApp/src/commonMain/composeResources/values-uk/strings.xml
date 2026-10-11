@@ -226,12 +226,12 @@
     <string name="guest_session_expired_have_account">У мене є обліковий запис</string>
 
     <string name="morning_brief">РАНКОВИЙ ОГЛЯД</string>
-    <string name="build_your_digest">Створіть свій дайджест</string>
-    <string name="you_re_not_tracking_any_companies_yet">Ви ще не відстежуєте жодних компаній. Додайте кілька, і ваш перший дайджест надійде завтра вранці.</string>
+    <string name="build_your_digest">Оберіть акції для свого огляду</string>
+    <string name="you_re_not_tracking_any_companies_yet">Додайте кілька компаній, і ваш перший огляд надійде протягом години.</string>
     <string name="add">Додати</string>
     <string name="browse_all_companies">Переглянути всі компанії</string>
-    <string name="today_s_digest">Сьогоднішній дайджест</string>
-    <string name="digest_pending_title">Ваш дайджест у дорозі</string>
+    <string name="today_s_digest">Сьогоднішній огляд</string>
+    <string name="digest_pending_title">Ваш огляд уже готується</string>
     <string name="digest_pending_description">Очікуйте протягом години. Перевірте пізніше.</string>
     <string name="digest_pending_description_premium">Очікуйте протягом години — ми сповістимо вас, коли він буде готовий.</string>
     <string name="digest_pending_description_at">Очікуйте до %1$s. Перевірте пізніше.</string>
@@ -245,10 +245,14 @@
     <string name="next_digest_by">Наступний огляд до %1$s</string>
     <string name="new_digest_on_the_way">Новий огляд уже готується</string>
     <string name="updated_at">Оновлено %1$s</string>
+    <string name="stocks_locked">%1$s заблоковано</string>
+    <string name="full_summaries_with_premium">Повні огляди з Premium</string>
+    <string name="tracking_stocks">Відстежується: %1$s</string>
+    <string name="add_more_stocks">Додати ще акції</string>
     <string name="digest_pending_notify_title">Отримати сповіщення, коли буде готово</string>
     <string name="digest_pending_notify_subtitle">А також встановити бажаний час доставки</string>
     <string name="key_event">КЛЮЧОВА ПОДІЯ</string>
-    <string name="x_more_stocks_in_your_digest">ще %1$d акцій у вашому дайджесті</string>
+    <string name="x_more_stocks_in_your_digest">Ще %1$d акцій у вашому огляді</string>
     <string name="x_more_stocks_are_locked">%1$d акцій заблоковано</string>
     <string name="locked_stock_premium_upsell">%1$s — включено в Premium</string>
     <string name="unlock">Розблокувати</string>

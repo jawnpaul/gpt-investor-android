@@ -38,6 +38,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.add
+import com.thejawnpaul.gptinvestor.add_more_stocks
 import com.thejawnpaul.gptinvestor.browse_all_companies
 import com.thejawnpaul.gptinvestor.build_your_digest
 import com.thejawnpaul.gptinvestor.digest_pending_description
@@ -68,11 +70,13 @@ import com.thejawnpaul.gptinvestor.done
 import com.thejawnpaul.gptinvestor.features.component.ShimmerBox
 import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.RecommendedDigestCompany
 import com.thejawnpaul.gptinvestor.features.digest.presentation.DigestSentiment
+import com.thejawnpaul.gptinvestor.features.digest.presentation.formatTickerList
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestStatus
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestView
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.PriceChangeChip
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.SentimentLabel
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.StockDigestPresentation
+import com.thejawnpaul.gptinvestor.full_summaries_with_premium
 import com.thejawnpaul.gptinvestor.ic_calendar
 import com.thejawnpaul.gptinvestor.ic_clock
 import com.thejawnpaul.gptinvestor.ic_lock
@@ -80,16 +84,16 @@ import com.thejawnpaul.gptinvestor.ic_notification_bell
 import com.thejawnpaul.gptinvestor.ic_search
 import com.thejawnpaul.gptinvestor.key_event
 import com.thejawnpaul.gptinvestor.latest_digest
-import com.thejawnpaul.gptinvestor.locked_stock_premium_upsell
 import com.thejawnpaul.gptinvestor.morning_brief
 import com.thejawnpaul.gptinvestor.new_digest_on_the_way
 import com.thejawnpaul.gptinvestor.next_digest_by
+import com.thejawnpaul.gptinvestor.stocks_locked
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.today_s_digest
+import com.thejawnpaul.gptinvestor.tracking_stocks
 import com.thejawnpaul.gptinvestor.unlock
 import com.thejawnpaul.gptinvestor.updated_at
-import com.thejawnpaul.gptinvestor.x_more_stocks_are_locked
 import com.thejawnpaul.gptinvestor.x_more_stocks_in_your_digest
 import com.thejawnpaul.gptinvestor.you_re_not_tracking_any_companies_yet
 import com.thejawnpaul.gptinvestor.your_digest
@@ -215,6 +219,8 @@ fun DailyDigestCard(
                     2 -> PendingDigestContent(
                         isPremium = view.isPremium,
                         nextDigestLabel = view.nextDigestLabel,
+                        trackedTickers = view.trackedTickers,
+                        onAddMoreStocks = onBrowseAll,
                         onUnlockPremium = onUnlockPremiumPending
                     )
 
@@ -407,7 +413,13 @@ private fun EmptyDigestContent(view: DailyDigestView, onAddStock: (String) -> Un
 }
 
 @Composable
-private fun PendingDigestContent(isPremium: Boolean, nextDigestLabel: String?, onUnlockPremium: () -> Unit) {
+private fun PendingDigestContent(
+    isPremium: Boolean,
+    nextDigestLabel: String?,
+    trackedTickers: List<String>,
+    onAddMoreStocks: () -> Unit,
+    onUnlockPremium: () -> Unit
+) {
     val customColors = LocalGPTInvestorColors.current
 
     Column(
@@ -439,6 +451,36 @@ private fun PendingDigestContent(isPremium: Boolean, nextDigestLabel: String?, o
             color = customColors.textColors.secondary50,
             textAlign = TextAlign.Center
         )
+        if (trackedTickers.isNotEmpty()) {
+            Spacer(Modifier.height(16.dp))
+            HorizontalDivider(color = customColors.utilColors.borderBright10)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(Res.string.tracking_stocks, formatTickerList(trackedTickers)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = customColors.textColors.secondary50,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                TextButton(onClick = onAddMoreStocks) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = stringResource(Res.string.add_more_stocks),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
         if (!isPremium) {
             Spacer(Modifier.height(20.dp))
             Surface(
@@ -583,25 +625,21 @@ private fun ReadyDigestContent(
                     }
                     Spacer(Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(
-                                Res.string.x_more_stocks_are_locked,
-                                lockedStocksCount
-                            ),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
-                        )
                         if (lockedStocksSummary != null) {
                             Text(
-                                text = stringResource(
-                                    Res.string.locked_stock_premium_upsell,
-                                    lockedStocksSummary
-                                ),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                                text = stringResource(Res.string.stocks_locked, lockedStocksSummary),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
+                        Text(
+                            text = stringResource(Res.string.full_summaries_with_premium),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
                     }
                     Button(
                         onClick = onUnlockPremium,
@@ -823,7 +861,7 @@ private fun ReadyDigestPreview() {
                         )
                     ),
                     lockedStocksCount = 2,
-                    lockedStocksSummary = "NVDA · TSLA",
+                    lockedStocksSummary = "NVDA & TSLA",
                     briefDateLabel = "Fri, Oct 9",
                     updatedLabel = "Sat 7:01 AM"
                 ),

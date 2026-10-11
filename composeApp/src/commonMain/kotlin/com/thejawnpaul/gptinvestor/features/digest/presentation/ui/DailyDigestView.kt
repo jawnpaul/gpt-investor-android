@@ -17,7 +17,8 @@ data class DailyDigestView(
     val isPremium: Boolean = true,
     val addingTickers: Set<String> = emptySet(),
     val addedTickers: Set<String> = emptySet(),
-    val lockedStocks: List<LockedStockDigestPresentation> = emptyList()
+    val lockedStocks: List<LockedStockDigestPresentation> = emptyList(),
+    val trackedTickers: List<String> = emptyList()
 )
 
 enum class DailyDigestStatus { EMPTY, PENDING, READY }

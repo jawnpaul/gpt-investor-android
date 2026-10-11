@@ -226,12 +226,12 @@
     <string name="guest_session_expired_have_account">میرا اکاؤنٹ ہے</string>
 
     <string name="morning_brief">صبح کا خلاصہ</string>
-    <string name="build_your_digest">اپنا ڈائجسٹ بنائیں</string>
-    <string name="you_re_not_tracking_any_companies_yet">آپ ابھی کسی کمپنی کو ٹریک نہیں کر رہے۔ کچھ شامل کریں اور آپ کا پہلا خلاصہ کل صبح آئے گا۔</string>
+    <string name="build_your_digest">اپنے خلاصے کے لیے اسٹاک چنیں</string>
+    <string name="you_re_not_tracking_any_companies_yet">چند کمپنیاں شامل کریں اور آپ کا پہلا خلاصہ ایک گھنٹے کے اندر آ جائے گا۔</string>
     <string name="add">شامل کریں</string>
     <string name="browse_all_companies">تمام کمپنیاں دیکھیں</string>
-    <string name="today_s_digest">آج کا ڈائجسٹ</string>
-    <string name="digest_pending_title">آپ کا ڈائجسٹ راستے میں ہے</string>
+    <string name="today_s_digest">آج کا خلاصہ</string>
+    <string name="digest_pending_title">آپ کا خلاصہ آ رہا ہے</string>
     <string name="digest_pending_description">ایک گھنٹے کے اندر متوقع۔ جلد واپس آئیں۔</string>
     <string name="digest_pending_description_premium">ایک گھنٹے کے اندر متوقع — جب تیار ہوگا ہم آپ کو مطلع کریں گے۔</string>
     <string name="digest_pending_description_at">%1$s تک متوقع۔ جلد واپس آئیں۔</string>
@@ -245,10 +245,14 @@
     <string name="next_digest_by">اگلا خلاصہ %1$s تک</string>
     <string name="new_digest_on_the_way">نیا خلاصہ آ رہا ہے</string>
     <string name="updated_at">اپ ڈیٹ %1$s</string>
+    <string name="stocks_locked">%1$s مقفل</string>
+    <string name="full_summaries_with_premium">پریمیم کے ساتھ مکمل خلاصے</string>
+    <string name="tracking_stocks">زیرِ نگرانی: %1$s</string>
+    <string name="add_more_stocks">مزید اسٹاک شامل کریں</string>
     <string name="digest_pending_notify_title">تیار ہونے پر اطلاع پائیں</string>
     <string name="digest_pending_notify_subtitle">اور اپنی پسندیدہ ترسیل کا وقت مقرر کریں</string>
     <string name="key_event">اہم واقعہ</string>
-    <string name="x_more_stocks_in_your_digest">آپ کے ڈائجسٹ میں %1$d مزید اسٹاک</string>
+    <string name="x_more_stocks_in_your_digest">آپ کے خلاصے میں مزید %1$d اسٹاک</string>
     <string name="x_more_stocks_are_locked">%1$d مزید اسٹاک مقفل ہیں</string>
     <string name="locked_stock_premium_upsell">%1$s — پریمیم میں شامل</string>
     <string name="unlock">کھولیں</string>

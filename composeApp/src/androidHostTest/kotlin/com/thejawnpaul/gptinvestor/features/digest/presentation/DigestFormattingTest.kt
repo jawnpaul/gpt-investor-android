@@ -46,4 +46,12 @@ class DigestFormattingTest {
         assertThat(formatPriceChange(0.0)).isEqualTo("0.0%")
         assertThat(formatPriceChange(-0.04)).isEqualTo("0.0%")
     }
+
+    @Test
+    fun `joins tickers the way the locked card and tracking row read them`() {
+        assertThat(formatTickerList(emptyList())).isEmpty()
+        assertThat(formatTickerList(listOf("TSLA"))).isEqualTo("TSLA")
+        assertThat(formatTickerList(listOf("TSLA", "MOH"))).isEqualTo("TSLA & MOH")
+        assertThat(formatTickerList(listOf("AAPL", "TSLA", "MOH"))).isEqualTo("AAPL, TSLA & MOH")
+    }
 }

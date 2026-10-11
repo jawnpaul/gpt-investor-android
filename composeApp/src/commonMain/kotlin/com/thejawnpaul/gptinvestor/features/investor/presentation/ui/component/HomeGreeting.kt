@@ -5,6 +5,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.TimePeriod
@@ -12,7 +14,6 @@ import com.thejawnpaul.gptinvestor.good_afternoon
 import com.thejawnpaul.gptinvestor.good_evening
 import com.thejawnpaul.gptinvestor.good_morning
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
-import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -28,8 +29,10 @@ fun HomeGreeting(timePeriod: TimePeriod, name: String?, modifier: Modifier = Mod
     Text(
         modifier = modifier,
         text = greetingText,
-        style = MaterialTheme.typography.bodyLarge,
-        color = LocalGPTInvestorColors.current.textColors.secondary50
+        style = MaterialTheme.typography.titleLarge,
+        fontWeight = FontWeight.SemiBold,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
     )
 }
 

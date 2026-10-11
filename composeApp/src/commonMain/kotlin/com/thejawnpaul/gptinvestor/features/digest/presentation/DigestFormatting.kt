@@ -49,3 +49,10 @@ internal fun formatPriceChange(percent: Double): String {
     }
     return "$sign${abs(tenths) / 10}.${abs(tenths) % 10}%"
 }
+
+/** ["TSLA"] -> "TSLA", ["TSLA", "MOH"] -> "TSLA & MOH", ["A", "B", "C"] -> "A, B & C". */
+internal fun formatTickerList(tickers: List<String>): String = when (tickers.size) {
+    0 -> ""
+    1 -> tickers.first()
+    else -> tickers.dropLast(1).joinToString(", ") + " & " + tickers.last()
+}

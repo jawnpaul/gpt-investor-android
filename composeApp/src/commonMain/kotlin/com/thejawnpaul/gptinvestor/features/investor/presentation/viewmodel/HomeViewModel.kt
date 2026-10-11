@@ -20,6 +20,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.Model
 import com.thejawnpaul.gptinvestor.features.digest.domain.DigestRepository
 import com.thejawnpaul.gptinvestor.features.digest.presentation.digestSentimentOf
 import com.thejawnpaul.gptinvestor.features.digest.presentation.formatMarketDate
+import com.thejawnpaul.gptinvestor.features.digest.presentation.formatTickerList
 import com.thejawnpaul.gptinvestor.features.digest.presentation.formatUpdatedAt
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestStatus
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestView
@@ -372,6 +373,11 @@ class HomeViewModel(
                     }
                 }
 
+                HomeEvent.GoToProfile -> {
+                    analyticsLogger.logEvent("home-profile-avatar-tapped", emptyMap())
+                    _actions.emit(HomeAction.NavigateToProfile)
+                }
+
                 HomeEvent.BrowseAllCompanies -> {
                     analyticsLogger.logEvent("digest-browse-all-companies-tapped", emptyMap())
                     _actions.emit(HomeAction.NavigateToDiscover)
@@ -520,9 +526,19 @@ class HomeViewModel(
                             briefDateLabel = formatMarketDate(digest.marketDate ?: digest.digestDate),
                             updatedLabel = formatUpdatedAt(digest.generatedAt, timeZone),
                             lockedStocksCount = lockedItems.size,
-                            lockedStocksSummary = lockedItems.joinToString(" · ") { it.ticker }
+                            lockedStocksSummary = formatTickerList(lockedItems.map { it.ticker }).ifEmpty { null },
+                            trackedTickers = emptyList()
                         )
                     )
+                }
+                if (digestStatus == DailyDigestStatus.PENDING) {
+                    // The pending card lists what the brief will cover; that's only known from the watchlist.
+                    watchlistRepository.getWatchlist().onSuccess { watchlist ->
+                        val tickers = watchlist.items.filterNot { it.locked }.map { it.ticker }
+                        _uiState.update { state ->
+                            state.copy(dailyDigestView = state.dailyDigestView.copy(trackedTickers = tickers))
+                        }
+                    }
                 }
             }.onFailure { failure ->
                 Logger.e(failure.stackTraceToString())
@@ -611,6 +627,7 @@ sealed interface HomeEvent {
     data class ClickTrendingCompany(val ticker: String) : HomeEvent
     data class AddStockToDigest(val ticker: String) : HomeEvent
     data object BrowseAllCompanies : HomeEvent
+    data object GoToProfile : HomeEvent
     data class UnlockPremium(val source: String) : HomeEvent
     data object SeeFullDigest : HomeEvent
     data object DigestDetailViewed : HomeEvent
@@ -626,4 +643,5 @@ sealed interface HomeAction {
     data object NavigateToAllTrending : HomeAction
     data object NavigateToDiscover : HomeAction
     data object NavigateToDigestDetail : HomeAction
+    data object NavigateToProfile : HomeAction
 }

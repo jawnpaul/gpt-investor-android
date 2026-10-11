@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bookmark
@@ -71,12 +72,15 @@ import com.thejawnpaul.gptinvestor.saved
 import com.thejawnpaul.gptinvestor.saved_picks
 import com.thejawnpaul.gptinvestor.saved_tidbits
 import com.thejawnpaul.gptinvestor.settings
+import com.thejawnpaul.gptinvestor.sign_in_action
+import com.thejawnpaul.gptinvestor.sign_in_to_save_stocks
 import com.thejawnpaul.gptinvestor.sign_out
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.upgrade_cta_subtitle
 import com.thejawnpaul.gptinvestor.upgrade_to_premium
 import com.thejawnpaul.gptinvestor.watching
+import com.thejawnpaul.gptinvestor.you_re_browsing_as_a_guest
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -106,59 +110,65 @@ fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, modifi
                 )
             }
 
-            if (!state.isPremiumUser) {
+            if (state.isGuestSession) {
                 item {
-                    UpgradeToPremiumCard(
-                        accentColor = customColors.accentColors.allAccent,
-                        onClick = { onEvent(ProfileEvent.UpgradeToPremiumClicked) }
+                    GuestSignInCard(onSignIn = { onEvent(ProfileEvent.SignInClicked) })
+                }
+            } else {
+                if (!state.isPremiumUser) {
+                    item {
+                        UpgradeToPremiumCard(
+                            accentColor = customColors.accentColors.allAccent,
+                            onClick = { onEvent(ProfileEvent.UpgradeToPremiumClicked) }
+                        )
+                    }
+                }
+
+                item {
+                    StatsRow(
+                        watchingCount = state.watchingCount,
+                        savedCount = state.savedTidbitsCount,
+                        queryCount = state.queryCount,
+                        borderColor = customColors.utilColors.borderBright10,
+                        secondaryTextColor = customColors.textColors.secondary50
                     )
                 }
-            }
 
-            item {
-                StatsRow(
-                    watchingCount = state.watchingCount,
-                    savedCount = state.savedTidbitsCount,
-                    queryCount = state.queryCount,
-                    borderColor = customColors.utilColors.borderBright10,
-                    secondaryTextColor = customColors.textColors.secondary50
-                )
-            }
+                item {
+                    SectionHeader(
+                        title = stringResource(Res.string.activity).uppercase(),
+                        color = customColors.textColors.secondary50
+                    )
+                }
 
-            item {
-                SectionHeader(
-                    title = stringResource(Res.string.activity).uppercase(),
-                    color = customColors.textColors.secondary50
-                )
-            }
-
-            item {
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    tonalElevation = 0.dp,
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    Column {
-                        ProfileMenuRow(
-                            icon = Icons.Filled.History,
-                            label = stringResource(Res.string.history),
-                            trailingText = stringResource(Res.string.questions_count, state.queryCount),
-                            onClick = { onEvent(ProfileEvent.HistoryClicked) }
-                        )
-                        HorizontalDivider(modifier = Modifier)
-                        ProfileMenuRow(
-                            icon = Icons.Filled.Bookmark,
-                            label = stringResource(Res.string.saved_picks),
-                            trailingText = state.savedPicksCountString,
-                            onClick = { onEvent(ProfileEvent.SavedPicksClicked) }
-                        )
-                        HorizontalDivider(modifier = Modifier)
-                        ProfileMenuRow(
-                            icon = Icons.Filled.Description,
-                            label = stringResource(Res.string.saved_tidbits),
-                            trailingText = state.savedTidbitsCountString,
-                            onClick = { onEvent(ProfileEvent.SavedTidbitsClicked) }
-                        )
+                item {
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        tonalElevation = 0.dp,
+                        color = MaterialTheme.colorScheme.surface
+                    ) {
+                        Column {
+                            ProfileMenuRow(
+                                icon = Icons.Filled.History,
+                                label = stringResource(Res.string.history),
+                                trailingText = stringResource(Res.string.questions_count, state.queryCount),
+                                onClick = { onEvent(ProfileEvent.HistoryClicked) }
+                            )
+                            HorizontalDivider(modifier = Modifier)
+                            ProfileMenuRow(
+                                icon = Icons.Filled.Bookmark,
+                                label = stringResource(Res.string.saved_picks),
+                                trailingText = state.savedPicksCountString,
+                                onClick = { onEvent(ProfileEvent.SavedPicksClicked) }
+                            )
+                            HorizontalDivider(modifier = Modifier)
+                            ProfileMenuRow(
+                                icon = Icons.Filled.Description,
+                                label = stringResource(Res.string.saved_tidbits),
+                                trailingText = state.savedTidbitsCountString,
+                                onClick = { onEvent(ProfileEvent.SavedTidbitsClicked) }
+                            )
+                        }
                     }
                 }
             }
@@ -212,50 +222,52 @@ fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, modifi
                 }
             }
 
-            item {
-                SectionHeader(
-                    title = stringResource(Res.string.settings).uppercase(),
-                    color = customColors.textColors.secondary50
-                )
-            }
-
-            item {
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    tonalElevation = 0.dp,
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    ProfileMenuRow(
-                        icon = Icons.AutoMirrored.Filled.Help,
-                        label = stringResource(Res.string.settings),
-                        showChevron = true,
-                        onClick = { onEvent(ProfileEvent.SettingsClicked) }
+            if (!state.isGuestSession) {
+                item {
+                    SectionHeader(
+                        title = stringResource(Res.string.settings).uppercase(),
+                        color = customColors.textColors.secondary50
                     )
                 }
-            }
 
-            item {
-                SectionHeader(
-                    title = stringResource(Res.string.more).uppercase(),
-                    color = customColors.textColors.secondary50
-                )
-            }
+                item {
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        tonalElevation = 0.dp,
+                        color = MaterialTheme.colorScheme.surface
+                    ) {
+                        ProfileMenuRow(
+                            icon = Icons.AutoMirrored.Filled.Help,
+                            label = stringResource(Res.string.settings),
+                            showChevron = true,
+                            onClick = { onEvent(ProfileEvent.SettingsClicked) }
+                        )
+                    }
+                }
 
-            item {
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    tonalElevation = 0.dp,
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    ProfileMenuRow(
-                        icon = Icons.AutoMirrored.Filled.Logout,
-                        label = stringResource(Res.string.sign_out),
-                        iconBgColor = MaterialTheme.colorScheme.errorContainer,
-                        iconTint = MaterialTheme.colorScheme.error,
-                        labelColor = MaterialTheme.colorScheme.error,
-                        showChevron = false,
-                        onClick = { onEvent(ProfileEvent.SignOutClicked) }
+                item {
+                    SectionHeader(
+                        title = stringResource(Res.string.more).uppercase(),
+                        color = customColors.textColors.secondary50
                     )
+                }
+
+                item {
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        tonalElevation = 0.dp,
+                        color = MaterialTheme.colorScheme.surface
+                    ) {
+                        ProfileMenuRow(
+                            icon = Icons.AutoMirrored.Filled.Logout,
+                            label = stringResource(Res.string.sign_out),
+                            iconBgColor = MaterialTheme.colorScheme.errorContainer,
+                            iconTint = MaterialTheme.colorScheme.error,
+                            labelColor = MaterialTheme.colorScheme.error,
+                            showChevron = false,
+                            onClick = { onEvent(ProfileEvent.SignOutClicked) }
+                        )
+                    }
                 }
             }
 
@@ -279,6 +291,38 @@ fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, modifi
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun GuestSignInCard(onSignIn: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        tonalElevation = 0.dp,
+        color = MaterialTheme.colorScheme.surface
+    ) {
+        Column {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = stringResource(Res.string.you_re_browsing_as_a_guest),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(Res.string.sign_in_to_save_stocks),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            HorizontalDivider()
+            ProfileMenuRow(
+                icon = Icons.AutoMirrored.Filled.Login,
+                label = stringResource(Res.string.sign_in_action),
+                onClick = onSignIn
+            )
+        }
     }
 }
 

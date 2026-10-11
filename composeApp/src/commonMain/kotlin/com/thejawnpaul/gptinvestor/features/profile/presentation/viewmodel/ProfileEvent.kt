@@ -14,5 +14,6 @@ sealed interface ProfileEvent {
     data object AppearanceClicked : ProfileEvent
     data object PrivacyClicked : ProfileEvent
     data object SettingsClicked : ProfileEvent
+    data object SignInClicked : ProfileEvent
     data class ChangeTheme(val theme: StringResource) : ProfileEvent
 }

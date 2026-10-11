@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.profile.presentation.viewmodel
 
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
@@ -53,6 +54,7 @@ class ProfileViewModelTest {
         every { topPickRepository.getSavedTopPicksCount() } returns flowOf(0)
         every { tidbitRepository.getSavedTidbitsCount() } returns flowOf(0)
         every { appPreferences.themePreference } returns flowOf("System")
+        every { appPreferences.isGuestLoggedIn } returns flowOf(false)
     }
 
     @After
@@ -83,6 +85,27 @@ class ProfileViewModelTest {
         assertThat(vm.state.value.userName).isEqualTo("Alice")
         assertThat(vm.state.value.queryCount).isEqualTo(7)
         assertThat(vm.state.value.showSignOutConfirmation).isFalse()
+    }
+
+    @Test
+    fun `state marks guest session when guest is logged in`() = runTest(testDispatcher) {
+        every { appPreferences.isGuestLoggedIn } returns flowOf(true)
+
+        val vm = buildViewModel()
+        backgroundScope.launch { vm.state.collect { } }
+        advanceUntilIdle()
+
+        assertThat(vm.state.value.isGuestSession).isTrue()
+    }
+
+    @Test
+    fun `SignInClicked emits NavigateToSignUp`() = runTest(testDispatcher) {
+        val vm = buildViewModel()
+
+        vm.actions.test {
+            vm.handleEvent(ProfileEvent.SignInClicked)
+            assertThat(awaitItem()).isEqualTo(ProfileAction.NavigateToSignUp)
+        }
     }
 
     @Test

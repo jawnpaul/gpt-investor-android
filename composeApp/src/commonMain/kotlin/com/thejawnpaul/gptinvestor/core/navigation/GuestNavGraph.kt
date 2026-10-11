@@ -36,6 +36,7 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 import com.thejawnpaul.gptinvestor.features.profile.presentation.ui.ProfileScreen
+import com.thejawnpaul.gptinvestor.features.profile.presentation.viewmodel.ProfileAction
 import com.thejawnpaul.gptinvestor.features.profile.presentation.viewmodel.ProfileViewModel
 import com.thejawnpaul.gptinvestor.features.search.presentation.state.SearchAction
 import com.thejawnpaul.gptinvestor.features.search.presentation.ui.SearchScreen
@@ -561,6 +562,15 @@ fun NavGraphBuilder.guestNavGraph(
     composable(route = GuestScreen.GuestProfileTab.route) {
         val viewModel: ProfileViewModel = koinViewModel()
         val state by viewModel.state.collectAsState()
+        LaunchedEffect(Unit) {
+            viewModel.actions.collect { action ->
+                if (action == ProfileAction.NavigateToSignUp) {
+                    navController.navigate(Screen.SignUpScreen.route) {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    }
+                }
+            }
+        }
         ProfileScreen(
             state = state,
             onEvent = viewModel::handleEvent

@@ -56,6 +56,7 @@ class ProfileViewModel(
         billingRepository.currentPurchases(),
         topPickRepository.getSavedTopPicksCount(),
         tidbitRepository.getSavedTidbitsCount().onStart { emit(0) },
+        appPreferences.isGuestLoggedIn,
         _state
     ) { args ->
         val userName = args[0] as String?
@@ -64,7 +65,8 @@ class ProfileViewModel(
         val purchases = args[3] as List<*>
         val savedPicksCount = args[4] as Int
         val savedTidbitsCount = args[5] as Int
-        val currentState = args[6] as ProfileUiState
+        val isGuestLoggedIn = args[6] as Boolean?
+        val currentState = args[7] as ProfileUiState
 
         currentState.copy(
             userName = userName.orEmpty(),
@@ -72,7 +74,8 @@ class ProfileViewModel(
             isNotificationsEnabled = notificationPermission ?: false,
             isPremiumUser = purchases.isNotEmpty(),
             savedPicksCount = savedPicksCount,
-            savedTidbitsCount = savedTidbitsCount
+            savedTidbitsCount = savedTidbitsCount,
+            isGuestSession = isGuestLoggedIn == true
         )
     }.stateIn(
         scope = viewModelScope,
@@ -165,6 +168,8 @@ class ProfileViewModel(
                 )
                 processAction(ProfileAction.NavigateToSettings)
             }
+
+            ProfileEvent.SignInClicked -> processAction(ProfileAction.NavigateToSignUp)
         }
     }
 

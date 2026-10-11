@@ -54,6 +54,9 @@ fun NavGraphBuilder.profileNavGraph(navController: NavHostController, platformAc
                         navController.navigate(route = Screen.SettingsScreen.route)
                     }
 
+                    ProfileAction.NavigateToSignUp -> {
+                    }
+
                     is ProfileAction.ShowToast -> {
                     }
                 }

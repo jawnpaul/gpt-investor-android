@@ -13,6 +13,7 @@ data class ProfileUiState(
     val savedTidbitsCount: Int = 0,
     val showSignOutConfirmation: Boolean = false,
     val isPremiumUser: Boolean = false,
+    val isGuestSession: Boolean = false,
     val isNotificationsEnabled: Boolean = false,
     val currentTheme: StringResource = Res.string.system,
     val themeList: List<StringResource> = emptyList()

@@ -12,8 +12,11 @@ import org.koin.core.annotation.Singleton
 class IosBillingRepository : IBillingRepository {
     override suspend fun connect(): Result<Unit> = Result.success(Unit)
 
-    override suspend fun launchPurchaseFlow(platformContext: PlatformContext, productId: String): BillingResult =
-        BillingResult.NotSupported
+    override suspend fun launchPurchaseFlow(
+        platformContext: PlatformContext,
+        productId: String,
+        trigger: String
+    ): BillingResult = BillingResult.NotSupported
 
     override fun currentPurchases(): Flow<List<BillingPurchase>> = flowOf(emptyList())
 

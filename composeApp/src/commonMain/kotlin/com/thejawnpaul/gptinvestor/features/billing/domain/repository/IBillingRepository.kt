@@ -9,7 +9,7 @@ interface IBillingRepository {
 
     suspend fun connect(): Result<Unit>
 
-    suspend fun launchPurchaseFlow(platformContext: PlatformContext, productId: String): BillingResult
+    suspend fun launchPurchaseFlow(platformContext: PlatformContext, productId: String, trigger: String): BillingResult
 
     fun currentPurchases(): Flow<List<BillingPurchase>>
 

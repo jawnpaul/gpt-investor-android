@@ -54,7 +54,8 @@ class PremiumViewModel(
             _state.update { it.copy(isPurchasing = true) }
             val result = billingRepository.launchPurchaseFlow(
                 platformContext = platformContext,
-                productId = BuildConfig.BILLING_PRODUCT_ID
+                productId = BuildConfig.BILLING_PRODUCT_ID,
+                trigger = trigger
             )
             _state.update { it.copy(isPurchasing = false) }
             when (result) {

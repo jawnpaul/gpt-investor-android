@@ -47,6 +47,11 @@ final class SwiftMixpanelProvider: NSObject, MixpanelProvider {
         mixpanel.reset()
     }
 
+    func setUserProperty(name: String, value: String) {
+        mixpanel.registerSuperProperties([name: value])
+        mixpanel.people.set(property: name, to: value)
+    }
+
     private func mixpanelProperties(from map: [String: Any]) -> [String: MixpanelType] {
         map.compactMapValues { $0 as? MixpanelType }
     }

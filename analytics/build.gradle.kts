@@ -17,6 +17,8 @@ kotlin {
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
+        withHostTest {}
+
         compilations.all {
             compileTaskProvider.configure {
                 compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
@@ -49,6 +51,10 @@ kotlin {
                 implementation(libs.firebase.common)
                 implementation(libs.firebase.analytics)
             }
+        }
+        getByName("androidHostTest").dependencies {
+            implementation(libs.junit)
+            implementation(libs.mockk)
         }
         iosMain {
             dependencies {

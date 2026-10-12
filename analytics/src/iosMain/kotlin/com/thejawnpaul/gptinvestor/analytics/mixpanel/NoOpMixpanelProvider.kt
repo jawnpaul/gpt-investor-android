@@ -10,4 +10,5 @@ class NoOpMixpanelProvider : MixpanelProvider {
     override fun logViewEvent(screenName: String) = Unit
     override fun identifyUser(userId: String, params: Map<String, Any>) = Unit
     override fun resetUser() = Unit
+    override fun setUserProperty(name: String, value: String) = Unit
 }

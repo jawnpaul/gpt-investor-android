@@ -43,4 +43,9 @@ actual class MixpanelLogger(context: Context) : AnalyticsLogger {
         mixpanel.track(eventName)
         mixpanel.reset()
     }
+
+    actual override fun setUserProperty(name: String, value: String) {
+        mixpanel.registerSuperPropertiesMap(mapOf(name to value))
+        mixpanel.people.set(name, value)
+    }
 }

@@ -51,7 +51,7 @@ fun NavGraphBuilder.discoverNavGraph(navController: NavHostController) {
                     }
 
                     DiscoveryAction.OnGoToBrowse -> {
-                        navController.navigate(Screen.BrowseStocksScreen.route)
+                        navController.navigate(Screen.BrowseStocksScreen.createRoute())
                     }
                 }
             }.launchIn(scope)

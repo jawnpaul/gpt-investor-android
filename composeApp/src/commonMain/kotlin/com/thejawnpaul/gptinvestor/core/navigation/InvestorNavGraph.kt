@@ -4,7 +4,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -53,7 +52,7 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
                     }
 
                     HomeAction.NavigateToDiscover -> {
-                        navController.navigate(Screen.DiscoverTabScreen.route)
+                        navController.navigateToTab(Screen.DiscoverTabScreen.route, Screen.HomeTabScreen.route)
                     }
 
                     HomeAction.NavigateToDigestDetail -> {
@@ -62,11 +61,7 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
 
                     // Same as tapping the Profile tab, so the bottom bar's back stack stays consistent.
                     HomeAction.NavigateToProfile -> {
-                        navController.navigate(Screen.ProfileTabScreen.route) {
-                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        navController.navigateToTab(Screen.ProfileTabScreen.route, Screen.HomeTabScreen.route)
                     }
                 }
             }.launchIn(this)

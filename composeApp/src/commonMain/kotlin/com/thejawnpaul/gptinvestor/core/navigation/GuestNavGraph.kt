@@ -5,7 +5,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -103,7 +102,10 @@ fun NavGraphBuilder.guestNavGraph(
                     }
 
                     HomeAction.NavigateToDiscover -> {
-                        navController.navigate(GuestScreen.GuestDiscoverTab.route)
+                        navController.navigateToTab(
+                            route = GuestScreen.GuestDiscoverTab.createRoute(),
+                            homeRoute = GuestScreen.GuestHomeTab.route
+                        )
                     }
 
                     HomeAction.NavigateToDigestDetail -> {
@@ -111,11 +113,7 @@ fun NavGraphBuilder.guestNavGraph(
 
                     // Same as tapping the Profile tab, so the bottom bar's back stack stays consistent.
                     HomeAction.NavigateToProfile -> {
-                        navController.navigate(GuestScreen.GuestProfileTab.route) {
-                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        navController.navigateToTab(GuestScreen.GuestProfileTab.route, GuestScreen.GuestHomeTab.route)
                     }
                 }
             }.launchIn(scope)

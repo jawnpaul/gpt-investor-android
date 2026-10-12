@@ -10,7 +10,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.mohamedrejeb.calf.sf.symbols.SFSymbol
 import com.mohamedrejeb.calf.ui.ExperimentalCalfUiApi
@@ -92,6 +91,14 @@ private val bottomNavItems = listOf(
     )
 )
 
+internal fun NavController.navigateToTab(route: String, homeRoute: String) {
+    navigate(route) {
+        popUpTo(homeRoute) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
+
 fun isBottomTabRoute(route: String?) = bottomNavItems.any { route in it.matchingRoutes }
 
 @OptIn(ExperimentalCalfUiApi::class)
@@ -110,11 +117,8 @@ fun BottomNavBar(navController: NavController, modifier: Modifier = Modifier) {
     val selectedIndex = bottomNavItems.indexOfFirst { currentRoute in it.matchingRoutes }
 
     val navigateTo: (BottomNavItem) -> Unit = { item ->
-        navController.navigate(if (isGuest) item.guestRoute else item.route) {
-            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-            launchSingleTop = true
-            restoreState = true
-        }
+        val homeRoute = if (isGuest) GuestScreen.GuestHomeTab.route else Screen.HomeTabScreen.route
+        navController.navigateToTab(if (isGuest) item.guestRoute else item.route, homeRoute)
     }
 
     AdaptiveNavigationBar(

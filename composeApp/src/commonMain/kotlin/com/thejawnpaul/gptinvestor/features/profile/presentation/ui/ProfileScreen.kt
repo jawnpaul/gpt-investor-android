@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PrivacyTip
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +51,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.mohamedrejeb.calf.ui.dialog.AdaptiveAlertDialog
+import com.mohamedrejeb.calf.ui.dialog.uikit.AlertDialogIosActionStyle
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.activity
 import com.thejawnpaul.gptinvestor.appearance
@@ -276,20 +277,25 @@ fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, modifi
     }
 
     if (state.showSignOutConfirmation) {
-        AlertDialog(
-            onDismissRequest = { onEvent(ProfileEvent.DismissSignOutDialog) },
-            title = { Text(stringResource(Res.string.sign_out)) },
-            text = { Text(stringResource(Res.string.are_you_sure_you_want_to_sign_out)) },
-            confirmButton = {
+        AdaptiveAlertDialog(
+            onConfirm = { onEvent(ProfileEvent.ConfirmSignOut) },
+            onDismiss = { onEvent(ProfileEvent.DismissSignOutDialog) },
+            confirmText = stringResource(Res.string.sign_out),
+            dismissText = stringResource(Res.string.cancel),
+            title = stringResource(Res.string.sign_out),
+            text = stringResource(Res.string.are_you_sure_you_want_to_sign_out),
+            materialConfirmButton = {
                 TextButton(onClick = { onEvent(ProfileEvent.ConfirmSignOut) }) {
                     Text(stringResource(Res.string.sign_out), color = MaterialTheme.colorScheme.error)
                 }
             },
-            dismissButton = {
+            materialDismissButton = {
                 TextButton(onClick = { onEvent(ProfileEvent.DismissSignOutDialog) }) {
                     Text(stringResource(Res.string.cancel))
                 }
-            }
+            },
+            iosConfirmButtonStyle = AlertDialogIosActionStyle.Destructive,
+            iosDismissButtonStyle = AlertDialogIosActionStyle.Cancel
         )
     }
 }

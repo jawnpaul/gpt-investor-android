@@ -310,6 +310,7 @@
 
     <string name="premium_sheet_title">Go Premium</string>
     <string name="premium_sheet_subtitle">Unlock the full GPTInvestor experience</string>
+    <string name="premium_sheet_subtitle_watchlist_full">You’ve used %1$d of %1$d free watchlist slots</string>
     <string name="premium_feature_digest_title">Daily Market Brief</string>
     <string name="premium_feature_digest_desc">Personalized stock briefings every morning</string>
     <string name="premium_feature_queries_title">Unlimited AI Queries</string>

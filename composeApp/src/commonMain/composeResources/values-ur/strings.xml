@@ -285,6 +285,7 @@
     <string name="browse_stocks_error">اسٹاک لوڈ نہیں ہو سکے</string>
     <string name="premium_sheet_title">پریمیم میں جائیں</string>
     <string name="premium_sheet_subtitle">مکمل GPTInvestor تجربہ کھولیں</string>
+    <string name="premium_sheet_subtitle_watchlist_full">آپ نے واچ لسٹ کی %1$d میں سے %1$d مفت جگہیں استعمال کر لی ہیں</string>
     <string name="premium_feature_digest_title">روزانہ مارکیٹ خلاصہ</string>
     <string name="premium_feature_digest_desc">ہر صبح ذاتی نوعیت کے اسٹاک خلاصے</string>
     <string name="premium_feature_queries_title">لامحدود AI سوالات</string>

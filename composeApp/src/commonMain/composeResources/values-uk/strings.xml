@@ -285,6 +285,7 @@
     <string name="browse_stocks_error">Не вдалося завантажити акції</string>
     <string name="premium_sheet_title">Перейти на Premium</string>
     <string name="premium_sheet_subtitle">Розблокуйте повний досвід GPTInvestor</string>
+    <string name="premium_sheet_subtitle_watchlist_full">Ви використали %1$d з %1$d безкоштовних місць у списку спостереження</string>
     <string name="premium_feature_digest_title">Щоденний огляд ринку</string>
     <string name="premium_feature_digest_desc">Персоналізовані огляди акцій щоранку</string>
     <string name="premium_feature_queries_title">Необмежені запити до ШІ</string>

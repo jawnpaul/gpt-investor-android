@@ -7,6 +7,8 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
+import com.thejawnpaul.gptinvestor.features.premium.domain.PREMIUM_SOURCE_WATCHLIST_FULL
+import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistFailure
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.PopularStockUiModel
@@ -42,6 +44,7 @@ private val recommendationColors = listOf(
 class WatchlistViewModel(
     private val watchlistRepository: WatchlistRepository,
     private val companyRepository: ICompanyRepository,
+    private val premiumEventBus: PremiumEventBus,
     @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(WatchlistUiState(isLoading = true))
@@ -151,7 +154,12 @@ class WatchlistViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             watchlistRepository.addStockToWatchList(ticker).fold(
-                { _uiState.update { it.copy(isLoading = false) } },
+                { failure ->
+                    _uiState.update { it.copy(isLoading = false) }
+                    if (failure is WatchlistFailure.WatchlistFull) {
+                        premiumEventBus.requestPremium(PREMIUM_SOURCE_WATCHLIST_FULL, failure.cap)
+                    }
+                },
                 {
                     analyticsLogger.logEvent(
                         eventName = "stock-added-to-watchlist",

@@ -29,6 +29,7 @@ import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.StockDigestPr
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.OnStartConversation
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
+import com.thejawnpaul.gptinvestor.features.premium.domain.PREMIUM_SOURCE_WATCHLIST_FULL
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
@@ -354,7 +355,10 @@ class HomeViewModel(
                                 }
 
                                 is WatchlistFailure.WatchlistFull -> {
-                                    processAction(HomeAction.ShowToast("Watchlist is full"))
+                                    premiumEventBus.requestPremium(
+                                        source = PREMIUM_SOURCE_WATCHLIST_FULL,
+                                        watchlistCap = failure.cap
+                                    )
                                 }
 
                                 is WatchlistFailure.TickerNotFound -> {

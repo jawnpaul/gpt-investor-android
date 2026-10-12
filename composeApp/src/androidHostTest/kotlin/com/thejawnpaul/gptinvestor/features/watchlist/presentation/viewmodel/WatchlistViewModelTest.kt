@@ -7,6 +7,8 @@ import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.RecommendedDigestCompany
+import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
+import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumRequest
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistFailure
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistData
@@ -38,6 +40,7 @@ class WatchlistViewModelTest {
     private val watchlistRepository: WatchlistRepository = mockk()
     private val analyticsLogger: AnalyticsLogger = mockk(relaxed = true)
     private val companyRepository: ICompanyRepository = mockk()
+    private val premiumEventBus = PremiumEventBus()
     private val changes = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     @Before
@@ -52,7 +55,7 @@ class WatchlistViewModelTest {
     }
 
     private fun TestScope.subscribedViewModel(): WatchlistViewModel {
-        val vm = WatchlistViewModel(watchlistRepository, companyRepository, analyticsLogger)
+        val vm = WatchlistViewModel(watchlistRepository, companyRepository, premiumEventBus, analyticsLogger)
         backgroundScope.launch { vm.uiState.collect { } }
         advanceUntilIdle()
         return vm
@@ -60,7 +63,7 @@ class WatchlistViewModelTest {
 
     @Test
     fun `does not load until the screen subscribes`() = runTest(testDispatcher) {
-        WatchlistViewModel(watchlistRepository, companyRepository, analyticsLogger)
+        WatchlistViewModel(watchlistRepository, companyRepository, premiumEventBus, analyticsLogger)
         advanceUntilIdle()
 
         coVerify(exactly = 0) { watchlistRepository.getWatchlist() }
@@ -119,7 +122,7 @@ class WatchlistViewModelTest {
 
     @Test
     fun `OnSignInClick emits NavigateToSignUp`() = runTest(testDispatcher) {
-        val vm = WatchlistViewModel(watchlistRepository, companyRepository, analyticsLogger)
+        val vm = WatchlistViewModel(watchlistRepository, companyRepository, premiumEventBus, analyticsLogger)
 
         vm.actions.test {
             vm.onEvent(WatchlistEvent.OnSignInClick)
@@ -170,4 +173,19 @@ class WatchlistViewModelTest {
             recommendations = emptyList()
         )
     )
+
+    @Test
+    fun `adding to a full watchlist opens the paywall with the cap`() = runTest(testDispatcher) {
+        coEvery { watchlistRepository.getWatchlist() } returns
+            Either.Right(WatchlistData(items = emptyList(), recommendations = emptyList()))
+        coEvery { watchlistRepository.addStockToWatchList("AAPL") } returns
+            Either.Left(WatchlistFailure.WatchlistFull(cap = 2))
+        val vm = subscribedViewModel()
+
+        premiumEventBus.events.test {
+            vm.onEvent(WatchlistEvent.OnWatchClick("AAPL"))
+            advanceUntilIdle()
+            assertThat(awaitItem()).isEqualTo(PremiumRequest(source = "watchlist_full", watchlistCap = 2))
+        }
+    }
 }

@@ -285,6 +285,7 @@
     <string name="browse_stocks_error">Aktien konnten nicht geladen werden</string>
     <string name="premium_sheet_title">Zu Premium wechseln</string>
     <string name="premium_sheet_subtitle">Das volle GPTInvestor-Erlebnis freischalten</string>
+    <string name="premium_sheet_subtitle_watchlist_full">Du hast %1$d von %1$d kostenlosen Watchlist-Plätzen belegt</string>
     <string name="premium_feature_digest_title">Tägliche Marktübersicht</string>
     <string name="premium_feature_digest_desc">Personalisierte Aktienberichte jeden Morgen</string>
     <string name="premium_feature_queries_title">Unbegrenzte KI-Anfragen</string>

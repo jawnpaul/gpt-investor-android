@@ -31,6 +31,9 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Structured
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
+import com.thejawnpaul.gptinvestor.features.premium.domain.PREMIUM_SOURCE_WATCHLIST_FULL
+import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistFailure
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -52,6 +55,7 @@ class CompanyViewModel(
     private val feedbackRepository: FeedbackRepository,
     private val appPreferences: AppPreferences,
     private val watchlistRepository: WatchlistRepository,
+    private val premiumEventBus: PremiumEventBus,
     @Provided private val analyticsLogger: AnalyticsLogger,
     private val guestSessionNotifier: GuestSessionNotifier
 ) : ViewModel() {
@@ -424,7 +428,13 @@ class CompanyViewModel(
                 val ticker = _selectedCompany.value.header.companyTicker.ifEmpty { selectedCompanyTicker.orEmpty() }
                 viewModelScope.launch {
                     watchlistRepository.addStockToWatchList(ticker).fold(
-                        { processCompanyDetailAction(CompanyDetailAction.WatchlistAddFailed) },
+                        { failure ->
+                            if (failure is WatchlistFailure.WatchlistFull) {
+                                premiumEventBus.requestPremium(PREMIUM_SOURCE_WATCHLIST_FULL, failure.cap)
+                            } else {
+                                processCompanyDetailAction(CompanyDetailAction.WatchlistAddFailed)
+                            }
+                        },
                         {
                             analyticsLogger.logEvent(
                                 eventName = "stock-added-to-watchlist",

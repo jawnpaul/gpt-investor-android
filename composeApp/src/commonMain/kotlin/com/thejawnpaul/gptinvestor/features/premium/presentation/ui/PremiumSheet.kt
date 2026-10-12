@@ -47,6 +47,7 @@ import com.thejawnpaul.gptinvestor.premium_feature_queries_title
 import com.thejawnpaul.gptinvestor.premium_feature_research_desc
 import com.thejawnpaul.gptinvestor.premium_feature_research_title
 import com.thejawnpaul.gptinvestor.premium_sheet_subtitle
+import com.thejawnpaul.gptinvestor.premium_sheet_subtitle_watchlist_full
 import com.thejawnpaul.gptinvestor.premium_sheet_title
 import com.thejawnpaul.gptinvestor.subscribe_now
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
@@ -109,7 +110,9 @@ private fun PremiumSheetContent(state: PremiumSheetState, onPurchase: () -> Unit
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = stringResource(Res.string.premium_sheet_subtitle),
+                    text = state.watchlistCap?.let {
+                        stringResource(Res.string.premium_sheet_subtitle_watchlist_full, it)
+                    } ?: stringResource(Res.string.premium_sheet_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = customColors.textColors.secondary50
                 )

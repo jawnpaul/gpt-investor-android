@@ -30,11 +30,16 @@ class PremiumViewModel(
     private val _state = MutableStateFlow(PremiumSheetState())
     val state: StateFlow<PremiumSheetState> = _state.asStateFlow()
 
+    private var trigger: String = ""
+
     init {
         viewModelScope.launch {
-            premiumEventBus.events.collect { source ->
-                analyticsLogger.logEvent("premium_sheet_shown", mapOf("source" to source))
-                _state.update { it.copy(isVisible = true) }
+            premiumEventBus.events.collect { request ->
+                analyticsLogger.logEvent("premium_sheet_shown", mapOf("source" to request.source))
+                trigger = paywallTriggerOf(request.source)
+                analyticsLogger.logEvent("paywall_viewed", mapOf("trigger" to trigger))
+                val watchlistCap = request.watchlistCap?.takeIf { it > 0 }
+                _state.update { it.copy(isVisible = true, watchlistCap = watchlistCap) }
             }
         }
     }
@@ -44,6 +49,7 @@ class PremiumViewModel(
     }
 
     fun purchase() {
+        analyticsLogger.logEvent("upgrade_tapped", mapOf("trigger" to trigger))
         viewModelScope.launch {
             _state.update { it.copy(isPurchasing = true) }
             val result = billingRepository.launchPurchaseFlow(
@@ -64,4 +70,10 @@ class PremiumViewModel(
             }
         }
     }
+}
+
+private fun paywallTriggerOf(source: String): String = when (source) {
+    "digest_pending_card", "digest_ready_card", "digest_detail_screen" -> "locked_digest"
+    "profile" -> "settings"
+    else -> source
 }

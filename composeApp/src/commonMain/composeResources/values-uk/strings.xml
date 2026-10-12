@@ -63,6 +63,7 @@
     <string name="sign_out">Вийти</string>
     <string name="settings">Налаштування</string>
     <string name="digest_delivery_time">Час доставки дайджесту</string>
+    <string name="digest_delivery_time_default">%1$s (за замовчуванням)</string>
     <string name="saved_picks">Збережені вибори</string>
     <string name="delete">Видалити</string>
     <string name="cancel">Скасувати</string>

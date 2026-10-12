@@ -8,6 +8,7 @@ const val TIER_PREMIUM = "premium"
 @Serializable
 data class UserSettingsResponse(
     @SerialName("digest_delivery_hour") val digestDeliveryHour: Int? = null,
+    @SerialName("digest_delivery_hour_is_default") val digestDeliveryHourIsDefault: Boolean? = null,
     @SerialName("digest_utc_hour") val digestUtcHour: Int? = null,
     @SerialName("notif_digest_enabled") val notifDigestEnabled: Boolean? = null,
     @SerialName("timezone_iana") val timezoneIana: String? = null,

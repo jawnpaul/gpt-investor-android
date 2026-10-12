@@ -42,6 +42,7 @@ import com.thejawnpaul.gptinvestor.core.navigation.BackButton
 import com.thejawnpaul.gptinvestor.delete
 import com.thejawnpaul.gptinvestor.delete_account
 import com.thejawnpaul.gptinvestor.digest_delivery_time
+import com.thejawnpaul.gptinvestor.digest_delivery_time_default
 import com.thejawnpaul.gptinvestor.done
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
 import com.thejawnpaul.gptinvestor.features.settings.presentation.state.SettingsView
@@ -82,6 +83,7 @@ fun SettingsScreen(
                 ) {
                     DigestTimeRow(
                         hourLabel = state.digestDeliveryHourLabel,
+                        isDefault = state.isDigestDeliveryHourDefault,
                         onClick = { onEvent(SettingsEvent.ShowTimePicker) }
                     )
                 }
@@ -176,7 +178,7 @@ private fun SettingsTimePickerPreview() {
 }
 
 @Composable
-private fun DigestTimeRow(hourLabel: String?, onClick: () -> Unit) {
+private fun DigestTimeRow(hourLabel: String?, isDefault: Boolean, onClick: () -> Unit) {
     val customColors = LocalGPTInvestorColors.current
     Row(
         modifier = Modifier
@@ -193,7 +195,11 @@ private fun DigestTimeRow(hourLabel: String?, onClick: () -> Unit) {
             )
             if (hourLabel != null) {
                 Text(
-                    text = hourLabel,
+                    text = if (isDefault) {
+                        stringResource(Res.string.digest_delivery_time_default, hourLabel)
+                    } else {
+                        hourLabel
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = customColors.textColors.secondary50
                 )

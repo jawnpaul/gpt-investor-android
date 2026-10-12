@@ -2,16 +2,15 @@ package com.thejawnpaul.gptinvestor.features.settings.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.thejawnpaul.gptinvestor.currentTimezoneSettings
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.settings.data.remote.model.TIER_PREMIUM
-import com.thejawnpaul.gptinvestor.features.settings.data.remote.model.UpdateUserSettingsRequest
 import com.thejawnpaul.gptinvestor.features.settings.domain.SettingsRepository
 import com.thejawnpaul.gptinvestor.features.settings.presentation.state.SettingsView
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.TimeZone
 import org.koin.core.annotation.KoinViewModel
 
 @KoinViewModel
@@ -37,7 +36,8 @@ class SettingsViewModel(
                     it.copy(
                         isPremium = settings.tier == TIER_PREMIUM,
                         digestDeliveryHour = settings.digestDeliveryHour,
-                        digestDeliveryHourLabel = settings.digestDeliveryHour?.let(::formatHour)
+                        digestDeliveryHourLabel = settings.digestDeliveryHour?.let(::formatHour),
+                        isDigestDeliveryHourDefault = settings.digestDeliveryHourIsDefault == true
                     )
                 }
             }
@@ -48,15 +48,13 @@ class SettingsViewModel(
         _uiState.update { it.copy(showTimePicker = false) }
         viewModelScope.launch {
             settingsRepository.updateUserSettings(
-                UpdateUserSettingsRequest(
-                    digestDeliveryHour = hour,
-                    timezoneIana = TimeZone.currentSystemDefault().id
-                )
+                currentTimezoneSettings().copy(digestDeliveryHour = hour)
             ).onSuccess { settings ->
                 _uiState.update {
                     it.copy(
                         digestDeliveryHour = settings.digestDeliveryHour,
-                        digestDeliveryHourLabel = settings.digestDeliveryHour?.let(::formatHour)
+                        digestDeliveryHourLabel = settings.digestDeliveryHour?.let(::formatHour),
+                        isDigestDeliveryHourDefault = settings.digestDeliveryHourIsDefault == true
                     )
                 }
             }

@@ -63,6 +63,7 @@
     <string name="sign_out">Abmelden</string>
     <string name="settings">Einstellungen</string>
     <string name="digest_delivery_time">Lieferzeit der Zusammenfassung</string>
+    <string name="digest_delivery_time_default">%1$s (Standard)</string>
     <string name="saved_picks">Gespeicherte Empfehlungen</string>
     <string name="delete">Löschen</string>
     <string name="cancel">Abbrechen</string>

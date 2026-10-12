@@ -5,6 +5,7 @@ data class SettingsView(
     val isPremium: Boolean = false,
     val digestDeliveryHour: Int? = null,
     val digestDeliveryHourLabel: String? = null,
+    val isDigestDeliveryHourDefault: Boolean = false,
     val showDeleteDialog: Boolean = false,
     val showTimePicker: Boolean = false
 )

@@ -69,7 +69,11 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
 
     LaunchedEffect(isUserSignedIn) {
         if (isUserSignedIn == true) {
-            settingsRepository.updateUserSettings(currentTimezoneSettings())
+            val current = currentTimezoneSettings()
+            val stored = settingsRepository.getUserSettings().getOrNull()
+            if (stored?.timezoneIana != current.timezoneIana || stored?.utcOffsetMinutes != current.utcOffsetMinutes) {
+                settingsRepository.updateUserSettings(current)
+            }
         }
     }
 
@@ -207,7 +211,7 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
     }
 }
 
-private fun currentTimezoneSettings(): UpdateUserSettingsRequest {
+internal fun currentTimezoneSettings(): UpdateUserSettingsRequest {
     val timeZone = TimeZone.currentSystemDefault()
     return UpdateUserSettingsRequest(
         timezoneIana = timeZone.id,

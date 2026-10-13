@@ -11,6 +11,7 @@ import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfigClient
 import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.User
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
+import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetTrendingCompaniesUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
@@ -65,7 +66,8 @@ class HomeViewModel(
     private val modelsRepository: ModelsRepository,
     private val digestRepository: DigestRepository,
     private val watchlistRepository: WatchlistRepository,
-    private val premiumEventBus: PremiumEventBus
+    private val premiumEventBus: PremiumEventBus,
+    private val billingRepository: IBillingRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState(timePeriod = computeTimePeriod()))
@@ -99,6 +101,10 @@ class HomeViewModel(
         getCurrentUser()
         logHomeScreenViewed()
         getDailyDigest()
+
+        viewModelScope.launch {
+            billingRepository.purchaseVerified.collect { getDailyDigest() }
+        }
 
         viewModelScope.launch {
             preferences.themePreference.collect { theme ->

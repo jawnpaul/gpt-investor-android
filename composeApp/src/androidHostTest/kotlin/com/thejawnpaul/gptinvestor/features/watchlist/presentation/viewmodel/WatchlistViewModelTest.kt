@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.RecommendedDigestCompany
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
@@ -42,11 +43,14 @@ class WatchlistViewModelTest {
     private val companyRepository: ICompanyRepository = mockk()
     private val premiumEventBus = PremiumEventBus()
     private val changes = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    private val purchaseVerified = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    private val billingRepository: IBillingRepository = mockk()
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         every { watchlistRepository.changes } returns changes
+        every { billingRepository.purchaseVerified } returns purchaseVerified
     }
 
     @After
@@ -55,7 +59,14 @@ class WatchlistViewModelTest {
     }
 
     private fun TestScope.subscribedViewModel(): WatchlistViewModel {
-        val vm = WatchlistViewModel(watchlistRepository, companyRepository, premiumEventBus, analyticsLogger)
+        val vm =
+            WatchlistViewModel(
+                watchlistRepository,
+                companyRepository,
+                premiumEventBus,
+                billingRepository,
+                analyticsLogger
+            )
         backgroundScope.launch { vm.uiState.collect { } }
         advanceUntilIdle()
         return vm
@@ -63,7 +74,7 @@ class WatchlistViewModelTest {
 
     @Test
     fun `does not load until the screen subscribes`() = runTest(testDispatcher) {
-        WatchlistViewModel(watchlistRepository, companyRepository, premiumEventBus, analyticsLogger)
+        WatchlistViewModel(watchlistRepository, companyRepository, premiumEventBus, billingRepository, analyticsLogger)
         advanceUntilIdle()
 
         coVerify(exactly = 0) { watchlistRepository.getWatchlist() }
@@ -81,6 +92,18 @@ class WatchlistViewModelTest {
         changes.emit(Unit)
         advanceUntilIdle()
 
+        assertThat(vm.uiState.value.watchlistItems.map { it.ticker }).containsExactly("AAPL", "TSLA").inOrder()
+    }
+
+    @Test
+    fun `reloads after a purchase is verified so locked items unlock`() = runTest(testDispatcher) {
+        coEvery { watchlistRepository.getWatchlist() } returnsMany listOf(loaded("AAPL"), loaded("AAPL", "TSLA"))
+        val vm = subscribedViewModel()
+
+        purchaseVerified.emit(Unit)
+        advanceUntilIdle()
+
+        coVerify(exactly = 2) { watchlistRepository.getWatchlist() }
         assertThat(vm.uiState.value.watchlistItems.map { it.ticker }).containsExactly("AAPL", "TSLA").inOrder()
     }
 
@@ -122,7 +145,14 @@ class WatchlistViewModelTest {
 
     @Test
     fun `OnSignInClick emits NavigateToSignUp`() = runTest(testDispatcher) {
-        val vm = WatchlistViewModel(watchlistRepository, companyRepository, premiumEventBus, analyticsLogger)
+        val vm =
+            WatchlistViewModel(
+                watchlistRepository,
+                companyRepository,
+                premiumEventBus,
+                billingRepository,
+                analyticsLogger
+            )
 
         vm.actions.test {
             vm.onEvent(WatchlistEvent.OnSignInClick)

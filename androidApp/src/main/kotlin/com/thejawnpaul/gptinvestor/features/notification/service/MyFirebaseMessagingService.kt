@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.features.notification.service
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -79,15 +80,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         imageUrl: String?
     ) {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Default Channel",
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            notificationManager.createNotificationChannel(channel)
-        }
 
         // Create intent for when notification is clicked
         val intent = Intent(this, MainActivity::class.java).apply {
@@ -182,5 +174,16 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     companion object {
         private const val CHANNEL_ID = "fcm_default_channel"
         private const val NOTIFICATION_ID = 1001
+
+        fun createDefaultChannel(context: Context) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(
+                    CHANNEL_ID,
+                    "Default Channel",
+                    NotificationManager.IMPORTANCE_DEFAULT
+                )
+                context.getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+            }
+        }
     }
 }

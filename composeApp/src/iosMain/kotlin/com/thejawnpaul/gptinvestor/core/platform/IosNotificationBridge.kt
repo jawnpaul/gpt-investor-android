@@ -30,6 +30,7 @@ object IosNotificationBridge : KoinComponent {
     fun onFcmTokenReceived(token: String) {
         MainScope().launch {
             notificationRepository.saveToken(token)
+            notificationRepository.syncTokenIfNeeded()
         }
     }
 }

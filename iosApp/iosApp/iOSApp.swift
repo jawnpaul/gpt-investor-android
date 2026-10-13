@@ -24,6 +24,14 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
 
         UNUserNotificationCenter.current().delegate = self
 
+        // FCM can only issue a token once APNs has one, and APNs registration doesn't persist across launches.
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            guard settings.authorizationStatus == .authorized else { return }
+            DispatchQueue.main.async {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+        }
+
         return true
     }
 

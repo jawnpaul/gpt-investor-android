@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
+import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import com.thejawnpaul.gptinvestor.features.premium.domain.PREMIUM_SOURCE_WATCHLIST_FULL
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
@@ -45,14 +46,15 @@ class WatchlistViewModel(
     private val watchlistRepository: WatchlistRepository,
     private val companyRepository: ICompanyRepository,
     private val premiumEventBus: PremiumEventBus,
+    billingRepository: IBillingRepository,
     @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(WatchlistUiState(isLoading = true))
     private val retryRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     // Loads when the screen starts collecting, and again after any add/remove anywhere in the app
-    // (e.g. company detail) or a retry, so the tab never shows a stale list.
-    private val reloads = merge(watchlistRepository.changes, retryRequests)
+    // (e.g. company detail), a retry, or a verified purchase, so the tab never shows a stale list.
+    private val reloads = merge(watchlistRepository.changes, retryRequests, billingRepository.purchaseVerified)
         .onStart { emit(Unit) }
         .mapLatest { loadWatchlist() }
 

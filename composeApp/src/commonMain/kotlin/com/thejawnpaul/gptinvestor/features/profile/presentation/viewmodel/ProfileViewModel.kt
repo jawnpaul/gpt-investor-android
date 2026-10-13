@@ -7,10 +7,10 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.dark
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
-import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.profile.presentation.state.ProfileUiState
+import com.thejawnpaul.gptinvestor.features.settings.domain.SettingsRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
 import com.thejawnpaul.gptinvestor.light
@@ -36,7 +36,7 @@ class ProfileViewModel(
     private val conversationRepository: IConversationRepository,
     private val topPickRepository: ITopPickRepository,
     private val tidbitRepository: TidbitRepository,
-    private val billingRepository: IBillingRepository,
+    private val settingsRepository: SettingsRepository,
     private val premiumEventBus: PremiumEventBus,
     @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
@@ -53,7 +53,7 @@ class ProfileViewModel(
         appPreferences.userName,
         conversationRepository.getQueryCount(),
         appPreferences.notificationPermission,
-        billingRepository.currentPurchases(),
+        settingsRepository.isPremium,
         topPickRepository.getSavedTopPicksCount(),
         tidbitRepository.getSavedTidbitsCount().onStart { emit(0) },
         appPreferences.isGuestLoggedIn,
@@ -62,7 +62,7 @@ class ProfileViewModel(
         val userName = args[0] as String?
         val queryCount = args[1] as Int
         val notificationPermission = args[2] as Boolean?
-        val purchases = args[3] as List<*>
+        val isPremium = args[3] as Boolean
         val savedPicksCount = args[4] as Int
         val savedTidbitsCount = args[5] as Int
         val isGuestLoggedIn = args[6] as Boolean?
@@ -72,7 +72,7 @@ class ProfileViewModel(
             userName = userName.orEmpty(),
             queryCount = queryCount,
             isNotificationsEnabled = notificationPermission ?: false,
-            isPremiumUser = purchases.isNotEmpty(),
+            isPremiumUser = isPremium,
             savedPicksCount = savedPicksCount,
             savedTidbitsCount = savedTidbitsCount,
             isGuestSession = isGuestLoggedIn == true

@@ -10,6 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import org.koin.core.annotation.Singleton
 
@@ -34,20 +35,15 @@ class AndroidNotificationPermissionController : NotificationPermissionController
         }
 
         LaunchedEffect(shouldRequest) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                when {
-                    ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.POST_NOTIFICATIONS
-                    ) == PackageManager.PERMISSION_GRANTED -> {
-                        currentOnGrant()
-                    }
-                    else -> {
-                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    }
-                }
-            } else {
-                currentOnGrant()
+            val canRequestPermission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            when {
+                canRequestPermission -> notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                NotificationManagerCompat.from(context).areNotificationsEnabled() -> currentOnGrant()
+                else -> currentOnDeny()
             }
         }
     }

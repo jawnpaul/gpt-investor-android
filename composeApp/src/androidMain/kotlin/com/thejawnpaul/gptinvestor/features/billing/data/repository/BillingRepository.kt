@@ -20,12 +20,17 @@ import com.thejawnpaul.gptinvestor.features.billing.data.remote.VerifyPurchaseRe
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingPurchase
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult as DomainBillingResult
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
+import com.thejawnpaul.gptinvestor.features.settings.domain.SettingsRepository
+import com.thejawnpaul.gptinvestor.remote.BearerTokenManager
 import com.thejawnpaul.gptinvestor.remote.TokenStorage
 import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -40,6 +45,8 @@ class BillingRepository(
     private val apiService: KtorApiService,
     private val tokenStorage: TokenStorage,
     private val premiumPurchaseTracker: PremiumPurchaseTracker,
+    private val settingsRepository: SettingsRepository,
+    @Provided private val bearerTokenManager: BearerTokenManager,
     @Provided private val scope: CoroutineScope
 ) : IBillingRepository,
     PurchasesUpdatedListener {
@@ -55,6 +62,9 @@ class BillingRepository(
 
     private val purchasesFlow = MutableStateFlow<List<BillingPurchase>>(emptyList())
 
+    private val _purchaseVerified = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    override val purchaseVerified: SharedFlow<Unit> = _purchaseVerified.asSharedFlow()
+
     override fun onPurchasesUpdated(billingResult: BillingResult, purchases: List<Purchase>?) {
         when (billingResult.responseCode) {
             BillingClient.BillingResponseCode.OK -> {
@@ -65,6 +75,8 @@ class BillingRepository(
                         val syncResult = syncPurchaseToBackend(domainPurchase)
                         if (syncResult.isSuccess) {
                             refreshAccessTokenAfterPurchaseSync()
+                            settingsRepository.getUserSettings()
+                            _purchaseVerified.tryEmit(Unit)
                         }
                         refreshPurchases()
                     }
@@ -278,6 +290,7 @@ class BillingRepository(
         val newAccessToken = refreshResponse.body?.accessToken
         if (refreshResponse.isSuccessful && !newAccessToken.isNullOrBlank()) {
             tokenStorage.saveAccessToken(newAccessToken)
+            bearerTokenManager.clearCache()
             Timber.d("Access token refreshed after purchase sync")
             Result.success(Unit)
         } else {

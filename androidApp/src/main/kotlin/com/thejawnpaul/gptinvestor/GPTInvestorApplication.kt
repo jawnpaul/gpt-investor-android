@@ -8,6 +8,7 @@ import com.google.firebase.appcheck.appCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.thejawnpaul.gptinvestor.core.di.GPTKoinApp
+import com.thejawnpaul.gptinvestor.features.notification.service.MyFirebaseMessagingService
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.plugin.module.dsl.koinConfiguration
@@ -25,6 +26,7 @@ class GPTInvestorApplication : Application() {
         )
 
         FirebaseApp.initializeApp(this)
+        MyFirebaseMessagingService.createDefaultChannel(this)
 
         if (BuildConfig.DEBUG) {
             Firebase.appCheck.installAppCheckProviderFactory(

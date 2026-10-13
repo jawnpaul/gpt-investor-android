@@ -110,6 +110,8 @@ class HomeViewModel(
             preferences.themePreference.collect { theme ->
                 _uiState.update { it.copy(theme = theme) }
             }
+        }
+        viewModelScope.launch {
             preferences.notificationPermission.collect { permission ->
                 _uiState.update { it.copy(requestForNotificationPermission = permission) }
             }

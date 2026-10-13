@@ -5,9 +5,9 @@ import com.google.common.truth.Truth.assertThat
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
-import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
+import com.thejawnpaul.gptinvestor.features.settings.domain.SettingsRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
 import io.mockk.coEvery
@@ -38,7 +38,8 @@ class ProfileViewModelTest {
     private val conversationRepository: IConversationRepository = mockk()
     private val topPickRepository: ITopPickRepository = mockk()
     private val tidbitRepository: TidbitRepository = mockk()
-    private val billingRepository: IBillingRepository = mockk()
+    private val settingsRepository: SettingsRepository = mockk()
+    private val isPremium = MutableStateFlow(false)
     private val premiumEventBus: PremiumEventBus = mockk(relaxed = true)
     private val analyticsLogger: AnalyticsLogger = mockk(relaxed = true)
 
@@ -50,7 +51,7 @@ class ProfileViewModelTest {
         every { appPreferences.userName } returns flowOf("")
         every { conversationRepository.getQueryCount() } returns flowOf(0)
         every { appPreferences.notificationPermission } returns flowOf(false)
-        every { billingRepository.currentPurchases() } returns flowOf(emptyList())
+        every { settingsRepository.isPremium } returns isPremium
         every { topPickRepository.getSavedTopPicksCount() } returns flowOf(0)
         every { tidbitRepository.getSavedTidbitsCount() } returns flowOf(0)
         every { appPreferences.themePreference } returns flowOf("System")
@@ -68,7 +69,7 @@ class ProfileViewModelTest {
         conversationRepository,
         topPickRepository,
         tidbitRepository,
-        billingRepository,
+        settingsRepository,
         premiumEventBus,
         analyticsLogger
     )
@@ -171,11 +172,13 @@ class ProfileViewModelTest {
     }
 
     @Test
-    fun `state reflects premium status when purchases are present`() = runTest(testDispatcher) {
-        every { billingRepository.currentPurchases() } returns flowOf(listOf(mockk()))
-
+    fun `state follows backend premium tier and updates without restart`() = runTest(testDispatcher) {
         val vm = buildViewModel()
         backgroundScope.launch { vm.state.collect { } }
+        advanceUntilIdle()
+        assertThat(vm.state.value.isPremiumUser).isFalse()
+
+        isPremium.value = true
         advanceUntilIdle()
 
         assertThat(vm.state.value.isPremiumUser).isTrue()

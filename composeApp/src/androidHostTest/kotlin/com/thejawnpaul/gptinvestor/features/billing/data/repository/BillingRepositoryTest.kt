@@ -7,6 +7,8 @@ import com.thejawnpaul.gptinvestor.core.api.KtorResponse
 import com.thejawnpaul.gptinvestor.features.billing.data.PremiumPurchaseTracker
 import com.thejawnpaul.gptinvestor.features.billing.data.remote.VerifyPurchaseResponse
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingPurchase
+import com.thejawnpaul.gptinvestor.features.settings.domain.SettingsRepository
+import com.thejawnpaul.gptinvestor.remote.BearerTokenManager
 import com.thejawnpaul.gptinvestor.remote.TokenStorage
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -25,6 +27,8 @@ class BillingRepositoryTest {
         apiService = apiService,
         tokenStorage = mockk<TokenStorage>(relaxed = true),
         premiumPurchaseTracker = tracker,
+        settingsRepository = mockk<SettingsRepository>(relaxed = true),
+        bearerTokenManager = mockk<BearerTokenManager>(relaxed = true),
         scope = TestScope()
     )
     private val purchase = BillingPurchase(purchaseToken = "token", productId = "premium_monthly", orderId = "order")

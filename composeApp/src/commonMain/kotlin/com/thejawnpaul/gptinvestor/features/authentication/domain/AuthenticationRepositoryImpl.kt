@@ -88,6 +88,7 @@ class AuthenticationRepositoryImpl(
         gptInvestorPreferences.clearAccessToken()
         gptInvestorPreferences.clearRefreshToken()
         gptInvestorPreferences.clearIsGuestLoggedIn()
+        gptInvestorPreferences.setIsTokenSynced(false)
         analyticsLogger.resetUser(eventName = EVENT_LOG_OUT)
         signOutPlatform()
         Result.success(Unit)
@@ -110,6 +111,7 @@ class AuthenticationRepositoryImpl(
         gptInvestorPreferences.clearIsUserOnModelWaitlist()
         gptInvestorPreferences.clearAccessToken()
         gptInvestorPreferences.clearRefreshToken()
+        gptInvestorPreferences.setIsTokenSynced(false)
         Result.success(Unit)
     } catch (e: Exception) {
         Logger.e(e) { "Delete account failed" }

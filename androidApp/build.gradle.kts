@@ -52,7 +52,7 @@ android {
         applicationId = "com.thejawnpaul.gptinvestor"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 39
+        versionCode = 40
         versionName = "1.2.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

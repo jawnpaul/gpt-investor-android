@@ -8,12 +8,11 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
-import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
-import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
-import com.thejawnpaul.gptinvestor.features.billing.domain.BillingConstants
-import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult
-import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionEvent
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionNotifier
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionReason
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionSource
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
@@ -29,6 +28,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInpu
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.state.ConversationView
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction.OnCopy
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
+import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,10 +45,10 @@ class ConversationViewModel(
     private val getInputPromptUseCase: GetInputPromptUseCase,
     private val feedBackRepository: FeedbackRepository,
     private val modelsRepository: ModelsRepository,
-    private val billingRepository: IBillingRepository,
+    private val premiumEventBus: PremiumEventBus,
     private val appPreferences: AppPreferences,
     @Provided private val analyticsLogger: AnalyticsLogger,
-    private val guestRateLimitNotifier: GuestRateLimitNotifier
+    private val guestSessionNotifier: GuestSessionNotifier
 ) : ViewModel() {
 
     private val conversationViewMutableStateFlow = MutableStateFlow(ConversationView())
@@ -224,6 +224,21 @@ class ConversationViewModel(
                 processAction(ConversationAction.ShowToast("An error occurred"))
             }
 
+            is Failure.GuestSessionExpired -> {
+                guestSessionNotifier.notify(
+                    GuestSessionEvent(reason = GuestSessionReason.Expired, source = GuestSessionSource.Stream)
+                )
+            }
+
+            is Failure.GuestLimitReached -> {
+                val isGuest = conversationViewMutableStateFlow.value.isGuest
+                if (isGuest) {
+                    guestSessionNotifier.notify(
+                        GuestSessionEvent(reason = GuestSessionReason.Limit, source = GuestSessionSource.Stream)
+                    )
+                }
+            }
+
             is Failure.RateLimitExceeded -> {
                 val isGuest = conversationViewMutableStateFlow.value.isGuest
                 analyticsLogger.logEvent(
@@ -232,7 +247,9 @@ class ConversationViewModel(
                 )
                 Logger.e("Rate limit exceeded")
                 if (isGuest) {
-                    guestRateLimitNotifier.notifyRateLimit()
+                    guestSessionNotifier.notify(
+                        GuestSessionEvent(reason = GuestSessionReason.Limit, source = GuestSessionSource.Stream)
+                    )
                 } else {
                     processAction(
                         ConversationAction.ShowToast("Rate limit exceeded. Please try again later.")
@@ -443,20 +460,14 @@ class ConversationViewModel(
         }
     }
 
-    fun launchPurchaseFlow(platformContext: PlatformContext) {
+    fun handleUpgradeClick() {
         viewModelScope.launch {
             if (conversationViewMutableStateFlow.value.isGuest) {
                 appPreferences.setIsGuestLoggedIn(false)
                 processAction(ConversationAction.OnSignOutGuest)
             } else {
-                val result = billingRepository.launchPurchaseFlow(
-                    platformContext = platformContext,
-                    productId = BillingConstants.PRO_SUBSCRIPTION_PRODUCT_ID
-                )
                 handleEvent(ConversationEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
-                if (result is BillingResult.Error) {
-                    processAction(ConversationAction.ShowToast("Billing Error: ${result.message}"))
-                }
+                premiumEventBus.requestPremium(source = "conversation_rate_limit")
             }
         }
     }

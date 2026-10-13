@@ -15,6 +15,10 @@ sealed class GuestScreen(val route: String) {
 
     data object GuestHistoryTab : GuestScreen("guest_history_tab_screen")
 
+    data object GuestWatchlistTab : GuestScreen("guest_watchlist_tab_screen")
+
+    data object GuestProfileTab : GuestScreen("guest_profile_tab_screen")
+
     data object GuestConversation : GuestScreen("guest_conversation_screen?chatInput={chatInput}&title={title}") {
         fun createRoute(chatInput: String, title: String? = null): String {
             val params = mutableListOf<String>()

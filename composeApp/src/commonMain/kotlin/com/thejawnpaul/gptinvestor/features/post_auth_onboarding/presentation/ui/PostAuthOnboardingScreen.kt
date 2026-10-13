@@ -22,13 +22,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -44,6 +40,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.continue_
+import com.thejawnpaul.gptinvestor.core.navigation.BackButton
 import com.thejawnpaul.gptinvestor.features.component.GPTInvestorButton
 import com.thejawnpaul.gptinvestor.features.postauthonboarding.domain.model.InvestingExperience
 import com.thejawnpaul.gptinvestor.features.postauthonboarding.domain.model.InvestingGoal
@@ -220,15 +217,10 @@ private fun StepTwoContent(
             Spacer(modifier = Modifier.height(8.dp))
 
             Box(modifier = Modifier.fillMaxWidth()) {
-                IconButton(
+                BackButton(
                     onClick = onBack,
                     modifier = Modifier.align(Alignment.CenterStart)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null
-                    )
-                }
+                )
                 StepIndicator(
                     currentStep = 1,
                     totalSteps = TOTAL_STEPS,

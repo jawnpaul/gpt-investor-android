@@ -33,6 +33,7 @@ class DataStoreAppPreferences(private val dataStore: DataStore<Preferences>) : A
         private val HAS_COMPLETED_ONBOARDING_KEY = booleanPreferencesKey("has_completed_onboarding_preference")
         private val HAS_COMPLETED_POST_AUTH_ONBOARDING_KEY =
             booleanPreferencesKey("has_completed_post_auth_onboarding_preference")
+        private val HAS_SEEN_BRIEF_SPOTLIGHT_KEY = booleanPreferencesKey("has_seen_brief_spotlight_preference")
     }
 
     override val themePreference: Flow<String?> = dataStore.data.map { preferences ->
@@ -258,6 +259,31 @@ class DataStoreAppPreferences(private val dataStore: DataStore<Preferences>) : A
     override suspend fun setHasCompletedPostAuthOnboarding(completed: Boolean) {
         dataStore.edit { preferences ->
             preferences[HAS_COMPLETED_POST_AUTH_ONBOARDING_KEY] = completed
+        }
+    }
+
+    override val hasBriefSpotlightSeen: Flow<Boolean?> = dataStore.data.map { preferences ->
+        preferences[HAS_SEEN_BRIEF_SPOTLIGHT_KEY]
+    }
+
+    override suspend fun setHasBriefSpotlightSeen(seen: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[HAS_SEEN_BRIEF_SPOTLIGHT_KEY] = seen
+        }
+    }
+
+    override suspend fun clearSessionData() {
+        dataStore.edit { preferences ->
+            preferences.remove(USER_ID_KEY)
+            preferences.remove(IS_USER_LOGGED_IN_KEY)
+            preferences.remove(THEME_KEY)
+            preferences.remove(IS_USER_ON_MODEL_WAITLIST_KEY)
+            preferences.remove(ACCESS_TOKEN_KEY)
+            preferences.remove(REFRESH_TOKEN_KEY)
+            preferences.remove(IS_GUEST_LOGGED_IN_KEY)
+            preferences.remove(USER_NAME_KEY)
+            preferences.remove(IS_FIRST_INSTALL_KEY)
+            preferences.remove(HAS_COMPLETED_ONBOARDING_KEY)
         }
     }
 }

@@ -5,6 +5,7 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.api.KtorResponse
 import com.thejawnpaul.gptinvestor.core.platform.AppConfig
+import com.thejawnpaul.gptinvestor.core.platform.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginResponse
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.User
@@ -18,6 +19,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.justRun
 import io.mockk.verify
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -45,6 +47,9 @@ class AuthenticationRepositoryImplTest {
     @MockK
     lateinit var appConfig: AppConfig
 
+    @MockK
+    lateinit var googleSignInProvider: GoogleSignInProvider
+
     private lateinit var repository: AuthenticationRepositoryImpl
 
     private val loginResponse = LoginResponse(
@@ -64,7 +69,8 @@ class AuthenticationRepositoryImplTest {
             apiService = apiService,
             tokenStorage = tokenStorage,
             bearerTokenManager = bearerTokenManager,
-            appConfig = appConfig
+            appConfig = appConfig,
+            googleSignInProvider = googleSignInProvider
         )
     }
 
@@ -83,6 +89,7 @@ class AuthenticationRepositoryImplTest {
         justRun { tokenStorage.saveRefreshToken(any()) }
         justRun { bearerTokenManager.clearCache() }
         coJustRun { gptInvestorPreferences.clearIsGuestLoggedIn() }
+        every { gptInvestorPreferences.isGuestLoggedIn } returns flowOf(false)
         justRun { analyticsLogger.identifyUser(any(), any()) }
     }
 
@@ -138,6 +145,7 @@ class AuthenticationRepositoryImplTest {
         justRun { tokenStorage.saveRefreshToken(any()) }
         every { bearerTokenManager.clearCache() } answers { callOrder.add("clearCache") }
         coEvery { gptInvestorPreferences.clearIsGuestLoggedIn() } coAnswers { callOrder.add("clearGuest") }
+        every { gptInvestorPreferences.isGuestLoggedIn } returns flowOf(false)
         justRun { analyticsLogger.identifyUser(any(), any()) }
 
         repository.loginWithEmailAndPassword("user@test.com", "password")

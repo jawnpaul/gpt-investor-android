@@ -1,9 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.ui
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
@@ -19,52 +16,37 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.ic_arrow_down
-import com.thejawnpaul.gptinvestor.ic_sun
-import org.jetbrains.compose.resources.vectorResource
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun ThemeDropdown(
-    selectedOption: String,
-    options: List<String>,
-    onClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    selectedOption: StringResource,
+    options: List<StringResource>,
+    onClick: (StringResource) -> Unit,
+    modifier: Modifier = Modifier,
+    expanded: Boolean = false,
+    onExpandedChange: (Boolean) -> Unit = {}
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var internalExpanded by remember { mutableStateOf(false) }
+    val isExpanded = if (expanded) expanded else internalExpanded
+
     Box(
         modifier = modifier
             .padding(end = 0.dp),
         contentAlignment = Alignment.Center
     ) {
-        Row(
-            modifier = Modifier
-                .padding(end = 0.dp)
-                .clickable(indication = null, interactionSource = null, onClick = {
-                    expanded = !expanded
-                }),
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_sun),
-                contentDescription = null
-            )
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_arrow_down),
-                contentDescription = null
-            )
-        }
-
         DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
+            expanded = isExpanded,
+            onDismissRequest = {
+                onExpandedChange(false)
+            }
         ) {
             options.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(text = option) },
+                    text = { Text(text = stringResource(option)) },
                     onClick = {
-                        expanded = false
+                        onExpandedChange(false)
                         onClick(option)
                     },
                     leadingIcon = {

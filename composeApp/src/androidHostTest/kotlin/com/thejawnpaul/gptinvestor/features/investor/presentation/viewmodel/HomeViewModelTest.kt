@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.datetime.TimeZone
 import org.junit.Test
 
 class HomeViewModelTest {
@@ -33,5 +34,28 @@ class HomeViewModelTest {
     @Test
     fun `should handle leading and trailing spaces`() {
         assertThat(extractFirstName("  John Doe  ")).isEqualTo("John")
+    }
+
+    @Test
+    fun `formats next digest time in the user's time zone`() {
+        val berlin = TimeZone.of("Europe/Berlin")
+
+        assertThat(formatNextDigestTime("2026-10-11T00:00:00+00:00", berlin)).isEqualTo("2 AM")
+        assertThat(formatNextDigestTime("2026-10-11T06:00:00+00:00", berlin)).isEqualTo("8 AM")
+        assertThat(formatNextDigestTime("2026-10-11T12:00:00+00:00", berlin)).isEqualTo("2 PM")
+    }
+
+    @Test
+    fun `formats midnight, noon and non-zero minutes`() {
+        assertThat(formatNextDigestTime("2026-10-11T00:00:00+00:00", TimeZone.UTC)).isEqualTo("12 AM")
+        assertThat(formatNextDigestTime("2026-10-11T12:00:00+00:00", TimeZone.UTC)).isEqualTo("12 PM")
+        assertThat(formatNextDigestTime("2026-10-11T08:30:00+00:00", TimeZone.of("Asia/Kolkata"))).isEqualTo("2 PM")
+        assertThat(formatNextDigestTime("2026-10-11T08:00:00+00:00", TimeZone.of("Asia/Kolkata"))).isEqualTo("1:30 PM")
+    }
+
+    @Test
+    fun `missing or malformed next digest time falls back to null`() {
+        assertThat(formatNextDigestTime(null, TimeZone.UTC)).isNull()
+        assertThat(formatNextDigestTime("not a date", TimeZone.UTC)).isNull()
     }
 }

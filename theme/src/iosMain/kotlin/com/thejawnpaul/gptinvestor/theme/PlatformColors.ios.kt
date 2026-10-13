@@ -10,6 +10,7 @@ import platform.UIKit.UIApplication
 import platform.UIKit.UIColor
 import platform.UIKit.UIStatusBarStyleDarkContent
 import platform.UIKit.UIStatusBarStyleLightContent
+import platform.UIKit.UIUserInterfaceStyle
 import platform.UIKit.UIView
 import platform.UIKit.UIWindow
 import platform.UIKit.setStatusBarStyle
@@ -61,6 +62,15 @@ internal actual fun SetPlatformColors(
             if (useDarkTheme) UIStatusBarStyleLightContent else UIStatusBarStyleDarkContent,
             animated = true
         )
+        UIApplication.sharedApplication.windows
+            .mapNotNull { it as? UIWindow }
+            .forEach {
+                it.overrideUserInterfaceStyle = if (useDarkTheme) {
+                    UIUserInterfaceStyle.UIUserInterfaceStyleDark
+                } else {
+                    UIUserInterfaceStyle.UIUserInterfaceStyleLight
+                }
+            }
     }
 }
 

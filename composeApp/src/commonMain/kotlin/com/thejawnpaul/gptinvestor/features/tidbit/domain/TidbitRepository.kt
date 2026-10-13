@@ -16,6 +16,7 @@ import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitLikeRequest
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.model.Tidbit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
 
@@ -37,6 +38,8 @@ interface TidbitRepository {
     fun getNewTidbitsPaged(): Flow<PagingData<Tidbit>>
 
     fun getBookmarkedTidbitsPaged(): Flow<PagingData<Tidbit>>
+
+    fun getSavedTidbitsCount(): Flow<Int>
 }
 
 @Singleton(binds = [TidbitRepository::class])
@@ -238,4 +241,17 @@ class TidbitRepositoryImpl(
             TidbitPagingSource(apiService, TidbitType.SAVED)
         }
     ).flow
+
+    override fun getSavedTidbitsCount(): Flow<Int> = flow {
+        try {
+            val response = apiService.getSavedTidbits(page = 1, pageSize = 1)
+            if (response.isSuccessful) {
+                emit(response.body?.totalTidbit ?: 0)
+            } else {
+                emit(0)
+            }
+        } catch (e: Exception) {
+            emit(0)
+        }
+    }
 }

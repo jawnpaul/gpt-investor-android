@@ -9,11 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -25,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.back
+import com.thejawnpaul.gptinvestor.core.navigation.BackButton
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryScreenView
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenEvent
 import com.thejawnpaul.gptinvestor.your_gpt_investor_history
@@ -41,14 +37,9 @@ fun HistoryScreen(state: HistoryScreenView, onEvent: (HistoryScreenEvent) -> Uni
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = {
+                BackButton(onClick = {
                     onEvent(HistoryScreenEvent.GoBack)
-                }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = stringResource(Res.string.back)
-                    )
-                }
+                })
 
                 Text(
                     text = stringResource(Res.string.your_gpt_investor_history),

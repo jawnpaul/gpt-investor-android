@@ -20,8 +20,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,8 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.bookmark
+import com.thejawnpaul.gptinvestor.core.navigation.BackButton
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CustomRichText
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.model.TidbitPresentation
@@ -126,12 +124,7 @@ private fun DetailTopAppBar(onBackClick: () -> Unit, modifier: Modifier = Modifi
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onBackClick) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                contentDescription = stringResource(Res.string.back)
-            )
-        }
+        BackButton(onClick = onBackClick)
     }
 }
 

@@ -13,8 +13,9 @@ import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
-import com.thejawnpaul.gptinvestor.core.platform.AndroidPlatformContext
+import com.thejawnpaul.gptinvestor.core.platform.ActivityContextHolder
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
+import com.thejawnpaul.gptinvestor.features.billing.data.PremiumPurchaseTracker
 import com.thejawnpaul.gptinvestor.features.billing.data.remote.VerifyPurchaseRequest
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingPurchase
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult as DomainBillingResult
@@ -38,6 +39,7 @@ class BillingRepository(
     private val context: Context,
     private val apiService: KtorApiService,
     private val tokenStorage: TokenStorage,
+    private val premiumPurchaseTracker: PremiumPurchaseTracker,
     @Provided private val scope: CoroutineScope
 ) : IBillingRepository,
     PurchasesUpdatedListener {
@@ -105,8 +107,12 @@ class BillingRepository(
         })
     }
 
-    override suspend fun launchPurchaseFlow(platformContext: PlatformContext, productId: String): DomainBillingResult {
-        val activity = (platformContext as? AndroidPlatformContext)?.context as? android.app.Activity
+    override suspend fun launchPurchaseFlow(
+        platformContext: PlatformContext,
+        productId: String,
+        trigger: String
+    ): DomainBillingResult {
+        val activity = ActivityContextHolder.get()
             ?: return DomainBillingResult.Error("Billing requires an Android Activity context")
         Timber.d("Launching purchase flow for: $productId")
         return withContext(Dispatchers.Main) {
@@ -154,6 +160,15 @@ class BillingRepository(
             Timber.d("Calling launchBillingFlow")
             val result = billingClient.launchBillingFlow(activity, billingFlowParams)
             Timber.d("launchBillingFlow result: ${result.responseCode}, ${result.debugMessage}")
+            if (result.responseCode == BillingClient.BillingResponseCode.OK) {
+                val price = productDetails.price()
+                premiumPurchaseTracker.onPurchaseFlowLaunched(
+                    trigger = trigger,
+                    productId = productId,
+                    value = price?.first,
+                    currency = price?.second
+                )
+            }
 
             when (result.responseCode) {
                 BillingClient.BillingResponseCode.OK -> DomainBillingResult.Success
@@ -238,6 +253,7 @@ class BillingRepository(
         val isVerificationSuccessful = response.isSuccessful && response.body?.success == true
         if (isVerificationSuccessful) {
             Timber.d("Purchase sync succeeded for productId=${purchase.productId}")
+            premiumPurchaseTracker.onPurchaseVerified(purchase.productId)
             Result.success(Unit)
         } else {
             Timber.e(
@@ -288,6 +304,16 @@ class BillingRepository(
                 cont.resume(Unit)
             }
         }
+    }
+
+    // The last subscription pricing phase is the recurring price, so a free trial isn't reported as 0.
+    private fun ProductDetails.price(): Pair<Double, String>? {
+        val subscriptionPhase = subscriptionOfferDetails?.firstOrNull()?.pricingPhases?.pricingPhaseList?.lastOrNull()
+        if (subscriptionPhase != null) {
+            return subscriptionPhase.priceAmountMicros / 1_000_000.0 to subscriptionPhase.priceCurrencyCode
+        }
+        val oneTimeOffer = oneTimePurchaseOfferDetails ?: return null
+        return oneTimeOffer.priceAmountMicros / 1_000_000.0 to oneTimeOffer.priceCurrencyCode
     }
 
     private fun Purchase.toDomainPurchase() = BillingPurchase(

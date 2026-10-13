@@ -31,4 +31,8 @@ class FirebaseLogger : AnalyticsLogger {
         firebaseAnalytics.resetAnalyticsData()
     }
 
+    override fun setUserProperty(name: String, value: String) {
+        firebaseAnalytics.setUserProperty(name, value)
+    }
+
 }

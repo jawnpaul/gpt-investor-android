@@ -14,10 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,7 +28,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.back
+import com.thejawnpaul.gptinvestor.core.navigation.BackButton
 import com.thejawnpaul.gptinvestor.ic_search
 import com.thejawnpaul.gptinvestor.search_a_stock_to_analyse
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
@@ -61,12 +58,7 @@ fun SearchTopBar(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                    contentDescription = stringResource(Res.string.back)
-                )
-            }
+            BackButton(onClick = onBack)
 
             Surface(
                 modifier = Modifier.fillMaxWidth(),

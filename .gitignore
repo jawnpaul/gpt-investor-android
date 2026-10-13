@@ -17,3 +17,5 @@ Gemfile.lock
 /iosApp/iosApp/GoogleService-*.plist
 *.xcuserdata
 xcuserdata/
+.claude
+

@@ -1,5 +1,13 @@
 package com.thejawnpaul.gptinvestor.features.authentication.presentation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.EaseOutQuart
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -55,6 +63,7 @@ import com.thejawnpaul.gptinvestor.signup_error_password_short
 import com.thejawnpaul.gptinvestor.signup_name_placeholder
 import com.thejawnpaul.gptinvestor.signup_password_placeholder
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.components.GiBanner
@@ -166,7 +175,12 @@ fun SignUpScreen(
                     hidePasswordContentDescription = stringResource(Res.string.hide_password),
                     onFocusLost = { onEvent(SignUpUiEvent.FieldBlurred(SignUpField.Password)) }
                 )
-                if (state.showEmailConflictPrompt) {
+                AnimatedVisibility(
+                    visible = state.showEmailConflictPrompt,
+                    enter = expandVertically(GiMotion.smooth()) +
+                        fadeIn(tween(GiMotion.BASE, delayMillis = GiMotion.INSTANT, easing = EaseOutQuart)),
+                    exit = shrinkVertically(GiMotion.smooth()) + fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing))
+                ) {
                     GiBanner(
                         title = stringResource(Res.string.email_conflict_title),
                         modifier = Modifier.semantics { liveRegion = LiveRegionMode.Assertive },

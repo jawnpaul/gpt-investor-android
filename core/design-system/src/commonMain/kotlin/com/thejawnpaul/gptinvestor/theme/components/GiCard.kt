@@ -26,7 +26,6 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
-// Hairline edge, never a shadow. Tappable cards get a 12% ink press layer with no scale.
 @Composable
 fun GiCard(
     modifier: Modifier = Modifier,

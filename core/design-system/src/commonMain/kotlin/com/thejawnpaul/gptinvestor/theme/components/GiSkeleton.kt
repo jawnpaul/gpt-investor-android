@@ -29,7 +29,6 @@ import com.thejawnpaul.gptinvestor.theme.GiTheme
 private const val SHIMMER_PERIOD_MS = 1400
 private const val SHIMMER_MIN_ALPHA = 0.55f
 
-// Placeholder block in skel; give it a size and the shape of what it stands in for.
 @Composable
 fun GiSkeleton(modifier: Modifier = Modifier, shape: Shape = GiRadius.sm) {
     val transition = rememberInfiniteTransition()

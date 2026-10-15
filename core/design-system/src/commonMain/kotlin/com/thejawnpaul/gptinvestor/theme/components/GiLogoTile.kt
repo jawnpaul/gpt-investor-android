@@ -29,7 +29,6 @@ import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
 // Decorative: the company name always sits next to the tile, so screen readers skip it.
-// Initials show until the logo loads, and stay if it fails or there is no logo.
 @Composable
 fun GiLogoTile(initials: String, brandColor: Color, modifier: Modifier = Modifier, imageUrl: String? = null) {
     var isLogoLoaded by remember(imageUrl) { mutableStateOf(false) }

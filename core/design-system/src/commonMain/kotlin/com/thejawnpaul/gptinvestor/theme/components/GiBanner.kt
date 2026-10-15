@@ -26,7 +26,6 @@ import com.thejawnpaul.gptinvestor.theme.GiTheme
 
 enum class GiBannerTone { Violet, Caution, Error }
 
-// Tinted soft fill, no edge. The action (usually a GiButton S) drops below the copy at large text sizes.
 @Composable
 fun GiBanner(
     title: String,

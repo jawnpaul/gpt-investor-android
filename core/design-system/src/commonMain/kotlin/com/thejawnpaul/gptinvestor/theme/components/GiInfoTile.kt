@@ -15,7 +15,6 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
-// Inner tile for use inside a raised surface: tile fill, no edge.
 @Composable
 fun GiInfoTile(label: String, text: String, modifier: Modifier = Modifier) {
     Column(

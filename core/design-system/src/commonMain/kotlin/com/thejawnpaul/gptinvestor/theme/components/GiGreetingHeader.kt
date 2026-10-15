@@ -21,7 +21,6 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
-// Home's top bar: optional date line over the greeting, avatar on the right linking to Profile.
 @Composable
 fun GiGreetingHeader(
     greeting: String,

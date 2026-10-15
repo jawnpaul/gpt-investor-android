@@ -53,7 +53,6 @@ fun GiBottomNav(modifier: Modifier = Modifier, content: @Composable RowScope.() 
     )
 }
 
-// At large text sizes the label hides and becomes the item's accessibility label instead.
 @Composable
 fun RowScope.GiBottomNavItem(
     label: String,

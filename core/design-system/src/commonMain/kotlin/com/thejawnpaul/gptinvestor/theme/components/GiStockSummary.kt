@@ -25,7 +25,6 @@ data class GiStock(
     val imageUrl: String? = null
 )
 
-// Logo tile, title over subtitle, delta pill. The delta pill never truncates; the text block does.
 @Composable
 fun GiStockSummary(stock: GiStock, modifier: Modifier = Modifier) {
     Row(

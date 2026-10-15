@@ -18,7 +18,6 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
-// At large text sizes the button drops below the copy instead of squeezing it.
 @Composable
 fun GiPremiumBanner(
     title: String,

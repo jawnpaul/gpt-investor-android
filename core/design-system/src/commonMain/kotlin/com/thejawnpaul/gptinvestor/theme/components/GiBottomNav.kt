@@ -85,12 +85,11 @@ fun RowScope.GiBottomNavItem(
             tint = color
         )
         if (showLabel) {
-            Text(
+            GiText(
                 text = label,
-                style = GiTheme.type.navLabel.copy(
-                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium
-                ),
+                style = GiTextStyle.NavLabel,
                 color = color,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
                 maxLines = 1
             )
         }

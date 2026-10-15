@@ -34,7 +34,7 @@ fun GiEyebrow(text: String, modifier: Modifier = Modifier, icon: ImageVector? = 
                 tint = GiTheme.colors.muted
             )
         }
-        Text(text = text, style = GiTheme.type.eyebrow, color = GiTheme.colors.muted)
+        GiText(text = text, style = GiTextStyle.Eyebrow)
     }
 }
 
@@ -53,16 +53,15 @@ fun GiSectionHeader(
             GiEyebrow(text = eyebrow, icon = eyebrowIcon)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
-            Text(
+            GiText(
                 text = title,
                 modifier = Modifier.weight(1f).alignByBaseline(),
-                style = GiTheme.type.sectionTitle,
-                color = GiTheme.colors.ink,
+                style = GiTextStyle.SectionTitle,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             if (trailingText != null) {
-                Text(
+                GiText(
                     text = trailingText,
                     modifier = Modifier
                         .alignByBaseline()
@@ -73,8 +72,7 @@ fun GiSectionHeader(
                                 Modifier
                             }
                         ),
-                    style = if (onTrailingClick != null) GiTheme.type.link else GiTheme.type.meta,
-                    color = if (onTrailingClick != null) GiTheme.colors.violet else GiTheme.colors.muted,
+                    style = if (onTrailingClick != null) GiTextStyle.Link else GiTextStyle.Meta,
                     maxLines = 1
                 )
             }

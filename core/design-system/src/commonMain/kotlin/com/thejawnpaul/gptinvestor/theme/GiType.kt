@@ -21,6 +21,7 @@ data class GiType(
     val companyName: TextStyle,
     val sectionTitle: TextStyle,
     val body: TextStyle,
+    val bodySmall: TextStyle,
     val label: TextStyle,
     val button: TextStyle,
     val link: TextStyle,
@@ -28,6 +29,7 @@ data class GiType(
     val eyebrow: TextStyle,
     val delta: TextStyle,
     val tag: TextStyle,
+    val caption: TextStyle,
     val navLabel: TextStyle,
 )
 
@@ -69,6 +71,7 @@ fun rememberGiType(): GiType {
             companyName = displayStyle(18, 24),
             sectionTitle = sansStyle(16, 24, FontWeight.SemiBold).copy(letterSpacing = (-0.01).em),
             body = sansStyle(15, 24, FontWeight.Normal),
+            bodySmall = sansStyle(14, 20, FontWeight.Normal),
             label = sansStyle(15, 22, FontWeight.SemiBold),
             button = sansStyle(16, 24, FontWeight.SemiBold),
             link = sansStyle(14, 20, FontWeight.SemiBold),
@@ -76,6 +79,7 @@ fun rememberGiType(): GiType {
             eyebrow = sansStyle(13, 16, FontWeight.Medium),
             delta = sansStyle(13, 20, FontWeight.Medium).copy(fontFeatureSettings = "tnum"),
             tag = sansStyle(12, 16, FontWeight.SemiBold),
+            caption = sansStyle(12, 16, FontWeight.Normal),
             navLabel = sansStyle(12, 16, FontWeight.Medium),
         )
     }

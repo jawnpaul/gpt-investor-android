@@ -66,8 +66,8 @@ fun GiCard(
 private fun GiCardPreview() {
     GiPreviewSurface {
         GiCard(onClick = {}) {
-            Text(text = "Card title", style = GiTheme.type.label, color = GiTheme.colors.ink)
-            Text(text = "Body text inside a raised card.", style = GiTheme.type.body, color = GiTheme.colors.body)
+            GiText(text = "Card title", style = GiTextStyle.Label)
+            GiText(text = "Body text inside a raised card.", style = GiTextStyle.Body)
         }
     }
 }

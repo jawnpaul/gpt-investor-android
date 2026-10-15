@@ -35,12 +35,8 @@ fun GiPremiumBanner(
     val copy = @Composable { copyModifier: Modifier ->
         Column(modifier = copyModifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x1)) {
             GiProTag()
-            Text(text = title, style = GiTheme.type.link, color = GiTheme.colors.ink)
-            Text(
-                text = subtitle,
-                style = GiTheme.type.tag.copy(fontWeight = FontWeight.Normal),
-                color = GiTheme.colors.body
-            )
+            GiText(text = title, style = GiTextStyle.Link, color = GiTheme.colors.ink)
+            GiText(text = subtitle, style = GiTextStyle.Caption)
         }
     }
     val action = @Composable {

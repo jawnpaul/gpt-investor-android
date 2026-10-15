@@ -37,7 +37,7 @@ fun GiProTag(modifier: Modifier = Modifier) {
             modifier = Modifier.size(14.dp),
             tint = GiTheme.colors.violet
         )
-        Text(text = "PRO", style = GiTheme.type.tag, color = GiTheme.colors.violet, maxLines = 1)
+        GiText(text = "PRO", style = GiTextStyle.Tag, color = GiTheme.colors.violet, maxLines = 1)
     }
 }
 

@@ -26,7 +26,7 @@ fun GiInfoTile(label: String, text: String, modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(GiSpace.x1)
     ) {
         GiEyebrow(text = label)
-        Text(text = text, style = GiTheme.type.label, color = GiTheme.colors.ink)
+        GiText(text = text, style = GiTextStyle.Label)
     }
 }
 

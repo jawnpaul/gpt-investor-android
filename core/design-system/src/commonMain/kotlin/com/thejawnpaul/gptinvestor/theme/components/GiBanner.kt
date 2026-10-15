@@ -59,13 +59,9 @@ fun GiBanner(
                 Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = accent)
             }
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(text = title, style = GiTheme.type.link, color = colors.ink)
+                GiText(text = title, style = GiTextStyle.Link, color = colors.ink)
                 if (subtitle != null) {
-                    Text(
-                        text = subtitle,
-                        style = GiTheme.type.tag.copy(fontWeight = FontWeight.Normal),
-                        color = colors.body
-                    )
+                    GiText(text = subtitle, style = GiTextStyle.Caption)
                 }
             }
         }

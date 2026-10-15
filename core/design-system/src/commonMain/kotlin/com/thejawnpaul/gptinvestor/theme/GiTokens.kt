@@ -31,6 +31,10 @@ object GiSpace {
     val sectionGap = 24.dp
     val titleToContent = 12.dp
     val navHeight = 84.dp
+    val settingsRow = 52.dp
+    val stockRow = 64.dp
+    val safeArea = 34.dp
+    val touchTarget = 44.dp
 }
 
 object GiEdge {
@@ -44,7 +48,11 @@ object GiEdge {
 
 // Cards never get a shadow: only the floating Ask composer (lift) and overlays.
 object GiElevation {
-    val lift = Shadow(radius = 16.dp, color = Color(0x140F121B), offset = DpOffset(0.dp, 4.dp))
+    fun lift(isDark: Boolean) = Shadow(
+        radius = 16.dp,
+        color = if (isDark) Color(0x3D000000) else Color(0x140F121B),
+        offset = DpOffset(0.dp, 4.dp),
+    )
 
     fun overlay(isDark: Boolean) = Shadow(
         radius = 32.dp,

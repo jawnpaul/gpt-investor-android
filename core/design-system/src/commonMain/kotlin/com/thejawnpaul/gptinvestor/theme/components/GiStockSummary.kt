@@ -34,17 +34,15 @@ fun GiStockSummary(stock: GiStock, modifier: Modifier = Modifier) {
     ) {
         GiLogoTile(initials = stock.initials, brandColor = stock.brandColor, imageUrl = stock.imageUrl)
         Column(modifier = Modifier.weight(1f)) {
-            Text(
+            GiText(
                 text = stock.title,
-                style = GiTheme.type.label,
-                color = GiTheme.colors.ink,
+                style = GiTextStyle.Label,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Text(
+            GiText(
                 text = stock.subtitle,
-                style = GiTheme.type.meta,
-                color = GiTheme.colors.muted,
+                style = GiTextStyle.Meta,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

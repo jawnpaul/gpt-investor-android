@@ -19,27 +19,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 
 private const val SHIMMER_PERIOD_MS = 1400
 private const val SHIMMER_MIN_ALPHA = 0.55f
 
 @Composable
 fun GiSkeleton(modifier: Modifier = Modifier, shape: Shape = GiRadius.sm) {
-    val transition = rememberInfiniteTransition()
-    val alpha by transition.animateFloat(
-        initialValue = 1f,
-        targetValue = SHIMMER_MIN_ALPHA,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = SHIMMER_PERIOD_MS / 2, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
+    val alpha = if (isReducedMotionEnabled()) 1f else shimmerAlpha()
     Box(
         modifier = modifier
             .alpha(alpha)
@@ -49,10 +43,24 @@ fun GiSkeleton(modifier: Modifier = Modifier, shape: Shape = GiRadius.sm) {
 }
 
 @Composable
-fun GiSpinner(modifier: Modifier = Modifier) {
+private fun shimmerAlpha(): Float {
+    val transition = rememberInfiniteTransition()
+    val alpha by transition.animateFloat(
+        initialValue = 1f,
+        targetValue = SHIMMER_MIN_ALPHA,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = SHIMMER_PERIOD_MS / 2, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+    return alpha
+}
+
+@Composable
+fun GiSpinner(modifier: Modifier = Modifier, color: Color = GiTheme.colors.ink) {
     CircularProgressIndicator(
         modifier = modifier.size(18.dp),
-        color = GiTheme.colors.violet,
+        color = color,
         strokeWidth = 2.dp
     )
 }

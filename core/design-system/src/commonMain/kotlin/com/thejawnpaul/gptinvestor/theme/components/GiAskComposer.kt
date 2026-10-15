@@ -51,7 +51,8 @@ fun GiAskComposer(
     onSend: () -> Unit,
     placeholder: String,
     sendContentDescription: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    floating: Boolean = true
 ) {
     val colors = GiTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
@@ -73,7 +74,13 @@ fun GiAskComposer(
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier
-                    .dropShadow(shape = GiRadius.md, shadow = GiElevation.lift)
+                    .then(
+                        if (floating) {
+                            Modifier.dropShadow(shape = GiRadius.md, shadow = GiElevation.lift(colors.isDark))
+                        } else {
+                            Modifier
+                        }
+                    )
                     .heightIn(min = 52.dp)
                     .clip(GiRadius.md)
                     .background(colors.raised)
@@ -90,13 +97,13 @@ fun GiAskComposer(
                     imageVector = GiIcons.mark,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp),
-                    tint = colors.ink
+                    tint = colors.violet
                 )
                 Box(modifier = Modifier.weight(1f)) {
                     if (value.isEmpty()) {
-                        Text(
+                        GiText(
                             text = placeholder,
-                            style = GiTheme.type.body,
+                            style = GiTextStyle.Body,
                             color = colors.muted,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis

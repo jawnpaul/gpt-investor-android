@@ -16,7 +16,7 @@ import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
 @Composable
-fun GiBriefCard(
+fun GiDigestCard(
     stock: GiStock,
     summary: String,
     onClick: () -> Unit,
@@ -37,14 +37,13 @@ fun GiBriefCard(
             ) {
                 GiSentimentPill(sentiment = sentiment, label = sentimentLabel)
                 if (sentimentCaption != null) {
-                    Text(text = sentimentCaption, style = GiTheme.type.meta, color = GiTheme.colors.muted)
+                    GiText(text = sentimentCaption, style = GiTextStyle.Meta)
                 }
             }
         }
-        Text(
+        GiText(
             text = summary,
-            style = GiTheme.type.body,
-            color = GiTheme.colors.body,
+            style = GiTextStyle.Body,
             maxLines = 4,
             overflow = TextOverflow.Ellipsis
         )
@@ -52,11 +51,10 @@ fun GiBriefCard(
             GiInfoTile(label = keyEventLabel, text = keyEvent)
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
+            GiText(
                 text = updatedText.orEmpty(),
                 modifier = Modifier.weight(1f),
-                style = GiTheme.type.meta,
-                color = GiTheme.colors.muted
+                style = GiTextStyle.Meta
             )
             Icon(
                 imageVector = GiIcons.caretRight,
@@ -71,9 +69,9 @@ fun GiBriefCard(
 @PreviewLightDark
 @Preview(name = "200%", fontScale = 2f)
 @Composable
-private fun GiBriefCardPreview() {
+private fun GiDigestCardPreview() {
     GiPreviewSurface {
-        GiBriefCard(
+        GiDigestCard(
             stock = previewStock.copy(initials = "AA", title = "Apple Inc.", subtitle = "AAPL · NASDAQ", percent = 0.1),
             sentiment = GiSentiment.Positive,
             sentimentLabel = "Bullish",

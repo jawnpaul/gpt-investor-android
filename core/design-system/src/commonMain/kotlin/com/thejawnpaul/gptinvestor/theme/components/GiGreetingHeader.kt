@@ -37,12 +37,11 @@ fun GiGreetingHeader(
     ) {
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             if (overline != null) {
-                Text(text = overline, style = GiTheme.type.meta, color = GiTheme.colors.muted)
+                GiText(text = overline, style = GiTextStyle.Meta)
             }
-            Text(
+            GiText(
                 text = greeting,
-                style = GiTheme.type.screenTitle,
-                color = GiTheme.colors.ink,
+                style = GiTextStyle.ScreenTitle,
                 maxLines = if (isLargeText()) 2 else 1,
                 overflow = TextOverflow.Ellipsis
             )

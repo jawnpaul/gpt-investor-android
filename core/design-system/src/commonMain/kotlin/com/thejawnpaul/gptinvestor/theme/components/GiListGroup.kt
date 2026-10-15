@@ -2,6 +2,9 @@ package com.thejawnpaul.gptinvestor.theme.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -12,14 +15,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiEdge
+import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
@@ -47,29 +56,46 @@ fun GiListRow(
     title: String,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
+    leading: (@Composable () -> Unit)? = null,
+    onClick: (() -> Unit)? = null,
+    minHeight: Dp = GiSpace.stockRow,
     trailing: (@Composable () -> Unit)? = null
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 64.dp)
+            .then(
+                if (onClick != null) {
+                    Modifier.clickable(
+                        interactionSource = interactionSource,
+                        indication = null,
+                        role = Role.Button,
+                        onClick = onClick
+                    )
+                } else {
+                    Modifier
+                }
+            )
+            .background(if (isPressed) GiTheme.colors.ink.copy(alpha = GiMotion.PRESSED_ALPHA) else Color.Transparent)
+            .heightIn(min = minHeight)
             .padding(horizontal = GiSpace.x4, vertical = GiSpace.x3),
         horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        leading?.invoke()
         Column(modifier = Modifier.weight(1f)) {
-            Text(
+            GiText(
                 text = title,
-                style = GiTheme.type.label,
-                color = GiTheme.colors.ink,
+                style = GiTextStyle.Label,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             if (subtitle != null) {
-                Text(
+                GiText(
                     text = subtitle,
-                    style = GiTheme.type.meta,
-                    color = GiTheme.colors.muted,
+                    style = GiTextStyle.Meta,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

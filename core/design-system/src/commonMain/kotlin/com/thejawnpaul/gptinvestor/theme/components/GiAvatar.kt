@@ -16,11 +16,13 @@ import androidx.compose.ui.unit.sp
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
+enum class GiAvatarSize { Medium, Large }
+
 @Composable
-fun GiAvatar(initials: String?, modifier: Modifier = Modifier) {
+fun GiAvatar(initials: String?, modifier: Modifier = Modifier, size: GiAvatarSize = GiAvatarSize.Medium) {
     Box(
         modifier = modifier
-            .size(44.dp)
+            .size(if (size == GiAvatarSize.Large) 56.dp else 44.dp)
             .clip(GiRadius.full)
             .background(GiTheme.colors.violetSoft),
         contentAlignment = Alignment.Center
@@ -35,7 +37,11 @@ fun GiAvatar(initials: String?, modifier: Modifier = Modifier) {
         } else {
             Text(
                 text = initials,
-                style = GiTheme.type.companyName.copy(fontSize = 16.sp, lineHeight = 24.sp),
+                style = if (size == GiAvatarSize.Large) {
+                    GiTheme.type.statNumber
+                } else {
+                    GiTheme.type.companyName.copy(fontSize = 16.sp, lineHeight = 24.sp)
+                },
                 color = GiTheme.colors.violet,
                 maxLines = 1
             )

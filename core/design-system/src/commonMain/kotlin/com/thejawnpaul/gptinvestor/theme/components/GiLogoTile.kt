@@ -20,6 +20,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -30,11 +31,17 @@ import com.thejawnpaul.gptinvestor.theme.GiTheme
 
 // Decorative: the company name always sits next to the tile, so screen readers skip it.
 @Composable
-fun GiLogoTile(initials: String, brandColor: Color, modifier: Modifier = Modifier, imageUrl: String? = null) {
+fun GiLogoTile(
+    initials: String,
+    brandColor: Color,
+    modifier: Modifier = Modifier,
+    imageUrl: String? = null,
+    size: Dp = 40.dp
+) {
     var isLogoLoaded by remember(imageUrl) { mutableStateOf(false) }
     Box(
         modifier = modifier
-            .size(40.dp)
+            .size(size)
             .clip(GiRadius.sm)
             .background(brandColor)
             .clearAndSetSemantics { },

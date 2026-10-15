@@ -54,11 +54,11 @@ import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.components.GiBanner
-import com.thejawnpaul.gptinvestor.theme.components.GiBriefCard
 import com.thejawnpaul.gptinvestor.theme.components.GiButton
 import com.thejawnpaul.gptinvestor.theme.components.GiButtonSize
 import com.thejawnpaul.gptinvestor.theme.components.GiButtonVariant
 import com.thejawnpaul.gptinvestor.theme.components.GiCard
+import com.thejawnpaul.gptinvestor.theme.components.GiDigestCard
 import com.thejawnpaul.gptinvestor.theme.components.GiDivider
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
 import com.thejawnpaul.gptinvestor.theme.components.GiListGroup
@@ -68,6 +68,8 @@ import com.thejawnpaul.gptinvestor.theme.components.GiSectionHeader
 import com.thejawnpaul.gptinvestor.theme.components.GiSentiment
 import com.thejawnpaul.gptinvestor.theme.components.GiSkeleton
 import com.thejawnpaul.gptinvestor.theme.components.GiSpinner
+import com.thejawnpaul.gptinvestor.theme.components.GiText
+import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.today_s_digest
 import com.thejawnpaul.gptinvestor.tracking_stocks
 import com.thejawnpaul.gptinvestor.unlock
@@ -147,10 +149,9 @@ fun DailyDigestCard(
 @Composable
 private fun EmptyDigest(view: DailyDigestView, onAddStock: (String) -> Unit, onBrowseAll: () -> Unit) {
     GiCard {
-        Text(
+        GiText(
             text = stringResource(Res.string.you_re_not_tracking_any_companies_yet),
-            style = GiTheme.type.body,
-            color = GiTheme.colors.body
+            style = GiTextStyle.Body
         )
         GiListGroup {
             view.suggestedStocks.forEachIndexed { index, stock ->
@@ -188,7 +189,7 @@ private fun AddStockAction(isAdding: Boolean, isAdded: Boolean, onAdd: () -> Uni
                 modifier = Modifier.size(16.dp),
                 tint = GiTheme.colors.gain
             )
-            Text(text = stringResource(Res.string.done), style = GiTheme.type.link, color = GiTheme.colors.gain)
+            GiText(text = stringResource(Res.string.done), style = GiTextStyle.Link, color = GiTheme.colors.gain)
         }
         else -> GiButton(
             text = stringResource(Res.string.add),
@@ -204,12 +205,11 @@ private fun PendingDigest(view: DailyDigestView, onAddMoreStocks: () -> Unit, on
     val nextDigestLabel = view.nextDigestLabel
     GiCard {
         Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x1)) {
-            Text(
+            GiText(
                 text = stringResource(Res.string.digest_pending_title),
-                style = GiTheme.type.label,
-                color = GiTheme.colors.ink
+                style = GiTextStyle.Label
             )
-            Text(
+            GiText(
                 text = when {
                     nextDigestLabel == null && view.isPremium ->
                         stringResource(Res.string.digest_pending_description_premium)
@@ -217,18 +217,16 @@ private fun PendingDigest(view: DailyDigestView, onAddMoreStocks: () -> Unit, on
                     view.isPremium -> stringResource(Res.string.digest_pending_description_premium_at, nextDigestLabel)
                     else -> stringResource(Res.string.digest_pending_description_at, nextDigestLabel)
                 },
-                style = GiTheme.type.body,
-                color = GiTheme.colors.body
+                style = GiTextStyle.Body
             )
         }
         if (view.trackedTickers.isNotEmpty()) {
             GiDivider()
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
+                GiText(
                     text = stringResource(Res.string.tracking_stocks, formatTickerList(view.trackedTickers)),
                     modifier = Modifier.weight(1f),
-                    style = GiTheme.type.meta,
-                    color = GiTheme.colors.muted,
+                    style = GiTextStyle.Meta,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -283,7 +281,7 @@ private fun ReadyDigest(view: DailyDigestView, onSeeFullDigest: () -> Unit, onUn
 
 @Composable
 private fun BriefStockCard(stock: StockDigestPresentation, updatedLabel: String?, onClick: () -> Unit) {
-    GiBriefCard(
+    GiDigestCard(
         stock = tickerStock(
             ticker = stock.ticker,
             title = stock.name,

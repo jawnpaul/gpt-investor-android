@@ -43,9 +43,9 @@ fun GiDeltaPill(percent: Double, modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         GiDeltaTriangle(up = !isLoss, color = content)
-        Text(
+        GiText(
             text = "${if (isLoss) "−" else "+"}${formatAbsolutePercent(percent)}%",
-            style = GiTheme.type.delta,
+            style = GiTextStyle.Delta,
             color = content,
             maxLines = 1
         )

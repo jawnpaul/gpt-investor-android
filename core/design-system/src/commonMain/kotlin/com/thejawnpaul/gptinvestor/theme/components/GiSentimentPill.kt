@@ -49,7 +49,7 @@ fun GiSentimentPill(sentiment: GiSentiment, label: String, modifier: Modifier = 
                     .background(content)
             )
         }
-        Text(text = label, style = GiTheme.type.tag, color = content, maxLines = 1)
+        GiText(text = label, style = GiTextStyle.Tag, color = content, maxLines = 1)
     }
 }
 

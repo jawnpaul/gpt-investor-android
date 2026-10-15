@@ -154,7 +154,8 @@ private fun HomeScreenContent(
                     avatarInitials = state.firstName?.firstOrNull()?.uppercase(),
                     avatarContentDescription = stringResource(Res.string.profile),
                     onAvatarClick = { onEvent(HomeEvent.GoToProfile) },
-                    modifier = gutter
+                    modifier = gutter,
+                    overline = state.todayLabel
                 )
 
                 if (state.isGuestSession) {

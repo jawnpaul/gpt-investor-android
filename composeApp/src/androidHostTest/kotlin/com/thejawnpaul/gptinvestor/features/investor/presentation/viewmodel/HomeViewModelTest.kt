@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import org.junit.Test
 
@@ -57,5 +58,11 @@ class HomeViewModelTest {
     fun `missing or malformed next digest time falls back to null`() {
         assertThat(formatNextDigestTime(null, TimeZone.UTC)).isNull()
         assertThat(formatNextDigestTime("not a date", TimeZone.UTC)).isNull()
+    }
+
+    @Test
+    fun `formats today as full weekday, day and month`() {
+        assertThat(formatTodayLabel(LocalDate(2026, 10, 14))).isEqualTo("Wednesday, 14 October")
+        assertThat(formatTodayLabel(LocalDate(2026, 1, 4))).isEqualTo("Sunday, 4 January")
     }
 }

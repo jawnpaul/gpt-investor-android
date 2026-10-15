@@ -49,8 +49,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import org.koin.core.annotation.KoinViewModel
 import org.koin.core.annotation.Provided
 
@@ -70,7 +72,12 @@ class HomeViewModel(
     private val billingRepository: IBillingRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(HomeUiState(timePeriod = computeTimePeriod()))
+    private val _uiState = MutableStateFlow(
+        HomeUiState(
+            timePeriod = computeTimePeriod(),
+            todayLabel = formatTodayLabel(Clock.System.todayIn(TimeZone.currentSystemDefault()))
+        )
+    )
     val uiState = combine(
         _uiState.asStateFlow(),
         preferences.userName,
@@ -569,6 +576,26 @@ class HomeViewModel(
 
 enum class TimePeriod { MORNING, AFTERNOON, EVENING }
 
+private val FULL_DAY_NAMES = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+private val FULL_MONTH_NAMES = listOf(
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+)
+
+// "Wednesday, 14 October", shown above the greeting.
+internal fun formatTodayLabel(date: LocalDate): String =
+    "${FULL_DAY_NAMES[date.dayOfWeek.ordinal]}, ${date.day} ${FULL_MONTH_NAMES[date.month.ordinal]}"
+
 internal fun extractFirstName(userName: String?): String? =
     userName?.trim()?.split("\\s+".toRegex())?.firstOrNull()?.takeIf { it.isNotBlank() }
 
@@ -618,6 +645,7 @@ data class HomeUiState(
     val homeTidbitView: HomeTidbitView = HomeTidbitView(),
     val isGuestSession: Boolean = false,
     val timePeriod: TimePeriod = TimePeriod.MORNING,
+    val todayLabel: String? = null,
     val firstName: String? = null,
     val dailyDigestView: DailyDigestView = DailyDigestView(loading = true)
 )

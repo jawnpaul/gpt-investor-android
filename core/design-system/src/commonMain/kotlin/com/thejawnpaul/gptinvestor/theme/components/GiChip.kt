@@ -97,7 +97,7 @@ fun GiChip(
             .background(chipColors.container)
             .then(if (edge != null) Modifier.border(GiEdge.width, edge, GiRadius.xs) else Modifier)
             .then(clickModifier)
-            .background(content.copy(alpha = stateLayerAlpha(interactionSource)))
+            .background(content.copy(alpha = pressedLayerAlpha(interactionSource)))
             .padding(horizontal = if (isLarge) GiSpace.x4 else GiSpace.x3),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically

@@ -68,7 +68,6 @@ object GiMotion {
     const val SLOW = 300
 
     const val PRESSED_SCALE = 0.98f
-    const val HOVER_ALPHA = 0.06f
     const val PRESSED_ALPHA = 0.12f
     const val DISABLED_ALPHA = 0.40f
 

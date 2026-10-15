@@ -119,7 +119,7 @@ private fun GiIconButtonLayout(
         targetValue = if (isPressed) GiMotion.PRESSED_SCALE else 1f,
         animationSpec = GiMotion.snappy()
     )
-    val layerAlpha = stateLayerAlpha(interactionSource)
+    val layerAlpha = pressedLayerAlpha(interactionSource)
     val isGhost = variant == GiIconButtonVariant.Ghost
     Box(
         modifier = Modifier

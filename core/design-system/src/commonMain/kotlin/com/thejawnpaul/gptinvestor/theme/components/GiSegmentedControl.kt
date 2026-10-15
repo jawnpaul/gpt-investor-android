@@ -94,7 +94,7 @@ private fun GiSegment(text: String, selected: Boolean, enabled: Boolean, onClick
                     }
                 }
             )
-            .background(colors.ink.copy(alpha = if (selected) 0f else stateLayerAlpha(interactionSource)))
+            .background(colors.ink.copy(alpha = if (selected) 0f else pressedLayerAlpha(interactionSource)))
             .padding(horizontal = GiSpace.x3),
         contentAlignment = Alignment.Center
     ) {

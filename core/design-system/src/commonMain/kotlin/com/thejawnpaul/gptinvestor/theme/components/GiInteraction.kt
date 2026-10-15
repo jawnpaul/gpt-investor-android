@@ -2,7 +2,6 @@ package com.thejawnpaul.gptinvestor.theme.components
 
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,19 +25,14 @@ object GiHaptics {
     val Reject = HapticFeedbackType.Reject
 }
 
+// Phones have no hover, so pressed is the only state layer.
 @Composable
-internal fun stateLayerAlpha(
+internal fun pressedLayerAlpha(
     interactionSource: InteractionSource,
-    hoverAlpha: Float = GiMotion.HOVER_ALPHA,
     pressedAlpha: Float = GiMotion.PRESSED_ALPHA
 ): Float {
     val isPressed by interactionSource.collectIsPressedAsState()
-    val isHovered by interactionSource.collectIsHoveredAsState()
-    return when {
-        isPressed -> pressedAlpha
-        isHovered -> hoverAlpha
-        else -> 0f
-    }
+    return if (isPressed) pressedAlpha else 0f
 }
 
 // Touch never focuses a clickable on Android, so this only shows for keyboard and switch access.

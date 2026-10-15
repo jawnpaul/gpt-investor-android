@@ -127,7 +127,7 @@ private fun GiTab(text: String, selected: Boolean, onClick: () -> Unit, modifier
                     }
                 }
             )
-            .background(colors.ink.copy(alpha = stateLayerAlpha(interactionSource)))
+            .background(colors.ink.copy(alpha = pressedLayerAlpha(interactionSource)))
             .padding(horizontal = TAB_PADDING),
         contentAlignment = Alignment.Center
     ) {

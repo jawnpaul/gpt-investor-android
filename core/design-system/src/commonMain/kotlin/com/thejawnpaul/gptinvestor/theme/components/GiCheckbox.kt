@@ -123,7 +123,7 @@ internal fun GiSelectionRow(
             .heightIn(min = GiSpace.touchTarget)
             .clip(GiRadius.sm)
             .then(selectionModifier)
-            .background(GiTheme.colors.ink.copy(alpha = stateLayerAlpha(interactionSource)))
+            .background(GiTheme.colors.ink.copy(alpha = pressedLayerAlpha(interactionSource)))
             .padding(horizontal = ROW_BLEED),
         horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
         verticalAlignment = Alignment.CenterVertically

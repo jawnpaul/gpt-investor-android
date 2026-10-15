@@ -55,7 +55,7 @@ fun GiSwitch(
         targetValue = if (checked) TRACK_WIDTH - KNOB_INSET - knobWidth else KNOB_INSET,
         animationSpec = GiMotion.snappy()
     )
-    val layerAlpha = stateLayerAlpha(source, hoverAlpha = TRACK_HOVER_ALPHA, pressedAlpha = TRACK_PRESSED_ALPHA)
+    val layerAlpha = pressedLayerAlpha(source, pressedAlpha = TRACK_PRESSED_ALPHA)
     Box(
         modifier = modifier
             .minimumInteractiveComponentSize()
@@ -99,7 +99,6 @@ private val TRACK_HEIGHT = 28.dp
 private val KNOB_SIZE = 22.dp
 private val PRESSED_KNOB_WIDTH = 26.dp
 private val KNOB_INSET = 3.dp
-private const val TRACK_HOVER_ALPHA = 0.08f
 private const val TRACK_PRESSED_ALPHA = 0.16f
 
 @PreviewLightDark

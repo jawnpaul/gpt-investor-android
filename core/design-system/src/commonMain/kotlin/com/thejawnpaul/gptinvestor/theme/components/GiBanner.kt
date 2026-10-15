@@ -106,6 +106,14 @@ private fun GiBannerPreview() {
             ) {
                 GiButton(text = "Retry", onClick = {}, size = GiButtonSize.Small, variant = GiButtonVariant.Secondary)
             }
+            GiBanner(
+                title = "You're offline",
+                subtitle = "Prices from 07:42",
+                icon = GiIcons.wifiSlash,
+                tone = GiBannerTone.Caution
+            ) {
+                GiButton(text = "Retry", onClick = {}, size = GiButtonSize.Small, variant = GiButtonVariant.Caution)
+            }
         }
     }
 }

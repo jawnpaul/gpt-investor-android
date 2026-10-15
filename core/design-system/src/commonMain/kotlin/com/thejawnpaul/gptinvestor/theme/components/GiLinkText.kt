@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
@@ -55,13 +56,19 @@ fun GiLinkText(
         )
     }
     val isError = tone == GiLinkTextTone.Error
+    val linkStyles = TextLinkStyles(
+        style = toneStyle.link,
+        pressedStyle = toneStyle.link.merge(
+            SpanStyle(background = toneStyle.link.color.copy(alpha = GiMotion.PRESSED_ALPHA))
+        )
+    )
     val annotated = buildAnnotatedString {
         append(text)
         links.forEach { link ->
             val start = text.indexOf(link.text)
             if (start >= 0) {
                 addLink(
-                    LinkAnnotation.Clickable(tag = link.text, styles = TextLinkStyles(style = toneStyle.link)) {
+                    LinkAnnotation.Clickable(tag = link.text, styles = linkStyles) {
                         link.onClick()
                     },
                     start = start,

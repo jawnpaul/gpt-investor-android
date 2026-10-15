@@ -1,5 +1,16 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.EaseOutQuart
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -34,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
@@ -84,11 +96,15 @@ fun GiTextField(
         isFocused -> GiFieldEdge(color = colors.violet, width = GiEdge.focusWidth)
         else -> GiFieldEdge(color = colors.control, width = GiEdge.fieldWidth)
     }
-    Column(
-        modifier = modifier.alpha(if (enabled) 1f else GiMotion.DISABLED_ALPHA),
-        verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
-    ) {
-        GiText(text = label, style = GiTextStyle.FieldLabel)
+    val edgeColor by animateColorAsState(edge.color, tween(GiMotion.FAST, easing = EaseOutQuart))
+    val edgeWidth by animateDpAsState(edge.width, tween(GiMotion.FAST, easing = EaseOutQuart))
+    val message = when {
+        errorText != null -> GiFieldMessageContent(text = errorText, isError = true, link = errorLink)
+        helperText != null -> GiFieldMessageContent(text = helperText, isError = false, link = null)
+        else -> null
+    }
+    Column(modifier = modifier.alpha(if (enabled) 1f else GiMotion.DISABLED_ALPHA)) {
+        GiText(text = label, modifier = Modifier.padding(bottom = GiSpace.x2), style = GiTextStyle.FieldLabel)
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
@@ -117,7 +133,7 @@ fun GiTextField(
                         .heightIn(min = 52.dp)
                         .clip(GiRadius.sm)
                         .background(colors.raised)
-                        .border(edge.width, edge.color, GiRadius.sm)
+                        .border(edgeWidth, edgeColor, GiRadius.sm)
                         .padding(start = GiSpace.x4, end = if (isPassword) GiSpace.x1 else GiSpace.x4),
                     horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
                     verticalAlignment = Alignment.CenterVertically
@@ -151,9 +167,18 @@ fun GiTextField(
                 }
             }
         )
-        when {
-            errorText != null -> GiFieldMessage(text = errorText, isError = true, link = errorLink)
-            helperText != null -> GiFieldMessage(text = helperText, isError = false)
+        AnimatedContent(
+            targetState = message,
+            transitionSpec = {
+                fadeIn(tween(GiMotion.BASE, delayMillis = GiMotion.INSTANT, easing = EaseOutQuart)) togetherWith
+                    fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing)) using
+                    SizeTransform(clip = false) { _, _ -> GiMotion.smooth() }
+            },
+            contentKey = { it?.text }
+        ) { content ->
+            if (content != null) {
+                GiFieldMessage(content = content, modifier = Modifier.padding(top = GiSpace.x2))
+            }
         }
     }
 }
@@ -166,28 +191,52 @@ private fun GiPasswordToggle(
     enabled: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val layerAlpha = pressedLayerAlpha(interactionSource)
+    val haptics = LocalHapticFeedback.current
     Box(
         modifier = modifier
             .size(GiSpace.touchTarget)
             .clip(GiRadius.full)
-            .toggleable(value = visible, enabled = enabled, role = Role.Switch, onValueChange = onVisibleChange)
+            .background(GiTheme.colors.ink.copy(alpha = layerAlpha))
+            .toggleable(
+                value = visible,
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = enabled,
+                role = Role.Switch,
+                onValueChange = {
+                    haptics.performHapticFeedback(GiHaptics.Selection)
+                    onVisibleChange(it)
+                }
+            )
             .semantics { if (contentDescription != null) this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            imageVector = if (visible) GiIcons.eyeSlash else GiIcons.eye,
-            contentDescription = null,
-            modifier = Modifier.size(20.dp),
-            tint = GiTheme.colors.muted
-        )
+        AnimatedContent(
+            targetState = visible,
+            transitionSpec = {
+                fadeIn(tween(GiMotion.FAST, easing = EaseOutQuart)) +
+                    scaleIn(GiMotion.snappy(), initialScale = ICON_SWAP_INITIAL_SCALE) togetherWith
+                    fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing))
+            }
+        ) { isVisible ->
+            Icon(
+                imageVector = if (isVisible) GiIcons.eyeSlash else GiIcons.eye,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = GiTheme.colors.muted
+            )
+        }
     }
 }
 
 @Composable
-private fun GiFieldMessage(text: String, isError: Boolean, link: GiLink? = null) {
+private fun GiFieldMessage(content: GiFieldMessageContent, modifier: Modifier = Modifier) {
+    val (text, isError, link) = content
     val color = if (isError) GiTheme.colors.error else GiTheme.colors.muted
     val firstLineHeight = with(LocalDensity.current) { GiTheme.type.bodySmall.lineHeight.toDp() }
-    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.Top) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.Top) {
         if (isError) {
             Box(modifier = Modifier.height(firstLineHeight), contentAlignment = Alignment.Center) {
                 Icon(imageVector = GiIcons.warningCircle, contentDescription = null, modifier = Modifier.size(16.dp), tint = color)
@@ -202,6 +251,10 @@ private fun GiFieldMessage(text: String, isError: Boolean, link: GiLink? = null)
 }
 
 internal data class GiFieldEdge(val color: Color, val width: Dp)
+
+private data class GiFieldMessageContent(val text: String, val isError: Boolean, val link: GiLink?)
+
+private const val ICON_SWAP_INITIAL_SCALE = 0.8f
 
 @PreviewLightDark
 @Preview(name = "200%", fontScale = 2f)

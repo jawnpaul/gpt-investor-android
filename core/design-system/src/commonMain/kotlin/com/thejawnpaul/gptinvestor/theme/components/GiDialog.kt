@@ -36,8 +36,6 @@ import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 
-// Only for actions that can't be undone; reversible ones get an Undo toast. The title is a question, the
-// body spells out what will be lost, and the safe choice comes last.
 @Composable
 fun GiDialog(
     title: String,

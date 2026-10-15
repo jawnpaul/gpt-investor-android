@@ -37,8 +37,6 @@ import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import kotlinx.coroutines.launch
 
-// A focused task over the current screen (explainers, alerts, guest limit). Put the body and one full-width
-// Button L in content; the sheet keeps it above the home indicator and scrolls past 90% of the screen.
 // The close button stays even though dragging works.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

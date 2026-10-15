@@ -30,7 +30,6 @@ import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 
-// Onboarding steps: the current step is a 24-wide violet bar, the rest are 6 dots.
 @Composable
 fun GiStepDots(count: Int, current: Int, modifier: Modifier = Modifier) {
     val spec: AnimationSpec<Dp> = if (isReducedMotionEnabled()) snap() else GiMotion.smooth()
@@ -57,7 +56,6 @@ fun GiStepDots(count: Int, current: Int, modifier: Modifier = Modifier) {
     }
 }
 
-// How far through an article the reader is; progress is 0..1.
 @Composable
 fun GiReadingProgress(progress: Float, modifier: Modifier = Modifier) {
     val clamped = progress.coerceIn(0f, 1f)
@@ -81,7 +79,6 @@ fun GiReadingProgress(progress: Float, modifier: Modifier = Modifier) {
     }
 }
 
-// Drag affordance at the top of bottom sheets; the sheet also has a close button.
 @Composable
 fun GiSheetHandle(modifier: Modifier = Modifier) {
     Box(

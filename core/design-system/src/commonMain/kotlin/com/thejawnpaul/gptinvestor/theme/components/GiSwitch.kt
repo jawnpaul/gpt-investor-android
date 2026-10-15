@@ -33,8 +33,7 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
-// Takes effect at once, no Save button. Pass onCheckedChange = null when the whole settings row is
-// toggleable, so the label is part of the tap target.
+// Pass onCheckedChange = null when the whole settings row is toggleable, so the label is part of the tap target.
 @Composable
 fun GiSwitch(
     checked: Boolean,

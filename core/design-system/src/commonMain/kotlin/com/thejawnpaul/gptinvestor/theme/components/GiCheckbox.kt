@@ -36,7 +36,6 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
-// The whole row is the tap target. Use GiSwitch for settings that apply at once.
 @Composable
 fun GiCheckbox(
     checked: Boolean,
@@ -100,7 +99,7 @@ fun GiCheckbox(
     }
 }
 
-// Shared by checkbox and radio: min 44 tall, bleeds 10 past its bounds so the control lines up with the content edge.
+// Bleeds 10 past its bounds so the control lines up with the content edge.
 @Composable
 internal fun GiSelectionRow(
     label: String?,

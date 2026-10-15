@@ -18,11 +18,9 @@ internal actual fun SetPlatformColors(
         if (view.isInEditMode) return@SideEffect
         val window = (view.context as? Activity)?.window ?: return@SideEffect
 
-        // Set transparent colors
         window.statusBarColor = android.graphics.Color.TRANSPARENT
         window.navigationBarColor = android.graphics.Color.TRANSPARENT
 
-        // Configure appearance
         val windowInsetsController = WindowCompat.getInsetsController(window, view)
         windowInsetsController.isAppearanceLightStatusBars = !useDarkTheme
         windowInsetsController.isAppearanceLightNavigationBars = !useDarkTheme

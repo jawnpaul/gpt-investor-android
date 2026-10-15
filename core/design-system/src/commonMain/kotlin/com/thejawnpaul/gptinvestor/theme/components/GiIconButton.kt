@@ -69,7 +69,6 @@ fun GiIconButton(
     )
 }
 
-// Pass the Fill icon as checkedIcon; checked also turns the icon violet.
 @Composable
 fun GiIconToggleButton(
     checked: Boolean,

@@ -20,8 +20,7 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
-// Say what goes here and give one action; never blame ("You have no…"). The icon tile stands in for
-// the 3D art that comes later.
+// The icon tile stands in for the 3D art that comes later.
 @Composable
 fun GiEmptyState(
     icon: ImageVector,

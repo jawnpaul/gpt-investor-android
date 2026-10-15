@@ -48,7 +48,6 @@ import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 
-// The user's question: a violet-soft bubble on the right, at most 80% wide, tail corner bottom-right.
 @Composable
 fun GiUserMessage(text: String, modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
@@ -65,9 +64,6 @@ fun GiUserMessage(text: String, modifier: Modifier = Modifier) {
     }
 }
 
-// The assistant's answer: no bubble, the mark and name above reading text. While streaming, a violet block
-// cursor follows the text and the actions stay hidden; screen readers hear the answer once it's done.
-// Answers lead with the verdict and end with "Not financial advice."
 @Composable
 fun GiAssistantMessage(
     name: String,
@@ -124,7 +120,6 @@ private fun GiStreamingText(text: String) {
     )
 }
 
-// While the assistant works: the glowing mark and a short status ("Reading the news…").
 @Composable
 fun GiThinkingIndicator(status: String, modifier: Modifier = Modifier) {
     Row(
@@ -166,7 +161,6 @@ private fun GiGlowingMark() {
     }
 }
 
-// An answer that failed part-way: say so, and offer Try again.
 @Composable
 fun GiAnswerError(message: String, retryText: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
     val colors = GiTheme.colors

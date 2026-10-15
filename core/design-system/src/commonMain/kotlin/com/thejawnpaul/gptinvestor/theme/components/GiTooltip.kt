@@ -46,8 +46,6 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
-// An info icon that explains a term on tap (phones have no hover). Tap outside or Back closes it.
-// One sentence; if it needs more, link to a Tidbit.
 @Composable
 fun GiInfoTooltip(text: String, contentDescription: String, modifier: Modifier = Modifier) {
     var isOpen by remember { mutableStateOf(false) }
@@ -123,7 +121,6 @@ private fun GiTooltipCaret(pointsUp: Boolean, modifier: Modifier = Modifier) {
     }
 }
 
-// Centres the bubble on the anchor, keeps it inside the gutter, and flips below when there's no room above.
 private class GiTooltipPositionProvider(
     private val gap: Int,
     private val margin: Int,
@@ -148,7 +145,7 @@ private class GiTooltipPositionProvider(
 private val CARET_WIDTH = 16.dp
 private val CARET_HEIGHT = 8.dp
 
-// Points out something new, once per feature and never stacked. Place it next to what it describes.
+// Doesn't position itself; place it next to what it describes.
 @Composable
 fun GiCoachMark(
     title: String,

@@ -43,12 +43,10 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
-// While an answer streams, Stop replaces Send.
 class GiComposerStop(val contentDescription: String, val onStop: () -> Unit)
 
 // Keeps the line hairline on purpose (not the control edge); turns violet while focused or filled.
 // Pass stop while the assistant is answering: Stop replaces Send and the beam runs around the edge.
-// Grows to 4 lines (2 at large text), then scrolls; the mark and the button stay on the last line.
 @Composable
 fun GiAskComposer(
     value: String,

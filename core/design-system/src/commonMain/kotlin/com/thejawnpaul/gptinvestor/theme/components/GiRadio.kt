@@ -57,7 +57,6 @@ fun GiRadio(
     }
 }
 
-// The 22 circle on its own, for rows that own the tap target and semantics (option cards).
 @Composable
 internal fun GiRadioCircle(selected: Boolean, modifier: Modifier = Modifier) {
     val colors = GiTheme.colors

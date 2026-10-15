@@ -17,8 +17,6 @@ import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
-// Only when nothing on the screen could load. A section that fails gets a banner; a field gets an inline error.
-// Say what happened and what to do; no codes, no blame.
 @Composable
 fun GiErrorState(
     title: String,

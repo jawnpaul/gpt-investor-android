@@ -86,7 +86,6 @@ fun GiTextStyle.textStyle(): TextStyle {
     }
 }
 
-// Paragraphs use body, meta and eyebrows use muted, links use violet, everything else uses ink.
 @Composable
 fun GiTextStyle.defaultColor(): Color {
     val colors = GiTheme.colors

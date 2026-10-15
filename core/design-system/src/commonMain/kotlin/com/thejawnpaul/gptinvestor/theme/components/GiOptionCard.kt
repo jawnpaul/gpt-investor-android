@@ -30,8 +30,7 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
-// A radio choice with more detail (plans, experience level). Put the cards of one group inside
-// Modifier.selectableGroup().
+// Put the cards of one group inside Modifier.selectableGroup().
 @Composable
 fun GiOptionCard(
     title: String,

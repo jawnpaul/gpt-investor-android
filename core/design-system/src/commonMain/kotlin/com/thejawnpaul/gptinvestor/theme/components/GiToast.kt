@@ -61,8 +61,6 @@ class GiToastData internal constructor(
     internal val result: CompletableDeferred<GiToastResult>
 )
 
-// One toast at a time: a new one replaces the old. Show from a coroutine and act on the result (e.g. Undo).
-// Durations stretch to the user's accessibility timeout setting.
 @Stable
 class GiToastState internal constructor(private val accessibilityManager: AccessibilityManager?) {
     var current: GiToastData? by mutableStateOf(null)

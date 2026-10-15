@@ -33,7 +33,7 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
-// Rows stacked in one raised, hairline-edged group; put GiDivider between rows.
+// Put GiDivider between rows.
 @Composable
 fun GiListGroup(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     Column(

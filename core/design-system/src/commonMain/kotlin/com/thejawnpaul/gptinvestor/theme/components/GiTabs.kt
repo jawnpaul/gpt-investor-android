@@ -48,8 +48,6 @@ import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 
-// Sections of one page (Overview / News / Financials). Labels are 1–2 word nouns; more than four scroll.
-// Never more than one tab bar on a screen.
 @Composable
 fun GiTabs(tabs: List<String>, selectedIndex: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
     val colors = GiTheme.colors

@@ -25,16 +25,13 @@ private fun statusBarView(): UIView {
         val keyWindow: UIWindow? = UIApplication.sharedApplication.windows
             .firstOrNull { (it as? UIWindow)?.isKeyWindow() == true } as? UIWindow
 
-        // Get the status bar manager from the window's scene
         val statusBarManager = keyWindow?.windowScene?.statusBarManager
 
-        // Use the exact frame provided by the system
         val statusFrame = statusBarManager?.statusBarFrame ?: CGRectMake(0.0, 0.0, 0.0, 0.0)
 
         statusBarView.tag = 3848245L
         statusBarView.layer.zPosition = 999999.0
 
-        // Apply the system-provided frame
         statusBarView.setFrame(statusFrame)
 
         if (statusBarView.superview == null) {

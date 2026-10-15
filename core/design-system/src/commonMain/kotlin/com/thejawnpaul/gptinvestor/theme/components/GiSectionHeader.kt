@@ -38,7 +38,6 @@ fun GiEyebrow(text: String, modifier: Modifier = Modifier, icon: ImageVector? = 
     }
 }
 
-// trailingText is a violet link when onTrailingClick is set, otherwise muted meta (e.g. a date).
 @Composable
 fun GiSectionHeader(
     title: String,

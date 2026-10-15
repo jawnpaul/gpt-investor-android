@@ -36,8 +36,6 @@ import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 import kotlin.math.hypot
 
-// A short violet streak that travels around the edge, for the Ask composer while the AI is answering (and,
-// per the spec, the one Pro element on a screen). Off with reduced motion.
 // Colour and speed are placeholders until design shares the prototype's border-beam settings.
 @Composable
 fun Modifier.giBeam(active: Boolean, shape: Shape, strength: Float = DEFAULT_STRENGTH): Modifier {

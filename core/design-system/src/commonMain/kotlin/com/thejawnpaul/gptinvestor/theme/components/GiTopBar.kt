@@ -22,9 +22,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
-// Pushed screens: back, a one-line title (ellipsis; screen readers still get it all) and up to three icon
-// buttons or one Button M. Pass title = null on detail screens whose title lives in the hero. Set scrolled
-// once content passes under the bar to draw its hairline.
 @Composable
 fun GiTopBar(
     title: String?,
@@ -67,8 +64,7 @@ fun GiTopBar(
     }
 }
 
-// Tab roots (Watchlist, Discover, Profile): a large Bricolage title, an optional muted subtitle, and actions
-// aligned to the top. Home uses GiGreetingHeader instead.
+// Home uses GiGreetingHeader instead.
 @Composable
 fun GiLargeTopBar(
     title: String,

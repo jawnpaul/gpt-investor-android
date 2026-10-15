@@ -36,8 +36,6 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
-// Filters one list 2–5 ways (All / US / NGX, 1D–5Y) with one-word labels. Sections with different
-// content use GiTabs.
 @Composable
 fun GiSegmentedControl(
     options: List<String>,

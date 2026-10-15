@@ -42,8 +42,6 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
-// Form fields (email, password, names). The label stays visible above the field; validate on blur and on
-// submit, never while typing. The edge uses `control` so the boundary meets 3:1.
 @Composable
 fun GiTextField(
     value: String,

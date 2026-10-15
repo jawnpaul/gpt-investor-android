@@ -93,7 +93,6 @@
     <string name="sources">Джерела</string>
     <string name="top_pick_rationale">Обґрунтування найкращого вибору</string>
     <string name="sign_up">Зареєструватися</string>
-    <string name="already_have_an_account">Вже маєте обліковий запис?</string>
     <string name="don_t_have_an_account">Не маєте облікового запису?</string>
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
     <string name="continue_with_google">Продовжити з Google</string>
@@ -316,5 +315,18 @@
     <string name="subscribe_now">Підписатися зараз</string>
     <string name="premium_billed_info">Щомісячна оплата · Скасування будь-коли</string>
     <string name="premium_ios_coming_soon">Покупки в застосунку незабаром з'являться на iOS</string>
+    <string name="auth_landing_tagline">Зрозумілі огляди будь-якої акції.</string>
+    <string name="auth_legal">Продовжуючи, ви погоджуєтеся з нашими %1$s і %2$s.</string>
+    <string name="terms">Умовами</string>
+    <string name="privacy_policy">Політикою конфіденційності</string>
+    <string name="auth_have_account">Вже маєте обліковий запис? %1$s</string>
+    <string name="signup_name_placeholder">Ваше ім’я</string>
+    <string name="email_placeholder">name@example.com</string>
+    <string name="signup_password_placeholder">Щонайменше 8 символів</string>
+    <string name="signup_error_name">Введіть своє ім’я.</string>
+    <string name="error_email_invalid">Введіть дійсну електронну адресу, наприклад name@example.com.</string>
+    <string name="signup_error_password_short">Використайте щонайменше 8 символів.</string>
+    <string name="show_password">Показати пароль</string>
+    <string name="hide_password">Приховати пароль</string>
 
 </resources>

@@ -93,7 +93,6 @@
     <string name="sources">Sources</string>
     <string name="top_pick_rationale">Top pick rationale</string>
     <string name="sign_up">Sign up</string>
-    <string name="already_have_an_account">Already have an account?</string>
     <string name="don_t_have_an_account">Don't have an account?</string>
     <string name="verify_email_title">Check your email</string>
     <string name="verify_email_body">Please verify your email address before logging in. Check your inbox for a verification link.</string>
@@ -342,4 +341,17 @@
     <string name="subscribe_now">Subscribe Now</string>
     <string name="premium_billed_info">Billed monthly · Cancel anytime</string>
     <string name="premium_ios_coming_soon">In-app purchases coming soon on iOS</string>
+    <string name="auth_landing_tagline">Plain-English briefs on any stock.</string>
+    <string name="auth_legal">By continuing you agree to our %1$s and %2$s.</string>
+    <string name="terms">Terms</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="auth_have_account">Already have an account? %1$s</string>
+    <string name="signup_name_placeholder">Your name</string>
+    <string name="email_placeholder">name@example.com</string>
+    <string name="signup_password_placeholder">At least 8 characters</string>
+    <string name="signup_error_name">Enter your name.</string>
+    <string name="error_email_invalid">Enter a valid email address, like name@example.com.</string>
+    <string name="signup_error_password_short">Use at least 8 characters.</string>
+    <string name="show_password">Show password</string>
+    <string name="hide_password">Hide password</string>
 </resources>

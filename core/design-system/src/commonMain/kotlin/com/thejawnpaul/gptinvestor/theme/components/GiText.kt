@@ -19,6 +19,7 @@ enum class GiTextStyle {
     Hero,
     Display,
     ScreenTitle,
+    PageTitle,
     StatNumber,
     CompanyName,
     SectionTitle,
@@ -67,6 +68,7 @@ fun GiTextStyle.textStyle(): TextStyle {
         GiTextStyle.Hero -> type.hero
         GiTextStyle.Display -> type.display
         GiTextStyle.ScreenTitle -> type.screenTitle
+        GiTextStyle.PageTitle -> type.pageTitle
         GiTextStyle.StatNumber -> type.statNumber
         GiTextStyle.CompanyName -> type.companyName
         GiTextStyle.SectionTitle -> type.sectionTitle

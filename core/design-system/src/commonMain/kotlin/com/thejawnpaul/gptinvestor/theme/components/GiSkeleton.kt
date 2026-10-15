@@ -15,12 +15,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiRadius
@@ -33,19 +33,19 @@ private const val SHIMMER_MIN_ALPHA = 0.55f
 
 @Composable
 fun GiSkeleton(modifier: Modifier = Modifier, shape: Shape = GiRadius.sm) {
-    val alpha = if (isReducedMotionEnabled()) 1f else shimmerAlpha()
+    val alpha = if (isReducedMotionEnabled()) null else shimmerAlpha()
     Box(
         modifier = modifier
-            .alpha(alpha)
+            .graphicsLayer { this.alpha = alpha?.value ?: 1f }
             .clip(shape)
             .background(GiTheme.colors.skel)
     )
 }
 
 @Composable
-private fun shimmerAlpha(): Float {
+private fun shimmerAlpha(): State<Float> {
     val transition = rememberInfiniteTransition()
-    val alpha by transition.animateFloat(
+    return transition.animateFloat(
         initialValue = 1f,
         targetValue = SHIMMER_MIN_ALPHA,
         animationSpec = infiniteRepeatable(
@@ -53,7 +53,6 @@ private fun shimmerAlpha(): Float {
             repeatMode = RepeatMode.Reverse
         )
     )
-    return alpha
 }
 
 @Composable

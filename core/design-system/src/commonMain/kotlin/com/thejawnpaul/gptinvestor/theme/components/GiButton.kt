@@ -25,8 +25,14 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -51,6 +57,8 @@ fun GiButton(
     size: GiButtonSize = GiButtonSize.Large,
     variant: GiButtonVariant = GiButtonVariant.Primary,
     leadingIcon: ImageVector? = null,
+    leadingPainter: Painter? = null,
+    tintLeadingIcon: Boolean = true,
     enabled: Boolean = true,
     loading: Boolean = false
 ) {
@@ -78,6 +86,8 @@ fun GiButton(
     val isTextVariant = variant == GiButtonVariant.Text || variant == GiButtonVariant.TextMuted
     val paddingX = if (isTextVariant) GiSpace.x2 else metrics.horizontalPadding
     val iconSize = if (size == GiButtonSize.Small) 16.dp else 20.dp
+    val iconTint = if (tintLeadingIcon) content else Color.Unspecified
+    val paddingY = if (isLargeText()) GiSpace.x3 else 0.dp
     Box(
         modifier = modifier
             .minimumInteractiveComponentSize()
@@ -104,7 +114,17 @@ fun GiButton(
                 onClick = onClick
             )
             .background(if (isPressed) content.copy(alpha = GiMotion.PRESSED_ALPHA) else Color.Transparent)
-            .padding(horizontal = paddingX),
+            .then(
+                if (loading) {
+                    Modifier.clearAndSetSemantics {
+                        contentDescription = text
+                        progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate
+                    }
+                } else {
+                    Modifier
+                }
+            )
+            .padding(horizontal = paddingX, vertical = paddingY),
         contentAlignment = Alignment.Center
     ) {
         // Stays laid out while loading so the button keeps its width.
@@ -114,7 +134,9 @@ fun GiButton(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (leadingIcon != null) {
-                Icon(imageVector = leadingIcon, contentDescription = null, modifier = Modifier.size(iconSize), tint = content)
+                Icon(imageVector = leadingIcon, contentDescription = null, modifier = Modifier.size(iconSize), tint = iconTint)
+            } else if (leadingPainter != null) {
+                Icon(painter = leadingPainter, contentDescription = null, modifier = Modifier.size(iconSize), tint = iconTint)
             }
             GiText(text = text, style = metrics.textStyle, color = content, textAlign = TextAlign.Center)
         }
@@ -138,6 +160,20 @@ private fun GiButtonPreview() {
             GiButton(text = "Add", onClick = {}, size = GiButtonSize.Medium, variant = GiButtonVariant.Secondary)
             GiButton(text = "Unlock", onClick = {}, size = GiButtonSize.Small)
             GiButton(text = "New chat", onClick = {}, size = GiButtonSize.Medium, leadingIcon = GiIcons.notePencil)
+            GiButton(
+                text = "Sign up with Google",
+                onClick = {},
+                variant = GiButtonVariant.Secondary,
+                leadingPainter = rememberVectorPainter(GiIcons.mark),
+                tintLeadingIcon = false
+            )
+            GiButton(
+                text = "Log in",
+                onClick = {},
+                variant = GiButtonVariant.Secondary,
+                leadingPainter = rememberVectorPainter(GiIcons.mark),
+                loading = true
+            )
             GiButton(text = "Delete account", onClick = {}, variant = GiButtonVariant.Destructive)
             GiButton(text = "Get brief", onClick = {}, size = GiButtonSize.Medium, loading = true)
             GiButton(text = "Get brief", onClick = {}, size = GiButtonSize.Medium, enabled = false)

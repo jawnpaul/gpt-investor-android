@@ -197,7 +197,18 @@ data class SignUpUiState(
     val nameError: Boolean = false,
     val emailError: Boolean = false,
     val passwordError: Boolean = false
-)
+) {
+    val isSignUpEnabled: Boolean
+        get() = name.isNotBlank() && email.isNotBlank() && password.isNotBlank() && isAvailable(AuthMethod.Email)
+
+    val isGoogleEnabled: Boolean
+        get() = isAvailable(AuthMethod.Google)
+
+    val isAppleEnabled: Boolean
+        get() = isAvailable(AuthMethod.Apple)
+
+    private fun isAvailable(method: AuthMethod): Boolean = loadingMethod == null || loadingMethod == method
+}
 
 enum class SignUpField { Name, Email, Password }
 

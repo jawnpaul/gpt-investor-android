@@ -153,4 +153,26 @@ class SignUpViewModelTest {
         advanceUntilIdle()
         assertThat(viewModel.signUpUiState.value.loadingMethod).isNull()
     }
+
+    @Test
+    fun `sign up is enabled only when every field has text`() = runTest {
+        val viewModel = buildViewModel()
+        assertThat(viewModel.signUpUiState.value.isSignUpEnabled).isFalse()
+
+        viewModel.fill(name = "Ada", email = "ada@example.com", password = " ")
+        assertThat(viewModel.signUpUiState.value.isSignUpEnabled).isFalse()
+
+        viewModel.handleEvent(SignUpUiEvent.PasswordChanged("abc"))
+        assertThat(viewModel.signUpUiState.value.isSignUpEnabled).isTrue()
+    }
+
+    @Test
+    fun `while google loads only the google button stays enabled`() = runTest {
+        val state =
+            SignUpUiState(name = "Ada", email = "ada@example.com", password = "abc", loadingMethod = AuthMethod.Google)
+
+        assertThat(state.isGoogleEnabled).isTrue()
+        assertThat(state.isSignUpEnabled).isFalse()
+        assertThat(state.isAppleEnabled).isFalse()
+    }
 }

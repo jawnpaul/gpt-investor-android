@@ -204,7 +204,7 @@ fun SignUpScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = GiSpace.x2),
-                    enabled = loadingMethod == null || loadingMethod == AuthMethod.Email,
+                    enabled = state.isSignUpEnabled,
                     loading = loadingMethod == AuthMethod.Email
                 )
             }
@@ -220,7 +220,7 @@ fun SignUpScreen(
                         modifier = Modifier.fillMaxWidth(),
                         variant = GiButtonVariant.Secondary,
                         leadingPainter = painterResource(Res.drawable.apple_icon),
-                        enabled = loadingMethod == null || loadingMethod == AuthMethod.Apple,
+                        enabled = state.isAppleEnabled,
                         loading = loadingMethod == AuthMethod.Apple
                     )
                 }
@@ -231,7 +231,7 @@ fun SignUpScreen(
                     variant = GiButtonVariant.Secondary,
                     leadingPainter = painterResource(Res.drawable.google_icon),
                     tintLeadingIcon = false,
-                    enabled = loadingMethod == null || loadingMethod == AuthMethod.Google,
+                    enabled = state.isGoogleEnabled,
                     loading = loadingMethod == AuthMethod.Google
                 )
             }

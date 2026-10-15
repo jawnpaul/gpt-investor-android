@@ -25,8 +25,7 @@ import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
-// Put the radios of one group inside Modifier.selectableGroup(). Without a label it is the bare
-// circle, for rows that own the tap target (option cards).
+// Put the radios of one group inside Modifier.selectableGroup().
 @Composable
 fun GiRadio(
     selected: Boolean,
@@ -35,13 +34,8 @@ fun GiRadio(
     label: String? = null,
     enabled: Boolean = true
 ) {
-    val colors = GiTheme.colors
     val haptics = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
-    val ringWidth by animateDpAsState(
-        targetValue = if (selected) 7.dp else 2.dp,
-        animationSpec = GiMotion.snappy()
-    )
     GiSelectionRow(
         label = label,
         enabled = enabled,
@@ -59,15 +53,25 @@ fun GiRadio(
             }
         )
     ) {
-        Box(
-            modifier = Modifier
-                .giFocusRing(interactionSource, GiRadius.full)
-                .size(22.dp)
-                .clip(GiRadius.full)
-                .background(colors.raised)
-                .border(ringWidth, if (selected) colors.violet else colors.control, GiRadius.full)
-        )
+        GiRadioCircle(selected = selected, modifier = Modifier.giFocusRing(interactionSource, GiRadius.full))
     }
+}
+
+// The 22 circle on its own, for rows that own the tap target and semantics (option cards).
+@Composable
+internal fun GiRadioCircle(selected: Boolean, modifier: Modifier = Modifier) {
+    val colors = GiTheme.colors
+    val ringWidth by animateDpAsState(
+        targetValue = if (selected) 7.dp else 2.dp,
+        animationSpec = GiMotion.snappy()
+    )
+    Box(
+        modifier = modifier
+            .size(22.dp)
+            .clip(GiRadius.full)
+            .background(colors.raised)
+            .border(ringWidth, if (selected) colors.violet else colors.control, GiRadius.full)
+    )
 }
 
 @PreviewLightDark

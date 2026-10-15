@@ -43,7 +43,11 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
+// While an answer streams, Stop replaces Send.
+class GiComposerStop(val contentDescription: String, val onStop: () -> Unit)
+
 // Keeps the line hairline on purpose (not the control edge); turns violet while focused or filled.
+// Pass stop while the assistant is answering.
 @Composable
 fun GiAskComposer(
     value: String,
@@ -52,12 +56,13 @@ fun GiAskComposer(
     placeholder: String,
     sendContentDescription: String,
     modifier: Modifier = Modifier,
-    floating: Boolean = true
+    floating: Boolean = true,
+    stop: GiComposerStop? = null
 ) {
     val colors = GiTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val canSend = value.isNotBlank()
+    val canSend = value.isNotBlank() && stop == null
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
@@ -111,22 +116,41 @@ fun GiAskComposer(
                     }
                     innerTextField()
                 }
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .alpha(if (canSend) 1f else GiMotion.DISABLED_ALPHA)
-                        .clip(GiRadius.sm)
-                        .background(colors.primary)
-                        .clickable(enabled = canSend, role = Role.Button, onClick = onSend)
-                        .semantics { contentDescription = sendContentDescription },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = GiIcons.arrowUp,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint = colors.onPrimary
-                    )
+                if (stop != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(GiRadius.sm)
+                            .background(colors.ink)
+                            .clickable(role = Role.Button, onClick = stop.onStop)
+                            .semantics { contentDescription = stop.contentDescription },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = GiIcons.stopFill,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = colors.bg
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .alpha(if (canSend) 1f else GiMotion.DISABLED_ALPHA)
+                            .clip(GiRadius.sm)
+                            .background(colors.primary)
+                            .clickable(enabled = canSend, role = Role.Button, onClick = onSend)
+                            .semantics { contentDescription = sendContentDescription },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = GiIcons.arrowUp,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = colors.onPrimary
+                        )
+                    }
                 }
             }
         }
@@ -152,6 +176,15 @@ private fun GiAskComposerPreview() {
                 onSend = {},
                 placeholder = "Ask me anything about markets…",
                 sendContentDescription = "Send"
+            )
+            GiAskComposer(
+                value = "",
+                onValueChange = {},
+                onSend = {},
+                placeholder = "Ask me anything about markets…",
+                sendContentDescription = "Send",
+                floating = false,
+                stop = GiComposerStop(contentDescription = "Stop answering", onStop = {})
             )
         }
     }

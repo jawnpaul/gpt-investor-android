@@ -9,6 +9,7 @@ import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.utility.extractApiErrorMessage
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.FirebaseLoginRequest
+import com.thejawnpaul.gptinvestor.features.authentication.data.remote.ForgotPasswordRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.User
@@ -142,11 +143,23 @@ class AuthenticationRepositoryImpl(
                 Result.success(loginResponse.message ?: "Login successful")
             } ?: Result.failure(Exception(response.body?.message ?: "Login failed"))
         } else {
-            if (response.code == 403) {
-                Result.failure(EmailNotVerifiedException())
-            } else {
-                Result.failure(Exception(extractApiErrorMessage(response.errorBody, "Login failed")))
+            when (response.code) {
+                403 -> Result.failure(EmailNotVerifiedException())
+                400, 401 -> Result.failure(InvalidCredentialsException())
+                else -> Result.failure(Exception(extractApiErrorMessage(response.errorBody, "Login failed")))
             }
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    override suspend fun requestPasswordReset(email: String): Result<Unit> = try {
+        val response = apiService.requestPasswordReset(ForgotPasswordRequest(email = email))
+        when {
+            response.isSuccessful || response.code == 500 -> Result.success(Unit)
+            response.code == 400 -> Result.failure(InvalidResetEmailException())
+            response.code == 429 -> Result.failure(TooManyResetRequestsException())
+            else -> Result.failure(Exception(extractApiErrorMessage(response.errorBody, "Request failed")))
         }
     } catch (e: Exception) {
         Result.failure(e)

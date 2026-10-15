@@ -338,6 +338,17 @@ object GiIcons {
             ",8-8h24Z"
         )
     }
+
+    val checkBold: ImageVector by lazy {
+        phosphor(
+            "check-bold",
+            "M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"
+        )
+    }
+
+    val minusBold: ImageVector by lazy {
+        phosphor("minus-bold", "M228,128a12,12,0,0,1-12,12H40a12,12,0,0,1,0-24H216A12,12,0,0,1,228,128Z")
+    }
 }
 
 private fun phosphor(name: String, pathData: String): ImageVector = ImageVector.Builder(

@@ -40,7 +40,8 @@ import com.thejawnpaul.gptinvestor.theme.GiTheme
 
 enum class GiButtonSize { Large, Medium, Small }
 
-enum class GiButtonVariant { Primary, Secondary, Destructive, Text, TextMuted }
+// Caution is the outlined Retry inside the offline banner, and nowhere else.
+enum class GiButtonVariant { Primary, Secondary, Destructive, Caution, Text, TextMuted }
 
 @Composable
 fun GiButton(
@@ -64,6 +65,7 @@ fun GiButton(
         GiButtonVariant.Primary -> GiButtonColors(container = colors.primary, content = colors.onPrimary)
         GiButtonVariant.Secondary -> GiButtonColors(container = Color.Transparent, content = colors.ink)
         GiButtonVariant.Destructive -> GiButtonColors(container = colors.error, content = colors.onError)
+        GiButtonVariant.Caution -> GiButtonColors(container = Color.Transparent, content = colors.caution)
         GiButtonVariant.Text -> GiButtonColors(container = Color.Transparent, content = colors.violet)
         GiButtonVariant.TextMuted -> GiButtonColors(container = Color.Transparent, content = colors.muted)
     }
@@ -88,10 +90,10 @@ fun GiButton(
             .clip(GiRadius.full)
             .background(buttonColors.container)
             .then(
-                if (variant == GiButtonVariant.Secondary) {
-                    Modifier.border(GiEdge.width, colors.line, GiRadius.full)
-                } else {
-                    Modifier
+                when (variant) {
+                    GiButtonVariant.Secondary -> Modifier.border(GiEdge.width, colors.line, GiRadius.full)
+                    GiButtonVariant.Caution -> Modifier.border(GiEdge.width, colors.caution, GiRadius.full)
+                    else -> Modifier
                 }
             )
             .clickable(

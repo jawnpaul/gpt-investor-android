@@ -31,6 +31,8 @@ data class GiType(
     val tag: TextStyle,
     val caption: TextStyle,
     val navLabel: TextStyle,
+    val input: TextStyle,
+    val fieldLabel: TextStyle,
 )
 
 val LocalGiType = staticCompositionLocalOf<GiType> { error("GiTheme not provided") }
@@ -81,6 +83,8 @@ fun rememberGiType(): GiType {
             tag = sansStyle(12, 16, FontWeight.SemiBold),
             caption = sansStyle(12, 16, FontWeight.Normal),
             navLabel = sansStyle(12, 16, FontWeight.Medium),
+            input = sansStyle(16, 24, FontWeight.Normal),
+            fieldLabel = sansStyle(13, 18, FontWeight.SemiBold),
         )
     }
 }

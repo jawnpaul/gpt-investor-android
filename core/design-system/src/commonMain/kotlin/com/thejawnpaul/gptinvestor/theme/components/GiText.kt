@@ -32,7 +32,9 @@ enum class GiTextStyle {
     Delta,
     Tag,
     Caption,
-    NavLabel
+    NavLabel,
+    Input,
+    FieldLabel
 }
 
 @Composable
@@ -79,6 +81,8 @@ fun GiTextStyle.textStyle(): TextStyle {
         GiTextStyle.Tag -> type.tag
         GiTextStyle.Caption -> type.caption
         GiTextStyle.NavLabel -> type.navLabel
+        GiTextStyle.Input -> type.input
+        GiTextStyle.FieldLabel -> type.fieldLabel
     }
 }
 

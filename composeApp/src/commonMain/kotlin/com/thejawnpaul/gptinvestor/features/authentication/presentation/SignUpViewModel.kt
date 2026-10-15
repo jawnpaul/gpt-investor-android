@@ -199,7 +199,7 @@ data class SignUpUiState(
     val passwordError: Boolean = false
 ) {
     val isSignUpEnabled: Boolean
-        get() = name.isNotBlank() && email.isNotBlank() && password.isNotBlank() && isAvailable(AuthMethod.Email)
+        get() = SignUpField.entries.none { isInvalid(it) } && isAvailable(AuthMethod.Email)
 
     val isGoogleEnabled: Boolean
         get() = isAvailable(AuthMethod.Google)

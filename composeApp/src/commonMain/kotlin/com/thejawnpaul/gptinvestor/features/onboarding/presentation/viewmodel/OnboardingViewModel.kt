@@ -77,6 +77,10 @@ class OnboardingViewModel(
         _uiState.update { it.copy(currentScreen = it.currentScreen + 1) }
     }
 
+    fun onPreviousScreen() {
+        _uiState.update { it.copy(currentScreen = (it.currentScreen - 1).coerceAtLeast(0)) }
+    }
+
     fun onSkip(screenIndex: Int) {
         analyticsLogger.logEvent(
             eventName = "onboarding-skipped",
@@ -85,7 +89,7 @@ class OnboardingViewModel(
         markCompletedAndNavigateHome()
     }
 
-    fun onStockSelected(ticker: String, companyName: String, source: String) {
+    fun onStockSelected(ticker: String, companyName: String, source: String, logoUrl: String?) {
         analyticsLogger.logEvent(
             eventName = "onboarding-stock-selected",
             params = mapOf("ticker" to ticker, "source" to source)
@@ -94,6 +98,7 @@ class OnboardingViewModel(
             it.copy(
                 selectedTicker = ticker,
                 selectedCompanyName = companyName,
+                selectedLogoUrl = logoUrl,
                 currentScreen = 3,
                 briefView = BriefView.Loading
             )

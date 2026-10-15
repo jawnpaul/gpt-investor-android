@@ -14,6 +14,7 @@ data class OnboardingUiState(
     val currentScreen: Int = 0,
     val selectedTicker: String? = null,
     val selectedCompanyName: String? = null,
+    val selectedLogoUrl: String? = null,
     val briefView: BriefView = BriefView.Loading,
     val searchQuery: String = "",
     val suggestedStocks: List<SuggestedStock> = defaultSuggestedStocks()

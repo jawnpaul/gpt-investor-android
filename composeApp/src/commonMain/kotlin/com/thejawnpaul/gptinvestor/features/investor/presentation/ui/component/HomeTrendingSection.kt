@@ -1,51 +1,46 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.couldn_t_load
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
-import com.thejawnpaul.gptinvestor.features.component.ShimmerBox
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.live_prices_unavailable
+import com.thejawnpaul.gptinvestor.retry
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
-import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import com.thejawnpaul.gptinvestor.theme.GiMotion
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.components.GiBanner
+import com.thejawnpaul.gptinvestor.theme.components.GiBannerTone
+import com.thejawnpaul.gptinvestor.theme.components.GiButton
+import com.thejawnpaul.gptinvestor.theme.components.GiButtonSize
+import com.thejawnpaul.gptinvestor.theme.components.GiButtonVariant
+import com.thejawnpaul.gptinvestor.theme.components.GiCard
+import com.thejawnpaul.gptinvestor.theme.components.GiMoverCard
+import com.thejawnpaul.gptinvestor.theme.components.GiSkeleton
 import org.jetbrains.compose.resources.stringResource
+
+private enum class TrendingDisplay { Loading, Error, Loaded }
 
 @Composable
 fun HomeTrendingSection(
@@ -54,46 +49,57 @@ fun HomeTrendingSection(
     onClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val displayState = when {
-        view.loading -> 0
-        view.showError -> 1
-        else -> 2
+    val display = when {
+        view.loading -> TrendingDisplay.Loading
+        view.showError -> TrendingDisplay.Error
+        else -> TrendingDisplay.Loaded
     }
-
+    val rowPadding = PaddingValues(horizontal = GiSpace.gutter)
     AnimatedContent(
-        targetState = displayState,
-        transitionSpec = { fadeIn(tween(220)) togetherWith fadeOut(tween(150)) },
+        targetState = display,
+        transitionSpec = { fadeIn(tween(GiMotion.BASE)) togetherWith fadeOut(tween(GiMotion.FAST)) },
         label = "TrendingSection",
         modifier = modifier
     ) { state ->
         when (state) {
-            0 -> LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp)
+            TrendingDisplay.Loading -> LazyRow(
+                contentPadding = rowPadding,
+                horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
+                userScrollEnabled = false
             ) {
-                items(3) {
-                    HomeTrendingShimmer()
-                }
+                items(3) { MoverSkeleton() }
             }
-            1 -> HomeErrorCard(
-                message = stringResource(Res.string.live_prices_unavailable),
-                onRetry = onRetry,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            else -> LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            TrendingDisplay.Error -> GiBanner(
+                title = stringResource(Res.string.couldn_t_load),
+                modifier = Modifier.padding(rowPadding),
+                subtitle = stringResource(Res.string.live_prices_unavailable),
+                tone = GiBannerTone.Error
+            ) {
+                GiButton(
+                    text = stringResource(Res.string.retry),
+                    onClick = onRetry,
+                    size = GiButtonSize.Small,
+                    variant = GiButtonVariant.Secondary
+                )
+            }
+            TrendingDisplay.Loaded -> LazyRow(
+                contentPadding = rowPadding,
+                horizontalArrangement = Arrangement.spacedBy(GiSpace.x3)
             ) {
                 items(view.companies, key = { it.tickerSymbol }) { stock ->
-                    HomeTrendingMoverItem(
-                        stock = stock,
-                        onClick = onClick,
+                    GiMoverCard(
+                        stock = tickerStock(
+                            ticker = stock.tickerSymbol,
+                            title = stock.tickerSymbol,
+                            subtitle = stock.companyName,
+                            percent = stock.percentageChange.toDouble(),
+                            imageUrl = stock.imageUrl
+                        ),
+                        onClick = { onClick(stock.tickerSymbol) },
                         modifier = Modifier.animateItem(
-                            fadeInSpec = tween(220),
-                            placementSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                            fadeOutSpec = tween(150)
+                            fadeInSpec = tween(GiMotion.BASE),
+                            placementSpec = GiMotion.smooth(),
+                            fadeOutSpec = tween(GiMotion.FAST)
                         )
                     )
                 }
@@ -103,141 +109,17 @@ fun HomeTrendingSection(
 }
 
 @Composable
-fun HomeTrendingMoverItem(stock: TrendingStockPresentation, onClick: (String) -> Unit, modifier: Modifier = Modifier) {
-    val gptInvestorColors = LocalGPTInvestorColors.current
-    val avatarColor = remember(stock.tickerSymbol) { tickerAvatarColor(stock.tickerSymbol) }
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.97f else 1f,
-        animationSpec = spring(stiffness = Spring.StiffnessMedium),
-        label = "pressScale"
-    )
-
-    Surface(
-        modifier = modifier.graphicsLayer {
-            scaleX = scale
-            scaleY = scale
-        },
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface,
-        interactionSource = interactionSource,
-        onClick = { onClick(stock.tickerSymbol) }
+private fun MoverSkeleton() {
+    GiCard(
+        modifier = Modifier.width(248.dp),
+        contentPadding = PaddingValues(horizontal = GiSpace.x4, vertical = GiSpace.x3)
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Surface(
-                modifier = Modifier.size(36.dp),
-                shape = CircleShape,
-                color = avatarColor
-            ) {
-                if (stock.imageUrl.isNotBlank()) {
-                    AsyncImage(
-                        model = stock.imageUrl,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = stock.tickerSymbol.firstOrNull()?.uppercase() ?: "",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color.White
-                        )
-                    }
-                }
+        Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3), verticalAlignment = Alignment.CenterVertically) {
+            GiSkeleton(modifier = Modifier.size(40.dp))
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
+                GiSkeleton(modifier = Modifier.fillMaxWidth(0.5f).height(14.dp))
+                GiSkeleton(modifier = Modifier.fillMaxWidth(0.8f).height(12.dp))
             }
-
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    text = stock.tickerSymbol,
-                    style = MaterialTheme.typography.labelLarge
-                )
-                Text(
-                    text = stock.companyName,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = gptInvestorColors.textColors.secondary50,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            val isPositive = stock.percentageChange >= 0
-            val changeColor = if (isPositive) {
-                gptInvestorColors.greenColors.defaultGreen
-            } else {
-                gptInvestorColors.redColors.allRed
-            }
-            val changeText = if (isPositive) "+${stock.percentageChange}%" else "${stock.percentageChange}%"
-
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = changeColor.copy(alpha = 0.15f)
-            ) {
-                Text(
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
-                    text = changeText,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = changeColor
-                )
-            }
-        }
-    }
-}
-
-private fun tickerAvatarColor(ticker: String): Color {
-    val colors = listOf(
-        Color(0xFF4CAF50),
-        Color(0xFF2196F3),
-        Color(0xFF9C27B0),
-        Color(0xFFFF9800),
-        Color(0xFFE91E63),
-        Color(0xFF00BCD4),
-        Color(0xFF607D8B)
-    )
-    val index = (ticker.firstOrNull()?.code ?: 0) % colors.size
-    return colors[index]
-}
-
-@Composable
-private fun HomeTrendingShimmer(modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            ShimmerBox(
-                modifier = Modifier.size(36.dp),
-                shape = CircleShape
-            )
-
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                ShimmerBox(
-                    width = 40.dp,
-                    height = 14.dp,
-                    shape = RoundedCornerShape(4.dp)
-                )
-                ShimmerBox(
-                    width = 60.dp,
-                    height = 10.dp,
-                    shape = RoundedCornerShape(4.dp)
-                )
-            }
-
-            ShimmerBox(
-                width = 44.dp,
-                height = 18.dp,
-                shape = RoundedCornerShape(8.dp)
-            )
         }
     }
 }
@@ -245,38 +127,17 @@ private fun HomeTrendingShimmer(modifier: Modifier = Modifier) {
 @PreviewLightDark
 @Composable
 private fun HomeTrendingSectionPreview() {
-    val companies = listOf(
-        TrendingStockPresentation(
-            companyName = "Apple Inc.",
-            tickerSymbol = "AAPL",
-            imageUrl = "",
-            percentageChange = 1.2f
-        ),
-        TrendingStockPresentation(
-            companyName = "Tesla, Inc.",
-            tickerSymbol = "TSLA",
-            imageUrl = "",
-            percentageChange = -2.5f
-        ),
-        TrendingStockPresentation(
-            companyName = "NVIDIA Corporation",
-            tickerSymbol = "NVDA",
-            imageUrl = "",
-            percentageChange = 0.5f
-        )
-    )
     GPTInvestorTheme {
-        Surface {
-            HomeTrendingSection(
-                view = TrendingCompaniesView(
-                    loading = false,
-                    companies = companies,
-                    error = null
-                ),
-                onRetry = {},
-                onClick = {}
-            )
-        }
+        HomeTrendingSection(
+            view = TrendingCompaniesView(
+                companies = listOf(
+                    TrendingStockPresentation("NVIDIA Corporation", "NVDA", "", 2.84f),
+                    TrendingStockPresentation("Skydance Corporation", "SKYD", "", -23.84f)
+                )
+            ),
+            onRetry = {},
+            onClick = {}
+        )
     }
 }
 
@@ -284,17 +145,7 @@ private fun HomeTrendingSectionPreview() {
 @Composable
 private fun HomeTrendingSectionLoadingPreview() {
     GPTInvestorTheme {
-        Surface {
-            HomeTrendingSection(
-                view = TrendingCompaniesView(
-                    loading = true,
-                    companies = emptyList(),
-                    error = null
-                ),
-                onRetry = {},
-                onClick = {}
-            )
-        }
+        HomeTrendingSection(view = TrendingCompaniesView(loading = true), onRetry = {}, onClick = {})
     }
 }
 
@@ -302,16 +153,6 @@ private fun HomeTrendingSectionLoadingPreview() {
 @Composable
 private fun HomeTrendingSectionErrorPreview() {
     GPTInvestorTheme {
-        Surface {
-            HomeTrendingSection(
-                view = TrendingCompaniesView(
-                    loading = false,
-                    companies = emptyList(),
-                    error = "Something went wrong"
-                ),
-                onRetry = {},
-                onClick = {}
-            )
-        }
+        HomeTrendingSection(view = TrendingCompaniesView(error = "Network"), onRetry = {}, onClick = {})
     }
 }

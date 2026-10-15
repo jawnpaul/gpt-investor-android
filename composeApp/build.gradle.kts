@@ -77,7 +77,7 @@ kotlin {
         implementation(project(":remote:remote"))
 
         api(project(":analytics"))
-        implementation(project(":theme"))
+        implementation(project(":core:design-system"))
 
         implementation(libs.compose.components.resources)
         implementation(libs.androidx.lifecycle.runtime.compose)

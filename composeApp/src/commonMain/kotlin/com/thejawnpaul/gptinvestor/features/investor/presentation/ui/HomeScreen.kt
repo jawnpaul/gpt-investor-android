@@ -27,17 +27,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -49,14 +43,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -72,10 +62,8 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorB
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.DailyDigestCard
-import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeGreeting
-import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeSectionHeader
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.HomeTrendingSection
-import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.QuestionInput
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.homeGreeting
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeUiState
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
@@ -85,8 +73,16 @@ import com.thejawnpaul.gptinvestor.join_list
 import com.thejawnpaul.gptinvestor.join_the_waitlist
 import com.thejawnpaul.gptinvestor.movers_right_now
 import com.thejawnpaul.gptinvestor.profile
+import com.thejawnpaul.gptinvestor.see_all
+import com.thejawnpaul.gptinvestor.send
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import com.thejawnpaul.gptinvestor.theme.components.GiAskComposer
+import com.thejawnpaul.gptinvestor.theme.components.GiGreetingHeader
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiSectionHeader
 import com.thejawnpaul.gptinvestor.trending_today
 import com.thejawnpaul.gptinvestor.you_re_on_the_list
 import com.thejawnpaul.gptinvestor.you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge
@@ -106,7 +102,6 @@ fun HomeScreen(state: HomeUiState, onEvent: (HomeEvent) -> Unit, modifier: Modif
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeScreenContent(
     state: HomeUiState,
@@ -119,61 +114,55 @@ private fun HomeScreenContent(
         onGrant = { onEvent(HomeEvent.NotificationPermissionGranted) },
         onDeny = { onEvent(HomeEvent.NotificationPermissionDenied) }
     )
+    val gutter = Modifier.padding(horizontal = GiSpace.gutter)
     Scaffold(
         modifier = modifier,
+        containerColor = GiTheme.colors.bg,
         contentWindowInsets = WindowInsets(0),
         bottomBar = {
-            QuestionInput(
+            // Floats over the scrolling content; the fade keeps cards from colliding with the composer.
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(Brush.verticalGradient(0f to Color.Transparent, 0.4f to GiTheme.colors.bg))
                     .consumeWindowInsets(WindowInsets.navigationBars)
-                    .windowInsetsPadding(insets = WindowInsets.ime),
-                onSendClick = { onEvent(HomeEvent.SendClick) },
-                hint = stringResource(Res.string.ask_me_anything_about_markets),
-                onTextChange = { onEvent(HomeEvent.ChatInputChanged(it)) },
-                text = state.chatInput ?: ""
-            )
-        },
-        topBar = {
-            // The greeting is the page title; the app name lives on splash and onboarding, not Home.
-            Row(
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .windowInsetsPadding(WindowInsets.ime)
+                    .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x6, bottom = GiSpace.x4)
             ) {
-                HomeGreeting(
-                    modifier = Modifier.weight(1f),
-                    timePeriod = state.timePeriod,
-                    name = state.firstName
+                GiAskComposer(
+                    value = state.chatInput ?: "",
+                    onValueChange = { onEvent(HomeEvent.ChatInputChanged(it)) },
+                    onSend = { onEvent(HomeEvent.SendClick) },
+                    placeholder = stringResource(Res.string.ask_me_anything_about_markets),
+                    sendContentDescription = stringResource(Res.string.send)
                 )
-                ProfileAvatarButton(name = state.firstName, onClick = { onEvent(HomeEvent.GoToProfile) })
             }
         }
     ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .statusBarsPadding()
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 0.dp, vertical = 8.dp)
+                    .padding(top = GiSpace.x3, bottom = innerPadding.calculateBottomPadding() + GiSpace.x6),
+                verticalArrangement = Arrangement.spacedBy(GiSpace.sectionGap)
             ) {
-                // Guest banner
+                // The greeting is the page title; the app name lives on splash and onboarding, not Home.
+                GiGreetingHeader(
+                    greeting = homeGreeting(timePeriod = state.timePeriod, name = state.firstName),
+                    avatarInitials = state.firstName?.firstOrNull()?.uppercase(),
+                    avatarContentDescription = stringResource(Res.string.profile),
+                    onAvatarClick = { onEvent(HomeEvent.GoToProfile) },
+                    modifier = gutter
+                )
+
                 if (state.isGuestSession) {
-                    TopGuestLabel(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        onClick = { onEvent(HomeEvent.GoToSignUp) }
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    TopGuestLabel(modifier = gutter, onClick = { onEvent(HomeEvent.GoToSignUp) })
                 }
 
                 DailyDigestCard(
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                    modifier = gutter,
                     view = state.dailyDigestView,
                     onAddStock = { onEvent(HomeEvent.AddStockToDigest(it)) },
                     onBrowseAll = { onEvent(HomeEvent.BrowseAllCompanies) },
@@ -181,22 +170,22 @@ private fun HomeScreenContent(
                     onUnlockPremiumPending = { onEvent(HomeEvent.UnlockPremium("digest_pending_card")) },
                     onUnlockPremiumReady = { onEvent(HomeEvent.UnlockPremium("digest_ready_card")) }
                 )
-                Spacer(modifier = Modifier.height(24.dp))
 
-                HomeSectionHeader(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    emoji = "🔥",
-                    label = stringResource(Res.string.trending_today),
-                    title = stringResource(Res.string.movers_right_now),
-                    onSeeAll = null
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                HomeTrendingSection(
-                    view = state.trendingCompaniesView,
-                    onRetry = { onEvent(HomeEvent.RetryTrendingCompanies) },
-                    onClick = { onEvent(HomeEvent.ClickTrendingCompany(it)) }
-                )
-                Spacer(modifier = Modifier.height(24.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(GiSpace.titleToContent)) {
+                    GiSectionHeader(
+                        title = stringResource(Res.string.movers_right_now),
+                        modifier = gutter,
+                        eyebrow = stringResource(Res.string.trending_today),
+                        eyebrowIcon = GiIcons.fire,
+                        trailingText = stringResource(Res.string.see_all),
+                        onTrailingClick = { onEvent(HomeEvent.GoToAllTrending) }
+                    )
+                    HomeTrendingSection(
+                        view = state.trendingCompaniesView,
+                        onRetry = { onEvent(HomeEvent.RetryTrendingCompanies) },
+                        onClick = { onEvent(HomeEvent.ClickTrendingCompany(it)) }
+                    )
+                }
             }
 
             if (state.showWaitlistBottomSheet) {
@@ -212,38 +201,6 @@ private fun HomeScreenContent(
                         onDismiss = { onEvent(HomeEvent.UpgradeModel(showBottomSheet = false)) }
                     )
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ProfileAvatarButton(name: String?, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val label = stringResource(Res.string.profile)
-    IconButton(onClick = onClick, modifier = modifier.semantics { contentDescription = label }) {
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.inverseSurface),
-            contentAlignment = Alignment.Center
-        ) {
-            val initial = name?.firstOrNull()?.uppercaseChar()
-            if (initial != null) {
-                Text(
-                    text = initial.toString(),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    modifier = Modifier.clearAndSetSemantics { }
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.inverseOnSurface,
-                    modifier = Modifier.size(20.dp)
-                )
             }
         }
     }

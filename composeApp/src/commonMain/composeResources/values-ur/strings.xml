@@ -93,7 +93,6 @@
     <string name="sources">ذرائع</string>
     <string name="top_pick_rationale">بہترین انتخاب کی وجہ</string>
     <string name="sign_up">Sign up</string>
-    <string name="don_t_have_an_account">اکاؤنٹ نہیں ہے؟</string>
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
     <string name="continue_with_google">Google کے ساتھ جاری رکھیں</string>
     <string name="continue_with_email">ای میل کے ساتھ جاری رکھیں</string>
@@ -328,5 +327,20 @@
     <string name="signup_error_password_short">کم از کم 8 حروف استعمال کریں۔</string>
     <string name="show_password">پاس ورڈ دکھائیں</string>
     <string name="hide_password">پاس ورڈ چھپائیں</string>
+    <string name="login_password_placeholder">آپ کا پاس ورڈ</string>
+    <string name="login_error_password_empty">اپنا پاس ورڈ درج کریں۔</string>
+    <string name="login_error_invalid_credentials">یہ ای میل اور پاس ورڈ میل نہیں کھاتے۔ دوبارہ کوشش کریں یا %1$s۔</string>
+    <string name="login_reset_password_link">اپنا پاس ورڈ ری سیٹ کریں</string>
+    <string name="forgot_password">پاس ورڈ بھول گئے؟</string>
+    <string name="auth_no_account">کیا آپ کا اکاؤنٹ نہیں ہے؟ %1$s</string>
+    <string name="forgot_password_title">پاس ورڈ ری سیٹ کریں</string>
+    <string name="forgot_password_body">وہ ای میل درج کریں جس سے آپ لاگ ان کرتے ہیں، ہم آپ کو ری سیٹ لنک بھیج دیں گے۔</string>
+    <string name="forgot_password_send">ری سیٹ لنک بھیجیں</string>
+    <string name="forgot_password_sent_title">اپنا ان باکس دیکھیں</string>
+    <string name="forgot_password_sent_body">اگر %1$s کے لیے کوئی اکاؤنٹ موجود ہے تو ہم نے ری سیٹ لنک بھیج دیا ہے۔</string>
+    <string name="forgot_password_resend">ای میل دوبارہ بھیجیں</string>
+    <string name="forgot_password_resend_in">%1$d سیکنڈ میں دوبارہ بھیجیں</string>
+    <string name="forgot_password_back_to_login">لاگ ان پر واپس جائیں</string>
+    <string name="forgot_password_error_rate_limited">بہت زیادہ کوششیں۔ بعد میں دوبارہ کوشش کریں۔</string>
 
 </resources>

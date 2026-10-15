@@ -338,6 +338,58 @@ object GiIcons {
             ",8-8h24Z"
         )
     }
+
+    val checkBold: ImageVector by lazy {
+        phosphor(
+            "check-bold",
+            "M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"
+        )
+    }
+
+    val minusBold: ImageVector by lazy {
+        phosphor("minus-bold", "M228,128a12,12,0,0,1-12,12H40a12,12,0,0,1,0-24H216A12,12,0,0,1,228,128Z")
+    }
+
+    val thumbsUpFill: ImageVector by lazy {
+        phosphor(
+            "thumbs-up-fill",
+            "M234,80.12A24,24,0,0,0,216,72H160V56a40,40,0,0,0-40-40,8,8,0,0,0-7.16,4.42L75.06,96H32a16,16,0,0,0-1" +
+            "6,16v88a16,16,0,0,0,16,16H204a24,24,0,0,0,23.82-21l12-96A24,24,0,0,0,234,80.12ZM32,112H72v88H32Z"
+        )
+    }
+
+    val thumbsDown: ImageVector by lazy {
+        phosphor(
+            "thumbs-down-regular",
+            "M239.82,157l-12-96A24,24,0,0,0,204,40H32A16,16,0,0,0,16,56v88a16,16,0,0,0,16,16H75.06l37.78,75.58A8," +
+            "8,0,0,0,120,240a40,40,0,0,0,40-40V184h56a24,24,0,0,0,23.82-27ZM72,144H32V56H72Zm150,21.29a7.88,7.88," +
+            "0,0,1-6,2.71H152a8,8,0,0,0-8,8v24a24,24,0,0,1-19.29,23.54L88,150.11V56H204a8,8,0,0,1,7.94,7l12,96A7." +
+            "87,7.87,0,0,1,222,165.29Z"
+        )
+    }
+
+    val thumbsDownFill: ImageVector by lazy {
+        phosphor(
+            "thumbs-down-fill",
+            "M239.82,157l-12-96A24,24,0,0,0,204,40H32A16,16,0,0,0,16,56v88a16,16,0,0,0,16,16H75.06l37.78,75.58A8," +
+            "8,0,0,0,120,240a40,40,0,0,0,40-40V184h56a24,24,0,0,0,23.82-27ZM72,144H32V56H72Z"
+        )
+    }
+
+    val arrowClockwise: ImageVector by lazy {
+        phosphor(
+            "arrow-clockwise-regular",
+            "M240,56v48a8,8,0,0,1-8,8H184a8,8,0,0,1,0-16H211.4L184.81,71.64l-.25-.24a80,80,0,1,0-1.67,114.78,8,8," +
+            "0,0,1,11,11.63A95.44,95.44,0,0,1,128,224h-1.32A96,96,0,1,1,195.75,60L224,85.8V56a8,8,0,1,1,16,0Z"
+        )
+    }
+
+    val stopFill: ImageVector by lazy {
+        phosphor(
+            "stop-fill",
+            "M216,56V200a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V56A16,16,0,0,1,56,40H200A16,16,0,0,1,216,56Z"
+        )
+    }
 }
 
 private fun phosphor(name: String, pathData: String): ImageVector = ImageVector.Builder(

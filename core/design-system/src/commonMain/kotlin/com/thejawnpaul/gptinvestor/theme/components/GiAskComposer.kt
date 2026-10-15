@@ -43,7 +43,12 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
+// While an answer streams, Stop replaces Send.
+class GiComposerStop(val contentDescription: String, val onStop: () -> Unit)
+
 // Keeps the line hairline on purpose (not the control edge); turns violet while focused or filled.
+// Pass stop while the assistant is answering: Stop replaces Send and the beam runs around the edge.
+// Grows to 4 lines (2 at large text), then scrolls; the mark and the button stay on the last line.
 @Composable
 fun GiAskComposer(
     value: String,
@@ -52,12 +57,13 @@ fun GiAskComposer(
     placeholder: String,
     sendContentDescription: String,
     modifier: Modifier = Modifier,
-    floating: Boolean = true
+    floating: Boolean = true,
+    stop: GiComposerStop? = null
 ) {
     val colors = GiTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val canSend = value.isNotBlank()
+    val canSend = value.isNotBlank() && stop == null
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
@@ -68,7 +74,7 @@ fun GiAskComposer(
             imeAction = ImeAction.Send
         ),
         keyboardActions = KeyboardActions(onSend = { if (canSend) onSend() }),
-        maxLines = if (isLargeText()) 2 else 1,
+        maxLines = if (isLargeText()) LARGE_TEXT_MAX_LINES else MAX_LINES,
         interactionSource = interactionSource,
         cursorBrush = SolidColor(colors.violet),
         decorationBox = { innerTextField ->
@@ -89,17 +95,25 @@ fun GiAskComposer(
                         color = if (isFocused || value.isNotEmpty()) colors.violet else colors.line,
                         shape = GiRadius.md
                     )
+                    .giBeam(active = stop != null, shape = GiRadius.md)
                     .padding(start = 14.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Bottom
             ) {
+                // Padding centres the mark and each text line on the 40 button, so one line still sits mid-field.
                 Icon(
                     imageVector = GiIcons.mark,
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier
+                        .padding(vertical = 10.dp)
+                        .size(20.dp),
                     tint = colors.violet
                 )
-                Box(modifier = Modifier.weight(1f)) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = GiSpace.x2)
+                ) {
                     if (value.isEmpty()) {
                         GiText(
                             text = placeholder,
@@ -111,27 +125,49 @@ fun GiAskComposer(
                     }
                     innerTextField()
                 }
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .alpha(if (canSend) 1f else GiMotion.DISABLED_ALPHA)
-                        .clip(GiRadius.sm)
-                        .background(colors.primary)
-                        .clickable(enabled = canSend, role = Role.Button, onClick = onSend)
-                        .semantics { contentDescription = sendContentDescription },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = GiIcons.arrowUp,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint = colors.onPrimary
-                    )
+                if (stop != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(GiRadius.sm)
+                            .background(colors.ink)
+                            .clickable(role = Role.Button, onClick = stop.onStop)
+                            .semantics { contentDescription = stop.contentDescription },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = GiIcons.stopFill,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = colors.bg
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .alpha(if (canSend) 1f else GiMotion.DISABLED_ALPHA)
+                            .clip(GiRadius.sm)
+                            .background(colors.primary)
+                            .clickable(enabled = canSend, role = Role.Button, onClick = onSend)
+                            .semantics { contentDescription = sendContentDescription },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = GiIcons.arrowUp,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = colors.onPrimary
+                        )
+                    }
                 }
             }
         }
     )
 }
+
+private const val MAX_LINES = 4
+private const val LARGE_TEXT_MAX_LINES = 2
 
 @PreviewLightDark
 @Preview(name = "200%", fontScale = 2f)
@@ -152,6 +188,23 @@ private fun GiAskComposerPreview() {
                 onSend = {},
                 placeholder = "Ask me anything about markets…",
                 sendContentDescription = "Send"
+            )
+            GiAskComposer(
+                value = "Compare Apple and Microsoft on revenue growth, margins and buybacks over the last three " +
+                    "years, then tell me which looks steadier for a long-term holder and why.",
+                onValueChange = {},
+                onSend = {},
+                placeholder = "Ask me anything about markets…",
+                sendContentDescription = "Send"
+            )
+            GiAskComposer(
+                value = "",
+                onValueChange = {},
+                onSend = {},
+                placeholder = "Ask me anything about markets…",
+                sendContentDescription = "Send",
+                floating = false,
+                stop = GiComposerStop(contentDescription = "Stop answering", onStop = {})
             )
         }
     }

@@ -10,27 +10,39 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
+
+enum class GiTopBarTitleStyle { Start, Centered, Page }
 
 @Composable
 fun GiTopBar(
     title: String?,
-    onBack: () -> Unit,
+    onBack: (() -> Unit)?,
     backContentDescription: String,
     modifier: Modifier = Modifier,
     scrolled: Boolean = false,
+    titleStyle: GiTopBarTitleStyle = GiTopBarTitleStyle.Start,
+    subtitle: String? = null,
+    center: (@Composable RowScope.() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
+    val centered = titleStyle == GiTopBarTitleStyle.Centered
+    val sideSlot = if (centered) Modifier.widthIn(min = GiSpace.touchTarget) else Modifier
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -39,27 +51,80 @@ fun GiTopBar(
     ) {
         Row(
             modifier = Modifier.padding(horizontal = GiSpace.gutter, vertical = GiSpace.x2),
-            horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement = Arrangement.spacedBy(if (center != null) GiSpace.x4 else GiSpace.x3),
+            verticalAlignment = if (subtitle != null) Alignment.Top else Alignment.CenterVertically
         ) {
-            GiIconButton(icon = GiIcons.caretLeft, contentDescription = backContentDescription, onClick = onBack)
-            if (title != null) {
-                GiText(
-                    text = title,
-                    modifier = Modifier
-                        .weight(1f)
-                        .semantics { heading() },
-                    style = GiTextStyle.SectionTitle,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+            if (onBack != null) {
+                GiIconButton(
+                    icon = GiIcons.caretLeft,
+                    contentDescription = backContentDescription,
+                    onClick = onBack,
+                    modifier = sideSlot
                 )
-            } else {
-                Spacer(modifier = Modifier.weight(1f))
+            } else if (centered) {
+                Spacer(modifier = sideSlot)
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x2), content = actions)
+            when {
+                center != null -> Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    content = center
+                )
+                title != null -> GiTopBarTitle(
+                    title = title,
+                    subtitle = subtitle,
+                    titleStyle = titleStyle,
+                    modifier = Modifier.weight(1f)
+                )
+                else -> Spacer(modifier = Modifier.weight(1f))
+            }
+            Row(
+                modifier = sideSlot,
+                horizontalArrangement = Arrangement.spacedBy(GiSpace.x2, Alignment.End),
+                content = actions
+            )
         }
         if (scrolled) {
             GiDivider()
+        }
+    }
+}
+
+@Composable
+private fun GiTopBarTitle(
+    title: String,
+    subtitle: String?,
+    titleStyle: GiTopBarTitleStyle,
+    modifier: Modifier = Modifier
+) {
+    val maxLines = when {
+        titleStyle == GiTopBarTitleStyle.Page -> Int.MAX_VALUE
+        isLargeText() -> 2
+        else -> 1
+    }
+    val textAlign = if (titleStyle == GiTopBarTitleStyle.Centered) TextAlign.Center else TextAlign.Start
+    Column(
+        modifier = modifier.then(if (subtitle != null) Modifier.padding(top = 10.dp) else Modifier),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        GiText(
+            text = title,
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics { heading() },
+            style = if (titleStyle == GiTopBarTitleStyle.Page) GiTextStyle.PageTitle else GiTextStyle.SectionTitle,
+            textAlign = textAlign,
+            maxLines = maxLines,
+            overflow = TextOverflow.Ellipsis
+        )
+        if (subtitle != null) {
+            Text(
+                text = subtitle,
+                modifier = Modifier.fillMaxWidth(),
+                color = GiTheme.colors.muted,
+                textAlign = textAlign,
+                style = GiTheme.type.meta.copy(lineHeight = 20.sp)
+            )
         }
     }
 }
@@ -110,6 +175,25 @@ private fun GiTopBarPreview() {
                 GiIconButton(icon = GiIcons.shareNetwork, contentDescription = "Share", onClick = {})
                 GiIconButton(icon = GiIcons.plus, contentDescription = "Add to watchlist", onClick = {})
             }
+            GiTopBar(
+                title = "TSLA",
+                onBack = {},
+                backContentDescription = "Back",
+                titleStyle = GiTopBarTitleStyle.Centered
+            )
+            GiTopBar(title = "Saved picks", onBack = {}, backContentDescription = "Back", subtitle = "12 picks")
+            GiTopBar(
+                title = "Create your account",
+                onBack = {},
+                backContentDescription = "Back",
+                titleStyle = GiTopBarTitleStyle.Page
+            )
+            GiTopBar(title = null, onBack = {}, backContentDescription = "Back", center = {
+                GiStepDots(count = 2, current = 0)
+            }) {
+                GiButton(text = "Skip", onClick = {}, size = GiButtonSize.Medium, variant = GiButtonVariant.TextMuted)
+            }
+            GiTopBar(title = "Welcome", onBack = null, backContentDescription = "Back")
         }
     }
 }

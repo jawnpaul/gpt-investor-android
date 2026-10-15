@@ -25,19 +25,32 @@ data class GiStock(
     val imageUrl: String? = null
 )
 
+enum class GiStockSummarySize { Default, Header }
+
 @Composable
-fun GiStockSummary(stock: GiStock, modifier: Modifier = Modifier) {
+fun GiStockSummary(
+    stock: GiStock,
+    modifier: Modifier = Modifier,
+    size: GiStockSummarySize = GiStockSummarySize.Default,
+    logoModifier: Modifier = Modifier
+) {
+    val header = size == GiStockSummarySize.Header
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        GiLogoTile(initials = stock.initials, brandColor = stock.brandColor, imageUrl = stock.imageUrl)
+        GiLogoTile(
+            initials = stock.initials,
+            brandColor = stock.brandColor,
+            modifier = logoModifier,
+            imageUrl = stock.imageUrl
+        )
         Column(modifier = Modifier.weight(1f)) {
             GiText(
                 text = stock.title,
-                style = GiTextStyle.Label,
-                maxLines = 1,
+                style = if (header) GiTextStyle.CompanyName else GiTextStyle.Label,
+                maxLines = if (header) Int.MAX_VALUE else 1,
                 overflow = TextOverflow.Ellipsis
             )
             GiText(
@@ -66,6 +79,9 @@ internal val previewStock = GiStock(
 @Composable
 private fun GiStockSummaryPreview() {
     GiPreviewSurface {
-        GiStockSummary(stock = previewStock)
+        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
+            GiStockSummary(stock = previewStock)
+            GiStockSummary(stock = previewStock.copy(percent = null), size = GiStockSummarySize.Header)
+        }
     }
 }

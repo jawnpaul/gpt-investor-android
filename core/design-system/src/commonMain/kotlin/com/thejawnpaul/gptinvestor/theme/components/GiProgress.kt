@@ -17,11 +17,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiMotion
@@ -31,7 +34,7 @@ import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 
 @Composable
-fun GiStepDots(count: Int, current: Int, modifier: Modifier = Modifier) {
+fun GiStepDots(count: Int, current: Int, modifier: Modifier = Modifier, contentDescription: String? = null) {
     val spec: AnimationSpec<Dp> = if (isReducedMotionEnabled()) snap() else GiMotion.smooth()
     Row(
         modifier = modifier.semantics {
@@ -40,15 +43,21 @@ fun GiStepDots(count: Int, current: Int, modifier: Modifier = Modifier) {
                 range = 1f..count.toFloat(),
                 steps = (count - 2).coerceAtLeast(0)
             )
+            if (contentDescription != null) this.contentDescription = contentDescription
         },
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         repeat(count) { index ->
             val isCurrent = index == current
-            val width by animateDpAsState(targetValue = if (isCurrent) 24.dp else 6.dp, animationSpec = spec)
+            val width = animateDpAsState(targetValue = if (isCurrent) 24.dp else 6.dp, animationSpec = spec)
             Box(
                 modifier = Modifier
-                    .size(width = width, height = 6.dp)
+                    .layout { measurable, _ ->
+                        val size = width.value.roundToPx()
+                        val height = 6.dp.roundToPx()
+                        val placeable = measurable.measure(Constraints.fixed(size, height))
+                        layout(size, height) { placeable.place(0, 0) }
+                    }
                     .clip(GiRadius.full)
                     .background(if (isCurrent) GiTheme.colors.violet else GiTheme.colors.chip)
             )

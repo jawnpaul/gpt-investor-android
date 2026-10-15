@@ -178,7 +178,8 @@ object GiIcons {
     val caretLeft: ImageVector by lazy {
         phosphor(
             "caret-left-regular",
-            "M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"
+            "M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z",
+            autoMirror = true
         )
     }
 
@@ -384,6 +385,17 @@ object GiIcons {
         )
     }
 
+    val warning: ImageVector by lazy {
+        phosphor(
+            "warning-regular",
+            "M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24." +
+            "35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8" +
+            ".5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1" +
+            ",15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8ZM120,144V104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm20,36a" +
+            "12,12,0,1,1-12-12A12,12,0,0,1,140,180Z"
+        )
+    }
+
     val stopFill: ImageVector by lazy {
         phosphor(
             "stop-fill",
@@ -392,12 +404,13 @@ object GiIcons {
     }
 }
 
-private fun phosphor(name: String, pathData: String): ImageVector = ImageVector.Builder(
+private fun phosphor(name: String, pathData: String, autoMirror: Boolean = false): ImageVector = ImageVector.Builder(
     name = name,
     defaultWidth = 24.dp,
     defaultHeight = 24.dp,
     viewportWidth = 256f,
-    viewportHeight = 256f
+    viewportHeight = 256f,
+    autoMirror = autoMirror
 ).addPath(pathData = addPathNodes(pathData), fill = SolidColor(Color.Black)).build()
 
 private val MARK_PATHS = listOf(

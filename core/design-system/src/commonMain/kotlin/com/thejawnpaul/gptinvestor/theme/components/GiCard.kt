@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import com.thejawnpaul.gptinvestor.theme.GiEdge
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
@@ -31,6 +32,7 @@ fun GiCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     contentPadding: PaddingValues = PaddingValues(GiSpace.cardPad),
+    spacing: Dp = GiSpace.x3,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = GiTheme.colors
@@ -55,7 +57,7 @@ fun GiCard(
             )
             .background(if (isPressed) colors.ink.copy(alpha = GiMotion.PRESSED_ALPHA) else Color.Transparent)
             .padding(contentPadding),
-        verticalArrangement = Arrangement.spacedBy(GiSpace.x3),
+        verticalArrangement = Arrangement.spacedBy(spacing),
         content = content
     )
 }

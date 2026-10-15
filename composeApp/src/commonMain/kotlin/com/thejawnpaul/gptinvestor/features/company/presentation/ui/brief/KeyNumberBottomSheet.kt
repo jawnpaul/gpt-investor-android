@@ -15,17 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefTone
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumber
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumberType
-import com.thejawnpaul.gptinvestor.key_dividend_yield
-import com.thejawnpaul.gptinvestor.key_pe_ratio
-import com.thejawnpaul.gptinvestor.key_revenue_growth
-import com.thejawnpaul.gptinvestor.market_cap
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -72,13 +66,6 @@ fun KeyNumberBottomSheet(keyNumber: KeyNumber, modifier: Modifier = Modifier) {
 
         Spacer(Modifier.height(32.dp))
     }
-}
-
-internal fun KeyNumberType.labelRes(): StringResource = when (this) {
-    KeyNumberType.MarketCap -> Res.string.market_cap
-    KeyNumberType.PeRatio -> Res.string.key_pe_ratio
-    KeyNumberType.RevenueGrowth -> Res.string.key_revenue_growth
-    KeyNumberType.DividendYield -> Res.string.key_dividend_yield
 }
 
 @PreviewLightDark

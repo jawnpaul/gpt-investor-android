@@ -27,11 +27,12 @@ import kotlin.math.abs
 import kotlin.math.roundToLong
 
 @Composable
-fun GiDeltaPill(percent: Double, modifier: Modifier = Modifier) {
+fun GiDeltaPill(percent: Double, modifier: Modifier = Modifier, suffix: String? = null) {
     val colors = GiTheme.colors
     val isLoss = percent < 0 && toHundredths(percent) > 0
     val content = if (isLoss) colors.loss else colors.gain
-    val description = "${if (isLoss) "down" else "up"} ${formatAbsolutePercent(percent)} percent"
+    val description = "${if (isLoss) "down" else "up"} ${formatAbsolutePercent(percent)} percent" +
+        suffix?.let { " $it" }.orEmpty()
     Row(
         modifier = modifier
             .heightIn(min = 24.dp)
@@ -44,7 +45,7 @@ fun GiDeltaPill(percent: Double, modifier: Modifier = Modifier) {
     ) {
         GiDeltaTriangle(up = !isLoss, color = content)
         GiText(
-            text = "${if (isLoss) "−" else "+"}${formatAbsolutePercent(percent)}%",
+            text = "${if (isLoss) "−" else "+"}${formatAbsolutePercent(percent)}%" + suffix?.let { " $it" }.orEmpty(),
             style = GiTextStyle.Delta,
             color = content,
             maxLines = 1
@@ -87,6 +88,7 @@ private fun GiDeltaPillPreview() {
         Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
             GiDeltaPill(percent = 1.24)
             GiDeltaPill(percent = -0.82)
+            GiDeltaPill(percent = -0.95, suffix = "today")
             GiDeltaPill(percent = 0.0)
         }
     }

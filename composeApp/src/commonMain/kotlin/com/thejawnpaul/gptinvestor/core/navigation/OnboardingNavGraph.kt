@@ -33,6 +33,7 @@ fun NavGraphBuilder.onboardingNavGraph(navController: NavHostController) {
             state = state.value,
             searchResults = viewModel.searchResults,
             onNextScreen = viewModel::onNextScreen,
+            onBack = viewModel::onPreviousScreen,
             onSkip = viewModel::onSkip,
             onSelectStock = viewModel::onStockSelected,
             onSearchQueryChange = viewModel::onSearchQueryChanged,

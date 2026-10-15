@@ -1,0 +1,136 @@
+package com.thejawnpaul.gptinvestor.theme.components
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import com.thejawnpaul.gptinvestor.theme.GiElevation
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.GiTheme
+import kotlinx.coroutines.launch
+
+// A focused task over the current screen (explainers, alerts, guest limit). Put the body and one full-width
+// Button L in content; the sheet keeps it above the home indicator and scrolls past 90% of the screen.
+// The close button stays even though dragging works.
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GiBottomSheet(
+    onDismissRequest: () -> Unit,
+    title: String,
+    closeContentDescription: String,
+    modifier: Modifier = Modifier,
+    sheetState: SheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    ),
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val colors = GiTheme.colors
+    val scope = rememberCoroutineScope()
+    val maxHeight = with(LocalDensity.current) { (LocalWindowInfo.current.containerSize.height * MAX_HEIGHT_FRACTION).toDp() }
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        modifier = modifier.dropShadow(shape = SHEET_SHAPE, shadow = GiElevation.overlay(colors.isDark)),
+        sheetState = sheetState,
+        shape = SHEET_SHAPE,
+        containerColor = colors.raised,
+        contentColor = colors.ink,
+        tonalElevation = 0.dp,
+        scrimColor = colors.scrim,
+        dragHandle = null,
+        contentWindowInsets = { WindowInsets(0) }
+    ) {
+        GiBottomSheetContent(
+            title = title,
+            closeContentDescription = closeContentDescription,
+            onClose = {
+                scope.launch { sheetState.hide() }.invokeOnCompletion {
+                    if (!sheetState.isVisible) onDismissRequest()
+                }
+            },
+            modifier = Modifier
+                .heightIn(max = maxHeight)
+                .verticalScroll(rememberScrollState())
+                .windowInsetsPadding(WindowInsets.navigationBars),
+            content = content
+        )
+    }
+}
+
+@Composable
+private fun GiBottomSheetContent(
+    title: String,
+    closeContentDescription: String,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = 10.dp, bottom = GiSpace.x6),
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
+    ) {
+        GiSheetHandle(modifier = Modifier.align(Alignment.CenterHorizontally))
+        Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3), verticalAlignment = Alignment.CenterVertically) {
+            GiText(
+                text = title,
+                modifier = Modifier
+                    .weight(1f)
+                    .semantics { heading() },
+                style = GiTextStyle.StatNumber
+            )
+            GiIconButton(icon = GiIcons.x, contentDescription = closeContentDescription, onClick = onClose)
+        }
+        content()
+    }
+}
+
+private val SHEET_SHAPE = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+private const val MAX_HEIGHT_FRACTION = 0.9f
+
+@PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
+@Composable
+private fun GiBottomSheetContentPreview() {
+    GiPreviewSurface {
+        Column(
+            modifier = Modifier
+                .clip(SHEET_SHAPE)
+                .background(GiTheme.colors.raised)
+        ) {
+            GiBottomSheetContent(title = "Set a price alert", closeContentDescription = "Close", onClose = {}) {
+                GiText(text = "We'll tell you when Apple crosses your price.", style = GiTextStyle.BodySmall)
+                GiButton(text = "Set alert", onClick = {}, modifier = Modifier.fillMaxWidth())
+            }
+        }
+    }
+}

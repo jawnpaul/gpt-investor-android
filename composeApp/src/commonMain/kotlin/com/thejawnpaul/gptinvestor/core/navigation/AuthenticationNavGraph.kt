@@ -2,6 +2,7 @@ package com.thejawnpaul.gptinvestor.core.navigation
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
@@ -17,7 +18,9 @@ import com.thejawnpaul.gptinvestor.features.authentication.presentation.LoginVie
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.SignUpScreen
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.SignUpUiAction
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.SignUpViewModel
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -47,6 +50,10 @@ fun NavGraphBuilder.authenticationNavGraph(
 
                     is DefaultAuthenticationAction.ShowToast -> {
                         platformActions.showMessage(action.message)
+                    }
+
+                    is DefaultAuthenticationAction.OpenUrl -> {
+                        platformActions.openUrl(action.url)
                     }
                 }
             }.launchIn(scope)
@@ -110,13 +117,19 @@ fun NavGraphBuilder.authenticationNavGraph(
                     is SignUpUiAction.OnShowToast -> {
                         platformActions.showMessage(action.message)
                     }
+
+                    is SignUpUiAction.InvalidSubmit -> Unit
                 }
             }.launchIn(scope)
+        }
+        val invalidSubmits = remember(viewModel) {
+            viewModel.actions.filterIsInstance<SignUpUiAction.InvalidSubmit>().map { it.firstInvalid }
         }
         SignUpScreen(
             modifier = Modifier,
             state = state.value,
-            onEvent = viewModel::handleEvent
+            onEvent = viewModel::handleEvent,
+            invalidSubmits = invalidSubmits
         )
     }
 }

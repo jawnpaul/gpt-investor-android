@@ -1,6 +1,13 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.EaseOutQuart
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,12 +28,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -51,6 +63,8 @@ fun GiButton(
     size: GiButtonSize = GiButtonSize.Large,
     variant: GiButtonVariant = GiButtonVariant.Primary,
     leadingIcon: ImageVector? = null,
+    leadingPainter: Painter? = null,
+    tintLeadingIcon: Boolean = true,
     enabled: Boolean = true,
     loading: Boolean = false
 ) {
@@ -60,6 +74,14 @@ fun GiButton(
     val scale by animateFloatAsState(
         targetValue = if (isPressed) GiMotion.PRESSED_SCALE else 1f,
         animationSpec = GiMotion.snappy()
+    )
+    val containerAlpha by animateFloatAsState(
+        targetValue = if (enabled) 1f else GiMotion.DISABLED_ALPHA,
+        animationSpec = tween(GiMotion.FAST, easing = EaseOutQuart)
+    )
+    val labelAlpha by animateFloatAsState(
+        targetValue = if (loading) 0f else 1f,
+        animationSpec = tween(if (loading) GiMotion.INSTANT else GiMotion.FAST, easing = LinearEasing)
     )
     val buttonColors = when (variant) {
         GiButtonVariant.Primary -> GiButtonColors(container = colors.primary, content = colors.onPrimary)
@@ -78,11 +100,13 @@ fun GiButton(
     val isTextVariant = variant == GiButtonVariant.Text || variant == GiButtonVariant.TextMuted
     val paddingX = if (isTextVariant) GiSpace.x2 else metrics.horizontalPadding
     val iconSize = if (size == GiButtonSize.Small) 16.dp else 20.dp
+    val iconTint = if (tintLeadingIcon) content else Color.Unspecified
+    val paddingY = if (isLargeText()) GiSpace.x3 else 0.dp
     Box(
         modifier = modifier
             .minimumInteractiveComponentSize()
-            .alpha(if (enabled) 1f else GiMotion.DISABLED_ALPHA)
             .graphicsLayer {
+                alpha = containerAlpha
                 scaleX = scale
                 scaleY = scale
             }
@@ -104,25 +128,44 @@ fun GiButton(
                 onClick = onClick
             )
             .background(if (isPressed) content.copy(alpha = GiMotion.PRESSED_ALPHA) else Color.Transparent)
-            .padding(horizontal = paddingX),
+            .then(
+                if (loading) {
+                    Modifier.clearAndSetSemantics {
+                        contentDescription = text
+                        progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate
+                    }
+                } else {
+                    Modifier
+                }
+            )
+            .padding(horizontal = paddingX, vertical = paddingY),
         contentAlignment = Alignment.Center
     ) {
         // Stays laid out while loading so the button keeps its width.
         Row(
-            modifier = Modifier.alpha(if (loading) 0f else 1f),
+            modifier = Modifier.graphicsLayer { alpha = labelAlpha },
             horizontalArrangement = Arrangement.spacedBy(GiSpace.x2),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (leadingIcon != null) {
-                Icon(imageVector = leadingIcon, contentDescription = null, modifier = Modifier.size(iconSize), tint = content)
+                Icon(imageVector = leadingIcon, contentDescription = null, modifier = Modifier.size(iconSize), tint = iconTint)
+            } else if (leadingPainter != null) {
+                Icon(painter = leadingPainter, contentDescription = null, modifier = Modifier.size(iconSize), tint = iconTint)
             }
             GiText(text = text, style = metrics.textStyle, color = content, textAlign = TextAlign.Center)
         }
-        if (loading) {
+        AnimatedVisibility(
+            visible = loading,
+            enter = fadeIn(tween(GiMotion.FAST, delayMillis = GiMotion.INSTANT, easing = EaseOutQuart)) +
+                scaleIn(GiMotion.snappy(), initialScale = SPINNER_INITIAL_SCALE),
+            exit = fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing))
+        ) {
             GiSpinner(color = content)
         }
     }
 }
+
+private const val SPINNER_INITIAL_SCALE = 0.8f
 
 private data class GiButtonColors(val container: Color, val content: Color)
 
@@ -138,6 +181,20 @@ private fun GiButtonPreview() {
             GiButton(text = "Add", onClick = {}, size = GiButtonSize.Medium, variant = GiButtonVariant.Secondary)
             GiButton(text = "Unlock", onClick = {}, size = GiButtonSize.Small)
             GiButton(text = "New chat", onClick = {}, size = GiButtonSize.Medium, leadingIcon = GiIcons.notePencil)
+            GiButton(
+                text = "Sign up with Google",
+                onClick = {},
+                variant = GiButtonVariant.Secondary,
+                leadingPainter = rememberVectorPainter(GiIcons.mark),
+                tintLeadingIcon = false
+            )
+            GiButton(
+                text = "Log in",
+                onClick = {},
+                variant = GiButtonVariant.Secondary,
+                leadingPainter = rememberVectorPainter(GiIcons.mark),
+                loading = true
+            )
             GiButton(text = "Delete account", onClick = {}, variant = GiButtonVariant.Destructive)
             GiButton(text = "Get brief", onClick = {}, size = GiButtonSize.Medium, loading = true)
             GiButton(text = "Get brief", onClick = {}, size = GiButtonSize.Medium, enabled = false)

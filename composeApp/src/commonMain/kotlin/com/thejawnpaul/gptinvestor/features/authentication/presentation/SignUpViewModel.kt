@@ -29,7 +29,7 @@ class SignUpViewModel(
         when (event) {
             is SignUpUiEvent.EmailChanged -> {
                 _signUpUiState.update {
-                    it.copy(email = event.email)
+                    it.copy(email = event.email).validated(SignUpField.Email)
                 }
             }
 
@@ -43,19 +43,28 @@ class SignUpViewModel(
 
             is SignUpUiEvent.NameChanged -> {
                 _signUpUiState.update {
-                    it.copy(name = event.name)
+                    it.copy(name = event.name).validated(SignUpField.Name)
                 }
             }
 
             is SignUpUiEvent.PasswordChanged -> {
                 _signUpUiState.update {
-                    it.copy(password = event.password)
+                    it.copy(password = event.password).validated(SignUpField.Password)
                 }
             }
 
             SignUpUiEvent.SignUpClick -> {
+                if (_signUpUiState.value.loadingMethod != null) return
                 analyticsLogger.logEvent(eventName = "sign-up-button-clicked", params = mapOf())
-                signUpWithEmailAndPassword()
+                val invalidFields = SignUpField.entries.filter { _signUpUiState.value.isInvalid(it) }
+                if (invalidFields.isEmpty()) {
+                    signUpWithEmailAndPassword()
+                } else {
+                    _signUpUiState.update { state ->
+                        SignUpField.entries.fold(state) { acc, field -> acc.withError(field, field in invalidFields) }
+                    }
+                    handleAction(action = SignUpUiAction.InvalidSubmit(firstInvalid = invalidFields.first()))
+                }
             }
 
             is SignUpUiEvent.SignUpWithGoogle -> {
@@ -70,12 +79,12 @@ class SignUpViewModel(
     }
 
     private fun signUpWithEmailAndPassword() {
-        val email = _signUpUiState.value.email
+        val email = _signUpUiState.value.email.trim()
         val password = _signUpUiState.value.password
         val name = _signUpUiState.value.name
         _signUpUiState.update {
             it.copy(
-                loading = true,
+                loadingMethod = AuthMethod.Email,
                 showEmailConflictPrompt = false
             )
         }
@@ -88,7 +97,7 @@ class SignUpViewModel(
             ).onSuccess {
                 _signUpUiState.update {
                     it.copy(
-                        loading = false
+                        loadingMethod = null
                     )
                 }
                 handleAction(
@@ -100,7 +109,7 @@ class SignUpViewModel(
             }.onFailure { failure ->
                 _signUpUiState.update {
                     it.copy(
-                        loading = false
+                        loadingMethod = null
                     )
                 }
                 if (failure is EmailAlreadyExistsException) {
@@ -115,14 +124,14 @@ class SignUpViewModel(
     private fun signUpWithGoogle(platformContext: PlatformContext) {
         _signUpUiState.update {
             it.copy(
-                loading = true
+                loadingMethod = AuthMethod.Google
             )
         }
         viewModelScope.launch {
             authRepository.signUpWithGoogle(platformContext).onSuccess {
                 _signUpUiState.update {
                     it.copy(
-                        loading = false
+                        loadingMethod = null
                     )
                 }
                 handleAction(action = SignUpUiAction.OnShowToast("Sign up Success"))
@@ -130,7 +139,7 @@ class SignUpViewModel(
             }.onFailure { failure ->
                 _signUpUiState.update {
                     it.copy(
-                        loading = false
+                        loadingMethod = null
                     )
                 }
                 handleAction(action = SignUpUiAction.OnShowToast(failure.message.toString()))
@@ -141,14 +150,14 @@ class SignUpViewModel(
     private fun signUpWithApple() {
         _signUpUiState.update {
             it.copy(
-                loading = true
+                loadingMethod = AuthMethod.Apple
             )
         }
         viewModelScope.launch {
             authRepository.signUpWithApple().onSuccess {
                 _signUpUiState.update {
                     it.copy(
-                        loading = false
+                        loadingMethod = null
                     )
                 }
                 handleAction(action = SignUpUiAction.OnShowToast("Sign up Success"))
@@ -156,7 +165,7 @@ class SignUpViewModel(
             }.onFailure { failure ->
                 _signUpUiState.update {
                     it.copy(
-                        loading = false
+                        loadingMethod = null
                     )
                 }
                 handleAction(action = SignUpUiAction.OnShowToast(failure.message.toString()))
@@ -171,18 +180,44 @@ class SignUpViewModel(
     }
 }
 
+private const val MIN_PASSWORD_LENGTH = 8
+
 data class SignUpUiState(
     val email: String = "",
     val password: String = "",
     val name: String = "",
-    val loading: Boolean = false,
-    val showEmailConflictPrompt: Boolean = false
+    val loadingMethod: AuthMethod? = null,
+    val showEmailConflictPrompt: Boolean = false,
+    val nameError: Boolean = false,
+    val emailError: Boolean = false,
+    val passwordError: Boolean = false
 ) {
-    val enableButton = email.trim().isNotEmpty() &&
-        password.trim().isNotEmpty() &&
-        name.trim()
-            .isNotEmpty() &&
-        !loading
+    val isSignUpEnabled: Boolean
+        get() = SignUpField.entries.none { isInvalid(it) } && isAvailable(AuthMethod.Email)
+
+    val isGoogleEnabled: Boolean
+        get() = isAvailable(AuthMethod.Google)
+
+    val isAppleEnabled: Boolean
+        get() = isAvailable(AuthMethod.Apple)
+
+    private fun isAvailable(method: AuthMethod): Boolean = loadingMethod == null || loadingMethod == method
+}
+
+enum class SignUpField { Name, Email, Password }
+
+private fun SignUpUiState.isInvalid(field: SignUpField): Boolean = when (field) {
+    SignUpField.Name -> name.isBlank()
+    SignUpField.Email -> !isValidEmail(email)
+    SignUpField.Password -> password.length < MIN_PASSWORD_LENGTH
+}
+
+private fun SignUpUiState.validated(field: SignUpField): SignUpUiState = withError(field, isInvalid(field))
+
+private fun SignUpUiState.withError(field: SignUpField, error: Boolean): SignUpUiState = when (field) {
+    SignUpField.Name -> copy(nameError = error)
+    SignUpField.Email -> copy(emailError = error)
+    SignUpField.Password -> copy(passwordError = error)
 }
 
 sealed interface SignUpUiEvent {
@@ -201,4 +236,5 @@ sealed interface SignUpUiAction {
     data object OnGoToLogin : SignUpUiAction
     data object OnGoBack : SignUpUiAction
     data object OnGoToHome : SignUpUiAction
+    data class InvalidSubmit(val firstInvalid: SignUpField) : SignUpUiAction
 }

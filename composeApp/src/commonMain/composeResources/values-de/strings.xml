@@ -93,7 +93,6 @@
     <string name="sources">Quellen</string>
     <string name="top_pick_rationale">Begründung der Top-Empfehlung</string>
     <string name="sign_up">Registrieren</string>
-    <string name="already_have_an_account">Sie haben bereits ein Konto?</string>
     <string name="don_t_have_an_account">Sie haben noch kein Konto?</string>
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
     <string name="continue_with_google">Mit Google fortfahren</string>
@@ -316,5 +315,18 @@
     <string name="subscribe_now">Jetzt abonnieren</string>
     <string name="premium_billed_info">Monatlich abgerechnet · Jederzeit kündbar</string>
     <string name="premium_ios_coming_soon">In-App-Käufe demnächst auf iOS verfügbar</string>
+    <string name="auth_landing_tagline">Verständliche Briefings zu jeder Aktie.</string>
+    <string name="auth_legal">Indem Sie fortfahren, stimmen Sie unseren %1$s und unserer %2$s zu.</string>
+    <string name="terms">Nutzungsbedingungen</string>
+    <string name="privacy_policy">Datenschutzerklärung</string>
+    <string name="auth_have_account">Sie haben bereits ein Konto? %1$s</string>
+    <string name="signup_name_placeholder">Ihr Name</string>
+    <string name="email_placeholder">name@example.com</string>
+    <string name="signup_password_placeholder">Mindestens 8 Zeichen</string>
+    <string name="signup_error_name">Geben Sie Ihren Namen ein.</string>
+    <string name="error_email_invalid">Geben Sie eine gültige E-Mail-Adresse ein, z. B. name@example.com.</string>
+    <string name="signup_error_password_short">Verwenden Sie mindestens 8 Zeichen.</string>
+    <string name="show_password">Passwort anzeigen</string>
+    <string name="hide_password">Passwort verbergen</string>
 
 </resources>

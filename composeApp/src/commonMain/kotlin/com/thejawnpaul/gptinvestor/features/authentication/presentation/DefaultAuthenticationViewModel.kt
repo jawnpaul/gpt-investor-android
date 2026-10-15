@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.features.authentication.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.core.utility.Constants
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +36,14 @@ class DefaultAuthenticationViewModel(
                 analyticsLogger.logEvent(eventName = "sign-up-clicked", params = mapOf())
                 handleAction(action = DefaultAuthenticationAction.OnGoToSignUp)
             }
+
+            DefaultAuthenticationEvent.OpenTerms -> {
+                handleAction(action = DefaultAuthenticationAction.OpenUrl(Constants.TERMS_URL))
+            }
+
+            DefaultAuthenticationEvent.OpenPrivacyPolicy -> {
+                handleAction(action = DefaultAuthenticationAction.OpenUrl(Constants.PRIVACY_POLICY_URL))
+            }
         }
     }
 
@@ -62,10 +71,13 @@ class DefaultAuthenticationViewModel(
 sealed interface DefaultAuthenticationEvent {
     data object GuestLogin : DefaultAuthenticationEvent
     data object SignUp : DefaultAuthenticationEvent
+    data object OpenTerms : DefaultAuthenticationEvent
+    data object OpenPrivacyPolicy : DefaultAuthenticationEvent
 }
 
 sealed interface DefaultAuthenticationAction {
     data class ShowToast(val message: String) : DefaultAuthenticationAction
     data object OnGoToHome : DefaultAuthenticationAction
     data object OnGoToSignUp : DefaultAuthenticationAction
+    data class OpenUrl(val url: String) : DefaultAuthenticationAction
 }

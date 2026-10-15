@@ -93,7 +93,6 @@
     <string name="sources">ذرائع</string>
     <string name="top_pick_rationale">بہترین انتخاب کی وجہ</string>
     <string name="sign_up">Sign up</string>
-    <string name="already_have_an_account">پہلے سے اکاؤنٹ ہے؟</string>
     <string name="don_t_have_an_account">اکاؤنٹ نہیں ہے؟</string>
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
     <string name="continue_with_google">Google کے ساتھ جاری رکھیں</string>
@@ -316,5 +315,18 @@
     <string name="subscribe_now">ابھی سبسکرائب کریں</string>
     <string name="premium_billed_info">ماہانہ بل · کسی بھی وقت منسوخ کریں</string>
     <string name="premium_ios_coming_soon">iOS پر ان-ایپ خریداری جلد آ رہی ہے</string>
+    <string name="auth_landing_tagline">کسی بھی اسٹاک پر آسان زبان میں بریف۔</string>
+    <string name="auth_legal">جاری رکھ کر آپ ہماری %1$s اور %2$s سے اتفاق کرتے ہیں۔</string>
+    <string name="terms">شرائط</string>
+    <string name="privacy_policy">رازداری کی پالیسی</string>
+    <string name="auth_have_account">پہلے سے اکاؤنٹ ہے؟ %1$s</string>
+    <string name="signup_name_placeholder">آپ کا نام</string>
+    <string name="email_placeholder">name@example.com</string>
+    <string name="signup_password_placeholder">کم از کم 8 حروف</string>
+    <string name="signup_error_name">اپنا نام درج کریں۔</string>
+    <string name="error_email_invalid">درست ای میل ایڈریس درج کریں، جیسے name@example.com۔</string>
+    <string name="signup_error_password_short">کم از کم 8 حروف استعمال کریں۔</string>
+    <string name="show_password">پاس ورڈ دکھائیں</string>
+    <string name="hide_password">پاس ورڈ چھپائیں</string>
 
 </resources>

@@ -1,150 +1,103 @@
 package com.thejawnpaul.gptinvestor.features.splash
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.financial_clarity_powered_by_ai
 import com.thejawnpaul.gptinvestor.gpt_investor
-import com.thejawnpaul.gptinvestor.input_logo
-import com.thejawnpaul.gptinvestor.mesh_background
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GiMotion
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 import kotlinx.coroutines.delay
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-// Simulated duration for the splash screen
 private const val SPLASH_DURATION_MS = 2000L
-private const val FADE_IN_DURATION_MS = 1500
-private const val GLOW_ANIMATION_DURATION_MS = 2000
+private const val WORDMARK_DELAY_MS = 150
+private val EaseOutQuart = CubicBezierEasing(0.25f, 1f, 0.5f, 1f)
+private val SplashMarkSize = 80.dp
 
 @Composable
 fun AnimatedSplashScreen(onSplashFinish: () -> Unit, modifier: Modifier = Modifier) {
-    var startAnimation by remember { mutableStateOf(false) }
-    val alpha = remember { Animatable(0f) }
-
-    // For the glowing effect on the logo
-    val infiniteTransition = rememberInfiniteTransition(label = "logoGlowTransition")
-    val glowScale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.15f, // How much the glow expands
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = GLOW_ANIMATION_DURATION_MS / 2,
-                easing = FastOutSlowInEasing
-            ),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "logoGlowScale"
-    )
-    val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.7f, // Base alpha of the glow
-        targetValue = 1f, // Peak alpha of the glow
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = GLOW_ANIMATION_DURATION_MS / 2,
-                easing = FastOutSlowInEasing
-            ),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "logoGlowAlpha"
-    )
+    val colors = GiTheme.colors
+    val type = GiTheme.type
+    val reducedMotion = isReducedMotionEnabled()
+    val reveal = remember { Animatable(if (reducedMotion) 1f else 0f) }
+    val rise = with(LocalDensity.current) { GiSpace.x2.toPx() }
 
     LaunchedEffect(onSplashFinish) {
-        startAnimation = true
-        alpha.animateTo(
+        reveal.animateTo(
             targetValue = 1f,
-            animationSpec = tween(durationMillis = FADE_IN_DURATION_MS)
+            animationSpec = tween(GiMotion.SLOW, delayMillis = WORDMARK_DELAY_MS, easing = EaseOutQuart)
         )
-        delay(SPLASH_DURATION_MS - FADE_IN_DURATION_MS) // Wait for the remaining duration
+        delay(SPLASH_DURATION_MS - GiMotion.SLOW - WORDMARK_DELAY_MS)
         onSplashFinish()
     }
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Wavy Background Image (Bottom)
-        Image(
-            painter = painterResource(Res.drawable.mesh_background),
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(colors.bg),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = GiIcons.mark,
             contentDescription = null,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 160.dp)
-                .fillMaxHeight(0.4f) // Adjust height as needed
-                .align(Alignment.BottomCenter)
-                .alpha(0.4f) // Make it subtle
-
+            modifier = Modifier.size(SplashMarkSize),
+            tint = colors.ink
         )
-
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .layout { measurable, constraints ->
+                    val placeable = measurable.measure(constraints)
+                    val belowMark = (SplashMarkSize / 2 + GiSpace.x6).roundToPx()
+                    layout(placeable.width, placeable.height) {
+                        placeable.place(0, placeable.height / 2 + belowMark)
+                    }
+                }
+                .padding(horizontal = GiSpace.gutter)
+                .graphicsLayer {
+                    alpha = reveal.value
+                    translationY = (1f - reveal.value) * rise
+                },
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(GiSpace.x1)
         ) {
-            Spacer(modifier = Modifier.weight(1.3f)) // Pushes content down a bit
-
-            // Glowing Logo
-            Box(contentAlignment = Alignment.Center) {
-                // Main Logo
-                Image(
-                    painter = painterResource(Res.drawable.input_logo),
-                    contentDescription = "GPT Investor Logo",
-                    modifier = Modifier
-                        .size(60.dp)
-                        .graphicsLayer(
-                            scaleX = glowScale,
-                            scaleY = glowScale,
-                            alpha = glowAlpha
-                        )
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             Text(
                 text = stringResource(Res.string.gpt_investor),
-                style = MaterialTheme.typography.titleLarge
+                color = colors.ink,
+                textAlign = TextAlign.Center,
+                style = type.screenTitle
             )
-
-            Spacer(modifier = Modifier.weight(1f)) // Pushes the bottom text down
-
             Text(
-                modifier = Modifier.fillMaxWidth(),
                 text = stringResource(Res.string.financial_clarity_powered_by_ai),
-                style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center
+                color = colors.muted,
+                textAlign = TextAlign.Center,
+                style = type.body
             )
-            Spacer(modifier = Modifier.weight(0.5f))
         }
     }
 }
@@ -153,8 +106,6 @@ fun AnimatedSplashScreen(onSplashFinish: () -> Unit, modifier: Modifier = Modifi
 @Composable
 private fun AnimatedSplashScreenPreview() {
     GPTInvestorTheme {
-        Surface {
-            AnimatedSplashScreen(onSplashFinish = { })
-        }
+        AnimatedSplashScreen(onSplashFinish = {})
     }
 }

@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiEdge
 import com.thejawnpaul.gptinvestor.theme.GiMotion
@@ -59,20 +60,21 @@ fun GiButton(
         targetValue = if (isPressed) GiMotion.PRESSED_SCALE else 1f,
         animationSpec = GiMotion.snappy()
     )
-    val (container, content) = when (variant) {
-        GiButtonVariant.Primary -> colors.primary to colors.onPrimary
-        GiButtonVariant.Secondary -> Color.Transparent to colors.ink
-        GiButtonVariant.Destructive -> colors.error to colors.onError
-        GiButtonVariant.Text -> Color.Transparent to colors.violet
-        GiButtonVariant.TextMuted -> Color.Transparent to colors.muted
+    val buttonColors = when (variant) {
+        GiButtonVariant.Primary -> GiButtonColors(container = colors.primary, content = colors.onPrimary)
+        GiButtonVariant.Secondary -> GiButtonColors(container = Color.Transparent, content = colors.ink)
+        GiButtonVariant.Destructive -> GiButtonColors(container = colors.error, content = colors.onError)
+        GiButtonVariant.Text -> GiButtonColors(container = Color.Transparent, content = colors.violet)
+        GiButtonVariant.TextMuted -> GiButtonColors(container = Color.Transparent, content = colors.muted)
     }
-    val (minHeight, sizePadding, style) = when (size) {
-        GiButtonSize.Large -> Triple(56.dp, 24.dp, GiTextStyle.Button)
-        GiButtonSize.Medium -> Triple(44.dp, 16.dp, GiTextStyle.Label)
-        GiButtonSize.Small -> Triple(36.dp, 14.dp, GiTextStyle.Link)
+    val metrics = when (size) {
+        GiButtonSize.Large -> GiButtonMetrics(minHeight = 56.dp, horizontalPadding = 24.dp, textStyle = GiTextStyle.Button)
+        GiButtonSize.Medium -> GiButtonMetrics(minHeight = 44.dp, horizontalPadding = 16.dp, textStyle = GiTextStyle.Label)
+        GiButtonSize.Small -> GiButtonMetrics(minHeight = 36.dp, horizontalPadding = 14.dp, textStyle = GiTextStyle.Link)
     }
+    val content = buttonColors.content
     val isTextVariant = variant == GiButtonVariant.Text || variant == GiButtonVariant.TextMuted
-    val paddingX = if (isTextVariant) GiSpace.x2 else sizePadding
+    val paddingX = if (isTextVariant) GiSpace.x2 else metrics.horizontalPadding
     val iconSize = if (size == GiButtonSize.Small) 16.dp else 20.dp
     Box(
         modifier = modifier
@@ -82,9 +84,9 @@ fun GiButton(
                 scaleX = scale
                 scaleY = scale
             }
-            .heightIn(min = minHeight)
+            .heightIn(min = metrics.minHeight)
             .clip(GiRadius.full)
-            .background(container)
+            .background(buttonColors.container)
             .then(
                 if (variant == GiButtonVariant.Secondary) {
                     Modifier.border(GiEdge.width, colors.line, GiRadius.full)
@@ -112,13 +114,17 @@ fun GiButton(
             if (leadingIcon != null) {
                 Icon(imageVector = leadingIcon, contentDescription = null, modifier = Modifier.size(iconSize), tint = content)
             }
-            GiText(text = text, style = style, color = content, textAlign = TextAlign.Center)
+            GiText(text = text, style = metrics.textStyle, color = content, textAlign = TextAlign.Center)
         }
         if (loading) {
             GiSpinner(color = content)
         }
     }
 }
+
+private data class GiButtonColors(val container: Color, val content: Color)
+
+private data class GiButtonMetrics(val minHeight: Dp, val horizontalPadding: Dp, val textStyle: GiTextStyle)
 
 @PreviewLightDark
 @Preview(name = "200%", fontScale = 2f)

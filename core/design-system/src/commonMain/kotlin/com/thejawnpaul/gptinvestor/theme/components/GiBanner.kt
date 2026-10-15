@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
@@ -37,16 +38,16 @@ fun GiBanner(
     action: (@Composable () -> Unit)? = null
 ) {
     val colors = GiTheme.colors
-    val (container, accent) = when (tone) {
-        GiBannerTone.Violet -> colors.violetSoft to colors.violet
-        GiBannerTone.Caution -> colors.cautionSoft to colors.caution
-        GiBannerTone.Error -> colors.errorSoft to colors.error
+    val toneColors = when (tone) {
+        GiBannerTone.Violet -> GiBannerColors(container = colors.violetSoft, accent = colors.violet)
+        GiBannerTone.Caution -> GiBannerColors(container = colors.cautionSoft, accent = colors.caution)
+        GiBannerTone.Error -> GiBannerColors(container = colors.errorSoft, accent = colors.error)
     }
     val isLargeText = isLargeText()
     val bannerModifier = modifier
         .fillMaxWidth()
         .clip(GiRadius.md)
-        .background(container)
+        .background(toneColors.container)
         .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
         .padding(horizontal = GiSpace.x4, vertical = GiSpace.x3)
     val copy = @Composable { copyModifier: Modifier ->
@@ -56,7 +57,7 @@ fun GiBanner(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (icon != null) {
-                Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = accent)
+                Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = toneColors.accent)
             }
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 GiText(text = title, style = GiTextStyle.Link, color = colors.ink)
@@ -82,6 +83,8 @@ fun GiBanner(
         }
     }
 }
+
+private data class GiBannerColors(val container: Color, val accent: Color)
 
 @PreviewLightDark
 @Preview(name = "200%", fontScale = 2f)

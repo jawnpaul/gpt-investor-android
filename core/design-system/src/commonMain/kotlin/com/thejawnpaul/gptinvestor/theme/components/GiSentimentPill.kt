@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -25,16 +26,17 @@ enum class GiSentiment { Positive, Neutral, Negative }
 @Composable
 fun GiSentimentPill(sentiment: GiSentiment, label: String, modifier: Modifier = Modifier) {
     val colors = GiTheme.colors
-    val (container, content) = when (sentiment) {
-        GiSentiment.Positive -> colors.gainSoft to colors.gain
-        GiSentiment.Neutral -> colors.tile to colors.muted
-        GiSentiment.Negative -> colors.lossSoft to colors.loss
+    val pillColors = when (sentiment) {
+        GiSentiment.Positive -> GiSentimentColors(container = colors.gainSoft, content = colors.gain)
+        GiSentiment.Neutral -> GiSentimentColors(container = colors.tile, content = colors.muted)
+        GiSentiment.Negative -> GiSentimentColors(container = colors.lossSoft, content = colors.loss)
     }
+    val content = pillColors.content
     Row(
         modifier = modifier
             .heightIn(min = 24.dp)
             .clip(GiRadius.xs)
-            .background(container)
+            .background(pillColors.container)
             .padding(horizontal = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(GiSpace.x1),
         verticalAlignment = Alignment.CenterVertically
@@ -52,6 +54,8 @@ fun GiSentimentPill(sentiment: GiSentiment, label: String, modifier: Modifier = 
         GiText(text = label, style = GiTextStyle.Tag, color = content, maxLines = 1)
     }
 }
+
+private data class GiSentimentColors(val container: Color, val content: Color)
 
 @PreviewLightDark
 @Preview(name = "200%", fontScale = 2f)

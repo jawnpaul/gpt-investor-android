@@ -47,7 +47,7 @@ import com.thejawnpaul.gptinvestor.theme.GiTheme
 class GiComposerStop(val contentDescription: String, val onStop: () -> Unit)
 
 // Keeps the line hairline on purpose (not the control edge); turns violet while focused or filled.
-// Pass stop while the assistant is answering.
+// Pass stop while the assistant is answering: Stop replaces Send and the beam runs around the edge.
 @Composable
 fun GiAskComposer(
     value: String,
@@ -94,6 +94,7 @@ fun GiAskComposer(
                         color = if (isFocused || value.isNotEmpty()) colors.violet else colors.line,
                         shape = GiRadius.md
                     )
+                    .giBeam(active = stop != null, shape = GiRadius.md)
                     .padding(start = 14.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically

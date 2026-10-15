@@ -12,7 +12,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -40,9 +39,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -133,7 +137,18 @@ fun GiTextField(
                         .heightIn(min = 52.dp)
                         .clip(GiRadius.sm)
                         .background(colors.raised)
-                        .border(edgeWidth, edgeColor, GiRadius.sm)
+                        .drawBehind {
+                            val strokeWidth = edgeWidth.toPx()
+                            val inset = strokeWidth / 2
+                            val corner = GiRadius.sm.topStart.toPx(size, this) - inset
+                            drawRoundRect(
+                                color = edgeColor,
+                                topLeft = Offset(inset, inset),
+                                size = Size(size.width - strokeWidth, size.height - strokeWidth),
+                                cornerRadius = CornerRadius(corner, corner),
+                                style = Stroke(strokeWidth)
+                            )
+                        }
                         .padding(start = GiSpace.x4, end = if (isPassword) GiSpace.x1 else GiSpace.x4),
                     horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
                     verticalAlignment = Alignment.CenterVertically

@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -62,18 +65,22 @@ fun GiLinkText(
             SpanStyle(background = toneStyle.link.color.copy(alpha = GiMotion.PRESSED_ALPHA))
         )
     )
-    val annotated = buildAnnotatedString {
-        append(text)
-        links.forEach { link ->
-            val start = text.indexOf(link.text)
-            if (start >= 0) {
-                addLink(
-                    LinkAnnotation.Clickable(tag = link.text, styles = linkStyles) {
-                        link.onClick()
-                    },
-                    start = start,
-                    end = start + link.text.length
-                )
+    val currentLinks by rememberUpdatedState(links)
+    val linkTexts = links.map { it.text }
+    val annotated = remember(text, linkTexts, linkStyles) {
+        buildAnnotatedString {
+            append(text)
+            linkTexts.forEach { linkText ->
+                val start = text.indexOf(linkText)
+                if (start >= 0) {
+                    addLink(
+                        LinkAnnotation.Clickable(tag = linkText, styles = linkStyles) {
+                            currentLinks.firstOrNull { it.text == linkText }?.onClick?.invoke()
+                        },
+                        start = start,
+                        end = start + linkText.length
+                    )
+                }
             }
         }
     }

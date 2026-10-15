@@ -23,6 +23,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -95,6 +97,7 @@ fun SignUpScreen(
     platformContext: PlatformContext = koinInject()
 ) {
     val scrollState = rememberScrollState()
+    val scrolled by remember { derivedStateOf { scrollState.value > 0 } }
     val haptics = LocalHapticFeedback.current
     val focusRequesters = remember { SignUpField.entries.associateWith { FocusRequester() } }
     LaunchedEffect(invalidSubmits) {
@@ -114,7 +117,7 @@ fun SignUpScreen(
                 title = stringResource(Res.string.sign_up),
                 onBack = { onEvent(SignUpUiEvent.GoBack) },
                 backContentDescription = stringResource(Res.string.back),
-                scrolled = scrollState.value > 0,
+                scrolled = scrolled,
                 titleStyle = GiTopBarTitleStyle.Page
             )
         }

@@ -143,8 +143,7 @@ fun SignUpScreen(
                         capitalization = KeyboardCapitalization.Words,
                         imeAction = ImeAction.Next
                     ),
-                    leadingIcon = GiIcons.user,
-                    onFocusLost = { onEvent(SignUpUiEvent.FieldBlurred(SignUpField.Name)) }
+                    leadingIcon = GiIcons.user
                 )
                 GiTextField(
                     value = state.email,
@@ -154,8 +153,7 @@ fun SignUpScreen(
                     placeholder = stringResource(Res.string.email_placeholder),
                     errorText = if (state.emailError) stringResource(Res.string.error_email_invalid) else null,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
-                    leadingIcon = GiIcons.envelopeSimple,
-                    onFocusLost = { onEvent(SignUpUiEvent.FieldBlurred(SignUpField.Email)) }
+                    leadingIcon = GiIcons.envelopeSimple
                 )
                 GiTextField(
                     value = state.password,
@@ -175,8 +173,7 @@ fun SignUpScreen(
                     leadingIcon = GiIcons.lock,
                     isPassword = true,
                     showPasswordContentDescription = stringResource(Res.string.show_password),
-                    hidePasswordContentDescription = stringResource(Res.string.hide_password),
-                    onFocusLost = { onEvent(SignUpUiEvent.FieldBlurred(SignUpField.Password)) }
+                    hidePasswordContentDescription = stringResource(Res.string.hide_password)
                 )
                 AnimatedVisibility(
                     visible = state.showEmailConflictPrompt,

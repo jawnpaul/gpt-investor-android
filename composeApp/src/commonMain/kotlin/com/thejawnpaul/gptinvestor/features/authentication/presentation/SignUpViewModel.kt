@@ -29,7 +29,7 @@ class SignUpViewModel(
         when (event) {
             is SignUpUiEvent.EmailChanged -> {
                 _signUpUiState.update {
-                    it.copy(email = event.email, emailError = false)
+                    it.copy(email = event.email).validated(SignUpField.Email)
                 }
             }
 
@@ -43,19 +43,13 @@ class SignUpViewModel(
 
             is SignUpUiEvent.NameChanged -> {
                 _signUpUiState.update {
-                    it.copy(name = event.name, nameError = false)
+                    it.copy(name = event.name).validated(SignUpField.Name)
                 }
             }
 
             is SignUpUiEvent.PasswordChanged -> {
                 _signUpUiState.update {
-                    it.copy(password = event.password, passwordError = false)
-                }
-            }
-
-            is SignUpUiEvent.FieldBlurred -> {
-                _signUpUiState.update {
-                    if (it.valueOf(event.field).isBlank()) it else it.withError(event.field, it.isInvalid(event.field))
+                    it.copy(password = event.password).validated(SignUpField.Password)
                 }
             }
 
@@ -212,17 +206,13 @@ data class SignUpUiState(
 
 enum class SignUpField { Name, Email, Password }
 
-private fun SignUpUiState.valueOf(field: SignUpField): String = when (field) {
-    SignUpField.Name -> name
-    SignUpField.Email -> email
-    SignUpField.Password -> password
-}
-
 private fun SignUpUiState.isInvalid(field: SignUpField): Boolean = when (field) {
     SignUpField.Name -> name.isBlank()
     SignUpField.Email -> !isValidEmail(email)
     SignUpField.Password -> password.length < MIN_PASSWORD_LENGTH
 }
+
+private fun SignUpUiState.validated(field: SignUpField): SignUpUiState = withError(field, isInvalid(field))
 
 private fun SignUpUiState.withError(field: SignUpField, error: Boolean): SignUpUiState = when (field) {
     SignUpField.Name -> copy(nameError = error)
@@ -234,7 +224,6 @@ sealed interface SignUpUiEvent {
     data class EmailChanged(val email: String) : SignUpUiEvent
     data class PasswordChanged(val password: String) : SignUpUiEvent
     data class NameChanged(val name: String) : SignUpUiEvent
-    data class FieldBlurred(val field: SignUpField) : SignUpUiEvent
     data object SignUpClick : SignUpUiEvent
     data object GoBack : SignUpUiEvent
     data object GoToLogin : SignUpUiEvent

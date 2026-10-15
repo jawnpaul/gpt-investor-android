@@ -97,30 +97,51 @@ class SignUpViewModelTest {
     }
 
     @Test
-    fun `editing a field clears its error`() = runTest {
-        val viewModel = buildViewModel()
-        viewModel.handleEvent(SignUpUiEvent.SignUpClick)
-        assertThat(viewModel.signUpUiState.value.emailError).isTrue()
+    fun `fields show no errors before anything is typed`() = runTest {
+        val state = buildViewModel().signUpUiState.value
 
-        viewModel.handleEvent(SignUpUiEvent.EmailChanged("a"))
-
-        val state = viewModel.signUpUiState.value
+        assertThat(state.nameError).isFalse()
         assertThat(state.emailError).isFalse()
-        assertThat(state.nameError).isTrue()
-        assertThat(state.passwordError).isTrue()
+        assertThat(state.passwordError).isFalse()
     }
 
     @Test
-    fun `leaving a non-empty invalid field shows its error and a blank one stays clear`() = runTest {
+    fun `typing validates the field on every keystroke`() = runTest {
         val viewModel = buildViewModel()
-        viewModel.handleEvent(SignUpUiEvent.EmailChanged("notanemail"))
 
-        viewModel.handleEvent(SignUpUiEvent.FieldBlurred(SignUpField.Email))
-        viewModel.handleEvent(SignUpUiEvent.FieldBlurred(SignUpField.Password))
+        viewModel.handleEvent(SignUpUiEvent.EmailChanged("a"))
+        assertThat(viewModel.signUpUiState.value.emailError).isTrue()
+
+        viewModel.handleEvent(SignUpUiEvent.EmailChanged("a@b.co"))
+        assertThat(viewModel.signUpUiState.value.emailError).isFalse()
+
+        viewModel.handleEvent(SignUpUiEvent.PasswordChanged("investor"))
+        assertThat(viewModel.signUpUiState.value.passwordError).isFalse()
+
+        viewModel.handleEvent(SignUpUiEvent.PasswordChanged("investo"))
+        assertThat(viewModel.signUpUiState.value.passwordError).isTrue()
+    }
+
+    @Test
+    fun `typing in one field leaves the others untouched`() = runTest {
+        val viewModel = buildViewModel()
+
+        viewModel.handleEvent(SignUpUiEvent.NameChanged("Ada"))
 
         val state = viewModel.signUpUiState.value
-        assertThat(state.emailError).isTrue()
+        assertThat(state.nameError).isFalse()
+        assertThat(state.emailError).isFalse()
         assertThat(state.passwordError).isFalse()
+    }
+
+    @Test
+    fun `clearing a field shows its error`() = runTest {
+        val viewModel = buildViewModel()
+        viewModel.handleEvent(SignUpUiEvent.NameChanged("Ada"))
+
+        viewModel.handleEvent(SignUpUiEvent.NameChanged(""))
+
+        assertThat(viewModel.signUpUiState.value.nameError).isTrue()
     }
 
     @Test

@@ -48,6 +48,7 @@ class GiComposerStop(val contentDescription: String, val onStop: () -> Unit)
 
 // Keeps the line hairline on purpose (not the control edge); turns violet while focused or filled.
 // Pass stop while the assistant is answering: Stop replaces Send and the beam runs around the edge.
+// Grows to 4 lines (2 at large text), then scrolls; the mark and the button stay on the last line.
 @Composable
 fun GiAskComposer(
     value: String,
@@ -73,7 +74,7 @@ fun GiAskComposer(
             imeAction = ImeAction.Send
         ),
         keyboardActions = KeyboardActions(onSend = { if (canSend) onSend() }),
-        maxLines = if (isLargeText()) 2 else 1,
+        maxLines = if (isLargeText()) LARGE_TEXT_MAX_LINES else MAX_LINES,
         interactionSource = interactionSource,
         cursorBrush = SolidColor(colors.violet),
         decorationBox = { innerTextField ->
@@ -97,15 +98,22 @@ fun GiAskComposer(
                     .giBeam(active = stop != null, shape = GiRadius.md)
                     .padding(start = 14.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Bottom
             ) {
+                // Padding centres the mark and each text line on the 40 button, so one line still sits mid-field.
                 Icon(
                     imageVector = GiIcons.mark,
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier
+                        .padding(vertical = 10.dp)
+                        .size(20.dp),
                     tint = colors.violet
                 )
-                Box(modifier = Modifier.weight(1f)) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = GiSpace.x2)
+                ) {
                     if (value.isEmpty()) {
                         GiText(
                             text = placeholder,
@@ -158,6 +166,9 @@ fun GiAskComposer(
     )
 }
 
+private const val MAX_LINES = 4
+private const val LARGE_TEXT_MAX_LINES = 2
+
 @PreviewLightDark
 @Preview(name = "200%", fontScale = 2f)
 @Composable
@@ -173,6 +184,14 @@ private fun GiAskComposerPreview() {
             )
             GiAskComposer(
                 value = "Why is NVDA up today?",
+                onValueChange = {},
+                onSend = {},
+                placeholder = "Ask me anything about markets…",
+                sendContentDescription = "Send"
+            )
+            GiAskComposer(
+                value = "Compare Apple and Microsoft on revenue growth, margins and buybacks over the last three " +
+                    "years, then tell me which looks steadier for a long-term holder and why.",
                 onValueChange = {},
                 onSend = {},
                 placeholder = "Ask me anything about markets…",

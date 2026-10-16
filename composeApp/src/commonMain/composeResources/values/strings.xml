@@ -239,13 +239,13 @@
     <string name="dark">Dark</string>
     <string name="system">System</string>
 
-    <string name="post_auth_onboarding_title">Help us personalize your experience</string>
+    <string name="post_auth_onboarding_title">Help us personalise your experience</string>
     <string name="post_auth_onboarding_subtitle">Your answers shape the insights and picks we show you.</string>
     <string name="post_auth_onboarding_experience_label">How would you describe your investing experience?</string>
     <string name="post_auth_onboarding_experience_beginner">I’m new to investing</string>
     <string name="post_auth_onboarding_experience_intermediate">Some experience</string>
     <string name="post_auth_onboarding_experience_experienced">Experienced investor</string>
-    <string name="post_auth_onboarding_goal_label">What’s your primary investing goal?</string>
+    <string name="post_auth_onboarding_goal_label">What’s your main investing goal?</string>
     <string name="post_auth_onboarding_goal_grow_wealth">Grow wealth long-term</string>
     <string name="post_auth_onboarding_goal_generate_income">Generate income</string>
     <string name="post_auth_onboarding_goal_learn_basics">Learn the basics</string>
@@ -254,6 +254,7 @@
     <string name="post_auth_onboarding_risk_conservative">Play it safe</string>
     <string name="post_auth_onboarding_risk_balanced">Balanced approach</string>
     <string name="post_auth_onboarding_risk_aggressive">Comfortable with volatility</string>
+    <string name="post_auth_onboarding_save_error">We couldn’t save your answers. Try again.</string>
     <string name="home">Home</string>
     <string name="profile">Profile</string>
     <string name="log_in_with_apple">Log in with Apple</string>

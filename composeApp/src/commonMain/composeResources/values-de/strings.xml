@@ -227,6 +227,7 @@
     <string name="post_auth_onboarding_risk_conservative">Lieber auf Nummer sicher gehen</string>
     <string name="post_auth_onboarding_risk_balanced">Ausgewogener Ansatz</string>
     <string name="post_auth_onboarding_risk_aggressive">Ich fühle mich mit Kursschwankungen wohl</string>
+    <string name="post_auth_onboarding_save_error">Wir konnten Ihre Antworten nicht speichern. Versuchen Sie es erneut.</string>
 
     <string name="verify_email_title">Prüfen Sie Ihre E-Mails</string>
     <string name="verify_email_body">Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich anmelden. Prüfen Sie Ihren Posteingang auf den Bestätigungslink.</string>

@@ -385,4 +385,11 @@
     <string name="forgot_password_resend_in">Resend in %1$d s</string>
     <string name="forgot_password_back_to_login">Back to log in</string>
     <string name="forgot_password_error_rate_limited">Too many attempts. Try again later.</string>
+    <string name="company_context_title">%1$s · %2$s</string>
+    <string name="ask_about_company">Ask about %1$s…</string>
+    <string name="reading_company_data">Reading %1$s’s latest data…</string>
+    <string name="answer_copied">Answer copied</string>
+    <string name="helpful">Helpful</string>
+    <string name="not_helpful">Not helpful</string>
+    <string name="stop_answering">Stop answering</string>
 </resources>

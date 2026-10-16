@@ -7,14 +7,14 @@ import org.koin.core.annotation.Singleton
 
 const val PREMIUM_SOURCE_WATCHLIST_FULL = "watchlist_full"
 
-data class PremiumRequest(val source: String, val watchlistCap: Int? = null)
+data class PremiumRequest(val source: String, val watchlistCap: Int? = null, val ticker: String? = null)
 
 @Singleton
 class PremiumEventBus {
     private val _events = MutableSharedFlow<PremiumRequest>(extraBufferCapacity = 1)
     val events: SharedFlow<PremiumRequest> = _events.asSharedFlow()
 
-    fun requestPremium(source: String, watchlistCap: Int? = null) {
-        _events.tryEmit(PremiumRequest(source = source, watchlistCap = watchlistCap))
+    fun requestPremium(source: String, watchlistCap: Int? = null, ticker: String? = null) {
+        _events.tryEmit(PremiumRequest(source = source, watchlistCap = watchlistCap, ticker = ticker))
     }
 }

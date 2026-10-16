@@ -215,7 +215,7 @@ class WatchlistViewModelTest {
         premiumEventBus.events.test {
             vm.onEvent(WatchlistEvent.OnWatchClick("AAPL"))
             advanceUntilIdle()
-            assertThat(awaitItem()).isEqualTo(PremiumRequest(source = "watchlist_full", watchlistCap = 2))
+            assertThat(awaitItem()).isEqualTo(PremiumRequest(source = "watchlist_full", watchlistCap = 2, ticker = "AAPL"))
         }
     }
 }

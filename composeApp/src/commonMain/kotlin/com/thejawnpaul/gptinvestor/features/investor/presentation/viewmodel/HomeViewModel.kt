@@ -373,7 +373,8 @@ class HomeViewModel(
                                 is WatchlistFailure.WatchlistFull -> {
                                     premiumEventBus.requestPremium(
                                         source = PREMIUM_SOURCE_WATCHLIST_FULL,
-                                        watchlistCap = failure.cap
+                                        watchlistCap = failure.cap,
+                                        ticker = event.ticker
                                     )
                                 }
 

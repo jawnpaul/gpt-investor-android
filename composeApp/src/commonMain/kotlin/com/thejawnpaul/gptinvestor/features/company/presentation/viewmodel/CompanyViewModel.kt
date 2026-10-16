@@ -101,6 +101,7 @@ class CompanyViewModel(
                 isGuestSession.value = isGuest == true
             }
         }
+        _selectedCompany.update { it.copy(ticker = selectedCompanyTicker.orEmpty()) }
         getAvailableModels()
         getCompany()
     }
@@ -419,6 +420,24 @@ class CompanyViewModel(
                 )
             }
 
+            is CompanyDetailEvent.AskAboutKeyNumber -> {
+                analyticsLogger.logEvent(
+                    eventName = "brief-key-number-ask-tapped",
+                    params = mapOf(
+                        "ticker" to (_selectedCompany.value.brief?.ticker ?: ""),
+                        "key_number_type" to event.keyNumberType.name,
+                        "user_type" to if (isGuestSession.value) "guest" else "authenticated"
+                    )
+                )
+                _selectedCompany.update { it.copy(inputQuery = event.question) }
+                getInputResponse()
+            }
+
+            CompanyDetailEvent.RetryLoad -> {
+                _selectedCompany.update { it.copy(error = null) }
+                getCompany()
+            }
+
             CompanyDetailEvent.ShareBrief -> {
                 val brief = _selectedCompany.value.brief ?: return
                 processCompanyDetailAction(CompanyDetailAction.OnShare(brief.name, brief.ticker, brief.id))
@@ -564,6 +583,8 @@ sealed interface CompanyDetailEvent {
     data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) : CompanyDetailEvent
     data class BriefSentimentViewed(val sentiment: BriefSentiment) : CompanyDetailEvent
     data class BriefKeyNumberExpanded(val keyNumberType: KeyNumberType) : CompanyDetailEvent
+    data class AskAboutKeyNumber(val keyNumberType: KeyNumberType, val question: String) : CompanyDetailEvent
+    data object RetryLoad : CompanyDetailEvent
     data object ShareBrief : CompanyDetailEvent
     data object AddToWatchlist : CompanyDetailEvent
     data object RemoveFromWatchlist : CompanyDetailEvent

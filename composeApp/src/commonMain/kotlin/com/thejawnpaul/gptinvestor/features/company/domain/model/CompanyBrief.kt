@@ -6,6 +6,7 @@ import com.thejawnpaul.gptinvestor.core.utility.toReadable
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.BriefNewsItem
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.BriefOpportunityRisk
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyBriefRemote
+import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.time.Clock
 
@@ -73,8 +74,12 @@ private fun Float.formatRatio(): String {
 
 private fun Float.formatSignedPercent(): String {
     val rounded = (this * 10).roundToInt() / 10f
-    val sign = if (rounded > 0f) "+" else ""
-    return "$sign$rounded%"
+    val sign = when {
+        rounded > 0f -> "+"
+        rounded < 0f -> "\u2212"
+        else -> ""
+    }
+    return "$sign${abs(rounded)}%"
 }
 
 private fun Float.formatPercent(): String {

@@ -11,6 +11,7 @@ data class SingleCompanyView(
     val conversation: Conversation = CompanyDetailDefaultConversation(id = 0, response = null),
     val error: String? = null,
     val companyName: String = "",
+    val ticker: String = "",
     val inputQuery: String = "",
     val header: CompanyHeaderPresentation = CompanyHeaderPresentation(),
     val brief: CompanyBrief? = null,

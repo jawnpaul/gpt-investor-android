@@ -149,9 +149,6 @@
     <string name="what_it_means">Was das bedeutet</string>
     <string name="the_risk">Das Risiko</string>
     <string name="the_opportunity">Die Chance</string>
-    <string name="sentiment_bullish">BULLISH</string>
-    <string name="sentiment_bearish">BEARISH</string>
-    <string name="sentiment_neutral">NEUTRAL</string>
     <string name="today">heute</string>
     <string name="favorite">Favorit</string>
     <string name="more">Mehr</string>
@@ -351,4 +348,20 @@
     <string name="forgot_password_back_to_login">Zurück zur Anmeldung</string>
     <string name="forgot_password_error_rate_limited">Zu viele Versuche. Versuchen Sie es später erneut.</string>
 
+    <string name="got_it">Verstanden</string>
+    <string name="brief_spotlight_title">Neu in der Kurzanalyse</string>
+    <string name="brief_spotlight_share_desc">Teile diese Kurzanalyse mit anderen</string>
+    <string name="brief_spotlight_watchlist_desc">Speichere dieses Unternehmen auf deiner Watchlist</string>
+    <string name="share_brief">Kurzanalyse teilen</string>
+    <string name="ask_about_this">Dazu fragen</string>
+    <string name="not_financial_advice">Keine Finanzberatung.</string>
+    <string name="couldn_t_load_brief">Kurzanalyse konnte nicht geladen werden</string>
+    <string name="key_question_market_cap">Was sagt eine Marktkapitalisierung von %1$s über %2$s aus?</string>
+    <string name="key_question_pe_ratio">Ist ein KGV von %1$s für %2$s hoch?</string>
+    <string name="key_question_revenue_growth">Was bedeutet ein Umsatzwachstum von %1$s für %2$s?</string>
+    <string name="key_question_dividend_yield">Ist eine Dividendenrendite von %1$s für %2$s gut?</string>
+    <plurals name="brief_footer_sources">
+        <item quantity="one">%1$d Quelle. Keine Finanzberatung.</item>
+        <item quantity="other">%1$d Quellen. Keine Finanzberatung.</item>
+    </plurals>
 </resources>

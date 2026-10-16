@@ -445,13 +445,23 @@ private fun CompanyDetailBriefContent(
     )
     val scope = rememberCoroutineScope()
     val reducedMotion = isReducedMotionEnabled()
-    val threadItemSpec = remember(reducedMotion) { ThreadItemSpec(reducedMotion) }
     val itemSizes = remember { mutableMapOf<Int, Int>() }
     LaunchedEffect(listState) {
         snapshotFlow { listState.layoutInfo.visibleItemsInfo }
             .collect { items -> items.forEach { itemSizes[it.index] = it.size } }
     }
     var showReasonsFor by remember { mutableStateOf<Long?>(null) }
+    var instantCollapseFor by remember { mutableStateOf<Long?>(null) }
+    var settlingCollapse by remember { mutableStateOf(false) }
+    val threadItemSpec = remember(reducedMotion, settlingCollapse) {
+        ThreadItemSpec(animatePlacement = !reducedMotion && !settlingCollapse)
+    }
+    LaunchedEffect(settlingCollapse) {
+        if (settlingCollapse) {
+            repeat(SETTLE_FRAMES) { withFrameNanos { } }
+            settlingCollapse = false
+        }
+    }
     val showPending = state.pendingQuery != null
     val questionCount = messages.size + if (showPending) 1 else 0
     var scrolledQuestionCount by remember { mutableIntStateOf(questionCount) }
@@ -517,7 +527,14 @@ private fun CompanyDetailBriefContent(
                             }
                         },
                         collapsed = !(expanded[message.id] ?: isLatest),
-                        onToggleCollapse = { expanded[message.id] = !(expanded[message.id] ?: isLatest) },
+                        animateCollapse = instantCollapseFor != message.id,
+                        onToggleCollapse = {
+                            val expandedNow = expanded[message.id] ?: isLatest
+                            val instant = expandedNow && listState.keepNextItemInPlace("a-$index")
+                            instantCollapseFor = if (instant) message.id else null
+                            settlingCollapse = instant
+                            expanded[message.id] = !expandedNow
+                        },
                         isGuest = state.isGuestSession,
                         showReasons = showReasonsFor == message.id,
                         onEvent = onEvent,
@@ -549,6 +566,7 @@ private fun CompanyAnswer(
     strings: AnswerStrings,
     onCompanyClick: (String) -> Unit,
     collapsed: Boolean,
+    animateCollapse: Boolean,
     onToggleCollapse: () -> Unit,
     isGuest: Boolean,
     showReasons: Boolean,
@@ -564,6 +582,7 @@ private fun CompanyAnswer(
             streaming = message.loading,
             disclaimer = strings.disclaimer,
             collapsed = collapsed,
+            animateCollapse = animateCollapse,
             onToggleCollapse = onToggleCollapse,
             showMoreText = strings.showMore,
             showLessText = strings.showLess,
@@ -693,6 +712,19 @@ private fun AnswerCompanyCard(
     }
 }
 
+private fun LazyListState.keepNextItemInPlace(answerKey: String): Boolean {
+    val items = layoutInfo.visibleItemsInfo
+    val answer = items.firstOrNull { it.key == answerKey } ?: return false
+    if (answer.offset >= 0) return false
+    val nextIndex = answer.index + 1
+    if (nextIndex < layoutInfo.totalItemsCount) {
+        val nextOffset = items.firstOrNull { it.index == nextIndex }?.offset
+            ?: (answer.offset + answer.size + layoutInfo.mainAxisItemSpacing)
+        requestScrollToItem(nextIndex, -nextOffset)
+    }
+    return true
+}
+
 private suspend fun LazyListState.scrollToTop(itemSizes: Map<Int, Int>, animate: Boolean) {
     if (!animate) {
         scrollToItem(0)
@@ -740,10 +772,10 @@ private data class AnswerStrings(
     val reasons: List<String> get() = listOf(tooComplex, inaccurate, notActionable, others)
 }
 
-private class ThreadItemSpec(reducedMotion: Boolean) {
+private class ThreadItemSpec(animatePlacement: Boolean) {
     val fadeIn = tween<Float>(GiMotion.BASE, easing = EaseOutQuart)
     val fadeOut = tween<Float>(GiMotion.FAST, easing = EaseOutQuart)
-    val placement = if (reducedMotion) null else GiMotion.smooth<IntOffset>()
+    val placement = if (animatePlacement) GiMotion.smooth<IntOffset>() else null
 }
 
 private fun LazyItemScope.threadItem(spec: ThreadItemSpec): Modifier =
@@ -751,6 +783,7 @@ private fun LazyItemScope.threadItem(spec: ThreadItemSpec): Modifier =
 
 private const val REASONS_TIMEOUT_MS = 15_000L
 private const val ITEMS_AFTER_BUBBLE = 2
+private const val SETTLE_FRAMES = 2
 private const val PINNED_SLIDE_DIVISOR = 4
 private const val COMPOSER_LARGE_TEXT_LINES = 3
 

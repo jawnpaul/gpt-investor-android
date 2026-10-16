@@ -125,6 +125,7 @@ fun GiAssistantMessage(
     disclaimer: String? = null,
     collapsed: Boolean = false,
     collapsedHeight: Dp = COLLAPSED_HEIGHT,
+    animateCollapse: Boolean = true,
     onToggleCollapse: (() -> Unit)? = null,
     showMoreText: String = "",
     showLessText: String = "",
@@ -144,7 +145,7 @@ fun GiAssistantMessage(
                 modifier = Modifier
                     .layoutId(AssistantSlot.Body)
                     .then(
-                        if (streaming) {
+                        if (streaming || !animateCollapse) {
                             Modifier
                         } else {
                             Modifier.animateContentSize(if (reducedMotion) snap() else GiMotion.smooth())

@@ -139,7 +139,6 @@ fun GiChip(
         }
         BasicText(
             text = text,
-            modifier = Modifier.weight(1f, fill = false),
             style = (if (isLarge) GiTheme.type.label else GiTheme.type.bodySmall).copy(
                 fontWeight = if (selected && !isQuiet) FontWeight.SemiBold else FontWeight.Medium
             ),

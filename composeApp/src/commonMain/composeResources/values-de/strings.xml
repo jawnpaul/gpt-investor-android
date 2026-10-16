@@ -38,7 +38,6 @@
     <string name="ask_gpt_investor">GPT Investor fragen</string>
     <string name="ask_about">Fragen zu …</string>
     <string name="ask_anything_about_stocks">Fragen Sie alles über Aktien …</string>
-    <string name="analysing_response">Antwort wird analysiert …</string>
     <string name="data_from">Daten von</string>
     <string name="about_company_name">Über %1$s</string>
     <string name="pe_ratio">KGV</string>
@@ -84,9 +83,7 @@
     <string name="send">Senden</string>
     <string name="copy">Kopieren</string>
     <string name="like">Gefällt mir</string>
-    <string name="dislike">Gefällt mir nicht</string>
     <string name="like_chosen">Gefällt mir ausgewählt</string>
-    <string name="dislike_chosen">Gefällt mir nicht ausgewählt</string>
     <string name="none_chosen">Keine Auswahl</string>
     <string name="read_more">Mehr lesen</string>
     <string name="read_less">Weniger lesen</string>
@@ -371,4 +368,6 @@
     <string name="helpful">Hilfreich</string>
     <string name="not_helpful">Nicht hilfreich</string>
     <string name="stop_answering">Antwort stoppen</string>
+    <string name="ask_a_follow_up">Folgefrage stellen…</string>
+    <string name="thinking">Denkt nach…</string>
 </resources>

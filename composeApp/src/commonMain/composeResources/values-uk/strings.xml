@@ -38,7 +38,6 @@
     <string name="ask_gpt_investor">Запитайте GPT Investor</string>
     <string name="ask_about">Запитайте про …</string>
     <string name="ask_anything_about_stocks">Запитайте що завгодно про акції …</string>
-    <string name="analysing_response">Аналізуємо відповідь …</string>
     <string name="data_from">Дані з</string>
     <string name="about_company_name">Про %1$s</string>
     <string name="pe_ratio">коефіцієнт P/E</string>
@@ -84,9 +83,7 @@
     <string name="send">Надіслати</string>
     <string name="copy">Копіювати</string>
     <string name="like">Подобається</string>
-    <string name="dislike">Не подобається</string>
     <string name="like_chosen">Обрано «Подобається»</string>
-    <string name="dislike_chosen">Обрано «Не подобається»</string>
     <string name="none_chosen">Нічого не обрано</string>
     <string name="read_more">Читати далі</string>
     <string name="read_less">Згорнути</string>
@@ -373,4 +370,6 @@
     <string name="helpful">Корисно</string>
     <string name="not_helpful">Не корисно</string>
     <string name="stop_answering">Зупинити відповідь</string>
+    <string name="ask_a_follow_up">Поставте уточнювальне запитання…</string>
+    <string name="thinking">Думаю…</string>
 </resources>

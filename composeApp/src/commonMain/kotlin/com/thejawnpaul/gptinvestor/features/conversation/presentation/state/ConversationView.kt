@@ -9,7 +9,7 @@ data class ConversationView(
     val conversation: Conversation = DefaultConversation(),
     val query: String = "",
     val loading: Boolean = false,
-    val genText: String = "",
+    val pendingQuery: String? = null,
     val availableModels: List<AvailableModel> = emptyList(),
     val selectedModel: AvailableModel = DefaultModel(),
     val waitlistAvailableOptions: List<String> = listOf(

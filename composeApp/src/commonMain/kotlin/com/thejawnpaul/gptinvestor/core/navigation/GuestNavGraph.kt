@@ -133,7 +133,8 @@ fun NavGraphBuilder.guestNavGraph(
         HomeScreen(
             modifier = Modifier,
             state = state.value,
-            onEvent = viewModel::handleEvent
+            onEvent = viewModel::handleEvent,
+            composerModifier = askComposerTransition()
         )
     }
 
@@ -263,6 +264,18 @@ fun NavGraphBuilder.guestNavGraph(
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
                     }
+
+                    is ConversationAction.OnShare -> {
+                        platformActions.shareText(action.text)
+                    }
+
+                    ConversationAction.OnGoToHistory -> {
+                        navController.navigate(GuestScreen.GuestHistoryTab.route) { launchSingleTop = true }
+                    }
+
+                    is ConversationAction.OnOpenCompany -> {
+                        navController.navigate(GuestScreen.GuestCompanyDetail.createRoute(action.ticker))
+                    }
                 }
             }.launchIn(scope)
         }
@@ -272,7 +285,8 @@ fun NavGraphBuilder.guestNavGraph(
             state = state.value,
             onEvent = viewModel::handleEvent,
             onAction = viewModel::processAction,
-            onUpgradeFromRateLimit = {}
+            onUpgradeFromRateLimit = {},
+            composerModifier = askComposerTransition()
         )
     }
 
@@ -307,6 +321,20 @@ fun NavGraphBuilder.guestNavGraph(
                         navController.navigate(Screen.SignUpScreen.route) {
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
+                    }
+
+                    is HistoryDetailAction.OnShare -> {
+                        platformActions.shareText(action.text)
+                    }
+
+                    HistoryDetailAction.OnGoToHistory -> {
+                        if (!navController.popBackStack(GuestScreen.GuestHistoryTab.route, inclusive = false)) {
+                            navController.navigate(GuestScreen.GuestHistoryTab.route)
+                        }
+                    }
+
+                    is HistoryDetailAction.OnOpenCompany -> {
+                        navController.navigate(GuestScreen.GuestCompanyDetail.createRoute(action.ticker))
                     }
                 }
             }.launchIn(scope)

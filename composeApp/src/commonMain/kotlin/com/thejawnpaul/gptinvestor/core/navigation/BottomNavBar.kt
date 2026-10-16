@@ -1,7 +1,19 @@
 package com.thejawnpaul.gptinvestor.core.navigation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
@@ -18,10 +30,12 @@ import com.thejawnpaul.gptinvestor.discover
 import com.thejawnpaul.gptinvestor.features.guest.presentation.GuestScreen
 import com.thejawnpaul.gptinvestor.home
 import com.thejawnpaul.gptinvestor.profile
+import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.components.GiBottomNav
 import com.thejawnpaul.gptinvestor.theme.components.GiBottomNavItem
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 import com.thejawnpaul.gptinvestor.watchlist_title
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -95,13 +109,37 @@ fun isBottomTabRoute(route: String?) = bottomNavItems.any { route in it.matching
 fun BottomNavBar(navController: NavController, modifier: Modifier = Modifier) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val routeIndex = bottomNavItems.indexOfFirst { currentRoute in it.matchingRoutes }
+    var lastTab by remember { mutableStateOf(NavTab(index = routeIndex, isGuest = currentRoute.isGuestRoute())) }
+    val shownTab = if (routeIndex >= 0) NavTab(index = routeIndex, isGuest = currentRoute.isGuestRoute()) else lastTab
+    SideEffect { lastTab = shownTab }
 
-    if (bottomNavItems.none { currentRoute in it.matchingRoutes }) return
+    val reducedMotion = isReducedMotionEnabled()
+    AnimatedVisibility(
+        visible = routeIndex >= 0,
+        modifier = modifier,
+        enter = if (reducedMotion) {
+            EnterTransition.None
+        } else {
+            expandVertically(GiMotion.smooth(), expandFrom = Alignment.Top) +
+                slideInVertically(GiMotion.smooth()) { it }
+        },
+        exit = if (reducedMotion) {
+            ExitTransition.None
+        } else {
+            shrinkVertically(GiMotion.smooth(), shrinkTowards = Alignment.Top) +
+                slideOutVertically(GiMotion.smooth()) { it }
+        }
+    ) {
+        BottomNavBarContent(navController = navController, tab = shownTab)
+    }
+}
 
-    val isGuest = currentRoute?.startsWith("guest_") == true
-
+@Composable
+private fun BottomNavBarContent(navController: NavController, tab: NavTab, modifier: Modifier = Modifier) {
+    val isGuest = tab.isGuest
     val labels = bottomNavItems.map { stringResource(it.label) }
-    val selectedIndex = bottomNavItems.indexOfFirst { currentRoute in it.matchingRoutes }
+    val selectedIndex = tab.index
 
     val navigateTo: (BottomNavItem) -> Unit = { item ->
         val homeRoute = if (isGuest) GuestScreen.GuestHomeTab.route else Screen.HomeTabScreen.route
@@ -140,3 +178,7 @@ fun BottomNavBar(navController: NavController, modifier: Modifier = Modifier) {
         }
     }
 }
+
+private data class NavTab(val index: Int, val isGuest: Boolean)
+
+private fun String?.isGuestRoute(): Boolean = this?.startsWith("guest_") == true

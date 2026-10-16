@@ -60,6 +60,18 @@ fun NavGraphBuilder.conversationNavGraph(navController: NavHostController, platf
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
                     }
+
+                    is ConversationAction.OnShare -> {
+                        platformActions.shareText(action.text)
+                    }
+
+                    ConversationAction.OnGoToHistory -> {
+                        navController.navigate(Screen.HistoryTabScreen.route) { launchSingleTop = true }
+                    }
+
+                    is ConversationAction.OnOpenCompany -> {
+                        navController.navigate(Screen.CompanyDetailScreen.createRoute(action.ticker))
+                    }
                 }
             }.launchIn(scope)
         }
@@ -71,7 +83,8 @@ fun NavGraphBuilder.conversationNavGraph(navController: NavHostController, platf
             onAction = viewModel::processAction,
             onUpgradeFromRateLimit = {
                 viewModel.handleUpgradeClick()
-            }
+            },
+            composerModifier = askComposerTransition()
         )
     }
 }

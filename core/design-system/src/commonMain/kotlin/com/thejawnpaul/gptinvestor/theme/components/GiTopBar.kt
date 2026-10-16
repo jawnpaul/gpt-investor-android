@@ -188,7 +188,7 @@ private fun GiTopBarPreview() {
                 backContentDescription = "Back",
                 scrolled = true
             ) {
-                GiIconButton(icon = GiIcons.clock, contentDescription = "History", onClick = {})
+                GiIconButton(icon = GiIcons.clockCounterClockwise, contentDescription = "History", onClick = {})
             }
             GiTopBar(title = null, onBack = {}, backContentDescription = "Back") {
                 GiIconButton(icon = GiIcons.shareNetwork, contentDescription = "Share", onClick = {})

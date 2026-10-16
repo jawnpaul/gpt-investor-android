@@ -78,7 +78,8 @@ fun GiIconToggleButton(
     contentDescription: String,
     modifier: Modifier = Modifier,
     variant: GiIconButtonVariant = GiIconButtonVariant.Default,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    loading: Boolean = false
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val uncheckedColor = if (variant == GiIconButtonVariant.Ghost) GiTheme.colors.muted else GiTheme.colors.ink
@@ -87,7 +88,7 @@ fun GiIconToggleButton(
         contentColor = if (checked) GiTheme.colors.violet else uncheckedColor,
         variant = variant,
         enabled = enabled,
-        loading = false,
+        loading = loading,
         interactionSource = interactionSource,
         modifier = modifier
             .semantics { this.contentDescription = contentDescription }
@@ -95,7 +96,7 @@ fun GiIconToggleButton(
                 value = checked,
                 interactionSource = interactionSource,
                 indication = null,
-                enabled = enabled,
+                enabled = enabled && !loading,
                 role = Role.Switch,
                 onValueChange = onCheckedChange
             )
@@ -178,6 +179,14 @@ private fun GiIconButtonPreview() {
             )
             GiIconButton(icon = GiIcons.bell, contentDescription = "Alerts", onClick = {}, enabled = false)
             GiIconButton(icon = GiIcons.bell, contentDescription = "Alerts", onClick = {}, loading = true)
+            GiIconToggleButton(
+                checked = false,
+                onCheckedChange = {},
+                icon = GiIcons.star,
+                checkedIcon = GiIcons.starFill,
+                contentDescription = "Save Apple",
+                loading = true
+            )
             GiIconButton(icon = GiIcons.x, contentDescription = "Close", onClick = {}, variant = GiIconButtonVariant.Tonal)
         }
     }

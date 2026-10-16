@@ -444,9 +444,13 @@ class CompanyViewModel(
             }
 
             CompanyDetailEvent.AddToWatchlist -> {
+                if (_selectedCompany.value.watchlistPending) return
                 val ticker = _selectedCompany.value.header.companyTicker.ifEmpty { selectedCompanyTicker.orEmpty() }
+                _selectedCompany.update { it.copy(watchlistPending = true) }
                 viewModelScope.launch {
-                    watchlistRepository.addStockToWatchList(ticker).fold(
+                    val result = watchlistRepository.addStockToWatchList(ticker)
+                    _selectedCompany.update { it.copy(watchlistPending = false) }
+                    result.fold(
                         { failure ->
                             if (failure is WatchlistFailure.WatchlistFull) {
                                 premiumEventBus.requestPremium(PREMIUM_SOURCE_WATCHLIST_FULL, failure.cap, ticker)
@@ -467,10 +471,14 @@ class CompanyViewModel(
             }
 
             CompanyDetailEvent.RemoveFromWatchlist -> {
+                if (_selectedCompany.value.watchlistPending) return
                 val ticker = _selectedCompany.value.brief?.ticker
                     ?: _selectedCompany.value.header.companyTicker.ifEmpty { selectedCompanyTicker.orEmpty() }
+                _selectedCompany.update { it.copy(watchlistPending = true) }
                 viewModelScope.launch {
-                    watchlistRepository.removeFromWatchlist(ticker).fold(
+                    val result = watchlistRepository.removeFromWatchlist(ticker)
+                    _selectedCompany.update { it.copy(watchlistPending = false) }
+                    result.fold(
                         { processCompanyDetailAction(CompanyDetailAction.WatchlistRemoveFailed(ticker)) },
                         {
                             analyticsLogger.logEvent(

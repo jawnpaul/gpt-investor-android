@@ -136,7 +136,8 @@ fun CompanyDetailScreen(
                             contentDescription = stringResource(
                                 if (isWatched) Res.string.remove_from_watchlist else Res.string.add_to_watchlist
                             ),
-                            enabled = brief != null
+                            enabled = brief != null,
+                            loading = state.watchlistPending
                         )
                     }
                     if (state.isGuestSession) {

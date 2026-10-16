@@ -29,7 +29,8 @@ data class SingleCompanyView(
     val selectedWaitlistOptions: List<String> = emptyList(),
     val showWaitListBottomSheet: Boolean = false,
     val isGuestSession: Boolean = false,
-    val showSpotlight: Boolean = false
+    val showSpotlight: Boolean = false,
+    val watchlistPending: Boolean = false
 ) {
     val enableSend = inputQuery.trim().isNotEmpty()
 }

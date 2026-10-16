@@ -31,7 +31,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -39,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.Role
@@ -78,12 +78,10 @@ fun GiAskComposer(
     val colors = GiTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val currentOnFocusChange by rememberUpdatedState(onFocusChange)
-    LaunchedEffect(isFocused) { currentOnFocusChange(isFocused) }
     val canSend = value.isNotBlank() && stop == null
     val edgeWidth = if (isFocused && value.isNotEmpty() && stop == null) GiEdge.focusWidth else GiEdge.width
     val reducedMotion = isReducedMotionEnabled()
-    val lift = GiElevation.lift(colors.isDark)
+    val lift = remember(colors.isDark) { GiElevation.lift(colors.isDark) }
     val shadowAlpha = animateFloatAsState(
         targetValue = if (floating) 1f else 0f,
         animationSpec = if (reducedMotion) snap() else tween(GiMotion.BASE, easing = EaseOutQuart)
@@ -91,7 +89,9 @@ fun GiAskComposer(
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .onFocusChanged { onFocusChange(it.isFocused) },
         enabled = stop == null,
         textStyle = GiTheme.type.body.copy(color = colors.ink),
         keyboardOptions = KeyboardOptions(

@@ -9,6 +9,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.snap
@@ -19,6 +20,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,13 +48,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -125,78 +133,130 @@ fun GiAssistantMessage(
 ) {
     val colors = GiTheme.colors
     val clamped = collapsed && !streaming
-    var overflows by remember { mutableStateOf(false) }
+    val metrics = remember { CollapseMetrics() }
     val reducedMotion = isReducedMotionEnabled()
-    Column(
+    val gap = if (clamped) GiSpace.x2 else GiSpace.x3
+    Layout(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(if (clamped) GiSpace.x2 else GiSpace.x3)
-    ) {
-        GiAssistantHeader(name = name)
-        Box(
-            modifier = Modifier
-                .then(
-                    if (streaming) {
-                        Modifier
-                    } else {
-                        Modifier.animateContentSize(if (reducedMotion) snap() else GiMotion.smooth())
-                    }
-                )
-                .clipToBounds()
-                .layout { measurable, constraints ->
-                    val placeable = measurable.measure(constraints.copy(maxHeight = Constraints.Infinity))
-                    val limit = collapsedHeight.roundToPx()
-                    overflows = placeable.height > limit
-                    val height = if (clamped) min(placeable.height, limit) else placeable.height
-                    layout(placeable.width, height) { placeable.place(0, 0) }
-                }
-                .drawWithContent {
-                    drawContent()
-                    if (clamped && overflows) {
-                        val fadeHeight = FADE_HEIGHT.toPx()
-                        drawRect(
-                            brush = Brush.verticalGradient(
-                                listOf(colors.bg.copy(alpha = 0f), colors.bg),
-                                startY = size.height - fadeHeight,
-                                endY = size.height
-                            ),
-                            topLeft = Offset(0f, size.height - fadeHeight),
-                            size = Size(size.width, fadeHeight)
-                        )
-                    }
-                }
-        ) {
-            content()
-        }
-        AnimatedVisibility(
-            visible = disclaimer != null && !clamped && !streaming,
-            enter = foldIn(reducedMotion),
-            exit = foldOut(reducedMotion)
-        ) {
-            GiText(text = disclaimer.orEmpty(), style = GiTextStyle.Meta, color = colors.muted)
-        }
-        AnimatedVisibility(
-            visible = onToggleCollapse != null && overflows && !streaming,
-            enter = foldIn(reducedMotion),
-            exit = foldOut(reducedMotion)
-        ) {
+        content = {
+            GiAssistantHeader(name = name, modifier = Modifier.layoutId(AssistantSlot.Header))
             Box(
                 modifier = Modifier
-                    .heightIn(min = GiSpace.touchTarget)
-                    .clickable(role = Role.Button, onClick = { onToggleCollapse?.invoke() }),
-                contentAlignment = Alignment.CenterStart
+                    .layoutId(AssistantSlot.Body)
+                    .then(
+                        if (streaming) {
+                            Modifier
+                        } else {
+                            Modifier.animateContentSize(if (reducedMotion) snap() else GiMotion.smooth())
+                        }
+                    )
+                    .clipToBounds()
+                    .layout { measurable, constraints ->
+                        val placeable = measurable.measure(constraints.copy(maxHeight = Constraints.Infinity))
+                        val limit = collapsedHeight.roundToPx()
+                        metrics.overflows = placeable.height > limit
+                        val height = if (clamped) min(placeable.height, limit) else placeable.height
+                        layout(placeable.width, height) { placeable.place(0, 0) }
+                    }
+                    .drawWithCache {
+                        val fadeHeight = FADE_HEIGHT.toPx()
+                        val fade = Brush.verticalGradient(
+                            listOf(colors.bg.copy(alpha = 0f), colors.bg),
+                            startY = size.height - fadeHeight,
+                            endY = size.height
+                        )
+                        onDrawWithContent {
+                            drawContent()
+                            if (clamped && metrics.overflows) {
+                                drawRect(
+                                    brush = fade,
+                                    topLeft = Offset(0f, size.height - fadeHeight),
+                                    size = Size(size.width, fadeHeight)
+                                )
+                            }
+                        }
+                    }
             ) {
-                GiText(
+                content()
+            }
+            AnimatedVisibility(
+                visible = disclaimer != null && !clamped && !streaming,
+                modifier = Modifier.layoutId(AssistantSlot.Disclaimer),
+                enter = foldIn(reducedMotion),
+                exit = foldOut(reducedMotion)
+            ) {
+                GiText(text = disclaimer.orEmpty(), style = GiTextStyle.Meta, color = colors.muted)
+            }
+            AnimatedVisibility(
+                visible = onToggleCollapse != null && !streaming,
+                modifier = Modifier.layoutId(AssistantSlot.Toggle),
+                enter = foldIn(reducedMotion),
+                exit = foldOut(reducedMotion)
+            ) {
+                GiCollapseToggle(
                     text = if (collapsed) showMoreText else showLessText,
-                    style = GiTextStyle.Link,
-                    color = colors.violet
+                    onClick = { onToggleCollapse?.invoke() }
                 )
             }
+            AnimatedVisibility(
+                visible = !streaming,
+                modifier = Modifier.layoutId(AssistantSlot.Actions),
+                enter = foldIn(reducedMotion),
+                exit = foldOut(reducedMotion)
+            ) {
+                Row(modifier = Modifier.offset(x = -ACTIONS_INSET), content = actions)
+            }
         }
-        AnimatedVisibility(visible = !streaming, enter = foldIn(reducedMotion), exit = foldOut(reducedMotion)) {
-            Row(modifier = Modifier.offset(x = -ACTIONS_INSET), content = actions)
+    ) { measurables, constraints ->
+        val childConstraints = constraints.copy(minWidth = 0, minHeight = 0)
+        val gapPx = gap.roundToPx()
+        val placeables = ArrayList<Placeable>(AssistantSlot.entries.size)
+        AssistantSlot.entries.forEach { slot ->
+            val measurable = measurables.firstOrNull { it.layoutId == slot } ?: return@forEach
+            val placeable = measurable.measure(childConstraints)
+            if (placeable.height > 0 && (slot != AssistantSlot.Toggle || metrics.overflows)) {
+                placeables += placeable
+            }
+        }
+        val height = placeables.sumOf { it.height } + gapPx * (placeables.size - 1).coerceAtLeast(0)
+        layout(constraints.maxWidth, height) {
+            var y = 0
+            placeables.forEach { placeable ->
+                placeable.place(0, y)
+                y += placeable.height + gapPx
+            }
         }
     }
 }
+
+@Composable
+private fun GiCollapseToggle(text: String, onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale = animateFloatAsState(
+        targetValue = if (isPressed) GiMotion.PRESSED_SCALE else 1f,
+        animationSpec = GiMotion.snappy()
+    )
+    Box(
+        modifier = Modifier
+            .heightIn(min = GiSpace.touchTarget)
+            .clickable(interactionSource = interactionSource, indication = null, role = Role.Button, onClick = onClick)
+            .graphicsLayer {
+                scaleX = scale.value
+                scaleY = scale.value
+                transformOrigin = TransformOrigin(0f, 0.5f)
+            },
+        contentAlignment = Alignment.CenterStart
+    ) {
+        GiText(text = text, style = GiTextStyle.Link, color = GiTheme.colors.violet)
+    }
+}
+
+private class CollapseMetrics {
+    var overflows = false
+}
+
+private enum class AssistantSlot { Header, Body, Disclaimer, Toggle, Actions }
 
 private fun foldIn(reducedMotion: Boolean): EnterTransition {
     val fade = fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart))
@@ -290,8 +350,8 @@ private fun GiGlowingMark() {
                     val scale = 1f + GLOW_SCALE_DELTA * breath
                     scaleX = scale
                     scaleY = scale
+                    alpha = GLOW_MIN_ALPHA + (1f - GLOW_MIN_ALPHA) * breath
                 }
-                .alpha(GLOW_MIN_ALPHA + (1f - GLOW_MIN_ALPHA) * breath)
                 .background(Brush.radialGradient(listOf(violet.copy(alpha = GLOW_ALPHA), Color.Transparent)))
         )
         Icon(

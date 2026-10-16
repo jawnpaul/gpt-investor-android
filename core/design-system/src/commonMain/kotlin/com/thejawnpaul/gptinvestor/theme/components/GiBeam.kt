@@ -33,10 +33,12 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.addOutline
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
 import com.thejawnpaul.gptinvestor.theme.GiEdge
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
@@ -103,20 +105,22 @@ private fun Modifier.beamRings(shape: Shape, alpha: () -> Float, rotation: (() -
             drawContent()
             val beamAlpha = alpha()
             val haloAlpha = beamAlpha * HALO_ALPHA / HALO_STEPS.size
-            val degrees = rotation?.invoke()
-            fun drawRing(path: Path, ringAlpha: Float) {
-                if (degrees == null) {
-                    drawPath(path = path, brush = fill, alpha = ringAlpha)
-                } else {
-                    clipPath(path) {
-                        rotate(degrees) { drawCircle(brush = fill, radius = reach, center = center, alpha = ringAlpha) }
-                    }
-                }
+            if (rotation == null) {
+                halo.fastForEach { drawPath(path = it, brush = fill, alpha = haloAlpha) }
+                drawPath(path = ring, brush = fill, alpha = beamAlpha)
+            } else {
+                val degrees = rotation()
+                halo.fastForEach { drawSwept(it, fill, haloAlpha, degrees, reach) }
+                drawSwept(ring, fill, beamAlpha, degrees, reach)
             }
-            halo.forEach { drawRing(it, haloAlpha) }
-            drawRing(ring, beamAlpha)
         }
     }
+
+private fun DrawScope.drawSwept(path: Path, brush: Brush, alpha: Float, degrees: Float, radius: Float) {
+    clipPath(path) {
+        rotate(degrees) { drawCircle(brush = brush, radius = radius, center = center, alpha = alpha) }
+    }
+}
 
 private fun CacheDrawScope.ringPath(shape: Shape, outset: Float): Path {
     val outer = Path().apply {

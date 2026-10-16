@@ -113,7 +113,18 @@ fun GiButton(
                 scaleY = scale
             }
             .heightIn(min = metrics.minHeight)
-            .giBeam(active = proPulse && !loading, shape = GiRadius.full, strength = PRO_PULSE_STRENGTH, style = GiBeamStyle.Pulse)
+            .then(
+                if (proPulse) {
+                    Modifier.giBeam(
+                        active = !loading,
+                        shape = GiRadius.full,
+                        strength = PRO_PULSE_STRENGTH,
+                        style = GiBeamStyle.Pulse
+                    )
+                } else {
+                    Modifier
+                }
+            )
             .clip(GiRadius.full)
             .background(buttonColors.container)
             .then(

@@ -15,8 +15,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -41,6 +40,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -83,9 +86,10 @@ fun GiChip(
     }
     val reducedMotion = isReducedMotionEnabled()
     val colorSpec: AnimationSpec<Color> = if (reducedMotion) snap() else GiMotion.snappy()
-    val container by animateColorAsState(chipColors.container, colorSpec)
-    val content by animateColorAsState(chipColors.content, colorSpec)
-    val edge by animateColorAsState(chipColors.edge ?: Color.Transparent, colorSpec)
+    val container = animateColorAsState(chipColors.container, colorSpec)
+    val content = animateColorAsState(chipColors.content, colorSpec)
+    val edge = animateColorAsState(chipColors.edge ?: Color.Transparent, colorSpec)
+    val pressedAlpha = pressedLayerAlpha(interactionSource)
     val isLarge = size == GiChipSize.Large
     val clickModifier = if (isQuiet) {
         Modifier.clickable(
@@ -115,30 +119,37 @@ fun GiChip(
             .giFocusRing(interactionSource, GiRadius.xs)
             .heightIn(min = if (isLarge) 44.dp else 32.dp)
             .clip(GiRadius.xs)
-            .background(container)
-            .then(if (isQuiet) Modifier else Modifier.border(GiEdge.width, edge, GiRadius.xs))
+            .drawWithCache {
+                val outline = GiRadius.xs.createOutline(this.size, layoutDirection, this)
+                val stroke = Stroke(width = GiEdge.width.toPx() * 2)
+                onDrawBehind {
+                    drawRect(container.value)
+                    if (!isQuiet) drawOutline(outline, edge.value, style = stroke)
+                }
+            }
             .then(clickModifier)
-            .background(content.copy(alpha = pressedLayerAlpha(interactionSource)))
+            .drawBehind { if (pressedAlpha > 0f) drawRect(content.value.copy(alpha = pressedAlpha)) }
             .padding(horizontal = if (isLarge) GiSpace.x4 else GiSpace.x3, vertical = GiSpace.x1),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (leadingIcon != null) {
-            GiChipIcon(icon = leadingIcon, tint = content)
+            GiChipIcon(icon = leadingIcon, tint = { content.value })
         } else if (!isQuiet) {
-            GiChipCheck(visible = selected, tint = content, reducedMotion = reducedMotion)
+            GiChipCheck(visible = selected, tint = { content.value }, reducedMotion = reducedMotion)
         }
-        GiText(
+        BasicText(
             text = text,
             modifier = Modifier.weight(1f, fill = false),
-            style = if (isLarge) GiTextStyle.Label else GiTextStyle.BodySmall,
-            color = content,
-            fontWeight = if (selected && !isQuiet) FontWeight.SemiBold else FontWeight.Medium
+            style = (if (isLarge) GiTheme.type.label else GiTheme.type.bodySmall).copy(
+                fontWeight = if (selected && !isQuiet) FontWeight.SemiBold else FontWeight.Medium
+            ),
+            color = { content.value }
         )
     }
 }
 
 @Composable
-private fun RowScope.GiChipCheck(visible: Boolean, tint: Color, reducedMotion: Boolean) {
+private fun RowScope.GiChipCheck(visible: Boolean, tint: () -> Color, reducedMotion: Boolean) {
     AnimatedVisibility(
         visible = visible,
         enter = if (reducedMotion) {
@@ -161,14 +172,14 @@ private fun RowScope.GiChipCheck(visible: Boolean, tint: Color, reducedMotion: B
 }
 
 @Composable
-private fun GiChipIcon(icon: ImageVector, tint: Color, modifier: Modifier = Modifier) {
+private fun GiChipIcon(icon: ImageVector, tint: () -> Color, modifier: Modifier = Modifier) {
     Icon(
         imageVector = icon,
         contentDescription = null,
         modifier = modifier
             .padding(end = 6.dp)
             .size(16.dp),
-        tint = tint
+        tint = tint()
     )
 }
 

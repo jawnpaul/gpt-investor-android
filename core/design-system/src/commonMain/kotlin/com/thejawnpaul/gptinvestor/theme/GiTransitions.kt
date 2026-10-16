@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.round
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 
 private val EaseOutQuart = CubicBezierEasing(0.25f, 1f, 0.5f, 1f)
@@ -76,9 +77,15 @@ private class AnimatePlacementNode :
             }
             val animatable = offset ?: Animatable(target, IntOffset.VectorConverter).also { offset = it }
             if (animatable.targetValue != target) {
-                coroutineScope.launch { animatable.animateTo(target, GiMotion.smooth()) }
+                coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
+                    animatable.animateTo(target, GiMotion.smooth())
+                }
             }
             placeable.place(animatable.value - target)
         }
+    }
+
+    override fun onReset() {
+        offset = null
     }
 }

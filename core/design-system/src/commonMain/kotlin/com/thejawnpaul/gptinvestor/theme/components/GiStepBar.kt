@@ -2,7 +2,6 @@ package com.thejawnpaul.gptinvestor.theme.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,9 +9,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -37,7 +36,7 @@ fun GiStepBar(count: Int, current: Int, contentDescription: String, modifier: Mo
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         repeat(count) { index ->
-            val color by animateColorAsState(
+            val color = animateColorAsState(
                 targetValue = if (index <= current) GiTheme.colors.violet else GiTheme.colors.chip,
                 animationSpec = tween(GiMotion.FAST)
             )
@@ -46,7 +45,7 @@ fun GiStepBar(count: Int, current: Int, contentDescription: String, modifier: Mo
                     .weight(1f)
                     .height(4.dp)
                     .clip(GiRadius.full)
-                    .background(color)
+                    .drawBehind { drawRect(color.value) }
             )
         }
     }

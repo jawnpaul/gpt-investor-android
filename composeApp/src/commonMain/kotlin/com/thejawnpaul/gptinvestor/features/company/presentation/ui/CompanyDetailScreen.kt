@@ -9,11 +9,14 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -27,6 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,7 +45,6 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
@@ -52,6 +55,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.add_to_watchlist
@@ -222,36 +226,6 @@ fun CompanyDetailScreen(
                             )
                         )
                     }
-                    AnimatedVisibility(
-                        visible = showPinnedRow,
-                        enter = fadeIn(tween(GiMotion.BASE)) + expandVertically(tween(GiMotion.BASE)),
-                        exit = fadeOut(tween(GiMotion.FAST)) + shrinkVertically(tween(GiMotion.FAST))
-                    ) {
-                        if (brief != null) {
-                            Column {
-                                GiStockSummary(
-                                    stock = tickerStock(
-                                        ticker = brief.ticker,
-                                        title = brief.name,
-                                        subtitle = brief.ticker,
-                                        percent = brief.change.toDouble(),
-                                        imageUrl = brief.logoUrl.ifBlank { null }
-                                    ),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .background(GiTheme.colors.bg)
-                                        .padding(
-                                            start = GiSpace.gutter,
-                                            end = GiSpace.gutter,
-                                            top = GiSpace.x2,
-                                            bottom = GiSpace.x3
-                                        ),
-                                    size = GiStockSummarySize.Header
-                                )
-                                GiDivider()
-                            }
-                        }
-                    }
                 }
             },
             bottomBar = {
@@ -294,47 +268,52 @@ fun CompanyDetailScreen(
                 state.error != null && !state.loading -> CompanyDisplay.Error
                 else -> CompanyDisplay.Loading
             }
-            AnimatedContent(
-                targetState = display,
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = innerPadding.calculateTopPadding()),
-                transitionSpec = {
-                    fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart)) togetherWith
-                        fadeOut(tween(GiMotion.FAST, easing = LinearEasing))
+                    .padding(top = innerPadding.calculateTopPadding())
+            ) {
+                AnimatedContent(
+                    targetState = display,
+                    modifier = Modifier.fillMaxSize(),
+                    transitionSpec = {
+                        fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart)) togetherWith
+                            fadeOut(tween(GiMotion.FAST, easing = LinearEasing))
+                    }
+                ) { current ->
+                    when (current) {
+                        CompanyDisplay.Loading -> Column(
+                            modifier = Modifier.padding(horizontal = GiSpace.gutter, vertical = GiSpace.x1)
+                        ) {
+                            CompanyBriefSkeleton()
+                        }
+                        CompanyDisplay.Error -> Column(
+                            modifier = Modifier.padding(horizontal = GiSpace.gutter, vertical = GiSpace.x1)
+                        ) {
+                            CompanyBriefError(onRetry = { onEvent(CompanyDetailEvent.RetryLoad) })
+                        }
+                        CompanyDisplay.Brief -> if (brief != null) {
+                            CompanyDetailBriefContent(
+                                brief = brief,
+                                state = state,
+                                messages = messages,
+                                listState = listState,
+                                bottomPadding = innerPadding.calculateBottomPadding(),
+                                onEvent = onEvent,
+                                onAction = onAction,
+                                onVerdictClick = { sentiment ->
+                                    showSentimentSheet = true
+                                    onEvent(CompanyDetailEvent.BriefSentimentViewed(sentiment))
+                                },
+                                onKeyNumberClick = { keyNumber ->
+                                    selectedKeyNumber = keyNumber
+                                    onEvent(CompanyDetailEvent.BriefKeyNumberExpanded(keyNumber.key))
+                                }
+                            )
+                        }
+                    }
                 }
-            ) { current ->
-                when (current) {
-                    CompanyDisplay.Loading -> Column(
-                        modifier = Modifier.padding(horizontal = GiSpace.gutter, vertical = GiSpace.x1)
-                    ) {
-                        CompanyBriefSkeleton()
-                    }
-                    CompanyDisplay.Error -> Column(
-                        modifier = Modifier.padding(horizontal = GiSpace.gutter, vertical = GiSpace.x1)
-                    ) {
-                        CompanyBriefError(onRetry = { onEvent(CompanyDetailEvent.RetryLoad) })
-                    }
-                    CompanyDisplay.Brief -> if (brief != null) {
-                        CompanyDetailBriefContent(
-                            brief = brief,
-                            state = state,
-                            messages = messages,
-                            listState = listState,
-                            bottomPadding = innerPadding.calculateBottomPadding(),
-                            onEvent = onEvent,
-                            onAction = onAction,
-                            onVerdictClick = { sentiment ->
-                                showSentimentSheet = true
-                                onEvent(CompanyDetailEvent.BriefSentimentViewed(sentiment))
-                            },
-                            onKeyNumberClick = { keyNumber ->
-                                selectedKeyNumber = keyNumber
-                                onEvent(CompanyDetailEvent.BriefKeyNumberExpanded(keyNumber.key))
-                            }
-                        )
-                    }
-                }
+                CompanyPinnedRow(visible = showPinnedRow, brief = brief)
             }
         }
 
@@ -450,6 +429,7 @@ private fun CompanyDetailBriefContent(
     val expanded = remember { mutableStateMapOf<Long, Boolean>() }
     val scope = rememberCoroutineScope()
     val reducedMotion = isReducedMotionEnabled()
+    val threadItemSpec = remember(reducedMotion) { ThreadItemSpec(reducedMotion) }
     val itemSizes = remember { mutableMapOf<Int, Int>() }
     LaunchedEffect(listState) {
         snapshotFlow { listState.layoutInfo.visibleItemsInfo }
@@ -458,15 +438,13 @@ private fun CompanyDetailBriefContent(
     var showReasonsFor by remember { mutableStateOf<Long?>(null) }
     val showPending = state.pendingQuery != null
     val questionCount = messages.size + if (showPending) 1 else 0
-    val pendingNow by rememberUpdatedState(showPending)
     var scrolledQuestionCount by remember { mutableIntStateOf(questionCount) }
     LaunchedEffect(questionCount) {
         val grew = questionCount > scrolledQuestionCount
         scrolledQuestionCount = questionCount
         if (grew) {
             withFrameNanos { }
-            val itemsAfterBubble = if (pendingNow) 1 else 2
-            listState.animateScrollToItem((listState.layoutInfo.totalItemsCount - itemsAfterBubble).coerceAtLeast(0))
+            listState.animateScrollToItem((listState.layoutInfo.totalItemsCount - ITEMS_AFTER_BUBBLE).coerceAtLeast(0))
         }
     }
     LaunchedEffect(showReasonsFor) {
@@ -498,16 +476,20 @@ private fun CompanyDetailBriefContent(
         messages.forEachIndexed { index, threadMessage ->
             val message = threadMessage.message
             val isLatest = index == messages.lastIndex && !showPending
-            item(key = "q-${message.id}", contentType = "question") {
-                GiUserMessage(text = message.query)
+            item(key = "q-$index", contentType = "question") {
+                GiUserMessage(text = message.query, modifier = threadItem(threadItemSpec))
             }
             if (message.loading && message.response.isNullOrBlank() && threadMessage.companies.isEmpty()) {
-                item(key = "t-${message.id}", contentType = "thinking") {
-                    GiThinkingIndicator(status = stringResource(Res.string.reading_company_data, companyName))
+                item(key = "t-$index", contentType = "thinking") {
+                    GiThinkingIndicator(
+                        status = stringResource(Res.string.reading_company_data, companyName),
+                        modifier = threadItem(threadItemSpec)
+                    )
                 }
             } else {
-                item(key = "a-${message.id}", contentType = "answer") {
+                item(key = "a-$index", contentType = "answer") {
                     CompanyAnswer(
+                        modifier = threadItem(threadItemSpec),
                         message = message,
                         companies = threadMessage.companies,
                         currentTicker = brief.ticker,
@@ -530,11 +512,14 @@ private fun CompanyDetailBriefContent(
             }
         }
         if (state.pendingQuery != null) {
-            item(key = "pending", contentType = "pending") {
-                Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
-                    GiUserMessage(text = state.pendingQuery)
-                    GiThinkingIndicator(status = stringResource(Res.string.reading_company_data, companyName))
-                }
+            item(key = "q-${messages.size}", contentType = "question") {
+                GiUserMessage(text = state.pendingQuery, modifier = threadItem(threadItemSpec))
+            }
+            item(key = "t-${messages.size}", contentType = "thinking") {
+                GiThinkingIndicator(
+                    status = stringResource(Res.string.reading_company_data, companyName),
+                    modifier = threadItem(threadItemSpec)
+                )
             }
         }
     }
@@ -610,7 +595,11 @@ private fun CompanyAnswer(
                 if (response.isNotBlank()) AnswerMarkdown(text = response)
             }
         }
-        if (showReasons) {
+        AnimatedVisibility(
+            visible = showReasons,
+            enter = fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart)) + expandVertically(GiMotion.smooth()),
+            exit = fadeOut(tween(GiMotion.FAST, easing = EaseOutQuart)) + shrinkVertically(GiMotion.smooth())
+        ) {
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(GiSpace.x2),
                 verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
@@ -627,6 +616,46 @@ private fun CompanyAnswer(
                         variant = GiButtonVariant.Secondary
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BoxScope.CompanyPinnedRow(visible: Boolean, brief: CompanyBrief?) {
+    val reducedMotion = isReducedMotionEnabled()
+    val enterFade = fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart))
+    val exitFade = fadeOut(tween(GiMotion.FAST, easing = EaseOutQuart))
+    AnimatedVisibility(
+        visible = visible && brief != null,
+        modifier = Modifier.align(Alignment.TopCenter),
+        enter = if (reducedMotion) {
+            enterFade
+        } else {
+            enterFade + slideInVertically(tween(GiMotion.BASE, easing = EaseOutQuart)) { -it / PINNED_SLIDE_DIVISOR }
+        },
+        exit = if (reducedMotion) {
+            exitFade
+        } else {
+            exitFade + slideOutVertically(tween(GiMotion.FAST, easing = EaseOutQuart)) { -it / PINNED_SLIDE_DIVISOR }
+        }
+    ) {
+        if (brief != null) {
+            Column(modifier = Modifier.background(GiTheme.colors.bg)) {
+                GiStockSummary(
+                    stock = tickerStock(
+                        ticker = brief.ticker,
+                        title = brief.name,
+                        subtitle = brief.ticker,
+                        percent = brief.change.toDouble(),
+                        imageUrl = brief.logoUrl.ifBlank { null }
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x2, bottom = GiSpace.x3),
+                    size = GiStockSummarySize.Header
+                )
+                GiDivider()
             }
         }
     }
@@ -694,7 +723,18 @@ private val DislikeReasons = listOf(
     Res.string.others
 )
 
+private class ThreadItemSpec(reducedMotion: Boolean) {
+    val fadeIn = tween<Float>(GiMotion.BASE, easing = EaseOutQuart)
+    val fadeOut = tween<Float>(GiMotion.FAST, easing = EaseOutQuart)
+    val placement = if (reducedMotion) null else GiMotion.smooth<IntOffset>()
+}
+
+private fun LazyItemScope.threadItem(spec: ThreadItemSpec): Modifier =
+    Modifier.animateItem(fadeInSpec = spec.fadeIn, placementSpec = spec.placement, fadeOutSpec = spec.fadeOut)
+
 private const val REASONS_TIMEOUT_MS = 15_000L
+private const val ITEMS_AFTER_BUBBLE = 2
+private const val PINNED_SLIDE_DIVISOR = 4
 private const val COMPOSER_LARGE_TEXT_LINES = 3
 
 @PreviewLightDark

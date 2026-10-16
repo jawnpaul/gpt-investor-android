@@ -23,7 +23,7 @@ import org.intellij.markdown.MarkdownElementTypes
 fun AnswerMarkdown(text: String, modifier: Modifier = Modifier) {
     val colors = GiTheme.colors
     val type = GiTheme.type
-    val markdownState = rememberMarkdownState(content = text, retainState = true)
+    val markdownState = rememberMarkdownState(content = text, retainState = true, immediate = true)
     val links = remember(colors.violet) { TextLinkStyles(SpanStyle(color = colors.violet)) }
     val heading = remember(type.sectionTitle, colors.ink) { type.sectionTitle.copy(color = colors.ink) }
     val strong = remember(colors.ink) { SpanStyle(fontWeight = FontWeight.SemiBold, color = colors.ink) }

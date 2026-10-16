@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.theme.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -12,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
@@ -35,6 +37,32 @@ fun GiStockSummary(
     logoModifier: Modifier = Modifier
 ) {
     val header = size == GiStockSummarySize.Header
+    if (isLargeText()) {
+        Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                GiLogoTile(
+                    initials = stock.initials,
+                    brandColor = stock.brandColor,
+                    modifier = logoModifier,
+                    imageUrl = stock.imageUrl
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    GiText(
+                        text = stock.title,
+                        style = if (header) GiTextStyle.CompanyName else GiTextStyle.Label
+                    )
+                    GiText(text = stock.subtitle, style = GiTextStyle.Meta)
+                }
+            }
+            if (stock.percent != null) {
+                GiDeltaPill(percent = stock.percent, modifier = Modifier.padding(start = LOGO_TILE_SIZE + GiSpace.x3))
+            }
+        }
+        return
+    }
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
@@ -65,6 +93,8 @@ fun GiStockSummary(
         }
     }
 }
+
+private val LOGO_TILE_SIZE = 40.dp
 
 internal val previewStock = GiStock(
     initials = "NV",

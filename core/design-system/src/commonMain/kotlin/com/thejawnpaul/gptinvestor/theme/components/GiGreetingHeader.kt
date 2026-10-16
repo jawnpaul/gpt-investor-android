@@ -30,10 +30,11 @@ fun GiGreetingHeader(
     modifier: Modifier = Modifier,
     overline: String? = null
 ) {
+    val isLargeText = isLargeText()
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = if (isLargeText) Alignment.Top else Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             if (overline != null) {
@@ -42,7 +43,7 @@ fun GiGreetingHeader(
             GiText(
                 text = greeting,
                 style = GiTextStyle.ScreenTitle,
-                maxLines = if (isLargeText()) 2 else 1,
+                maxLines = if (isLargeText) Int.MAX_VALUE else 1,
                 overflow = TextOverflow.Ellipsis
             )
         }

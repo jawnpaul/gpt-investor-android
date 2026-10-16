@@ -31,7 +31,7 @@ fun GiPremiumBanner(
         .fillMaxWidth()
         .clip(GiRadius.md)
         .background(GiTheme.colors.violetSoft)
-        .padding(horizontal = GiSpace.x4, vertical = GiSpace.x3)
+        .padding(horizontal = GiSpace.x4, vertical = if (isLargeText) GiSpace.x4 else GiSpace.x3)
     val copy = @Composable { copyModifier: Modifier ->
         Column(modifier = copyModifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x1)) {
             GiProTag()

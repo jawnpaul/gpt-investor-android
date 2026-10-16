@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.theme.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -51,29 +52,37 @@ fun GiSectionHeader(
         if (eyebrow != null) {
             GiEyebrow(text = eyebrow, icon = eyebrowIcon)
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
-            GiText(
-                text = title,
-                modifier = Modifier.weight(1f).alignByBaseline(),
-                style = GiTextStyle.SectionTitle,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+        val trailing = @Composable { trailingModifier: Modifier ->
             if (trailingText != null) {
                 GiText(
                     text = trailingText,
-                    modifier = Modifier
-                        .alignByBaseline()
-                        .then(
-                            if (onTrailingClick != null) {
-                                Modifier.clickable(role = Role.Button, onClick = onTrailingClick)
-                            } else {
-                                Modifier
-                            }
-                        ),
+                    modifier = trailingModifier.then(
+                        if (onTrailingClick != null) {
+                            Modifier.clickable(role = Role.Button, onClick = onTrailingClick)
+                        } else {
+                            Modifier
+                        }
+                    ),
                     style = if (onTrailingClick != null) GiTextStyle.Link else GiTextStyle.Meta,
                     maxLines = 1
                 )
+            }
+        }
+        if (isLargeText()) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
+                GiText(text = title, modifier = Modifier.alignByBaseline(), style = GiTextStyle.SectionTitle)
+                trailing(Modifier.alignByBaseline())
+            }
+        } else {
+            Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
+                GiText(
+                    text = title,
+                    modifier = Modifier.weight(1f).alignByBaseline(),
+                    style = GiTextStyle.SectionTitle,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                trailing(Modifier.alignByBaseline())
             }
         }
     }

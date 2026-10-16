@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.theme.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -20,13 +21,15 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
+enum class GiProTagTone { OnBanner, Standalone }
+
 @Composable
-fun GiProTag(modifier: Modifier = Modifier) {
+fun GiProTag(modifier: Modifier = Modifier, tone: GiProTagTone = GiProTagTone.OnBanner) {
     Row(
         modifier = modifier
             .heightIn(min = 24.dp)
             .clip(GiRadius.xs)
-            .background(GiTheme.colors.raised)
+            .background(if (tone == GiProTagTone.Standalone) GiTheme.colors.violetSoft else GiTheme.colors.raised)
             .padding(horizontal = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(GiSpace.x1),
         verticalAlignment = Alignment.CenterVertically
@@ -46,8 +49,13 @@ fun GiProTag(modifier: Modifier = Modifier) {
 @Composable
 private fun GiProTagPreview() {
     GiPreviewSurface {
-        Box(modifier = Modifier.background(GiTheme.colors.violetSoft).padding(GiSpace.x3)) {
-            GiProTag()
+        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
+            Box(modifier = Modifier.background(GiTheme.colors.violetSoft).padding(GiSpace.x3)) {
+                GiProTag()
+            }
+            Box(modifier = Modifier.background(GiTheme.colors.raised).padding(GiSpace.x3)) {
+                GiProTag(tone = GiProTagTone.Standalone)
+            }
         }
     }
 }

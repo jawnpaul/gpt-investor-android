@@ -159,7 +159,7 @@ class WatchlistViewModel(
                 { failure ->
                     _uiState.update { it.copy(isLoading = false) }
                     if (failure is WatchlistFailure.WatchlistFull) {
-                        premiumEventBus.requestPremium(PREMIUM_SOURCE_WATCHLIST_FULL, failure.cap)
+                        premiumEventBus.requestPremium(PREMIUM_SOURCE_WATCHLIST_FULL, failure.cap, ticker)
                     }
                 },
                 {

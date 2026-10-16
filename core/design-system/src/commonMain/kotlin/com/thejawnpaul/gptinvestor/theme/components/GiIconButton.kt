@@ -36,7 +36,7 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
-enum class GiIconButtonVariant { Default, Ghost }
+enum class GiIconButtonVariant { Default, Ghost, Tonal }
 
 // contentDescription names the action ("Save Apple"), not the icon.
 @Composable
@@ -119,7 +119,6 @@ private fun GiIconButtonLayout(
         animationSpec = GiMotion.snappy()
     )
     val layerAlpha = pressedLayerAlpha(interactionSource)
-    val isGhost = variant == GiIconButtonVariant.Ghost
     Box(
         modifier = Modifier
             .alpha(if (enabled) 1f else GiMotion.DISABLED_ALPHA)
@@ -131,8 +130,20 @@ private fun GiIconButtonLayout(
             .then(modifier)
             .size(44.dp)
             .clip(GiRadius.full)
-            .background(if (isGhost) Color.Transparent else colors.raised)
-            .then(if (isGhost) Modifier else Modifier.border(GiEdge.width, colors.line, GiRadius.full))
+            .background(
+                when (variant) {
+                    GiIconButtonVariant.Default -> colors.raised
+                    GiIconButtonVariant.Ghost -> Color.Transparent
+                    GiIconButtonVariant.Tonal -> colors.tile
+                }
+            )
+            .then(
+                if (variant == GiIconButtonVariant.Default) {
+                    Modifier.border(GiEdge.width, colors.line, GiRadius.full)
+                } else {
+                    Modifier
+                }
+            )
             .background(colors.ink.copy(alpha = layerAlpha)),
         contentAlignment = Alignment.Center
     ) {
@@ -167,6 +178,7 @@ private fun GiIconButtonPreview() {
             )
             GiIconButton(icon = GiIcons.bell, contentDescription = "Alerts", onClick = {}, enabled = false)
             GiIconButton(icon = GiIcons.bell, contentDescription = "Alerts", onClick = {}, loading = true)
+            GiIconButton(icon = GiIcons.x, contentDescription = "Close", onClick = {}, variant = GiIconButtonVariant.Tonal)
         }
     }
 }

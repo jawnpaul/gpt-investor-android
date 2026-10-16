@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -66,7 +67,8 @@ fun GiButton(
     leadingPainter: Painter? = null,
     tintLeadingIcon: Boolean = true,
     enabled: Boolean = true,
-    loading: Boolean = false
+    loading: Boolean = false,
+    proPulse: Boolean = false
 ) {
     val colors = GiTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
@@ -111,6 +113,18 @@ fun GiButton(
                 scaleY = scale
             }
             .heightIn(min = metrics.minHeight)
+            .then(
+                if (proPulse) {
+                    Modifier.giBeam(
+                        active = !loading,
+                        shape = GiRadius.full,
+                        strength = PRO_PULSE_STRENGTH,
+                        style = GiBeamStyle.Pulse
+                    )
+                } else {
+                    Modifier
+                }
+            )
             .clip(GiRadius.full)
             .background(buttonColors.container)
             .then(
@@ -166,6 +180,7 @@ fun GiButton(
 }
 
 private const val SPINNER_INITIAL_SCALE = 0.8f
+private const val PRO_PULSE_STRENGTH = 0.6f
 
 private data class GiButtonColors(val container: Color, val content: Color)
 
@@ -178,6 +193,7 @@ private fun GiButtonPreview() {
     GiPreviewSurface {
         Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
             GiButton(text = "Add to watchlist", onClick = {})
+            GiButton(text = "Subscribe now", onClick = {}, modifier = Modifier.fillMaxWidth(), proPulse = true)
             GiButton(text = "Add", onClick = {}, size = GiButtonSize.Medium, variant = GiButtonVariant.Secondary)
             GiButton(text = "Unlock", onClick = {}, size = GiButtonSize.Small)
             GiButton(text = "New chat", onClick = {}, size = GiButtonSize.Medium, leadingIcon = GiIcons.notePencil)

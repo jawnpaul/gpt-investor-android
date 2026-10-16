@@ -39,7 +39,7 @@ class PremiumViewModel(
                 trigger = paywallTriggerOf(request.source)
                 analyticsLogger.logEvent("paywall_viewed", mapOf("trigger" to trigger))
                 val watchlistCap = request.watchlistCap?.takeIf { it > 0 }
-                _state.update { it.copy(isVisible = true, watchlistCap = watchlistCap) }
+                _state.update { it.copy(isVisible = true, watchlistCap = watchlistCap, ticker = request.ticker) }
             }
         }
     }

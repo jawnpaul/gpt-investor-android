@@ -1,5 +1,14 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.EaseOutQuart
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -30,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -46,6 +56,7 @@ import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 
 class GiComposerStop(val contentDescription: String, val onStop: () -> Unit)
 
@@ -71,6 +82,12 @@ fun GiAskComposer(
     LaunchedEffect(isFocused) { currentOnFocusChange(isFocused) }
     val canSend = value.isNotBlank() && stop == null
     val edgeWidth = if (isFocused && value.isNotEmpty() && stop == null) GiEdge.focusWidth else GiEdge.width
+    val reducedMotion = isReducedMotionEnabled()
+    val lift = GiElevation.lift(colors.isDark)
+    val shadowAlpha = animateFloatAsState(
+        targetValue = if (floating) 1f else 0f,
+        animationSpec = if (reducedMotion) snap() else tween(GiMotion.BASE, easing = EaseOutQuart)
+    )
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
@@ -88,13 +105,12 @@ fun GiAskComposer(
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier
-                    .then(
-                        if (floating) {
-                            Modifier.dropShadow(shape = GiRadius.md, shadow = GiElevation.lift(colors.isDark))
-                        } else {
-                            Modifier
-                        }
-                    )
+                    .dropShadow(shape = GiRadius.md) {
+                        radius = lift.radius.toPx()
+                        color = lift.color
+                        offset = Offset(lift.offset.x.toPx(), lift.offset.y.toPx())
+                        alpha = shadowAlpha.value
+                    }
                     .heightIn(min = 52.dp)
                     .giBeam(active = stop != null, shape = GiRadius.md)
                     .clip(GiRadius.md)
@@ -133,14 +149,28 @@ fun GiAskComposer(
                     }
                     innerTextField()
                 }
-                if (stop != null) {
-                    Box(
+                AnimatedContent(
+                    targetState = stop,
+                    transitionSpec = {
+                        val enter = fadeIn(tween(GiMotion.FAST, easing = EaseOutQuart))
+                        (
+                            if (reducedMotion) {
+                                enter
+                            } else {
+                                enter + scaleIn(tween(GiMotion.FAST, easing = EaseOutQuart), initialScale = SWAP_SCALE)
+                            }
+                            ) togetherWith fadeOut(tween(GiMotion.INSTANT))
+                    },
+                    contentKey = { it != null }
+                ) { currentStop ->
+                    if (currentStop != null) {
+                        Box(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(GiRadius.sm)
                             .background(colors.ink)
-                            .clickable(role = Role.Button, onClick = stop.onStop)
-                            .semantics { contentDescription = stop.contentDescription },
+                            .clickable(role = Role.Button, onClick = currentStop.onStop)
+                            .semantics { contentDescription = currentStop.contentDescription },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -169,12 +199,14 @@ fun GiAskComposer(
                         )
                     }
                 }
+                }
             }
         }
     )
 }
 
 private const val MAX_LINES = 4
+private const val SWAP_SCALE = 0.8f
 private const val LARGE_TEXT_MAX_LINES = 2
 
 @PreviewLightDark

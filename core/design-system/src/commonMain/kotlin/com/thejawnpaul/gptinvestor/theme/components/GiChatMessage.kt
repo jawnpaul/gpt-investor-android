@@ -1,5 +1,8 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.EaseOutQuart
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -10,6 +13,10 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -45,9 +52,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.Placeholder
@@ -131,9 +138,7 @@ fun GiAssistantMessage(
                     if (streaming) {
                         Modifier
                     } else {
-                        Modifier.animateContentSize(
-                            if (reducedMotion) snap() else tween(GiMotion.BASE, easing = EaseOutQuart)
-                        )
+                        Modifier.animateContentSize(if (reducedMotion) snap() else GiMotion.smooth())
                     }
                 )
                 .clipToBounds()
@@ -162,14 +167,22 @@ fun GiAssistantMessage(
         ) {
             content()
         }
-        if (disclaimer != null && !clamped && !streaming) {
-            GiText(text = disclaimer, style = GiTextStyle.Meta, color = colors.muted)
+        AnimatedVisibility(
+            visible = disclaimer != null && !clamped && !streaming,
+            enter = foldIn(reducedMotion),
+            exit = foldOut(reducedMotion)
+        ) {
+            GiText(text = disclaimer.orEmpty(), style = GiTextStyle.Meta, color = colors.muted)
         }
-        if (onToggleCollapse != null && overflows && !streaming) {
+        AnimatedVisibility(
+            visible = onToggleCollapse != null && overflows && !streaming,
+            enter = foldIn(reducedMotion),
+            exit = foldOut(reducedMotion)
+        ) {
             Box(
                 modifier = Modifier
                     .heightIn(min = GiSpace.touchTarget)
-                    .clickable(role = Role.Button, onClick = onToggleCollapse),
+                    .clickable(role = Role.Button, onClick = { onToggleCollapse?.invoke() }),
                 contentAlignment = Alignment.CenterStart
             ) {
                 GiText(
@@ -179,10 +192,20 @@ fun GiAssistantMessage(
                 )
             }
         }
-        if (!streaming) {
+        AnimatedVisibility(visible = !streaming, enter = foldIn(reducedMotion), exit = foldOut(reducedMotion)) {
             Row(modifier = Modifier.offset(x = -ACTIONS_INSET), content = actions)
         }
     }
+}
+
+private fun foldIn(reducedMotion: Boolean): EnterTransition {
+    val fade = fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart))
+    return if (reducedMotion) fade else fade + expandVertically(GiMotion.smooth())
+}
+
+private fun foldOut(reducedMotion: Boolean): ExitTransition {
+    val fade = fadeOut(tween(GiMotion.FAST, easing = EaseOutQuart))
+    return if (reducedMotion) fade else fade + shrinkVertically(GiMotion.smooth())
 }
 
 @Composable

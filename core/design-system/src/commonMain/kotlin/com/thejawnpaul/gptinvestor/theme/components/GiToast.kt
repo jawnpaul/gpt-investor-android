@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.theme.components
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.EaseOutQuart
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiElevation
 import com.thejawnpaul.gptinvestor.theme.GiMotion
@@ -133,10 +135,12 @@ fun GiToastHost(state: GiToastState, modifier: Modifier = Modifier) {
         targetState = state.current,
         modifier = modifier,
         transitionSpec = {
-            val enter: EnterTransition = fadeIn(tween(GiMotion.BASE)) +
-                if (reducedMotion) EnterTransition.None else slideInVertically(tween(GiMotion.BASE)) { slide }
-            val exit: ExitTransition = fadeOut(tween(GiMotion.FAST)) +
-                if (reducedMotion) ExitTransition.None else slideOutVertically(tween(GiMotion.FAST)) { slide }
+            val enterSpec = tween<IntOffset>(GiMotion.BASE, easing = EaseOutQuart)
+            val exitSpec = tween<IntOffset>(GiMotion.FAST, easing = EaseOutQuart)
+            val enter: EnterTransition = fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart)) +
+                if (reducedMotion) EnterTransition.None else slideInVertically(enterSpec) { slide }
+            val exit: ExitTransition = fadeOut(tween(GiMotion.FAST, easing = EaseOutQuart)) +
+                if (reducedMotion) ExitTransition.None else slideOutVertically(exitSpec) { slide }
             enter togetherWith exit
         },
         label = "GiToastHost"

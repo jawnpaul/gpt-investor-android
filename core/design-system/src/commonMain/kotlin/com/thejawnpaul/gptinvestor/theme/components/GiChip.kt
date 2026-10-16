@@ -1,7 +1,20 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.EaseOutQuart
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,6 +24,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -40,6 +54,7 @@ import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 
 // Filter: toggles in a scrolling row. Quiet: an AI suggestion under an input; tapping it is an action.
 enum class GiChipStyle { Filter, Quiet }
@@ -63,14 +78,14 @@ fun GiChip(
     val isQuiet = style == GiChipStyle.Quiet
     val chipColors = when {
         isQuiet -> GiChipColors(container = colors.tile, content = colors.body, edge = null)
-        selected -> GiChipColors(container = colors.violetSoft, content = colors.violet, edge = colors.violetSoft)
+        selected -> GiChipColors(container = colors.violetSoft, content = colors.violet, edge = Color.Transparent)
         else -> GiChipColors(container = colors.raised, content = colors.ink, edge = colors.line)
     }
-    val colorSpec = tween<Color>(GiMotion.FAST)
+    val reducedMotion = isReducedMotionEnabled()
+    val colorSpec: AnimationSpec<Color> = if (reducedMotion) snap() else GiMotion.snappy()
     val container by animateColorAsState(chipColors.container, colorSpec)
     val content by animateColorAsState(chipColors.content, colorSpec)
     val edge by animateColorAsState(chipColors.edge ?: Color.Transparent, colorSpec)
-    val icon = leadingIcon ?: GiIcons.check.takeIf { selected && !isQuiet }
     val isLarge = size == GiChipSize.Large
     val clickModifier = if (isQuiet) {
         Modifier.clickable(
@@ -105,11 +120,12 @@ fun GiChip(
             .then(clickModifier)
             .background(content.copy(alpha = pressedLayerAlpha(interactionSource)))
             .padding(horizontal = if (isLarge) GiSpace.x4 else GiSpace.x3, vertical = GiSpace.x1),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (icon != null) {
-            Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = content)
+        if (leadingIcon != null) {
+            GiChipIcon(icon = leadingIcon, tint = content)
+        } else if (!isQuiet) {
+            GiChipCheck(visible = selected, tint = content, reducedMotion = reducedMotion)
         }
         GiText(
             text = text,
@@ -119,6 +135,41 @@ fun GiChip(
             fontWeight = if (selected && !isQuiet) FontWeight.SemiBold else FontWeight.Medium
         )
     }
+}
+
+@Composable
+private fun RowScope.GiChipCheck(visible: Boolean, tint: Color, reducedMotion: Boolean) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = if (reducedMotion) {
+            EnterTransition.None
+        } else {
+            expandHorizontally(GiMotion.snappy(), expandFrom = Alignment.Start) +
+                scaleIn(GiMotion.snappy(), initialScale = 0.6f) +
+                fadeIn(tween(GiMotion.FAST, easing = EaseOutQuart))
+        },
+        exit = if (reducedMotion) {
+            ExitTransition.None
+        } else {
+            shrinkHorizontally(GiMotion.snappy(), shrinkTowards = Alignment.Start) +
+                scaleOut(GiMotion.snappy(), targetScale = 0.6f) +
+                fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing))
+        }
+    ) {
+        GiChipIcon(icon = GiIcons.check, tint = tint)
+    }
+}
+
+@Composable
+private fun GiChipIcon(icon: ImageVector, tint: Color, modifier: Modifier = Modifier) {
+    Icon(
+        imageVector = icon,
+        contentDescription = null,
+        modifier = modifier
+            .padding(end = 6.dp)
+            .size(16.dp),
+        tint = tint
+    )
 }
 
 private data class GiChipColors(val container: Color, val content: Color, val edge: Color?)

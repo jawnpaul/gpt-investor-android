@@ -79,6 +79,8 @@ import com.thejawnpaul.gptinvestor.theme.components.GiIconButton
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
 import com.thejawnpaul.gptinvestor.theme.components.GiStepBar
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
+import com.thejawnpaul.gptinvestor.theme.giAnimatePlacement
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 import com.thejawnpaul.gptinvestor.theme.rememberGiSharedAxisTransition
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -251,8 +253,11 @@ private fun <T> PersonaliseQuestion(
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val placement = if (isReducedMotionEnabled()) Modifier else Modifier.giAnimatePlacement()
     Column(
-        modifier = modifier.semantics { isTraversalGroup = true },
+        modifier = modifier
+            .then(placement)
+            .semantics { isTraversalGroup = true },
         verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
     ) {
         Text(text = label, color = GiTheme.colors.ink, style = GiTheme.type.label)
@@ -264,6 +269,7 @@ private fun <T> PersonaliseQuestion(
                 GiChip(
                     text = stringResource(optionLabel(option)),
                     onClick = { onSelect(option) },
+                    modifier = placement,
                     selected = option == selected,
                     size = GiChipSize.Large
                 )

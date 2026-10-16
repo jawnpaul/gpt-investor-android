@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -57,6 +58,7 @@ import com.thejawnpaul.gptinvestor.features.watchlist.presentation.viewmodel.Wat
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.viewmodel.WatchlistViewModel
 import com.thejawnpaul.gptinvestor.removed_from_watchlist
 import com.thejawnpaul.gptinvestor.share_brief_text
+import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.jetbrains.compose.resources.getString
@@ -71,6 +73,7 @@ fun NavGraphBuilder.guestNavGraph(
         val viewModel = koinViewModel<HomeViewModel>()
         val state = viewModel.uiState.collectAsState()
         val scope = rememberCoroutineScope()
+        val haptics = LocalHapticFeedback.current
         LaunchedEffect(Unit) {
             viewModel.actions.onEach { action ->
                 when (action) {
@@ -89,6 +92,10 @@ fun NavGraphBuilder.guestNavGraph(
 
                     is HomeAction.ShowToast -> {
                         platformActions.showMessage(action.message)
+                    }
+
+                    is HomeAction.AddStockFinished -> {
+                        haptics.performHapticFeedback(if (action.added) GiHaptics.Confirm else GiHaptics.Reject)
                     }
 
                     HomeAction.OnGoToSignUp -> {

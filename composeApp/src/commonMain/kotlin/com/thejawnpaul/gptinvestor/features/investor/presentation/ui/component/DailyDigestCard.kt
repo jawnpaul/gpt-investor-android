@@ -24,6 +24,8 @@ import com.thejawnpaul.gptinvestor.add
 import com.thejawnpaul.gptinvestor.add_more_stocks
 import com.thejawnpaul.gptinvestor.browse_all_companies
 import com.thejawnpaul.gptinvestor.build_your_digest
+import com.thejawnpaul.gptinvestor.check_connection_try_again
+import com.thejawnpaul.gptinvestor.couldn_t_load_your_brief
 import com.thejawnpaul.gptinvestor.digest_pending_description
 import com.thejawnpaul.gptinvestor.digest_pending_description_at
 import com.thejawnpaul.gptinvestor.digest_pending_description_premium
@@ -31,41 +33,37 @@ import com.thejawnpaul.gptinvestor.digest_pending_description_premium_at
 import com.thejawnpaul.gptinvestor.digest_pending_notify_subtitle
 import com.thejawnpaul.gptinvestor.digest_pending_notify_title
 import com.thejawnpaul.gptinvestor.digest_pending_title
-import com.thejawnpaul.gptinvestor.digest_sentiment_negative
-import com.thejawnpaul.gptinvestor.digest_sentiment_neutral
-import com.thejawnpaul.gptinvestor.digest_sentiment_positive
 import com.thejawnpaul.gptinvestor.done
 import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.RecommendedDigestCompany
 import com.thejawnpaul.gptinvestor.features.digest.presentation.DigestSentiment
 import com.thejawnpaul.gptinvestor.features.digest.presentation.formatTickerList
+import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.BriefStockCard
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestStatus
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestView
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.StockDigestPresentation
 import com.thejawnpaul.gptinvestor.full_summaries_with_premium
-import com.thejawnpaul.gptinvestor.key_event
 import com.thejawnpaul.gptinvestor.latest_digest
 import com.thejawnpaul.gptinvestor.morning_brief
 import com.thejawnpaul.gptinvestor.new_digest_on_the_way
 import com.thejawnpaul.gptinvestor.next_digest_by
-import com.thejawnpaul.gptinvestor.sentiment
+import com.thejawnpaul.gptinvestor.retry
 import com.thejawnpaul.gptinvestor.stocks_locked
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.components.GiBanner
+import com.thejawnpaul.gptinvestor.theme.components.GiBannerTone
 import com.thejawnpaul.gptinvestor.theme.components.GiButton
 import com.thejawnpaul.gptinvestor.theme.components.GiButtonSize
 import com.thejawnpaul.gptinvestor.theme.components.GiButtonVariant
 import com.thejawnpaul.gptinvestor.theme.components.GiCard
-import com.thejawnpaul.gptinvestor.theme.components.GiDigestCard
 import com.thejawnpaul.gptinvestor.theme.components.GiDivider
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
 import com.thejawnpaul.gptinvestor.theme.components.GiListGroup
 import com.thejawnpaul.gptinvestor.theme.components.GiListRow
 import com.thejawnpaul.gptinvestor.theme.components.GiPremiumBanner
 import com.thejawnpaul.gptinvestor.theme.components.GiSectionHeader
-import com.thejawnpaul.gptinvestor.theme.components.GiSentiment
 import com.thejawnpaul.gptinvestor.theme.components.GiSkeleton
 import com.thejawnpaul.gptinvestor.theme.components.GiSpinner
 import com.thejawnpaul.gptinvestor.theme.components.GiText
@@ -73,13 +71,12 @@ import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.today_s_digest
 import com.thejawnpaul.gptinvestor.tracking_stocks
 import com.thejawnpaul.gptinvestor.unlock
-import com.thejawnpaul.gptinvestor.updated_at
 import com.thejawnpaul.gptinvestor.x_more_stocks_in_your_digest
 import com.thejawnpaul.gptinvestor.you_re_not_tracking_any_companies_yet
 import com.thejawnpaul.gptinvestor.your_digest
 import org.jetbrains.compose.resources.stringResource
 
-private enum class DigestDisplay { Loading, Empty, Pending, Ready }
+private enum class DigestDisplay { Loading, Error, Empty, Pending, Ready }
 
 @Composable
 fun DailyDigestCard(
@@ -89,10 +86,12 @@ fun DailyDigestCard(
     onSeeFullDigest: () -> Unit,
     onUnlockPremiumPending: () -> Unit,
     onUnlockPremiumReady: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val display = when {
         view.loading -> DigestDisplay.Loading
+        view.error -> DigestDisplay.Error
         view.status == DailyDigestStatus.PENDING -> DigestDisplay.Pending
         view.status == DailyDigestStatus.READY -> DigestDisplay.Ready
         else -> DigestDisplay.Empty
@@ -130,6 +129,18 @@ fun DailyDigestCard(
         ) { state ->
             when (state) {
                 DigestDisplay.Loading -> DigestSkeleton()
+                DigestDisplay.Error -> GiBanner(
+                    title = stringResource(Res.string.couldn_t_load_your_brief),
+                    subtitle = stringResource(Res.string.check_connection_try_again),
+                    tone = GiBannerTone.Error
+                ) {
+                    GiButton(
+                        text = stringResource(Res.string.retry),
+                        onClick = onRetry,
+                        size = GiButtonSize.Small,
+                        variant = GiButtonVariant.Secondary
+                    )
+                }
                 DigestDisplay.Empty -> EmptyDigest(view = view, onAddStock = onAddStock, onBrowseAll = onBrowseAll)
                 DigestDisplay.Pending -> PendingDigest(
                     view = view,
@@ -280,40 +291,6 @@ private fun ReadyDigest(view: DailyDigestView, onSeeFullDigest: () -> Unit, onUn
 }
 
 @Composable
-private fun BriefStockCard(stock: StockDigestPresentation, updatedLabel: String?, onClick: () -> Unit) {
-    GiDigestCard(
-        stock = tickerStock(
-            ticker = stock.ticker,
-            title = stock.name,
-            subtitle = stock.ticker,
-            percent = stock.priceChange
-        ),
-        summary = stock.summary,
-        onClick = onClick,
-        sentiment = stock.sentiment?.toGiSentiment(),
-        sentimentLabel = stock.sentiment?.let {
-            stringResource(
-                when (it) {
-                    DigestSentiment.POSITIVE -> Res.string.digest_sentiment_positive
-                    DigestSentiment.NEUTRAL -> Res.string.digest_sentiment_neutral
-                    DigestSentiment.NEGATIVE -> Res.string.digest_sentiment_negative
-                }
-            )
-        },
-        sentimentCaption = stringResource(Res.string.sentiment),
-        keyEventLabel = stringResource(Res.string.key_event),
-        keyEvent = stock.keyEvent,
-        updatedText = updatedLabel?.let { stringResource(Res.string.updated_at, it) }
-    )
-}
-
-private fun DigestSentiment.toGiSentiment(): GiSentiment = when (this) {
-    DigestSentiment.POSITIVE -> GiSentiment.Positive
-    DigestSentiment.NEUTRAL -> GiSentiment.Neutral
-    DigestSentiment.NEGATIVE -> GiSentiment.Negative
-}
-
-@Composable
 private fun DigestSkeleton() {
     GiCard {
         Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3), verticalAlignment = Alignment.CenterVertically) {
@@ -338,7 +315,8 @@ private fun DailyDigestCardPreviewHost(view: DailyDigestView) {
             onBrowseAll = {},
             onSeeFullDigest = {},
             onUnlockPremiumPending = {},
-            onUnlockPremiumReady = {}
+            onUnlockPremiumReady = {},
+            onRetry = {}
         )
     }
 }

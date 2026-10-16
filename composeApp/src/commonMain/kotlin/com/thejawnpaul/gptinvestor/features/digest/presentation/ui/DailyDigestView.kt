@@ -5,6 +5,7 @@ import com.thejawnpaul.gptinvestor.features.digest.presentation.DigestSentiment
 
 data class DailyDigestView(
     val loading: Boolean = false,
+    val error: Boolean = false,
     val status: DailyDigestStatus = DailyDigestStatus.READY,
     val stocks: List<StockDigestPresentation> = emptyList(),
     val suggestedStocks: List<RecommendedDigestCompany> = emptyList(),

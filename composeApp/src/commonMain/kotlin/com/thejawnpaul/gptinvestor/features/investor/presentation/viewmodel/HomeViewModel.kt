@@ -340,6 +340,7 @@ class HomeViewModel(
                                 eventName = "stock-added-to-watchlist",
                                 params = mapOf("ticker" to event.ticker, "source" to "digest_card")
                             )
+                            processAction(HomeAction.AddStockFinished(added = true))
                             _uiState.update { state ->
                                 state.copy(
                                     dailyDigestView = state.dailyDigestView.copy(
@@ -388,6 +389,11 @@ class HomeViewModel(
                                     processAction(HomeAction.ShowToast("Failed to add to watchlist"))
                                 }
                             }
+                            if (failure !is WatchlistFailure.SignUpRequired &&
+                                failure !is WatchlistFailure.WatchlistFull
+                            ) {
+                                processAction(HomeAction.AddStockFinished(added = false))
+                            }
                         }
                     }
                 }
@@ -431,6 +437,16 @@ class HomeViewModel(
                             "locked_stocks" to digest.lockedStocksCount
                         )
                     )
+                }
+
+                HomeEvent.RetryDailyDigest -> getDailyDigest()
+
+                is HomeEvent.ClickDigestStock -> {
+                    analyticsLogger.logEvent(
+                        eventName = "digest-stock-tapped",
+                        params = mapOf("ticker" to event.ticker, "source" to "digest_detail")
+                    )
+                    _actions.emit(HomeAction.OnGoToCompanyDetail(event.ticker))
                 }
 
                 HomeEvent.DigestDetailUnlockPremium -> {
@@ -499,9 +515,10 @@ class HomeViewModel(
 
     private fun getDailyDigest() {
         _uiState.update { state ->
-            state.copy(dailyDigestView = state.dailyDigestView.copy(loading = true))
+            state.copy(dailyDigestView = state.dailyDigestView.copy(loading = true, error = false))
         }
         viewModelScope.launch {
+            val isGuest = preferences.isGuestLoggedIn.first() == true
             digestRepository.getDailyDigest().onSuccess { digest ->
                 val unlockedItems = digest.items?.filter { !it.locked } ?: emptyList()
                 val lockedItems = digest.items?.filter { it.locked } ?: emptyList()
@@ -563,10 +580,11 @@ class HomeViewModel(
                 Logger.e(failure.stackTraceToString())
                 _uiState.update { state ->
                     state.copy(
-                        dailyDigestView = state.dailyDigestView.copy(
-                            loading = false,
-                            status = DailyDigestStatus.EMPTY
-                        )
+                        dailyDigestView = if (isGuest) {
+                            state.dailyDigestView.copy(loading = false, status = DailyDigestStatus.EMPTY)
+                        } else {
+                            state.dailyDigestView.copy(loading = false, error = true)
+                        }
                     )
                 }
             }
@@ -599,18 +617,11 @@ internal fun formatTodayLabel(date: LocalDate): String =
 internal fun extractFirstName(userName: String?): String? =
     userName?.trim()?.split("\\s+".toRegex())?.firstOrNull()?.takeIf { it.isNotBlank() }
 
-// next_digest_at is an ISO-8601 UTC instant; show it as a local clock time, e.g. "8 AM" or "8:30 AM".
+// next_digest_at is an ISO-8601 UTC instant; show it as a local 24-hour time, e.g. "07:00" or "13:30".
 internal fun formatNextDigestTime(nextDigestAt: String?, timeZone: TimeZone): String? {
     val instant = nextDigestAt?.let { runCatching { Instant.parse(it) }.getOrNull() } ?: return null
     val local = instant.toLocalDateTime(timeZone)
-    val period = if (local.hour < 12) "AM" else "PM"
-    val hour = when {
-        local.hour == 0 -> 12
-        local.hour > 12 -> local.hour - 12
-        else -> local.hour
-    }
-    val minutes = if (local.minute == 0) "" else ":" + local.minute.toString().padStart(2, '0')
-    return "$hour$minutes $period"
+    return "${local.hour.toString().padStart(2, '0')}:${local.minute.toString().padStart(2, '0')}"
 }
 
 private fun computeTimePeriod(): TimePeriod {
@@ -672,6 +683,8 @@ sealed interface HomeEvent {
     data object SeeFullDigest : HomeEvent
     data object DigestDetailViewed : HomeEvent
     data object DigestDetailUnlockPremium : HomeEvent
+    data object RetryDailyDigest : HomeEvent
+    data class ClickDigestStock(val ticker: String) : HomeEvent
 }
 
 sealed interface HomeAction {
@@ -679,6 +692,7 @@ sealed interface HomeAction {
 
     data class OnGoToCompanyDetail(val ticker: String) : HomeAction
     data class ShowToast(val message: String) : HomeAction
+    data class AddStockFinished(val added: Boolean) : HomeAction
     data object OnGoToSignUp : HomeAction
     data object NavigateToAllTrending : HomeAction
     data object NavigateToDiscover : HomeAction

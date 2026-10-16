@@ -169,7 +169,8 @@ private fun HomeScreenContent(
                     onBrowseAll = { onEvent(HomeEvent.BrowseAllCompanies) },
                     onSeeFullDigest = { onEvent(HomeEvent.SeeFullDigest) },
                     onUnlockPremiumPending = { onEvent(HomeEvent.UnlockPremium("digest_pending_card")) },
-                    onUnlockPremiumReady = { onEvent(HomeEvent.UnlockPremium("digest_ready_card")) }
+                    onUnlockPremiumReady = { onEvent(HomeEvent.UnlockPremium("digest_ready_card")) },
+                    onRetry = { onEvent(HomeEvent.RetryDailyDigest) }
                 )
 
                 Column(verticalArrangement = Arrangement.spacedBy(GiSpace.titleToContent)) {

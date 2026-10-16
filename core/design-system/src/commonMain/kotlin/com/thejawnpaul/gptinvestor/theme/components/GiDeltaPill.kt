@@ -31,8 +31,7 @@ fun GiDeltaPill(percent: Double, modifier: Modifier = Modifier, suffix: String? 
     val colors = GiTheme.colors
     val isLoss = percent < 0 && toHundredths(percent) > 0
     val content = if (isLoss) colors.loss else colors.gain
-    val description = "${if (isLoss) "down" else "up"} ${formatAbsolutePercent(percent)} percent" +
-        suffix?.let { " $it" }.orEmpty()
+    val description = deltaDescription(percent, suffix)
     Row(
         modifier = modifier
             .heightIn(min = 24.dp)
@@ -71,6 +70,11 @@ internal fun GiDeltaTriangle(up: Boolean, color: Color, modifier: Modifier = Mod
         }
         drawPath(path = path, color = color)
     }
+}
+
+internal fun deltaDescription(percent: Double, suffix: String? = null): String {
+    val isLoss = percent < 0 && toHundredths(percent) > 0
+    return "${if (isLoss) "down" else "up"} ${formatAbsolutePercent(percent)} percent" + suffix?.let { " $it" }.orEmpty()
 }
 
 private fun toHundredths(percent: Double): Long = (abs(percent) * 100).roundToLong()

@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -51,12 +52,10 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.add_to_watchlist
 import com.thejawnpaul.gptinvestor.ask_about_company
@@ -158,13 +157,12 @@ fun CompanyDetailScreen(
     modifier: Modifier = Modifier
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val density = LocalDensity.current
     val listState = rememberLazyListState()
     var showSentimentSheet by remember { mutableStateOf(false) }
     var showRemoveFromWatchlistDialog by remember { mutableStateOf(false) }
     var selectedKeyNumber by remember { mutableStateOf<KeyNumber?>(null) }
     var composerFocused by remember { mutableStateOf(false) }
-    var composerBarHeight by remember { mutableStateOf(0.dp) }
+    val composerBarHeight = remember { mutableIntStateOf(0) }
     val brief = state.brief
     val isWatched = brief?.isWatched == true
     val messages = remember(state.conversation) { companyThread(state.conversation) }
@@ -231,7 +229,7 @@ fun CompanyDetailScreen(
             bottomBar = {
                 GiComposerBar(
                     modifier = Modifier
-                        .onSizeChanged { composerBarHeight = with(density) { it.height.toDp() } }
+                        .onSizeChanged { composerBarHeight.intValue = it.height }
                         .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime)),
                     docked = askMode
                 ) {
@@ -376,7 +374,8 @@ fun CompanyDetailScreen(
             state = toastState,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(start = GiSpace.gutter, end = GiSpace.gutter, bottom = composerBarHeight + GiSpace.x4)
+                .padding(horizontal = GiSpace.gutter)
+                .offset { IntOffset(0, -(composerBarHeight.intValue + GiSpace.x4.roundToPx())) }
         )
 
         CompanyBriefTip(
@@ -427,6 +426,23 @@ private fun CompanyDetailBriefContent(
     }
     val companyName = state.companyName.ifEmpty { brief.name }
     val expanded = remember { mutableStateMapOf<Long, Boolean>() }
+    val answerStrings = AnswerStrings(
+        name = stringResource(Res.string.gpt_investor),
+        disclaimer = stringResource(Res.string.not_financial_advice),
+        showMore = stringResource(Res.string.show_more),
+        showLess = stringResource(Res.string.show_less),
+        reading = stringResource(Res.string.reading_company_data, companyName),
+        labels = GiAnswerActionLabels(
+            copy = stringResource(Res.string.copy),
+            helpful = stringResource(Res.string.helpful),
+            notHelpful = stringResource(Res.string.not_helpful),
+            share = stringResource(Res.string.share)
+        ),
+        tooComplex = stringResource(Res.string.too_complex),
+        inaccurate = stringResource(Res.string.inaccurate),
+        notActionable = stringResource(Res.string.not_actionable),
+        others = stringResource(Res.string.others)
+    )
     val scope = rememberCoroutineScope()
     val reducedMotion = isReducedMotionEnabled()
     val threadItemSpec = remember(reducedMotion) { ThreadItemSpec(reducedMotion) }
@@ -482,7 +498,7 @@ private fun CompanyDetailBriefContent(
             if (message.loading && message.response.isNullOrBlank() && threadMessage.companies.isEmpty()) {
                 item(key = "t-$index", contentType = "thinking") {
                     GiThinkingIndicator(
-                        status = stringResource(Res.string.reading_company_data, companyName),
+                        status = answerStrings.reading,
                         modifier = threadItem(threadItemSpec)
                     )
                 }
@@ -492,7 +508,7 @@ private fun CompanyDetailBriefContent(
                         modifier = threadItem(threadItemSpec),
                         message = message,
                         companies = threadMessage.companies,
-                        currentTicker = brief.ticker,
+                        strings = answerStrings,
                         onCompanyClick = { ticker ->
                             if (ticker.equals(brief.ticker, ignoreCase = true)) {
                                 scope.launch { listState.scrollToTop(itemSizes, animate = !reducedMotion) }
@@ -517,7 +533,7 @@ private fun CompanyDetailBriefContent(
             }
             item(key = "t-${messages.size}", contentType = "thinking") {
                 GiThinkingIndicator(
-                    status = stringResource(Res.string.reading_company_data, companyName),
+                    status = answerStrings.reading,
                     modifier = threadItem(threadItemSpec)
                 )
             }
@@ -530,7 +546,7 @@ private fun CompanyDetailBriefContent(
 private fun CompanyAnswer(
     message: GenAiTextMessage,
     companies: List<CompanyDetailRemoteResponse>,
-    currentTicker: String,
+    strings: AnswerStrings,
     onCompanyClick: (String) -> Unit,
     collapsed: Boolean,
     onToggleCollapse: () -> Unit,
@@ -542,25 +558,19 @@ private fun CompanyAnswer(
     modifier: Modifier = Modifier
 ) {
     val response = message.response.orEmpty()
-    val labels = GiAnswerActionLabels(
-        copy = stringResource(Res.string.copy),
-        helpful = stringResource(Res.string.helpful),
-        notHelpful = stringResource(Res.string.not_helpful),
-        share = stringResource(Res.string.share)
-    )
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
         GiAssistantMessage(
-            name = stringResource(Res.string.gpt_investor),
+            name = strings.name,
             streaming = message.loading,
-            disclaimer = stringResource(Res.string.not_financial_advice),
+            disclaimer = strings.disclaimer,
             collapsed = collapsed,
             onToggleCollapse = onToggleCollapse,
-            showMoreText = stringResource(Res.string.show_more),
-            showLessText = stringResource(Res.string.show_less),
+            showMoreText = strings.showMore,
+            showLessText = strings.showLess,
             actions = {
                 if (response.isNotBlank()) {
                     GiAnswerActions(
-                        labels = labels,
+                        labels = strings.labels,
                         onCopy = { onEvent(CompanyDetailEvent.CopyToClipboard(response)) },
                         onShare = { onEvent(CompanyDetailEvent.ShareAnswer(response)) },
                         feedback = when (message.feedbackStatus) {
@@ -604,8 +614,7 @@ private fun CompanyAnswer(
                 horizontalArrangement = Arrangement.spacedBy(GiSpace.x2),
                 verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
             ) {
-                DislikeReasons.forEach { reasonRes ->
-                    val reason = stringResource(reasonRes)
+                strings.reasons.forEach { reason ->
                     GiButton(
                         text = reason,
                         onClick = {
@@ -716,12 +725,20 @@ private fun companyThread(conversation: Conversation): List<CompanyThreadMessage
     }
 }
 
-private val DislikeReasons = listOf(
-    Res.string.too_complex,
-    Res.string.inaccurate,
-    Res.string.not_actionable,
-    Res.string.others
-)
+private data class AnswerStrings(
+    val name: String,
+    val disclaimer: String,
+    val showMore: String,
+    val showLess: String,
+    val reading: String,
+    val labels: GiAnswerActionLabels,
+    val tooComplex: String,
+    val inaccurate: String,
+    val notActionable: String,
+    val others: String
+) {
+    val reasons: List<String> get() = listOf(tooComplex, inaccurate, notActionable, others)
+}
 
 private class ThreadItemSpec(reducedMotion: Boolean) {
     val fadeIn = tween<Float>(GiMotion.BASE, easing = EaseOutQuart)

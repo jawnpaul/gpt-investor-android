@@ -3,13 +3,16 @@ package com.thejawnpaul.gptinvestor.features.conversation.presentation.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.LinkInteractionListener
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import com.mikepenz.markdown.annotator.AnnotatorSettings
-import com.mikepenz.markdown.annotator.annotatorSettings
+import com.mikepenz.markdown.annotator.DefaultAnnotatorSettings
 import com.mikepenz.markdown.annotator.buildMarkdownAnnotatedString
 import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownColor
@@ -39,12 +42,17 @@ fun AnswerMarkdown(text: String, modifier: Modifier = Modifier) {
             }
         }
     }
-    settingsHolder[0] = annotatorSettings(
-        linkTextSpanStyle = links,
-        codeSpanStyle = CODE_SPAN_STYLE,
-        annotator = annotator,
-        referenceLinkHandler = null
-    )
+    val uriHandler = LocalUriHandler.current
+    remember(links, annotator, uriHandler) {
+        DefaultAnnotatorSettings(
+            linkTextSpanStyle = links,
+            codeSpanStyle = CODE_SPAN_STYLE,
+            annotator = annotator,
+            linkInteractionListener = LinkInteractionListener { link ->
+                (link as? LinkAnnotation.Url)?.url?.let { url -> runCatching { uriHandler.openUri(url) } }
+            }
+        ).also { settingsHolder[0] = it }
+    }
     Markdown(
         markdownState = markdownState,
         modifier = modifier,

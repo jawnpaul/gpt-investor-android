@@ -1,6 +1,9 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
+import androidx.compose.animation.core.EaseOutQuart
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,7 +82,8 @@ fun GiIconToggleButton(
     contentDescription: String,
     modifier: Modifier = Modifier,
     variant: GiIconButtonVariant = GiIconButtonVariant.Default,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    loading: Boolean = false
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val uncheckedColor = if (variant == GiIconButtonVariant.Ghost) GiTheme.colors.muted else GiTheme.colors.ink
@@ -87,7 +92,7 @@ fun GiIconToggleButton(
         contentColor = if (checked) GiTheme.colors.violet else uncheckedColor,
         variant = variant,
         enabled = enabled,
-        loading = false,
+        loading = loading,
         interactionSource = interactionSource,
         modifier = modifier
             .semantics { this.contentDescription = contentDescription }
@@ -95,7 +100,7 @@ fun GiIconToggleButton(
                 value = checked,
                 interactionSource = interactionSource,
                 indication = null,
-                enabled = enabled,
+                enabled = enabled && !loading,
                 role = Role.Switch,
                 onValueChange = onCheckedChange
             )
@@ -119,6 +124,15 @@ private fun GiIconButtonLayout(
         animationSpec = GiMotion.snappy()
     )
     val layerAlpha = pressedLayerAlpha(interactionSource)
+    val spinnerAlpha = animateFloatAsState(
+        targetValue = if (loading) 1f else 0f,
+        animationSpec = if (loading) {
+            tween(GiMotion.FAST, easing = EaseOutQuart)
+        } else {
+            tween(GiMotion.INSTANT, easing = LinearEasing)
+        }
+    )
+    val swapping by remember { derivedStateOf { spinnerAlpha.value > 0f } }
     Box(
         modifier = Modifier
             .alpha(if (enabled) 1f else GiMotion.DISABLED_ALPHA)
@@ -147,10 +161,16 @@ private fun GiIconButtonLayout(
             .background(colors.ink.copy(alpha = layerAlpha)),
         contentAlignment = Alignment.Center
     ) {
-        if (loading) {
-            GiSpinner(color = contentColor)
-        } else {
-            Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = contentColor)
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier
+                .size(20.dp)
+                .then(if (swapping) Modifier.graphicsLayer { alpha = 1f - spinnerAlpha.value } else Modifier),
+            tint = contentColor
+        )
+        if (swapping) {
+            GiSpinner(modifier = Modifier.graphicsLayer { alpha = spinnerAlpha.value }, color = contentColor)
         }
     }
 }
@@ -178,6 +198,14 @@ private fun GiIconButtonPreview() {
             )
             GiIconButton(icon = GiIcons.bell, contentDescription = "Alerts", onClick = {}, enabled = false)
             GiIconButton(icon = GiIcons.bell, contentDescription = "Alerts", onClick = {}, loading = true)
+            GiIconToggleButton(
+                checked = false,
+                onCheckedChange = {},
+                icon = GiIcons.star,
+                checkedIcon = GiIcons.starFill,
+                contentDescription = "Save Apple",
+                loading = true
+            )
             GiIconButton(icon = GiIcons.x, contentDescription = "Close", onClick = {}, variant = GiIconButtonVariant.Tonal)
         }
     }

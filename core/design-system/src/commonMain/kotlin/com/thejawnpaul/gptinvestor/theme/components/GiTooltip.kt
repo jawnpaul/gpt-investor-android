@@ -7,12 +7,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
@@ -25,13 +27,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -149,35 +155,80 @@ private val CARET_HEIGHT = 8.dp
 @Composable
 fun GiCoachMark(
     title: String,
-    body: String,
     actionText: String,
-    onDismiss: () -> Unit,
+    onAction: () -> Unit,
     modifier: Modifier = Modifier,
+    body: String? = null,
     stepCount: Int = 1,
-    currentStep: Int = 0
+    currentStep: Int = 0,
+    secondaryActionText: String? = null,
+    onSecondaryAction: () -> Unit = {},
+    caretEndOffset: Dp? = null,
+    content: (@Composable ColumnScope.() -> Unit)? = null
 ) {
     val colors = GiTheme.colors
-    Column(
-        modifier = modifier
-            .width(280.dp)
-            .dropShadow(shape = GiRadius.md, shadow = GiElevation.overlay(colors.isDark))
-            .clip(GiRadius.md)
-            .background(colors.raised)
-            .border(GiEdge.width, colors.line, GiRadius.md)
-            .padding(GiSpace.x4),
-        verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
-    ) {
-        GiText(text = title, style = GiTextStyle.Label)
-        GiText(text = body, style = GiTextStyle.BodySmall)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (stepCount > 1) {
-                GiStepDots(count = stepCount, current = currentStep)
+    Box(modifier = modifier.widthIn(max = MAX_COACH_MARK_WIDTH).semantics { paneTitle = title }) {
+        Column(
+            modifier = Modifier
+                .dropShadow(shape = GiRadius.md, shadow = GiElevation.overlay(colors.isDark))
+                .clip(GiRadius.md)
+                .background(colors.raised)
+                .border(GiEdge.width, colors.line, GiRadius.md)
+                .padding(GiSpace.x4),
+            verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
+        ) {
+            GiText(text = title, style = GiTextStyle.Label)
+            if (content != null) {
+                content()
+            } else if (body != null) {
+                GiText(text = body, style = GiTextStyle.BodySmall)
             }
-            Box(modifier = Modifier.weight(1f))
-            GiButton(text = actionText, onClick = onDismiss, size = GiButtonSize.Medium, variant = GiButtonVariant.Text)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (stepCount > 1) {
+                    GiStepDots(count = stepCount, current = currentStep)
+                }
+                Box(modifier = Modifier.weight(1f))
+                if (secondaryActionText != null) {
+                    GiButton(
+                        text = secondaryActionText,
+                        onClick = onSecondaryAction,
+                        size = GiButtonSize.Medium,
+                        variant = GiButtonVariant.TextMuted
+                    )
+                }
+                GiButton(text = actionText, onClick = onAction, size = GiButtonSize.Medium, variant = GiButtonVariant.Text)
+            }
+        }
+        if (caretEndOffset != null) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = caretEndOffset)
+                    .offset(y = -CARET_SIZE / 2)
+                    .size(CARET_SIZE)
+                    .rotate(CARET_ROTATION)
+                    .background(colors.raised, CARET_SHAPE)
+            )
         }
     }
 }
+
+@Composable
+fun GiCoachMarkRow(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        GiIconTile(icon = icon, size = GiIconTileSize.Small, tone = GiIconTileTone.Violet)
+        GiText(text = text, modifier = Modifier.weight(1f), style = GiTextStyle.BodySmall)
+    }
+}
+
+private val MAX_COACH_MARK_WIDTH = 280.dp
+private val CARET_SIZE = 12.dp
+private val CARET_SHAPE = RoundedCornerShape(2.dp)
+private const val CARET_ROTATION = 45f
 
 @PreviewLightDark
 @Preview(name = "200%", fontScale = 2f)
@@ -196,8 +247,19 @@ private fun GiTooltipPreview() {
                 title = "New: price alerts",
                 body = "Tap the bell on any stock to get told when it moves.",
                 actionText = "Got it",
-                onDismiss = {}
+                onAction = {}
             )
+            GiCoachMark(
+                title = "New in Brief",
+                actionText = "Next",
+                onAction = {},
+                modifier = Modifier.padding(top = GiSpace.x2),
+                stepCount = 2,
+                secondaryActionText = "Skip",
+                caretEndOffset = 68.dp
+            ) {
+                GiCoachMarkRow(icon = GiIcons.shareNetwork, text = "Share this brief with anyone")
+            }
         }
     }
 }

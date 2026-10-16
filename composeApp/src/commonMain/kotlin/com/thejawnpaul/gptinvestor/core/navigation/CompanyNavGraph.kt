@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.core.navigation
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -19,6 +20,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.Compa
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 import com.thejawnpaul.gptinvestor.removed_from_watchlist
 import com.thejawnpaul.gptinvestor.share_brief_text
+import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
 import org.jetbrains.compose.resources.getString
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -27,6 +29,7 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
         val parentViewModel = koinViewModel<CompanyViewModel>()
         val state = parentViewModel.selectedCompany.collectAsState()
 
+        val haptics = LocalHapticFeedback.current
         LaunchedEffect(Unit) {
             parentViewModel.companyDetailAction.collect { action ->
                 when (action) {
@@ -59,10 +62,12 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
                     }
 
                     CompanyDetailAction.WatchlistAdded -> {
+                        haptics.performHapticFeedback(GiHaptics.Confirm)
                         platformActions.showMessage(getString(Res.string.added_to_watchlist_success))
                     }
 
                     CompanyDetailAction.WatchlistAddFailed -> {
+                        haptics.performHapticFeedback(GiHaptics.Reject)
                         platformActions.showMessage(getString(Res.string.added_to_watchlist_error))
                     }
 
@@ -71,6 +76,7 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
                     }
 
                     is CompanyDetailAction.WatchlistRemoveFailed -> {
+                        haptics.performHapticFeedback(GiHaptics.Reject)
                         platformActions.showMessage(
                             getString(Res.string.failed_to_remove_from_watchlist, action.ticker)
                         )

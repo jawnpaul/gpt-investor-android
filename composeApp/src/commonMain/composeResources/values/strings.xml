@@ -153,9 +153,6 @@
     <string name="what_it_means">What it means</string>
     <string name="the_risk">The risk</string>
     <string name="the_opportunity">The opportunity</string>
-    <string name="sentiment_bullish">BULLISH</string>
-    <string name="sentiment_bearish">BEARISH</string>
-    <string name="sentiment_neutral">NEUTRAL</string>
     <string name="today">today</string>
     <string name="favorite">Favorite</string>
     <string name="more">More</string>
@@ -165,7 +162,19 @@
     <string name="share_brief_text">Check out the %1$s (%2$s) brief on GPTInvestor:\nhttps://gptinvestorapp.com/brief/%3$s</string>
     <string name="brief_spotlight_title">New in Brief</string>
     <string name="brief_spotlight_share_desc">Share this brief with anyone</string>
-    <string name="brief_spotlight_watchlist_desc">Save this company to your Watchlist</string>
+    <string name="brief_spotlight_watchlist_desc">Save this company to your watchlist</string>
+    <string name="share_brief">Share brief</string>
+    <string name="ask_about_this">Ask about this</string>
+    <string name="not_financial_advice">Not financial advice.</string>
+    <string name="couldn_t_load_brief">Couldn’t load this brief</string>
+    <string name="key_question_market_cap">What does a market cap of %1$s say about %2$s?</string>
+    <string name="key_question_pe_ratio">Is a P/E ratio of %1$s high for %2$s?</string>
+    <string name="key_question_revenue_growth">What does revenue growth of %1$s mean for %2$s?</string>
+    <string name="key_question_dividend_yield">Is a dividend yield of %1$s good for %2$s?</string>
+    <plurals name="brief_footer_sources">
+        <item quantity="one">%1$d source. Not financial advice.</item>
+        <item quantity="other">%1$d sources. Not financial advice.</item>
+    </plurals>
     <string name="got_it">Got it</string>
     <string name="onboarding_headline_value_prop">Feel confident about every stock decision</string>
     <string name="onboarding_body_value_prop">GPT Investor turns complex financial data into plain English insights, so you always know what's going on with the stocks you care about.</string>
@@ -320,7 +329,7 @@
     <string name="browse_top_picks">Browse top picks</string>
     <string name="popular_this_week">POPULAR THIS WEEK</string>
     <string name="watch">Watch</string>
-    <string name="remove_from_watchlist">Remove from Watchlist</string>
+    <string name="remove_from_watchlist">Remove from watchlist</string>
     <string name="remove_from_watchlist_confirmation">Remove %1$s from your watchlist?</string>
     <string name="remove">Remove</string>
     <string name="added_to_watchlist">%1$s added to watchlist</string>

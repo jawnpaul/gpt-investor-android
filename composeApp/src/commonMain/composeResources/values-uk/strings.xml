@@ -149,9 +149,6 @@
     <string name="what_it_means">Що це означає</string>
     <string name="the_risk">Ризик</string>
     <string name="the_opportunity">Можливість</string>
-    <string name="sentiment_bullish">ОПТИМІСТИЧНИЙ</string>
-    <string name="sentiment_bearish">ПЕСИМІСТИЧНИЙ</string>
-    <string name="sentiment_neutral">НЕЙТРАЛЬНИЙ</string>
     <string name="today">сьогодні</string>
     <string name="favorite">Улюблене</string>
     <string name="more">Більше</string>
@@ -351,4 +348,22 @@
     <string name="forgot_password_back_to_login">Повернутися до входу</string>
     <string name="forgot_password_error_rate_limited">Забагато спроб. Спробуйте пізніше.</string>
 
+    <string name="got_it">Зрозуміло</string>
+    <string name="brief_spotlight_title">Нове в огляді</string>
+    <string name="brief_spotlight_share_desc">Поділіться цим оглядом з будь-ким</string>
+    <string name="brief_spotlight_watchlist_desc">Збережіть цю компанію у своєму списку спостереження</string>
+    <string name="share_brief">Поділитися оглядом</string>
+    <string name="ask_about_this">Запитати про це</string>
+    <string name="not_financial_advice">Не є фінансовою порадою.</string>
+    <string name="couldn_t_load_brief">Не вдалося завантажити огляд</string>
+    <string name="key_question_market_cap">Що ринкова капіталізація %1$s говорить про %2$s?</string>
+    <string name="key_question_pe_ratio">Чи високий коефіцієнт P/E %1$s для %2$s?</string>
+    <string name="key_question_revenue_growth">Що означає зростання виручки на %1$s для %2$s?</string>
+    <string name="key_question_dividend_yield">Чи хороша дивідендна дохідність %1$s для %2$s?</string>
+    <plurals name="brief_footer_sources">
+        <item quantity="one">%1$d джерело. Не є фінансовою порадою.</item>
+        <item quantity="few">%1$d джерела. Не є фінансовою порадою.</item>
+        <item quantity="many">%1$d джерел. Не є фінансовою порадою.</item>
+        <item quantity="other">%1$d джерела. Не є фінансовою порадою.</item>
+    </plurals>
 </resources>

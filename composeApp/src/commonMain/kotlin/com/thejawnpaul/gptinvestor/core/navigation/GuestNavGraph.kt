@@ -320,6 +320,7 @@ fun NavGraphBuilder.guestNavGraph(
     composable(route = GuestScreen.GuestCompanyDetail.route) {
         val viewModel = koinViewModel<CompanyViewModel>()
         val state = viewModel.selectedCompany.collectAsState()
+        val haptics = LocalHapticFeedback.current
         LaunchedEffect(Unit) {
             viewModel.companyDetailAction.collect { action ->
                 when (action) {
@@ -352,10 +353,12 @@ fun NavGraphBuilder.guestNavGraph(
                     }
 
                     CompanyDetailAction.WatchlistAdded -> {
+                        haptics.performHapticFeedback(GiHaptics.Confirm)
                         platformActions.showMessage(getString(Res.string.added_to_watchlist_success))
                     }
 
                     CompanyDetailAction.WatchlistAddFailed -> {
+                        haptics.performHapticFeedback(GiHaptics.Reject)
                         platformActions.showMessage(getString(Res.string.added_to_watchlist_error))
                     }
 
@@ -364,6 +367,7 @@ fun NavGraphBuilder.guestNavGraph(
                     }
 
                     is CompanyDetailAction.WatchlistRemoveFailed -> {
+                        haptics.performHapticFeedback(GiHaptics.Reject)
                         platformActions.showMessage(
                             getString(Res.string.failed_to_remove_from_watchlist, action.ticker)
                         )

@@ -149,9 +149,6 @@
     <string name="what_it_means">اس کا مطلب</string>
     <string name="the_risk">خطرہ</string>
     <string name="the_opportunity">موقع</string>
-    <string name="sentiment_bullish">تیزی کا رجحان</string>
-    <string name="sentiment_bearish">مندی کا رجحان</string>
-    <string name="sentiment_neutral">غیر جانب دار</string>
     <string name="today">آج</string>
     <string name="favorite">پسندیدہ</string>
     <string name="more">مزید</string>
@@ -351,4 +348,20 @@
     <string name="forgot_password_back_to_login">لاگ ان پر واپس جائیں</string>
     <string name="forgot_password_error_rate_limited">بہت زیادہ کوششیں۔ بعد میں دوبارہ کوشش کریں۔</string>
 
+    <string name="got_it">ٹھیک ہے</string>
+    <string name="brief_spotlight_title">مختصر رپورٹ میں نیا</string>
+    <string name="brief_spotlight_share_desc">یہ مختصر رپورٹ کسی کے ساتھ بھی شیئر کریں</string>
+    <string name="brief_spotlight_watchlist_desc">اس کمپنی کو اپنی واچ لسٹ میں محفوظ کریں</string>
+    <string name="share_brief">مختصر رپورٹ شیئر کریں</string>
+    <string name="ask_about_this">اس کے بارے میں پوچھیں</string>
+    <string name="not_financial_advice">مالی مشورہ نہیں۔</string>
+    <string name="couldn_t_load_brief">یہ مختصر رپورٹ لوڈ نہیں ہو سکی</string>
+    <string name="key_question_market_cap">%1$s کی مارکیٹ کیپ %2$s کے بارے میں کیا بتاتی ہے؟</string>
+    <string name="key_question_pe_ratio">کیا %2$s کے لیے %1$s کا P/E تناسب زیادہ ہے؟</string>
+    <string name="key_question_revenue_growth">%1$s کی آمدنی میں اضافہ %2$s کے لیے کیا معنی رکھتا ہے؟</string>
+    <string name="key_question_dividend_yield">کیا %2$s کے لیے %1$s کا ڈیویڈنڈ منافع اچھا ہے؟</string>
+    <plurals name="brief_footer_sources">
+        <item quantity="one">%1$d ذریعہ۔ مالی مشورہ نہیں۔</item>
+        <item quantity="other">%1$d ذرائع۔ مالی مشورہ نہیں۔</item>
+    </plurals>
 </resources>

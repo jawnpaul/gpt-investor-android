@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiColors
 import com.thejawnpaul.gptinvestor.theme.GiIconSize
@@ -43,6 +44,7 @@ fun GiKeyNumberRow(
     tone: GiSentiment,
     modifier: Modifier = Modifier,
     valueTone: GiSentiment? = null,
+    spacing: Dp = GiSpace.x3,
     onClick: (() -> Unit)? = null
 ) {
     val colors = GiTheme.colors
@@ -63,7 +65,7 @@ fun GiKeyNumberRow(
             }
         )
         .background(if (isPressed) colors.ink.copy(alpha = GiMotion.PRESSED_ALPHA) else Color.Transparent)
-        .padding(vertical = GiSpace.x4)
+        .padding(vertical = spacing)
     val valueColor = when (valueTone) {
         GiSentiment.Positive -> colors.gain
         GiSentiment.Negative -> colors.loss
@@ -85,7 +87,7 @@ fun GiKeyNumberRow(
     } else {
         Row(
             modifier = rowModifier,
-            horizontalArrangement = Arrangement.spacedBy(GiSpace.x4),
+            horizontalArrangement = Arrangement.spacedBy(spacing),
             verticalAlignment = Alignment.CenterVertically
         ) {
             GiKeyNumberLabel(

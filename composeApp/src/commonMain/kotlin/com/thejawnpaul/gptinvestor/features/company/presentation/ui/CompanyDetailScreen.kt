@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -135,6 +137,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBarTitleStyle
 import com.thejawnpaul.gptinvestor.theme.components.GiUserMessage
 import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 import com.thejawnpaul.gptinvestor.too_complex
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -446,6 +449,12 @@ private fun CompanyDetailBriefContent(
     val companyName = state.companyName.ifEmpty { brief.name }
     val expanded = remember { mutableStateMapOf<Long, Boolean>() }
     val scope = rememberCoroutineScope()
+    val reducedMotion = isReducedMotionEnabled()
+    val itemSizes = remember { mutableMapOf<Int, Int>() }
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo }
+            .collect { items -> items.forEach { itemSizes[it.index] = it.size } }
+    }
     var showReasonsFor by remember { mutableStateOf<Long?>(null) }
     val showPending = state.pendingQuery != null
     val questionCount = messages.size + if (showPending) 1 else 0
@@ -504,7 +513,7 @@ private fun CompanyDetailBriefContent(
                         currentTicker = brief.ticker,
                         onCompanyClick = { ticker ->
                             if (ticker.equals(brief.ticker, ignoreCase = true)) {
-                                scope.launch { listState.animateScrollToItem(0) }
+                                scope.launch { listState.scrollToTop(itemSizes, animate = !reducedMotion) }
                             } else {
                                 onAction(CompanyDetailAction.OnOpenCompany(ticker))
                             }
@@ -644,6 +653,20 @@ private fun AnswerCompanyCard(
             showCaret = true
         )
     }
+}
+
+private suspend fun LazyListState.scrollToTop(itemSizes: Map<Int, Int>, animate: Boolean) {
+    if (!animate) {
+        scrollToItem(0)
+        return
+    }
+    val visible = layoutInfo.visibleItemsInfo
+    val averageSize = if (visible.isEmpty()) 0 else visible.sumOf { it.size } / visible.size
+    val spacing = layoutInfo.mainAxisItemSpacing
+    val distance = (0 until firstVisibleItemIndex).sumOf { (itemSizes[it] ?: averageSize) + spacing } +
+        firstVisibleItemScrollOffset
+    animateScrollBy(-distance.toFloat(), GiMotion.smooth())
+    if (firstVisibleItemIndex != 0 || firstVisibleItemScrollOffset != 0) animateScrollToItem(0)
 }
 
 private class CompanyThreadMessage(val message: GenAiTextMessage, val companies: List<CompanyDetailRemoteResponse>)

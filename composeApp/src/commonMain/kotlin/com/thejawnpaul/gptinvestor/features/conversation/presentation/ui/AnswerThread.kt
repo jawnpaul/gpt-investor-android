@@ -65,7 +65,7 @@ import org.jetbrains.compose.resources.stringResource
 
 class ThreadMessage(val message: GenAiTextMessage, val companies: List<CompanyDetailRemoteResponse>)
 
-fun threadMessages(messages: List<GenAiMessage>): List<ThreadMessage> {
+private fun threadMessages(messages: List<GenAiMessage>): List<ThreadMessage> {
     val texts = messages.filterIsInstance<GenAiTextMessage>()
     val entities = messages.filterIsInstance<GenAiEntityMessage>().filter { it.entity != null }
     return texts.map { text ->
@@ -78,6 +78,28 @@ fun threadMessages(messages: List<GenAiMessage>): List<ThreadMessage> {
         }
         ThreadMessage(message = text, companies = companies)
     }
+}
+
+@Composable
+fun rememberThreadMessages(messages: List<GenAiMessage>): List<ThreadMessage> {
+    val cache = remember { ThreadMessageCache() }
+    return remember(messages) { cache.reuse(threadMessages(messages)) }
+}
+
+private class ThreadMessageCache {
+    private var last: List<ThreadMessage> = emptyList()
+
+    fun reuse(next: List<ThreadMessage>): List<ThreadMessage> {
+        val reused = next.mapIndexed { index, item ->
+            val old = last.getOrNull(index)
+            if (old != null && old.message == item.message && old.companies.sameItems(item.companies)) old else item
+        }
+        last = reused
+        return reused
+    }
+
+    private fun <T> List<T>.sameItems(other: List<T>): Boolean =
+        size == other.size && indices.all { this[it] === other[it] }
 }
 
 data class AnswerStrings(

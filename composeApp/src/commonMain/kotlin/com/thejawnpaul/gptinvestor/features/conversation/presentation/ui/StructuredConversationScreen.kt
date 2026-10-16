@@ -7,9 +7,11 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.ime
@@ -19,9 +21,8 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -91,7 +92,7 @@ fun StructuredConversationScreen(
     val thread = rememberAnswerThreadState()
     val strings = answerStrings()
     val thinkingStatus = stringResource(Res.string.thinking)
-    val threadMessages = remember(messages) { threadMessages(messages) }
+    val threadMessages = rememberThreadMessages(messages)
     ScrollToNewQuestionEffect(
         listState = listState,
         questionCount = threadMessages.size + if (pendingQuery != null) 1 else 0
@@ -196,13 +197,14 @@ fun StructuredConversationScreen(
 @Composable
 private fun KeepThreadEndInViewEffect(listState: LazyListState) {
     LaunchedEffect(listState) {
-        var previousPadding = -1
-        var wasAtEnd = false
-        snapshotFlow { listState.layoutInfo.afterContentPadding }.collect { padding ->
-            val grewAtEnd = wasAtEnd && previousPadding >= 0 && padding > previousPadding
-            if (grewAtEnd) listState.dispatchRawDelta((padding - previousPadding).toFloat())
-            previousPadding = padding
-            wasAtEnd = grewAtEnd || !listState.canScrollForward
+        var previous: ThreadEnd? = null
+        snapshotFlow {
+            ThreadEnd(padding = listState.layoutInfo.afterContentPadding, atEnd = !listState.canScrollForward)
+        }.collect { current ->
+            val last = previous
+            val grewAtEnd = last != null && last.atEnd && current.padding > last.padding
+            if (grewAtEnd) listState.dispatchRawDelta((current.padding - last.padding).toFloat())
+            previous = if (grewAtEnd) current.copy(atEnd = true) else current
         }
     }
 }
@@ -228,14 +230,15 @@ private fun ConversationSuggestions(visible: Boolean, suggestions: List<Suggesti
         enter = if (reducedMotion) fadeIn else fadeIn + expandVertically(GiMotion.smooth()),
         exit = if (reducedMotion) fadeOut else fadeOut + shrinkVertically(GiMotion.smooth())
     ) {
-        LazyRow(
+        Row(
             modifier = Modifier
                 .bleedHorizontally()
-                .padding(bottom = GiSpace.x3),
-            contentPadding = PaddingValues(horizontal = GiSpace.gutter),
+                .padding(bottom = GiSpace.x3)
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = GiSpace.gutter),
             horizontalArrangement = Arrangement.spacedBy(GiSpace.x2)
         ) {
-            items(chips, key = { it.query }) { chip ->
+            chips.forEach { chip ->
                 GiChip(text = chip.label, onClick = { onClick(chip.query) }, style = GiChipStyle.Quiet)
             }
         }
@@ -259,6 +262,8 @@ private fun Modifier.bleedHorizontally(): Modifier = layout { measurable, constr
 }
 
 private data class SuggestionChip(val label: String, val query: String)
+
+private data class ThreadEnd(val padding: Int, val atEnd: Boolean)
 
 private const val COMPOSER_LARGE_TEXT_LINES = 3
 private const val SUGGESTIONS_DELAY_MS = GiMotion.SLOW.toLong()

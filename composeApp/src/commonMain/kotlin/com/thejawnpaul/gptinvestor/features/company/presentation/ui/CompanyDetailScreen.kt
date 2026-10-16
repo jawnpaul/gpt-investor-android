@@ -80,7 +80,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ThreadM
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.answerStrings
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.answerThreadItems
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.rememberAnswerThreadState
-import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.threadMessages
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.rememberThreadMessages
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.WaitlistBottomSheetContent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.tickerStock
@@ -138,9 +138,7 @@ fun CompanyDetailScreen(
     val composerBarHeight = remember { mutableIntStateOf(0) }
     val brief = state.brief
     val isWatched = brief?.isWatched == true
-    val messages = remember(state.conversation) {
-        threadMessages((state.conversation as? StructuredConversation)?.messageList.orEmpty())
-    }
+    val messages = rememberThreadMessages((state.conversation as? StructuredConversation)?.messageList.orEmpty())
     val askMode = composerFocused || messages.isNotEmpty() || state.pendingQuery != null
     val heroScrolledAway by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
     val showPinnedRow = askMode && brief != null && heroScrolledAway

@@ -56,7 +56,8 @@ fun GiAskComposer(
     sendContentDescription: String,
     modifier: Modifier = Modifier,
     floating: Boolean = true,
-    stop: GiComposerStop? = null
+    stop: GiComposerStop? = null,
+    largeTextMaxLines: Int = LARGE_TEXT_MAX_LINES
 ) {
     val colors = GiTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
@@ -72,7 +73,7 @@ fun GiAskComposer(
             imeAction = ImeAction.Send
         ),
         keyboardActions = KeyboardActions(onSend = { if (canSend) onSend() }),
-        maxLines = if (isLargeText()) LARGE_TEXT_MAX_LINES else MAX_LINES,
+        maxLines = if (isLargeText()) largeTextMaxLines else MAX_LINES,
         interactionSource = interactionSource,
         cursorBrush = SolidColor(colors.violet),
         decorationBox = { innerTextField ->
@@ -117,7 +118,7 @@ fun GiAskComposer(
                             text = placeholder,
                             style = GiTextStyle.Body,
                             color = colors.muted,
-                            maxLines = 1,
+                            maxLines = if (isLargeText()) largeTextMaxLines else 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }

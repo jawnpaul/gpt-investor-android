@@ -38,7 +38,6 @@
     <string name="ask_gpt_investor">GPT Investor سے پوچھیں</string>
     <string name="ask_about">… کے بارے میں پوچھیں</string>
     <string name="ask_anything_about_stocks">اسٹاکس کے بارے میں کچھ بھی پوچھیں …</string>
-    <string name="analysing_response">جواب کا تجزیہ کیا جا رہا ہے …</string>
     <string name="data_from">ڈیٹا ماخذ</string>
     <string name="about_company_name">%1$s کے بارے میں</string>
     <string name="pe_ratio">قیمت/آمدنی تناسب</string>
@@ -84,9 +83,7 @@
     <string name="send">بھیجیں</string>
     <string name="copy">کاپی کریں</string>
     <string name="like">پسند</string>
-    <string name="dislike">ناپسند</string>
     <string name="like_chosen">پسند منتخب کی گئی</string>
-    <string name="dislike_chosen">ناپسند منتخب کی گئی</string>
     <string name="none_chosen">کچھ منتخب نہیں کیا گیا</string>
     <string name="read_more">مزید پڑھیں</string>
     <string name="read_less">کم پڑھیں</string>
@@ -371,4 +368,6 @@
     <string name="helpful">مددگار</string>
     <string name="not_helpful">مددگار نہیں</string>
     <string name="stop_answering">جواب روکیں</string>
+    <string name="ask_a_follow_up">مزید سوال پوچھیں…</string>
+    <string name="thinking">سوچ رہا ہے…</string>
 </resources>

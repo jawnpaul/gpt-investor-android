@@ -82,6 +82,20 @@ fun NavGraphBuilder.historyNavGraph(navController: NavHostController, platformAc
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
                     }
+
+                    is HistoryDetailAction.OnShare -> {
+                        platformActions.shareText(action.text)
+                    }
+
+                    HistoryDetailAction.OnGoToHistory -> {
+                        if (!navController.popBackStack(Screen.HistoryTabScreen.route, inclusive = false)) {
+                            navController.navigate(Screen.HistoryTabScreen.route)
+                        }
+                    }
+
+                    is HistoryDetailAction.OnOpenCompany -> {
+                        navController.navigate(Screen.CompanyDetailScreen.createRoute(action.ticker))
+                    }
                 }
             }.launchIn(scope)
         }

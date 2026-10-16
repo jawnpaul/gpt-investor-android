@@ -38,7 +38,6 @@
     <string name="ask_gpt_investor">Ask GPT Investor</string>
     <string name="ask_about">Ask about …</string>
     <string name="ask_anything_about_stocks">Ask anything about stocks …</string>
-    <string name="analysing_response">Analysing response …</string>
     <string name="data_from">Data from</string>
     <string name="about_company_name">About %1$s</string>
     <string name="pe_ratio">p/e ratio</string>
@@ -84,9 +83,7 @@
     <string name="send">Send</string>
     <string name="copy">Copy</string>
     <string name="like">Like</string>
-    <string name="dislike">Dislike</string>
     <string name="like_chosen">Like chosen</string>
-    <string name="dislike_chosen">Dislike chosen</string>
     <string name="none_chosen">None chosen</string>
     <string name="read_more">Read more</string>
     <string name="read_less">Read less</string>
@@ -392,4 +389,6 @@
     <string name="helpful">Helpful</string>
     <string name="not_helpful">Not helpful</string>
     <string name="stop_answering">Stop answering</string>
+    <string name="ask_a_follow_up">Ask a follow-up…</string>
+    <string name="thinking">Thinking…</string>
 </resources>

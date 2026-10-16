@@ -1,625 +1,303 @@
 package com.thejawnpaul.gptinvestor.features.conversation.presentation.ui
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.EaseOutQuart
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.analysing_response
-import com.thejawnpaul.gptinvestor.ask_anything_about
-import com.thejawnpaul.gptinvestor.copy
-import com.thejawnpaul.gptinvestor.core.navigation.BackButton
-import com.thejawnpaul.gptinvestor.dislike
-import com.thejawnpaul.gptinvestor.dislike_chosen
-import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailHeader
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailTab
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.ExpandableRichText
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
+import com.thejawnpaul.gptinvestor.ask_a_follow_up
+import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.SuggestionRemote
-import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
-import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntityMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
-import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.QuestionInput
-import com.thejawnpaul.gptinvestor.ic_copy
-import com.thejawnpaul.gptinvestor.ic_dislike
-import com.thejawnpaul.gptinvestor.ic_dislike_filled
-import com.thejawnpaul.gptinvestor.ic_like
-import com.thejawnpaul.gptinvestor.ic_like_filled
-import com.thejawnpaul.gptinvestor.inaccurate
-import com.thejawnpaul.gptinvestor.like
-import com.thejawnpaul.gptinvestor.like_chosen
-import com.thejawnpaul.gptinvestor.not_actionable
-import com.thejawnpaul.gptinvestor.others
-import com.thejawnpaul.gptinvestor.sources
+import com.thejawnpaul.gptinvestor.history
+import com.thejawnpaul.gptinvestor.send
+import com.thejawnpaul.gptinvestor.stop_answering
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
-import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
-import com.thejawnpaul.gptinvestor.theme.bodyChatBody
-import com.thejawnpaul.gptinvestor.too_complex
-import com.thejawnpaul.gptinvestor.user_icon
-import kotlinx.coroutines.delay
-import org.jetbrains.compose.resources.painterResource
+import com.thejawnpaul.gptinvestor.theme.GiMotion
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.components.GiAskComposer
+import com.thejawnpaul.gptinvestor.theme.components.GiChip
+import com.thejawnpaul.gptinvestor.theme.components.GiChipStyle
+import com.thejawnpaul.gptinvestor.theme.components.GiComposerBar
+import com.thejawnpaul.gptinvestor.theme.components.GiComposerStop
+import com.thejawnpaul.gptinvestor.theme.components.GiIconButton
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
+import com.thejawnpaul.gptinvestor.thinking
 import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StructuredConversationScreen(
-    text: String,
-    conversation: StructuredConversation,
+    title: String,
+    messages: List<GenAiMessage>,
+    pendingQuery: String?,
+    isAnswering: Boolean,
     inputQuery: String,
-    selectedModel: AvailableModel,
-    availableModels: List<AvailableModel>,
+    suggestions: List<SuggestionRemote>,
+    isGuest: Boolean,
     onNavigateUp: () -> Unit,
-    onSendClick: () -> Unit,
-    onSignUpClick: () -> Unit,
-    onCopy: (String) -> Unit,
+    onOpenHistory: () -> Unit,
     onInputQueryChange: (String) -> Unit,
-    onClickNews: (url: String) -> Unit,
-    onClickSuggestedPrompt: (String) -> Unit,
+    onSendClick: () -> Unit,
+    onStopClick: () -> Unit,
+    onSuggestionClick: (String) -> Unit,
+    onCopy: (String) -> Unit,
+    onShare: (String) -> Unit,
     onClickFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
-    onModelChange: (AvailableModel) -> Unit,
-    onUpgradeModel: (showBottomSheet: Boolean, modelId: String) -> Unit,
-    modifier: Modifier = Modifier,
-    companyName: String = "",
-    isGuest: Boolean = false
+    onOpenCompany: (ticker: String) -> Unit,
+    onSignUpClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val company = conversation.messageList.filterIsInstance<GenAiEntityMessage>().firstOrNull()
     val keyboardController = LocalSoftwareKeyboardController.current
+    val listState = rememberLazyListState()
+    val thread = rememberAnswerThreadState()
+    val strings = answerStrings()
+    val thinkingStatus = stringResource(Res.string.thinking)
+    val threadMessages = remember(messages) { threadMessages(messages) }
+    ScrollToNewQuestionEffect(
+        listState = listState,
+        questionCount = threadMessages.size + if (pendingQuery != null) 1 else 0
+    )
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        containerColor = GiTheme.colors.bg,
+        contentWindowInsets = WindowInsets(0),
         topBar = {
-            Column(modifier = Modifier.statusBarsPadding()) {
-                company?.let {
-                    CompanyDetailHeader(
-                        modifier = Modifier.fillMaxWidth(),
-                        onNavigateUp = onNavigateUp,
-                        companyHeader = CompanyHeaderPresentation(
-                            companyTicker = it.entity?.ticker ?: "",
-                            companyName = it.entity?.name ?: "",
-                            companyLogo = it.entity?.formattedImageUrl ?: "",
-                            price = it.entity?.price ?: 0f,
-                            percentageChange = it.entity?.change ?: 0f
-                        )
-                    )
-                } ?: Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+            Column {
+                GiTopBar(
+                    title = title,
+                    onBack = onNavigateUp,
+                    backContentDescription = stringResource(Res.string.back),
+                    scrolled = true
                 ) {
-                    BackButton(onClick = onNavigateUp)
-                    Text(
-                        text = conversation.title,
-                        style = MaterialTheme.typography.titleLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                    GiIconButton(
+                        icon = GiIcons.clockCounterClockwise,
+                        contentDescription = stringResource(Res.string.history),
+                        onClick = onOpenHistory
                     )
                 }
                 if (isGuest) {
-                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = onSignUpClick)
+                    TopGuestLabel(
+                        onClick = onSignUpClick,
+                        modifier = Modifier.padding(
+                            start = GiSpace.gutter,
+                            end = GiSpace.gutter,
+                            top = GiSpace.x3,
+                            bottom = GiSpace.x3
+                        )
+                    )
                 }
             }
         },
         bottomBar = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+            GiComposerBar(
+                modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime)),
+                docked = true
             ) {
-                if (conversation.suggestedPrompts.isNotEmpty()) {
-                    FollowUpQuestions(
-                        modifier = Modifier,
-                        list = conversation.suggestedPrompts,
-                        onClick = { prompt ->
-                            onClickSuggestedPrompt(prompt.query ?: "")
-                        }
+                Column {
+                    ConversationSuggestions(
+                        visible = !isAnswering && pendingQuery == null && inputQuery.isEmpty(),
+                        suggestions = suggestions,
+                        onClick = onSuggestionClick
+                    )
+                    GiAskComposer(
+                        value = inputQuery,
+                        onValueChange = onInputQueryChange,
+                        onSend = {
+                            keyboardController?.hide()
+                            onSendClick()
+                        },
+                        placeholder = stringResource(Res.string.ask_a_follow_up),
+                        sendContentDescription = stringResource(Res.string.send),
+                        floating = false,
+                        stop = if (isAnswering) {
+                            GiComposerStop(
+                                contentDescription = stringResource(Res.string.stop_answering),
+                                onStop = onStopClick
+                            )
+                        } else {
+                            null
+                        },
+                        largeTextMaxLines = COMPOSER_LARGE_TEXT_LINES
                     )
                 }
-
-                QuestionInput(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .windowInsetsPadding(
-                            insets = WindowInsets.ime
-                        ),
-                    onSendClick = {
-                        keyboardController?.hide()
-                        onSendClick()
-                    },
-                    hint = stringResource(
-                        Res.string.ask_anything_about,
-                        companyName
-                    ),
-                    onTextChange = { input ->
-                        onInputQueryChange(input)
-                    },
-                    text = inputQuery
-                )
             }
         }
     ) { innerPadding ->
-
-        var showBottomSheet by remember { mutableStateOf(false) }
-
-        if (showBottomSheet) {
-            GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
-                showBottomSheet = false
-            }) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = stringResource(Res.string.sources),
-                        style = MaterialTheme.typography.labelMedium
-                    )
-
-                    company?.entity?.news?.map { it.toPresentation() }?.let { news ->
-                        news.forEachIndexed { index, item ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(
-                                    8.dp
-                                )
-                            ) {
-                                AsyncImage(
-                                    model = item.imageUrl,
-                                    modifier = Modifier
-                                        .size(20.dp)
-                                        .clip(CircleShape),
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Crop
-                                )
-
-                                Text(
-                                    text = item.publisher,
-                                    style = MaterialTheme.typography.titleSmall
-                                )
-                            }
-
-                            if (index != news.lastIndex) {
-                                HorizontalDivider()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxWidth()
-
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = GiSpace.gutter,
+                end = GiSpace.gutter,
+                top = innerPadding.calculateTopPadding() + GiSpace.x5,
+                bottom = innerPadding.calculateBottomPadding() + GiSpace.x5
+            ),
+            verticalArrangement = Arrangement.spacedBy(GiSpace.x5)
         ) {
-            HorizontalDivider(modifier = Modifier.fillMaxWidth())
-
-            if (conversation.messageList.isNotEmpty()) {
-                LazyColumn(
-                    contentPadding = PaddingValues(vertical = 16.dp),
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(
-                        items = conversation.messageList,
-                        key = { item -> item.id }
-                    ) { genAiMessage ->
-                        SingleStructuredResponse(
-                            modifier = Modifier,
-                            genAiMessage = genAiMessage,
-                            text = text,
-                            onClickNews = onClickNews,
-                            onClickFeedback = onClickFeedback,
-                            onCopy = onCopy,
-                            isGuest = isGuest,
-                            onClickSource = {
-                                showBottomSheet = true
-                            }
-                        )
-                    }
-
-                    item {
-                        Spacer(modifier = Modifier.size(100.dp))
-                    }
-                }
-            }
+            answerThreadItems(
+                messages = threadMessages,
+                pendingQuery = pendingQuery,
+                thinkingStatus = thinkingStatus,
+                strings = strings,
+                thread = thread,
+                listState = listState,
+                isGuest = isGuest,
+                onCompanyClick = onOpenCompany,
+                onCopy = onCopy,
+                onShare = onShare,
+                onFeedback = onClickFeedback
+            )
         }
     }
 }
 
 @Composable
-fun SingleStructuredResponse(
-    genAiMessage: GenAiMessage,
-    onClickNews: (url: String) -> Unit,
-    onClickFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
-    onCopy: (text: String) -> Unit,
-    onClickSource: () -> Unit,
-    modifier: Modifier = Modifier,
-    text: String = "",
-    isGuest: Boolean = false
-) {
-    val gptInvestorColors = LocalGPTInvestorColors.current
-
-    when (genAiMessage) {
-        is GenAiTextMessage -> {
-            if (genAiMessage.loading && genAiMessage.response.isNullOrBlank()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Card {
-                        Row(
-                            horizontalArrangement = Arrangement.Absolute.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            Text(
-                                genAiMessage.query,
-                                modifier = Modifier.padding(horizontal = 8.dp)
-                            )
-
-                            Image(
-                                painter = painterResource(Res.drawable.user_icon),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .padding(8.dp)
-                                    .drawBehind {
-                                        drawCircle(color = Color(245, 245, 245))
-                                    }
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.size(16.dp))
-
-                    Card {
-                        Text(
-                            stringResource(Res.string.analysing_response),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                        )
-                    }
-                }
-            } else {
-                val modelResponse = genAiMessage.response ?: ""
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    val showDislikeReasons = remember { mutableStateOf(false) }
-                    val feedBackState = remember { mutableStateOf(genAiMessage.feedbackStatus) }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Spacer(modifier = Modifier.weight(0.1f))
-                        Surface(
-                            modifier = Modifier.weight(0.9f),
-                            shape = RoundedCornerShape(corner = CornerSize(12.dp))
-                        ) {
-                            Text(
-                                modifier = Modifier.padding(16.dp),
-                                text = genAiMessage.query,
-                                style = MaterialTheme.typography.bodyChatBody,
-                                textAlign = TextAlign.Start
-                            )
-                        }
-                    }
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.Start)
-                            .padding(bottom = 16.dp)
-                    ) {
-                        ExpandableRichText(
-                            text = modelResponse,
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
-
-                        if (!genAiMessage.loading && !isGuest) {
-                            val dislikeReasons =
-                                listOf(
-                                    Res.string.too_complex,
-                                    Res.string.inaccurate,
-                                    Res.string.not_actionable,
-                                    Res.string.others
-                                )
-
-                            if (showDislikeReasons.value) {
-                                // list of dislike reasons
-                                LazyRow(
-                                    modifier = Modifier.padding(top = 8.dp),
-                                    contentPadding = PaddingValues(horizontal = 16.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                                ) {
-                                    items(dislikeReasons) { reason ->
-                                        val stringReason = stringResource(reason)
-                                        Surface(
-                                            modifier = Modifier,
-                                            onClick = {
-                                                onClickFeedback(
-                                                    genAiMessage.id,
-                                                    -1,
-                                                    stringReason
-                                                )
-                                                feedBackState.value = -1
-                                                showDislikeReasons.value = false
-                                            },
-                                            shape = RoundedCornerShape(corner = CornerSize(20.dp)),
-                                            border = BorderStroke(
-                                                1.dp,
-                                                MaterialTheme.colorScheme.outlineVariant
-                                            )
-                                        ) {
-                                            Text(
-                                                text = stringReason,
-                                                modifier = Modifier
-                                                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                                                style = MaterialTheme.typography.labelMedium,
-                                                textAlign = TextAlign.Center
-                                            )
-                                        }
-                                    }
-                                }
-                                // show it for 15 seconds
-                                LaunchedEffect(Unit) {
-                                    delay(15000L)
-                                    showDislikeReasons.value = false
-                                }
-                            } else {
-                                Row(
-                                    modifier = Modifier.padding(start = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    // copy
-                                    IconButton(
-                                        modifier = Modifier.size(32.dp),
-                                        onClick = {
-                                            onCopy(modelResponse)
-                                        }
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(Res.drawable.ic_copy),
-                                            contentDescription = stringResource(Res.string.copy)
-                                        )
-                                    }
-
-                                    when (feedBackState.value) {
-                                        1 -> {
-                                            // like chosen
-                                            IconButton(
-                                                modifier = Modifier.size(32.dp),
-                                                onClick = {
-                                                }
-                                            ) {
-                                                Icon(
-                                                    painter = painterResource(
-                                                        Res.drawable.ic_like_filled
-                                                    ),
-                                                    contentDescription = stringResource(
-                                                        Res.string.like_chosen
-                                                    )
-                                                )
-                                            }
-                                        }
-
-                                        -1 -> {
-                                            // dislike chosen
-                                            IconButton(modifier = Modifier.size(32.dp), onClick = {
-                                            }) {
-                                                Icon(
-                                                    painter = painterResource(
-                                                        Res.drawable.ic_dislike_filled
-                                                    ),
-                                                    contentDescription = stringResource(
-                                                        Res.string.dislike_chosen
-                                                    )
-                                                )
-                                            }
-                                        }
-
-                                        else -> {
-                                            // none chosen
-
-                                            // like
-                                            IconButton(
-                                                modifier = Modifier.size(32.dp),
-                                                onClick = {
-                                                    feedBackState.value = 1
-                                                    onClickFeedback(genAiMessage.id, 1, null)
-                                                }
-                                            ) {
-                                                Icon(
-                                                    painter = painterResource(
-                                                        Res.drawable.ic_like
-                                                    ),
-                                                    contentDescription = stringResource(
-                                                        Res.string.like
-                                                    )
-                                                )
-                                            }
-
-                                            // dislike
-                                            IconButton(
-                                                modifier = Modifier.size(32.dp),
-                                                onClick = {
-                                                    showDislikeReasons.value = true
-                                                    feedBackState.value = -1
-                                                    onClickFeedback(genAiMessage.id, -1, null)
-                                                }
-                                            ) {
-                                                Icon(
-                                                    painter = painterResource(
-                                                        Res.drawable.ic_dislike
-                                                    ),
-                                                    contentDescription = stringResource(
-                                                        Res.string.dislike
-                                                    )
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        is GenAiEntityMessage -> {
-            // Show company ui
-            Column(modifier = Modifier.fillMaxWidth()) {
-                genAiMessage.entity?.let { entity ->
-
-                    // tabs
-                    CompanyDetailTab(
-                        modifier = Modifier.fillMaxWidth(),
-                        company = entity,
-                        onClickNews = onClickNews,
-                        onClickSources = onClickSource
-                    )
-                }
-            }
+private fun ConversationSuggestions(visible: Boolean, suggestions: List<SuggestionRemote>, onClick: (String) -> Unit) {
+    val reducedMotion = isReducedMotionEnabled()
+    val chips = remember(suggestions) {
+        suggestions.mapNotNull { suggestion ->
+            val query = suggestion.query?.ifBlank { null } ?: suggestion.label?.ifBlank { null }
+            query?.let { SuggestionChip(label = suggestion.label?.ifBlank { null } ?: it, query = it) }
         }
     }
-}
-
-@Composable
-fun FollowUpQuestions(
-    list: List<SuggestionRemote>,
-    onClick: (prompt: SuggestionRemote) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    if (list.isNotEmpty()) {
+    val fadeIn = fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart))
+    val fadeOut = fadeOut(tween(GiMotion.FAST, easing = EaseOutQuart))
+    AnimatedVisibility(
+        visible = visible && chips.isNotEmpty(),
+        enter = if (reducedMotion) fadeIn else fadeIn + expandVertically(GiMotion.smooth()),
+        exit = if (reducedMotion) fadeOut else fadeOut + shrinkVertically(GiMotion.smooth())
+    ) {
         LazyRow(
-            modifier = modifier,
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier
+                .bleedHorizontally()
+                .padding(bottom = GiSpace.x3),
+            contentPadding = PaddingValues(horizontal = GiSpace.gutter),
+            horizontalArrangement = Arrangement.spacedBy(GiSpace.x2)
         ) {
-            items(items = list) { suggestion ->
-                Surface(
-                    modifier = Modifier,
-                    onClick = {
-                        onClick(suggestion)
-                    },
-                    shape = RoundedCornerShape(corner = CornerSize(20.dp)),
-                    border = BorderStroke(
-                        1.dp,
-                        MaterialTheme.colorScheme.outlineVariant
-                    )
-                ) {
-                    Text(
-                        text = suggestion.label ?: "",
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp, vertical = 10.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.Center
-                    )
-                }
+            items(chips, key = { it.query }) { chip ->
+                GiChip(text = chip.label, onClick = { onClick(chip.query) }, style = GiChipStyle.Quiet)
             }
         }
     }
 }
 
-@Preview
+fun conversationTitle(conversation: StructuredConversation?, pendingQuery: String?): String =
+    conversation?.title?.ifBlank { null }
+        ?: conversation?.messageList?.firstNotNullOfOrNull { (it as? GenAiTextMessage)?.query }
+        ?: pendingQuery.orEmpty()
+
+private fun Modifier.bleedHorizontally(): Modifier = layout { measurable, constraints ->
+    val bleed = GiSpace.gutter.roundToPx()
+    val placeable = measurable.measure(
+        constraints.copy(
+            minWidth = constraints.maxWidth + bleed * 2,
+            maxWidth = constraints.maxWidth + bleed * 2
+        )
+    )
+    layout(constraints.maxWidth, placeable.height) { placeable.place(-bleed, 0) }
+}
+
+private data class SuggestionChip(val label: String, val query: String)
+
+private const val COMPOSER_LARGE_TEXT_LINES = 3
+
+private val previewMessages = listOf(
+    GenAiTextMessage(
+        id = 1,
+        query = "What are the biggest tech stocks this year?",
+        feedbackStatus = 1,
+        response = "As of mid-2024, the biggest tech stocks are ranked by **market capitalisation**. Rankings " +
+            "fluctuate daily, and biggest does not mean best investment."
+    ),
+    GenAiTextMessage(id = 2, query = "Which one is cheapest?", feedbackStatus = 0, loading = true)
+)
+
+@PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
 @Composable
-private fun ConversationPreview(modifier: Modifier = Modifier) {
-    val messages = listOf(
-        GenAiTextMessage(
-            query = "I am the best",
-            loading = true,
-            response = "I am a fan of Manchester United based in Nigeria and also " +
-                "interested in the success of the club in general",
-            feedbackStatus = 0
-        ),
-        GenAiTextMessage(
-            query = "What are the latest prediction for netflix stock price?",
-            loading = false,
-            response = "",
-            feedbackStatus = 1
-        )
-    )
-    val conversation =
-        StructuredConversation(id = 1, title = "Aak me", messageList = messages.toMutableList())
-    val prompts = listOf(
-        SuggestionRemote(
-            label = "Netflix stock prices is going ",
-            query = ""
-        ),
-        SuggestionRemote(
-            label = "Netflix stock prices is going " +
-                "really high and things are expected tp go higher the more this season",
-            query = ""
-        ),
-        SuggestionRemote(
-            label = "Netflix stock prices is going " +
-                "really high and things are expected tp go higher the more this season",
-            query = ""
-        )
-    )
+private fun StructuredConversationScreenPreview() {
     GPTInvestorTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
-            FollowUpQuestions(modifier = Modifier, list = prompts, onClick = {})
-        }
+        StructuredConversationScreen(
+            title = "What are the biggest tech stocks this year?",
+            messages = previewMessages,
+            pendingQuery = null,
+            isAnswering = true,
+            inputQuery = "",
+            suggestions = emptyList(),
+            isGuest = false,
+            onNavigateUp = {},
+            onOpenHistory = {},
+            onInputQueryChange = {},
+            onSendClick = {},
+            onStopClick = {},
+            onSuggestionClick = {},
+            onCopy = {},
+            onShare = {},
+            onClickFeedback = { _, _, _ -> },
+            onOpenCompany = {},
+            onSignUpClick = {}
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun StructuredConversationScreenIdlePreview() {
+    GPTInvestorTheme {
+        StructuredConversationScreen(
+            title = "Biggest tech stocks",
+            messages = previewMessages.take(1),
+            pendingQuery = null,
+            isAnswering = false,
+            inputQuery = "",
+            suggestions = listOf(
+                SuggestionRemote(label = "Compare NVDA and AMD", query = "Compare NVDA and AMD"),
+                SuggestionRemote(label = "Is Apple overvalued?", query = "Is Apple overvalued?")
+            ),
+            isGuest = false,
+            onNavigateUp = {},
+            onOpenHistory = {},
+            onInputQueryChange = {},
+            onSendClick = {},
+            onStopClick = {},
+            onSuggestionClick = {},
+            onCopy = {},
+            onShare = {},
+            onClickFeedback = { _, _, _ -> },
+            onOpenCompany = {},
+            onSignUpClick = {}
+        )
     }
 }

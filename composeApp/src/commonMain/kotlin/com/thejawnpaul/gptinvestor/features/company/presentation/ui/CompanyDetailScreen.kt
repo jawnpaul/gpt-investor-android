@@ -46,6 +46,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -85,10 +89,11 @@ import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.WaitlistBottomSheetContent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.tickerStock
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.ui.RemoveFromWatchlistDialog
+import com.thejawnpaul.gptinvestor.loading_brief
+import com.thejawnpaul.gptinvestor.loading_company_brief
 import com.thejawnpaul.gptinvestor.not_financial_advice
 import com.thejawnpaul.gptinvestor.reading_company_data
 import com.thejawnpaul.gptinvestor.remove_from_watchlist
-import com.thejawnpaul.gptinvestor.retry
 import com.thejawnpaul.gptinvestor.send
 import com.thejawnpaul.gptinvestor.share_brief
 import com.thejawnpaul.gptinvestor.stop_answering
@@ -97,14 +102,10 @@ import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.components.GiAskComposer
-import com.thejawnpaul.gptinvestor.theme.components.GiBanner
-import com.thejawnpaul.gptinvestor.theme.components.GiBannerTone
-import com.thejawnpaul.gptinvestor.theme.components.GiButton
-import com.thejawnpaul.gptinvestor.theme.components.GiButtonSize
-import com.thejawnpaul.gptinvestor.theme.components.GiButtonVariant
 import com.thejawnpaul.gptinvestor.theme.components.GiComposerBar
 import com.thejawnpaul.gptinvestor.theme.components.GiComposerStop
 import com.thejawnpaul.gptinvestor.theme.components.GiDivider
+import com.thejawnpaul.gptinvestor.theme.components.GiErrorState
 import com.thejawnpaul.gptinvestor.theme.components.GiIconButton
 import com.thejawnpaul.gptinvestor.theme.components.GiIconToggleButton
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
@@ -116,6 +117,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBarTitleStyle
 import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
+import com.thejawnpaul.gptinvestor.try_again
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -143,6 +145,11 @@ fun CompanyDetailScreen(
     val heroScrolledAway by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
     val showPinnedRow = askMode && brief != null && heroScrolledAway
     val companyName = state.companyName.ifEmpty { state.ticker }
+    val display = when {
+        brief != null -> CompanyDisplay.Brief
+        state.error != null && !state.loading -> CompanyDisplay.Error
+        else -> CompanyDisplay.Loading
+    }
     val onWatchlistClick = {
         if (isWatched) {
             showRemoveFromWatchlistDialog = true
@@ -200,44 +207,46 @@ fun CompanyDetailScreen(
                 }
             },
             bottomBar = {
-                GiComposerBar(
-                    modifier = Modifier
-                        .onSizeChanged { composerBarHeight.intValue = it.height }
-                        .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime)),
-                    docked = askMode
-                ) {
-                    GiAskComposer(
-                        value = state.inputQuery,
-                        onValueChange = { onEvent(CompanyDetailEvent.QueryInputChanged(it)) },
-                        onSend = {
-                            keyboardController?.hide()
-                            onEvent(CompanyDetailEvent.SendClick)
-                        },
-                        placeholder = if (askMode) {
-                            stringResource(Res.string.ask_about_company, companyName)
-                        } else {
-                            stringResource(Res.string.ask_anything_about, companyName)
-                        },
-                        sendContentDescription = stringResource(Res.string.send),
-                        floating = !askMode,
-                        stop = if (state.isAnswering) {
-                            GiComposerStop(
-                                contentDescription = stringResource(Res.string.stop_answering),
-                                onStop = { onEvent(CompanyDetailEvent.StopAnswering) }
-                            )
-                        } else {
-                            null
-                        },
-                        largeTextMaxLines = COMPOSER_LARGE_TEXT_LINES,
-                        onFocusChange = { composerFocused = it }
-                    )
+                if (display != CompanyDisplay.Error) {
+                    GiComposerBar(
+                        modifier = Modifier
+                            .onSizeChanged { composerBarHeight.intValue = it.height }
+                            .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime)),
+                        docked = askMode
+                    ) {
+                        GiAskComposer(
+                            value = state.inputQuery,
+                            onValueChange = { onEvent(CompanyDetailEvent.QueryInputChanged(it)) },
+                            onSend = {
+                                keyboardController?.hide()
+                                onEvent(CompanyDetailEvent.SendClick)
+                            },
+                            placeholder = if (askMode) {
+                                stringResource(Res.string.ask_about_company, companyName)
+                            } else {
+                                stringResource(Res.string.ask_anything_about, companyName)
+                            },
+                            sendContentDescription = stringResource(Res.string.send),
+                            floating = !askMode,
+                            stop = if (state.isAnswering) {
+                                GiComposerStop(
+                                    contentDescription = stringResource(Res.string.stop_answering),
+                                    onStop = { onEvent(CompanyDetailEvent.StopAnswering) }
+                                )
+                            } else {
+                                null
+                            },
+                            largeTextMaxLines = COMPOSER_LARGE_TEXT_LINES,
+                            onFocusChange = { composerFocused = it }
+                        )
+                    }
                 }
             }
         ) { innerPadding ->
-            val display = when {
-                brief != null -> CompanyDisplay.Brief
-                state.error != null && !state.loading -> CompanyDisplay.Error
-                else -> CompanyDisplay.Loading
+            val loadingStatus = if (companyName.isNotBlank()) {
+                stringResource(Res.string.loading_company_brief, companyName)
+            } else {
+                stringResource(Res.string.loading_brief)
             }
             Box(
                 modifier = Modifier
@@ -254,15 +263,22 @@ fun CompanyDetailScreen(
                 ) { current ->
                     when (current) {
                         CompanyDisplay.Loading -> Column(
-                            modifier = Modifier.padding(horizontal = GiSpace.gutter, vertical = GiSpace.x1)
+                            modifier = Modifier
+                                .semantics {
+                                    liveRegion = LiveRegionMode.Polite
+                                    contentDescription = loadingStatus
+                                }
+                                .padding(horizontal = GiSpace.gutter, vertical = GiSpace.x1)
                         ) {
-                            CompanyBriefSkeleton()
+                            CompanyBriefSkeleton(announce = false)
                         }
-                        CompanyDisplay.Error -> Column(
-                            modifier = Modifier.padding(horizontal = GiSpace.gutter, vertical = GiSpace.x1)
-                        ) {
-                            CompanyBriefError(onRetry = { onEvent(CompanyDetailEvent.RetryLoad) })
-                        }
+                        CompanyDisplay.Error -> GiErrorState(
+                            title = stringResource(Res.string.couldn_t_load_brief),
+                            body = stringResource(Res.string.check_connection_try_again),
+                            actionText = stringResource(Res.string.try_again),
+                            onAction = { onEvent(CompanyDetailEvent.RetryLoad) },
+                            modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+                        )
                         CompanyDisplay.Brief -> if (brief != null) {
                             CompanyDetailBriefContent(
                                 brief = brief,
@@ -364,23 +380,6 @@ fun CompanyDetailScreen(
 private enum class CompanyDisplay { Loading, Error, Brief }
 
 @Composable
-private fun CompanyBriefError(onRetry: () -> Unit, modifier: Modifier = Modifier) {
-    GiBanner(
-        title = stringResource(Res.string.couldn_t_load_brief),
-        modifier = modifier,
-        subtitle = stringResource(Res.string.check_connection_try_again),
-        tone = GiBannerTone.Error
-    ) {
-        GiButton(
-            text = stringResource(Res.string.retry),
-            onClick = onRetry,
-            size = GiButtonSize.Small,
-            variant = GiButtonVariant.Secondary
-        )
-    }
-}
-
-@Composable
 private fun CompanyDetailBriefContent(
     brief: CompanyBrief,
     state: SingleCompanyView,
@@ -451,7 +450,8 @@ private fun CompanyDetailBriefContent(
             onShare = { onEvent(CompanyDetailEvent.ShareAnswer(it)) },
             onFeedback = { messageId, status, reason ->
                 onEvent(CompanyDetailEvent.SendFeedback(messageId, status, reason))
-            }
+            },
+            onRetry = { onEvent(CompanyDetailEvent.RetryAnswer(it)) }
         )
     }
 }

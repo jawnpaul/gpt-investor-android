@@ -18,7 +18,9 @@ import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.markdownAnnotator
+import com.mikepenz.markdown.model.markdownPadding
 import com.mikepenz.markdown.model.rememberMarkdownState
+import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import org.intellij.markdown.MarkdownElementTypes
 
@@ -29,6 +31,7 @@ fun AnswerMarkdown(text: String, modifier: Modifier = Modifier) {
     val markdownState = rememberMarkdownState(content = text, retainState = true, immediate = true)
     val links = remember(colors.violet) { TextLinkStyles(SpanStyle(color = colors.violet)) }
     val heading = remember(type.sectionTitle, colors.ink) { type.sectionTitle.copy(color = colors.ink) }
+    val code = remember(type.body) { type.body.copy(fontFamily = FontFamily.Monospace) }
     val strong = remember(colors.ink) { SpanStyle(fontWeight = FontWeight.SemiBold, color = colors.ink) }
     val settingsHolder = remember { arrayOfNulls<AnnotatorSettings>(1) }
     val annotator = remember(strong) {
@@ -56,17 +59,37 @@ fun AnswerMarkdown(text: String, modifier: Modifier = Modifier) {
     Markdown(
         markdownState = markdownState,
         modifier = modifier,
-        colors = markdownColor(text = colors.body),
+        colors = markdownColor(
+            text = colors.body,
+            codeBackground = colors.tile,
+            inlineCodeBackground = colors.tile,
+            dividerColor = colors.line,
+            tableBackground = colors.tile
+        ),
         typography = markdownTypography(
             h1 = heading,
             h2 = heading,
             h3 = heading,
+            h4 = heading,
+            h5 = heading,
+            h6 = heading,
             text = type.body,
+            code = code,
+            inlineCode = code,
+            quote = type.body,
             paragraph = type.body,
             ordered = type.body,
             bullet = type.body,
             list = type.body,
-            textLink = links
+            textLink = links,
+            table = type.body
+        ),
+        padding = markdownPadding(
+            block = GiSpace.x1,
+            list = GiSpace.x1,
+            listItemTop = GiSpace.x1,
+            listItemBottom = GiSpace.x1,
+            listIndent = GiSpace.x2
         ),
         annotator = annotator
     )

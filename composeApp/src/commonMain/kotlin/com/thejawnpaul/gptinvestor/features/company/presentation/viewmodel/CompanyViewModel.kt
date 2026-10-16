@@ -28,6 +28,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversati
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.ConversationPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.answerFailed
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.stopAnswer
@@ -185,23 +186,34 @@ class CompanyViewModel(
                     "source" to "user_input"
                 )
             )
-            when (_selectedCompany.value.conversation) {
-                is CompanyDetailDefaultConversation -> {
-                    ask(
-                        ConversationPrompt(
-                            query = query,
-                            tickerSymbol = _selectedCompany.value.header.companyTicker,
-                            conversationId = -1L
-                        )
+            askQuery(query)
+        }
+    }
+
+    private fun retryAnswer(query: String) {
+        if (query.isBlank() || _selectedCompany.value.isAnswering) return
+        _selectedCompany.update { it.copy(pendingQuery = query, isAnswering = true) }
+        requestStartTime = Clock.System.now().toEpochMilliseconds()
+        askQuery(query)
+    }
+
+    private fun askQuery(query: String) {
+        when (_selectedCompany.value.conversation) {
+            is CompanyDetailDefaultConversation -> {
+                ask(
+                    ConversationPrompt(
+                        query = query,
+                        tickerSymbol = _selectedCompany.value.header.companyTicker,
+                        conversationId = -1L
                     )
-                }
+                )
+            }
 
-                is StructuredConversation -> {
-                    ask(ConversationPrompt(query = query, conversationId = selectedConversationId.value))
-                }
+            is StructuredConversation -> {
+                ask(ConversationPrompt(query = query, conversationId = selectedConversationId.value))
+            }
 
-                else -> {
-                }
+            else -> {
             }
         }
     }
@@ -264,6 +276,10 @@ class CompanyViewModel(
 
     private fun handleCompanyInputResponseFailure(failure: Failure) {
         Logger.e(failure.toString())
+        val shownInline = _selectedCompany.value.let { state ->
+            val last = (state.conversation as? StructuredConversation)?.messageList?.lastOrNull()
+            state.pendingQuery == null && (last as? GenAiTextMessage)?.answerFailed == true
+        }
         when (failure) {
             is Failure.GuestSessionExpired -> {
                 guestSessionNotifier.notify(
@@ -304,9 +320,11 @@ class CompanyViewModel(
             }
 
             is GenAIException -> {
-                processCompanyDetailAction(
-                    CompanyDetailAction.ShowToast("An error occurred")
-                )
+                if (!shownInline) {
+                    processCompanyDetailAction(
+                        CompanyDetailAction.ShowToast("An error occurred")
+                    )
+                }
             }
 
             is Failure.ContextLimitReached -> {
@@ -316,21 +334,27 @@ class CompanyViewModel(
             }
 
             is Failure.NetworkConnection -> {
-                processCompanyDetailAction(
-                    CompanyDetailAction.ShowToast("No internet connection")
-                )
+                if (!shownInline) {
+                    processCompanyDetailAction(
+                        CompanyDetailAction.ShowToast("No internet connection")
+                    )
+                }
             }
 
             is Failure.ServerError -> {
-                processCompanyDetailAction(
-                    CompanyDetailAction.ShowToast("Server error. Please try again later.")
-                )
+                if (!shownInline) {
+                    processCompanyDetailAction(
+                        CompanyDetailAction.ShowToast("Server error. Please try again later.")
+                    )
+                }
             }
 
             else -> {
-                processCompanyDetailAction(
-                    CompanyDetailAction.ShowToast("Something went wrong")
-                )
+                if (!shownInline) {
+                    processCompanyDetailAction(
+                        CompanyDetailAction.ShowToast("Something went wrong")
+                    )
+                }
             }
         }
         _selectedCompany.update {
@@ -463,6 +487,10 @@ class CompanyViewModel(
                 )
                 _selectedCompany.update { it.copy(inputQuery = event.question) }
                 getInputResponse()
+            }
+
+            is CompanyDetailEvent.RetryAnswer -> {
+                retryAnswer(event.query)
             }
 
             CompanyDetailEvent.RetryLoad -> {
@@ -635,6 +663,7 @@ sealed interface CompanyDetailEvent {
     data class BriefKeyNumberExpanded(val keyNumberType: KeyNumberType) : CompanyDetailEvent
     data class AskAboutKeyNumber(val keyNumberType: KeyNumberType, val question: String) : CompanyDetailEvent
     data object RetryLoad : CompanyDetailEvent
+    data class RetryAnswer(val query: String) : CompanyDetailEvent
     data object ShareBrief : CompanyDetailEvent
     data object AddToWatchlist : CompanyDetailEvent
     data object RemoveFromWatchlist : CompanyDetailEvent

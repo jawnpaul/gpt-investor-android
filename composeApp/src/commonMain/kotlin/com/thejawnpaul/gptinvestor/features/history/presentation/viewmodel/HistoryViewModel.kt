@@ -13,6 +13,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversati
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.ConversationPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.answerFailed
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.stopAnswer
@@ -141,12 +142,19 @@ class HistoryViewModel(
         if (query.trim().isNotEmpty()) ask(query = query, source = "user_input")
     }
 
-    private fun ask(query: String, source: String) {
+    private fun retryAnswer(query: String) {
+        if (query.isBlank() || conversation.value.loading) return
+        ask(query = query, source = null)
+    }
+
+    private fun ask(query: String, source: String?) {
         answerGeneration++
         val generation = answerGeneration
-        conversationView.update { it.copy(loading = true, pendingQuery = query, query = "") }
+        conversationView.update {
+            it.copy(loading = true, pendingQuery = query, query = if (source == null) it.query else "")
+        }
         requestStartTime = Clock.System.now().toEpochMilliseconds()
-        logMessageSent(source = source)
+        source?.let { logMessageSent(source = it) }
         answerJob = getInputPromptUseCase(
             ConversationPrompt(
                 conversationId = conversationId ?: -1L,
@@ -182,6 +190,7 @@ class HistoryViewModel(
     }
 
     private fun handleInputResponseFailure(failure: Failure) {
+        var shownInline = false
         conversationView.update { state ->
             val updatedConversation =
                 (state.conversation as? StructuredConversation)?.let { conversation ->
@@ -197,6 +206,9 @@ class HistoryViewModel(
                     }
                     conversation.copy(messageList = updatedMessages)
                 } ?: state.conversation
+            shownInline = state.pendingQuery == null &&
+                ((updatedConversation as? StructuredConversation)?.messageList?.lastOrNull() as? GenAiTextMessage)
+                    ?.answerFailed == true
             state.copy(
                 loading = false,
                 conversation = updatedConversation,
@@ -207,7 +219,7 @@ class HistoryViewModel(
         when (failure) {
             is GenAIException -> {
                 Logger.e("AI exception")
-                processHistoryDetailAction(HistoryDetailAction.ShowToast("An error occurred"))
+                if (!shownInline) processHistoryDetailAction(HistoryDetailAction.ShowToast("An error occurred"))
             }
 
             is Failure.RateLimitExceeded -> {
@@ -234,18 +246,20 @@ class HistoryViewModel(
             }
 
             is Failure.NetworkConnection -> {
-                processHistoryDetailAction(HistoryDetailAction.ShowToast("No internet connection"))
+                if (!shownInline) processHistoryDetailAction(HistoryDetailAction.ShowToast("No internet connection"))
             }
 
             is Failure.ServerError -> {
-                processHistoryDetailAction(
-                    HistoryDetailAction.ShowToast("Server error. Please try again later.")
-                )
+                if (!shownInline) {
+                    processHistoryDetailAction(
+                        HistoryDetailAction.ShowToast("Server error. Please try again later.")
+                    )
+                }
             }
 
             else -> {
                 Logger.e(failure.toString())
-                processHistoryDetailAction(HistoryDetailAction.ShowToast("Something went wrong"))
+                if (!shownInline) processHistoryDetailAction(HistoryDetailAction.ShowToast("Something went wrong"))
             }
         }
     }
@@ -323,6 +337,10 @@ class HistoryViewModel(
         when (event) {
             is HistoryDetailEvent.ClickSuggestedPrompt -> {
                 getSuggestedPromptResponse(query = event.prompt)
+            }
+
+            is HistoryDetailEvent.RetryAnswer -> {
+                retryAnswer(event.query)
             }
 
             is HistoryDetailEvent.GetHistory -> {
@@ -501,6 +519,7 @@ sealed interface HistoryDetailEvent {
     data class ShowRateLimitBottomSheet(val showBottomSheet: Boolean) : HistoryDetailEvent
     data object GoToSignUp : HistoryDetailEvent
     data object StopAnswering : HistoryDetailEvent
+    data class RetryAnswer(val query: String) : HistoryDetailEvent
     data class ShareAnswer(val text: String) : HistoryDetailEvent
     data object GoToHistory : HistoryDetailEvent
     data class OpenCompany(val ticker: String) : HistoryDetailEvent

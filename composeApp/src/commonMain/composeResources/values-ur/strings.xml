@@ -372,11 +372,14 @@
     <string name="thinking">سوچ رہا ہے…</string>
     <string name="splash_tagline">آپ کے پیسوں کے بارے میں واضح جوابات</string>
     <string name="onboarding_brief_error_message">آپ کا خلاصہ لوڈ کرتے وقت کچھ غلط ہو گیا۔</string>
-    <string name="onboarding_cta_try_again">دوبارہ کوشش کریں</string>
+    <string name="try_again">دوبارہ کوشش کریں</string>
     <string name="onboarding_cta_go_to_app_short">ایپ پر جائیں</string>
     <string name="guest_session_started">مہمان سیشن شروع ہو گیا</string>
     <string name="digest_detail_empty_title">اس خلاصے میں ابھی کوئی اسٹاک نہیں</string>
     <string name="digest_detail_empty_body">اپنی واچ لسٹ میں کمپنیاں شامل کریں، وہ آپ کے اگلے خلاصے میں نظر آئیں گی۔</string>
     <string name="digest_detail_empty_action">ہوم پر واپس جائیں</string>
     <string name="offline_opening_saved">کنکشن نہیں ہے۔ آپ کا محفوظ ڈیٹا کھولا جا رہا ہے…</string>
+    <string name="loading_company_brief">%1$s کی مختصر رپورٹ لوڈ ہو رہی ہے</string>
+    <string name="why_sentiment">%1$s کیوں؟</string>
+    <string name="answer_error">ہم اس کا جواب نہیں دے سکے۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
 </resources>

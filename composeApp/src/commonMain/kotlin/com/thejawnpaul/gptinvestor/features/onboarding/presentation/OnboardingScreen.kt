@@ -89,7 +89,6 @@ import com.thejawnpaul.gptinvestor.onboarding_brief_error_message
 import com.thejawnpaul.gptinvestor.onboarding_cta_get_started
 import com.thejawnpaul.gptinvestor.onboarding_cta_go_to_app_short
 import com.thejawnpaul.gptinvestor.onboarding_cta_start_exploring
-import com.thejawnpaul.gptinvestor.onboarding_cta_try_again
 import com.thejawnpaul.gptinvestor.onboarding_cta_try_it_now
 import com.thejawnpaul.gptinvestor.onboarding_headline_how_it_works
 import com.thejawnpaul.gptinvestor.onboarding_headline_stock_selection
@@ -147,6 +146,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiWaveIllustration
 import com.thejawnpaul.gptinvestor.theme.components.giBeam
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 import com.thejawnpaul.gptinvestor.theme.rememberGiSharedAxisTransition
+import com.thejawnpaul.gptinvestor.try_again
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.StringResource
@@ -907,7 +907,7 @@ private fun BriefError(onRetry: () -> Unit, onFinish: () -> Unit, modifier: Modi
         )
         Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
             GiButton(
-                text = stringResource(Res.string.onboarding_cta_try_again),
+                text = stringResource(Res.string.try_again),
                 onClick = onRetry,
                 modifier = Modifier.fillMaxWidth()
             )

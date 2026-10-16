@@ -374,11 +374,14 @@
     <string name="thinking">Думаю…</string>
     <string name="splash_tagline">Чіткі відповіді про ваші гроші</string>
     <string name="onboarding_brief_error_message">Не вдалося завантажити ваш огляд.</string>
-    <string name="onboarding_cta_try_again">Повторити спробу</string>
+    <string name="try_again">Повторити спробу</string>
     <string name="onboarding_cta_go_to_app_short">До застосунку</string>
     <string name="guest_session_started">Гостьовий сеанс розпочато</string>
     <string name="digest_detail_empty_title">У цьому огляді ще немає акцій</string>
     <string name="digest_detail_empty_body">Додайте компанії до списку спостереження, і вони з’являться у вашому наступному огляді.</string>
     <string name="digest_detail_empty_action">Назад на головну</string>
     <string name="offline_opening_saved">Немає з’єднання. Відкриваємо ваші збережені дані…</string>
+    <string name="loading_company_brief">Завантажуємо огляд %1$s</string>
+    <string name="why_sentiment">Чому %1$s?</string>
+    <string name="answer_error">Не вдалося відповісти. Перевірте з’єднання та спробуйте ще раз.</string>
 </resources>

@@ -190,7 +190,7 @@
     <string name="onboarding_error_message">Something went wrong. Let's take you to the app.</string>
     <string name="onboarding_cta_go_to_app">Go to GPT Investor</string>
     <string name="onboarding_brief_error_message">Something went wrong loading your brief.</string>
-    <string name="onboarding_cta_try_again">Try again</string>
+    <string name="try_again">Try again</string>
     <string name="onboarding_cta_go_to_app_short">Go to app</string>
     <string name="onboarding_value_plain_english_title">Plain English</string>
     <string name="onboarding_value_plain_english_body">No jargon, no confusion.</string>
@@ -400,4 +400,7 @@
     <string name="digest_detail_empty_body">Add companies to your watchlist and they’ll appear in your next brief.</string>
     <string name="digest_detail_empty_action">Back to Home</string>
     <string name="offline_opening_saved">No connection. Opening your saved data…</string>
+    <string name="loading_company_brief">Loading the %1$s brief</string>
+    <string name="why_sentiment">Why %1$s?</string>
+    <string name="answer_error">We couldn’t answer that. Check your connection and try again.</string>
 </resources>

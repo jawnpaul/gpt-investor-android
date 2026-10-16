@@ -26,14 +26,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.answer_error
 import com.thejawnpaul.gptinvestor.copy
 import com.thejawnpaul.gptinvestor.core.utility.toCurrency
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntityMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.answerFailed
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.tickerStock
 import com.thejawnpaul.gptinvestor.gpt_investor
 import com.thejawnpaul.gptinvestor.helpful
@@ -49,6 +54,7 @@ import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.components.GiAnswerActionLabels
 import com.thejawnpaul.gptinvestor.theme.components.GiAnswerActions
+import com.thejawnpaul.gptinvestor.theme.components.GiAnswerError
 import com.thejawnpaul.gptinvestor.theme.components.GiAssistantMessage
 import com.thejawnpaul.gptinvestor.theme.components.GiButton
 import com.thejawnpaul.gptinvestor.theme.components.GiButtonSize
@@ -60,6 +66,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiThinkingIndicator
 import com.thejawnpaul.gptinvestor.theme.components.GiUserMessage
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 import com.thejawnpaul.gptinvestor.too_complex
+import com.thejawnpaul.gptinvestor.try_again
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 
@@ -108,7 +115,9 @@ data class AnswerStrings(
     val showMore: String,
     val showLess: String,
     val labels: GiAnswerActionLabels,
-    val reasons: List<String>
+    val reasons: List<String>,
+    val answerError: String,
+    val tryAgain: String
 )
 
 @Composable
@@ -128,7 +137,9 @@ fun answerStrings(): AnswerStrings = AnswerStrings(
         stringResource(Res.string.inaccurate),
         stringResource(Res.string.not_actionable),
         stringResource(Res.string.others)
-    )
+    ),
+    answerError = stringResource(Res.string.answer_error),
+    tryAgain = stringResource(Res.string.try_again)
 )
 
 @Stable
@@ -183,7 +194,8 @@ fun LazyListScope.answerThreadItems(
     onCompanyClick: (String) -> Unit,
     onCopy: (String) -> Unit,
     onShare: (String) -> Unit,
-    onFeedback: (messageId: Long, status: Int, reason: String?) -> Unit
+    onFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
+    onRetry: (query: String) -> Unit
 ) {
     messages.forEachIndexed { index, threadMessage ->
         val message = threadMessage.message
@@ -217,6 +229,7 @@ fun LazyListScope.answerThreadItems(
                     onCopy = onCopy,
                     onShare = onShare,
                     onFeedback = onFeedback,
+                    onRetry = { onRetry(message.query) },
                     onNotHelpful = { thread.showReasonsFor = message.id },
                     onReasonPick = { thread.showReasonsFor = null }
                 )
@@ -248,16 +261,18 @@ private fun ThreadAnswer(
     onCopy: (String) -> Unit,
     onShare: (String) -> Unit,
     onFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
+    onRetry: () -> Unit,
     onNotHelpful: () -> Unit,
     onReasonPick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val response = message.response.orEmpty()
+    val failed = message.answerFailed && !(companies.isNotEmpty() && message.response.isNullOrBlank())
+    val response = if (failed) "" else message.response.orEmpty()
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
         GiAssistantMessage(
             name = strings.name,
             streaming = message.loading,
-            disclaimer = strings.disclaimer,
+            disclaimer = if (failed) null else strings.disclaimer,
             collapsed = collapsed,
             animateCollapse = animateCollapse,
             onToggleCollapse = onToggleCollapse,
@@ -298,7 +313,16 @@ private fun ThreadAnswer(
                         onClick = { onCompanyClick(company.ticker) }
                     )
                 }
-                if (response.isNotBlank()) AnswerMarkdown(text = response)
+                if (failed) {
+                    GiAnswerError(
+                        message = strings.answerError,
+                        retryText = strings.tryAgain,
+                        onRetry = onRetry,
+                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+                    )
+                } else if (response.isNotBlank()) {
+                    AnswerMarkdown(text = response)
+                }
             }
         }
         AnimatedVisibility(

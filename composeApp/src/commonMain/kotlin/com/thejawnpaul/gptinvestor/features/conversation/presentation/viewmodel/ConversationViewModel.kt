@@ -21,6 +21,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultCon
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.answerFailed
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefaultPromptResponseUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefaultPromptsUseCase
@@ -143,9 +144,14 @@ class ConversationViewModel(
         ask(query = query, source = "suggested_prompt")
     }
 
-    private fun ask(query: String, source: String) {
-        startAnswer(query)
-        logMessageSent(source = source)
+    private fun retryAnswer(query: String) {
+        if (query.isBlank() || conversation.value.loading) return
+        ask(query = query, source = null)
+    }
+
+    private fun ask(query: String, source: String?) {
+        startAnswer(query, keepDraft = source == null)
+        source?.let { logMessageSent(source = it) }
         val generation = answerGeneration
         answerJob = getInputPromptUseCase(
             ConversationPrompt(
@@ -162,9 +168,11 @@ class ConversationViewModel(
         }
     }
 
-    private fun startAnswer(query: String) {
+    private fun startAnswer(query: String, keepDraft: Boolean = false) {
         answerGeneration++
-        conversationViewMutableStateFlow.update { it.copy(loading = true, pendingQuery = query, query = "") }
+        conversationViewMutableStateFlow.update {
+            it.copy(loading = true, pendingQuery = query, query = if (keepDraft) it.query else "")
+        }
         requestStartTime = Clock.System.now().toEpochMilliseconds()
     }
 
@@ -192,6 +200,7 @@ class ConversationViewModel(
     }
 
     private fun handleConversationFailure(failure: Failure) {
+        var shownInline = false
         conversationViewMutableStateFlow.update { state ->
             val updatedConversation =
                 (state.conversation as? StructuredConversation)?.let { conversation ->
@@ -207,6 +216,9 @@ class ConversationViewModel(
                     }
                     conversation.copy(messageList = updatedMessages)
                 } ?: state.conversation
+            shownInline = state.pendingQuery == null &&
+                ((updatedConversation as? StructuredConversation)?.messageList?.lastOrNull() as? GenAiTextMessage)
+                    ?.answerFailed == true
             state.copy(
                 loading = false,
                 conversation = updatedConversation,
@@ -217,7 +229,7 @@ class ConversationViewModel(
         when (failure) {
             is GenAIException -> {
                 Logger.e("AI exception")
-                processAction(ConversationAction.ShowToast("An error occurred"))
+                if (!shownInline) processAction(ConversationAction.ShowToast("An error occurred"))
             }
 
             is Failure.GuestSessionExpired -> {
@@ -265,16 +277,16 @@ class ConversationViewModel(
             }
 
             is Failure.NetworkConnection -> {
-                processAction(ConversationAction.ShowToast("No internet connection"))
+                if (!shownInline) processAction(ConversationAction.ShowToast("No internet connection"))
             }
 
             is Failure.ServerError -> {
-                processAction(ConversationAction.ShowToast("Server error. Please try again later."))
+                if (!shownInline) processAction(ConversationAction.ShowToast("Server error. Please try again later."))
             }
 
             else -> {
                 Logger.e(failure.toString())
-                processAction(ConversationAction.ShowToast("Something went wrong"))
+                if (!shownInline) processAction(ConversationAction.ShowToast("Something went wrong"))
             }
         }
     }
@@ -331,6 +343,10 @@ class ConversationViewModel(
 
             is ConversationEvent.SuggestedPromptClicked -> {
                 getSuggestedPromptResponse(event.prompt)
+            }
+
+            is ConversationEvent.RetryAnswer -> {
+                retryAnswer(event.query)
             }
 
             is ConversationEvent.UpdateInputQuery -> {
@@ -534,6 +550,7 @@ sealed interface ConversationEvent {
     data class ShowRateLimitBottomSheet(val showBottomSheet: Boolean) : ConversationEvent
     data object GoToSignUp : ConversationEvent
     data object StopAnswering : ConversationEvent
+    data class RetryAnswer(val query: String) : ConversationEvent
     data class ShareAnswer(val text: String) : ConversationEvent
     data object GoToHistory : ConversationEvent
     data class OpenCompany(val ticker: String) : ConversationEvent

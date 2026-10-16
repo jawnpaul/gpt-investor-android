@@ -82,6 +82,7 @@ fun StructuredConversationScreen(
     onCopy: (String) -> Unit,
     onShare: (String) -> Unit,
     onClickFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
+    onRetry: (query: String) -> Unit,
     onOpenCompany: (ticker: String) -> Unit,
     onSignUpClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -188,7 +189,8 @@ fun StructuredConversationScreen(
                 onCompanyClick = onOpenCompany,
                 onCopy = onCopy,
                 onShare = onShare,
-                onFeedback = onClickFeedback
+                onFeedback = onClickFeedback,
+                onRetry = onRetry
             )
         }
     }
@@ -301,6 +303,7 @@ private fun StructuredConversationScreenPreview() {
             onCopy = {},
             onShare = {},
             onClickFeedback = { _, _, _ -> },
+            onRetry = {},
             onOpenCompany = {},
             onSignUpClick = {}
         )
@@ -331,6 +334,7 @@ private fun StructuredConversationScreenIdlePreview() {
             onCopy = {},
             onShare = {},
             onClickFeedback = { _, _, _ -> },
+            onRetry = {},
             onOpenCompany = {},
             onSignUpClick = {}
         )

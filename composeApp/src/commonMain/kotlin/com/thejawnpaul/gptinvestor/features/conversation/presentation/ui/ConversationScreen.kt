@@ -76,6 +76,7 @@ fun ConversationScreen(
                     onClickFeedback = { messageId, status, reason ->
                         onEvent(ConversationEvent.SendFeedback(messageId, status, reason))
                     },
+                    onRetry = { onEvent(ConversationEvent.RetryAnswer(it)) },
                     onOpenCompany = { onEvent(ConversationEvent.OpenCompany(it)) },
                     onSignUpClick = { onEvent(ConversationEvent.GoToSignUp) },
                     composerModifier = composerModifier

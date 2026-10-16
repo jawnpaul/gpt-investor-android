@@ -76,6 +76,7 @@ fun HistoryDetailScreen(
                 onClickFeedback = { messageId, status, reason ->
                     onEvent(HistoryDetailEvent.SendFeedback(messageId, status, reason))
                 },
+                onRetry = { onEvent(HistoryDetailEvent.RetryAnswer(it)) },
                 onOpenCompany = { onEvent(HistoryDetailEvent.OpenCompany(it)) },
                 onSignUpClick = { onEvent(HistoryDetailEvent.GoToSignUp) }
             )

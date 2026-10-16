@@ -76,6 +76,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiText
 import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.today
 import com.thejawnpaul.gptinvestor.what_it_means
+import com.thejawnpaul.gptinvestor.why_sentiment
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -233,9 +234,17 @@ private fun BriefVerdictCard(
     modifier: Modifier = Modifier
 ) {
     val colors = GiTheme.colors
-    GiCard(modifier = modifier.fillMaxWidth(), onClick = onClick, spacing = GiSpace.x2) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            GiSentimentPill(sentiment = sentiment.toGi(), label = stringResource(sentiment.labelRes()))
+    val label = stringResource(sentiment.labelRes())
+    val announcement = spokenSentences(label, summary, stringResource(Res.string.why_sentiment, label))
+    GiCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) { contentDescription = announcement },
+        onClick = onClick,
+        spacing = GiSpace.x2
+    ) {
+        Row(modifier = Modifier.clearAndSetSemantics {}, verticalAlignment = Alignment.CenterVertically) {
+            GiSentimentPill(sentiment = sentiment.toGi(), label = label)
             Spacer(modifier = Modifier.weight(1f))
             Icon(
                 imageVector = GiIcons.caretRight,
@@ -245,7 +254,12 @@ private fun BriefVerdictCard(
             )
         }
         if (!summary.isNullOrBlank()) {
-            Text(text = summary, color = colors.ink, style = GiTheme.type.statNumber)
+            Text(
+                text = summary,
+                modifier = Modifier.clearAndSetSemantics {},
+                color = colors.ink,
+                style = GiTheme.type.statNumber
+            )
         }
     }
 }
@@ -504,8 +518,14 @@ private fun BriefRiskOpportunitySection(
 private fun BriefRiskOpportunityRow(section: BriefSection, isRisk: Boolean, modifier: Modifier = Modifier) {
     val colors = GiTheme.colors
     val type = GiTheme.type
+    val kind = stringResource(if (isRisk) Res.string.risk_label else Res.string.opportunity_label)
+    val title = section.title.ifBlank {
+        stringResource(if (isRisk) Res.string.the_risk else Res.string.the_opportunity)
+    }
     Row(
-        modifier = modifier.padding(vertical = GiSpace.x3),
+        modifier = modifier
+            .padding(vertical = GiSpace.x3)
+            .clearAndSetSemantics { contentDescription = spokenSentences(kind, title, section.body) },
         horizontalArrangement = Arrangement.spacedBy(GiSpace.x3)
     ) {
         GiIconTile(
@@ -515,14 +535,12 @@ private fun BriefRiskOpportunityRow(section: BriefSection, isRisk: Boolean, modi
         )
         Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x1)) {
             Text(
-                text = stringResource(if (isRisk) Res.string.risk_label else Res.string.opportunity_label),
+                text = kind,
                 color = if (isRisk) colors.loss else colors.gain,
                 style = type.tag
             )
             Text(
-                text = section.title.ifBlank {
-                    stringResource(if (isRisk) Res.string.the_risk else Res.string.the_opportunity)
-                },
+                text = title,
                 color = colors.ink,
                 style = type.label
             )
@@ -573,6 +591,12 @@ private fun BriefRiskOpportunityTileRow(section: BriefSection, isRisk: Boolean, 
         }
     }
 }
+
+private fun spokenSentences(vararg parts: String?): String = parts
+    .mapNotNull { part -> part?.trimEnd()?.takeIf { it.isNotEmpty() } }
+    .joinToString(" ") { part -> if (part.last() in SENTENCE_ENDS) part else "$part." }
+
+private val SENTENCE_ENDS = setOf('.', '?', '!')
 
 internal fun BriefSentiment.toGi(): GiSentiment = when (this) {
     BriefSentiment.Bullish -> GiSentiment.Positive

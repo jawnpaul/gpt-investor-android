@@ -1,25 +1,13 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.ui
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -27,38 +15,27 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.arrow_right_gradient
 import com.thejawnpaul.gptinvestor.ask_me_anything_about_markets
 import com.thejawnpaul.gptinvestor.choose_the_capabilities_you_d_love_in_the_advanced_ai_model
+import com.thejawnpaul.gptinvestor.close
 import com.thejawnpaul.gptinvestor.continue_
-import com.thejawnpaul.gptinvestor.copy_success
 import com.thejawnpaul.gptinvestor.core.platform.NotificationPermissionController
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.DailyDigestCard
@@ -78,15 +55,23 @@ import com.thejawnpaul.gptinvestor.send
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
-import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
 import com.thejawnpaul.gptinvestor.theme.components.GiAskComposer
+import com.thejawnpaul.gptinvestor.theme.components.GiBottomSheet
+import com.thejawnpaul.gptinvestor.theme.components.GiButton
+import com.thejawnpaul.gptinvestor.theme.components.GiCheckbox
+import com.thejawnpaul.gptinvestor.theme.components.GiDivider
 import com.thejawnpaul.gptinvestor.theme.components.GiGreetingHeader
+import com.thejawnpaul.gptinvestor.theme.components.GiIconTile
+import com.thejawnpaul.gptinvestor.theme.components.GiIconTileSize
+import com.thejawnpaul.gptinvestor.theme.components.GiIconTileTone
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiListGroup
 import com.thejawnpaul.gptinvestor.theme.components.GiSectionHeader
+import com.thejawnpaul.gptinvestor.theme.components.GiText
+import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.trending_today
 import com.thejawnpaul.gptinvestor.you_re_on_the_list
 import com.thejawnpaul.gptinvestor.you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -199,24 +184,57 @@ private fun HomeScreenContent(
             }
 
             if (state.showWaitlistBottomSheet) {
-                GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
-                    onEvent(HomeEvent.UpgradeModel(showBottomSheet = false))
-                }) {
-                    WaitlistBottomSheetContent(
-                        modifier = Modifier,
-                        options = state.waitlistAvailableOptions,
-                        selectedOptions = state.selectedWaitlistOptions,
-                        onSelectOption = { onEvent(HomeEvent.SelectWaitListOption(it)) },
-                        onJoinWaitList = { onEvent(HomeEvent.JoinWaitlist) },
-                        onDismiss = { onEvent(HomeEvent.UpgradeModel(showBottomSheet = false)) }
-                    )
-                }
+                WaitlistBottomSheet(
+                    options = state.waitlistAvailableOptions,
+                    selectedOptions = state.selectedWaitlistOptions,
+                    onSelectOption = { onEvent(HomeEvent.SelectWaitListOption(it)) },
+                    onJoinWaitList = { onEvent(HomeEvent.JoinWaitlist) },
+                    onDismiss = { onEvent(HomeEvent.UpgradeModel(showBottomSheet = false)) }
+                )
             }
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+// No board for the waitlist: built on the v4 sheet pattern (StatNumber title, body, options group, CTA L).
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun WaitlistBottomSheet(
+    options: List<String>,
+    selectedOptions: List<String>,
+    onJoinWaitList: () -> Unit,
+    onDismiss: () -> Unit,
+    onSelectOption: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var joined by rememberSaveable { mutableStateOf(false) }
+    GiBottomSheet(
+        onDismissRequest = onDismiss,
+        title = waitlistTitle(joined),
+        subtitle = waitlistSubtitle(joined),
+        closeContentDescription = stringResource(Res.string.close),
+        modifier = modifier,
+        eyebrow = if (joined) {
+            { WaitlistJoinedTile() }
+        } else {
+            null
+        }
+    ) {
+        WaitlistBody(
+            joined = joined,
+            options = options,
+            selectedOptions = selectedOptions,
+            onSelectOption = onSelectOption,
+            onJoin = {
+                onJoinWaitList()
+                joined = true
+            },
+            onDismiss = onDismiss
+        )
+    }
+}
+
+// Body for callers that still host the waitlist inside their own sheet; draws the same header.
 @Composable
 fun WaitlistBottomSheetContent(
     options: List<String>,
@@ -226,182 +244,99 @@ fun WaitlistBottomSheetContent(
     onSelectOption: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val joinInteractionSource = remember { MutableInteractionSource() }
-    val isJoinPressed by joinInteractionSource.collectIsPressedAsState()
-    val joinScale by animateFloatAsState(
-        targetValue = if (isJoinPressed) 0.97f else 1f,
-        animationSpec = spring(stiffness = Spring.StiffnessMedium),
-        label = "pressScale"
-    )
-
+    var joined by rememberSaveable { mutableStateOf(false) }
     Column(
-        modifier = modifier.padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = GiSpace.gutter, end = GiSpace.gutter, bottom = GiSpace.x6),
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
     ) {
-        var content by remember { mutableIntStateOf(0) }
-
-        when (content) {
-            0 -> {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(Res.string.join_the_waitlist).uppercase(),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleLarge
-                )
-
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(
-                        Res.string.choose_the_capabilities_you_d_love_in_the_advanced_ai_model
-                    ),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    options.forEach {
-                        SingleWaitlistOption(
-                            modifier = Modifier,
-                            isSelected = selectedOptions.contains(it),
-                            onSelectOption = { onSelectOption(it) },
-                            text = it
-                        )
-                    }
-                }
-
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                        .graphicsLayer {
-                            scaleX = joinScale
-                            scaleY = joinScale
-                        },
-                    shape = RoundedCornerShape(corner = CornerSize(20.dp)),
-                    border = BorderStroke(
-                        width = 1.dp,
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(Color(0xFFF947F6), Color(0xFF0095FF))
-                        )
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    interactionSource = joinInteractionSource,
-                    onClick = {
-                        onJoinWaitList()
-                        content = 1
-                    }
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.join_list).uppercase(),
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    brush = Brush.horizontalGradient(
-                                        colors = listOf(Color(0xFFF947F6), Color(0xFF0095FF))
-                                    )
-                                )
-                            )
-                            Image(
-                                modifier = Modifier.size(20.dp),
-                                painter = painterResource(Res.drawable.arrow_right_gradient),
-                                contentDescription = null
-                            )
-                        }
-                    }
-                }
-            }
-
-            1 -> {
-                Spacer(modifier = Modifier.height(16.dp))
-                Image(
-                    painter = painterResource(Res.drawable.copy_success),
-                    contentDescription = null
-                )
-                Text(
-                    text = stringResource(Res.string.you_re_on_the_list),
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Text(
-                    text = stringResource(
-                        Res.string.you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge
-                    ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    onClick = { onDismiss() },
-                    colors = ButtonDefaults.buttonColors()
-                        .copy(containerColor = MaterialTheme.colorScheme.onSurface)
-                ) {
-                    Text(text = stringResource(Res.string.continue_).uppercase())
-                }
-            }
+        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
+            if (joined) WaitlistJoinedTile()
+            GiText(
+                text = waitlistTitle(joined),
+                style = GiTextStyle.StatNumber,
+                modifier = Modifier.semantics { heading() }
+            )
+            GiText(text = waitlistSubtitle(joined), style = GiTextStyle.Body, color = GiTheme.colors.body)
         }
-
-        Spacer(modifier = Modifier.height(32.dp))
+        WaitlistBody(
+            joined = joined,
+            options = options,
+            selectedOptions = selectedOptions,
+            onSelectOption = onSelectOption,
+            onJoin = {
+                onJoinWaitList()
+                joined = true
+            },
+            onDismiss = onDismiss
+        )
     }
 }
 
 @Composable
-fun SingleWaitlistOption(isSelected: Boolean, text: String, onSelectOption: () -> Unit, modifier: Modifier = Modifier) {
-    val gptInvestorColors = LocalGPTInvestorColors.current
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.97f else 1f,
-        animationSpec = spring(stiffness = Spring.StiffnessMedium),
-        label = "pressScale"
-    )
+private fun waitlistTitle(joined: Boolean): String =
+    stringResource(if (joined) Res.string.you_re_on_the_list else Res.string.join_the_waitlist)
 
-    if (isSelected) {
-        Surface(
-            modifier = modifier.graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            },
-            shape = RoundedCornerShape(corner = CornerSize(20.dp)),
-            border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onSurface),
-            interactionSource = interactionSource,
-            onClick = onSelectOption
-        ) {
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                text = text,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
+@Composable
+private fun waitlistSubtitle(joined: Boolean): String = stringResource(
+    if (joined) {
+        Res.string.you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge
     } else {
-        Surface(
-            modifier = modifier.graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            },
-            shape = RoundedCornerShape(corner = CornerSize(20.dp)),
-            border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant),
-            interactionSource = interactionSource,
-            onClick = onSelectOption
-        ) {
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                text = text,
-                style = MaterialTheme.typography.bodyMedium,
-                color = gptInvestorColors.textColors.secondary50
-            )
+        Res.string.choose_the_capabilities_you_d_love_in_the_advanced_ai_model
+    }
+)
+
+@Composable
+private fun WaitlistJoinedTile() {
+    GiIconTile(icon = GiIcons.check, size = GiIconTileSize.Large, tone = GiIconTileTone.Gain)
+}
+
+@Composable
+private fun WaitlistBody(
+    joined: Boolean,
+    options: List<String>,
+    selectedOptions: List<String>,
+    onSelectOption: (String) -> Unit,
+    onJoin: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    if (joined) {
+        GiButton(
+            text = stringResource(Res.string.continue_),
+            onClick = onDismiss,
+            modifier = Modifier.fillMaxWidth()
+        )
+        return
+    }
+    if (options.isNotEmpty()) {
+        GiListGroup {
+            options.forEachIndexed { index, option ->
+                if (index > 0) GiDivider()
+                SingleWaitlistOption(
+                    isSelected = selectedOptions.contains(option),
+                    text = option,
+                    onSelectOption = { onSelectOption(option) },
+                    modifier = Modifier.padding(horizontal = GiSpace.x4, vertical = GiSpace.x1)
+                )
+            }
         }
     }
+    GiButton(
+        text = stringResource(Res.string.join_list),
+        onClick = onJoin,
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+fun SingleWaitlistOption(isSelected: Boolean, text: String, onSelectOption: () -> Unit, modifier: Modifier = Modifier) {
+    GiCheckbox(
+        checked = isSelected,
+        onCheckedChange = { onSelectOption() },
+        label = text,
+        modifier = modifier.fillMaxWidth()
+    )
 }
 
 @PreviewLightDark

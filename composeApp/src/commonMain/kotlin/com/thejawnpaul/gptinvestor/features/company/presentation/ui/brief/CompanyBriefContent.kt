@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,12 +17,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.digest_sentiment_negative
@@ -45,9 +53,11 @@ import com.thejawnpaul.gptinvestor.tap_to_explain
 import com.thejawnpaul.gptinvestor.the_opportunity
 import com.thejawnpaul.gptinvestor.the_risk
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.components.GiCard
+import com.thejawnpaul.gptinvestor.theme.components.GiContentSheet
 import com.thejawnpaul.gptinvestor.theme.components.GiDeltaPill
 import com.thejawnpaul.gptinvestor.theme.components.GiDivider
 import com.thejawnpaul.gptinvestor.theme.components.GiExplainerTile
@@ -62,17 +72,77 @@ import com.thejawnpaul.gptinvestor.theme.components.GiSentiment
 import com.thejawnpaul.gptinvestor.theme.components.GiSentimentPill
 import com.thejawnpaul.gptinvestor.theme.components.GiStockSummary
 import com.thejawnpaul.gptinvestor.theme.components.GiStockSummarySize
+import com.thejawnpaul.gptinvestor.theme.components.GiText
+import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.today
 import com.thejawnpaul.gptinvestor.what_it_means
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
+/** Which screen the brief is laid out for. */
+internal enum class CompanyBriefLayout {
+    /** Company screen: verdict card, sections in one divided list group. The caller insets the list. */
+    Company,
+
+    /**
+     * Onboarding first brief: verdict as page text under a tappable sentiment pill; sections and the optional
+     * footer on a full-bleed raised sheet docked to the bottom of the list.
+     */
+    Onboarding
+}
+
+/**
+ * The brief as list items.
+ *
+ * With [CompanyBriefLayout.Onboarding], hero and verdict sit on the page (inset by [horizontalPadding]); the
+ * sections and the optional [footer] sit on a full-bleed raised sheet. The sheet docks to the bottom of the list,
+ * so the caller should not add bottom content padding; pass the space it needs (nav bar etc.) as
+ * [sheetBottomPadding].
+ *
+ * With [CompanyBriefLayout.Company] (default), the caller insets the list; [horizontalPadding] and
+ * [sheetBottomPadding] are unused and the [footer], if any, is its own item after the sections.
+ */
 internal fun LazyListScope.companyBriefItems(
     brief: CompanyBrief,
     onVerdictClick: () -> Unit,
     onKeyNumberClick: (KeyNumber) -> Unit,
     onNewsClick: ((String) -> Unit)? = null,
-    logoModifier: Modifier = Modifier
+    logoModifier: Modifier = Modifier,
+    layout: CompanyBriefLayout = CompanyBriefLayout.Company,
+    horizontalPadding: Dp = GiSpace.gutter,
+    sheetBottomPadding: Dp = GiSpace.safeArea,
+    footer: (@Composable ColumnScope.() -> Unit)? = null
+) {
+    when (layout) {
+        CompanyBriefLayout.Company -> companyLayoutItems(
+            brief = brief,
+            onVerdictClick = onVerdictClick,
+            onKeyNumberClick = onKeyNumberClick,
+            onNewsClick = onNewsClick,
+            logoModifier = logoModifier,
+            footer = footer
+        )
+
+        CompanyBriefLayout.Onboarding -> onboardingLayoutItems(
+            brief = brief,
+            onVerdictClick = onVerdictClick,
+            onKeyNumberClick = onKeyNumberClick,
+            onNewsClick = onNewsClick,
+            logoModifier = logoModifier,
+            horizontalPadding = horizontalPadding,
+            sheetBottomPadding = sheetBottomPadding,
+            footer = footer
+        )
+    }
+}
+
+private fun LazyListScope.companyLayoutItems(
+    brief: CompanyBrief,
+    onVerdictClick: () -> Unit,
+    onKeyNumberClick: (KeyNumber) -> Unit,
+    onNewsClick: ((String) -> Unit)?,
+    logoModifier: Modifier,
+    footer: (@Composable ColumnScope.() -> Unit)?
 ) {
     item(key = "hero", contentType = "hero") { BriefHero(brief = brief, logoModifier = logoModifier) }
     brief.sentiment?.let { sentiment ->
@@ -81,7 +151,50 @@ internal fun LazyListScope.companyBriefItems(
         }
     }
     item(key = "sections", contentType = "sections") {
-        BriefSections(brief = brief, onKeyNumberClick = onKeyNumberClick, onNewsClick = onNewsClick)
+        BriefSectionsGroup(brief = brief, onKeyNumberClick = onKeyNumberClick, onNewsClick = onNewsClick)
+    }
+    footer?.let { content ->
+        item(key = "footer", contentType = "footer") { Column { content() } }
+    }
+}
+
+private fun LazyListScope.onboardingLayoutItems(
+    brief: CompanyBrief,
+    onVerdictClick: () -> Unit,
+    onKeyNumberClick: (KeyNumber) -> Unit,
+    onNewsClick: ((String) -> Unit)?,
+    logoModifier: Modifier,
+    horizontalPadding: Dp,
+    sheetBottomPadding: Dp,
+    footer: (@Composable ColumnScope.() -> Unit)?
+) {
+    item(key = "hero", contentType = "hero") {
+        BriefHero(
+            brief = brief,
+            modifier = Modifier.padding(horizontal = horizontalPadding),
+            logoModifier = logoModifier
+        )
+    }
+    brief.sentiment?.let { sentiment ->
+        item(key = "verdict", contentType = "verdict") {
+            BriefVerdict(
+                sentiment = sentiment,
+                summary = brief.sentimentSummary,
+                onClick = onVerdictClick,
+                modifier = Modifier.padding(horizontal = horizontalPadding)
+            )
+        }
+    }
+    item(key = "sections", contentType = "sections") {
+        BriefSectionsSheet(
+            brief = brief,
+            onKeyNumberClick = onKeyNumberClick,
+            onNewsClick = onNewsClick,
+            bottomPadding = sheetBottomPadding,
+            footer = footer,
+            // The list spaces items by 16; the page-to-sheet gap is 24.
+            modifier = Modifier.padding(top = GiSpace.x2)
+        )
     }
 }
 
@@ -111,6 +224,7 @@ private fun BriefHero(brief: CompanyBrief, modifier: Modifier = Modifier, logoMo
     }
 }
 
+// Company layout: the whole verdict is one tappable card.
 @Composable
 private fun BriefVerdictCard(
     sentiment: BriefSentiment,
@@ -136,20 +250,51 @@ private fun BriefVerdictCard(
     }
 }
 
+// Onboarding layout: the verdict is page text; the sentiment pill above it opens the sentiment sheet.
 @Composable
-private fun BriefSections(
+private fun BriefVerdict(
+    sentiment: BriefSentiment,
+    summary: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
+        GiSentimentPill(
+            sentiment = sentiment.toGi(),
+            label = stringResource(sentiment.labelRes()),
+            modifier = Modifier
+                .minimumInteractiveComponentSize()
+                .clip(GiRadius.xs)
+                .clickable(role = Role.Button, onClick = onClick)
+        )
+        if (!summary.isNullOrBlank()) {
+            GiText(text = summary, style = GiTextStyle.PageTitle)
+        }
+    }
+}
+
+// Company layout: sections in one list group, separated by dividers.
+@Composable
+private fun BriefSectionsGroup(
     brief: CompanyBrief,
     onKeyNumberClick: (KeyNumber) -> Unit,
     onNewsClick: ((String) -> Unit)?,
     modifier: Modifier = Modifier
 ) {
+    val layout = CompanyBriefLayout.Company
     val sections = buildList<@Composable () -> Unit> {
         brief.summary?.let { add { BriefSummarySection(summary = it) } }
         if (brief.keyNumbers.isNotEmpty()) {
-            add { BriefKeyNumbersSection(keyNumbers = brief.keyNumbers, onKeyNumberClick = onKeyNumberClick) }
+            add {
+                BriefKeyNumbersSection(
+                    keyNumbers = brief.keyNumbers,
+                    onKeyNumberClick = onKeyNumberClick,
+                    layout = layout
+                )
+            }
         }
         if (brief.news.isNotEmpty()) {
-            add { BriefNewsSection(news = brief.news, onNewsClick = onNewsClick) }
+            add { BriefNewsSection(news = brief.news, onNewsClick = onNewsClick, layout = layout) }
         }
         if (brief.risk != null || brief.opportunity != null) {
             add { BriefRiskOpportunitySection(risk = brief.risk, opportunity = brief.opportunity) }
@@ -164,9 +309,55 @@ private fun BriefSections(
     }
 }
 
+// Onboarding layout: sections and footer on a full-bleed raised sheet, spaced without dividers.
+@Composable
+private fun BriefSectionsSheet(
+    brief: CompanyBrief,
+    onKeyNumberClick: (KeyNumber) -> Unit,
+    onNewsClick: ((String) -> Unit)?,
+    bottomPadding: Dp,
+    footer: (@Composable ColumnScope.() -> Unit)?,
+    modifier: Modifier = Modifier
+) {
+    val layout = CompanyBriefLayout.Onboarding
+    val hasSections = brief.summary != null ||
+        brief.keyNumbers.isNotEmpty() ||
+        brief.news.isNotEmpty() ||
+        brief.risk != null ||
+        brief.opportunity != null
+    if (!hasSections && footer == null) return
+    GiContentSheet(
+        modifier = modifier,
+        contentPadding = PaddingValues(
+            start = GiSpace.gutter,
+            end = GiSpace.gutter,
+            top = GiSpace.x6,
+            bottom = bottomPadding
+        ),
+        verticalSpacing = GiSpace.x8
+    ) {
+        brief.summary?.let { BriefSummarySection(summary = it) }
+        if (brief.keyNumbers.isNotEmpty()) {
+            BriefKeyNumbersSection(keyNumbers = brief.keyNumbers, onKeyNumberClick = onKeyNumberClick, layout = layout)
+        }
+        if (brief.news.isNotEmpty()) {
+            BriefNewsSection(news = brief.news, onNewsClick = onNewsClick, layout = layout)
+        }
+        if (brief.risk != null || brief.opportunity != null) {
+            BriefRiskOpportunityTile(risk = brief.risk, opportunity = brief.opportunity)
+        }
+        footer?.invoke(this)
+    }
+}
+
 @Composable
 private fun BriefCardSectionTitle(text: String, modifier: Modifier = Modifier) {
-    Text(text = text, modifier = modifier, color = GiTheme.colors.ink, style = GiTheme.type.sectionTitle)
+    Text(
+        text = text,
+        modifier = modifier.semantics { heading() },
+        color = GiTheme.colors.ink,
+        style = GiTheme.type.sectionTitle
+    )
 }
 
 @Composable
@@ -182,25 +373,10 @@ private fun BriefSummarySection(summary: String, modifier: Modifier = Modifier) 
 private fun BriefKeyNumbersSection(
     keyNumbers: List<KeyNumber>,
     onKeyNumberClick: (KeyNumber) -> Unit,
+    layout: CompanyBriefLayout,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x1)) {
-        FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = GiSpace.x2),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            itemVerticalAlignment = Alignment.CenterVertically
-        ) {
-            BriefCardSectionTitle(text = stringResource(Res.string.section_key_numbers))
-            if (keyNumbers.any { it.insight != null }) {
-                Text(
-                    text = stringResource(Res.string.tap_to_explain),
-                    color = GiTheme.colors.muted,
-                    style = GiTheme.type.meta
-                )
-            }
-        }
+    val rows: @Composable () -> Unit = {
         keyNumbers.forEachIndexed { index, keyNumber ->
             if (index > 0) GiDivider()
             GiKeyNumberRow(
@@ -213,42 +389,99 @@ private fun BriefKeyNumbersSection(
             )
         }
     }
-}
-
-@Composable
-private fun BriefNewsSection(news: List<NewsBrief>, onNewsClick: ((String) -> Unit)?, modifier: Modifier = Modifier) {
-    val colors = GiTheme.colors
-    val type = GiTheme.type
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x1)) {
-        BriefCardSectionTitle(
-            text = stringResource(Res.string.section_whats_happening),
-            modifier = Modifier.padding(bottom = GiSpace.x1)
-        )
-        news.forEachIndexed { index, item ->
-            if (index > 0) GiDivider()
-            Column(
-                modifier = Modifier.padding(vertical = GiSpace.x3),
-                verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
-            ) {
-                Text(text = "${item.publisher} · ${item.publishedRelative}", color = colors.muted, style = type.meta)
-                Text(
-                    text = item.title,
-                    modifier = if (onNewsClick != null) {
-                        Modifier.clickable(role = Role.Button) { onNewsClick(item.link) }
-                    } else {
-                        Modifier
-                    },
-                    color = colors.ink,
-                    style = type.label
-                )
-                item.whatItMeans?.let {
-                    GiExplainerTile(label = stringResource(Res.string.what_it_means), text = it)
+        when (layout) {
+            CompanyBriefLayout.Company -> {
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = GiSpace.x2),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    itemVerticalAlignment = Alignment.CenterVertically
+                ) {
+                    BriefCardSectionTitle(text = stringResource(Res.string.section_key_numbers))
+                    if (keyNumbers.any { it.insight != null }) {
+                        Text(
+                            text = stringResource(Res.string.tap_to_explain),
+                            color = GiTheme.colors.muted,
+                            style = GiTheme.type.meta
+                        )
+                    }
                 }
+                rows()
+            }
+
+            CompanyBriefLayout.Onboarding -> {
+                BriefCardSectionTitle(text = stringResource(Res.string.section_key_numbers))
+                Column { rows() }
             }
         }
     }
 }
 
+@Composable
+private fun BriefNewsSection(
+    news: List<NewsBrief>,
+    onNewsClick: ((String) -> Unit)?,
+    layout: CompanyBriefLayout,
+    modifier: Modifier = Modifier
+) {
+    val itemPadding = if (layout == CompanyBriefLayout.Company) GiSpace.x3 else GiSpace.x4
+    val items: @Composable () -> Unit = {
+        news.forEachIndexed { index, item ->
+            if (index > 0) GiDivider()
+            BriefNewsItem(item = item, onNewsClick = onNewsClick, verticalPadding = itemPadding)
+        }
+    }
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x1)) {
+        when (layout) {
+            CompanyBriefLayout.Company -> {
+                BriefCardSectionTitle(
+                    text = stringResource(Res.string.section_whats_happening),
+                    modifier = Modifier.padding(bottom = GiSpace.x1)
+                )
+                items()
+            }
+
+            CompanyBriefLayout.Onboarding -> {
+                BriefCardSectionTitle(text = stringResource(Res.string.section_whats_happening))
+                Column { items() }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BriefNewsItem(
+    item: NewsBrief,
+    onNewsClick: ((String) -> Unit)?,
+    verticalPadding: Dp,
+    modifier: Modifier = Modifier
+) {
+    val colors = GiTheme.colors
+    val type = GiTheme.type
+    Column(
+        modifier = modifier.padding(vertical = verticalPadding),
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
+    ) {
+        Text(text = "${item.publisher} · ${item.publishedRelative}", color = colors.muted, style = type.meta)
+        Text(
+            text = item.title,
+            modifier = if (onNewsClick != null) {
+                Modifier.clickable(role = Role.Button) { onNewsClick(item.link) }
+            } else {
+                Modifier
+            },
+            color = colors.ink,
+            style = type.label
+        )
+        item.whatItMeans?.let {
+            GiExplainerTile(label = stringResource(Res.string.what_it_means), text = it)
+        }
+    }
+}
+
+// Company layout: risk and opportunity as divided rows with coloured tags.
 @Composable
 private fun BriefRiskOpportunitySection(
     risk: BriefSection?,
@@ -294,6 +527,49 @@ private fun BriefRiskOpportunityRow(section: BriefSection, isRisk: Boolean, modi
                 style = type.label
             )
             Text(text = section.body, color = colors.body, style = type.body)
+        }
+    }
+}
+
+// Onboarding layout: risk and opportunity together in one tile box, without coloured tags.
+@Composable
+private fun BriefRiskOpportunityTile(risk: BriefSection?, opportunity: BriefSection?, modifier: Modifier = Modifier) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
+        BriefCardSectionTitle(text = stringResource(Res.string.section_risk_opportunity))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(GiRadius.sm)
+                .background(GiTheme.colors.tile)
+                .padding(GiSpace.x4),
+            verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
+        ) {
+            risk?.let { BriefRiskOpportunityTileRow(section = it, isRisk = true) }
+            if (risk != null && opportunity != null) GiDivider()
+            opportunity?.let { BriefRiskOpportunityTileRow(section = it, isRisk = false) }
+        }
+    }
+}
+
+@Composable
+private fun BriefRiskOpportunityTileRow(section: BriefSection, isRisk: Boolean, modifier: Modifier = Modifier) {
+    val title = section.title.ifBlank {
+        stringResource(if (isRisk) Res.string.the_risk else Res.string.the_opportunity)
+    }
+    // No visible coloured tag here; keep "Risk" / "Opportunity" for screen readers.
+    val kind = stringResource(if (isRisk) Res.string.risk_label else Res.string.opportunity_label)
+    Row(
+        modifier = modifier.clearAndSetSemantics { contentDescription = "$kind. $title. ${section.body}" },
+        horizontalArrangement = Arrangement.spacedBy(GiSpace.x3)
+    ) {
+        GiIconTile(
+            icon = if (isRisk) GiIcons.warning else GiIcons.check,
+            size = GiIconTileSize.Small,
+            tone = if (isRisk) GiIconTileTone.Loss else GiIconTileTone.Gain
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x1)) {
+            GiText(text = title, style = GiTextStyle.Label)
+            GiText(text = section.body, style = GiTextStyle.Body)
         }
     }
 }
@@ -387,6 +663,26 @@ private fun CompanyBriefContentPreview() {
             verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
         ) {
             companyBriefItems(brief = previewCompanyBrief, onVerdictClick = {}, onKeyNumberClick = {})
+        }
+    }
+}
+
+@PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
+@Composable
+private fun CompanyBriefContentOnboardingPreview() {
+    GPTInvestorTheme {
+        LazyColumn(
+            modifier = Modifier.background(GiTheme.colors.bg),
+            contentPadding = PaddingValues(top = GiSpace.x3),
+            verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
+        ) {
+            companyBriefItems(
+                brief = previewCompanyBrief,
+                onVerdictClick = {},
+                onKeyNumberClick = {},
+                layout = CompanyBriefLayout.Onboarding
+            )
         }
     }
 }

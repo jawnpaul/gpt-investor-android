@@ -134,7 +134,7 @@ fun LoginScreen(
                 .fillMaxSize()
                 .navigationBarsPadding()
                 .imePadding()
-                .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x3, bottom = GiSpace.x4),
+                .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x4, bottom = GiSpace.x4),
             scrollState = scrollState
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
@@ -206,7 +206,8 @@ fun LoginScreen(
                     onClick = { onEvent(LoginUiEvent.LoginClick) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = GiSpace.x2),
+                        // The "Forgot password?" link supplies the 16 gap above the button while it shows.
+                        .then(if (state.showInvalidCredentials) Modifier.padding(top = GiSpace.x2) else Modifier),
                     enabled = state.isLoginEnabled,
                     loading = loadingMethod == AuthMethod.Email
                 )

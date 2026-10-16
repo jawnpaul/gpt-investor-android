@@ -107,6 +107,13 @@ class OnboardingViewModel(
         fetchBrief(ticker)
     }
 
+    fun onRetryBrief() {
+        val ticker = _uiState.value.selectedTicker ?: return
+        _uiState.update { it.copy(briefView = BriefView.Loading) }
+        briefStartTime = Clock.System.now().toEpochMilliseconds()
+        fetchBrief(ticker)
+    }
+
     fun onSearchQueryChanged(query: String) {
         _uiState.update { it.copy(searchQuery = query) }
         appliedSearchQuery.value = query

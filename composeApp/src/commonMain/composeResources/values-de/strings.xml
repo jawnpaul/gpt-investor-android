@@ -370,4 +370,13 @@
     <string name="stop_answering">Antwort stoppen</string>
     <string name="ask_a_follow_up">Folgefrage stellen…</string>
     <string name="thinking">Denkt nach…</string>
+    <string name="splash_tagline">Klare Antworten rund um Ihr Geld</string>
+    <string name="onboarding_brief_error_message">Beim Laden Ihres Briefings ist ein Fehler aufgetreten.</string>
+    <string name="onboarding_cta_try_again">Erneut versuchen</string>
+    <string name="onboarding_cta_go_to_app_short">Zur App</string>
+    <string name="guest_session_started">Gastsitzung gestartet</string>
+    <string name="digest_detail_empty_title">Noch keine Aktien in diesem Briefing</string>
+    <string name="digest_detail_empty_body">Fügen Sie Unternehmen zu Ihrer Watchlist hinzu, dann erscheinen sie in Ihrem nächsten Briefing.</string>
+    <string name="digest_detail_empty_action">Zurück zum Start</string>
+    <string name="offline_opening_saved">Keine Verbindung. Ihre gespeicherten Daten werden geöffnet…</string>
 </resources>

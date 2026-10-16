@@ -38,6 +38,7 @@ fun NavGraphBuilder.onboardingNavGraph(navController: NavHostController) {
             onSelectStock = viewModel::onStockSelected,
             onSearchQueryChange = viewModel::onSearchQueryChanged,
             onBackToStockSelection = viewModel::onBackToStockSelection,
+            onRetryBrief = viewModel::onRetryBrief,
             onFinish = viewModel::onFinish
         )
     }

@@ -33,13 +33,18 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun CompanyBriefSkeleton(
     modifier: Modifier = Modifier,
+    // False when a status message above already announces the load: the skeleton is then hidden from
+    // accessibility services instead of being a second live region.
+    announce: Boolean = true,
     header: @Composable () -> Unit = { CompanyBriefHeaderSkeleton() }
 ) {
     val description = stringResource(Res.string.loading_brief)
     Column(
         modifier = modifier.clearAndSetSemantics {
-            liveRegion = LiveRegionMode.Polite
-            contentDescription = description
+            if (announce) {
+                liveRegion = LiveRegionMode.Polite
+                contentDescription = description
+            }
         },
         verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
     ) {

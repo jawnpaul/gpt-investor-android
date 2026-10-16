@@ -128,7 +128,7 @@ fun SignUpScreen(
                 .fillMaxSize()
                 .navigationBarsPadding()
                 .imePadding()
-                .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x3, bottom = GiSpace.x4),
+                .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x4, bottom = GiSpace.x4),
             scrollState = scrollState
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {

@@ -39,9 +39,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,13 +54,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
@@ -71,6 +72,7 @@ import com.thejawnpaul.gptinvestor.clear_search
 import com.thejawnpaul.gptinvestor.digest_sentiment_neutral
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumber
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefLayout
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefSentimentSheet
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefSkeleton
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyKeyNumberSheet
@@ -83,11 +85,12 @@ import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.Sugges
 import com.thejawnpaul.gptinvestor.gpt_investor
 import com.thejawnpaul.gptinvestor.onboarding_body_value_prop
 import com.thejawnpaul.gptinvestor.onboarding_brief_disclaimer
+import com.thejawnpaul.gptinvestor.onboarding_brief_error_message
 import com.thejawnpaul.gptinvestor.onboarding_cta_get_started
-import com.thejawnpaul.gptinvestor.onboarding_cta_go_to_app
+import com.thejawnpaul.gptinvestor.onboarding_cta_go_to_app_short
 import com.thejawnpaul.gptinvestor.onboarding_cta_start_exploring
+import com.thejawnpaul.gptinvestor.onboarding_cta_try_again
 import com.thejawnpaul.gptinvestor.onboarding_cta_try_it_now
-import com.thejawnpaul.gptinvestor.onboarding_error_message
 import com.thejawnpaul.gptinvestor.onboarding_headline_how_it_works
 import com.thejawnpaul.gptinvestor.onboarding_headline_stock_selection
 import com.thejawnpaul.gptinvestor.onboarding_headline_value_prop
@@ -109,7 +112,9 @@ import com.thejawnpaul.gptinvestor.onboarding_value_real_time_body
 import com.thejawnpaul.gptinvestor.onboarding_value_real_time_title
 import com.thejawnpaul.gptinvestor.skip
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
+import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.components.GiBrandMark
@@ -133,9 +138,13 @@ import com.thejawnpaul.gptinvestor.theme.components.GiSentimentPill
 import com.thejawnpaul.gptinvestor.theme.components.GiStepDots
 import com.thejawnpaul.gptinvestor.theme.components.GiStockSummary
 import com.thejawnpaul.gptinvestor.theme.components.GiStockSummarySize
+import com.thejawnpaul.gptinvestor.theme.components.GiText
+import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
+import com.thejawnpaul.gptinvestor.theme.components.GiTopBarTitleStyle
 import com.thejawnpaul.gptinvestor.theme.components.GiUserMessage
 import com.thejawnpaul.gptinvestor.theme.components.GiWaveIllustration
+import com.thejawnpaul.gptinvestor.theme.components.giBeam
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 import com.thejawnpaul.gptinvestor.theme.rememberGiSharedAxisTransition
 import kotlinx.coroutines.flow.Flow
@@ -146,6 +155,10 @@ import org.jetbrains.compose.resources.stringResource
 private val EaseOutQuart = CubicBezierEasing(0.25f, 1f, 0.5f, 1f)
 
 private const val STEP_COUNT = 3
+private const val GRID_COLUMNS = 3
+private const val LARGE_TEXT_GRID_COLUMNS = 2
+private const val LARGE_TEXT_FONT_SCALE = 1.5f
+private const val BEAM_STRENGTH = 0.6f
 private const val PICK_STEP = 2
 private const val BRIEF_SCREEN = 3
 private const val MAX_SEARCH_RESULTS = 20
@@ -165,6 +178,7 @@ fun OnboardingScreen(
     onSelectStock: (ticker: String, companyName: String, source: String, logoUrl: String?) -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onBackToStockSelection: () -> Unit,
+    onRetryBrief: () -> Unit,
     onFinish: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -189,6 +203,7 @@ fun OnboardingScreen(
                     state = state,
                     logoTransition = logoTransition,
                     onBack = onBackToStockSelection,
+                    onRetry = onRetryBrief,
                     onFinish = onFinish
                 )
             } else {
@@ -280,7 +295,7 @@ private fun OnboardingFooter(step: Int, onNext: () -> Unit, onSkip: () -> Unit, 
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x3, bottom = GiSpace.x4),
+            .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x2, bottom = GiSpace.x4),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         OnboardingStepDots(current = step)
@@ -314,8 +329,6 @@ private fun OnboardingFooter(step: Int, onNext: () -> Unit, onSkip: () -> Unit, 
 
 @Composable
 private fun WelcomeContent(modifier: Modifier = Modifier) {
-    val colors = GiTheme.colors
-    val type = GiTheme.type
     GiFillScrollColumn(
         modifier = modifier
             .fillMaxSize()
@@ -331,17 +344,17 @@ private fun WelcomeContent(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
         ) {
             GiBrandMark(modifier = Modifier.padding(bottom = GiSpace.x3))
-            Text(
+            GiText(
                 text = stringResource(Res.string.onboarding_headline_value_prop),
-                color = colors.ink,
-                textAlign = TextAlign.Center,
-                style = type.hero
+                modifier = Modifier.semantics { heading() },
+                style = GiTextStyle.Hero,
+                textAlign = TextAlign.Center
             )
-            Text(
+            GiText(
                 text = stringResource(Res.string.onboarding_body_value_prop),
-                color = colors.muted,
-                textAlign = TextAlign.Center,
-                style = type.input
+                style = GiTextStyle.Input,
+                color = GiTheme.colors.muted,
+                textAlign = TextAlign.Center
             )
         }
         Spacer(modifier = Modifier.weight(1f))
@@ -351,8 +364,6 @@ private fun WelcomeContent(modifier: Modifier = Modifier) {
 
 @Composable
 private fun ValuePropsContent(modifier: Modifier = Modifier) {
-    val colors = GiTheme.colors
-    val type = GiTheme.type
     GiFillScrollColumn(
         modifier = modifier
             .fillMaxSize()
@@ -364,10 +375,10 @@ private fun ValuePropsContent(modifier: Modifier = Modifier) {
             modifier = Modifier.padding(top = GiSpace.x8, bottom = GiSpace.x2),
             verticalArrangement = Arrangement.spacedBy(GiSpace.x6)
         ) {
-            Text(
+            GiText(
                 text = stringResource(Res.string.onboarding_headline_how_it_works),
-                color = colors.ink,
-                style = type.display
+                modifier = Modifier.semantics { heading() },
+                style = GiTextStyle.Display
             )
             Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
                 ValuePropRow(
@@ -404,33 +415,27 @@ private fun ValuePreviewCard(modifier: Modifier = Modifier) {
             Icon(
                 imageVector = GiIcons.mark,
                 contentDescription = null,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(GiIconSize.md),
                 tint = colors.ink
             )
-            Text(text = stringResource(Res.string.gpt_investor), color = colors.muted, style = GiTheme.type.link)
+            GiText(text = stringResource(Res.string.gpt_investor), style = GiTextStyle.Link, color = colors.muted)
             Spacer(modifier = Modifier.weight(1f))
             GiSentimentPill(
                 sentiment = GiSentiment.Neutral,
                 label = stringResource(Res.string.digest_sentiment_neutral)
             )
         }
-        Text(
-            text = stringResource(Res.string.onboarding_value_card_answer),
-            color = colors.body,
-            style = GiTheme.type.body
-        )
+        GiText(text = stringResource(Res.string.onboarding_value_card_answer), style = GiTextStyle.Body)
     }
 }
 
 @Composable
 private fun ValuePropRow(title: StringResource, body: StringResource, modifier: Modifier = Modifier) {
-    val colors = GiTheme.colors
-    val type = GiTheme.type
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
         GiIconTile(icon = GiIcons.check, size = GiIconTileSize.Small, tone = GiIconTileTone.Gain)
         Column {
-            Text(text = stringResource(title), color = colors.ink, style = type.label)
-            Text(text = stringResource(body), color = colors.muted, style = type.meta)
+            GiText(text = stringResource(title), style = GiTextStyle.Label)
+            GiText(text = stringResource(body), style = GiTextStyle.MetaRelaxed)
         }
     }
 }
@@ -456,8 +461,6 @@ private fun PickStockContent(
     onSearchQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = GiTheme.colors
-    val type = GiTheme.type
     val pagingItems = searchResults.collectAsLazyPagingItems()
     val results = if (state.searchQuery.isBlank()) {
         emptyList()
@@ -465,6 +468,7 @@ private fun PickStockContent(
         pagingItems.itemSnapshotList.items.take(MAX_SEARCH_RESULTS)
     }
     val scrollState = rememberScrollState()
+    val scrolled by remember(scrollState) { derivedStateOf { scrollState.canScrollBackward } }
     var tappedLogo by remember { mutableStateOf<String?>(null) }
     val selectStock: (ticker: String, name: String, source: String, logoUrl: String?) -> Unit =
         { ticker, name, source, logoUrl ->
@@ -476,7 +480,7 @@ private fun PickStockContent(
             title = null,
             onBack = onBack,
             backContentDescription = stringResource(Res.string.back),
-            scrolled = scrollState.canScrollBackward
+            scrolled = scrolled
         ) {
             GiButton(
                 text = stringResource(Res.string.skip),
@@ -493,18 +497,19 @@ private fun PickStockContent(
                 .padding(start = GiSpace.gutter, end = GiSpace.gutter, bottom = GiSpace.x4)
         ) {
             Column(
-                modifier = Modifier.padding(top = GiSpace.x6),
+                // The top bar already adds 8 below the back button.
+                modifier = Modifier.padding(top = GiSpace.x4),
                 verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
             ) {
-                Text(
+                GiText(
                     text = stringResource(Res.string.onboarding_headline_stock_selection),
-                    color = colors.ink,
-                    style = type.display
+                    modifier = Modifier.semantics { heading() },
+                    style = GiTextStyle.Display
                 )
-                Text(
+                GiText(
                     text = stringResource(Res.string.onboarding_subtext_stock_selection),
-                    color = colors.muted,
-                    style = type.input
+                    style = GiTextStyle.Input,
+                    color = GiTheme.colors.muted
                 )
             }
             SuggestedStocksGrid(
@@ -523,7 +528,7 @@ private fun PickStockContent(
                         Modifier
                     }
                 },
-                modifier = Modifier.padding(top = GiSpace.x6)
+                modifier = Modifier.padding(top = GiSpace.x7)
             )
             GiSearchField(
                 value = state.searchQuery,
@@ -596,7 +601,7 @@ private fun SearchResultRow(
             Icon(
                 imageVector = GiIcons.caretRight,
                 contentDescription = null,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(GiIconSize.sm),
                 tint = GiTheme.colors.muted
             )
         }
@@ -610,8 +615,10 @@ private fun SuggestedStocksGrid(
     logoModifierFor: @Composable (ticker: String) -> Modifier,
     modifier: Modifier = Modifier
 ) {
+    val columns = if (isLargeText()) LARGE_TEXT_GRID_COLUMNS else GRID_COLUMNS
+    val rows = remember(stocks, columns) { stocks.chunked(columns) }
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
-        stocks.chunked(STEP_COUNT).forEach { rowStocks ->
+        rows.forEach { rowStocks ->
             Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
                 rowStocks.forEach { stock ->
                     SuggestedStockTile(
@@ -621,6 +628,8 @@ private fun SuggestedStocksGrid(
                         logoModifier = logoModifierFor(stock.ticker)
                     )
                 }
+                // Keep a short last row on the grid instead of stretching its tiles.
+                repeat(columns - rowStocks.size) { Spacer(modifier = Modifier.weight(1f)) }
             }
         }
     }
@@ -633,8 +642,6 @@ private fun SuggestedStockTile(
     modifier: Modifier = Modifier,
     logoModifier: Modifier = Modifier
 ) {
-    val colors = GiTheme.colors
-    val type = GiTheme.type
     val haptics = LocalHapticFeedback.current
     val logo = tickerStock(
         ticker = stock.ticker,
@@ -662,13 +669,12 @@ private fun SuggestedStockTile(
                 modifier = logoModifier,
                 imageUrl = logo.imageUrl
             )
-            Text(text = stock.ticker, color = colors.ink, style = type.label)
-            Text(
+            GiText(text = stock.ticker, style = GiTextStyle.Label)
+            GiText(
                 text = stock.name,
-                color = colors.muted,
+                style = GiTextStyle.Meta,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = type.meta
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -679,10 +685,12 @@ private fun BriefScreen(
     state: OnboardingUiState,
     logoTransition: LogoTransition,
     onBack: () -> Unit,
+    onRetry: () -> Unit,
     onFinish: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
+    val listScrolled by remember(listState) { derivedStateOf { listState.canScrollBackward } }
     val reducedMotion = isReducedMotionEnabled()
     val briefRise = with(LocalDensity.current) { GiSpace.x4.roundToPx() }
     Scaffold(
@@ -691,10 +699,12 @@ private fun BriefScreen(
         contentWindowInsets = WindowInsets(0),
         topBar = {
             GiTopBar(
-                title = null,
+                // The exchange isn't in the onboarding state yet; the board's "TSLA · NASDAQ" falls back to the ticker.
+                title = state.selectedTicker?.takeIf { state.briefView !is BriefView.Error },
                 onBack = onBack,
                 backContentDescription = stringResource(Res.string.back),
-                scrolled = state.briefView is BriefView.Success && listState.canScrollBackward
+                scrolled = state.briefView is BriefView.Success && listScrolled,
+                titleStyle = GiTopBarTitleStyle.Centered
             )
         }
     ) { innerPadding ->
@@ -730,7 +740,7 @@ private fun BriefScreen(
                     sharedScope = logoTransition.sharedScope,
                     briefScope = briefScope
                 )
-                is BriefView.Error -> BriefError(onFinish = onFinish)
+                is BriefView.Error -> BriefError(onRetry = onRetry, onFinish = onFinish)
             }
         }
     }
@@ -743,7 +753,6 @@ private fun BriefLoading(
     briefScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier
 ) {
-    val colors = GiTheme.colors
     val companyName = state.selectedCompanyName.orEmpty()
     val ticker = state.selectedTicker.orEmpty()
     Column(
@@ -751,12 +760,13 @@ private fun BriefLoading(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .navigationBarsPadding()
-            .padding(horizontal = GiSpace.gutter, vertical = GiSpace.x1),
-        verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
+            .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x3, bottom = GiSpace.x6),
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x5)
     ) {
         GiCard(
             modifier = Modifier
                 .fillMaxWidth()
+                .giBeam(active = true, shape = GiRadius.md, strength = BEAM_STRENGTH)
                 .semantics { liveRegion = LiveRegionMode.Polite },
             contentPadding = PaddingValues(horizontal = GiSpace.x4, vertical = GiSpace.x3)
         ) {
@@ -766,20 +776,19 @@ private fun BriefLoading(
             ) {
                 GiBrandMark(size = GiBrandMarkSize.Small, spinning = true)
                 Column {
-                    Text(
+                    GiText(
                         text = stringResource(Res.string.onboarding_loading_headline, companyName),
-                        color = colors.ink,
-                        style = GiTheme.type.label
+                        style = GiTextStyle.Label
                     )
-                    Text(
+                    GiText(
                         text = stringResource(Res.string.onboarding_loading_subtitle),
-                        color = colors.muted,
-                        style = GiTheme.type.meta
+                        style = GiTextStyle.MetaRelaxed
                     )
                 }
             }
         }
         CompanyBriefSkeleton(
+            announce = false,
             header = {
                 GiStockSummary(
                     stock = tickerStock(
@@ -811,8 +820,6 @@ private fun BriefContent(
     briefScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier
 ) {
-    val colors = GiTheme.colors
-    val type = GiTheme.type
     val brief = briefView.brief
     var selectedKeyNumber by remember { mutableStateOf<KeyNumber?>(null) }
     var showSentimentSheet by remember { mutableStateOf(false) }
@@ -822,28 +829,27 @@ private fun BriefContent(
     LazyColumn(
         state = listState,
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start = GiSpace.gutter,
-            end = GiSpace.gutter,
-            top = GiSpace.x1,
-            bottom = GiSpace.x6 + navigationBarBottom
-        ),
+        // The sections sheet is full-bleed and docks to the bottom, so only the page items are inset.
+        contentPadding = PaddingValues(top = GiSpace.x3),
         verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
     ) {
         item(key = "title", contentType = "title") {
-            Text(
+            GiText(
                 text = stringResource(Res.string.onboarding_success_headline, state.selectedCompanyName.orEmpty()),
-                color = colors.ink,
-                style = type.pageTitle
+                modifier = Modifier
+                    .padding(horizontal = GiSpace.gutter)
+                    .semantics { heading() },
+                style = GiTextStyle.PageTitle
             )
         }
         companyBriefItems(
             brief = brief,
             onVerdictClick = { showSentimentSheet = true },
             onKeyNumberClick = { selectedKeyNumber = it },
-            logoModifier = heroLogoModifier
-        )
-        item(key = "footer", contentType = "footer") {
+            logoModifier = heroLogoModifier,
+            layout = CompanyBriefLayout.Onboarding,
+            sheetBottomPadding = GiSpace.safeArea + navigationBarBottom
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -851,22 +857,21 @@ private fun BriefContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
             ) {
-                Text(
+                GiText(
                     text = stringResource(Res.string.onboarding_success_body),
-                    color = colors.muted,
-                    textAlign = TextAlign.Center,
-                    style = type.body
+                    style = GiTextStyle.Body,
+                    color = GiTheme.colors.muted,
+                    textAlign = TextAlign.Center
                 )
                 GiButton(
                     text = stringResource(Res.string.onboarding_cta_start_exploring),
                     onClick = onFinish,
                     modifier = Modifier.fillMaxWidth()
                 )
-                Text(
+                GiText(
                     text = stringResource(Res.string.onboarding_brief_disclaimer),
-                    color = colors.muted,
-                    textAlign = TextAlign.Center,
-                    style = type.meta
+                    style = GiTextStyle.Meta,
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -886,7 +891,7 @@ private fun BriefContent(
 }
 
 @Composable
-private fun BriefError(onFinish: () -> Unit, modifier: Modifier = Modifier) {
+private fun BriefError(onRetry: () -> Unit, onFinish: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -895,19 +900,31 @@ private fun BriefError(onFinish: () -> Unit, modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(GiSpace.x6, Alignment.CenterVertically)
     ) {
-        Text(
-            text = stringResource(Res.string.onboarding_error_message),
-            color = GiTheme.colors.body,
-            textAlign = TextAlign.Center,
-            style = GiTheme.type.body
+        GiText(
+            text = stringResource(Res.string.onboarding_brief_error_message),
+            style = GiTextStyle.Body,
+            textAlign = TextAlign.Center
         )
-        GiButton(
-            text = stringResource(Res.string.onboarding_cta_go_to_app),
-            onClick = onFinish,
-            modifier = Modifier.fillMaxWidth()
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
+            GiButton(
+                text = stringResource(Res.string.onboarding_cta_try_again),
+                onClick = onRetry,
+                modifier = Modifier.fillMaxWidth()
+            )
+            GiButton(
+                text = stringResource(Res.string.onboarding_cta_go_to_app_short),
+                onClick = onFinish,
+                modifier = Modifier.fillMaxWidth(),
+                size = GiButtonSize.Medium,
+                variant = GiButtonVariant.TextMuted
+            )
+        }
     }
 }
+
+@Composable
+@ReadOnlyComposable
+private fun isLargeText(): Boolean = LocalDensity.current.fontScale >= LARGE_TEXT_FONT_SCALE
 
 @Composable
 private fun OnboardingScreenPreview(state: OnboardingUiState) {
@@ -921,6 +938,7 @@ private fun OnboardingScreenPreview(state: OnboardingUiState) {
             onSelectStock = { _, _, _, _ -> },
             onSearchQueryChange = {},
             onBackToStockSelection = {},
+            onRetryBrief = {},
             onFinish = {}
         )
     }
@@ -941,6 +959,7 @@ private fun OnboardingValuePropsPreview() {
 }
 
 @PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
 @Composable
 private fun OnboardingPickStockPreview() {
     OnboardingScreenPreview(state = OnboardingUiState(currentScreen = 2))
@@ -950,7 +969,12 @@ private fun OnboardingPickStockPreview() {
 @Composable
 private fun OnboardingBriefLoadingPreview() {
     OnboardingScreenPreview(
-        state = OnboardingUiState(currentScreen = 3, selectedCompanyName = "Tesla", briefView = BriefView.Loading)
+        state = OnboardingUiState(
+            currentScreen = 3,
+            selectedTicker = "TSLA",
+            selectedCompanyName = "Tesla",
+            briefView = BriefView.Loading
+        )
     )
 }
 
@@ -961,6 +985,7 @@ private fun OnboardingBriefPreview() {
     OnboardingScreenPreview(
         state = OnboardingUiState(
             currentScreen = 3,
+            selectedTicker = "TSLA",
             selectedCompanyName = "Tesla",
             briefView = BriefView.Success(previewCompanyBrief)
         )

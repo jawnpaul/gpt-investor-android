@@ -112,6 +112,7 @@
     <string name="discover">Discover</string>
     <string name="search">Search</string>
     <string name="financial_clarity_powered_by_ai">Financial Clarity \nPowered by AI</string>
+    <string name="splash_tagline">Clear answers about your money</string>
     <string name="your_personal_financial_guru">Your Personal Financial Guru. \nJust Chat.</string>
     <string name="get_actionable_stock_picks_everyday">Get Actionable Stock Picks. \nEvery Day.</string>
     <string name="join_the_waitlist">Join the waitlist</string>
@@ -188,6 +189,9 @@
     <string name="onboarding_cta_start_exploring">Start exploring</string>
     <string name="onboarding_error_message">Something went wrong. Let's take you to the app.</string>
     <string name="onboarding_cta_go_to_app">Go to GPT Investor</string>
+    <string name="onboarding_brief_error_message">Something went wrong loading your brief.</string>
+    <string name="onboarding_cta_try_again">Try again</string>
+    <string name="onboarding_cta_go_to_app_short">Go to app</string>
     <string name="onboarding_value_plain_english_title">Plain English</string>
     <string name="onboarding_value_plain_english_body">No jargon, no confusion.</string>
     <string name="onboarding_value_real_time_title">Real-time data</string>
@@ -391,4 +395,9 @@
     <string name="stop_answering">Stop answering</string>
     <string name="ask_a_follow_up">Ask a follow-up…</string>
     <string name="thinking">Thinking…</string>
+    <string name="guest_session_started">Guest session started</string>
+    <string name="digest_detail_empty_title">No stocks in this brief yet</string>
+    <string name="digest_detail_empty_body">Add companies to your watchlist and they’ll appear in your next brief.</string>
+    <string name="digest_detail_empty_action">Back to Home</string>
+    <string name="offline_opening_saved">No connection. Opening your saved data…</string>
 </resources>

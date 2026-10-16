@@ -15,16 +15,22 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -78,6 +84,8 @@ import com.thejawnpaul.gptinvestor.theme.components.GiFillScrollColumn
 import com.thejawnpaul.gptinvestor.theme.components.GiIconButton
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
 import com.thejawnpaul.gptinvestor.theme.components.GiStepBar
+import com.thejawnpaul.gptinvestor.theme.components.GiText
+import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
 import com.thejawnpaul.gptinvestor.theme.giAnimatePlacement
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
@@ -102,6 +110,8 @@ fun PostAuthOnboardingScreen(
     val experienceScrollState = rememberScrollState()
     val goalsScrollState = rememberScrollState()
     val scrollStateFor: (Int) -> ScrollState = { step -> if (step == 0) experienceScrollState else goalsScrollState }
+    val currentScrollState = scrollStateFor(state.currentStep)
+    val scrolled by remember(currentScrollState) { derivedStateOf { currentScrollState.canScrollBackward } }
     NavigationBackHandler(
         state = rememberNavigationEventState(currentInfo = NavigationEventInfo.None),
         isBackEnabled = state.currentStep > 0,
@@ -114,7 +124,7 @@ fun PostAuthOnboardingScreen(
         topBar = {
             PersonaliseTopBar(
                 state = state,
-                scrolled = scrollStateFor(state.currentStep).canScrollBackward,
+                scrolled = scrolled,
                 onSkip = onSkip,
                 onBack = onBack
             )
@@ -149,7 +159,7 @@ fun PostAuthOnboardingScreen(
                 } else {
                     Column(
                         modifier = Modifier.padding(top = GiSpace.x8),
-                        verticalArrangement = Arrangement.spacedBy(GiSpace.x6)
+                        verticalArrangement = Arrangement.spacedBy(GiSpace.x7)
                     ) {
                         PersonaliseQuestion(
                             label = stringResource(Res.string.post_auth_onboarding_goal_label),
@@ -195,13 +205,15 @@ private fun PersonaliseTopBar(
                 exit = shrinkHorizontally(GiMotion.smooth(), shrinkTowards = Alignment.Start) +
                     fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing))
             ) {
-                GiIconButton(
-                    icon = GiIcons.caretLeft,
-                    contentDescription = back,
-                    onClick = onBack,
-                    modifier = Modifier.padding(end = GiSpace.x4),
-                    enabled = !state.isLoading
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    GiIconButton(
+                        icon = GiIcons.caretLeft,
+                        contentDescription = back,
+                        onClick = onBack,
+                        enabled = !state.isLoading
+                    )
+                    Spacer(modifier = Modifier.width(GiSpace.x4))
+                }
             }
             GiStepBar(
                 count = STEP_COUNT,
@@ -224,22 +236,21 @@ private fun PersonaliseTopBar(
 @Composable
 private fun PersonaliseHeading(step: Int, modifier: Modifier = Modifier) {
     val colors = GiTheme.colors
-    val type = GiTheme.type
     Column(
         modifier = modifier.padding(top = GiSpace.x6),
         verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
     ) {
         GiEyebrow(text = stringResource(Res.string.onboarding_step_of, step + 1, STEP_COUNT))
-        Text(
+        GiText(
             text = stringResource(Res.string.post_auth_onboarding_title),
             modifier = Modifier.semantics { heading() },
-            color = colors.ink,
-            style = type.display
+            style = GiTextStyle.Display,
+            color = colors.ink
         )
-        Text(
+        GiText(
             text = stringResource(Res.string.post_auth_onboarding_subtitle),
-            color = colors.muted,
-            style = type.input
+            style = GiTextStyle.Input,
+            color = colors.muted
         )
     }
 }
@@ -260,8 +271,15 @@ private fun <T> PersonaliseQuestion(
             .semantics { isTraversalGroup = true },
         verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
     ) {
-        Text(text = label, color = GiTheme.colors.ink, style = GiTheme.type.label)
+        // The question is a heading so each chip group is announced under (and navigable by) its question.
+        GiText(
+            text = label,
+            modifier = Modifier.semantics { heading() },
+            style = GiTextStyle.Label,
+            color = GiTheme.colors.ink
+        )
         FlowRow(
+            modifier = Modifier.selectableGroup(),
             horizontalArrangement = Arrangement.spacedBy(GiSpace.x2),
             verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
         ) {
@@ -271,7 +289,8 @@ private fun <T> PersonaliseQuestion(
                     onClick = { onSelect(option) },
                     modifier = placement,
                     selected = option == selected,
-                    size = GiChipSize.Large
+                    size = GiChipSize.Large,
+                    singleChoice = true
                 )
             }
         }

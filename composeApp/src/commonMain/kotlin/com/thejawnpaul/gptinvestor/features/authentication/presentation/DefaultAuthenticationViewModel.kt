@@ -2,14 +2,17 @@ package com.thejawnpaul.gptinvestor.features.authentication.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.utility.Constants
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
+import com.thejawnpaul.gptinvestor.guest_session_started
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.koin.core.annotation.Provided
 
@@ -52,7 +55,7 @@ class DefaultAuthenticationViewModel(
         viewModelScope.launch {
             authRepository.guestLogin().onSuccess {
                 _loading.update { false }
-                handleAction(action = DefaultAuthenticationAction.ShowToast("Guest session started"))
+                _actions.emit(DefaultAuthenticationAction.ShowToast(getString(Res.string.guest_session_started)))
                 handleAction(action = DefaultAuthenticationAction.OnGoToHome)
             }.onFailure { failure ->
                 _loading.update { false }

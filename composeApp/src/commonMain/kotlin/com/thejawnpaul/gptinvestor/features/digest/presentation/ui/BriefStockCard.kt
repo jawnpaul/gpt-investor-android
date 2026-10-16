@@ -27,7 +27,7 @@ internal fun BriefStockCard(
         stock = tickerStock(
             ticker = stock.ticker,
             title = stock.name,
-            subtitle = stock.ticker,
+            subtitle = stock.exchange?.takeIf { it.isNotBlank() }?.let { "${stock.ticker} · $it" } ?: stock.ticker,
             percent = stock.priceChange
         ),
         summary = stock.summary,

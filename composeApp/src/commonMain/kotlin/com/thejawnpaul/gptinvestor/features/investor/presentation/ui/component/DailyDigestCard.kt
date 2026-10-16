@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,6 +48,7 @@ import com.thejawnpaul.gptinvestor.next_digest_by
 import com.thejawnpaul.gptinvestor.retry
 import com.thejawnpaul.gptinvestor.stocks_locked
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
@@ -71,7 +71,6 @@ import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.today_s_digest
 import com.thejawnpaul.gptinvestor.tracking_stocks
 import com.thejawnpaul.gptinvestor.unlock
-import com.thejawnpaul.gptinvestor.x_more_stocks_in_your_digest
 import com.thejawnpaul.gptinvestor.you_re_not_tracking_any_companies_yet
 import com.thejawnpaul.gptinvestor.your_digest
 import org.jetbrains.compose.resources.stringResource
@@ -159,20 +158,23 @@ fun DailyDigestCard(
 
 @Composable
 private fun EmptyDigest(view: DailyDigestView, onAddStock: (String) -> Unit, onBrowseAll: () -> Unit) {
-    GiCard {
+    GiCard(spacing = GiSpace.x4) {
         GiText(
             text = stringResource(Res.string.you_re_not_tracking_any_companies_yet),
             style = GiTextStyle.Body
         )
-        GiListGroup {
-            view.suggestedStocks.forEachIndexed { index, stock ->
-                if (index > 0) GiDivider()
-                GiListRow(title = stock.ticker, subtitle = stock.companyName) {
-                    AddStockAction(
-                        isAdding = stock.ticker in view.addingTickers,
-                        isAdded = stock.ticker in view.addedTickers,
-                        onAdd = { onAddStock(stock.ticker) }
-                    )
+        // Guests get no recommendations; never render an empty list group.
+        if (view.suggestedStocks.isNotEmpty()) {
+            GiListGroup {
+                view.suggestedStocks.forEachIndexed { index, stock ->
+                    if (index > 0) GiDivider()
+                    GiListRow(title = stock.ticker, subtitle = stock.companyName) {
+                        AddStockAction(
+                            isAdding = stock.ticker in view.addingTickers,
+                            isAdded = stock.ticker in view.addedTickers,
+                            onAdd = { onAddStock(stock.ticker) }
+                        )
+                    }
                 }
             }
         }
@@ -197,7 +199,7 @@ private fun AddStockAction(isAdding: Boolean, isAdded: Boolean, onAdd: () -> Uni
             Icon(
                 imageVector = GiIcons.check,
                 contentDescription = null,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(GiIconSize.sm),
                 tint = GiTheme.colors.gain
             )
             GiText(text = stringResource(Res.string.done), style = GiTextStyle.Link, color = GiTheme.colors.gain)
@@ -267,17 +269,6 @@ private fun ReadyDigest(view: DailyDigestView, onSeeFullDigest: () -> Unit, onUn
         view.stocks.firstOrNull()?.let { stock ->
             BriefStockCard(stock = stock, updatedLabel = view.updatedLabel, onClick = onSeeFullDigest)
         }
-        // Only unlocked stocks: locked ones get their own upsell below, so they aren't counted twice.
-        val remainingStocks = view.stocks.size - 1
-        if (remainingStocks > 0) {
-            GiButton(
-                text = stringResource(Res.string.x_more_stocks_in_your_digest, remainingStocks),
-                onClick = onSeeFullDigest,
-                modifier = Modifier.fillMaxWidth(),
-                size = GiButtonSize.Medium,
-                variant = GiButtonVariant.Secondary
-            )
-        }
         if (view.lockedStocksCount > 0) {
             GiPremiumBanner(
                 title = view.lockedStocksSummary?.let { stringResource(Res.string.stocks_locked, it) }
@@ -290,9 +281,10 @@ private fun ReadyDigest(view: DailyDigestView, onSeeFullDigest: () -> Unit, onUn
     }
 }
 
+// Also the loading state of Digest Detail.
 @Composable
-private fun DigestSkeleton() {
-    GiCard {
+internal fun DigestSkeleton(modifier: Modifier = Modifier) {
+    GiCard(modifier = modifier) {
         Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3), verticalAlignment = Alignment.CenterVertically) {
             GiSkeleton(modifier = Modifier.size(40.dp))
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {

@@ -31,7 +31,9 @@ data class StockDigestPresentation(
     val keyEvent: String? = null,
     val sentiment: DigestSentiment? = null,
     val priceChange: Double? = null,
-    val updatedLabel: String? = null
+    val updatedLabel: String? = null,
+    // Not sent by the digest API yet; the card falls back to the bare ticker.
+    val exchange: String? = null
 )
 
 data class LockedStockDigestPresentation(

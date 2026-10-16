@@ -106,7 +106,8 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
             onStockClick = { homeViewModel.handleEvent(HomeEvent.ClickDigestStock(it)) },
             onUnlockPremium = {
                 homeViewModel.handleEvent(HomeEvent.DigestDetailUnlockPremium)
-            }
+            },
+            onRetry = { homeViewModel.handleEvent(HomeEvent.RetryDailyDigest) }
         )
     }
 }

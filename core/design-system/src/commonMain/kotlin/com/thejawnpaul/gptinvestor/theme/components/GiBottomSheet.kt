@@ -45,6 +45,8 @@ fun GiBottomSheet(
     title: String,
     closeContentDescription: String,
     modifier: Modifier = Modifier,
+    eyebrow: (@Composable () -> Unit)? = null,
+    subtitle: String? = null,
     sheetState: SheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
         enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
@@ -69,6 +71,8 @@ fun GiBottomSheet(
         GiBottomSheetContent(
             title = title,
             closeContentDescription = closeContentDescription,
+            eyebrow = eyebrow,
+            subtitle = subtitle,
             onClose = {
                 scope.launch { sheetState.hide() }.invokeOnCompletion {
                     if (!sheetState.isVisible) onDismissRequest()
@@ -89,6 +93,8 @@ private fun GiBottomSheetContent(
     closeContentDescription: String,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
+    eyebrow: (@Composable () -> Unit)? = null,
+    subtitle: String? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
@@ -98,15 +104,24 @@ private fun GiBottomSheetContent(
         verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
     ) {
         GiSheetHandle(modifier = Modifier.align(Alignment.CenterHorizontally))
-        Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3), verticalAlignment = Alignment.CenterVertically) {
-            GiText(
-                text = title,
-                modifier = Modifier
-                    .weight(1f)
-                    .semantics { heading() },
-                style = GiTextStyle.StatNumber
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
+            verticalAlignment = if (eyebrow == null && subtitle == null) Alignment.CenterVertically else Alignment.Top
+        ) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
+                eyebrow?.invoke()
+                GiText(text = title, modifier = Modifier.semantics { heading() }, style = GiTextStyle.StatNumber)
+                if (subtitle != null) {
+                    GiText(text = subtitle, style = GiTextStyle.Body, color = GiTheme.colors.body)
+                }
+            }
+            GiIconButton(
+                icon = GiIcons.x,
+                contentDescription = closeContentDescription,
+                onClick = onClose,
+                variant = GiIconButtonVariant.Tonal
             )
-            GiIconButton(icon = GiIcons.x, contentDescription = closeContentDescription, onClick = onClose)
         }
         content()
     }
@@ -120,14 +135,31 @@ private const val MAX_HEIGHT_FRACTION = 0.9f
 @Composable
 private fun GiBottomSheetContentPreview() {
     GiPreviewSurface {
-        Column(
-            modifier = Modifier
-                .clip(SHEET_SHAPE)
-                .background(GiTheme.colors.raised)
-        ) {
-            GiBottomSheetContent(title = "Set a price alert", closeContentDescription = "Close", onClose = {}) {
-                GiText(text = "We'll tell you when Apple crosses your price.", style = GiTextStyle.BodySmall)
-                GiButton(text = "Set alert", onClick = {}, modifier = Modifier.fillMaxWidth())
+        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
+            Column(
+                modifier = Modifier
+                    .clip(SHEET_SHAPE)
+                    .background(GiTheme.colors.raised)
+            ) {
+                GiBottomSheetContent(title = "Set a price alert", closeContentDescription = "Close", onClose = {}) {
+                    GiText(text = "We'll tell you when Apple crosses your price.", style = GiTextStyle.BodySmall)
+                    GiButton(text = "Set alert", onClick = {}, modifier = Modifier.fillMaxWidth())
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .clip(SHEET_SHAPE)
+                    .background(GiTheme.colors.raised)
+            ) {
+                GiBottomSheetContent(
+                    title = "Go Premium",
+                    closeContentDescription = "Close",
+                    onClose = {},
+                    eyebrow = { GiProTag(tone = GiProTagTone.Standalone) },
+                    subtitle = "Unlock the full GPT Investor experience."
+                ) {
+                    GiButton(text = "Subscribe now", onClick = {}, modifier = Modifier.fillMaxWidth(), proPulse = true)
+                }
             }
         }
     }

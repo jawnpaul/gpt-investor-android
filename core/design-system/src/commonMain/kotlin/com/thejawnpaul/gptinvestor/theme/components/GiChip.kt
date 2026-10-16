@@ -1,5 +1,7 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -7,8 +9,9 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -63,8 +66,11 @@ fun GiChip(
         selected -> GiChipColors(container = colors.violetSoft, content = colors.violet, edge = colors.violetSoft)
         else -> GiChipColors(container = colors.raised, content = colors.ink, edge = colors.line)
     }
-    val content = chipColors.content
-    val edge = chipColors.edge
+    val colorSpec = tween<Color>(GiMotion.FAST)
+    val container by animateColorAsState(chipColors.container, colorSpec)
+    val content by animateColorAsState(chipColors.content, colorSpec)
+    val edge by animateColorAsState(chipColors.edge ?: Color.Transparent, colorSpec)
+    val icon = leadingIcon ?: GiIcons.check.takeIf { selected && !isQuiet }
     val isLarge = size == GiChipSize.Large
     val clickModifier = if (isQuiet) {
         Modifier.clickable(
@@ -92,25 +98,25 @@ fun GiChip(
             .minimumInteractiveComponentSize()
             .alpha(if (enabled) 1f else GiMotion.DISABLED_ALPHA)
             .giFocusRing(interactionSource, GiRadius.xs)
-            .height(if (isLarge) 44.dp else 32.dp)
+            .heightIn(min = if (isLarge) 44.dp else 32.dp)
             .clip(GiRadius.xs)
-            .background(chipColors.container)
-            .then(if (edge != null) Modifier.border(GiEdge.width, edge, GiRadius.xs) else Modifier)
+            .background(container)
+            .then(if (isQuiet) Modifier else Modifier.border(GiEdge.width, edge, GiRadius.xs))
             .then(clickModifier)
             .background(content.copy(alpha = pressedLayerAlpha(interactionSource)))
-            .padding(horizontal = if (isLarge) GiSpace.x4 else GiSpace.x3),
+            .padding(horizontal = if (isLarge) GiSpace.x4 else GiSpace.x3, vertical = GiSpace.x1),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (leadingIcon != null) {
-            Icon(imageVector = leadingIcon, contentDescription = null, modifier = Modifier.size(16.dp), tint = content)
+        if (icon != null) {
+            Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = content)
         }
         GiText(
             text = text,
+            modifier = Modifier.weight(1f, fill = false),
             style = if (isLarge) GiTextStyle.Label else GiTextStyle.BodySmall,
             color = content,
-            fontWeight = if (selected && !isQuiet) FontWeight.SemiBold else FontWeight.Medium,
-            maxLines = 1
+            fontWeight = if (selected && !isQuiet) FontWeight.SemiBold else FontWeight.Medium
         )
     }
 }
@@ -136,13 +142,20 @@ private fun GiChipPreview() {
                 GiChip(text = "Is Apple a buy?", onClick = {}, style = GiChipStyle.Quiet)
                 GiChip(text = "+5%", onClick = {}, enabled = false)
             }
-            GiChip(
-                text = "Apple",
-                onClick = {},
-                selected = true,
-                size = GiChipSize.Large,
-                leadingIcon = GiIcons.check
-            )
+            var experience by remember { mutableStateOf("Some experience") }
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(GiSpace.x2),
+                verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
+            ) {
+                listOf("I'm new to investing", "Some experience", "Comfortable with volatility").forEach { label ->
+                    GiChip(
+                        text = label,
+                        onClick = { experience = label },
+                        selected = label == experience,
+                        size = GiChipSize.Large
+                    )
+                }
+            }
         }
     }
 }

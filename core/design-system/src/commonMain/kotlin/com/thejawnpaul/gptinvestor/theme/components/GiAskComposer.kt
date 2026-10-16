@@ -1,5 +1,14 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.EaseOutQuart
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,6 +28,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -26,6 +36,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -42,6 +56,7 @@ import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 
 class GiComposerStop(val contentDescription: String, val onStop: () -> Unit)
 
@@ -57,16 +72,27 @@ fun GiAskComposer(
     modifier: Modifier = Modifier,
     floating: Boolean = true,
     stop: GiComposerStop? = null,
-    largeTextMaxLines: Int = LARGE_TEXT_MAX_LINES
+    largeTextMaxLines: Int = LARGE_TEXT_MAX_LINES,
+    onFocusChange: (Boolean) -> Unit = {}
 ) {
     val colors = GiTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     val canSend = value.isNotBlank() && stop == null
+    val edgeWidth = if (isFocused && value.isNotEmpty() && stop == null) GiEdge.focusWidth else GiEdge.width
+    val reducedMotion = isReducedMotionEnabled()
+    val lift = remember(colors.isDark) { GiElevation.lift(colors.isDark) }
+    val shadowAlpha = animateFloatAsState(
+        targetValue = if (floating) 1f else 0f,
+        animationSpec = if (reducedMotion) snap() else tween(GiMotion.BASE, easing = EaseOutQuart)
+    )
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .onFocusChanged { onFocusChange(it.isFocused) },
+        enabled = stop == null,
         textStyle = GiTheme.type.body.copy(color = colors.ink),
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.Sentences,
@@ -79,24 +105,23 @@ fun GiAskComposer(
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier
-                    .then(
-                        if (floating) {
-                            Modifier.dropShadow(shape = GiRadius.md, shadow = GiElevation.lift(colors.isDark))
-                        } else {
-                            Modifier
-                        }
-                    )
+                    .dropShadow(shape = GiRadius.md) {
+                        radius = lift.radius.toPx()
+                        color = lift.color
+                        offset = Offset(lift.offset.x.toPx(), lift.offset.y.toPx())
+                        alpha = shadowAlpha.value
+                    }
                     .heightIn(min = 52.dp)
                     .giBeam(active = stop != null, shape = GiRadius.md)
                     .clip(GiRadius.md)
                     .background(colors.raised)
                     .border(
-                        width = GiEdge.width,
+                        width = edgeWidth,
                         color = if (isFocused || value.isNotEmpty()) colors.violet else colors.line,
                         shape = GiRadius.md
                     )
-                    .padding(start = 14.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    .padding(start = if (floating) 14.dp else 16.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(if (floating) 10.dp else GiSpace.x2),
                 verticalAlignment = Alignment.Bottom
             ) {
                 // Padding centres the mark and each text line on the 40 button, so one line still sits mid-field.
@@ -124,14 +149,28 @@ fun GiAskComposer(
                     }
                     innerTextField()
                 }
-                if (stop != null) {
-                    Box(
+                AnimatedContent(
+                    targetState = stop,
+                    transitionSpec = {
+                        val enter = fadeIn(tween(GiMotion.FAST, easing = EaseOutQuart))
+                        (
+                            if (reducedMotion) {
+                                enter
+                            } else {
+                                enter + scaleIn(tween(GiMotion.FAST, easing = EaseOutQuart), initialScale = SWAP_SCALE)
+                            }
+                            ) togetherWith fadeOut(tween(GiMotion.INSTANT))
+                    },
+                    contentKey = { it != null }
+                ) { currentStop ->
+                    if (currentStop != null) {
+                        Box(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(GiRadius.sm)
                             .background(colors.ink)
-                            .clickable(role = Role.Button, onClick = stop.onStop)
-                            .semantics { contentDescription = stop.contentDescription },
+                            .clickable(role = Role.Button, onClick = currentStop.onStop)
+                            .semantics { contentDescription = currentStop.contentDescription },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -160,12 +199,14 @@ fun GiAskComposer(
                         )
                     }
                 }
+                }
             }
         }
     )
 }
 
 private const val MAX_LINES = 4
+private const val SWAP_SCALE = 0.8f
 private const val LARGE_TEXT_MAX_LINES = 2
 
 @PreviewLightDark
@@ -205,6 +246,40 @@ private fun GiAskComposerPreview() {
                 floating = false,
                 stop = GiComposerStop(contentDescription = "Stop answering", onStop = {})
             )
+        }
+    }
+}
+
+@PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
+@Composable
+private fun GiAskComposerDockedPreview() {
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    GiPreviewSurface {
+        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
+            GiComposerBar(docked = true) {
+                GiAskComposer(
+                    value = "Is JNJ a good dividend stock?",
+                    onValueChange = {},
+                    onSend = {},
+                    placeholder = "Ask about Johnson & Johnson…",
+                    sendContentDescription = "Send",
+                    modifier = Modifier.focusRequester(focusRequester),
+                    floating = false
+                )
+            }
+            GiComposerBar(docked = true) {
+                GiAskComposer(
+                    value = "",
+                    onValueChange = {},
+                    onSend = {},
+                    placeholder = "Ask about Johnson & Johnson…",
+                    sendContentDescription = "Send",
+                    floating = false,
+                    stop = GiComposerStop(contentDescription = "Stop answering", onStop = {})
+                )
+            }
         }
     }
 }

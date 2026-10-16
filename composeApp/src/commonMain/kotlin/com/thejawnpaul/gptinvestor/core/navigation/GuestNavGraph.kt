@@ -15,6 +15,7 @@ import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.added_to_watchlist
 import com.thejawnpaul.gptinvestor.added_to_watchlist_error
 import com.thejawnpaul.gptinvestor.added_to_watchlist_success
+import com.thejawnpaul.gptinvestor.answer_copied
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.failed_to_remove_from_watchlist
@@ -59,8 +60,11 @@ import com.thejawnpaul.gptinvestor.features.watchlist.presentation.viewmodel.Wat
 import com.thejawnpaul.gptinvestor.removed_from_watchlist
 import com.thejawnpaul.gptinvestor.share_brief_text
 import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -321,6 +325,7 @@ fun NavGraphBuilder.guestNavGraph(
         val viewModel = koinViewModel<CompanyViewModel>()
         val state = viewModel.selectedCompany.collectAsState()
         val haptics = LocalHapticFeedback.current
+        val toastState = rememberGiToastState()
         LaunchedEffect(Unit) {
             viewModel.companyDetailAction.collect { action ->
                 when (action) {
@@ -334,7 +339,20 @@ fun NavGraphBuilder.guestNavGraph(
 
                     is CompanyDetailAction.OnCopy -> {
                         platformActions.copyToClipboard("", action.text)
-                        platformActions.showMessage("Copied")
+                        launch {
+                            toastState.show(
+                                message = getString(Res.string.answer_copied),
+                                icon = GiIcons.checkCircle
+                            )
+                        }
+                    }
+
+                    is CompanyDetailAction.OnShareText -> {
+                        platformActions.shareText(action.text)
+                    }
+
+                    is CompanyDetailAction.OnOpenCompany -> {
+                        navController.navigate(GuestScreen.GuestCompanyDetail.createRoute(action.ticker))
                     }
 
                     CompanyDetailAction.OnGoToSignUp -> {
@@ -380,7 +398,8 @@ fun NavGraphBuilder.guestNavGraph(
             modifier = Modifier,
             state = state.value,
             onEvent = viewModel::handleCompanyDetailEvent,
-            onAction = viewModel::processCompanyDetailAction
+            onAction = viewModel::processCompanyDetailAction,
+            toastState = toastState
         )
     }
 

@@ -1,5 +1,11 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.EaseOutQuart
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
@@ -70,13 +77,25 @@ fun GiTopBar(
                     verticalAlignment = Alignment.CenterVertically,
                     content = center
                 )
-                title != null -> GiTopBarTitle(
-                    title = title,
-                    subtitle = subtitle,
-                    titleStyle = titleStyle,
-                    modifier = Modifier.weight(1f)
-                )
-                else -> Spacer(modifier = Modifier.weight(1f))
+                else -> AnimatedContent(
+                    targetState = title,
+                    modifier = Modifier.weight(1f),
+                    transitionSpec = {
+                        fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart)) togetherWith
+                            fadeOut(tween(GiMotion.FAST, easing = EaseOutQuart))
+                    }
+                ) { currentTitle ->
+                    if (currentTitle != null) {
+                        GiTopBarTitle(
+                            title = currentTitle,
+                            subtitle = subtitle,
+                            titleStyle = titleStyle,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.fillMaxWidth())
+                    }
+                }
             }
             Row(
                 modifier = sideSlot,

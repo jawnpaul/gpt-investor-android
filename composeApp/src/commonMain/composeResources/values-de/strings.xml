@@ -364,4 +364,11 @@
         <item quantity="one">%1$d Quelle. Keine Finanzberatung.</item>
         <item quantity="other">%1$d Quellen. Keine Finanzberatung.</item>
     </plurals>
+    <string name="company_context_title">%1$s · %2$s</string>
+    <string name="ask_about_company">Fragen Sie zu %1$s …</string>
+    <string name="reading_company_data">Lese die neuesten Daten zu %1$s …</string>
+    <string name="answer_copied">Antwort kopiert</string>
+    <string name="helpful">Hilfreich</string>
+    <string name="not_helpful">Nicht hilfreich</string>
+    <string name="stop_answering">Antwort stoppen</string>
 </resources>

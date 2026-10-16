@@ -15,7 +15,8 @@ data class SingleCompanyView(
     val inputQuery: String = "",
     val header: CompanyHeaderPresentation = CompanyHeaderPresentation(),
     val brief: CompanyBrief? = null,
-    val genText: String = "",
+    val pendingQuery: String? = null,
+    val isAnswering: Boolean = false,
     val availableModels: List<AvailableModel> = emptyList(),
     val selectedModel: AvailableModel = DefaultModel(),
     val waitlistAvailableOptions: List<String> = listOf(

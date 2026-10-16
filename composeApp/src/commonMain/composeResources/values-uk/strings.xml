@@ -366,4 +366,11 @@
         <item quantity="many">%1$d джерел. Не є фінансовою порадою.</item>
         <item quantity="other">%1$d джерела. Не є фінансовою порадою.</item>
     </plurals>
+    <string name="company_context_title">%1$s · %2$s</string>
+    <string name="ask_about_company">Запитайте про %1$s…</string>
+    <string name="reading_company_data">Читаю останні дані %1$s…</string>
+    <string name="answer_copied">Відповідь скопійовано</string>
+    <string name="helpful">Корисно</string>
+    <string name="not_helpful">Не корисно</string>
+    <string name="stop_answering">Зупинити відповідь</string>
 </resources>

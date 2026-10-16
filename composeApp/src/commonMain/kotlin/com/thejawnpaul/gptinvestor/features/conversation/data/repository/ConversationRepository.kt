@@ -34,13 +34,16 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.utils.io.readUTF8Line
 import kotlin.time.Clock
 import kotlin.time.Clock.System
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Singleton
 
@@ -91,6 +94,7 @@ class ConversationRepository(
     override suspend fun getDefaultPromptResponse(prompt: DefaultPrompt): Flow<Either<Failure, Conversation>> = flow {
         var structuredConversation: StructuredConversation? = null
         var messageId: Long? = null
+        var streaming = false
         try {
             // Always create a new conversation entity
             val conversationId = conversationDao.insertConversation(
@@ -126,6 +130,7 @@ class ConversationRepository(
             val isGuest = appPreferences.isGuestLoggedIn.first() == true
             apiService.chatAiResponse(aiChatRequest) { chatResponse ->
                 if (chatResponse.status.value in 200..299) {
+                    streaming = true
                     handleSseStream(
                         response = chatResponse,
                         initialConversation = structuredConversation,
@@ -154,6 +159,10 @@ class ConversationRepository(
                 }
             }
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                messageId?.let { if (!streaming) saveStoppedAnswer(it, "") }
+                throw e
+            }
             Logger.e(e.stackTraceToString())
             structuredConversation?.let { conversation ->
                 val updatedMessages = ArrayList(conversation.messageList)
@@ -174,6 +183,7 @@ class ConversationRepository(
     override suspend fun getInputResponse(prompt: ConversationPrompt): Flow<Either<Failure, Conversation>> = flow {
         var currentConversation: StructuredConversation? = null
         var newMessageId: Long = -1L
+        var streaming = false
         try {
             // Use a non-null local var to allow safe reassignment of the conversation object
             var conversation: StructuredConversation = getConversation(prompt)
@@ -211,6 +221,7 @@ class ConversationRepository(
             val isGuestInput = appPreferences.isGuestLoggedIn.first() == true
             apiService.chatAiResponse(aiChatRequest) { chatResponse ->
                 if (chatResponse.status.value in 200..299) {
+                    streaming = true
                     handleSseStream(
                         chatResponse,
                         conversation,
@@ -237,6 +248,10 @@ class ConversationRepository(
                 }
             }
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                if (newMessageId != -1L && !streaming) saveStoppedAnswer(newMessageId, "")
+                throw e
+            }
             Logger.e(e.stackTraceToString())
             currentConversation?.let { conversation ->
                 val updatedMessages = ArrayList(conversation.messageList)
@@ -505,6 +520,10 @@ class ConversationRepository(
                 }
             }
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                saveStoppedAnswer(messageId, chunk.toString())
+                throw e
+            }
             Logger.e("Error during SSE stream")
             val updatedMessages = ArrayList(currentConversation.messageList)
             val index =
@@ -521,6 +540,24 @@ class ConversationRepository(
                 emit(Either.Right(currentConversation))
             }
             emit(Either.Left(Failure.ServerError))
+        }
+    }
+
+    private suspend fun saveStoppedAnswer(messageId: Long, partialResponse: String) = withContext(NonCancellable) {
+        try {
+            val message = messageDao.getSingleMessage(messageId)
+            if (partialResponse.isNotBlank()) {
+                messageDao.updateMessage(message.copy(response = partialResponse))
+            } else {
+                messageDao.deleteMessage(message)
+                if (messageDao.getMessagesForConversation(message.conversationId).isEmpty()) {
+                    conversationDao.getSingleConversation(message.conversationId)?.let {
+                        conversationDao.deleteConversation(it)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Logger.e("Couldn't save stopped answer: ${e.message}")
         }
     }
 

@@ -35,7 +35,9 @@ import com.thejawnpaul.gptinvestor.features.premium.domain.PREMIUM_SOURCE_WATCHL
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistFailure
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
+import kotlin.concurrent.Volatile
 import kotlin.time.Clock
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -91,6 +93,11 @@ class CompanyViewModel(
     private val selectedConversationId = MutableStateFlow(-1L)
 
     private var requestStartTime: Long = 0L
+
+    private var askJob: Job? = null
+
+    @Volatile
+    private var askGeneration = 0
 
     private val selectedCompanyTicker: String?
         get() = savedStateHandle.get<String>("ticker")
@@ -167,8 +174,9 @@ class CompanyViewModel(
     }
 
     fun getInputResponse() {
-        if (_selectedCompany.value.inputQuery.trim().isNotEmpty()) {
-            _selectedCompany.update { it.copy(loading = true) }
+        val query = _selectedCompany.value.inputQuery
+        if (query.trim().isNotEmpty()) {
+            _selectedCompany.update { it.copy(pendingQuery = query, isAnswering = true, inputQuery = "") }
             requestStartTime = Clock.System.now().toEpochMilliseconds()
             analyticsLogger.logEvent(
                 eventName = "message-sent",
@@ -178,30 +186,17 @@ class CompanyViewModel(
             )
             when (_selectedCompany.value.conversation) {
                 is CompanyDetailDefaultConversation -> {
-                    val prompt = ConversationPrompt(
-                        query = _selectedCompany.value.inputQuery,
-                        tickerSymbol = _selectedCompany.value.header.companyTicker,
-                        conversationId = -1L
-                    )
-                    getInputPromptUseCase(params = prompt) {
-                        it.fold(
-                            ::handleCompanyInputResponseFailure,
-                            ::handleCompanyInputResponseSuccess
+                    ask(
+                        ConversationPrompt(
+                            query = query,
+                            tickerSymbol = _selectedCompany.value.header.companyTicker,
+                            conversationId = -1L
                         )
-                    }
+                    )
                 }
 
                 is StructuredConversation -> {
-                    val prompt = ConversationPrompt(
-                        query = _selectedCompany.value.inputQuery,
-                        conversationId = selectedConversationId.value
-                    )
-                    getInputPromptUseCase(params = prompt) {
-                        it.fold(
-                            ::handleCompanyInputResponseFailure,
-                            ::handleCompanyInputResponseSuccess
-                        )
-                    }
+                    ask(ConversationPrompt(query = query, conversationId = selectedConversationId.value))
                 }
 
                 else -> {
@@ -211,7 +206,7 @@ class CompanyViewModel(
     }
 
     fun getSuggestedPromptResponse(query: String) {
-        _selectedCompany.update { it.copy(loading = true) }
+        _selectedCompany.update { it.copy(pendingQuery = query, isAnswering = true, inputQuery = "") }
         requestStartTime = Clock.System.now().toEpochMilliseconds()
         analyticsLogger.logEvent(
             eventName = "message-sent",
@@ -219,16 +214,59 @@ class CompanyViewModel(
                 "source" to "suggested_prompt"
             )
         )
-        val prompt = ConversationPrompt(
-            query = query,
-            conversationId = selectedConversationId.value
-        )
-        getInputPromptUseCase(params = prompt) {
-            it.fold(
-                ::handleCompanyInputResponseFailure,
-                ::handleCompanyInputResponseSuccess
-            )
+        ask(ConversationPrompt(query = query, conversationId = selectedConversationId.value))
+    }
+
+    private fun ask(prompt: ConversationPrompt) {
+        val generation = ++askGeneration
+        askJob = getInputPromptUseCase(params = prompt) {
+            if (generation == askGeneration) {
+                it.fold(
+                    ::handleCompanyInputResponseFailure,
+                    ::handleCompanyInputResponseSuccess
+                )
+            }
         }
+    }
+
+    private fun stopAnswering() {
+        askGeneration++
+        askJob?.cancel()
+        askJob = null
+        var conversationCleared = false
+        _selectedCompany.update { state ->
+            val conversation = state.conversation as? StructuredConversation
+            val last = conversation?.messageList?.lastOrNull() as? GenAiTextMessage
+            val stopped = when {
+                state.pendingQuery != null || conversation == null || last == null || !last.loading ->
+                    state.copy(inputQuery = state.pendingQuery ?: state.inputQuery)
+                !last.response.isNullOrBlank() -> state.copy(
+                    conversation = conversation.copy(
+                        messageList = (conversation.messageList.dropLast(1) + last.copy(loading = false))
+                            .toMutableList()
+                    )
+                )
+                conversation.messageList.size == 1 -> {
+                    conversationCleared = true
+                    state.copy(
+                        conversation = CompanyDetailDefaultConversation(id = 0, response = null),
+                        inputQuery = last.query
+                    )
+                }
+                else -> state.copy(
+                    conversation = conversation.copy(
+                        messageList = conversation.messageList.dropLast(1).toMutableList()
+                    ),
+                    inputQuery = last.query
+                )
+            }
+            stopped.copy(pendingQuery = null, isAnswering = false)
+        }
+        if (conversationCleared) selectedConversationId.value = -1L
+        analyticsLogger.logEvent(
+            eventName = "answer-stopped",
+            params = mapOf("ticker" to (_selectedCompany.value.brief?.ticker ?: ""))
+        )
     }
 
     private fun handleCompanyInputResponseFailure(failure: Failure) {
@@ -306,7 +344,9 @@ class CompanyViewModel(
             it.copy(
                 error = "Something went wrong.",
                 loading = false,
-                inputQuery = ""
+                inputQuery = "",
+                pendingQuery = null,
+                isAnswering = false
             )
         }
     }
@@ -327,11 +367,10 @@ class CompanyViewModel(
         _selectedCompany.update {
             it.copy(
                 conversation = conversation,
-                loading = false,
-                inputQuery = ""
+                pendingQuery = null,
+                isAnswering = !s.streamComplete && (s.messageList.lastOrNull() as? GenAiTextMessage)?.loading == true
             )
         }
-        _selectedCompany.update { it.copy(genText = s.messageList.last().response.toString()) }
         selectedConversationId.update { s.id }
     }
 
@@ -497,6 +536,16 @@ class CompanyViewModel(
                     appPreferences.setHasBriefSpotlightSeen(true)
                 }
             }
+
+            CompanyDetailEvent.StopAnswering -> stopAnswering()
+
+            is CompanyDetailEvent.ShareAnswer -> {
+                analyticsLogger.logEvent(
+                    eventName = "answer-shared",
+                    params = mapOf("ticker" to (_selectedCompany.value.brief?.ticker ?: ""))
+                )
+                processCompanyDetailAction(CompanyDetailAction.OnShareText(event.text))
+            }
         }
     }
 
@@ -597,6 +646,8 @@ sealed interface CompanyDetailEvent {
     data object AddToWatchlist : CompanyDetailEvent
     data object RemoveFromWatchlist : CompanyDetailEvent
     data object DismissSpotlight : CompanyDetailEvent
+    data object StopAnswering : CompanyDetailEvent
+    data class ShareAnswer(val text: String) : CompanyDetailEvent
 }
 
 sealed interface CompanyDetailAction {
@@ -610,4 +661,6 @@ sealed interface CompanyDetailAction {
     data object WatchlistAddFailed : CompanyDetailAction
     data class WatchlistRemoved(val ticker: String) : CompanyDetailAction
     data class WatchlistRemoveFailed(val ticker: String) : CompanyDetailAction
+    data class OnShareText(val text: String) : CompanyDetailAction
+    data class OnOpenCompany(val ticker: String) : CompanyDetailAction
 }

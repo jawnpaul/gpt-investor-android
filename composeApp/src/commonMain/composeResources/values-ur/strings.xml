@@ -364,4 +364,11 @@
         <item quantity="one">%1$d ذریعہ۔ مالی مشورہ نہیں۔</item>
         <item quantity="other">%1$d ذرائع۔ مالی مشورہ نہیں۔</item>
     </plurals>
+    <string name="company_context_title">%1$s · %2$s</string>
+    <string name="ask_about_company">%1$s کے بارے میں پوچھیں…</string>
+    <string name="reading_company_data">%1$s کا تازہ ترین ڈیٹا پڑھ رہا ہے…</string>
+    <string name="answer_copied">جواب کاپی ہو گیا</string>
+    <string name="helpful">مددگار</string>
+    <string name="not_helpful">مددگار نہیں</string>
+    <string name="stop_answering">جواب روکیں</string>
 </resources>

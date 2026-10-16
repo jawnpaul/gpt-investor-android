@@ -351,6 +351,10 @@ fun NavGraphBuilder.guestNavGraph(
                         platformActions.shareText(action.text)
                     }
 
+                    is CompanyDetailAction.OnOpenCompany -> {
+                        navController.navigate(GuestScreen.GuestCompanyDetail.createRoute(action.ticker))
+                    }
+
                     CompanyDetailAction.OnGoToSignUp -> {
                         navController.navigate(Screen.SignUpScreen.route) {
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }

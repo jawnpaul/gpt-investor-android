@@ -39,6 +39,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
@@ -59,7 +60,9 @@ import com.thejawnpaul.gptinvestor.brief_footer_sources
 import com.thejawnpaul.gptinvestor.check_connection_try_again
 import com.thejawnpaul.gptinvestor.company_context_title
 import com.thejawnpaul.gptinvestor.copy
+import com.thejawnpaul.gptinvestor.core.utility.toCurrency
 import com.thejawnpaul.gptinvestor.couldn_t_load_brief
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSection
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSentiment
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefTone
@@ -76,6 +79,8 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.compan
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.questionRes
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailEvent
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntityMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.AnswerMarkdown
@@ -119,6 +124,8 @@ import com.thejawnpaul.gptinvestor.theme.components.GiFeedback
 import com.thejawnpaul.gptinvestor.theme.components.GiIconButton
 import com.thejawnpaul.gptinvestor.theme.components.GiIconToggleButton
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiListGroup
+import com.thejawnpaul.gptinvestor.theme.components.GiStockRow
 import com.thejawnpaul.gptinvestor.theme.components.GiStockSummary
 import com.thejawnpaul.gptinvestor.theme.components.GiStockSummarySize
 import com.thejawnpaul.gptinvestor.theme.components.GiThinkingIndicator
@@ -130,6 +137,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiUserMessage
 import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
 import com.thejawnpaul.gptinvestor.too_complex
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -152,12 +160,7 @@ fun CompanyDetailScreen(
     var composerBarHeight by remember { mutableStateOf(0.dp) }
     val brief = state.brief
     val isWatched = brief?.isWatched == true
-    val messages = remember(state.conversation) {
-        (state.conversation as? StructuredConversation)
-            ?.messageList
-            ?.filterIsInstance<GenAiTextMessage>()
-            .orEmpty()
-    }
+    val messages = remember(state.conversation) { companyThread(state.conversation) }
     val askMode = composerFocused || messages.isNotEmpty() || state.pendingQuery != null
     val heroScrolledAway by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
     val showPinnedRow = askMode && brief != null && heroScrolledAway
@@ -427,7 +430,7 @@ private fun CompanyBriefError(onRetry: () -> Unit, modifier: Modifier = Modifier
 private fun CompanyDetailBriefContent(
     brief: CompanyBrief,
     state: SingleCompanyView,
-    messages: List<GenAiTextMessage>,
+    messages: List<CompanyThreadMessage>,
     listState: LazyListState,
     bottomPadding: Dp,
     onEvent: (CompanyDetailEvent) -> Unit,
@@ -442,6 +445,7 @@ private fun CompanyDetailBriefContent(
     }
     val companyName = state.companyName.ifEmpty { brief.name }
     val expanded = remember { mutableStateMapOf<Long, Boolean>() }
+    val scope = rememberCoroutineScope()
     var showReasonsFor by remember { mutableStateOf<Long?>(null) }
     val showPending = state.pendingQuery != null
     val questionCount = messages.size + if (showPending) 1 else 0
@@ -482,12 +486,13 @@ private fun CompanyDetailBriefContent(
         item(key = "footer", contentType = "footer") {
             Text(text = footer, color = GiTheme.colors.muted, style = GiTheme.type.meta)
         }
-        messages.forEachIndexed { index, message ->
+        messages.forEachIndexed { index, threadMessage ->
+            val message = threadMessage.message
             val isLatest = index == messages.lastIndex && !showPending
             item(key = "q-${message.id}", contentType = "question") {
                 GiUserMessage(text = message.query)
             }
-            if (message.loading && message.response.isNullOrBlank()) {
+            if (message.loading && message.response.isNullOrBlank() && threadMessage.companies.isEmpty()) {
                 item(key = "t-${message.id}", contentType = "thinking") {
                     GiThinkingIndicator(status = stringResource(Res.string.reading_company_data, companyName))
                 }
@@ -495,6 +500,15 @@ private fun CompanyDetailBriefContent(
                 item(key = "a-${message.id}", contentType = "answer") {
                     CompanyAnswer(
                         message = message,
+                        companies = threadMessage.companies,
+                        currentTicker = brief.ticker,
+                        onCompanyClick = { ticker ->
+                            if (ticker.equals(brief.ticker, ignoreCase = true)) {
+                                scope.launch { listState.animateScrollToItem(0) }
+                            } else {
+                                onAction(CompanyDetailAction.OnOpenCompany(ticker))
+                            }
+                        },
                         collapsed = !(expanded[message.id] ?: isLatest),
                         onToggleCollapse = { expanded[message.id] = !(expanded[message.id] ?: isLatest) },
                         isGuest = state.isGuestSession,
@@ -521,6 +535,9 @@ private fun CompanyDetailBriefContent(
 @Composable
 private fun CompanyAnswer(
     message: GenAiTextMessage,
+    companies: List<CompanyDetailRemoteResponse>,
+    currentTicker: String,
+    onCompanyClick: (String) -> Unit,
     collapsed: Boolean,
     onToggleCollapse: () -> Unit,
     isGuest: Boolean,
@@ -547,32 +564,42 @@ private fun CompanyAnswer(
             showMoreText = stringResource(Res.string.show_more),
             showLessText = stringResource(Res.string.show_less),
             actions = {
-                GiAnswerActions(
-                    labels = labels,
-                    onCopy = { onEvent(CompanyDetailEvent.CopyToClipboard(response)) },
-                    onShare = { onEvent(CompanyDetailEvent.ShareAnswer(response)) },
-                    feedback = when (message.feedbackStatus) {
-                        1 -> GiFeedback.Helpful
-                        -1 -> GiFeedback.NotHelpful
-                        else -> GiFeedback.None
-                    },
-                    onHelpful = if (isGuest) {
-                        null
-                    } else {
-                        { onEvent(CompanyDetailEvent.SendFeedback(message.id, 1, null)) }
-                    },
-                    onNotHelpful = if (isGuest) {
-                        null
-                    } else {
-                        {
-                            onEvent(CompanyDetailEvent.SendFeedback(message.id, -1, null))
-                            onNotHelpful()
+                if (response.isNotBlank()) {
+                    GiAnswerActions(
+                        labels = labels,
+                        onCopy = { onEvent(CompanyDetailEvent.CopyToClipboard(response)) },
+                        onShare = { onEvent(CompanyDetailEvent.ShareAnswer(response)) },
+                        feedback = when (message.feedbackStatus) {
+                            1 -> GiFeedback.Helpful
+                            -1 -> GiFeedback.NotHelpful
+                            else -> GiFeedback.None
+                        },
+                        onHelpful = if (isGuest) {
+                            null
+                        } else {
+                            { onEvent(CompanyDetailEvent.SendFeedback(message.id, 1, null)) }
+                        },
+                        onNotHelpful = if (isGuest) {
+                            null
+                        } else {
+                            {
+                                onEvent(CompanyDetailEvent.SendFeedback(message.id, -1, null))
+                                onNotHelpful()
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         ) {
-            AnswerMarkdown(text = response)
+            Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
+                companies.forEach { company ->
+                    AnswerCompanyCard(
+                        company = company,
+                        onClick = { onCompanyClick(company.ticker) }
+                    )
+                }
+                if (response.isNotBlank()) AnswerMarkdown(text = response)
+            }
         }
         if (showReasons) {
             FlowRow(
@@ -593,6 +620,47 @@ private fun CompanyAnswer(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun AnswerCompanyCard(
+    company: CompanyDetailRemoteResponse,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val name = company.name ?: company.ticker
+    val subtitle = company.price?.let { "${company.ticker} · ${it.toCurrency("$")}" } ?: company.ticker
+    GiListGroup(modifier = modifier) {
+        GiStockRow(
+            stock = tickerStock(
+                ticker = company.ticker,
+                title = name,
+                subtitle = subtitle,
+                percent = company.change?.toDouble(),
+                imageUrl = company.imageUrl?.ifBlank { null }
+            ),
+            onClick = onClick,
+            showCaret = true
+        )
+    }
+}
+
+private class CompanyThreadMessage(val message: GenAiTextMessage, val companies: List<CompanyDetailRemoteResponse>)
+
+private fun companyThread(conversation: Conversation): List<CompanyThreadMessage> {
+    val all = (conversation as? StructuredConversation)?.messageList.orEmpty()
+    val texts = all.filterIsInstance<GenAiTextMessage>()
+    val entities = all.filterIsInstance<GenAiEntityMessage>().filter { it.entity != null }
+    return texts.map { text ->
+        val own = entities.filter { entity -> texts.lastOrNull { it.id < entity.id }?.id == text.id }
+        val companies = when {
+            own.isNotEmpty() -> own.mapNotNull { it.entity }
+            !text.loading && text.response.isNullOrBlank() ->
+                listOfNotNull(entities.lastOrNull { it.id < text.id }?.entity)
+            else -> emptyList()
+        }
+        CompanyThreadMessage(message = text, companies = companies)
     }
 }
 

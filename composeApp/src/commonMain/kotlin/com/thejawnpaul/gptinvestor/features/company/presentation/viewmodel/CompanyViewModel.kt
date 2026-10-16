@@ -662,4 +662,5 @@ sealed interface CompanyDetailAction {
     data class WatchlistRemoved(val ticker: String) : CompanyDetailAction
     data class WatchlistRemoveFailed(val ticker: String) : CompanyDetailAction
     data class OnShareText(val text: String) : CompanyDetailAction
+    data class OnOpenCompany(val ticker: String) : CompanyDetailAction
 }

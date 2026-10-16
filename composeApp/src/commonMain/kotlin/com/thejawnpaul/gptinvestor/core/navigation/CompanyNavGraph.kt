@@ -60,6 +60,10 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
                         platformActions.shareText(action.text)
                     }
 
+                    is CompanyDetailAction.OnOpenCompany -> {
+                        navController.navigate(Screen.CompanyDetailScreen.createRoute(action.ticker))
+                    }
+
                     CompanyDetailAction.OnGoToSignUp -> {
                         navController.navigate(Screen.SignUpScreen.route) {
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }

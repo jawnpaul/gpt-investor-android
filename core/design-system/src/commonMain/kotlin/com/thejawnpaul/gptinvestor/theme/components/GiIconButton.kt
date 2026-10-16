@@ -35,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiEdge
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
@@ -165,7 +166,7 @@ private fun GiIconButtonLayout(
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier
-                .size(20.dp)
+                .size(GiIconSize.md)
                 .then(if (swapping) Modifier.graphicsLayer { alpha = 1f - spinnerAlpha.value } else Modifier),
             tint = contentColor
         )
@@ -206,7 +207,8 @@ private fun GiIconButtonPreview() {
                 contentDescription = "Save Apple",
                 loading = true
             )
-            GiIconButton(icon = GiIcons.x, contentDescription = "Close", onClick = {}, variant = GiIconButtonVariant.Tonal)
+            GiIconButton(icon = GiIcons.x, contentDescription = "Close", onClick = {
+            }, variant = GiIconButtonVariant.Tonal)
         }
     }
 }

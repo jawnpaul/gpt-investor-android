@@ -5,14 +5,13 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
@@ -28,7 +27,7 @@ fun GiDigestCard(
     keyEventLabel: String? = null,
     keyEvent: String? = null,
     updatedText: String? = null,
-    summaryMaxLines: Int = 4
+    summaryMaxLines: Int = 3
 ) {
     GiCard(modifier = modifier, onClick = onClick) {
         GiStockSummary(stock = stock)
@@ -62,7 +61,7 @@ fun GiDigestCard(
             Icon(
                 imageVector = GiIcons.caretRight,
                 contentDescription = null,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(GiIconSize.sm),
                 tint = GiTheme.colors.muted
             )
         }

@@ -14,8 +14,10 @@ import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +33,8 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
+import com.thejawnpaul.gptinvestor.theme.GiEdge
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
@@ -82,7 +86,7 @@ fun GiCheckbox(
                     if (isFilled) {
                         Modifier
                     } else {
-                        Modifier.border(2.dp, if (isError) colors.error else colors.control, GiRadius.xs)
+                        Modifier.border(GiEdge.control, if (isError) colors.error else colors.control, GiRadius.xs)
                     }
                 ),
             contentAlignment = Alignment.Center
@@ -91,7 +95,7 @@ fun GiCheckbox(
                 Icon(
                     imageVector = if (indeterminate) GiIcons.minusBold else GiIcons.checkBold,
                     contentDescription = null,
-                    modifier = Modifier.size(16.dp),
+                    modifier = Modifier.size(GiIconSize.sm),
                     tint = colors.onViolet
                 )
             }
@@ -105,13 +109,15 @@ internal fun GiSelectionRow(
     label: String?,
     enabled: Boolean,
     interactionSource: MutableInteractionSource,
-    selectionModifier: Modifier,
     modifier: Modifier = Modifier,
+    selectionModifier: Modifier = Modifier,
     control: @Composable () -> Unit
 ) {
+    val currentControl by rememberUpdatedState(control)
+    val movableControl = remember { movableContentOf { currentControl() } }
     if (label == null) {
         Box(modifier = modifier.alpha(if (enabled) 1f else GiMotion.DISABLED_ALPHA).then(selectionModifier)) {
-            control()
+            movableControl()
         }
         return
     }
@@ -127,7 +133,7 @@ internal fun GiSelectionRow(
         horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        control()
+        movableControl()
         GiText(text = label, style = GiTextStyle.Label, fontWeight = FontWeight.Medium)
     }
 }

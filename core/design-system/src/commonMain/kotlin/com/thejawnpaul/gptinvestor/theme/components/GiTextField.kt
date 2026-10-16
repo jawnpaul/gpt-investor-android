@@ -3,8 +3,6 @@ package com.thejawnpaul.gptinvestor.theme.components
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.EaseOutQuart
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -23,10 +21,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -61,8 +59,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import com.thejawnpaul.gptinvestor.theme.GiControlHeight
+import com.thejawnpaul.gptinvestor.theme.GiEasing
 import com.thejawnpaul.gptinvestor.theme.GiEdge
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
@@ -87,28 +87,27 @@ fun GiTextField(
     showPasswordContentDescription: String? = null,
     hidePasswordContentDescription: String? = null,
     errorLink: GiLink? = null,
-    onFocusLost: (() -> Unit)? = null
+    onBlur: (() -> Unit)? = null
 ) {
     val colors = GiTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var hasBeenFocused by remember { mutableStateOf(false) }
-    val currentOnFocusLost by rememberUpdatedState(onFocusLost)
+    val currentOnBlur by rememberUpdatedState(onBlur)
     val edge = when {
         isError -> GiFieldEdge(color = colors.error, width = GiEdge.focusWidth)
         isFocused -> GiFieldEdge(color = colors.violet, width = GiEdge.focusWidth)
         else -> GiFieldEdge(color = colors.control, width = GiEdge.fieldWidth)
     }
-    val edgeColor by animateColorAsState(edge.color, tween(GiMotion.FAST, easing = EaseOutQuart))
-    val edgeWidth by animateDpAsState(edge.width, tween(GiMotion.FAST, easing = EaseOutQuart))
+    val edgeColor by animateColorAsState(edge.color, tween(GiMotion.FAST, easing = GiEasing.emphasised))
+    val edgeWidth by animateDpAsState(edge.width, tween(GiMotion.FAST, easing = GiEasing.emphasised))
     val message = when {
         errorText != null -> GiFieldMessageContent(text = errorText, isError = true, link = errorLink)
         helperText != null -> GiFieldMessageContent(text = helperText, isError = false, link = null)
         else -> null
     }
     Column(modifier = modifier.alpha(if (enabled) 1f else GiMotion.DISABLED_ALPHA)) {
-        GiText(text = label, modifier = Modifier.padding(bottom = GiSpace.x2), style = GiTextStyle.FieldLabel)
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
@@ -119,7 +118,7 @@ fun GiTextField(
                         hasBeenFocused = true
                     } else if (hasBeenFocused) {
                         hasBeenFocused = false
-                        currentOnFocusLost?.invoke()
+                        currentOnBlur?.invoke()
                     }
                 }
                 .semantics { if (errorText != null) error(errorText) },
@@ -127,57 +126,78 @@ fun GiTextField(
             textStyle = GiTheme.type.input.copy(color = colors.ink),
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
-            visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else visualTransformation,
+            visualTransformation = if (isPassword &&
+                !passwordVisible
+            ) {
+                PasswordVisualTransformation()
+            } else {
+                visualTransformation
+            },
             singleLine = true,
             interactionSource = interactionSource,
             cursorBrush = SolidColor(colors.violet),
             decorationBox = { innerTextField ->
-                Row(
-                    modifier = Modifier
-                        .heightIn(min = 52.dp)
-                        .clip(GiRadius.sm)
-                        .background(colors.raised)
-                        .drawBehind {
-                            val strokeWidth = edgeWidth.toPx()
-                            val inset = strokeWidth / 2
-                            val corner = GiRadius.sm.topStart.toPx(size, this) - inset
-                            drawRoundRect(
-                                color = edgeColor,
-                                topLeft = Offset(inset, inset),
-                                size = Size(size.width - strokeWidth, size.height - strokeWidth),
-                                cornerRadius = CornerRadius(corner, corner),
-                                style = Stroke(strokeWidth)
+                // The label lives inside the decoration box so it merges into the field's semantics
+                // and TalkBack reads it when the field is focused.
+                Column {
+                    GiText(
+                        text = label,
+                        modifier = Modifier.padding(bottom = GiSpace.x2),
+                        style = GiTextStyle.FieldLabel
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = GiControlHeight.field)
+                            .clip(GiRadius.sm)
+                            .background(colors.raised)
+                            .drawBehind {
+                                val strokeWidth = edgeWidth.toPx()
+                                val inset = strokeWidth / 2
+                                val corner = GiRadius.sm.topStart.toPx(size, this) - inset
+                                drawRoundRect(
+                                    color = edgeColor,
+                                    topLeft = Offset(inset, inset),
+                                    size = Size(size.width - strokeWidth, size.height - strokeWidth),
+                                    cornerRadius = CornerRadius(corner, corner),
+                                    style = Stroke(strokeWidth)
+                                )
+                            }
+                            .padding(start = GiSpace.x4, end = if (isPassword) GiSpace.x1 else GiSpace.x4),
+                        horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (leadingIcon != null) {
+                            Icon(
+                                imageVector = leadingIcon,
+                                contentDescription = null,
+                                modifier = Modifier.size(GiIconSize.md),
+                                tint = colors.muted
                             )
                         }
-                        .padding(start = GiSpace.x4, end = if (isPassword) GiSpace.x1 else GiSpace.x4),
-                    horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (leadingIcon != null) {
-                        Icon(
-                            imageVector = leadingIcon,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                            tint = colors.muted
-                        )
-                    }
-                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                        if (value.isEmpty() && placeholder != null) {
-                            GiText(text = placeholder, style = GiTextStyle.Input, color = colors.muted, maxLines = 1)
+                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                            if (value.isEmpty() && placeholder != null) {
+                                GiText(
+                                    text = placeholder,
+                                    style = GiTextStyle.Input,
+                                    color = colors.muted,
+                                    maxLines = 1
+                                )
+                            }
+                            innerTextField()
                         }
-                        innerTextField()
-                    }
-                    if (isPassword) {
-                        GiPasswordToggle(
-                            visible = passwordVisible,
-                            onVisibleChange = { passwordVisible = it },
-                            contentDescription = if (passwordVisible) {
-                                hidePasswordContentDescription
-                            } else {
-                                showPasswordContentDescription
-                            },
-                            enabled = enabled
-                        )
+                        if (isPassword) {
+                            GiPasswordToggle(
+                                visible = passwordVisible,
+                                onVisibleChange = { passwordVisible = it },
+                                contentDescription = if (passwordVisible) {
+                                    hidePasswordContentDescription
+                                } else {
+                                    showPasswordContentDescription
+                                },
+                                enabled = enabled
+                            )
+                        }
                     }
                 }
             }
@@ -185,8 +205,8 @@ fun GiTextField(
         AnimatedContent(
             targetState = message,
             transitionSpec = {
-                fadeIn(tween(GiMotion.BASE, delayMillis = GiMotion.INSTANT, easing = EaseOutQuart)) togetherWith
-                    fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing)) using
+                fadeIn(tween(GiMotion.BASE, delayMillis = GiMotion.INSTANT, easing = GiEasing.emphasised)) togetherWith
+                    fadeOut(tween(GiMotion.INSTANT, easing = GiEasing.linear)) using
                     SizeTransform(clip = false) { _, _ -> GiMotion.smooth() }
             },
             contentKey = { it?.text }
@@ -231,15 +251,15 @@ private fun GiPasswordToggle(
         AnimatedContent(
             targetState = visible,
             transitionSpec = {
-                fadeIn(tween(GiMotion.FAST, easing = EaseOutQuart)) +
+                fadeIn(tween(GiMotion.FAST, easing = GiEasing.emphasised)) +
                     scaleIn(GiMotion.snappy(), initialScale = ICON_SWAP_INITIAL_SCALE) togetherWith
-                    fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing))
+                    fadeOut(tween(GiMotion.INSTANT, easing = GiEasing.linear))
             }
         ) { isVisible ->
             Icon(
                 imageVector = if (isVisible) GiIcons.eyeSlash else GiIcons.eye,
                 contentDescription = null,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(GiIconSize.md),
                 tint = GiTheme.colors.muted
             )
         }
@@ -251,10 +271,19 @@ private fun GiFieldMessage(content: GiFieldMessageContent, modifier: Modifier = 
     val (text, isError, link) = content
     val color = if (isError) GiTheme.colors.error else GiTheme.colors.muted
     val firstLineHeight = with(LocalDensity.current) { GiTheme.type.bodySmall.lineHeight.toDp() }
-    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.Top) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(GiSpace.x1_5),
+        verticalAlignment = Alignment.Top
+    ) {
         if (isError) {
             Box(modifier = Modifier.height(firstLineHeight), contentAlignment = Alignment.Center) {
-                Icon(imageVector = GiIcons.warningCircle, contentDescription = null, modifier = Modifier.size(16.dp), tint = color)
+                Icon(
+                    imageVector = GiIcons.warningCircle,
+                    contentDescription = null,
+                    modifier = Modifier.size(GiIconSize.sm),
+                    tint = color
+                )
             }
         }
         if (link != null) {

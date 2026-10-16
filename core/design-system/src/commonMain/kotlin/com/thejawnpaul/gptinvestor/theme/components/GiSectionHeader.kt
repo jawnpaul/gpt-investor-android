@@ -2,12 +2,13 @@ package com.thejawnpaul.gptinvestor.theme.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,7 +17,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
@@ -24,14 +25,14 @@ import com.thejawnpaul.gptinvestor.theme.GiTheme
 fun GiEyebrow(text: String, modifier: Modifier = Modifier, icon: ImageVector? = null) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(GiSpace.x1),
+        horizontalArrangement = Arrangement.spacedBy(GiSpace.x2),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (icon != null) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(GiIconSize.sm),
                 tint = GiTheme.colors.muted
             )
         }
@@ -53,19 +54,18 @@ fun GiSectionHeader(
             GiEyebrow(text = eyebrow, icon = eyebrowIcon)
         }
         val trailing = @Composable { trailingModifier: Modifier ->
-            if (trailingText != null) {
-                GiText(
-                    text = trailingText,
-                    modifier = trailingModifier.then(
-                        if (onTrailingClick != null) {
-                            Modifier.clickable(role = Role.Button, onClick = onTrailingClick)
-                        } else {
-                            Modifier
-                        }
-                    ),
-                    style = if (onTrailingClick != null) GiTextStyle.Link else GiTextStyle.Meta,
-                    maxLines = 1
-                )
+            if (trailingText != null && onTrailingClick != null) {
+                // 44 tall hit area; the label stays centred and the Box forwards its baseline.
+                Box(
+                    modifier = trailingModifier
+                        .heightIn(min = GiSpace.touchTarget)
+                        .clickable(role = Role.Button, onClick = onTrailingClick),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    GiText(text = trailingText, style = GiTextStyle.Link, maxLines = 1)
+                }
+            } else if (trailingText != null) {
+                GiText(text = trailingText, modifier = trailingModifier, style = GiTextStyle.Meta, maxLines = 1)
             }
         }
         if (isLargeText()) {

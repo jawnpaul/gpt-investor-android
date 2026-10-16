@@ -26,7 +26,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,6 +51,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiEdge
 import com.thejawnpaul.gptinvestor.theme.GiElevation
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
@@ -165,40 +165,40 @@ fun GiAskComposer(
                 ) { currentStop ->
                     if (currentStop != null) {
                         Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(GiRadius.sm)
-                            .background(colors.ink)
-                            .clickable(role = Role.Button, onClick = currentStop.onStop)
-                            .semantics { contentDescription = currentStop.contentDescription },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = GiIcons.stopFill,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = colors.bg
-                        )
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(GiRadius.sm)
+                                .background(colors.ink)
+                                .clickable(role = Role.Button, onClick = currentStop.onStop)
+                                .semantics { contentDescription = currentStop.contentDescription },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = GiIcons.stopFill,
+                                contentDescription = null,
+                                modifier = Modifier.size(GiIconSize.sm),
+                                tint = colors.bg
+                            )
+                        }
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .alpha(if (canSend) 1f else GiMotion.DISABLED_ALPHA)
+                                .clip(GiRadius.sm)
+                                .background(colors.primary)
+                                .clickable(enabled = canSend, role = Role.Button, onClick = onSend)
+                                .semantics { contentDescription = sendContentDescription },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = GiIcons.arrowUp,
+                                contentDescription = null,
+                                modifier = Modifier.size(GiIconSize.md),
+                                tint = colors.onPrimary
+                            )
+                        }
                     }
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .alpha(if (canSend) 1f else GiMotion.DISABLED_ALPHA)
-                            .clip(GiRadius.sm)
-                            .background(colors.primary)
-                            .clickable(enabled = canSend, role = Role.Button, onClick = onSend)
-                            .semantics { contentDescription = sendContentDescription },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = GiIcons.arrowUp,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                            tint = colors.onPrimary
-                        )
-                    }
-                }
                 }
             }
         }

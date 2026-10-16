@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
@@ -224,7 +225,7 @@ private fun RowScope.GiStockRowEnd(trailing: (@Composable () -> Unit)?, showCare
         Icon(
             imageVector = GiIcons.caretRight,
             contentDescription = null,
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(GiIconSize.sm),
             tint = GiTheme.colors.muted
         )
     }

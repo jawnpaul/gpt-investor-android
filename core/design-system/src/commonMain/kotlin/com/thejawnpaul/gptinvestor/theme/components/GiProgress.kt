@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -14,9 +15,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -26,12 +35,15 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
+import kotlin.math.roundToInt
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun GiStepDots(count: Int, current: Int, modifier: Modifier = Modifier, contentDescription: String? = null) {
@@ -87,6 +99,39 @@ fun GiReadingProgress(progress: Float, modifier: Modifier = Modifier) {
         )
     }
 }
+
+/**
+ * Deferred-read variant of [GiReadingProgress] for scroll-driven progress: [progress] is read in a
+ * snapshot flow and the fill is drawn in the draw phase, so scrolling never recomposes the caller.
+ */
+@Composable
+fun GiReadingProgress(progress: () -> Float, modifier: Modifier = Modifier) {
+    val latest = rememberUpdatedState(progress)
+    val reducedMotion = isReducedMotionEnabled()
+    val animated = remember { Animatable(progress().coerceIn(0f, 1f)) }
+    LaunchedEffect(reducedMotion) {
+        snapshotFlow { latest.value().coerceIn(0f, 1f) }.collectLatest { target ->
+            if (reducedMotion) animated.snapTo(target) else animated.animateTo(target, GiMotion.smooth())
+        }
+    }
+    // Semantics only change per whole percent, keeping recomposition bounded while scrolling.
+    val percent by remember { derivedStateOf { (latest.value().coerceIn(0f, 1f) * PERCENT).roundToInt() } }
+    val fill = GiTheme.colors.violet
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(3.dp)
+            .background(GiTheme.colors.line)
+            .semantics { progressBarRangeInfo = ProgressBarRangeInfo(current = percent / PERCENT, range = 0f..1f) }
+            .drawBehind {
+                val width = (size.width * animated.value).roundToInt().toFloat()
+                val x = if (layoutDirection == LayoutDirection.Rtl) size.width - width else 0f
+                drawRect(color = fill, topLeft = Offset(x, 0f), size = Size(width, size.height))
+            }
+    )
+}
+
+private const val PERCENT = 100f
 
 @Composable
 fun GiSheetHandle(modifier: Modifier = Modifier) {

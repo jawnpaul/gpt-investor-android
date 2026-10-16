@@ -30,8 +30,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.thejawnpaul.gptinvestor.theme.GiElevation
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
+import com.thejawnpaul.gptinvestor.theme.GiSize
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
@@ -51,7 +53,14 @@ fun GiDialog(
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         val visibleState = remember { MutableTransitionState(false).apply { targetState = true } }
         val enter: EnterTransition = fadeIn(tween(GiMotion.BASE)) +
-            if (isReducedMotionEnabled()) EnterTransition.None else scaleIn(tween(GiMotion.BASE), initialScale = 0.96f)
+            if (isReducedMotionEnabled()) {
+                EnterTransition.None
+            } else {
+                scaleIn(
+                    tween(GiMotion.BASE),
+                    initialScale = GiMotion.ENTER_SCALE
+                )
+            }
         AnimatedVisibility(visibleState = visibleState, enter = enter) {
             GiDialogContent(
                 title = title,
@@ -84,7 +93,7 @@ private fun GiDialogContent(
     Column(
         modifier = modifier
             .padding(horizontal = GiSpace.gutter)
-            .widthIn(max = 320.dp)
+            .widthIn(max = GiSize.dialogMax)
             .dropShadow(shape = GiRadius.lg, shadow = GiElevation.overlay(colors.isDark))
             .clip(GiRadius.lg)
             .background(colors.raised)
@@ -102,7 +111,7 @@ private fun GiDialogContent(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(GiIconSize.lg),
                     tint = if (destructive) colors.error else colors.violet
                 )
             }

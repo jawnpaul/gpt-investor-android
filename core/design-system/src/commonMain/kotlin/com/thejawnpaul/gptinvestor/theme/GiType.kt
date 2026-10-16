@@ -35,6 +35,9 @@ data class GiType(
     val navLabel: TextStyle,
     val input: TextStyle,
     val fieldLabel: TextStyle,
+    val metaRelaxed: TextStyle,
+    val initials: TextStyle,
+    val tileInitials: TextStyle
 )
 
 val LocalGiType = staticCompositionLocalOf<GiType> { error("GiTheme not provided") }
@@ -57,14 +60,14 @@ fun rememberGiType(): GiType {
             fontWeight = FontWeight.SemiBold,
             fontSize = size.sp,
             lineHeight = lineHeight.sp,
-            letterSpacing = (-0.02).em,
+            letterSpacing = (-0.02).em
         )
 
         fun sansStyle(size: Int, lineHeight: Int, weight: FontWeight) = TextStyle(
             fontFamily = sans,
             fontWeight = weight,
             fontSize = size.sp,
-            lineHeight = lineHeight.sp,
+            lineHeight = lineHeight.sp
         )
 
         GiType(
@@ -88,7 +91,10 @@ fun rememberGiType(): GiType {
             caption = sansStyle(12, 16, FontWeight.Normal),
             navLabel = sansStyle(12, 16, FontWeight.Medium),
             input = sansStyle(16, 24, FontWeight.Normal),
-            fieldLabel = sansStyle(13, 18, FontWeight.SemiBold),
+            fieldLabel = sansStyle(14, 20, FontWeight.SemiBold),
+            metaRelaxed = sansStyle(13, 20, FontWeight.Normal),
+            initials = sansStyle(16, 24, FontWeight.SemiBold),
+            tileInitials = sansStyle(11, 16, FontWeight.SemiBold)
         )
     }
 }
@@ -108,5 +114,5 @@ fun GiType.toTypography(): Typography = Typography(
     bodySmall = meta,
     labelLarge = button,
     labelMedium = eyebrow,
-    labelSmall = navLabel,
+    labelSmall = navLabel
 )

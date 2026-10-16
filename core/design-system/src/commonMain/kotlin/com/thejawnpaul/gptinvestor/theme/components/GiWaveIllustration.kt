@@ -37,7 +37,7 @@ fun GiWaveIllustration(modifier: Modifier = Modifier) {
                         cubicTo(60f * scale, (y - a) * scale, 120f * scale, (y + a) * scale, 195f * scale, y * scale)
                         cubicTo(
                             270f * scale,
-                            (y + a) * scale,
+                            (y - a) * scale,
                             330f * scale,
                             (y - a) * scale,
                             400f * scale,

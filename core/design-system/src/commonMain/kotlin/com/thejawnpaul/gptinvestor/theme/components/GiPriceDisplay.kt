@@ -16,18 +16,19 @@ import com.thejawnpaul.gptinvestor.theme.GiTheme
 import kotlin.math.abs
 import kotlin.math.roundToLong
 
-enum class GiPriceSize { Medium }
+enum class GiPriceSize { Large, Medium }
 
 @Composable
 fun GiPriceDisplay(
     price: Double,
     modifier: Modifier = Modifier,
-    size: GiPriceSize = GiPriceSize.Medium,
+    size: GiPriceSize = GiPriceSize.Large,
     currencySymbol: String = "$"
 ) {
     val colors = GiTheme.colors
     val type = GiTheme.type
     val (integerStyle, decimalStyle) = when (size) {
+        GiPriceSize.Large -> type.display to type.statNumber
         GiPriceSize.Medium -> type.screenTitle to type.companyName
     }
     val parts = splitPrice(price)
@@ -63,6 +64,7 @@ private fun GiPriceDisplayPreview() {
         Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
             GiPriceDisplay(price = 379.07)
             GiPriceDisplay(price = 1234.5)
+            GiPriceDisplay(price = 214.5, size = GiPriceSize.Medium)
         }
     }
 }

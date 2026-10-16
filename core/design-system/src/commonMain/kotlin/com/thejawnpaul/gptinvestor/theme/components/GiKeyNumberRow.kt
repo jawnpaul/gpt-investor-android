@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiColors
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
@@ -46,7 +47,7 @@ fun GiKeyNumberRow(
 ) {
     val colors = GiTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
+    val isPressed = if (onClick != null) interactionSource.collectIsPressedAsState().value else false
     val rowModifier = modifier
         .fillMaxWidth()
         .then(
@@ -62,7 +63,7 @@ fun GiKeyNumberRow(
             }
         )
         .background(if (isPressed) colors.ink.copy(alpha = GiMotion.PRESSED_ALPHA) else Color.Transparent)
-        .padding(vertical = GiSpace.x3)
+        .padding(vertical = GiSpace.x4)
     val valueColor = when (valueTone) {
         GiSentiment.Positive -> colors.gain
         GiSentiment.Negative -> colors.loss
@@ -73,13 +74,18 @@ fun GiKeyNumberRow(
         Column(modifier = rowModifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
             GiKeyNumberLabel(label = label, value = value, valueColor = valueColor)
             if (insight != null) {
-                GiKeyNumberInsight(insight = insight, tone = tone, showCaret = false, modifier = Modifier.fillMaxWidth())
+                GiKeyNumberInsight(
+                    insight = insight,
+                    tone = tone,
+                    showCaret = false,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     } else {
         Row(
             modifier = rowModifier,
-            horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
+            horizontalArrangement = Arrangement.spacedBy(GiSpace.x4),
             verticalAlignment = Alignment.CenterVertically
         ) {
             GiKeyNumberLabel(
@@ -187,7 +193,7 @@ private fun GiKeyNumberInsight(
             Icon(
                 imageVector = GiIcons.caretRight,
                 contentDescription = null,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(GiIconSize.sm),
                 tint = toneColors.content
             )
         }

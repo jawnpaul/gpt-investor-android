@@ -1,7 +1,6 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
 import androidx.compose.animation.core.EaseInOut
-import androidx.compose.animation.core.EaseOutQuart
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -39,11 +38,13 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
+import com.thejawnpaul.gptinvestor.theme.GiEasing
 import com.thejawnpaul.gptinvestor.theme.GiEdge
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.giLightColors
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 import kotlin.math.PI
 import kotlin.math.abs
@@ -64,7 +65,7 @@ fun Modifier.giBeam(
     val presence = animateFloatAsState(
         targetValue = if (active) 1f else 0f,
         animationSpec = if (active) {
-            tween(GiMotion.BASE, easing = EaseOutQuart)
+            tween(GiMotion.BASE, easing = GiEasing.emphasised)
         } else {
             tween(GiMotion.FAST, easing = LinearEasing)
         }
@@ -79,7 +80,12 @@ fun Modifier.giBeam(
                 targetValue = FULL_TURN,
                 animationSpec = infiniteRepeatable(tween(durationMillis = LAP_MS, easing = LinearEasing))
             )
-            beamRings(shape = shape, alpha = { strength * presence.value }, rotation = { angle.value }, brush = ::travelBrush)
+            val rings = remember(shape, strength, presence, angle) {
+                Modifier.beamRings(shape = shape, alpha = {
+                    strength * presence.value
+                }, rotation = { angle.value }, brush = ::travelBrush)
+            }
+            this then rings
         }
         GiBeamStyle.Pulse -> {
             val alpha = transition.animateFloat(
@@ -90,31 +96,40 @@ fun Modifier.giBeam(
                     repeatMode = RepeatMode.Reverse
                 )
             )
-            beamRings(shape = shape, alpha = { alpha.value * presence.value }, rotation = null, brush = ::pulseBrush)
+            val rings = remember(shape, presence, alpha) {
+                Modifier.beamRings(shape = shape, alpha = {
+                    alpha.value * presence.value
+                }, rotation = null, brush = ::pulseBrush)
+            }
+            this then rings
         }
     }
 }
 
-private fun Modifier.beamRings(shape: Shape, alpha: () -> Float, rotation: (() -> Float)?, brush: (Size) -> Brush): Modifier =
-    drawWithCache {
-        val ring = ringPath(shape, BEAM_WIDTH.toPx())
-        val halo = HALO_STEPS.map { ringPath(shape, it.toPx()) }
-        val fill = brush(size)
-        val reach = hypot(size.width, size.height)
-        onDrawWithContent {
-            drawContent()
-            val beamAlpha = alpha()
-            val haloAlpha = beamAlpha * HALO_ALPHA / HALO_STEPS.size
-            if (rotation == null) {
-                halo.fastForEach { drawPath(path = it, brush = fill, alpha = haloAlpha) }
-                drawPath(path = ring, brush = fill, alpha = beamAlpha)
-            } else {
-                val degrees = rotation()
-                halo.fastForEach { drawSwept(it, fill, haloAlpha, degrees, reach) }
-                drawSwept(ring, fill, beamAlpha, degrees, reach)
-            }
+private fun Modifier.beamRings(
+    shape: Shape,
+    alpha: () -> Float,
+    rotation: (() -> Float)?,
+    brush: (Size) -> Brush
+): Modifier = drawWithCache {
+    val ring = ringPath(shape, BEAM_WIDTH.toPx())
+    val halo = HALO_STEPS.map { ringPath(shape, it.toPx()) }
+    val fill = brush(size)
+    val reach = hypot(size.width, size.height)
+    onDrawWithContent {
+        drawContent()
+        val beamAlpha = alpha()
+        val haloAlpha = beamAlpha * HALO_ALPHA / HALO_STEPS.size
+        if (rotation == null) {
+            halo.fastForEach { drawPath(path = it, brush = fill, alpha = haloAlpha) }
+            drawPath(path = ring, brush = fill, alpha = beamAlpha)
+        } else {
+            val degrees = rotation()
+            halo.fastForEach { drawSwept(it, fill, haloAlpha, degrees, reach) }
+            drawSwept(ring, fill, beamAlpha, degrees, reach)
         }
     }
+}
 
 private fun DrawScope.drawSwept(path: Path, brush: Brush, alpha: Float, degrees: Float, radius: Float) {
     clipPath(path) {
@@ -124,7 +139,9 @@ private fun DrawScope.drawSwept(path: Path, brush: Brush, alpha: Float, degrees:
 
 private fun CacheDrawScope.ringPath(shape: Shape, outset: Float): Path {
     val outer = Path().apply {
-        addOutline(shape.createOutline(Size(size.width + outset * 2, size.height + outset * 2), layoutDirection, this@ringPath))
+        addOutline(
+            shape.createOutline(Size(size.width + outset * 2, size.height + outset * 2), layoutDirection, this@ringPath)
+        )
         translate(Offset(-outset, -outset))
     }
     val inner = Path().apply { addOutline(shape.createOutline(size, layoutDirection, this@ringPath)) }
@@ -164,11 +181,11 @@ private const val TRAVEL_FADE = 220f / FULL_TURN
 private const val TRAVEL_STOP_1 = 285f / FULL_TURN
 private const val TRAVEL_STOP_2 = 320f / FULL_TURN
 private const val TRAVEL_STOP_3 = 348f / FULL_TURN
-private val BEAM_WIDTH = 1.5.dp
+private val BEAM_WIDTH = GiEdge.emphasis
 private val HALO_STEPS = listOf(2.5.dp, 5.dp, 7.5.dp, 10.dp)
-private val BEAM_BLUE = Color(0xFF5B7CFF)
-private val BEAM_VIOLET = Color(0xFF8B5CF6)
-private val BEAM_LILAC = Color(0xFFA994FF)
+private val BEAM_BLUE = giLightColors.beam1
+private val BEAM_VIOLET = giLightColors.beam2
+private val BEAM_LILAC = giLightColors.beam3
 
 @PreviewLightDark
 @Composable

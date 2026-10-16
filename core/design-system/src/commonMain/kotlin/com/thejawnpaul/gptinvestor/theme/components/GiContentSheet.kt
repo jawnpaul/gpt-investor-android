@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,13 +19,10 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiEdge
+import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
-
-private val SheetCorner = 12.dp
-private val SheetShape = RoundedCornerShape(topStart = SheetCorner, topEnd = SheetCorner)
 
 @Composable
 fun GiContentSheet(
@@ -39,11 +35,11 @@ fun GiContentSheet(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(SheetShape)
+            .clip(GiRadius.sheet)
             .background(colors.raised)
             .drawWithCache {
                 val stroke = GiEdge.width.toPx()
-                val corner = SheetCorner.toPx()
+                val corner = GiRadius.sheet.topStart.toPx(size, this)
                 val edge = Path().apply {
                     addRoundRect(
                         RoundRect(

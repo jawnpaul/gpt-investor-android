@@ -1,11 +1,9 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -15,12 +13,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.thejawnpaul.gptinvestor.theme.GiEdge
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiTheme
@@ -60,16 +60,20 @@ fun GiRadio(
 @Composable
 internal fun GiRadioCircle(selected: Boolean, modifier: Modifier = Modifier) {
     val colors = GiTheme.colors
-    val ringWidth by animateDpAsState(
-        targetValue = if (selected) 7.dp else 2.dp,
+    val ringWidth = animateDpAsState(
+        targetValue = if (selected) 7.dp else GiEdge.control,
         animationSpec = GiMotion.snappy()
     )
-    Box(
+    val fill = colors.raised
+    val ringColor = if (selected) colors.violet else colors.control
+    Spacer(
         modifier = modifier
             .size(22.dp)
-            .clip(GiRadius.full)
-            .background(colors.raised)
-            .border(ringWidth, if (selected) colors.violet else colors.control, GiRadius.full)
+            .drawBehind {
+                val stroke = ringWidth.value.toPx()
+                drawCircle(fill)
+                drawCircle(ringColor, radius = size.minDimension / 2 - stroke / 2, style = Stroke(stroke))
+            }
     )
 }
 

@@ -23,7 +23,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiEdge
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
@@ -81,7 +80,7 @@ fun GiOptionCard(
     }
 }
 
-private val SELECTED_EDGE_WIDTH = 1.5.dp
+private val SELECTED_EDGE_WIDTH = GiEdge.emphasis
 
 @PreviewLightDark
 @Preview(name = "200%", fontScale = 2f)

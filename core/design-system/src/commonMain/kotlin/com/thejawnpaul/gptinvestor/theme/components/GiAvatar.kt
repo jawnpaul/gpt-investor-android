@@ -12,7 +12,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
@@ -31,7 +31,7 @@ fun GiAvatar(initials: String?, modifier: Modifier = Modifier, size: GiAvatarSiz
             Icon(
                 imageVector = GiIcons.user,
                 contentDescription = null,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(GiIconSize.md),
                 tint = GiTheme.colors.violet
             )
         } else {
@@ -40,7 +40,7 @@ fun GiAvatar(initials: String?, modifier: Modifier = Modifier, size: GiAvatarSiz
                 style = if (size == GiAvatarSize.Large) {
                     GiTheme.type.statNumber
                 } else {
-                    GiTheme.type.companyName.copy(fontSize = 16.sp, lineHeight = 24.sp)
+                    GiTheme.type.initials
                 },
                 color = GiTheme.colors.violet,
                 maxLines = 1

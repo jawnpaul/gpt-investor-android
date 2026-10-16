@@ -36,7 +36,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.thejawnpaul.gptinvestor.theme.GiControlHeight
 import com.thejawnpaul.gptinvestor.theme.GiEdge
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
@@ -55,11 +57,7 @@ fun GiSearchField(
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     val hasText = value.isNotEmpty()
-    val edgeColor = when {
-        isFocused -> colors.violet
-        hasText -> colors.control
-        else -> colors.line
-    }
+    val edgeColor = if (isFocused) colors.violet else colors.line
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
@@ -73,20 +71,20 @@ fun GiSearchField(
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier
-                    .heightIn(min = 48.dp)
+                    .heightIn(min = GiControlHeight.search)
                     .clip(GiRadius.sm)
                     .background(colors.raised)
                     .border(GiEdge.width, edgeColor, GiRadius.sm)
-                    .padding(start = GiSpace.x4, end = if (hasText) 0.dp else 10.dp),
+                    .padding(start = GiSpace.x4, end = if (hasText) 0.dp else GiSpace.x2_5),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     imageVector = GiIcons.magnifyingGlass,
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(GiIconSize.md),
                     tint = colors.muted
                 )
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(GiSpace.x2_5))
                 Box(modifier = Modifier.weight(1f)) {
                     if (!hasText) {
                         GiText(
@@ -103,7 +101,7 @@ fun GiSearchField(
                     // A 48 touch box around the 28 circle puts the circle 10 from the edge, as drawn.
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
+                            .size(GiControlHeight.search)
                             .clickable(role = Role.Button) { onValueChange("") }
                             .semantics { contentDescription = clearContentDescription },
                         contentAlignment = Alignment.Center
@@ -118,7 +116,7 @@ fun GiSearchField(
                             Icon(
                                 imageVector = GiIcons.x,
                                 contentDescription = null,
-                                modifier = Modifier.size(16.dp),
+                                modifier = Modifier.size(GiIconSize.sm),
                                 tint = colors.muted
                             )
                         }

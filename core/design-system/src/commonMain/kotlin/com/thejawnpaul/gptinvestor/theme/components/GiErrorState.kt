@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
@@ -33,7 +33,12 @@ fun GiErrorState(
         verticalArrangement = Arrangement.spacedBy(GiSpace.x3, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(40.dp), tint = GiTheme.colors.error)
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(GiIconSize.xl),
+            tint = GiTheme.colors.error
+        )
         GiText(text = title, style = GiTextStyle.CompanyName, textAlign = TextAlign.Center)
         GiText(text = body, style = GiTextStyle.BodySmall, textAlign = TextAlign.Center)
         GiButton(text = actionText, onClick = onAction, size = GiButtonSize.Medium)

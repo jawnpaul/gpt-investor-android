@@ -9,18 +9,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
@@ -36,6 +34,8 @@ fun GiBanner(
     leading: (@Composable () -> Unit)? = null,
     tone: GiBannerTone = GiBannerTone.Violet,
     onClick: (() -> Unit)? = null,
+    subtitleStyle: GiTextStyle = GiTextStyle.Caption,
+    subtitleColor: Color = GiTheme.colors.body,
     action: (@Composable () -> Unit)? = null
 ) {
     val colors = GiTheme.colors
@@ -55,17 +55,22 @@ fun GiBanner(
         Row(
             modifier = copyModifier,
             horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Top
         ) {
             if (leading != null) {
                 leading()
             } else if (icon != null) {
-                Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = toneColors.accent)
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(GiIconSize.md),
+                    tint = toneColors.accent
+                )
             }
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GiSpace.x0_5)) {
                 GiText(text = title, style = GiTextStyle.Link, color = colors.ink)
                 if (subtitle != null) {
-                    GiText(text = subtitle, style = GiTextStyle.Caption)
+                    GiText(text = subtitle, style = subtitleStyle, color = subtitleColor)
                 }
             }
         }
@@ -79,7 +84,7 @@ fun GiBanner(
         Row(
             modifier = bannerModifier,
             horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Top
         ) {
             copy(Modifier.weight(1f))
             action?.invoke()

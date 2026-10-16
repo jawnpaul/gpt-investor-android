@@ -68,7 +68,13 @@ fun GiSegmentedControl(
 }
 
 @Composable
-private fun GiSegment(text: String, selected: Boolean, enabled: Boolean, onClick: () -> Unit, modifier: Modifier) {
+private fun GiSegment(
+    text: String,
+    selected: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val colors = GiTheme.colors
     val haptics = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }

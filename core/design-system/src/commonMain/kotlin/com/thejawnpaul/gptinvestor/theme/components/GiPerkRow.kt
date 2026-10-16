@@ -43,7 +43,11 @@ private fun GiPerkRowPreview() {
                 title = "Full brief coverage",
                 subtitle = "Every stock in your watchlist, unlocked"
             )
-            GiPerkRow(icon = GiIcons.star, title = "Premium research", subtitle = "Top picks, tidbits and curated insights")
+            GiPerkRow(
+                icon = GiIcons.star,
+                title = "Premium research",
+                subtitle = "Top picks, tidbits and curated insights"
+            )
         }
     }
 }

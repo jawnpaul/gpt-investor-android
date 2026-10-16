@@ -71,7 +71,9 @@ private fun GiIconTilePreview() {
     GiPreviewSurface {
         Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
             Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
-                GiIconTileTone.entries.forEach { GiIconTile(icon = GiIcons.check, size = GiIconTileSize.Small, tone = it) }
+                GiIconTileTone.entries.forEach {
+                    GiIconTile(icon = GiIcons.check, size = GiIconTileSize.Small, tone = it)
+                }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
                 GiIconTileSize.entries.forEach { GiIconTile(icon = GiIcons.warning, size = it) }

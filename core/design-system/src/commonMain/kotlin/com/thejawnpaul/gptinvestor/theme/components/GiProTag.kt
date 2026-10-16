@@ -16,7 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
+import com.thejawnpaul.gptinvestor.theme.GiControlHeight
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
@@ -27,22 +29,29 @@ enum class GiProTagTone { OnBanner, Standalone }
 fun GiProTag(modifier: Modifier = Modifier, tone: GiProTagTone = GiProTagTone.OnBanner) {
     Row(
         modifier = modifier
-            .heightIn(min = 24.dp)
+            .heightIn(min = GiControlHeight.pill)
             .clip(GiRadius.xs)
             .background(if (tone == GiProTagTone.Standalone) GiTheme.colors.violetSoft else GiTheme.colors.raised)
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = GiSpace.x2_5),
         horizontalArrangement = Arrangement.spacedBy(GiSpace.x1),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = GiIcons.mark,
             contentDescription = null,
-            modifier = Modifier.size(14.dp),
+            modifier = Modifier.size(GiIconSize.xs),
             tint = GiTheme.colors.violet
         )
-        GiText(text = "PRO", style = GiTextStyle.Tag, color = GiTheme.colors.violet, maxLines = 1)
+        Text(
+            text = "PRO",
+            style = GiTheme.type.tag.copy(letterSpacing = PRO_LETTER_SPACING.em),
+            color = GiTheme.colors.violet,
+            maxLines = 1
+        )
     }
 }
+
+private const val PRO_LETTER_SPACING = 0.04f
 
 @PreviewLightDark
 @Preview(name = "200%", fontScale = 2f)

@@ -1,6 +1,5 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,9 +25,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -48,7 +50,9 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.thejawnpaul.gptinvestor.theme.GiEdge
 import com.thejawnpaul.gptinvestor.theme.GiElevation
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiRadius
+import com.thejawnpaul.gptinvestor.theme.GiSize
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 
@@ -63,7 +67,12 @@ fun GiInfoTooltip(text: String, contentDescription: String, modifier: Modifier =
             .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center
     ) {
-        Icon(imageVector = GiIcons.info, contentDescription = null, modifier = Modifier.size(16.dp), tint = GiTheme.colors.muted)
+        Icon(
+            imageVector = GiIcons.info,
+            contentDescription = null,
+            modifier = Modifier.size(GiIconSize.sm),
+            tint = GiTheme.colors.muted
+        )
         if (isOpen) {
             GiTooltipPopup(text = text, onDismiss = { isOpen = false })
         }
@@ -89,42 +98,51 @@ private fun GiTooltipPopup(text: String, onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true)
     ) {
-        val caretOffset = with(density) { caretX.toDp() } - CARET_WIDTH / 2
-        Column {
-            if (!isAbove) GiTooltipCaret(pointsUp = true, modifier = Modifier.offset(x = caretOffset))
+        val caretColor = GiTheme.colors.ink
+        Box(
+            modifier = Modifier
+                .drawWithCache {
+                    val caretWidth = CARET_WIDTH.toPx()
+                    val caretHeight = CARET_HEIGHT.toPx()
+                    val up = caretPath(caretWidth, caretHeight, pointsUp = true)
+                    val down = caretPath(caretWidth, caretHeight, pointsUp = false)
+                    onDrawBehind {
+                        val left = caretX - caretWidth / 2
+                        if (isAbove) {
+                            translate(left, size.height - caretHeight) { drawPath(down, caretColor) }
+                        } else {
+                            translate(left, 0f) { drawPath(up, caretColor) }
+                        }
+                    }
+                }
+                .padding(bottom = CARET_HEIGHT)
+        ) {
             GiText(
                 text = text,
                 modifier = Modifier
-                    .widthIn(max = 260.dp)
+                    .graphicsLayer { translationY = if (isAbove) 0f else CARET_HEIGHT.toPx() }
+                    .widthIn(max = GiSize.tooltipMax)
                     .clip(GiRadius.sm)
                     .background(GiTheme.colors.ink)
                     .padding(horizontal = GiSpace.x3, vertical = GiSpace.x2),
                 style = GiTextStyle.BodySmall,
                 color = GiTheme.colors.bg
             )
-            if (isAbove) GiTooltipCaret(pointsUp = false, modifier = Modifier.offset(x = caretOffset))
         }
     }
 }
 
-@Composable
-private fun GiTooltipCaret(pointsUp: Boolean, modifier: Modifier = Modifier) {
-    val color = GiTheme.colors.ink
-    Canvas(modifier = modifier.size(width = CARET_WIDTH, height = CARET_HEIGHT)) {
-        val path = Path().apply {
-            if (pointsUp) {
-                moveTo(size.width / 2, 0f)
-                lineTo(size.width, size.height)
-                lineTo(0f, size.height)
-            } else {
-                moveTo(0f, 0f)
-                lineTo(size.width, 0f)
-                lineTo(size.width / 2, size.height)
-            }
-            close()
-        }
-        drawPath(path, color)
+private fun caretPath(width: Float, height: Float, pointsUp: Boolean): Path = Path().apply {
+    if (pointsUp) {
+        moveTo(width / 2, 0f)
+        lineTo(width, height)
+        lineTo(0f, height)
+    } else {
+        moveTo(0f, 0f)
+        lineTo(width, 0f)
+        lineTo(width / 2, height)
     }
+    close()
 }
 
 private class GiTooltipPositionProvider(
@@ -196,7 +214,12 @@ fun GiCoachMark(
                         variant = GiButtonVariant.TextMuted
                     )
                 }
-                GiButton(text = actionText, onClick = onAction, size = GiButtonSize.Medium, variant = GiButtonVariant.Text)
+                GiButton(
+                    text = actionText,
+                    onClick = onAction,
+                    size = GiButtonSize.Medium,
+                    variant = GiButtonVariant.Text
+                )
             }
         }
         if (caretEndOffset != null) {

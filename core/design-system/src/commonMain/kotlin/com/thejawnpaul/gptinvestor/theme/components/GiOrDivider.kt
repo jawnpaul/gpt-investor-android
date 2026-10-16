@@ -22,7 +22,7 @@ fun GiOrDivider(text: String, modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         GiDivider(modifier = Modifier.weight(1f))
-        GiText(text = text, style = GiTextStyle.Meta, color = GiTheme.colors.muted)
+        GiText(text = text, style = GiTextStyle.MetaRelaxed, color = GiTheme.colors.muted)
         GiDivider(modifier = Modifier.weight(1f))
     }
 }

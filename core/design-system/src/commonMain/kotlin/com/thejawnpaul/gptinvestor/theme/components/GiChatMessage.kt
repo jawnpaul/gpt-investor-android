@@ -49,7 +49,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -74,6 +73,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
@@ -276,7 +276,12 @@ internal fun GiAssistantHeader(name: String, modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.spacedBy(GiSpace.x2),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(imageVector = GiIcons.mark, contentDescription = null, modifier = Modifier.size(20.dp), tint = GiTheme.colors.violet)
+        Icon(
+            imageVector = GiIcons.mark,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = GiTheme.colors.violet
+        )
         GiText(text = name, style = GiTextStyle.Link, color = GiTheme.colors.muted)
     }
 }
@@ -359,7 +364,7 @@ private fun GiGlowingMark() {
             imageVector = GiIcons.mark,
             contentDescription = null,
             modifier = Modifier
-                .size(24.dp)
+                .size(GiIconSize.lg)
                 .graphicsLayer { rotationZ = rotation },
             tint = violet
         )
@@ -371,7 +376,12 @@ fun GiAnswerError(message: String, retryText: String, onRetry: () -> Unit, modif
     val colors = GiTheme.colors
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(imageVector = GiIcons.warningCircle, contentDescription = null, modifier = Modifier.size(16.dp), tint = colors.error)
+            Icon(
+                imageVector = GiIcons.warningCircle,
+                contentDescription = null,
+                modifier = Modifier.size(GiIconSize.sm),
+                tint = colors.error
+            )
             GiText(text = message, style = GiTextStyle.BodySmall, color = colors.error)
         }
         GiButton(
@@ -385,7 +395,8 @@ fun GiAnswerError(message: String, retryText: String, onRetry: () -> Unit, modif
 }
 
 private const val USER_BUBBLE_MAX_WIDTH = 0.8f
-private val USER_BUBBLE_SHAPE = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp, bottomEnd = 4.dp, bottomStart = 12.dp)
+private val USER_BUBBLE_SHAPE =
+    RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp, bottomEnd = 4.dp, bottomStart = 12.dp)
 private val ACTIONS_INSET = 12.dp
 private const val CURSOR_ID = "cursor"
 private const val GLOW_PERIOD_MS = 3_200

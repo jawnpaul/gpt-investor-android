@@ -6,12 +6,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.thejawnpaul.gptinvestor.theme.GiRadius
@@ -33,10 +31,15 @@ fun GiPremiumBanner(
         .background(GiTheme.colors.violetSoft)
         .padding(horizontal = GiSpace.x4, vertical = if (isLargeText) GiSpace.x4 else GiSpace.x3)
     val copy = @Composable { copyModifier: Modifier ->
-        Column(modifier = copyModifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x1)) {
+        Column(modifier = copyModifier) {
             GiProTag()
-            GiText(text = title, style = GiTextStyle.Link, color = GiTheme.colors.ink)
-            GiText(text = subtitle, style = GiTextStyle.Caption)
+            GiText(
+                text = title,
+                modifier = Modifier.padding(top = GiSpace.x1_5),
+                style = GiTextStyle.Link,
+                color = GiTheme.colors.ink
+            )
+            GiText(text = subtitle, modifier = Modifier.padding(top = GiSpace.x0_5), style = GiTextStyle.Caption)
         }
     }
     val action = @Composable {

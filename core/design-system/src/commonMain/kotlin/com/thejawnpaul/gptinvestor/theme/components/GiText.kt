@@ -26,16 +26,20 @@ enum class GiTextStyle {
     Body,
     BodySmall,
     Label,
+    LabelRegular,
     Button,
     Link,
     Meta,
+    MetaRelaxed,
     Eyebrow,
     Delta,
     Tag,
     Caption,
     NavLabel,
     Input,
-    FieldLabel
+    FieldLabel,
+    Initials,
+    TileInitials
 }
 
 @Composable
@@ -75,9 +79,11 @@ fun GiTextStyle.textStyle(): TextStyle {
         GiTextStyle.Body -> type.body
         GiTextStyle.BodySmall -> type.bodySmall
         GiTextStyle.Label -> type.label
+        GiTextStyle.LabelRegular -> type.labelRegular
         GiTextStyle.Button -> type.button
         GiTextStyle.Link -> type.link
         GiTextStyle.Meta -> type.meta
+        GiTextStyle.MetaRelaxed -> type.metaRelaxed
         GiTextStyle.Eyebrow -> type.eyebrow
         GiTextStyle.Delta -> type.delta
         GiTextStyle.Tag -> type.tag
@@ -85,6 +91,8 @@ fun GiTextStyle.textStyle(): TextStyle {
         GiTextStyle.NavLabel -> type.navLabel
         GiTextStyle.Input -> type.input
         GiTextStyle.FieldLabel -> type.fieldLabel
+        GiTextStyle.Initials -> type.initials
+        GiTextStyle.TileInitials -> type.tileInitials
     }
 }
 
@@ -93,7 +101,7 @@ fun GiTextStyle.defaultColor(): Color {
     val colors = GiTheme.colors
     return when (this) {
         GiTextStyle.Body, GiTextStyle.BodySmall, GiTextStyle.Caption -> colors.body
-        GiTextStyle.Meta, GiTextStyle.Eyebrow, GiTextStyle.NavLabel -> colors.muted
+        GiTextStyle.Meta, GiTextStyle.MetaRelaxed, GiTextStyle.Eyebrow, GiTextStyle.NavLabel -> colors.muted
         GiTextStyle.Link -> colors.violet
         else -> colors.ink
     }

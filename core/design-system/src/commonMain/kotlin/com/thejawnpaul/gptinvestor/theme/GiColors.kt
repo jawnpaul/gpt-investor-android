@@ -44,6 +44,9 @@ data class GiColors(
     val invAction: Color,
     val scrim: Color,
     val isDark: Boolean,
+    val beam1: Color = Color(0xFF5B7CFF),
+    val beam2: Color = Color(0xFF8B5CF6),
+    val beam3: Color = Color(0xFFA994FF)
 )
 
 val giLightColors = GiColors(
@@ -81,7 +84,7 @@ val giLightColors = GiColors(
     cautionSoft = Color(0xFFFFF0B8),
     invAction = Color(0xFFA994FF),
     scrim = Color(0x7A0F121B),
-    isDark = false,
+    isDark = false
 )
 
 val giDarkColors = GiColors(
@@ -119,7 +122,7 @@ val giDarkColors = GiColors(
     cautionSoft = Color(0xFF3A2E05),
     invAction = Color(0xFF5A3CF0),
     scrim = Color(0xA3000000),
-    isDark = true,
+    isDark = true
 )
 
 val LocalGiColors = staticCompositionLocalOf { giLightColors }
@@ -162,6 +165,6 @@ fun GiColors.toColorScheme(): ColorScheme {
         inverseOnSurface = bg,
         inversePrimary = violet,
         surfaceTint = Color.Transparent,
-        scrim = scrim,
+        scrim = scrim
     )
 }

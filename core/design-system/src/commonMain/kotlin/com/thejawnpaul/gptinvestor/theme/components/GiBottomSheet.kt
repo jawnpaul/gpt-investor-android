@@ -1,11 +1,7 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.background
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -16,7 +12,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -27,12 +22,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiElevation
+import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import kotlinx.coroutines.launch
@@ -55,12 +55,13 @@ fun GiBottomSheet(
 ) {
     val colors = GiTheme.colors
     val scope = rememberCoroutineScope()
-    val maxHeight = with(LocalDensity.current) { (LocalWindowInfo.current.containerSize.height * MAX_HEIGHT_FRACTION).toDp() }
+    val maxHeight =
+        with(LocalDensity.current) { (LocalWindowInfo.current.containerSize.height * MAX_HEIGHT_FRACTION).toDp() }
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
-        modifier = modifier.dropShadow(shape = SHEET_SHAPE, shadow = GiElevation.overlay(colors.isDark)),
+        modifier = modifier.dropShadow(shape = GiRadius.sheet, shadow = GiElevation.overlay(colors.isDark)),
         sheetState = sheetState,
-        shape = SHEET_SHAPE,
+        shape = GiRadius.sheet,
         containerColor = colors.raised,
         contentColor = colors.ink,
         tonalElevation = 0.dp,
@@ -120,14 +121,13 @@ private fun GiBottomSheetContent(
                 icon = GiIcons.x,
                 contentDescription = closeContentDescription,
                 onClick = onClose,
-                variant = GiIconButtonVariant.Tonal
+                variant = GiIconButtonVariant.Default
             )
         }
         content()
     }
 }
 
-private val SHEET_SHAPE = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
 private const val MAX_HEIGHT_FRACTION = 0.9f
 
 @PreviewLightDark
@@ -138,7 +138,7 @@ private fun GiBottomSheetContentPreview() {
         Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
             Column(
                 modifier = Modifier
-                    .clip(SHEET_SHAPE)
+                    .clip(GiRadius.sheet)
                     .background(GiTheme.colors.raised)
             ) {
                 GiBottomSheetContent(title = "Set a price alert", closeContentDescription = "Close", onClose = {}) {
@@ -148,7 +148,7 @@ private fun GiBottomSheetContentPreview() {
             }
             Column(
                 modifier = Modifier
-                    .clip(SHEET_SHAPE)
+                    .clip(GiRadius.sheet)
                     .background(GiTheme.colors.raised)
             ) {
                 GiBottomSheetContent(

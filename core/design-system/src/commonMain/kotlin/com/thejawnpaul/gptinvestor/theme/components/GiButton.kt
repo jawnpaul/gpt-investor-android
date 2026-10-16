@@ -1,8 +1,6 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.EaseOutQuart
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -45,7 +43,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.thejawnpaul.gptinvestor.theme.GiControlHeight
+import com.thejawnpaul.gptinvestor.theme.GiEasing
 import com.thejawnpaul.gptinvestor.theme.GiEdge
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
@@ -79,11 +80,11 @@ fun GiButton(
     )
     val containerAlpha by animateFloatAsState(
         targetValue = if (enabled) 1f else GiMotion.DISABLED_ALPHA,
-        animationSpec = tween(GiMotion.FAST, easing = EaseOutQuart)
+        animationSpec = tween(GiMotion.FAST, easing = GiEasing.emphasised)
     )
     val labelAlpha by animateFloatAsState(
         targetValue = if (loading) 0f else 1f,
-        animationSpec = tween(if (loading) GiMotion.INSTANT else GiMotion.FAST, easing = LinearEasing)
+        animationSpec = tween(if (loading) GiMotion.INSTANT else GiMotion.FAST, easing = GiEasing.linear)
     )
     val buttonColors = when (variant) {
         GiButtonVariant.Primary -> GiButtonColors(container = colors.primary, content = colors.onPrimary)
@@ -94,19 +95,37 @@ fun GiButton(
         GiButtonVariant.TextMuted -> GiButtonColors(container = Color.Transparent, content = colors.muted)
     }
     val metrics = when (size) {
-        GiButtonSize.Large -> GiButtonMetrics(minHeight = 56.dp, horizontalPadding = 24.dp, textStyle = GiTextStyle.Button)
-        GiButtonSize.Medium -> GiButtonMetrics(minHeight = 44.dp, horizontalPadding = 16.dp, textStyle = GiTextStyle.Label)
-        GiButtonSize.Small -> GiButtonMetrics(minHeight = 36.dp, horizontalPadding = 14.dp, textStyle = GiTextStyle.Link)
+        GiButtonSize.Large -> GiButtonMetrics(
+            minHeight = GiControlHeight.buttonL,
+            horizontalPadding = 24.dp,
+            textStyle = GiTextStyle.Button
+        )
+        GiButtonSize.Medium -> GiButtonMetrics(
+            minHeight = GiControlHeight.target,
+            horizontalPadding = 16.dp,
+            textStyle = GiTextStyle.Label
+        )
+        GiButtonSize.Small -> GiButtonMetrics(
+            minHeight = GiControlHeight.buttonS,
+            horizontalPadding = 14.dp,
+            textStyle = GiTextStyle.Link
+        )
     }
     val content = buttonColors.content
     val isTextVariant = variant == GiButtonVariant.Text || variant == GiButtonVariant.TextMuted
-    val paddingX = if (isTextVariant) GiSpace.x2 else metrics.horizontalPadding
-    val iconSize = if (size == GiButtonSize.Small) 16.dp else 20.dp
+    val paddingX = if (isTextVariant) 0.dp else metrics.horizontalPadding
+    val iconSize = if (size == GiButtonSize.Small) GiIconSize.sm else GiIconSize.md
     val iconTint = if (tintLeadingIcon) content else Color.Unspecified
     val paddingY = if (isLargeText()) GiSpace.x3 else 0.dp
     Box(
         modifier = modifier
-            .minimumInteractiveComponentSize()
+            .then(
+                if (isTextVariant) {
+                    Modifier.heightIn(min = GiSpace.touchTarget)
+                } else {
+                    Modifier.minimumInteractiveComponentSize()
+                }
+            )
             .graphicsLayer {
                 alpha = containerAlpha
                 scaleX = scale
@@ -162,17 +181,27 @@ fun GiButton(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (leadingIcon != null) {
-                Icon(imageVector = leadingIcon, contentDescription = null, modifier = Modifier.size(iconSize), tint = iconTint)
+                Icon(
+                    imageVector = leadingIcon,
+                    contentDescription = null,
+                    modifier = Modifier.size(iconSize),
+                    tint = iconTint
+                )
             } else if (leadingPainter != null) {
-                Icon(painter = leadingPainter, contentDescription = null, modifier = Modifier.size(iconSize), tint = iconTint)
+                Icon(
+                    painter = leadingPainter,
+                    contentDescription = null,
+                    modifier = Modifier.size(iconSize),
+                    tint = iconTint
+                )
             }
             GiText(text = text, style = metrics.textStyle, color = content, textAlign = TextAlign.Center)
         }
         AnimatedVisibility(
             visible = loading,
-            enter = fadeIn(tween(GiMotion.FAST, delayMillis = GiMotion.INSTANT, easing = EaseOutQuart)) +
+            enter = fadeIn(tween(GiMotion.FAST, delayMillis = GiMotion.INSTANT, easing = GiEasing.emphasised)) +
                 scaleIn(GiMotion.snappy(), initialScale = SPINNER_INITIAL_SCALE),
-            exit = fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing))
+            exit = fadeOut(tween(GiMotion.INSTANT, easing = GiEasing.linear))
         ) {
             GiSpinner(color = content)
         }

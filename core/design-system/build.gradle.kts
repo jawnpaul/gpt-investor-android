@@ -65,7 +65,9 @@ ktlint {
 
     // Only the v4 files for now; the pre-v4 theme files predate ktlint in this module.
     filter {
-        exclude { element -> element.file.path.contains("/build/") || !element.file.name.startsWith("Gi") }
+        exclude { element ->
+            element.file.path.contains("/build/") || (!element.isDirectory && !element.file.name.startsWith("Gi"))
+        }
     }
 
     additionalEditorconfig.set(

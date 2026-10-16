@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,12 +50,20 @@ fun GiLinkText(
         GiLinkTextTone.Legal -> GiLinkTextStyle(
             text = type.tag.copy(fontWeight = FontWeight.Normal),
             color = colors.muted,
-            link = SpanStyle(color = colors.ink, fontWeight = FontWeight.Medium, textDecoration = TextDecoration.Underline)
+            link = SpanStyle(
+                color = colors.ink,
+                fontWeight = FontWeight.Medium,
+                textDecoration = TextDecoration.Underline
+            )
         )
         GiLinkTextTone.Error -> GiLinkTextStyle(
             text = type.bodySmall,
             color = colors.error,
-            link = SpanStyle(color = colors.error, fontWeight = FontWeight.SemiBold, textDecoration = TextDecoration.Underline)
+            link = SpanStyle(
+                color = colors.error,
+                fontWeight = FontWeight.SemiBold,
+                textDecoration = TextDecoration.Underline
+            )
         )
     }
     val isError = tone == GiLinkTextTone.Error

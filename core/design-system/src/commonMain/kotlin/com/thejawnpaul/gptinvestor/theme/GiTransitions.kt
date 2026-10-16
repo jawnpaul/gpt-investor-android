@@ -3,9 +3,8 @@ package com.thejawnpaul.gptinvestor.theme
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector2D
-import androidx.compose.animation.core.VectorConverter
-import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -21,16 +20,15 @@ import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.round
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 
-private val EaseOutQuart = CubicBezierEasing(0.25f, 1f, 0.5f, 1f)
 private const val STEP_FADE_OUT_MS = 90
 private const val STEP_FADE_IN_MS = 210
 
@@ -46,7 +44,9 @@ fun rememberGiSharedAxisTransition(): (forward: Boolean) -> ContentTransform {
             } else {
                 val direction = if (forward != isRtl) 1 else -1
                 slideInHorizontally(GiMotion.smooth()) { offset * direction } +
-                    fadeIn(tween(STEP_FADE_IN_MS, delayMillis = STEP_FADE_OUT_MS, easing = EaseOutQuart)) togetherWith
+                    fadeIn(
+                        tween(STEP_FADE_IN_MS, delayMillis = STEP_FADE_OUT_MS, easing = GiEasing.emphasised)
+                    ) togetherWith
                     slideOutHorizontally(GiMotion.smooth()) { -offset * direction } +
                     fadeOut(tween(STEP_FADE_OUT_MS, easing = LinearEasing))
             }

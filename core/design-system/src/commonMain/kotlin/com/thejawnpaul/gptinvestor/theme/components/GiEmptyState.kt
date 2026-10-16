@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
@@ -42,7 +43,12 @@ fun GiEmptyState(
                 .background(GiTheme.colors.violetSoft),
             contentAlignment = Alignment.Center
         ) {
-            Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(40.dp), tint = GiTheme.colors.violet)
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(GiIconSize.xl),
+                tint = GiTheme.colors.violet
+            )
         }
         GiText(text = title, style = GiTextStyle.SectionTitle, textAlign = TextAlign.Center)
         GiText(text = body, style = GiTextStyle.BodySmall, textAlign = TextAlign.Center)

@@ -50,6 +50,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiElevation
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
@@ -79,11 +80,7 @@ class GiToastState internal constructor(private val accessibilityManager: Access
     var current: GiToastData? by mutableStateOf(null)
         private set
 
-    suspend fun show(
-        message: String,
-        icon: ImageVector? = null,
-        actionText: String? = null
-    ): GiToastResult {
+    suspend fun show(message: String, icon: ImageVector? = null, actionText: String? = null): GiToastResult {
         val data = GiToastData(message, icon, actionText, CompletableDeferred())
         current?.result?.complete(GiToastResult.Dismissed)
         current = data
@@ -191,7 +188,12 @@ fun GiToast(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (icon != null) {
-            Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = colors.bg)
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(GiIconSize.md),
+                tint = colors.bg
+            )
         }
         GiText(
             text = message,

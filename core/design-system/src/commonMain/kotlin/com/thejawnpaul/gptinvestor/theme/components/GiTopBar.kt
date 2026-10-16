@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,8 +27,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
@@ -57,7 +54,12 @@ fun GiTopBar(
             .windowInsetsPadding(WindowInsets.statusBars)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = GiSpace.gutter, vertical = GiSpace.x2),
+            modifier = Modifier.padding(
+                start = GiSpace.gutter,
+                end = GiSpace.gutter,
+                top = GiSpace.x2,
+                bottom = GiSpace.x3
+            ),
             horizontalArrangement = Arrangement.spacedBy(if (center != null) GiSpace.x4 else GiSpace.x3),
             verticalAlignment = if (subtitle != null) Alignment.Top else Alignment.CenterVertically
         ) {
@@ -123,8 +125,8 @@ private fun GiTopBarTitle(
     }
     val textAlign = if (titleStyle == GiTopBarTitleStyle.Centered) TextAlign.Center else TextAlign.Start
     Column(
-        modifier = modifier.then(if (subtitle != null) Modifier.padding(top = 10.dp) else Modifier),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+        modifier = modifier.then(if (subtitle != null) Modifier.padding(top = GiSpace.x2_5) else Modifier),
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x0_5)
     ) {
         GiText(
             text = title,
@@ -137,12 +139,12 @@ private fun GiTopBarTitle(
             overflow = TextOverflow.Ellipsis
         )
         if (subtitle != null) {
-            Text(
+            GiText(
                 text = subtitle,
                 modifier = Modifier.fillMaxWidth(),
+                style = GiTextStyle.MetaRelaxed,
                 color = GiTheme.colors.muted,
-                textAlign = textAlign,
-                style = GiTheme.type.meta.copy(lineHeight = 20.sp)
+                textAlign = textAlign
             )
         }
     }

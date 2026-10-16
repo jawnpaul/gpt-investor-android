@@ -20,23 +20,18 @@ internal fun digestSentimentOf(value: String?): DigestSentiment? = when (value?.
 private val DAY_NAMES = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 private val MONTH_NAMES = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
-/** "2026-10-09" (the trading day a brief covers) -> "Fri, Oct 9". */
+/** "2026-10-09" (the trading day a brief covers) -> "Fri 9 Oct". */
 internal fun formatMarketDate(marketDate: String?): String? {
     val date = marketDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return null
-    return "${DAY_NAMES[date.dayOfWeek.ordinal]}, ${MONTH_NAMES[date.month.ordinal]} ${date.day}"
+    return "${DAY_NAMES[date.dayOfWeek.ordinal]} ${date.day} ${MONTH_NAMES[date.month.ordinal]}"
 }
 
-/** ISO-8601 UTC instant -> local "Sat 7:01 PM"; null when missing or in the old RFC 1123 format. */
+/** ISO-8601 UTC instant -> local "Sat 19:01"; null when missing or in the old RFC 1123 format. */
 internal fun formatUpdatedAt(generatedAt: String?, timeZone: TimeZone): String? {
     val instant = generatedAt?.let { runCatching { Instant.parse(it) }.getOrNull() } ?: return null
     val local = instant.toLocalDateTime(timeZone)
-    val period = if (local.hour < 12) "AM" else "PM"
-    val hour = when {
-        local.hour == 0 -> 12
-        local.hour > 12 -> local.hour - 12
-        else -> local.hour
-    }
-    return "${DAY_NAMES[local.dayOfWeek.ordinal]} $hour:${local.minute.toString().padStart(2, '0')} $period"
+    val time = "${local.hour.toString().padStart(2, '0')}:${local.minute.toString().padStart(2, '0')}"
+    return "${DAY_NAMES[local.dayOfWeek.ordinal]} $time"
 }
 
 /** 1.5 -> "+1.5%", -1.11 -> "-1.1%", 0.0 -> "0.0%". */

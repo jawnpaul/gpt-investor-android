@@ -205,7 +205,7 @@
     <string name="key_definition_revenue_growth">Revenue growth compares this year’s sales with last year’s.</string>
     <string name="key_definition_dividend_yield">Dividend yield is the yearly cash paid to shareholders as a share of today’s price.</string>
 
-    <string name="ask_me_anything_about_markets">Ask me anything about markets...</string>
+    <string name="ask_me_anything_about_markets">Ask me anything about markets…</string>
     <string name="trending_today">Trending today</string>
     <string name="movers_right_now">Movers right now</string>
     <string name="top_picks_today">Top picks today</string>
@@ -279,7 +279,6 @@
     <string name="digest_pending_description_premium">Expect it within the hour — we’ll notify you when it’s ready.</string>
     <string name="digest_pending_description_at">Expect it by %1$s. Check back soon.</string>
     <string name="digest_pending_description_premium_at">Expect it by %1$s — we’ll notify you when it’s ready.</string>
-    <string name="digest_sentiment">Sentiment: %1$s</string>
     <string name="sentiment">Sentiment</string>
     <string name="digest_sentiment_positive">Positive</string>
     <string name="digest_sentiment_neutral">Neutral</string>
@@ -307,7 +306,12 @@
     <string name="x_more_stocks_are_locked">%1$d more stocks are locked</string>
     <string name="locked_stock_premium_upsell">%1$s — included with Premium</string>
     <string name="unlock">Unlock</string>
-    <string name="tap_to_unlock_full_summaries">Tap to unlock full summaries</string>
+    <string name="digest_locked_heading">Your watchlist · %1$d locked</string>
+    <string name="unlock_full_summaries">Unlock full summaries</string>
+    <string name="every_stock_every_morning">Every stock in your watchlist, every morning</string>
+    <string name="locked">Locked</string>
+    <string name="couldn_t_load_your_brief">Couldn’t load your brief</string>
+    <string name="check_connection_try_again">Check your connection and try again.</string>
     <string name="x_of_y">%1$d of %2$d</string>
     <string name="x_companies">%1$d companies</string>
     <string name="watchlist_title">Watchlist</string>

@@ -255,7 +255,6 @@
     <string name="digest_pending_description_premium">Очікуйте протягом години — ми сповістимо вас, коли він буде готовий.</string>
     <string name="digest_pending_description_at">Очікуйте до %1$s. Перевірте пізніше.</string>
     <string name="digest_pending_description_premium_at">Очікуйте до %1$s — ми сповістимо вас, коли він буде готовий.</string>
-    <string name="digest_sentiment">Настрій: %1$s</string>
     <string name="digest_sentiment_positive">Позитивний</string>
     <string name="digest_sentiment_neutral">Нейтральний</string>
     <string name="digest_sentiment_negative">Негативний</string>
@@ -282,7 +281,12 @@
     <string name="x_more_stocks_are_locked">%1$d акцій заблоковано</string>
     <string name="locked_stock_premium_upsell">%1$s — включено в Premium</string>
     <string name="unlock">Розблокувати</string>
-    <string name="tap_to_unlock_full_summaries">Торкніться, щоб розблокувати повні резюме</string>
+    <string name="digest_locked_heading">Ваш список спостереження · заблоковано: %1$d</string>
+    <string name="unlock_full_summaries">Розблокувати повні огляди</string>
+    <string name="every_stock_every_morning">Кожна акція у вашому списку спостереження, щоранку</string>
+    <string name="locked">Заблоковано</string>
+    <string name="couldn_t_load_your_brief">Не вдалося завантажити огляд</string>
+    <string name="check_connection_try_again">Перевірте з’єднання та спробуйте ще раз.</string>
     <string name="x_of_y">%1$d з %2$d</string>
     <string name="x_companies">%1$d компаній</string>
     <string name="watchlist_title">Список спостереження</string>

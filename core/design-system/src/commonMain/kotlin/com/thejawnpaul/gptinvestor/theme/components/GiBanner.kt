@@ -33,6 +33,7 @@ fun GiBanner(
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     icon: ImageVector? = null,
+    leading: (@Composable () -> Unit)? = null,
     tone: GiBannerTone = GiBannerTone.Violet,
     onClick: (() -> Unit)? = null,
     action: (@Composable () -> Unit)? = null
@@ -56,7 +57,9 @@ fun GiBanner(
             horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (icon != null) {
+            if (leading != null) {
+                leading()
+            } else if (icon != null) {
                 Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = toneColors.accent)
             }
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -113,6 +116,13 @@ private fun GiBannerPreview() {
                 tone = GiBannerTone.Caution
             ) {
                 GiButton(text = "Retry", onClick = {}, size = GiButtonSize.Small, variant = GiButtonVariant.Caution)
+            }
+            GiBanner(
+                title = "You're browsing as a guest",
+                subtitle = "Sign in to save stocks and track performance",
+                leading = { GiIconTile(icon = GiIcons.mark, tone = GiIconTileTone.Raised) }
+            ) {
+                GiButton(text = "Sign in", onClick = {}, size = GiButtonSize.Small, variant = GiButtonVariant.Secondary)
             }
         }
     }

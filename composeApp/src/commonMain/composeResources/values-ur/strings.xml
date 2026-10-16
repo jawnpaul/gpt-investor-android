@@ -255,7 +255,6 @@
     <string name="digest_pending_description_premium">ایک گھنٹے کے اندر متوقع — جب تیار ہوگا ہم آپ کو مطلع کریں گے۔</string>
     <string name="digest_pending_description_at">%1$s تک متوقع۔ جلد واپس آئیں۔</string>
     <string name="digest_pending_description_premium_at">%1$s تک متوقع — جب تیار ہوگا ہم آپ کو مطلع کریں گے۔</string>
-    <string name="digest_sentiment">رجحان: %1$s</string>
     <string name="digest_sentiment_positive">مثبت</string>
     <string name="digest_sentiment_neutral">غیر جانبدار</string>
     <string name="digest_sentiment_negative">منفی</string>
@@ -282,7 +281,12 @@
     <string name="x_more_stocks_are_locked">%1$d مزید اسٹاک مقفل ہیں</string>
     <string name="locked_stock_premium_upsell">%1$s — پریمیم میں شامل</string>
     <string name="unlock">کھولیں</string>
-    <string name="tap_to_unlock_full_summaries">مکمل خلاصے کھولنے کے لیے تھپتھپائیں</string>
+    <string name="digest_locked_heading">آپ کی واچ لسٹ · %1$d مقفل</string>
+    <string name="unlock_full_summaries">مکمل خلاصے کھولیں</string>
+    <string name="every_stock_every_morning">آپ کی واچ لسٹ کا ہر اسٹاک، ہر صبح</string>
+    <string name="locked">مقفل</string>
+    <string name="couldn_t_load_your_brief">آپ کا خلاصہ لوڈ نہیں ہو سکا</string>
+    <string name="check_connection_try_again">اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
     <string name="x_of_y">%2$d میں سے %1$d</string>
     <string name="x_companies">%1$d کمپنیاں</string>
     <string name="watchlist_title">واچ لسٹ</string>

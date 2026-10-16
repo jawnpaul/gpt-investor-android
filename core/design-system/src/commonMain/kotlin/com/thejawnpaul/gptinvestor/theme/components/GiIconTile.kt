@@ -28,7 +28,7 @@ enum class GiIconTileSize(internal val tile: Dp, internal val icon: Dp) {
     Large(tile = 48.dp, icon = 24.dp)
 }
 
-enum class GiIconTileTone { Violet, Gain, Loss, Neutral }
+enum class GiIconTileTone { Violet, Gain, Loss, Neutral, Raised }
 
 @Composable
 fun GiIconTile(
@@ -43,6 +43,7 @@ fun GiIconTile(
         GiIconTileTone.Gain -> GiIconTileColors(container = colors.gainSoft, content = colors.gain)
         GiIconTileTone.Loss -> GiIconTileColors(container = colors.lossSoft, content = colors.loss)
         GiIconTileTone.Neutral -> GiIconTileColors(container = colors.tile, content = colors.muted)
+        GiIconTileTone.Raised -> GiIconTileColors(container = colors.raised, content = colors.ink)
     }
     Box(
         modifier = modifier

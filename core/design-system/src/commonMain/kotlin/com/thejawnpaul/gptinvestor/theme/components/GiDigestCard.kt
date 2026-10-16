@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -26,14 +27,16 @@ fun GiDigestCard(
     sentimentCaption: String? = null,
     keyEventLabel: String? = null,
     keyEvent: String? = null,
-    updatedText: String? = null
+    updatedText: String? = null,
+    summaryMaxLines: Int = 4
 ) {
     GiCard(modifier = modifier, onClick = onClick) {
         GiStockSummary(stock = stock)
         if (sentiment != null && sentimentLabel != null) {
-            Row(
+            FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(GiSpace.x2),
-                verticalAlignment = Alignment.CenterVertically
+                verticalArrangement = Arrangement.spacedBy(GiSpace.x2),
+                itemVerticalAlignment = Alignment.CenterVertically
             ) {
                 GiSentimentPill(sentiment = sentiment, label = sentimentLabel)
                 if (sentimentCaption != null) {
@@ -44,7 +47,7 @@ fun GiDigestCard(
         GiText(
             text = summary,
             style = GiTextStyle.Body,
-            maxLines = 4,
+            maxLines = summaryMaxLines,
             overflow = TextOverflow.Ellipsis
         )
         if (keyEventLabel != null && keyEvent != null) {

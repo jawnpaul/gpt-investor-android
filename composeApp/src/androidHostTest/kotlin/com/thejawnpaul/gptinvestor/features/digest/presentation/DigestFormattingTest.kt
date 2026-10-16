@@ -17,8 +17,8 @@ class DigestFormattingTest {
 
     @Test
     fun `formats the trading day a brief covers`() {
-        assertThat(formatMarketDate("2026-10-09")).isEqualTo("Fri, Oct 9")
-        assertThat(formatMarketDate("2026-01-12")).isEqualTo("Mon, Jan 12")
+        assertThat(formatMarketDate("2026-10-09")).isEqualTo("Fri 9 Oct")
+        assertThat(formatMarketDate("2026-01-12")).isEqualTo("Mon 12 Jan")
         assertThat(formatMarketDate(null)).isNull()
         assertThat(formatMarketDate("Fri")).isNull()
     }
@@ -27,9 +27,9 @@ class DigestFormattingTest {
     fun `formats generated_at in the user's time zone`() {
         val berlin = TimeZone.of("Europe/Berlin")
 
-        assertThat(formatUpdatedAt("2026-10-10T17:01:11Z", berlin)).isEqualTo("Sat 7:01 PM")
-        assertThat(formatUpdatedAt("2026-10-10T22:05:00Z", berlin)).isEqualTo("Sun 12:05 AM")
-        assertThat(formatUpdatedAt("2026-10-10T10:00:00Z", TimeZone.UTC)).isEqualTo("Sat 10:00 AM")
+        assertThat(formatUpdatedAt("2026-10-10T17:01:11Z", berlin)).isEqualTo("Sat 19:01")
+        assertThat(formatUpdatedAt("2026-10-10T22:05:00Z", berlin)).isEqualTo("Sun 00:05")
+        assertThat(formatUpdatedAt("2026-10-10T10:00:00Z", TimeZone.UTC)).isEqualTo("Sat 10:00")
     }
 
     @Test

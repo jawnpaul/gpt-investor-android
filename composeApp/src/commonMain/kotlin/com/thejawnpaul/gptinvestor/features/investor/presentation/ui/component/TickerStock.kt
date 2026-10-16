@@ -21,7 +21,7 @@ internal fun tickerStock(
     percent: Double?,
     imageUrl: String? = null
 ): GiStock = GiStock(
-    initials = ticker.take(2),
+    initials = if (ticker.length <= 3) ticker else ticker.take(2),
     brandColor = TICKER_COLORS[(ticker.firstOrNull()?.code ?: 0) % TICKER_COLORS.size],
     title = title,
     subtitle = subtitle,

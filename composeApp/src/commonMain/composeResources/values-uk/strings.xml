@@ -227,6 +227,7 @@
     <string name="post_auth_onboarding_risk_conservative">Обираю обережний підхід</string>
     <string name="post_auth_onboarding_risk_balanced">Збалансований підхід</string>
     <string name="post_auth_onboarding_risk_aggressive">Спокійно ставлюся до волатильності</string>
+    <string name="post_auth_onboarding_save_error">Не вдалося зберегти ваші відповіді. Спробуйте ще раз.</string>
 
     <string name="verify_email_title">Перевірте свою електронну пошту</string>
     <string name="verify_email_body">Підтвердьте свою електронну адресу перед входом. Перевірте вхідні повідомлення на наявність посилання для підтвердження.</string>

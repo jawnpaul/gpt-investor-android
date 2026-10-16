@@ -227,6 +227,7 @@
     <string name="post_auth_onboarding_risk_conservative">محفوظ راستہ اختیار کرنا</string>
     <string name="post_auth_onboarding_risk_balanced">متوازن انداز</string>
     <string name="post_auth_onboarding_risk_aggressive">اتار چڑھاؤ سے مطمئن ہوں</string>
+    <string name="post_auth_onboarding_save_error">ہم آپ کے جوابات محفوظ نہیں کر سکے۔ دوبارہ کوشش کریں۔</string>
 
     <string name="verify_email_title">اپنی ای میل چیک کریں</string>
     <string name="verify_email_body">لاگ اِن کرنے سے پہلے اپنی ای میل ایڈریس کی تصدیق کریں۔ تصدیقی لنک کے لیے اپنا ان باکس چیک کریں۔</string>

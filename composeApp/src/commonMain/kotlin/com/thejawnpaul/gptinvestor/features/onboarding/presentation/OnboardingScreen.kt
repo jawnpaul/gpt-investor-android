@@ -3,7 +3,6 @@ package com.thejawnpaul.gptinvestor.features.onboarding.presentation
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
@@ -15,9 +14,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -54,7 +51,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.liveRegion
@@ -63,7 +59,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
@@ -142,6 +137,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
 import com.thejawnpaul.gptinvestor.theme.components.GiUserMessage
 import com.thejawnpaul.gptinvestor.theme.components.GiWaveIllustration
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
+import com.thejawnpaul.gptinvestor.theme.rememberGiSharedAxisTransition
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.StringResource
@@ -152,8 +148,6 @@ private val EaseOutQuart = CubicBezierEasing(0.25f, 1f, 0.5f, 1f)
 private const val STEP_COUNT = 3
 private const val PICK_STEP = 2
 private const val BRIEF_SCREEN = 3
-private const val STEP_FADE_OUT_MS = 90
-private const val STEP_FADE_IN_MS = 210
 private const val MAX_SEARCH_RESULTS = 20
 private const val SOURCE_SUGGESTED = "suggested"
 private const val SOURCE_SEARCH = "search"
@@ -174,7 +168,7 @@ fun OnboardingScreen(
     onFinish: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val transition = rememberSharedAxisTransition()
+    val transition = rememberGiSharedAxisTransition()
     NavigationBackHandler(
         state = rememberNavigationEventState(currentInfo = NavigationEventInfo.None),
         isBackEnabled = state.currentScreen > 0,
@@ -235,26 +229,6 @@ private fun pickLogoKey(ticker: String) = "onboarding-pick-logo-$ticker"
 private fun briefLogoKey(ticker: String) = "onboarding-brief-logo-$ticker"
 
 @Composable
-private fun rememberSharedAxisTransition(): (forward: Boolean) -> ContentTransform {
-    val reducedMotion = isReducedMotionEnabled()
-    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
-    val offset = with(LocalDensity.current) { GiSpace.x8.roundToPx() }
-    return remember(reducedMotion, isRtl, offset) {
-        { forward ->
-            if (reducedMotion) {
-                fadeIn(tween(GiMotion.FAST)) togetherWith fadeOut(tween(GiMotion.FAST))
-            } else {
-                val direction = if (forward != isRtl) 1 else -1
-                slideInHorizontally(GiMotion.smooth()) { offset * direction } +
-                    fadeIn(tween(STEP_FADE_IN_MS, delayMillis = STEP_FADE_OUT_MS, easing = EaseOutQuart)) togetherWith
-                    slideOutHorizontally(GiMotion.smooth()) { -offset * direction } +
-                    fadeOut(tween(STEP_FADE_OUT_MS, easing = LinearEasing))
-            }
-        }
-    }
-}
-
-@Composable
 private fun OnboardingSteps(
     state: OnboardingUiState,
     searchResults: Flow<PagingData<CompanyPresentation>>,
@@ -267,7 +241,7 @@ private fun OnboardingSteps(
     modifier: Modifier = Modifier
 ) {
     val step = state.currentScreen.coerceAtMost(PICK_STEP)
-    val transition = rememberSharedAxisTransition()
+    val transition = rememberGiSharedAxisTransition()
     Scaffold(
         modifier = modifier,
         containerColor = GiTheme.colors.bg,

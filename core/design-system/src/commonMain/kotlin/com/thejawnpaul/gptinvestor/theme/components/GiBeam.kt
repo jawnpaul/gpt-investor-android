@@ -1,9 +1,11 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
 import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.EaseOutQuart
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -15,6 +17,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.CacheDrawScope
 import androidx.compose.ui.draw.clip
@@ -33,6 +38,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.theme.GiEdge
+import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
@@ -52,7 +58,17 @@ fun Modifier.giBeam(
     strength: Float = DEFAULT_STRENGTH,
     style: GiBeamStyle = GiBeamStyle.Travel
 ): Modifier {
-    if (!active || isReducedMotionEnabled()) return this
+    if (isReducedMotionEnabled()) return this
+    val presence = animateFloatAsState(
+        targetValue = if (active) 1f else 0f,
+        animationSpec = if (active) {
+            tween(GiMotion.BASE, easing = EaseOutQuart)
+        } else {
+            tween(GiMotion.FAST, easing = LinearEasing)
+        }
+    )
+    val visible by remember { derivedStateOf { presence.value > 0f } }
+    if (!visible) return this
     val transition = rememberInfiniteTransition()
     return when (style) {
         GiBeamStyle.Travel -> {
@@ -61,7 +77,7 @@ fun Modifier.giBeam(
                 targetValue = FULL_TURN,
                 animationSpec = infiniteRepeatable(tween(durationMillis = LAP_MS, easing = LinearEasing))
             )
-            beamRings(shape = shape, alpha = { strength }, rotation = { angle.value }, brush = ::travelBrush)
+            beamRings(shape = shape, alpha = { strength * presence.value }, rotation = { angle.value }, brush = ::travelBrush)
         }
         GiBeamStyle.Pulse -> {
             val alpha = transition.animateFloat(
@@ -72,12 +88,12 @@ fun Modifier.giBeam(
                     repeatMode = RepeatMode.Reverse
                 )
             )
-            beamRings(shape = shape, alpha = { alpha.value }, rotation = { 0f }, brush = ::pulseBrush)
+            beamRings(shape = shape, alpha = { alpha.value * presence.value }, rotation = null, brush = ::pulseBrush)
         }
     }
 }
 
-private fun Modifier.beamRings(shape: Shape, alpha: () -> Float, rotation: () -> Float, brush: (Size) -> Brush): Modifier =
+private fun Modifier.beamRings(shape: Shape, alpha: () -> Float, rotation: (() -> Float)?, brush: (Size) -> Brush): Modifier =
     drawWithCache {
         val ring = ringPath(shape, BEAM_WIDTH.toPx())
         val halo = HALO_STEPS.map { ringPath(shape, it.toPx()) }
@@ -86,16 +102,19 @@ private fun Modifier.beamRings(shape: Shape, alpha: () -> Float, rotation: () ->
         onDrawWithContent {
             drawContent()
             val beamAlpha = alpha()
-            val degrees = rotation()
             val haloAlpha = beamAlpha * HALO_ALPHA / HALO_STEPS.size
-            halo.forEach { path ->
-                clipPath(path) {
-                    rotate(degrees) { drawCircle(brush = fill, radius = reach, center = center, alpha = haloAlpha) }
+            val degrees = rotation?.invoke()
+            fun drawRing(path: Path, ringAlpha: Float) {
+                if (degrees == null) {
+                    drawPath(path = path, brush = fill, alpha = ringAlpha)
+                } else {
+                    clipPath(path) {
+                        rotate(degrees) { drawCircle(brush = fill, radius = reach, center = center, alpha = ringAlpha) }
+                    }
                 }
             }
-            clipPath(ring) {
-                rotate(degrees) { drawCircle(brush = fill, radius = reach, center = center, alpha = beamAlpha) }
-            }
+            halo.forEach { drawRing(it, haloAlpha) }
+            drawRing(ring, beamAlpha)
         }
     }
 

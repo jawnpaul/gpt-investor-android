@@ -284,14 +284,14 @@ class ConversationRepository(
             // create new conversation
             val id = conversationDao.insertConversation(
                 ConversationEntity(
-                    title = "Default title",
+                    title = "",
                     createdAt = Clock.System.now().toEpochMilliseconds()
                 )
             )
 
             StructuredConversation(
                 id = id,
-                title = "Default title",
+                title = "",
                 messageList = mutableListOf()
             )
         }
@@ -550,6 +550,9 @@ class ConversationRepository(
                 messageDao.updateMessage(message.copy(response = partialResponse))
             } else {
                 messageDao.deleteMessage(message)
+                messageDao.getMessagesForConversation(message.conversationId)
+                    .filter { it.companyDetailRemoteResponse != null && it.messageId > messageId }
+                    .forEach { messageDao.deleteMessage(it) }
                 if (messageDao.getMessagesForConversation(message.conversationId).isEmpty()) {
                     conversationDao.getSingleConversation(message.conversationId)?.let {
                         conversationDao.deleteConversation(it)

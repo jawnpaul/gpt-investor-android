@@ -5,10 +5,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseOutQuart
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -18,8 +16,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,7 +27,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,13 +37,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
@@ -64,10 +57,7 @@ import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.brief_footer_sources
 import com.thejawnpaul.gptinvestor.check_connection_try_again
 import com.thejawnpaul.gptinvestor.company_context_title
-import com.thejawnpaul.gptinvestor.copy
-import com.thejawnpaul.gptinvestor.core.utility.toCurrency
 import com.thejawnpaul.gptinvestor.couldn_t_load_brief
-import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSection
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSentiment
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefTone
@@ -84,39 +74,29 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.compan
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.questionRes
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailEvent
-import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
-import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntityMessage
-import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
-import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.AnswerMarkdown
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ScrollToNewQuestionEffect
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ThreadMessage
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.answerStrings
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.answerThreadItems
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.rememberAnswerThreadState
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.threadMessages
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.WaitlistBottomSheetContent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.tickerStock
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.ui.RemoveFromWatchlistDialog
-import com.thejawnpaul.gptinvestor.gpt_investor
-import com.thejawnpaul.gptinvestor.helpful
-import com.thejawnpaul.gptinvestor.inaccurate
-import com.thejawnpaul.gptinvestor.not_actionable
 import com.thejawnpaul.gptinvestor.not_financial_advice
-import com.thejawnpaul.gptinvestor.not_helpful
-import com.thejawnpaul.gptinvestor.others
 import com.thejawnpaul.gptinvestor.reading_company_data
 import com.thejawnpaul.gptinvestor.remove_from_watchlist
 import com.thejawnpaul.gptinvestor.retry
 import com.thejawnpaul.gptinvestor.send
-import com.thejawnpaul.gptinvestor.share
 import com.thejawnpaul.gptinvestor.share_brief
-import com.thejawnpaul.gptinvestor.show_less
-import com.thejawnpaul.gptinvestor.show_more
 import com.thejawnpaul.gptinvestor.stop_answering
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
-import com.thejawnpaul.gptinvestor.theme.components.GiAnswerActionLabels
-import com.thejawnpaul.gptinvestor.theme.components.GiAnswerActions
 import com.thejawnpaul.gptinvestor.theme.components.GiAskComposer
-import com.thejawnpaul.gptinvestor.theme.components.GiAssistantMessage
 import com.thejawnpaul.gptinvestor.theme.components.GiBanner
 import com.thejawnpaul.gptinvestor.theme.components.GiBannerTone
 import com.thejawnpaul.gptinvestor.theme.components.GiButton
@@ -125,24 +105,17 @@ import com.thejawnpaul.gptinvestor.theme.components.GiButtonVariant
 import com.thejawnpaul.gptinvestor.theme.components.GiComposerBar
 import com.thejawnpaul.gptinvestor.theme.components.GiComposerStop
 import com.thejawnpaul.gptinvestor.theme.components.GiDivider
-import com.thejawnpaul.gptinvestor.theme.components.GiFeedback
 import com.thejawnpaul.gptinvestor.theme.components.GiIconButton
 import com.thejawnpaul.gptinvestor.theme.components.GiIconToggleButton
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
-import com.thejawnpaul.gptinvestor.theme.components.GiListGroup
-import com.thejawnpaul.gptinvestor.theme.components.GiStockRow
 import com.thejawnpaul.gptinvestor.theme.components.GiStockSummary
 import com.thejawnpaul.gptinvestor.theme.components.GiStockSummarySize
-import com.thejawnpaul.gptinvestor.theme.components.GiThinkingIndicator
 import com.thejawnpaul.gptinvestor.theme.components.GiToastHost
 import com.thejawnpaul.gptinvestor.theme.components.GiToastState
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBarTitleStyle
-import com.thejawnpaul.gptinvestor.theme.components.GiUserMessage
 import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
-import com.thejawnpaul.gptinvestor.too_complex
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -165,7 +138,9 @@ fun CompanyDetailScreen(
     val composerBarHeight = remember { mutableIntStateOf(0) }
     val brief = state.brief
     val isWatched = brief?.isWatched == true
-    val messages = remember(state.conversation) { companyThread(state.conversation) }
+    val messages = remember(state.conversation) {
+        threadMessages((state.conversation as? StructuredConversation)?.messageList.orEmpty())
+    }
     val askMode = composerFocused || messages.isNotEmpty() || state.pendingQuery != null
     val heroScrolledAway by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
     val showPinnedRow = askMode && brief != null && heroScrolledAway
@@ -411,7 +386,7 @@ private fun CompanyBriefError(onRetry: () -> Unit, modifier: Modifier = Modifier
 private fun CompanyDetailBriefContent(
     brief: CompanyBrief,
     state: SingleCompanyView,
-    messages: List<CompanyThreadMessage>,
+    messages: List<ThreadMessage>,
     listState: LazyListState,
     bottomPadding: Dp,
     onEvent: (CompanyDetailEvent) -> Unit,
@@ -425,24 +400,9 @@ private fun CompanyDetailBriefContent(
         stringResource(Res.string.not_financial_advice)
     }
     val companyName = state.companyName.ifEmpty { brief.name }
-    val expanded = remember { mutableStateMapOf<Long, Boolean>() }
-    val answerStrings = AnswerStrings(
-        name = stringResource(Res.string.gpt_investor),
-        disclaimer = stringResource(Res.string.not_financial_advice),
-        showMore = stringResource(Res.string.show_more),
-        showLess = stringResource(Res.string.show_less),
-        reading = stringResource(Res.string.reading_company_data, companyName),
-        labels = GiAnswerActionLabels(
-            copy = stringResource(Res.string.copy),
-            helpful = stringResource(Res.string.helpful),
-            notHelpful = stringResource(Res.string.not_helpful),
-            share = stringResource(Res.string.share)
-        ),
-        tooComplex = stringResource(Res.string.too_complex),
-        inaccurate = stringResource(Res.string.inaccurate),
-        notActionable = stringResource(Res.string.not_actionable),
-        others = stringResource(Res.string.others)
-    )
+    val strings = answerStrings()
+    val thinkingStatus = stringResource(Res.string.reading_company_data, companyName)
+    val thread = rememberAnswerThreadState()
     val scope = rememberCoroutineScope()
     val reducedMotion = isReducedMotionEnabled()
     val itemSizes = remember { mutableMapOf<Int, Int>() }
@@ -450,35 +410,10 @@ private fun CompanyDetailBriefContent(
         snapshotFlow { listState.layoutInfo.visibleItemsInfo }
             .collect { items -> items.forEach { itemSizes[it.index] = it.size } }
     }
-    var showReasonsFor by remember { mutableStateOf<Long?>(null) }
-    var instantCollapseFor by remember { mutableStateOf<Long?>(null) }
-    var settlingCollapse by remember { mutableStateOf(false) }
-    val threadItemSpec = remember(reducedMotion, settlingCollapse) {
-        ThreadItemSpec(animatePlacement = !reducedMotion && !settlingCollapse)
-    }
-    LaunchedEffect(settlingCollapse) {
-        if (settlingCollapse) {
-            repeat(SETTLE_FRAMES) { withFrameNanos { } }
-            settlingCollapse = false
-        }
-    }
-    val showPending = state.pendingQuery != null
-    val questionCount = messages.size + if (showPending) 1 else 0
-    var scrolledQuestionCount by remember { mutableIntStateOf(questionCount) }
-    LaunchedEffect(questionCount) {
-        val grew = questionCount > scrolledQuestionCount
-        scrolledQuestionCount = questionCount
-        if (grew) {
-            withFrameNanos { }
-            listState.animateScrollToItem((listState.layoutInfo.totalItemsCount - ITEMS_AFTER_BUBBLE).coerceAtLeast(0))
-        }
-    }
-    LaunchedEffect(showReasonsFor) {
-        if (showReasonsFor != null) {
-            delay(REASONS_TIMEOUT_MS)
-            showReasonsFor = null
-        }
-    }
+    ScrollToNewQuestionEffect(
+        listState = listState,
+        questionCount = messages.size + if (state.pendingQuery != null) 1 else 0
+    )
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxSize(),
@@ -499,153 +434,27 @@ private fun CompanyDetailBriefContent(
         item(key = "footer", contentType = "footer") {
             Text(text = footer, color = GiTheme.colors.muted, style = GiTheme.type.meta)
         }
-        messages.forEachIndexed { index, threadMessage ->
-            val message = threadMessage.message
-            val isLatest = index == messages.lastIndex && !showPending
-            item(key = "q-$index", contentType = "question") {
-                GiUserMessage(text = message.query, modifier = threadItem(threadItemSpec))
-            }
-            if (message.loading && message.response.isNullOrBlank() && threadMessage.companies.isEmpty()) {
-                item(key = "t-$index", contentType = "thinking") {
-                    GiThinkingIndicator(
-                        status = answerStrings.reading,
-                        modifier = threadItem(threadItemSpec)
-                    )
+        answerThreadItems(
+            messages = messages,
+            pendingQuery = state.pendingQuery,
+            thinkingStatus = thinkingStatus,
+            strings = strings,
+            thread = thread,
+            listState = listState,
+            isGuest = state.isGuestSession,
+            onCompanyClick = { ticker ->
+                if (ticker.equals(brief.ticker, ignoreCase = true)) {
+                    scope.launch { listState.scrollToTop(itemSizes, animate = !reducedMotion) }
+                } else {
+                    onAction(CompanyDetailAction.OnOpenCompany(ticker))
                 }
-            } else {
-                item(key = "a-$index", contentType = "answer") {
-                    CompanyAnswer(
-                        modifier = threadItem(threadItemSpec),
-                        message = message,
-                        companies = threadMessage.companies,
-                        strings = answerStrings,
-                        onCompanyClick = { ticker ->
-                            if (ticker.equals(brief.ticker, ignoreCase = true)) {
-                                scope.launch { listState.scrollToTop(itemSizes, animate = !reducedMotion) }
-                            } else {
-                                onAction(CompanyDetailAction.OnOpenCompany(ticker))
-                            }
-                        },
-                        collapsed = !(expanded[message.id] ?: isLatest),
-                        animateCollapse = instantCollapseFor != message.id,
-                        onToggleCollapse = {
-                            val expandedNow = expanded[message.id] ?: isLatest
-                            val instant = expandedNow && listState.keepNextItemInPlace("a-$index")
-                            instantCollapseFor = if (instant) message.id else null
-                            settlingCollapse = instant
-                            expanded[message.id] = !expandedNow
-                        },
-                        isGuest = state.isGuestSession,
-                        showReasons = showReasonsFor == message.id,
-                        onEvent = onEvent,
-                        onNotHelpful = { showReasonsFor = message.id },
-                        onReasonPick = { showReasonsFor = null }
-                    )
-                }
+            },
+            onCopy = { onEvent(CompanyDetailEvent.CopyToClipboard(it)) },
+            onShare = { onEvent(CompanyDetailEvent.ShareAnswer(it)) },
+            onFeedback = { messageId, status, reason ->
+                onEvent(CompanyDetailEvent.SendFeedback(messageId, status, reason))
             }
-        }
-        if (state.pendingQuery != null) {
-            item(key = "q-${messages.size}", contentType = "question") {
-                GiUserMessage(text = state.pendingQuery, modifier = threadItem(threadItemSpec))
-            }
-            item(key = "t-${messages.size}", contentType = "thinking") {
-                GiThinkingIndicator(
-                    status = answerStrings.reading,
-                    modifier = threadItem(threadItemSpec)
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun CompanyAnswer(
-    message: GenAiTextMessage,
-    companies: List<CompanyDetailRemoteResponse>,
-    strings: AnswerStrings,
-    onCompanyClick: (String) -> Unit,
-    collapsed: Boolean,
-    animateCollapse: Boolean,
-    onToggleCollapse: () -> Unit,
-    isGuest: Boolean,
-    showReasons: Boolean,
-    onEvent: (CompanyDetailEvent) -> Unit,
-    onNotHelpful: () -> Unit,
-    onReasonPick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val response = message.response.orEmpty()
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
-        GiAssistantMessage(
-            name = strings.name,
-            streaming = message.loading,
-            disclaimer = strings.disclaimer,
-            collapsed = collapsed,
-            animateCollapse = animateCollapse,
-            onToggleCollapse = onToggleCollapse,
-            showMoreText = strings.showMore,
-            showLessText = strings.showLess,
-            actions = {
-                if (response.isNotBlank()) {
-                    GiAnswerActions(
-                        labels = strings.labels,
-                        onCopy = { onEvent(CompanyDetailEvent.CopyToClipboard(response)) },
-                        onShare = { onEvent(CompanyDetailEvent.ShareAnswer(response)) },
-                        feedback = when (message.feedbackStatus) {
-                            1 -> GiFeedback.Helpful
-                            -1 -> GiFeedback.NotHelpful
-                            else -> GiFeedback.None
-                        },
-                        onHelpful = if (isGuest) {
-                            null
-                        } else {
-                            { onEvent(CompanyDetailEvent.SendFeedback(message.id, 1, null)) }
-                        },
-                        onNotHelpful = if (isGuest) {
-                            null
-                        } else {
-                            {
-                                onEvent(CompanyDetailEvent.SendFeedback(message.id, -1, null))
-                                onNotHelpful()
-                            }
-                        }
-                    )
-                }
-            }
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
-                companies.forEach { company ->
-                    AnswerCompanyCard(
-                        company = company,
-                        onClick = { onCompanyClick(company.ticker) }
-                    )
-                }
-                if (response.isNotBlank()) AnswerMarkdown(text = response)
-            }
-        }
-        AnimatedVisibility(
-            visible = showReasons,
-            enter = fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart)) + expandVertically(GiMotion.smooth()),
-            exit = fadeOut(tween(GiMotion.FAST, easing = EaseOutQuart)) + shrinkVertically(GiMotion.smooth())
-        ) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(GiSpace.x2),
-                verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
-            ) {
-                strings.reasons.forEach { reason ->
-                    GiButton(
-                        text = reason,
-                        onClick = {
-                            onEvent(CompanyDetailEvent.SendFeedback(message.id, -1, reason))
-                            onReasonPick()
-                        },
-                        size = GiButtonSize.Small,
-                        variant = GiButtonVariant.Secondary
-                    )
-                }
-            }
-        }
+        )
     }
 }
 
@@ -689,42 +498,6 @@ private fun BoxScope.CompanyPinnedRow(visible: Boolean, brief: CompanyBrief?) {
     }
 }
 
-@Composable
-private fun AnswerCompanyCard(
-    company: CompanyDetailRemoteResponse,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val name = company.name ?: company.ticker
-    val subtitle = company.price?.let { "${company.ticker} · ${it.toCurrency("$")}" } ?: company.ticker
-    GiListGroup(modifier = modifier) {
-        GiStockRow(
-            stock = tickerStock(
-                ticker = company.ticker,
-                title = name,
-                subtitle = subtitle,
-                percent = company.change?.toDouble(),
-                imageUrl = company.imageUrl?.ifBlank { null }
-            ),
-            onClick = onClick,
-            showCaret = true
-        )
-    }
-}
-
-private fun LazyListState.keepNextItemInPlace(answerKey: String): Boolean {
-    val items = layoutInfo.visibleItemsInfo
-    val answer = items.firstOrNull { it.key == answerKey } ?: return false
-    if (answer.offset >= 0) return false
-    val nextIndex = answer.index + 1
-    if (nextIndex < layoutInfo.totalItemsCount) {
-        val nextOffset = items.firstOrNull { it.index == nextIndex }?.offset
-            ?: (answer.offset + answer.size + layoutInfo.mainAxisItemSpacing)
-        requestScrollToItem(nextIndex, -nextOffset)
-    }
-    return true
-}
-
 private suspend fun LazyListState.scrollToTop(itemSizes: Map<Int, Int>, animate: Boolean) {
     if (!animate) {
         scrollToItem(0)
@@ -739,51 +512,6 @@ private suspend fun LazyListState.scrollToTop(itemSizes: Map<Int, Int>, animate:
     if (firstVisibleItemIndex != 0 || firstVisibleItemScrollOffset != 0) animateScrollToItem(0)
 }
 
-private class CompanyThreadMessage(val message: GenAiTextMessage, val companies: List<CompanyDetailRemoteResponse>)
-
-private fun companyThread(conversation: Conversation): List<CompanyThreadMessage> {
-    val all = (conversation as? StructuredConversation)?.messageList.orEmpty()
-    val texts = all.filterIsInstance<GenAiTextMessage>()
-    val entities = all.filterIsInstance<GenAiEntityMessage>().filter { it.entity != null }
-    return texts.map { text ->
-        val own = entities.filter { entity -> texts.lastOrNull { it.id < entity.id }?.id == text.id }
-        val companies = when {
-            own.isNotEmpty() -> own.mapNotNull { it.entity }
-            !text.loading && text.response.isNullOrBlank() ->
-                listOfNotNull(entities.lastOrNull { it.id < text.id }?.entity)
-            else -> emptyList()
-        }
-        CompanyThreadMessage(message = text, companies = companies)
-    }
-}
-
-private data class AnswerStrings(
-    val name: String,
-    val disclaimer: String,
-    val showMore: String,
-    val showLess: String,
-    val reading: String,
-    val labels: GiAnswerActionLabels,
-    val tooComplex: String,
-    val inaccurate: String,
-    val notActionable: String,
-    val others: String
-) {
-    val reasons: List<String> get() = listOf(tooComplex, inaccurate, notActionable, others)
-}
-
-private class ThreadItemSpec(animatePlacement: Boolean) {
-    val fadeIn = tween<Float>(GiMotion.BASE, easing = EaseOutQuart)
-    val fadeOut = tween<Float>(GiMotion.FAST, easing = EaseOutQuart)
-    val placement = if (animatePlacement) GiMotion.smooth<IntOffset>() else null
-}
-
-private fun LazyItemScope.threadItem(spec: ThreadItemSpec): Modifier =
-    Modifier.animateItem(fadeInSpec = spec.fadeIn, placementSpec = spec.placement, fadeOutSpec = spec.fadeOut)
-
-private const val REASONS_TIMEOUT_MS = 15_000L
-private const val ITEMS_AFTER_BUBBLE = 2
-private const val SETTLE_FRAMES = 2
 private const val PINNED_SLIDE_DIVISOR = 4
 private const val COMPOSER_LARGE_TEXT_LINES = 3
 

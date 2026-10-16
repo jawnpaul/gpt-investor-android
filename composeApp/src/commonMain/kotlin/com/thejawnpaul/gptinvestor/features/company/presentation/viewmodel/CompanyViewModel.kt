@@ -30,6 +30,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextM
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.stopAnswer
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
 import com.thejawnpaul.gptinvestor.features.premium.domain.PREMIUM_SOURCE_WATCHLIST_FULL
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
@@ -236,31 +237,23 @@ class CompanyViewModel(
         var conversationCleared = false
         _selectedCompany.update { state ->
             val conversation = state.conversation as? StructuredConversation
-            val last = conversation?.messageList?.lastOrNull() as? GenAiTextMessage
-            val stopped = when {
-                state.pendingQuery != null || conversation == null || last == null || !last.loading ->
+            val stopped = conversation?.let { stopAnswer(it.messageList) }
+            val next = when {
+                state.pendingQuery != null || conversation == null || stopped == null ->
                     state.copy(inputQuery = state.pendingQuery ?: state.inputQuery)
-                !last.response.isNullOrBlank() -> state.copy(
-                    conversation = conversation.copy(
-                        messageList = (conversation.messageList.dropLast(1) + last.copy(loading = false))
-                            .toMutableList()
-                    )
-                )
-                conversation.messageList.size == 1 -> {
+                stopped.messages.isEmpty() -> {
                     conversationCleared = true
                     state.copy(
                         conversation = CompanyDetailDefaultConversation(id = 0, response = null),
-                        inputQuery = last.query
+                        inputQuery = stopped.restoredQuery ?: state.inputQuery
                     )
                 }
                 else -> state.copy(
-                    conversation = conversation.copy(
-                        messageList = conversation.messageList.dropLast(1).toMutableList()
-                    ),
-                    inputQuery = last.query
+                    conversation = conversation.copy(messageList = stopped.messages.toMutableList()),
+                    inputQuery = stopped.restoredQuery ?: state.inputQuery
                 )
             }
-            stopped.copy(pendingQuery = null, isAnswering = false)
+            next.copy(pendingQuery = null, isAnswering = false)
         }
         if (conversationCleared) selectedConversationId.value = -1L
         analyticsLogger.logEvent(

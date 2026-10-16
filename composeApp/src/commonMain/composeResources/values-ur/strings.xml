@@ -125,13 +125,13 @@
     <string name="load_more">مزید لوڈ کریں</string>
     <string name="saved_tidbits">محفوظ کردہ مختصر معلومات</string>
     <string name="rate_limit_bottom_sheet_title">آپ اپنے پیغامات کی حد تک پہنچ گئے ہیں</string>
-    <string name="rate_limit_bottom_sheet_description">بغیر رکاوٹ چیٹ جاری رکھنے کے لیے اپنا پلان اپ گریڈ کریں۔</string>
+    <string name="rate_limit_bottom_sheet_description">بغیر کسی حد کے چیٹ جاری رکھنے کے لیے اپ گریڈ کریں۔</string>
     <string name="search_companies_in">%1$s میں کمپنیوں کو تلاش کریں</string>
     <string name="search_all_companies">تمام کمپنیوں کو تلاش کریں</string>
     <string name="name">نام</string>
     <string name="continue_as_guest">بطور مہمان جاری رکھیں</string>
     <string name="guest_limit_reached_title">مہمان کی حد پوری ہو گئی</string>
-    <string name="guest_limit_reached_description">GPT Investor کو مکمل رسائی کے ساتھ استعمال جاری رکھنے کے لیے سائن اِن کریں۔</string>
+    <string name="guest_limit_reached_description">GPT Investor سے سوالات پوچھتے رہنے کے لیے سائن اپ کریں۔</string>
     <string name="or">یا</string>
     <string name="log_in_with_google">Google کے ساتھ لاگ اِن کریں</string>
     <string name="sign_up_with_google">Google کے ساتھ سائن اپ کریں</string>
@@ -382,4 +382,7 @@
     <string name="loading_company_brief">%1$s کی مختصر رپورٹ لوڈ ہو رہی ہے</string>
     <string name="why_sentiment">%1$s کیوں؟</string>
     <string name="answer_error">ہم اس کا جواب نہیں دے سکے۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
+    <string name="answer_offline_title">جواب تیار نہیں ہو سکا۔</string>
+    <string name="answer_offline_body">آپ آف لائن ہیں۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
+    <string name="try_asking">یہ پوچھ کر دیکھیں</string>
 </resources>

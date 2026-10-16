@@ -44,6 +44,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
+import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Singleton
 
@@ -265,7 +266,7 @@ class ConversationRepository(
                     emit(Either.Right(conversation.copy(messageList = updatedMessages)))
                 }
             }
-            emit(Either.Left(Failure.ServerError))
+            emit(Either.Left(if (e is IOException) Failure.NetworkConnection else Failure.ServerError))
         }
     }.flowOn(Dispatchers.IO)
 

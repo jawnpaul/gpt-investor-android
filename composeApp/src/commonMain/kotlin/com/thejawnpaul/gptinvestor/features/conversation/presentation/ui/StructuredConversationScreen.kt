@@ -86,7 +86,8 @@ fun StructuredConversationScreen(
     onOpenCompany: (ticker: String) -> Unit,
     onSignUpClick: () -> Unit,
     modifier: Modifier = Modifier,
-    composerModifier: Modifier = Modifier
+    composerModifier: Modifier = Modifier,
+    answerOffline: Boolean = false
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val listState = rememberLazyListState()
@@ -186,6 +187,7 @@ fun StructuredConversationScreen(
                 thread = thread,
                 listState = listState,
                 isGuest = isGuest,
+                answerOffline = answerOffline,
                 onCompanyClick = onOpenCompany,
                 onCopy = onCopy,
                 onShare = onShare,

@@ -17,6 +17,7 @@ data class SingleCompanyView(
     val brief: CompanyBrief? = null,
     val pendingQuery: String? = null,
     val isAnswering: Boolean = false,
+    val answerOffline: Boolean = false,
     val availableModels: List<AvailableModel> = emptyList(),
     val selectedModel: AvailableModel = DefaultModel(),
     val waitlistAvailableOptions: List<String> = listOf(

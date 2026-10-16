@@ -171,7 +171,12 @@ class ConversationViewModel(
     private fun startAnswer(query: String, keepDraft: Boolean = false) {
         answerGeneration++
         conversationViewMutableStateFlow.update {
-            it.copy(loading = true, pendingQuery = query, query = if (keepDraft) it.query else "")
+            it.copy(
+                loading = true,
+                pendingQuery = query,
+                query = if (keepDraft) it.query else "",
+                answerOffline = false
+            )
         }
         requestStartTime = Clock.System.now().toEpochMilliseconds()
     }
@@ -223,7 +228,8 @@ class ConversationViewModel(
                 loading = false,
                 conversation = updatedConversation,
                 pendingQuery = null,
-                query = state.pendingQuery ?: state.query
+                query = state.pendingQuery ?: state.query,
+                answerOffline = failure is Failure.NetworkConnection
             )
         }
         when (failure) {

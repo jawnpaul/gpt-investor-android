@@ -439,6 +439,7 @@ private fun CompanyDetailBriefContent(
             thread = thread,
             listState = listState,
             isGuest = state.isGuestSession,
+            answerOffline = state.answerOffline,
             onCompanyClick = { ticker ->
                 if (ticker.equals(brief.ticker, ignoreCase = true)) {
                     scope.launch { listState.scrollToTop(itemSizes, animate = !reducedMotion) }

@@ -125,13 +125,13 @@
     <string name="load_more">Завантажити ще</string>
     <string name="saved_tidbits">Збережені цікавинки</string>
     <string name="rate_limit_bottom_sheet_title">Ви досягли ліміту повідомлень</string>
-    <string name="rate_limit_bottom_sheet_description">Оновіть свій план, щоб продовжити спілкування без перерв.</string>
+    <string name="rate_limit_bottom_sheet_description">Оновіть план, щоб спілкуватися без обмежень.</string>
     <string name="search_companies_in">Шукати компанії в %1$s</string>
     <string name="search_all_companies">Шукати всі компанії</string>
     <string name="name">Назва</string>
     <string name="continue_as_guest">Продовжити як гість</string>
     <string name="guest_limit_reached_title">Ліміт для гостей вичерпано</string>
-    <string name="guest_limit_reached_description">Увійдіть, щоб продовжити користуватися GPT Investor з повним доступом.</string>
+    <string name="guest_limit_reached_description">Зареєструйтеся, щоб і далі ставити запитання GPT Investor.</string>
     <string name="or">або</string>
     <string name="log_in_with_google">Увійти через Google</string>
     <string name="sign_up_with_google">Зареєструватися через Google</string>
@@ -384,4 +384,7 @@
     <string name="loading_company_brief">Завантажуємо огляд %1$s</string>
     <string name="why_sentiment">Чому %1$s?</string>
     <string name="answer_error">Не вдалося відповісти. Перевірте з’єднання та спробуйте ще раз.</string>
+    <string name="answer_offline_title">Не вдалося створити відповідь.</string>
+    <string name="answer_offline_body">Ви офлайн. Перевірте з’єднання та спробуйте ще раз.</string>
+    <string name="try_asking">Спробуйте запитати</string>
 </resources>

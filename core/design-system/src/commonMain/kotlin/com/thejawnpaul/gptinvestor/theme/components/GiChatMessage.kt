@@ -59,6 +59,7 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -66,12 +67,16 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.sp
 import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
@@ -108,11 +113,7 @@ fun GiAssistantMessage(
         if (streaming) {
             GiStreamingText(text = text)
         } else {
-            GiText(
-                text = text,
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-                style = GiTextStyle.Body
-            )
+            GiText(text = text, style = GiTextStyle.Body)
         }
     }
 }
@@ -124,7 +125,7 @@ fun GiAssistantMessage(
     streaming: Boolean = false,
     disclaimer: String? = null,
     collapsed: Boolean = false,
-    collapsedHeight: Dp = COLLAPSED_HEIGHT,
+    collapsedHeight: Dp = Dp.Unspecified,
     animateCollapse: Boolean = true,
     onToggleCollapse: (() -> Unit)? = null,
     showMoreText: String = "",
@@ -137,6 +138,8 @@ fun GiAssistantMessage(
     val metrics = remember { CollapseMetrics() }
     val reducedMotion = isReducedMotionEnabled()
     val gap = if (clamped) GiSpace.x2 else GiSpace.x3
+    val bodyLineHeight = with(LocalDensity.current) { GiTheme.type.body.lineHeight.toDp() }
+    val clampHeight = if (collapsedHeight.isSpecified) collapsedHeight else bodyLineHeight * COLLAPSED_LINES
     Layout(
         modifier = modifier.fillMaxWidth(),
         content = {
@@ -144,6 +147,7 @@ fun GiAssistantMessage(
             Box(
                 modifier = Modifier
                     .layoutId(AssistantSlot.Body)
+                    .semantics { if (!streaming) liveRegion = LiveRegionMode.Polite }
                     .then(
                         if (streaming || !animateCollapse) {
                             Modifier
@@ -154,7 +158,7 @@ fun GiAssistantMessage(
                     .clipToBounds()
                     .layout { measurable, constraints ->
                         val placeable = measurable.measure(constraints.copy(maxHeight = Constraints.Infinity))
-                        val limit = collapsedHeight.roundToPx()
+                        val limit = clampHeight.roundToPx()
                         metrics.overflows = placeable.height > limit
                         val height = if (clamped) min(placeable.height, limit) else placeable.height
                         layout(placeable.width, height) { placeable.place(0, 0) }
@@ -372,17 +376,42 @@ private fun GiGlowingMark() {
 }
 
 @Composable
-fun GiAnswerError(message: String, retryText: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
+fun GiAnswerError(
+    message: String,
+    retryText: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+    title: String? = null
+) {
     val colors = GiTheme.colors
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+    Column(
+        modifier = modifier.semantics { liveRegion = LiveRegionMode.Assertive },
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = if (title == null) Alignment.CenterVertically else Alignment.Top
+        ) {
             Icon(
                 imageVector = GiIcons.warningCircle,
                 contentDescription = null,
-                modifier = Modifier.size(GiIconSize.sm),
+                modifier = Modifier
+                    .padding(top = if (title == null) 0.dp else GiSpace.x0_5)
+                    .size(GiIconSize.sm),
                 tint = colors.error
             )
-            GiText(text = message, style = GiTextStyle.BodySmall, color = colors.error)
+            if (title == null) {
+                GiText(text = message, style = GiTextStyle.BodySmall, color = colors.error)
+            } else {
+                val text = remember(title, message) {
+                    buildAnnotatedString {
+                        withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append(title) }
+                        append(" ")
+                        append(message)
+                    }
+                }
+                Text(text = text, style = GiTextStyle.BodySmall.textStyle(), color = colors.ink)
+            }
         }
         GiButton(
             text = retryText,
@@ -405,7 +434,7 @@ private const val GLOW_MIN_ALPHA = 0.85f
 private const val GLOW_SCALE_DELTA = 0.08f
 private const val ROTATION_PERIOD_MS = 2_400
 private const val FULL_TURN = 360f
-private val COLLAPSED_HEIGHT = 120.dp
+private const val COLLAPSED_LINES = 5
 private val FADE_HEIGHT = 48.dp
 
 @PreviewLightDark
@@ -446,6 +475,12 @@ private fun GiChatMessagePreview() {
                 )
             }
             GiAnswerError(message = "Couldn't finish this answer.", retryText = "Try again", onRetry = {})
+            GiAnswerError(
+                title = "Couldn't generate an answer.",
+                message = "You're offline. Check your connection and try again.",
+                retryText = "Try again",
+                onRetry = {}
+            )
         }
     }
 }

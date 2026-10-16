@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
-import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.RateLimitBottomSheetContent
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.RateLimitBottomSheet
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.StructuredConversationScreen
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.conversationTitle
 import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryConversationView
@@ -24,14 +24,10 @@ fun HistoryDetailScreen(
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         if (state.showRateLimitBottomSheet) {
-            GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
-                onEvent(HistoryDetailEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
-            }) {
-                RateLimitBottomSheetContent(
-                    modifier = Modifier,
-                    onUpgrade = onUpgradeFromRateLimit
-                )
-            }
+            RateLimitBottomSheet(
+                onDismiss = { onEvent(HistoryDetailEvent.ShowRateLimitBottomSheet(showBottomSheet = false)) },
+                onUpgrade = onUpgradeFromRateLimit
+            )
         }
 
         if (state.showWaitListBottomSheet) {
@@ -78,7 +74,8 @@ fun HistoryDetailScreen(
                 },
                 onRetry = { onEvent(HistoryDetailEvent.RetryAnswer(it)) },
                 onOpenCompany = { onEvent(HistoryDetailEvent.OpenCompany(it)) },
-                onSignUpClick = { onEvent(HistoryDetailEvent.GoToSignUp) }
+                onSignUpClick = { onEvent(HistoryDetailEvent.GoToSignUp) },
+                answerOffline = state.answerOffline
             )
         }
     }

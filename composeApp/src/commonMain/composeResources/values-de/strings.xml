@@ -125,13 +125,13 @@
     <string name="load_more">Mehr laden</string>
     <string name="saved_tidbits">Gespeicherte Wissenshäppchen</string>
     <string name="rate_limit_bottom_sheet_title">Sie haben Ihr Nachrichtenlimit erreicht</string>
-    <string name="rate_limit_bottom_sheet_description">Führen Sie ein Upgrade Ihres Tarifs durch, um ohne Unterbrechungen weiter zu chatten.</string>
+    <string name="rate_limit_bottom_sheet_description">Führen Sie ein Upgrade durch, um ohne Limits weiter zu chatten.</string>
     <string name="search_companies_in">Unternehmen in %1$s suchen</string>
     <string name="search_all_companies">Alle Unternehmen suchen</string>
     <string name="name">Name</string>
     <string name="continue_as_guest">Als Gast fortfahren</string>
     <string name="guest_limit_reached_title">Gastlimit erreicht</string>
-    <string name="guest_limit_reached_description">Melden Sie sich an, um GPT Investor weiterhin mit vollem Zugriff zu erkunden.</string>
+    <string name="guest_limit_reached_description">Registrieren Sie sich, um GPT Investor weiterhin Fragen zu stellen.</string>
     <string name="or">oder</string>
     <string name="log_in_with_google">Mit Google anmelden</string>
     <string name="sign_up_with_google">Mit Google registrieren</string>
@@ -382,4 +382,7 @@
     <string name="loading_company_brief">Kurzanalyse zu %1$s wird geladen</string>
     <string name="why_sentiment">Warum %1$s?</string>
     <string name="answer_error">Wir konnten das nicht beantworten. Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.</string>
+    <string name="answer_offline_title">Antwort konnte nicht erstellt werden.</string>
+    <string name="answer_offline_body">Sie sind offline. Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.</string>
+    <string name="try_asking">Fragen Sie zum Beispiel</string>
 </resources>

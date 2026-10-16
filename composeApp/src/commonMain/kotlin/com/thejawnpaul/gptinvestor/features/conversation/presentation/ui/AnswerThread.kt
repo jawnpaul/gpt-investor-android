@@ -26,12 +26,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.answer_error
+import com.thejawnpaul.gptinvestor.answer_offline_body
+import com.thejawnpaul.gptinvestor.answer_offline_title
 import com.thejawnpaul.gptinvestor.copy
 import com.thejawnpaul.gptinvestor.core.utility.toCurrency
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
@@ -72,10 +71,19 @@ import org.jetbrains.compose.resources.stringResource
 
 class ThreadMessage(val message: GenAiTextMessage, val companies: List<CompanyDetailRemoteResponse>)
 
+private fun answerFailed(message: GenAiTextMessage, companies: List<CompanyDetailRemoteResponse>): Boolean =
+    message.answerFailed && !(companies.isNotEmpty() && message.response.isNullOrBlank())
+
+private val ThreadMessage.failed: Boolean
+    get() = answerFailed(message, companies)
+
+private val ThreadMessage.answered: Boolean
+    get() = !message.loading && !failed
+
 private fun threadMessages(messages: List<GenAiMessage>): List<ThreadMessage> {
     val texts = messages.filterIsInstance<GenAiTextMessage>()
     val entities = messages.filterIsInstance<GenAiEntityMessage>().filter { it.entity != null }
-    return texts.map { text ->
+    val thread = texts.map { text ->
         val own = entities.filter { entity -> texts.lastOrNull { it.id < entity.id }?.id == text.id }
         val companies = when {
             own.isNotEmpty() -> own.mapNotNull { it.entity }
@@ -84,6 +92,9 @@ private fun threadMessages(messages: List<GenAiMessage>): List<ThreadMessage> {
             else -> emptyList()
         }
         ThreadMessage(message = text, companies = companies)
+    }
+    return thread.filterIndexed { index, item ->
+        !item.failed || thread.drop(index + 1).none { it.message.query == item.message.query && it.answered }
     }
 }
 
@@ -117,6 +128,8 @@ data class AnswerStrings(
     val labels: GiAnswerActionLabels,
     val reasons: List<String>,
     val answerError: String,
+    val offlineTitle: String,
+    val offlineBody: String,
     val tryAgain: String
 )
 
@@ -139,6 +152,8 @@ fun answerStrings(): AnswerStrings = AnswerStrings(
         stringResource(Res.string.others)
     ),
     answerError = stringResource(Res.string.answer_error),
+    offlineTitle = stringResource(Res.string.answer_offline_title),
+    offlineBody = stringResource(Res.string.answer_offline_body),
     tryAgain = stringResource(Res.string.try_again)
 )
 
@@ -191,6 +206,7 @@ fun LazyListScope.answerThreadItems(
     thread: AnswerThreadState,
     listState: LazyListState,
     isGuest: Boolean,
+    answerOffline: Boolean,
     onCompanyClick: (String) -> Unit,
     onCopy: (String) -> Unit,
     onShare: (String) -> Unit,
@@ -225,6 +241,7 @@ fun LazyListScope.answerThreadItems(
                         thread.expanded[message.id] = !expandedNow
                     },
                     isGuest = isGuest,
+                    offline = answerOffline && isLatest,
                     showReasons = thread.showReasonsFor == message.id,
                     onCopy = onCopy,
                     onShare = onShare,
@@ -257,6 +274,7 @@ private fun ThreadAnswer(
     animateCollapse: Boolean,
     onToggleCollapse: () -> Unit,
     isGuest: Boolean,
+    offline: Boolean,
     showReasons: Boolean,
     onCopy: (String) -> Unit,
     onShare: (String) -> Unit,
@@ -266,7 +284,7 @@ private fun ThreadAnswer(
     onReasonPick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val failed = message.answerFailed && !(companies.isNotEmpty() && message.response.isNullOrBlank())
+    val failed = answerFailed(message, companies)
     val response = if (failed) "" else message.response.orEmpty()
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
         GiAssistantMessage(
@@ -315,10 +333,10 @@ private fun ThreadAnswer(
                 }
                 if (failed) {
                     GiAnswerError(
-                        message = strings.answerError,
+                        title = if (offline) strings.offlineTitle else null,
+                        message = if (offline) strings.offlineBody else strings.answerError,
                         retryText = strings.tryAgain,
-                        onRetry = onRetry,
-                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+                        onRetry = onRetry
                     )
                 } else if (response.isNotBlank()) {
                     AnswerMarkdown(text = response)

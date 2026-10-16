@@ -44,14 +44,10 @@ fun ConversationScreen(
         }
 
         if (state.showRateLimitBottomSheet) {
-            GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
-                onEvent(ConversationEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
-            }) {
-                RateLimitBottomSheetContent(
-                    modifier = Modifier,
-                    onUpgrade = onUpgradeFromRateLimit
-                )
-            }
+            RateLimitBottomSheet(
+                onDismiss = { onEvent(ConversationEvent.ShowRateLimitBottomSheet(showBottomSheet = false)) },
+                onUpgrade = onUpgradeFromRateLimit
+            )
         }
 
         val structured = state.conversation as? StructuredConversation
@@ -79,7 +75,8 @@ fun ConversationScreen(
                     onRetry = { onEvent(ConversationEvent.RetryAnswer(it)) },
                     onOpenCompany = { onEvent(ConversationEvent.OpenCompany(it)) },
                     onSignUpClick = { onEvent(ConversationEvent.GoToSignUp) },
-                    composerModifier = composerModifier
+                    composerModifier = composerModifier,
+                    answerOffline = state.answerOffline
                 )
             }
 

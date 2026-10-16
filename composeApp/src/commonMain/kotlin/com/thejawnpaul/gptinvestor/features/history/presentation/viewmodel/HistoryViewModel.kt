@@ -151,7 +151,12 @@ class HistoryViewModel(
         answerGeneration++
         val generation = answerGeneration
         conversationView.update {
-            it.copy(loading = true, pendingQuery = query, query = if (source == null) it.query else "")
+            it.copy(
+                loading = true,
+                pendingQuery = query,
+                query = if (source == null) it.query else "",
+                answerOffline = false
+            )
         }
         requestStartTime = Clock.System.now().toEpochMilliseconds()
         source?.let { logMessageSent(source = it) }
@@ -213,7 +218,8 @@ class HistoryViewModel(
                 loading = false,
                 conversation = updatedConversation,
                 pendingQuery = null,
-                query = state.pendingQuery ?: state.query
+                query = state.pendingQuery ?: state.query,
+                answerOffline = failure is Failure.NetworkConnection
             )
         }
         when (failure) {

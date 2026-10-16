@@ -178,7 +178,9 @@ class CompanyViewModel(
     fun getInputResponse() {
         val query = _selectedCompany.value.inputQuery
         if (query.trim().isNotEmpty()) {
-            _selectedCompany.update { it.copy(pendingQuery = query, isAnswering = true, inputQuery = "") }
+            _selectedCompany.update {
+                it.copy(pendingQuery = query, isAnswering = true, inputQuery = "", answerOffline = false)
+            }
             requestStartTime = Clock.System.now().toEpochMilliseconds()
             analyticsLogger.logEvent(
                 eventName = "message-sent",
@@ -192,7 +194,7 @@ class CompanyViewModel(
 
     private fun retryAnswer(query: String) {
         if (query.isBlank() || _selectedCompany.value.isAnswering) return
-        _selectedCompany.update { it.copy(pendingQuery = query, isAnswering = true) }
+        _selectedCompany.update { it.copy(pendingQuery = query, isAnswering = true, answerOffline = false) }
         requestStartTime = Clock.System.now().toEpochMilliseconds()
         askQuery(query)
     }
@@ -219,7 +221,9 @@ class CompanyViewModel(
     }
 
     fun getSuggestedPromptResponse(query: String) {
-        _selectedCompany.update { it.copy(pendingQuery = query, isAnswering = true, inputQuery = "") }
+        _selectedCompany.update {
+            it.copy(pendingQuery = query, isAnswering = true, inputQuery = "", answerOffline = false)
+        }
         requestStartTime = Clock.System.now().toEpochMilliseconds()
         analyticsLogger.logEvent(
             eventName = "message-sent",
@@ -363,7 +367,8 @@ class CompanyViewModel(
                 loading = false,
                 inputQuery = "",
                 pendingQuery = null,
-                isAnswering = false
+                isAnswering = false,
+                answerOffline = failure is Failure.NetworkConnection
             )
         }
     }

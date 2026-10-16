@@ -1,13 +1,9 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.EaseOutQuart
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -127,6 +124,15 @@ private fun GiIconButtonLayout(
         animationSpec = GiMotion.snappy()
     )
     val layerAlpha = pressedLayerAlpha(interactionSource)
+    val spinnerAlpha = animateFloatAsState(
+        targetValue = if (loading) 1f else 0f,
+        animationSpec = if (loading) {
+            tween(GiMotion.FAST, easing = EaseOutQuart)
+        } else {
+            tween(GiMotion.INSTANT, easing = LinearEasing)
+        }
+    )
+    val swapping by remember { derivedStateOf { spinnerAlpha.value > 0f } }
     Box(
         modifier = Modifier
             .alpha(if (enabled) 1f else GiMotion.DISABLED_ALPHA)
@@ -155,19 +161,16 @@ private fun GiIconButtonLayout(
             .background(colors.ink.copy(alpha = layerAlpha)),
         contentAlignment = Alignment.Center
     ) {
-        AnimatedContent(
-            targetState = loading,
-            transitionSpec = {
-                fadeIn(tween(GiMotion.FAST, easing = EaseOutQuart)) togetherWith
-                    fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing))
-            },
-            contentAlignment = Alignment.Center
-        ) { isLoading ->
-            if (isLoading) {
-                GiSpinner(color = contentColor)
-            } else {
-                Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = contentColor)
-            }
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier
+                .size(20.dp)
+                .then(if (swapping) Modifier.graphicsLayer { alpha = 1f - spinnerAlpha.value } else Modifier),
+            tint = contentColor
+        )
+        if (swapping) {
+            GiSpinner(modifier = Modifier.graphicsLayer { alpha = spinnerAlpha.value }, color = contentColor)
         }
     }
 }

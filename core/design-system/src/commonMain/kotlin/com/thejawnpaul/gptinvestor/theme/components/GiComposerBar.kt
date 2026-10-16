@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.tooling.preview.Preview
@@ -15,10 +16,11 @@ import com.thejawnpaul.gptinvestor.theme.GiTheme
 @Composable
 fun GiComposerBar(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val bg = GiTheme.colors.bg
+    val fade = remember(bg) { Brush.verticalGradient(0f to bg.copy(alpha = 0f), FADE_END to bg) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Brush.verticalGradient(0f to bg.copy(alpha = 0f), FADE_END to bg))
+            .background(fade)
             .then(modifier)
             .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x6, bottom = GiSpace.x4)
     ) {

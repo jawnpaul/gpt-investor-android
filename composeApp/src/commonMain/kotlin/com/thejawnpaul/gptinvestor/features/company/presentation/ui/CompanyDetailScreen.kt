@@ -321,10 +321,12 @@ private fun CompanyDetailBriefContent(
     onVerdictClick: (BriefSentiment) -> Unit,
     onKeyNumberClick: (KeyNumber) -> Unit
 ) {
-    val messages = (state.conversation as? StructuredConversation)
-        ?.messageList
-        ?.filterIsInstance<GenAiTextMessage>()
-        .orEmpty()
+    val messages = remember(state.conversation) {
+        (state.conversation as? StructuredConversation)
+            ?.messageList
+            ?.filterIsInstance<GenAiTextMessage>()
+            .orEmpty()
+    }
     val footer = if (brief.news.isNotEmpty()) {
         pluralStringResource(Res.plurals.brief_footer_sources, brief.news.size, brief.news.size)
     } else {

@@ -83,7 +83,8 @@ fun NavGraphBuilder.conversationNavGraph(navController: NavHostController, platf
             onAction = viewModel::processAction,
             onUpgradeFromRateLimit = {
                 viewModel.handleUpgradeClick()
-            }
+            },
+            composerModifier = askComposerTransition()
         )
     }
 }

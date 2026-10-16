@@ -18,12 +18,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -54,6 +60,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiIcons
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 import com.thejawnpaul.gptinvestor.thinking
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -76,7 +83,8 @@ fun StructuredConversationScreen(
     onClickFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
     onOpenCompany: (ticker: String) -> Unit,
     onSignUpClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    composerModifier: Modifier = Modifier
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val listState = rememberLazyListState()
@@ -88,6 +96,7 @@ fun StructuredConversationScreen(
         listState = listState,
         questionCount = threadMessages.size + if (pendingQuery != null) 1 else 0
     )
+    KeepThreadEndInViewEffect(listState)
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -140,6 +149,7 @@ fun StructuredConversationScreen(
                         },
                         placeholder = stringResource(Res.string.ask_a_follow_up),
                         sendContentDescription = stringResource(Res.string.send),
+                        modifier = composerModifier,
                         floating = false,
                         stop = if (isAnswering) {
                             GiComposerStop(
@@ -184,8 +194,27 @@ fun StructuredConversationScreen(
 }
 
 @Composable
+private fun KeepThreadEndInViewEffect(listState: LazyListState) {
+    LaunchedEffect(listState) {
+        var previousPadding = -1
+        var wasAtEnd = false
+        snapshotFlow { listState.layoutInfo.afterContentPadding }.collect { padding ->
+            val grewAtEnd = wasAtEnd && previousPadding >= 0 && padding > previousPadding
+            if (grewAtEnd) listState.dispatchRawDelta((padding - previousPadding).toFloat())
+            previousPadding = padding
+            wasAtEnd = grewAtEnd || !listState.canScrollForward
+        }
+    }
+}
+
+@Composable
 private fun ConversationSuggestions(visible: Boolean, suggestions: List<SuggestionRemote>, onClick: (String) -> Unit) {
     val reducedMotion = isReducedMotionEnabled()
+    var shown by remember { mutableStateOf(visible) }
+    LaunchedEffect(visible) {
+        if (visible) delay(SUGGESTIONS_DELAY_MS)
+        shown = visible
+    }
     val chips = remember(suggestions) {
         suggestions.mapNotNull { suggestion ->
             val query = suggestion.query?.ifBlank { null } ?: suggestion.label?.ifBlank { null }
@@ -195,7 +224,7 @@ private fun ConversationSuggestions(visible: Boolean, suggestions: List<Suggesti
     val fadeIn = fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart))
     val fadeOut = fadeOut(tween(GiMotion.FAST, easing = EaseOutQuart))
     AnimatedVisibility(
-        visible = visible && chips.isNotEmpty(),
+        visible = shown && chips.isNotEmpty(),
         enter = if (reducedMotion) fadeIn else fadeIn + expandVertically(GiMotion.smooth()),
         exit = if (reducedMotion) fadeOut else fadeOut + shrinkVertically(GiMotion.smooth())
     ) {
@@ -232,6 +261,7 @@ private fun Modifier.bleedHorizontally(): Modifier = layout { measurable, constr
 private data class SuggestionChip(val label: String, val query: String)
 
 private const val COMPOSER_LARGE_TEXT_LINES = 3
+private const val SUGGESTIONS_DELAY_MS = GiMotion.SLOW.toLong()
 
 private val previewMessages = listOf(
     GenAiTextMessage(

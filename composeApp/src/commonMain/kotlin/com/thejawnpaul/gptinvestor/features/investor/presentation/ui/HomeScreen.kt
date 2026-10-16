@@ -91,14 +91,20 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @Composable
-fun HomeScreen(state: HomeUiState, onEvent: (HomeEvent) -> Unit, modifier: Modifier = Modifier) {
+fun HomeScreen(
+    state: HomeUiState,
+    onEvent: (HomeEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    composerModifier: Modifier = Modifier
+) {
     val notificationPermissionController: NotificationPermissionController = koinInject()
 
     HomeScreenContent(
         state = state,
         onEvent = onEvent,
         notificationPermissionController = notificationPermissionController,
-        modifier = modifier
+        modifier = modifier,
+        composerModifier = composerModifier
     )
 }
 
@@ -107,7 +113,8 @@ private fun HomeScreenContent(
     state: HomeUiState,
     onEvent: (HomeEvent) -> Unit,
     notificationPermissionController: NotificationPermissionController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    composerModifier: Modifier = Modifier
 ) {
     notificationPermissionController.RequestPermissionIfNeeded(
         shouldRequest = state.requestForNotificationPermission == null && !state.isGuestSession,
@@ -134,7 +141,8 @@ private fun HomeScreenContent(
                     onValueChange = { onEvent(HomeEvent.ChatInputChanged(it)) },
                     onSend = { onEvent(HomeEvent.SendClick) },
                     placeholder = stringResource(Res.string.ask_me_anything_about_markets),
-                    sendContentDescription = stringResource(Res.string.send)
+                    sendContentDescription = stringResource(Res.string.send),
+                    modifier = composerModifier
                 )
             }
         }

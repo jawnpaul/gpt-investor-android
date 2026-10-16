@@ -77,7 +77,8 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
         HomeScreen(
             modifier = Modifier,
             state = state.value,
-            onEvent = homeViewModel::handleEvent
+            onEvent = homeViewModel::handleEvent,
+            composerModifier = askComposerTransition()
         )
     }
 

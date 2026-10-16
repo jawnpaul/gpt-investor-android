@@ -133,7 +133,8 @@ fun NavGraphBuilder.guestNavGraph(
         HomeScreen(
             modifier = Modifier,
             state = state.value,
-            onEvent = viewModel::handleEvent
+            onEvent = viewModel::handleEvent,
+            composerModifier = askComposerTransition()
         )
     }
 
@@ -284,7 +285,8 @@ fun NavGraphBuilder.guestNavGraph(
             state = state.value,
             onEvent = viewModel::handleEvent,
             onAction = viewModel::processAction,
-            onUpgradeFromRateLimit = {}
+            onUpgradeFromRateLimit = {},
+            composerModifier = askComposerTransition()
         )
     }
 

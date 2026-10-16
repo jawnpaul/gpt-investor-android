@@ -18,7 +18,8 @@ fun ConversationScreen(
     onEvent: (ConversationEvent) -> Unit,
     onAction: (ConversationAction) -> Unit,
     onUpgradeFromRateLimit: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    composerModifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         if (state.showWaitListBottomSheet) {
@@ -76,7 +77,8 @@ fun ConversationScreen(
                         onEvent(ConversationEvent.SendFeedback(messageId, status, reason))
                     },
                     onOpenCompany = { onEvent(ConversationEvent.OpenCompany(it)) },
-                    onSignUpClick = { onEvent(ConversationEvent.GoToSignUp) }
+                    onSignUpClick = { onEvent(ConversationEvent.GoToSignUp) },
+                    composerModifier = composerModifier
                 )
             }
 

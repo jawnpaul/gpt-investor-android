@@ -11,6 +11,8 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,11 +27,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.AccessibilityManager
 import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.ui.platform.LocalDensity
@@ -48,7 +53,11 @@ import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
+import kotlin.time.TimeSource
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
 enum class GiToastResult { Dismissed, ActionPerformed }
@@ -59,7 +68,9 @@ class GiToastData internal constructor(
     val icon: ImageVector?,
     val actionText: String?,
     internal val result: CompletableDeferred<GiToastResult>
-)
+) {
+    internal var held by mutableStateOf(false)
+}
 
 @Stable
 class GiToastState internal constructor(private val accessibilityManager: AccessibilityManager?) {
@@ -82,10 +93,24 @@ class GiToastState internal constructor(private val accessibilityManager: Access
             containsControls = actionText != null
         ) ?: baseDuration
         return try {
-            withTimeoutOrNull(duration) { data.result.await() } ?: GiToastResult.Dismissed
+            coroutineScope {
+                val timer = launch { data.runTimer(duration) }
+                data.result.await().also { timer.cancel() }
+            }
         } finally {
             if (current === data) current = null
         }
+    }
+
+    private suspend fun GiToastData.runTimer(duration: Long) {
+        var remaining = duration
+        while (remaining > 0) {
+            snapshotFlow { held }.first { !it }
+            val mark = TimeSource.Monotonic.markNow()
+            withTimeoutOrNull(remaining) { snapshotFlow { held }.first { it } }
+            remaining -= mark.elapsedNow().inWholeMilliseconds
+        }
+        result.complete(GiToastResult.Dismissed)
     }
 
     internal fun performAction(data: GiToastData) {
@@ -119,6 +144,19 @@ fun GiToastHost(state: GiToastState, modifier: Modifier = Modifier) {
         if (data != null) {
             GiToast(
                 message = data.message,
+                modifier = Modifier.pointerInput(data) {
+                    awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                        data.held = true
+                        try {
+                            do {
+                                val event = awaitPointerEvent(PointerEventPass.Initial)
+                            } while (event.changes.any { it.pressed })
+                        } finally {
+                            data.held = false
+                        }
+                    }
+                },
                 icon = data.icon,
                 actionText = data.actionText,
                 onAction = { state.performAction(data) }
@@ -163,7 +201,9 @@ fun GiToast(
         if (actionText != null) {
             GiText(
                 text = actionText,
-                modifier = Modifier.clickable(role = Role.Button, onClick = onAction),
+                modifier = Modifier
+                    .clickable(role = Role.Button, onClick = onAction)
+                    .padding(horizontal = GiSpace.x1),
                 style = GiTextStyle.Link,
                 color = colors.invAction
             )

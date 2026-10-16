@@ -93,7 +93,6 @@
     <string name="sources">Quellen</string>
     <string name="top_pick_rationale">Begründung der Top-Empfehlung</string>
     <string name="sign_up">Registrieren</string>
-    <string name="don_t_have_an_account">Sie haben noch kein Konto?</string>
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
     <string name="continue_with_google">Mit Google fortfahren</string>
     <string name="continue_with_email">Mit E-Mail fortfahren</string>
@@ -328,5 +327,20 @@
     <string name="signup_error_password_short">Verwenden Sie mindestens 8 Zeichen.</string>
     <string name="show_password">Passwort anzeigen</string>
     <string name="hide_password">Passwort verbergen</string>
+    <string name="login_password_placeholder">Ihr Passwort</string>
+    <string name="login_error_password_empty">Geben Sie Ihr Passwort ein.</string>
+    <string name="login_error_invalid_credentials">E-Mail und Passwort stimmen nicht überein. Versuchen Sie es erneut oder %1$s.</string>
+    <string name="login_reset_password_link">setzen Sie Ihr Passwort zurück</string>
+    <string name="forgot_password">Passwort vergessen?</string>
+    <string name="auth_no_account">Sie haben noch kein Konto? %1$s</string>
+    <string name="forgot_password_title">Passwort zurücksetzen</string>
+    <string name="forgot_password_body">Geben Sie die E-Mail-Adresse ein, mit der Sie sich anmelden, und wir senden Ihnen einen Link zum Zurücksetzen.</string>
+    <string name="forgot_password_send">Link senden</string>
+    <string name="forgot_password_sent_title">Prüfen Sie Ihren Posteingang</string>
+    <string name="forgot_password_sent_body">Falls ein Konto für %1$s existiert, haben wir einen Link zum Zurücksetzen gesendet.</string>
+    <string name="forgot_password_resend">E-Mail erneut senden</string>
+    <string name="forgot_password_resend_in">Erneut senden in %1$d s</string>
+    <string name="forgot_password_back_to_login">Zurück zur Anmeldung</string>
+    <string name="forgot_password_error_rate_limited">Zu viele Versuche. Versuchen Sie es später erneut.</string>
 
 </resources>

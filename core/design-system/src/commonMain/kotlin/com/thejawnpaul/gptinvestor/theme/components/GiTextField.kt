@@ -77,6 +77,7 @@ fun GiTextField(
     placeholder: String? = null,
     helperText: String? = null,
     errorText: String? = null,
+    isError: Boolean = errorText != null,
     enabled: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
@@ -91,7 +92,6 @@ fun GiTextField(
     val colors = GiTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val isError = errorText != null
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var hasBeenFocused by remember { mutableStateOf(false) }
     val currentOnFocusLost by rememberUpdatedState(onFocusLost)

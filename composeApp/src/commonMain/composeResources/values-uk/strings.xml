@@ -93,7 +93,6 @@
     <string name="sources">Джерела</string>
     <string name="top_pick_rationale">Обґрунтування найкращого вибору</string>
     <string name="sign_up">Зареєструватися</string>
-    <string name="don_t_have_an_account">Не маєте облікового запису?</string>
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
     <string name="continue_with_google">Продовжити з Google</string>
     <string name="continue_with_email">Продовжити з електронною поштою</string>
@@ -328,5 +327,20 @@
     <string name="signup_error_password_short">Використайте щонайменше 8 символів.</string>
     <string name="show_password">Показати пароль</string>
     <string name="hide_password">Приховати пароль</string>
+    <string name="login_password_placeholder">Ваш пароль</string>
+    <string name="login_error_password_empty">Введіть пароль.</string>
+    <string name="login_error_invalid_credentials">Ця електронна адреса та пароль не збігаються. Спробуйте ще раз або %1$s.</string>
+    <string name="login_reset_password_link">скиньте пароль</string>
+    <string name="forgot_password">Забули пароль?</string>
+    <string name="auth_no_account">Немає облікового запису? %1$s</string>
+    <string name="forgot_password_title">Скидання пароля</string>
+    <string name="forgot_password_body">Введіть електронну адресу, з якою ви входите, і ми надішлемо посилання для скидання.</string>
+    <string name="forgot_password_send">Надіслати посилання</string>
+    <string name="forgot_password_sent_title">Перевірте пошту</string>
+    <string name="forgot_password_sent_body">Якщо обліковий запис для %1$s існує, ми надіслали посилання для скидання.</string>
+    <string name="forgot_password_resend">Надіслати ще раз</string>
+    <string name="forgot_password_resend_in">Надіслати ще раз через %1$d с</string>
+    <string name="forgot_password_back_to_login">Повернутися до входу</string>
+    <string name="forgot_password_error_rate_limited">Забагато спроб. Спробуйте пізніше.</string>
 
 </resources>

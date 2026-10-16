@@ -38,3 +38,12 @@ data class SignUpResponse(
     @SerialName("status") val status: String? = null,
     @SerialName("user_id") val userId: String? = null
 )
+
+@Serializable
+data class ForgotPasswordRequest(@SerialName("email") val email: String)
+
+@Serializable
+data class ForgotPasswordResponse(
+    @SerialName("message") val message: String? = null,
+    @SerialName("status") val status: String? = null
+)

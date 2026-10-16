@@ -93,7 +93,6 @@
     <string name="sources">Sources</string>
     <string name="top_pick_rationale">Top pick rationale</string>
     <string name="sign_up">Sign up</string>
-    <string name="don_t_have_an_account">Don't have an account?</string>
     <string name="verify_email_title">Check your email</string>
     <string name="verify_email_body">Please verify your email address before logging in. Check your inbox for a verification link.</string>
     <string name="email_conflict_title">Account already exists</string>
@@ -354,4 +353,19 @@
     <string name="signup_error_password_short">Use at least 8 characters.</string>
     <string name="show_password">Show password</string>
     <string name="hide_password">Hide password</string>
+    <string name="login_password_placeholder">Your password</string>
+    <string name="login_error_password_empty">Enter your password.</string>
+    <string name="login_error_invalid_credentials">That email and password don't match. Try again or %1$s.</string>
+    <string name="login_reset_password_link">reset your password</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="auth_no_account">Don't have an account? %1$s</string>
+    <string name="forgot_password_title">Reset password</string>
+    <string name="forgot_password_body">Enter the email you log in with and we'll send you a reset link.</string>
+    <string name="forgot_password_send">Send reset link</string>
+    <string name="forgot_password_sent_title">Check your inbox</string>
+    <string name="forgot_password_sent_body">If an account exists for %1$s, we've sent a reset link.</string>
+    <string name="forgot_password_resend">Resend email</string>
+    <string name="forgot_password_resend_in">Resend in %1$d s</string>
+    <string name="forgot_password_back_to_login">Back to log in</string>
+    <string name="forgot_password_error_rate_limited">Too many attempts. Try again later.</string>
 </resources>

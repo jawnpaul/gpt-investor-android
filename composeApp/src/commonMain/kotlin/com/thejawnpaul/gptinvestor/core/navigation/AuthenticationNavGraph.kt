@@ -7,11 +7,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DefaultAuthenticationAction
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DefaultAuthenticationScreen
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DefaultAuthenticationViewModel
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.FORGOT_PASSWORD_EMAIL_ARG
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.ForgotPasswordScreen
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.ForgotPasswordUiAction
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.ForgotPasswordViewModel
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.LoginScreen
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.LoginUiAction
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.LoginViewModel
@@ -88,11 +94,48 @@ fun NavGraphBuilder.authenticationNavGraph(
                     LoginUiAction.OnGoToHome -> {
                         navigateAfterAuth(navController, Screen.LoginScreen.route, hasCompletedPostAuthOnboarding)
                     }
+
+                    is LoginUiAction.OnGoToForgotPassword -> {
+                        navController.navigate(Screen.ForgotPasswordScreen.createRoute(action.email))
+                    }
+
+                    is LoginUiAction.InvalidSubmit -> Unit
+                }
+            }.launchIn(scope)
+        }
+        val invalidSubmits = remember(viewModel) {
+            viewModel.actions.filterIsInstance<LoginUiAction.InvalidSubmit>().map { it.firstInvalid }
+        }
+        LoginScreen(state = state.value, onEvent = viewModel::handleEvent, invalidSubmits = invalidSubmits)
+    }
+
+    composable(
+        route = Screen.ForgotPasswordScreen.route,
+        arguments = listOf(
+            navArgument(FORGOT_PASSWORD_EMAIL_ARG) {
+                type = NavType.StringType
+                defaultValue = ""
+            }
+        )
+    ) {
+        val viewModel = koinViewModel<ForgotPasswordViewModel>()
+        val state = viewModel.uiState.collectAsState()
+        val scope = rememberCoroutineScope()
+        LaunchedEffect(Unit) {
+            viewModel.actions.onEach { action ->
+                when (action) {
+                    ForgotPasswordUiAction.OnGoBack -> {
+                        navController.navigateUp()
+                    }
+
+                    is ForgotPasswordUiAction.OnShowToast -> {
+                        platformActions.showMessage(action.message)
+                    }
                 }
             }.launchIn(scope)
         }
 
-        LoginScreen(state = state.value, onEvent = viewModel::handleEvent)
+        ForgotPasswordScreen(state = state.value, onEvent = viewModel::handleEvent)
     }
 
     composable(route = Screen.SignUpScreen.route) {

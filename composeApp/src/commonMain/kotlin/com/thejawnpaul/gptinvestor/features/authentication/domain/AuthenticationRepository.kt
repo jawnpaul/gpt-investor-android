@@ -10,6 +10,7 @@ interface AuthenticationRepository {
     fun getAuthState(): Flow<Boolean>
     suspend fun deleteAccount(): Result<Unit>
     suspend fun loginWithEmailAndPassword(email: String, password: String): Result<String>
+    suspend fun requestPasswordReset(email: String): Result<Unit>
     suspend fun signUpWithEmailAndPassword(email: String, password: String, name: String): Result<String>
     suspend fun loginWithGoogle(platformContext: PlatformContext): Result<Unit>
     suspend fun loginWithApple(): Result<Unit>

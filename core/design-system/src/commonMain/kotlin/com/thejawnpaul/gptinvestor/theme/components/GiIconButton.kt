@@ -1,6 +1,13 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.EaseOutQuart
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -148,10 +155,19 @@ private fun GiIconButtonLayout(
             .background(colors.ink.copy(alpha = layerAlpha)),
         contentAlignment = Alignment.Center
     ) {
-        if (loading) {
-            GiSpinner(color = contentColor)
-        } else {
-            Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = contentColor)
+        AnimatedContent(
+            targetState = loading,
+            transitionSpec = {
+                fadeIn(tween(GiMotion.FAST, easing = EaseOutQuart)) togetherWith
+                    fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing))
+            },
+            contentAlignment = Alignment.Center
+        ) { isLoading ->
+            if (isLoading) {
+                GiSpinner(color = contentColor)
+            } else {
+                Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = contentColor)
+            }
         }
     }
 }

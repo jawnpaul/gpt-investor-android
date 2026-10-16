@@ -26,10 +26,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -83,6 +86,8 @@ import com.thejawnpaul.gptinvestor.theme.components.GiIconButton
 import com.thejawnpaul.gptinvestor.theme.components.GiIconToggleButton
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -276,14 +281,13 @@ fun CompanyDetailScreen(
             }
         }
 
-        if (state.showSpotlight && brief != null) {
-            CompanyBriefTip(
-                onDismiss = { onEvent(CompanyDetailEvent.DismissSpotlight) },
-                onShare = { onEvent(CompanyDetailEvent.ShareBrief) },
-                onWatchlist = onWatchlistClick,
-                isWatched = isWatched
-            )
-        }
+        CompanyBriefTip(
+            visible = state.showSpotlight && brief != null,
+            onDismiss = { onEvent(CompanyDetailEvent.DismissSpotlight) },
+            onShare = { onEvent(CompanyDetailEvent.ShareBrief) },
+            onWatchlist = onWatchlistClick,
+            isWatched = isWatched
+        )
     }
 }
 
@@ -325,6 +329,13 @@ private fun CompanyDetailBriefContent(
         pluralStringResource(Res.plurals.brief_footer_sources, brief.news.size, brief.news.size)
     } else {
         stringResource(Res.string.not_financial_advice)
+    }
+    val messageCount by rememberUpdatedState(messages.size)
+    LaunchedEffect(listState) {
+        snapshotFlow { messageCount }
+            .drop(1)
+            .filter { it > 0 }
+            .collect { listState.animateScrollToItem(listState.layoutInfo.totalItemsCount - 1) }
     }
     LazyColumn(
         state = listState,

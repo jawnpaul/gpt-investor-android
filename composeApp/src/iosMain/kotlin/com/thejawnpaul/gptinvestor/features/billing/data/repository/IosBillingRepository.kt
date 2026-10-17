@@ -9,16 +9,19 @@ import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingPurchase
 import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.remote.TokenStorage
-import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
+import kotlin.coroutines.resume
 
 @Singleton(binds = [IBillingRepository::class])
 class IosBillingRepository(
@@ -28,11 +31,18 @@ class IosBillingRepository(
     @Provided private val scope: CoroutineScope
 ) : IBillingRepository {
 
+    private val _purchaseVerified = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    override val purchaseVerified: SharedFlow<Unit> = _purchaseVerified.asSharedFlow()
+
     private val purchasesFlow = MutableStateFlow<List<BillingPurchase>>(emptyList())
 
     override suspend fun connect(): Result<Unit> = Result.success(Unit)
 
-    override suspend fun launchPurchaseFlow(platformContext: PlatformContext, productId: String): BillingResult =
+    override suspend fun launchPurchaseFlow(
+        platformContext: PlatformContext,
+        productId: String,
+        trigger: String,
+    ): BillingResult =
         suspendCancellableCoroutine { cont ->
             storeKitProvider.purchase(
                 productId = productId,
@@ -42,9 +52,11 @@ class IosBillingRepository(
                         productId = pid,
                         orderId = orderId
                     )
+                    if (cont.isActive) cont.resume(BillingResult.Success)
                     scope.launch(Dispatchers.Default) {
                         val syncResult = syncPurchaseToBackend(purchase)
                         if (syncResult.isSuccess) {
+                            _purchaseVerified.tryEmit(Unit)
                             refreshAccessTokenAfterPurchaseSync()
                         }
                         refreshPurchases()

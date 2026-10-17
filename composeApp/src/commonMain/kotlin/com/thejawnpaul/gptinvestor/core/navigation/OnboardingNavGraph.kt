@@ -26,6 +26,13 @@ fun NavGraphBuilder.onboardingNavGraph(navController: NavHostController) {
                             popUpTo(0) { inclusive = true }
                         }
                     }
+
+                    OnboardingAction.NavigateToSignUp -> {
+                        navController.navigate(Screen.DefaultAuthenticationScreen.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                        navController.navigate(Screen.SignUpScreen.route)
+                    }
                 }
             }.launchIn(scope)
         }

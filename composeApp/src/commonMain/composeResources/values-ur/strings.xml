@@ -411,4 +411,16 @@
     <string name="discover_search_error_title_generic">تلاش لوڈ نہیں ہو سکی</string>
     <string name="discover_search_error_body">تلاش کے لیے کنکشن ضروری ہے۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
     <string name="discover_loading_search">تلاش لوڈ ہو رہی ہے</string>
+    <string name="create_an_account">اکاؤنٹ بنائیں</string>
+    <string name="profile_guest">مہمان</string>
+    <string name="profile_free_plan">مفت پلان</string>
+    <string name="profile_premium_plan">Premium پلان</string>
+    <string name="profile_upgrade_title">Premium پر اپ گریڈ کریں</string>
+    <string name="profile_upgrade_body">لامحدود واچ لسٹ، Thesis Tracker اور آپ کے ہر فالو کردہ اسٹاک کا روزانہ خلاصہ۔</string>
+    <string name="profile_see_premium">Premium دیکھیں</string>
+    <string name="profile_questions">سوالات</string>
+    <string name="settings_on">آن</string>
+    <string name="settings_off">آف</string>
+    <string name="sign_out_title">سائن آؤٹ کریں؟</string>
+    <string name="sign_out_body">آپ کی واچ لسٹ، محفوظ کردہ چیزیں اور ہسٹری آپ کے اکاؤنٹ میں رہیں گی۔ جہاں چھوڑا تھا وہیں سے جاری رکھنے کے لیے دوبارہ لاگ ان کریں۔</string>
 </resources>

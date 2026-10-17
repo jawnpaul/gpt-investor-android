@@ -237,12 +237,9 @@
     <string name="notifications">Notifications</string>
     <string name="appearance">Appearance</string>
     <string name="privacy">Privacy</string>
-    <string name="are_you_sure_you_want_to_sign_out">Are you sure you want to sign out?</string>
     <string name="watching">Watching</string>
     <string name="saved">Saved</string>
     <string name="queries">Queries</string>
-    <string name="upgrade_to_premium">Upgrade to premium</string>
-    <string name="upgrade_cta_subtitle">Unlimited watchlist, Thesis Tracker, and more</string>
     <string name="light">Light</string>
     <string name="dark">Dark</string>
     <string name="system">System</string>
@@ -432,4 +429,16 @@
     <string name="discover_search_error_title_generic">Couldn’t load search</string>
     <string name="discover_search_error_body">Search needs a connection. Check your connection and try again.</string>
     <string name="discover_loading_search">Loading search</string>
+    <string name="create_an_account">Create an account</string>
+    <string name="profile_guest">Guest</string>
+    <string name="profile_free_plan">Free plan</string>
+    <string name="profile_premium_plan">Premium plan</string>
+    <string name="profile_upgrade_title">Upgrade to Premium</string>
+    <string name="profile_upgrade_body">Unlimited watchlist, Thesis Tracker and a daily summary for every stock you follow.</string>
+    <string name="profile_see_premium">See Premium</string>
+    <string name="profile_questions">Questions</string>
+    <string name="settings_on">On</string>
+    <string name="settings_off">Off</string>
+    <string name="sign_out_title">Sign out?</string>
+    <string name="sign_out_body">Your watchlist, saved items and history stay in your account. Log in again to pick up where you left off.</string>
 </resources>

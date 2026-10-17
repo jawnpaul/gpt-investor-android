@@ -413,4 +413,16 @@
     <string name="discover_search_error_title_generic">Не вдалося завантажити пошук</string>
     <string name="discover_search_error_body">Для пошуку потрібне з’єднання. Перевірте з’єднання та спробуйте ще раз.</string>
     <string name="discover_loading_search">Завантаження пошуку</string>
+    <string name="create_an_account">Створити обліковий запис</string>
+    <string name="profile_guest">Гість</string>
+    <string name="profile_free_plan">Безкоштовний план</string>
+    <string name="profile_premium_plan">План Premium</string>
+    <string name="profile_upgrade_title">Перейти на Premium</string>
+    <string name="profile_upgrade_body">Необмежений список спостереження, Thesis Tracker і щоденний підсумок для кожної акції, за якою ви стежите.</string>
+    <string name="profile_see_premium">Переглянути Premium</string>
+    <string name="profile_questions">Запитання</string>
+    <string name="settings_on">Увімк.</string>
+    <string name="settings_off">Вимк.</string>
+    <string name="sign_out_title">Вийти?</string>
+    <string name="sign_out_body">Ваш список спостереження, збережене та історія залишаться у вашому обліковому записі. Увійдіть знову, щоб продовжити з того самого місця.</string>
 </resources>

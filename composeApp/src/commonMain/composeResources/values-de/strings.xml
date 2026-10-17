@@ -411,4 +411,16 @@
     <string name="discover_search_error_title_generic">Suche konnte nicht geladen werden</string>
     <string name="discover_search_error_body">Die Suche braucht eine Verbindung. Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.</string>
     <string name="discover_loading_search">Suche wird geladen</string>
+    <string name="create_an_account">Konto erstellen</string>
+    <string name="profile_guest">Gast</string>
+    <string name="profile_free_plan">Kostenloser Plan</string>
+    <string name="profile_premium_plan">Premium-Plan</string>
+    <string name="profile_upgrade_title">Auf Premium upgraden</string>
+    <string name="profile_upgrade_body">Unbegrenzte Watchlist, Thesis Tracker und eine tägliche Zusammenfassung für jede Aktie, der Sie folgen.</string>
+    <string name="profile_see_premium">Premium ansehen</string>
+    <string name="profile_questions">Fragen</string>
+    <string name="settings_on">An</string>
+    <string name="settings_off">Aus</string>
+    <string name="sign_out_title">Abmelden?</string>
+    <string name="sign_out_body">Ihre Watchlist, gespeicherte Inhalte und Ihr Verlauf bleiben in Ihrem Konto. Melden Sie sich wieder an, um dort weiterzumachen, wo Sie aufgehört haben.</string>
 </resources>

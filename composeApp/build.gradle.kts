@@ -242,10 +242,14 @@ buildkonfig {
             "WEB_CLIENT_ID",
             localProperties.getProperty("WEB_CLIENT_ID_PROD") ?: ""
         )
+        buildConfigField(FieldSpec.Type.STRING, "BILLING_PRODUCT_ID", "")
     }
 
     targetConfigs {
-        create("ios") {
+        create("iosArm64") {
+            buildConfigField(FieldSpec.Type.STRING, "BILLING_PRODUCT_ID", localProperties.getProperty("IOS_BILLING_PRODUCT_ID") ?: "")
+        }
+        create("iosSimulatorArm64") {
             buildConfigField(FieldSpec.Type.STRING, "BILLING_PRODUCT_ID", localProperties.getProperty("IOS_BILLING_PRODUCT_ID") ?: "")
         }
         create("android") {

@@ -47,7 +47,8 @@ class TopPickRepository(
                                 confidenceScore = confidenceScore,
                                 date = date,
                                 price = price ?: 0.0f,
-                                change = percentageChange ?: 0.0f
+                                change = percentageChange ?: 0.0f,
+                                imageUrl = imageUrl?.toHttpsUrl().orEmpty()
                             )
                         }
                     }

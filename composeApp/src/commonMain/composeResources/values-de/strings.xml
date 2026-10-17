@@ -295,10 +295,8 @@
     <string name="added_to_watchlist">%1$s zur Watchlist hinzugefügt</string>
     <string name="removed_from_watchlist">%1$s aus der Watchlist entfernt</string>
     <string name="failed_to_remove_from_watchlist">%1$s konnte nicht entfernt werden</string>
-    <string name="browse_stocks_search_placeholder">Aktien, Unternehmen suchen…</string>
     <string name="browse_stocks_empty">Keine Aktien gefunden</string>
     <string name="browse_stocks_filter_by_sector">Nach Sektor filtern</string>
-    <string name="browse_stocks_error">Aktien konnten nicht geladen werden</string>
     <string name="premium_sheet_title">Zu Premium wechseln</string>
     <string name="premium_sheet_subtitle">Schalte das volle GPT Investor-Erlebnis frei.</string>
     <string name="premium_sheet_subtitle_watchlist_full">Du hast %1$d von %2$d kostenlosen Watchlist-Plätzen belegt.</string>
@@ -386,4 +384,16 @@
     <string name="answer_offline_body">Sie sind offline. Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.</string>
     <string name="try_asking">Fragen Sie zum Beispiel</string>
     <string name="view">Ansehen</string>
+    <string name="browse_companies_title">Unternehmen durchsuchen</string>
+    <string name="browse_search_placeholder">Aktien oder Unternehmen suchen</string>
+    <string name="browse_sector">Sektor</string>
+    <string name="browse_sector_all">Alle</string>
+    <string name="browse_loading">Unternehmen werden geladen</string>
+    <string name="browse_empty_in_sector">Nichts in %1$s passt zu „%2$s“. Prüfen Sie die Schreibweise oder durchsuchen Sie alle Sektoren.</string>
+    <string name="browse_empty_query">Nichts passt zu „%1$s“. Prüfen Sie die Schreibweise und versuchen Sie es erneut.</string>
+    <string name="browse_empty_sector">In %1$s gibt es noch keine Unternehmen. Versuchen Sie einen anderen Sektor.</string>
+    <string name="browse_empty_all">Es gibt noch keine Unternehmen anzuzeigen. Versuchen Sie es gleich noch einmal.</string>
+    <string name="browse_search_all_sectors">Alle Sektoren durchsuchen</string>
+    <string name="browse_error_title">Unternehmen konnten nicht geladen werden</string>
+    <string name="browse_more_error">Weitere Unternehmen konnten nicht geladen werden.</string>
 </resources>

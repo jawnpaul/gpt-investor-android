@@ -295,10 +295,8 @@
     <string name="added_to_watchlist">%1$s додано до списку спостереження</string>
     <string name="removed_from_watchlist">%1$s видалено зі списку спостереження</string>
     <string name="failed_to_remove_from_watchlist">Не вдалося видалити %1$s</string>
-    <string name="browse_stocks_search_placeholder">Шукати акції, компанії…</string>
     <string name="browse_stocks_empty">Акцій не знайдено</string>
     <string name="browse_stocks_filter_by_sector">Фільтрувати за сектором</string>
-    <string name="browse_stocks_error">Не вдалося завантажити акції</string>
     <string name="premium_sheet_title">Перейти на Premium</string>
     <string name="premium_sheet_subtitle">Розблокуйте всі можливості GPT Investor.</string>
     <string name="premium_sheet_subtitle_watchlist_full">Ви використали %1$d з %2$d безкоштовних місць у списку спостереження.</string>
@@ -388,4 +386,16 @@
     <string name="answer_offline_body">Ви офлайн. Перевірте з’єднання та спробуйте ще раз.</string>
     <string name="try_asking">Спробуйте запитати</string>
     <string name="view">Переглянути</string>
+    <string name="browse_companies_title">Перегляд компаній</string>
+    <string name="browse_search_placeholder">Пошук акцій або компаній</string>
+    <string name="browse_sector">Сектор</string>
+    <string name="browse_sector_all">Усі</string>
+    <string name="browse_loading">Завантаження компаній</string>
+    <string name="browse_empty_in_sector">У секторі %1$s немає збігів для «%2$s». Перевірте написання або шукайте в усіх секторах.</string>
+    <string name="browse_empty_query">Немає збігів для «%1$s». Перевірте написання та спробуйте ще раз.</string>
+    <string name="browse_empty_sector">У секторі %1$s ще немає компаній. Спробуйте інший сектор.</string>
+    <string name="browse_empty_all">Поки що немає компаній для показу. Спробуйте трохи згодом.</string>
+    <string name="browse_search_all_sectors">Шукати в усіх секторах</string>
+    <string name="browse_error_title">Не вдалося завантажити компанії</string>
+    <string name="browse_more_error">Не вдалося завантажити більше компаній.</string>
 </resources>

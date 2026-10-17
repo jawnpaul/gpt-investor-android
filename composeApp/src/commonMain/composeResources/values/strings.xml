@@ -336,10 +336,8 @@
     <string name="added_to_watchlist">%1$s added to watchlist</string>
     <string name="removed_from_watchlist">%1$s removed from watchlist</string>
     <string name="failed_to_remove_from_watchlist">Couldn’t remove %1$s</string>
-    <string name="browse_stocks_search_placeholder">Search stocks, companies…</string>
     <string name="browse_stocks_empty">No stocks found</string>
     <string name="browse_stocks_filter_by_sector">Filter by sector</string>
-    <string name="browse_stocks_error">Couldn’t load stocks</string>
 
     <string name="premium_sheet_title">Go Premium</string>
     <string name="premium_sheet_subtitle">Unlock the full GPT Investor experience.</string>
@@ -407,4 +405,16 @@
     <string name="answer_offline_body">You’re offline. Check your connection and try again.</string>
     <string name="try_asking">Try asking</string>
     <string name="view">View</string>
+    <string name="browse_companies_title">Browse companies</string>
+    <string name="browse_search_placeholder">Search stocks or companies</string>
+    <string name="browse_sector">Sector</string>
+    <string name="browse_sector_all">All</string>
+    <string name="browse_loading">Loading companies</string>
+    <string name="browse_empty_in_sector">Nothing in %1$s matches “%2$s”. Check the spelling or search every sector.</string>
+    <string name="browse_empty_query">Nothing matches “%1$s”. Check the spelling and try again.</string>
+    <string name="browse_empty_sector">There are no companies in %1$s yet. Try another sector.</string>
+    <string name="browse_empty_all">There are no companies to show yet. Try again in a moment.</string>
+    <string name="browse_search_all_sectors">Search all sectors</string>
+    <string name="browse_error_title">We couldn’t load companies</string>
+    <string name="browse_more_error">We couldn’t load more companies.</string>
 </resources>

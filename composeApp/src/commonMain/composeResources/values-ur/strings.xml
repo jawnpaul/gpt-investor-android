@@ -295,10 +295,8 @@
     <string name="added_to_watchlist">%1$s واچ لسٹ میں شامل ہوا</string>
     <string name="removed_from_watchlist">%1$s واچ لسٹ سے ہٹایا گیا</string>
     <string name="failed_to_remove_from_watchlist">%1$s کو نہیں ہٹایا جا سکا</string>
-    <string name="browse_stocks_search_placeholder">اسٹاک، کمپنیاں تلاش کریں…</string>
     <string name="browse_stocks_empty">کوئی اسٹاک نہیں ملا</string>
     <string name="browse_stocks_filter_by_sector">سیکٹر کے مطابق فلٹر کریں</string>
-    <string name="browse_stocks_error">اسٹاک لوڈ نہیں ہو سکے</string>
     <string name="premium_sheet_title">پریمیم میں جائیں</string>
     <string name="premium_sheet_subtitle">GPT Investor کا مکمل تجربہ کھولیں۔</string>
     <string name="premium_sheet_subtitle_watchlist_full">آپ نے واچ لسٹ کی %2$d میں سے %1$d مفت جگہیں استعمال کر لی ہیں۔</string>
@@ -386,4 +384,16 @@
     <string name="answer_offline_body">آپ آف لائن ہیں۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
     <string name="try_asking">یہ پوچھ کر دیکھیں</string>
     <string name="view">دیکھیں</string>
+    <string name="browse_companies_title">کمپنیاں دیکھیں</string>
+    <string name="browse_search_placeholder">اسٹاک یا کمپنیاں تلاش کریں</string>
+    <string name="browse_sector">شعبہ</string>
+    <string name="browse_sector_all">سب</string>
+    <string name="browse_loading">کمپنیاں لوڈ ہو رہی ہیں</string>
+    <string name="browse_empty_in_sector">%1$s میں “%2$s” سے کچھ نہیں ملتا۔ ہجے چیک کریں یا تمام شعبوں میں تلاش کریں۔</string>
+    <string name="browse_empty_query">“%1$s” سے کچھ نہیں ملتا۔ ہجے چیک کریں اور دوبارہ کوشش کریں۔</string>
+    <string name="browse_empty_sector">%1$s میں ابھی کوئی کمپنی نہیں ہے۔ کوئی اور شعبہ آزمائیں۔</string>
+    <string name="browse_empty_all">ابھی دکھانے کے لیے کوئی کمپنی نہیں ہے۔ تھوڑی دیر میں دوبارہ کوشش کریں۔</string>
+    <string name="browse_search_all_sectors">تمام شعبوں میں تلاش کریں</string>
+    <string name="browse_error_title">ہم کمپنیاں لوڈ نہیں کر سکے</string>
+    <string name="browse_more_error">ہم مزید کمپنیاں لوڈ نہیں کر سکے۔</string>
 </resources>

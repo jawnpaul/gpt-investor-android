@@ -86,7 +86,7 @@ class OnboardingViewModel(
             eventName = "onboarding-skipped",
             params = mapOf("screen_index" to screenIndex)
         )
-        markCompletedAndNavigateHome()
+        markCompletedAndNavigate(OnboardingAction.NavigateToHome)
     }
 
     fun onStockSelected(ticker: String, companyName: String, source: String, logoUrl: String?) {
@@ -130,7 +130,7 @@ class OnboardingViewModel(
             eventName = "onboarding-finished",
             params = mapOf("ticker" to ticker, "total_duration_ms" to durationMs)
         )
-        markCompletedAndNavigateHome()
+        markCompletedAndNavigate(OnboardingAction.NavigateToSignUp)
     }
 
     private fun fetchBrief(ticker: String) {
@@ -158,10 +158,10 @@ class OnboardingViewModel(
         }
     }
 
-    private fun markCompletedAndNavigateHome() {
+    private fun markCompletedAndNavigate(action: OnboardingAction) {
         viewModelScope.launch {
             appPreferences.setHasCompletedOnboarding(true)
-            _actions.emit(OnboardingAction.NavigateToHome)
+            _actions.emit(action)
         }
     }
 
@@ -193,4 +193,5 @@ class OnboardingViewModel(
 
 sealed interface OnboardingAction {
     data object NavigateToHome : OnboardingAction
+    data object NavigateToSignUp : OnboardingAction
 }

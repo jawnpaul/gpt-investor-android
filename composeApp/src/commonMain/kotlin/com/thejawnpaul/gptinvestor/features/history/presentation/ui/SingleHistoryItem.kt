@@ -1,24 +1,25 @@
 package com.thejawnpaul.gptinvestor.features.history.presentation.ui
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
-import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiListGroup
+import com.thejawnpaul.gptinvestor.theme.components.GiListRow
+import com.thejawnpaul.gptinvestor.theme.components.GiText
+import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 
 @Composable
 fun SingleHistoryItem(
@@ -26,50 +27,51 @@ fun SingleHistoryItem(
     onClick: (id: Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val gptInvestorColors = LocalGPTInvestorColors.current
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
-            .clickable(indication = null, interactionSource = null, onClick = {
-                onClick(conversation.id)
-            }),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            modifier = Modifier.weight(0.8f),
-            text = conversation.title,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.bodyMedium
-        )
-
-        Text(
-            modifier = Modifier.padding(start = 8.dp),
-            text = conversation.lastMessageTime ?: "",
-            style = MaterialTheme.typography.bodySmall,
-            color = gptInvestorColors.textColors.secondary50
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun ItemPreview() {
-    GPTInvestorTheme {
-        Surface {
-            Column(modifier = Modifier.fillMaxSize()) {
-                SingleHistoryItem(
-                    modifier = Modifier,
-                    onClick = {},
-                    conversation = StructuredConversation(
-                        id = 0,
-                        title = "What factors are influencing Netflix stock price today?",
-                        lastMessageTime = "10:00"
-                    )
+    val firstQuestion = conversation.messageList
+        .firstNotNullOfOrNull { it as? GenAiTextMessage }
+        ?.query
+        ?.takeIf { it.isNotBlank() && it != conversation.title }
+    GiListRow(
+        title = conversation.title,
+        modifier = modifier,
+        subtitle = firstQuestion,
+        onClick = { onClick(conversation.id) },
+        trailing = {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                conversation.lastMessageTime?.let { time ->
+                    GiText(text = time, style = GiTextStyle.Meta)
+                }
+                Icon(
+                    imageVector = GiIcons.caretRight,
+                    contentDescription = null,
+                    modifier = Modifier.size(GiIconSize.sm),
+                    tint = GiTheme.colors.muted
                 )
             }
+        }
+    )
+}
+
+@PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
+@Composable
+private fun SingleHistoryItemPreview() {
+    GPTInvestorTheme {
+        GiListGroup {
+            SingleHistoryItem(
+                onClick = {},
+                conversation = StructuredConversation(
+                    id = 0,
+                    title = "Biggest tech stocks",
+                    messageList = mutableListOf(
+                        GenAiTextMessage(query = "What are the biggest tech stocks this year?", feedbackStatus = 0)
+                    ),
+                    lastMessageTime = "16:03"
+                )
+            )
         }
     }
 }

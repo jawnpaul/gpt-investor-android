@@ -47,7 +47,6 @@
     <string name="related">متعلقہ</string>
     <string name="related_to">%1$s سے متعلق</string>
     <string name="discover_gpt_investor">GPT Investor دریافت کریں</string>
-    <string name="your_gpt_investor_history">آپ کی GPT Investor ہسٹری</string>
     <string name="no_search_result">آپ کی تلاش سے مطابقت رکھنے والا کوئی نتیجہ نہیں ملا</string>
     <string name="top_picks">بہترین انتخاب</string>
     <string name="see_all">سب دیکھیں</string>
@@ -395,6 +394,11 @@
     <string name="browse_search_all_sectors">تمام شعبوں میں تلاش کریں</string>
     <string name="browse_error_title">ہم کمپنیاں لوڈ نہیں کر سکے</string>
     <string name="browse_more_error">ہم مزید کمپنیاں لوڈ نہیں کر سکے۔</string>
+    <string name="history_title">آپ کی GPT Investor ہسٹری</string>
+    <string name="history_empty_title">ابھی کوئی چیٹ نہیں</string>
+    <string name="history_empty_body">آپ GPT Investor سے جو سوال پوچھتے ہیں وہ یہاں نظر آتے ہیں، تاکہ آپ انہیں بعد میں جاری رکھ سکیں۔</string>
+    <string name="history_empty_action">سوال پوچھیں</string>
+    <string name="history_loading">آپ کی چیٹس لوڈ ہو رہی ہیں</string>
     <string name="discover_loading_picks">آج کے انتخاب لوڈ ہو رہے ہیں</string>
     <string name="discover_picks_error_title">انتخاب لوڈ نہیں ہو سکے</string>
     <string name="discover_lesson_error_title">سبق لوڈ نہیں ہو سکا</string>

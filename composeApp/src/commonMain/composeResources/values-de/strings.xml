@@ -47,7 +47,6 @@
     <string name="related">Ähnlich</string>
     <string name="related_to">Bezogen auf %1$s</string>
     <string name="discover_gpt_investor">GPT Investor entdecken</string>
-    <string name="your_gpt_investor_history">Ihr GPT Investor-Verlauf</string>
     <string name="no_search_result">Keine Ergebnisse für Ihre Suchanfrage</string>
     <string name="top_picks">Top-Empfehlungen</string>
     <string name="see_all">Alle anzeigen</string>
@@ -395,6 +394,11 @@
     <string name="browse_search_all_sectors">Alle Sektoren durchsuchen</string>
     <string name="browse_error_title">Unternehmen konnten nicht geladen werden</string>
     <string name="browse_more_error">Weitere Unternehmen konnten nicht geladen werden.</string>
+    <string name="history_title">Ihr GPT Investor-Verlauf</string>
+    <string name="history_empty_title">Noch keine Chats</string>
+    <string name="history_empty_body">Fragen, die Sie GPT Investor stellen, erscheinen hier, damit Sie später daran anknüpfen können.</string>
+    <string name="history_empty_action">Frage stellen</string>
+    <string name="history_loading">Ihre Chats werden geladen</string>
     <string name="discover_loading_picks">Die heutigen Empfehlungen werden geladen</string>
     <string name="discover_picks_error_title">Empfehlungen konnten nicht geladen werden</string>
     <string name="discover_lesson_error_title">Die Lektion konnte nicht geladen werden</string>

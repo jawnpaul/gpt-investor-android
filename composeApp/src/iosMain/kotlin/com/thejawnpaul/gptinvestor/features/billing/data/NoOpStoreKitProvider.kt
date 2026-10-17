@@ -1,8 +1,10 @@
 package com.thejawnpaul.gptinvestor.features.billing.data
 
-import org.koin.core.annotation.Singleton
-
-@Singleton
+/**
+ * Fallback no-op StoreKitProvider. Not registered via @Singleton — the real
+ * SwiftStoreKitProvider is always injected by mainViewController before Koin starts,
+ * so @ComponentScan must not discover this class, or it will override the real provider.
+ */
 class NoOpStoreKitProvider : StoreKitProvider {
     override fun purchase(
         productId: String,

@@ -4,6 +4,7 @@
 
 import Foundation
 import StoreKit
+import ComposeApp
 
 @MainActor
 final class SwiftStoreKitProvider: NSObject, StoreKitProvider {

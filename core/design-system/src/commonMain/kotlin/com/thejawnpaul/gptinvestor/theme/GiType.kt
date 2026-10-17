@@ -8,6 +8,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.Font
@@ -60,14 +61,16 @@ fun rememberGiType(): GiType {
             fontWeight = FontWeight.SemiBold,
             fontSize = size.sp,
             lineHeight = lineHeight.sp,
-            letterSpacing = (-0.02).em
+            letterSpacing = (-0.02).em,
+            lineHeightStyle = BoardLineHeight
         )
 
         fun sansStyle(size: Int, lineHeight: Int, weight: FontWeight) = TextStyle(
             fontFamily = sans,
             fontWeight = weight,
             fontSize = size.sp,
-            lineHeight = lineHeight.sp
+            lineHeight = lineHeight.sp,
+            lineHeightStyle = BoardLineHeight
         )
 
         GiType(
@@ -115,4 +118,9 @@ fun GiType.toTypography(): Typography = Typography(
     labelLarge = button,
     labelMedium = eyebrow,
     labelSmall = navLabel
+)
+
+private val BoardLineHeight = LineHeightStyle(
+    alignment = LineHeightStyle.Alignment.Center,
+    trim = LineHeightStyle.Trim.None
 )

@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -117,7 +116,6 @@ fun GiChip(
     }
     Row(
         modifier = modifier
-            .minimumInteractiveComponentSize()
             .alpha(if (enabled) 1f else GiMotion.DISABLED_ALPHA)
             .giFocusRing(interactionSource, GiRadius.xs)
             .heightIn(min = if (isLarge) GiControlHeight.target else GiControlHeight.chipS)

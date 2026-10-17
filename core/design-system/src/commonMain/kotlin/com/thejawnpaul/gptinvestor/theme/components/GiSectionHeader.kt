@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -55,9 +56,16 @@ fun GiSectionHeader(
         }
         val trailing = @Composable { trailingModifier: Modifier ->
             if (trailingText != null && onTrailingClick != null) {
-                // 44 tall hit area; the label stays centred and the Box forwards its baseline.
+                val labelHeight = GiTheme.type.link.lineHeight
                 Box(
                     modifier = trailingModifier
+                        .layout { measurable, constraints ->
+                            val placeable = measurable.measure(constraints)
+                            val trim = (placeable.height - labelHeight.roundToPx()).coerceAtLeast(0)
+                            layout(placeable.width, placeable.height - trim) {
+                                placeable.place(0, -trim / 2)
+                            }
+                        }
                         .heightIn(min = GiSpace.touchTarget)
                         .clickable(role = Role.Button, onClick = onTrailingClick),
                     contentAlignment = Alignment.CenterStart

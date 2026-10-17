@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -119,13 +118,7 @@ fun GiButton(
     val paddingY = if (isLargeText()) GiSpace.x3 else 0.dp
     Box(
         modifier = modifier
-            .then(
-                if (isTextVariant) {
-                    Modifier.heightIn(min = GiSpace.touchTarget)
-                } else {
-                    Modifier.minimumInteractiveComponentSize()
-                }
-            )
+            .then(if (isTextVariant) Modifier.heightIn(min = GiSpace.touchTarget) else Modifier)
             .graphicsLayer {
                 alpha = containerAlpha
                 scaleX = scale

@@ -282,10 +282,8 @@
     <string name="build_your_watchlist">اپنی واچ لسٹ بنائیں</string>
     <string name="watchlist_empty_description">جن اسٹاکس کی آپ کو پروا ہے انہیں ٹریک کریں۔ ہم آمدنی کے نتائج، بڑی خبروں اور ہر اس چیز کی نشاندہی کریں گے جو آپ کا تجزیہ بدل سکتی ہے۔</string>
     <string name="browse_top_picks">بہترین انتخاب دیکھیں</string>
-    <string name="popular_this_week">اس ہفتے مقبول</string>
     <string name="watch">دیکھیں</string>
     <string name="remove_from_watchlist">واچ لسٹ سے ہٹائیں</string>
-    <string name="remove_from_watchlist_confirmation">%1$s کو واچ لسٹ سے ہٹائیں؟</string>
     <string name="remove">ہٹائیں</string>
     <string name="added_to_watchlist">%1$s واچ لسٹ میں شامل ہوا</string>
     <string name="removed_from_watchlist">%1$s واچ لسٹ سے ہٹایا گیا</string>
@@ -408,7 +406,27 @@
     <string name="discover_search_error_title_generic">تلاش لوڈ نہیں ہو سکی</string>
     <string name="discover_search_error_body">تلاش کے لیے کنکشن ضروری ہے۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
     <string name="discover_loading_search">تلاش لوڈ ہو رہی ہے</string>
+    <plurals name="watchlist_stocks_count">
+        <item quantity="one">%1$d اسٹاک</item>
+        <item quantity="other">%1$d اسٹاکس</item>
+    </plurals>
+    <plurals name="watchlist_daily_summary_body">
+        <item quantity="one">مفت خلاصے %1$d اسٹاک کا احاطہ کرتے ہیں۔ Premium تمام %2$d کا احاطہ کرتا ہے۔</item>
+        <item quantity="other">مفت خلاصے %1$d اسٹاکس کا احاطہ کرتے ہیں۔ Premium تمام %2$d کا احاطہ کرتا ہے۔</item>
+    </plurals>
+    <string name="watchlist_up_count">%1$d اوپر</string>
+    <string name="watchlist_prices_as_of">قیمتیں %1$s تک</string>
+    <string name="watchlist_offline_title">آپ آف لائن ہیں</string>
+    <string name="watchlist_offline_body">قیمتیں پرانی ہو سکتی ہیں۔ ریفریش کرنے کے لیے نیچے کھینچیں۔</string>
+    <string name="watchlist_loading">آپ کی واچ لسٹ لوڈ ہو رہی ہے</string>
+    <string name="watchlist_remove_cd">%1$s کو واچ لسٹ سے ہٹائیں</string>
+    <string name="watchlist_remove_title">%1$s ہٹائیں؟</string>
+    <string name="watchlist_remove_body">%1$s آپ کی واچ لسٹ سے ہٹ جائے گا اور آپ کی اپ ڈیٹس میں نظر نہیں آئے گا۔ آپ اسے کسی بھی وقت دوبارہ شامل کر سکتے ہیں۔</string>
+    <string name="watchlist_daily_summary_title">ہر اسٹاک کا روزانہ خلاصہ حاصل کریں</string>
+    <string name="watchlist_guest_body">اسٹاکس کو اپنی واچ لسٹ میں محفوظ کرنے اور ان کی کارکردگی پر نظر رکھنے کے لیے سائن ان کریں۔</string>
     <string name="create_an_account">اکاؤنٹ بنائیں</string>
+    <string name="watchlist_popular">اس ہفتے مقبول</string>
+    <string name="watchlist_watch_cd">%1$s کو واچ لسٹ میں شامل کریں</string>
     <string name="profile_guest">مہمان</string>
     <string name="profile_free_plan">مفت پلان</string>
     <string name="profile_premium_plan">Premium پلان</string>

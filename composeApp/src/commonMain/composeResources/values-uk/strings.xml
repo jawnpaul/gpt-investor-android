@@ -282,10 +282,8 @@
     <string name="build_your_watchlist">Створіть список спостереження</string>
     <string name="watchlist_empty_description">Відстежуйте акції, які вас цікавлять. Ми повідомимо про звіти, важливі новини та все, що може змінити вашу тезу.</string>
     <string name="browse_top_picks">Переглянути топ-підбірки</string>
-    <string name="popular_this_week">ПОПУЛЯРНЕ ЦЕЙ ТИЖДЕНЬ</string>
     <string name="watch">Спостерігати</string>
     <string name="remove_from_watchlist">Видалити зі списку спостереження</string>
-    <string name="remove_from_watchlist_confirmation">Видалити %1$s зі списку спостереження?</string>
     <string name="remove">Видалити</string>
     <string name="added_to_watchlist">%1$s додано до списку спостереження</string>
     <string name="removed_from_watchlist">%1$s видалено зі списку спостереження</string>
@@ -410,7 +408,31 @@
     <string name="discover_search_error_title_generic">Не вдалося завантажити пошук</string>
     <string name="discover_search_error_body">Для пошуку потрібне з’єднання. Перевірте з’єднання та спробуйте ще раз.</string>
     <string name="discover_loading_search">Завантаження пошуку</string>
+    <plurals name="watchlist_stocks_count">
+        <item quantity="one">%1$d акція</item>
+        <item quantity="few">%1$d акції</item>
+        <item quantity="many">%1$d акцій</item>
+        <item quantity="other">%1$d акції</item>
+    </plurals>
+    <plurals name="watchlist_daily_summary_body">
+        <item quantity="one">Безкоштовні огляди охоплюють %1$d акцію. Premium охоплює всі %2$d.</item>
+        <item quantity="few">Безкоштовні огляди охоплюють %1$d акції. Premium охоплює всі %2$d.</item>
+        <item quantity="many">Безкоштовні огляди охоплюють %1$d акцій. Premium охоплює всі %2$d.</item>
+        <item quantity="other">Безкоштовні огляди охоплюють %1$d акції. Premium охоплює всі %2$d.</item>
+    </plurals>
+    <string name="watchlist_up_count">%1$d у плюсі</string>
+    <string name="watchlist_prices_as_of">ціни станом на %1$s</string>
+    <string name="watchlist_offline_title">Ви офлайн</string>
+    <string name="watchlist_offline_body">Ціни можуть бути застарілими. Потягніть униз, щоб оновити.</string>
+    <string name="watchlist_loading">Завантаження списку спостереження</string>
+    <string name="watchlist_remove_cd">Видалити %1$s зі списку спостереження</string>
+    <string name="watchlist_remove_title">Видалити %1$s?</string>
+    <string name="watchlist_remove_body">%1$s зникне зі списку спостереження й більше не з’являтиметься в оновленнях. Ви можете додати її знову будь-коли.</string>
+    <string name="watchlist_daily_summary_title">Щоденний підсумок для кожної акції</string>
+    <string name="watchlist_guest_body">Увійдіть, щоб зберігати акції у списку спостереження та стежити за їхньою динамікою.</string>
     <string name="create_an_account">Створити обліковий запис</string>
+    <string name="watchlist_popular">Популярне цього тижня</string>
+    <string name="watchlist_watch_cd">Стежити за %1$s</string>
     <string name="profile_guest">Гість</string>
     <string name="profile_free_plan">Безкоштовний план</string>
     <string name="profile_premium_plan">План Premium</string>

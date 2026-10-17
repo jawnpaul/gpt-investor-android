@@ -282,10 +282,8 @@
     <string name="build_your_watchlist">Watchlist erstellen</string>
     <string name="watchlist_empty_description">Verfolgen Sie die Aktien, die Ihnen wichtig sind. Wir melden Quartalszahlen, wichtige Nachrichten und alles, was Ihre These ändern könnte.</string>
     <string name="browse_top_picks">Top-Empfehlungen durchsuchen</string>
-    <string name="popular_this_week">DIESE WOCHE BELIEBT</string>
     <string name="watch">Beobachten</string>
     <string name="remove_from_watchlist">Aus Watchlist entfernen</string>
-    <string name="remove_from_watchlist_confirmation">%1$s aus Ihrer Watchlist entfernen?</string>
     <string name="remove">Entfernen</string>
     <string name="added_to_watchlist">%1$s zur Watchlist hinzugefügt</string>
     <string name="removed_from_watchlist">%1$s aus der Watchlist entfernt</string>
@@ -408,7 +406,27 @@
     <string name="discover_search_error_title_generic">Suche konnte nicht geladen werden</string>
     <string name="discover_search_error_body">Die Suche braucht eine Verbindung. Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.</string>
     <string name="discover_loading_search">Suche wird geladen</string>
+    <plurals name="watchlist_stocks_count">
+        <item quantity="one">%1$d Aktie</item>
+        <item quantity="other">%1$d Aktien</item>
+    </plurals>
+    <plurals name="watchlist_daily_summary_body">
+        <item quantity="one">Kostenlose Briefings decken %1$d Aktie ab. Premium deckt alle %2$d ab.</item>
+        <item quantity="other">Kostenlose Briefings decken %1$d Aktien ab. Premium deckt alle %2$d ab.</item>
+    </plurals>
+    <string name="watchlist_up_count">%1$d im Plus</string>
+    <string name="watchlist_prices_as_of">Kurse vom %1$s</string>
+    <string name="watchlist_offline_title">Sie sind offline</string>
+    <string name="watchlist_offline_body">Die Kurse sind möglicherweise veraltet. Zum Aktualisieren nach unten ziehen.</string>
+    <string name="watchlist_loading">Ihre Watchlist wird geladen</string>
+    <string name="watchlist_remove_cd">%1$s aus der Watchlist entfernen</string>
+    <string name="watchlist_remove_title">%1$s entfernen?</string>
+    <string name="watchlist_remove_body">%1$s wird aus Ihrer Watchlist entfernt und erscheint nicht mehr in Ihren Updates. Sie können die Aktie jederzeit wieder hinzufügen.</string>
+    <string name="watchlist_daily_summary_title">Tägliche Zusammenfassung für jede Aktie</string>
+    <string name="watchlist_guest_body">Melden Sie sich an, um Aktien in Ihrer Watchlist zu speichern und ihre Entwicklung zu verfolgen.</string>
     <string name="create_an_account">Konto erstellen</string>
+    <string name="watchlist_popular">Diese Woche beliebt</string>
+    <string name="watchlist_watch_cd">%1$s beobachten</string>
     <string name="profile_guest">Gast</string>
     <string name="profile_free_plan">Kostenloser Plan</string>
     <string name="profile_premium_plan">Premium-Plan</string>

@@ -1,32 +1,36 @@
 package com.thejawnpaul.gptinvestor.features.watchlist.presentation.ui
 
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalHapticFeedback
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.cancel
 import com.thejawnpaul.gptinvestor.remove
-import com.thejawnpaul.gptinvestor.remove_from_watchlist
-import com.thejawnpaul.gptinvestor.remove_from_watchlist_confirmation
+import com.thejawnpaul.gptinvestor.theme.components.GiDialog
+import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.watchlist_remove_body
+import com.thejawnpaul.gptinvestor.watchlist_remove_title
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun RemoveFromWatchlistDialog(ticker: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(Res.string.remove_from_watchlist)) },
-        text = { Text(text = stringResource(Res.string.remove_from_watchlist_confirmation, ticker)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(text = stringResource(Res.string.remove), color = MaterialTheme.colorScheme.error)
-            }
+fun RemoveFromWatchlistDialog(
+    ticker: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    companyName: String? = null
+) {
+    val haptics = LocalHapticFeedback.current
+    GiDialog(
+        title = stringResource(Res.string.watchlist_remove_title, ticker),
+        body = stringResource(Res.string.watchlist_remove_body, companyName?.takeIf { it.isNotBlank() } ?: ticker),
+        confirmText = stringResource(Res.string.remove),
+        onConfirm = {
+            haptics.performHapticFeedback(GiHaptics.Reject)
+            onConfirm()
         },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(Res.string.cancel))
-            }
-        }
+        dismissText = stringResource(Res.string.cancel),
+        onDismiss = onDismiss,
+        icon = GiIcons.trash,
+        destructive = true
     )
 }

@@ -320,10 +320,8 @@
     <string name="build_your_watchlist">Build your watchlist</string>
     <string name="watchlist_empty_description">Track the stocks you care about. We’ll flag earnings, big news and anything that could change your thesis.</string>
     <string name="browse_top_picks">Browse top picks</string>
-    <string name="popular_this_week">POPULAR THIS WEEK</string>
     <string name="watch">Watch</string>
     <string name="remove_from_watchlist">Remove from watchlist</string>
-    <string name="remove_from_watchlist_confirmation">Remove %1$s from your watchlist?</string>
     <string name="remove">Remove</string>
     <string name="added_to_watchlist">%1$s added to watchlist</string>
     <string name="removed_from_watchlist">%1$s removed from watchlist</string>
@@ -426,7 +424,27 @@
     <string name="discover_search_error_title_generic">Couldn’t load search</string>
     <string name="discover_search_error_body">Search needs a connection. Check your connection and try again.</string>
     <string name="discover_loading_search">Loading search</string>
+    <plurals name="watchlist_stocks_count">
+        <item quantity="one">%1$d stock</item>
+        <item quantity="other">%1$d stocks</item>
+    </plurals>
+    <plurals name="watchlist_daily_summary_body">
+        <item quantity="one">Free briefs cover %1$d stock. Premium covers all %2$d.</item>
+        <item quantity="other">Free briefs cover %1$d stocks. Premium covers all %2$d.</item>
+    </plurals>
+    <string name="watchlist_up_count">%1$d up</string>
+    <string name="watchlist_prices_as_of">prices as of %1$s</string>
+    <string name="watchlist_offline_title">You’re offline</string>
+    <string name="watchlist_offline_body">Prices may be out of date. Pull down to refresh.</string>
+    <string name="watchlist_loading">Loading your watchlist</string>
+    <string name="watchlist_remove_cd">Remove %1$s from watchlist</string>
+    <string name="watchlist_remove_title">Remove %1$s?</string>
+    <string name="watchlist_remove_body">%1$s will leave your watchlist and stop showing up in your updates. You can add it back any time.</string>
+    <string name="watchlist_daily_summary_title">Get a daily summary for every stock</string>
+    <string name="watchlist_guest_body">Sign in to save stocks to your watchlist and track how they perform.</string>
     <string name="create_an_account">Create an account</string>
+    <string name="watchlist_popular">Popular this week</string>
+    <string name="watchlist_watch_cd">Watch %1$s</string>
     <string name="profile_guest">Guest</string>
     <string name="profile_free_plan">Free plan</string>
     <string name="profile_premium_plan">Premium plan</string>

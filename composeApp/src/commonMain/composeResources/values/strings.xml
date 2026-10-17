@@ -224,7 +224,6 @@
     <string name="couldn_t_load">Couldn't load</string>
     <string name="live_prices_unavailable">Live prices are unavailable right now</string>
     <string name="couldn_t_fetch_picks">We couldn't fetch today's picks</string>
-    <string name="today_s_lesson_didn_t_load">Today's lesson didn't load</string>
     <string name="you_re_browsing_as_a_guest">You're browsing as a guest</string>
     <string name="sign_in_to_save_stocks">Sign in to save stocks and track performance</string>
     <string name="tidbit_min_read">Tidbit · 2 min read</string>
@@ -417,4 +416,8 @@
     <string name="browse_search_all_sectors">Search all sectors</string>
     <string name="browse_error_title">We couldn’t load companies</string>
     <string name="browse_more_error">We couldn’t load more companies.</string>
+    <string name="discover_loading_picks">Loading today’s picks</string>
+    <string name="discover_picks_error_title">Couldn’t load picks</string>
+    <string name="discover_lesson_error_title">Couldn’t load the lesson</string>
+    <string name="discover_lesson_error_body">Your saved tidbits still work offline.</string>
 </resources>

@@ -196,7 +196,6 @@
     <string name="couldn_t_load">لوڈ نہیں ہو سکا</string>
     <string name="live_prices_unavailable">لائیو قیمتیں فی الحال دستیاب نہیں ہیں</string>
     <string name="couldn_t_fetch_picks">ہم آج کے انتخاب حاصل نہیں کر سکے</string>
-    <string name="today_s_lesson_didn_t_load">آج کا سبق لوڈ نہیں ہو سکا</string>
     <string name="you_re_browsing_as_a_guest">آپ مہمان کے طور پر براؤز کر رہے ہیں</string>
     <string name="sign_in_to_save_stocks">اسٹاکس محفوظ کرنے اور کارکردگی کو ٹریک کرنے کے لیے سائن اِن کریں</string>
     <string name="tidbit_min_read">مختصر معلومات · 2 منٹ کا مطالعہ</string>
@@ -396,4 +395,8 @@
     <string name="browse_search_all_sectors">تمام شعبوں میں تلاش کریں</string>
     <string name="browse_error_title">ہم کمپنیاں لوڈ نہیں کر سکے</string>
     <string name="browse_more_error">ہم مزید کمپنیاں لوڈ نہیں کر سکے۔</string>
+    <string name="discover_loading_picks">آج کے انتخاب لوڈ ہو رہے ہیں</string>
+    <string name="discover_picks_error_title">انتخاب لوڈ نہیں ہو سکے</string>
+    <string name="discover_lesson_error_title">سبق لوڈ نہیں ہو سکا</string>
+    <string name="discover_lesson_error_body">آپ کی محفوظ کردہ مختصر معلومات آف لائن بھی کام کرتی ہیں۔</string>
 </resources>

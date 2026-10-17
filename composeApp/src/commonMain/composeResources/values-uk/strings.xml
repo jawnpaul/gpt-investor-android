@@ -196,7 +196,6 @@
     <string name="couldn_t_load">Не вдалося завантажити</string>
     <string name="live_prices_unavailable">Поточні ціни наразі недоступні</string>
     <string name="couldn_t_fetch_picks">Не вдалося отримати сьогоднішні вибори</string>
-    <string name="today_s_lesson_didn_t_load">Сьогоднішній урок не завантажився</string>
     <string name="you_re_browsing_as_a_guest">Ви переглядаєте як гість</string>
     <string name="sign_in_to_save_stocks">Увійдіть, щоб зберігати акції та відстежувати їхню ефективність</string>
     <string name="tidbit_min_read">Цікавинка · 2 хв читання</string>
@@ -398,4 +397,8 @@
     <string name="browse_search_all_sectors">Шукати в усіх секторах</string>
     <string name="browse_error_title">Не вдалося завантажити компанії</string>
     <string name="browse_more_error">Не вдалося завантажити більше компаній.</string>
+    <string name="discover_loading_picks">Завантаження сьогоднішніх виборів</string>
+    <string name="discover_picks_error_title">Не вдалося завантажити вибори</string>
+    <string name="discover_lesson_error_title">Не вдалося завантажити урок</string>
+    <string name="discover_lesson_error_body">Збережені цікавинки працюють і офлайн.</string>
 </resources>

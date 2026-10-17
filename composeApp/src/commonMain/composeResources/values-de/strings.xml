@@ -196,7 +196,6 @@
     <string name="couldn_t_load">Laden nicht möglich</string>
     <string name="live_prices_unavailable">Live-Kurse sind derzeit nicht verfügbar</string>
     <string name="couldn_t_fetch_picks">Die heutigen Empfehlungen konnten nicht abgerufen werden</string>
-    <string name="today_s_lesson_didn_t_load">Die heutige Lektion konnte nicht geladen werden</string>
     <string name="you_re_browsing_as_a_guest">Sie durchsuchen die App als Gast</string>
     <string name="sign_in_to_save_stocks">Melden Sie sich an, um Aktien zu speichern und die Performance zu verfolgen</string>
     <string name="tidbit_min_read">Wissenshäppchen · 2 Min. Lesezeit</string>
@@ -396,4 +395,8 @@
     <string name="browse_search_all_sectors">Alle Sektoren durchsuchen</string>
     <string name="browse_error_title">Unternehmen konnten nicht geladen werden</string>
     <string name="browse_more_error">Weitere Unternehmen konnten nicht geladen werden.</string>
+    <string name="discover_loading_picks">Die heutigen Empfehlungen werden geladen</string>
+    <string name="discover_picks_error_title">Empfehlungen konnten nicht geladen werden</string>
+    <string name="discover_lesson_error_title">Die Lektion konnte nicht geladen werden</string>
+    <string name="discover_lesson_error_body">Ihre gespeicherten Wissenshäppchen funktionieren auch offline.</string>
 </resources>

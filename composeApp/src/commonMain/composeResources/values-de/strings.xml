@@ -385,4 +385,5 @@
     <string name="answer_offline_title">Antwort konnte nicht erstellt werden.</string>
     <string name="answer_offline_body">Sie sind offline. Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.</string>
     <string name="try_asking">Fragen Sie zum Beispiel</string>
+    <string name="view">Ansehen</string>
 </resources>

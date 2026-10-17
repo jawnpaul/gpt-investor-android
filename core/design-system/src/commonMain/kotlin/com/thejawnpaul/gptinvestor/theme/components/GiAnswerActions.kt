@@ -51,7 +51,8 @@ fun GiAnswerActions(
                 icon = GiIcons.thumbsDown,
                 checkedIcon = GiIcons.thumbsDownFill,
                 contentDescription = labels.notHelpful,
-                variant = GiIconButtonVariant.Ghost
+                variant = GiIconButtonVariant.Ghost,
+                checkedHaptic = GiHaptics.Selection
             )
         }
         GiIconButton(

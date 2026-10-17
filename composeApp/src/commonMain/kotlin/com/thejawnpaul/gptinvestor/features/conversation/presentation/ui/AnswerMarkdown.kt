@@ -1,11 +1,14 @@
 package com.thejawnpaul.gptinvestor.features.conversation.presentation.ui
 
+import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.LinkInteractionListener
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontFamily
@@ -14,10 +17,13 @@ import androidx.compose.ui.text.withStyle
 import com.mikepenz.markdown.annotator.AnnotatorSettings
 import com.mikepenz.markdown.annotator.DefaultAnnotatorSettings
 import com.mikepenz.markdown.annotator.buildMarkdownAnnotatedString
+import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.m3.Markdown
+import com.mikepenz.markdown.m3.elements.MarkdownCheckBox
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.markdownAnnotator
+import com.mikepenz.markdown.model.markdownInlineContent
 import com.mikepenz.markdown.model.markdownPadding
 import com.mikepenz.markdown.model.rememberMarkdownState
 import com.thejawnpaul.gptinvestor.theme.GiSpace
@@ -25,7 +31,7 @@ import com.thejawnpaul.gptinvestor.theme.GiTheme
 import org.intellij.markdown.MarkdownElementTypes
 
 @Composable
-fun AnswerMarkdown(text: String, modifier: Modifier = Modifier) {
+internal fun AnswerMarkdown(text: String, modifier: Modifier = Modifier, tail: AnswerTail? = null) {
     val colors = GiTheme.colors
     val type = GiTheme.type
     val markdownState = rememberMarkdownState(content = text, retainState = true, immediate = true)
@@ -56,9 +62,28 @@ fun AnswerMarkdown(text: String, modifier: Modifier = Modifier) {
             }
         ).also { settingsHolder[0] = it }
     }
+    val streamingComponents = tail?.let { streamingTail ->
+        markdownComponents(
+            checkbox = { model -> MarkdownCheckBox(model.content, model.node, model.typography.text) },
+            paragraph = { model -> StreamingParagraph(model = model, tail = streamingTail, fadeColor = colors.body) }
+        )
+    }
+    val cursorContent = tail?.let { streamingTail ->
+        markdownInlineContent(
+            mapOf(
+                ANSWER_CURSOR_ID to InlineTextContent(
+                    Placeholder(CURSOR_SLOT_WIDTH, CURSOR_HEIGHT, PlaceholderVerticalAlign.TextCenter)
+                ) { AnswerCursor(blink = streamingTail.blink, alpha = streamingTail.cursorAlpha) }
+            )
+        )
+    }
     Markdown(
         markdownState = markdownState,
         modifier = modifier,
+        inlineContent = cursorContent ?: markdownInlineContent(),
+        components = streamingComponents ?: markdownComponents(
+            checkbox = { model -> MarkdownCheckBox(model.content, model.node, model.typography.text) }
+        ),
         colors = markdownColor(
             text = colors.body,
             codeBackground = colors.tile,

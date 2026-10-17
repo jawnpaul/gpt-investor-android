@@ -1,5 +1,7 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -33,9 +35,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.thejawnpaul.gptinvestor.theme.GiEasing
 import com.thejawnpaul.gptinvestor.theme.GiIconSize
+import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 
 @Composable
 fun GiStockRow(
@@ -208,12 +213,19 @@ private val LOCK_SIZE = 16.dp
 
 @Composable
 private fun GiStockRowPrice(price: String) {
-    Text(
-        text = price,
-        color = GiTheme.colors.ink,
-        style = GiTheme.type.labelRegular.copy(fontFeatureSettings = "tnum"),
-        maxLines = 1
-    )
+    val style = GiTheme.type.labelRegular.copy(fontFeatureSettings = "tnum")
+    val color = GiTheme.colors.ink
+    if (isReducedMotionEnabled()) {
+        Text(text = price, color = color, style = style, maxLines = 1)
+    } else {
+        Crossfade(
+            targetState = price,
+            animationSpec = tween(GiMotion.FAST, easing = GiEasing.emphasised),
+            label = "rowPrice"
+        ) { shown ->
+            Text(text = shown, color = color, style = style, maxLines = 1)
+        }
+    }
 }
 
 @Composable

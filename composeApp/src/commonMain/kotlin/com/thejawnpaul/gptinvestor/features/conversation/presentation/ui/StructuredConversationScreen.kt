@@ -157,7 +157,10 @@ fun StructuredConversationScreen(
                         stop = if (isAnswering) {
                             GiComposerStop(
                                 contentDescription = stringResource(Res.string.stop_answering),
-                                onStop = onStopClick
+                                onStop = {
+                                    AnswerStopSignal.count++
+                                    onStopClick()
+                                }
                             )
                         } else {
                             null

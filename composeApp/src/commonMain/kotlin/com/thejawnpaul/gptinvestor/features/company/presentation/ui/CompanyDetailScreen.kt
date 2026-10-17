@@ -78,6 +78,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.questi
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailEvent
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.AnswerStopSignal
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ScrollToNewQuestionEffect
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ThreadMessage
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.answerStrings
@@ -185,6 +186,7 @@ fun CompanyDetailScreen(
                             onCheckedChange = { onWatchlistClick() },
                             icon = GiIcons.star,
                             checkedIcon = GiIcons.starFill,
+                            checkedHaptic = null,
                             contentDescription = stringResource(
                                 if (isWatched) Res.string.remove_from_watchlist else Res.string.add_to_watchlist
                             ),
@@ -229,7 +231,10 @@ fun CompanyDetailScreen(
                             stop = if (state.isAnswering) {
                                 GiComposerStop(
                                     contentDescription = stringResource(Res.string.stop_answering),
-                                    onStop = { onEvent(CompanyDetailEvent.StopAnswering) }
+                                    onStop = {
+                                        AnswerStopSignal.count++
+                                        onEvent(CompanyDetailEvent.StopAnswering)
+                                    }
                                 )
                             } else {
                                 null

@@ -23,7 +23,9 @@ import com.thejawnpaul.gptinvestor.removed_from_watchlist
 import com.thejawnpaul.gptinvestor.share_brief_text
 import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiToastResult
 import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
+import com.thejawnpaul.gptinvestor.view
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.koin.compose.viewmodel.koinViewModel
@@ -81,7 +83,14 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
 
                     CompanyDetailAction.WatchlistAdded -> {
                         haptics.performHapticFeedback(GiHaptics.Confirm)
-                        platformActions.showMessage(getString(Res.string.added_to_watchlist_success))
+                        val message = getString(Res.string.added_to_watchlist_success)
+                        val view = getString(Res.string.view)
+                        launch {
+                            val result = toastState.show(message = message, icon = GiIcons.check, actionText = view)
+                            if (result == GiToastResult.ActionPerformed) {
+                                navController.navigateToTab(Screen.WatchlistTabScreen.route, Screen.HomeTabScreen.route)
+                            }
+                        }
                     }
 
                     CompanyDetailAction.WatchlistAddFailed -> {

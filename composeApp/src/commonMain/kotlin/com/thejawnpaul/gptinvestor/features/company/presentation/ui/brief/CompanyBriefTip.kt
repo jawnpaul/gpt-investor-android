@@ -116,6 +116,7 @@ fun CompanyBriefTip(
                         },
                         icon = GiIcons.star,
                         checkedIcon = GiIcons.starFill,
+                        checkedHaptic = null,
                         contentDescription = stringResource(
                             if (isWatched) Res.string.remove_from_watchlist else Res.string.add_to_watchlist
                         )

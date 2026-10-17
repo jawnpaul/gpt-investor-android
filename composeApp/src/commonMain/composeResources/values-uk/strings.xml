@@ -387,4 +387,5 @@
     <string name="answer_offline_title">Не вдалося створити відповідь.</string>
     <string name="answer_offline_body">Ви офлайн. Перевірте з’єднання та спробуйте ще раз.</string>
     <string name="try_asking">Спробуйте запитати</string>
+    <string name="view">Переглянути</string>
 </resources>

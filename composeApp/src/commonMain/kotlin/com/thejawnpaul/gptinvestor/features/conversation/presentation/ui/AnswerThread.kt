@@ -286,10 +286,12 @@ private fun ThreadAnswer(
 ) {
     val failed = answerFailed(message, companies)
     val response = if (failed) "" else message.response.orEmpty()
+    val presentation =
+        rememberAnswerPresentation(messageId = message.id, response = response, streaming = message.loading)
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
         GiAssistantMessage(
             name = strings.name,
-            streaming = message.loading,
+            streaming = presentation.revealing,
             disclaimer = if (failed) null else strings.disclaimer,
             collapsed = collapsed,
             animateCollapse = animateCollapse,
@@ -339,7 +341,7 @@ private fun ThreadAnswer(
                         onRetry = onRetry
                     )
                 } else if (response.isNotBlank()) {
-                    AnswerMarkdown(text = response)
+                    AnswerMarkdown(text = presentation.text, tail = presentation.tail)
                 }
             }
         }

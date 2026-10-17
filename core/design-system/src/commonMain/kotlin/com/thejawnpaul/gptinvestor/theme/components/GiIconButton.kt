@@ -28,18 +28,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.thejawnpaul.gptinvestor.theme.GiEasing
 import com.thejawnpaul.gptinvestor.theme.GiEdge
 import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 
 enum class GiIconButtonVariant { Default, Ghost, Tonal }
 
@@ -84,13 +88,22 @@ fun GiIconToggleButton(
     modifier: Modifier = Modifier,
     variant: GiIconButtonVariant = GiIconButtonVariant.Default,
     enabled: Boolean = true,
-    loading: Boolean = false
+    loading: Boolean = false,
+    checkedHaptic: HapticFeedbackType? = GiHaptics.Confirm
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+    val haptics = LocalHapticFeedback.current
+    val reducedMotion = isReducedMotionEnabled()
     val uncheckedColor = if (variant == GiIconButtonVariant.Ghost) GiTheme.colors.muted else GiTheme.colors.ink
+    val checkedColor = GiTheme.colors.violet
+    val fill = animateFloatAsState(
+        targetValue = if (checked) 1f else 0f,
+        animationSpec = tween(GiMotion.FAST, easing = GiEasing.emphasised),
+        label = "toggleFill"
+    )
     GiIconButtonLayout(
-        icon = if (checked) checkedIcon else icon,
-        contentColor = if (checked) GiTheme.colors.violet else uncheckedColor,
+        icon = icon,
+        contentColor = if (checked) checkedColor else uncheckedColor,
         variant = variant,
         enabled = enabled,
         loading = loading,
@@ -103,10 +116,46 @@ fun GiIconToggleButton(
                 indication = null,
                 enabled = enabled && !loading,
                 role = Role.Switch,
-                onValueChange = onCheckedChange
+                onValueChange = { on ->
+                    if (on && checkedHaptic != null) haptics.performHapticFeedback(checkedHaptic)
+                    onCheckedChange(on)
+                }
             )
-    )
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(GiIconSize.md)
+                    .graphicsLayer { alpha = 1f - fill.value },
+                tint = uncheckedColor
+            )
+            Icon(
+                imageVector = checkedIcon,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(GiIconSize.md)
+                    .graphicsLayer {
+                        val progress = fill.value
+                        alpha = progress
+                        val scale = if (checked &&
+                            !reducedMotion
+                        ) {
+                            SAVE_START_SCALE + (1f - SAVE_START_SCALE) * progress
+                        } else {
+                            1f
+                        }
+                        scaleX = scale
+                        scaleY = scale
+                    },
+                tint = checkedColor
+            )
+        }
+    }
 }
+
+private const val SAVE_START_SCALE = 0.9f
 
 @Composable
 private fun GiIconButtonLayout(
@@ -116,7 +165,8 @@ private fun GiIconButtonLayout(
     enabled: Boolean,
     loading: Boolean,
     interactionSource: MutableInteractionSource,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    iconContent: (@Composable () -> Unit)? = null
 ) {
     val colors = GiTheme.colors
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -162,14 +212,19 @@ private fun GiIconButtonLayout(
             .background(colors.ink.copy(alpha = layerAlpha)),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier
-                .size(GiIconSize.md)
-                .then(if (swapping) Modifier.graphicsLayer { alpha = 1f - spinnerAlpha.value } else Modifier),
-            tint = contentColor
-        )
+        val iconFade = if (swapping) Modifier.graphicsLayer { alpha = 1f - spinnerAlpha.value } else Modifier
+        if (iconContent != null) {
+            Box(modifier = iconFade, contentAlignment = Alignment.Center) { iconContent() }
+        } else {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(GiIconSize.md)
+                    .then(iconFade),
+                tint = contentColor
+            )
+        }
         if (swapping) {
             GiSpinner(modifier = Modifier.graphicsLayer { alpha = spinnerAlpha.value }, color = contentColor)
         }

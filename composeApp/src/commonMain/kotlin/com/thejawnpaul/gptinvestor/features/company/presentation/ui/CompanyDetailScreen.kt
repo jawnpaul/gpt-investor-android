@@ -70,7 +70,6 @@ import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumber
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumberType
 import com.thejawnpaul.gptinvestor.features.company.domain.model.NewsBrief
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCompanyView
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefSentimentSheet
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefSkeleton
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefTip
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyKeyNumberSheet
@@ -133,7 +132,6 @@ fun CompanyDetailScreen(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val listState = rememberLazyListState()
-    var showSentimentSheet by remember { mutableStateOf(false) }
     var showRemoveFromWatchlistDialog by remember { mutableStateOf(false) }
     var selectedKeyNumber by remember { mutableStateOf<KeyNumber?>(null) }
     var composerFocused by remember { mutableStateOf(false) }
@@ -288,10 +286,6 @@ fun CompanyDetailScreen(
                                 bottomPadding = innerPadding.calculateBottomPadding(),
                                 onEvent = onEvent,
                                 onAction = onAction,
-                                onVerdictClick = { sentiment ->
-                                    showSentimentSheet = true
-                                    onEvent(CompanyDetailEvent.BriefSentimentViewed(sentiment))
-                                },
                                 onKeyNumberClick = { keyNumber ->
                                     selectedKeyNumber = keyNumber
                                     onEvent(CompanyDetailEvent.BriefKeyNumberExpanded(keyNumber.key))
@@ -302,14 +296,6 @@ fun CompanyDetailScreen(
                 }
                 CompanyPinnedRow(visible = showPinnedRow, brief = brief)
             }
-        }
-
-        if (showSentimentSheet && brief?.sentiment != null) {
-            CompanyBriefSentimentSheet(
-                sentiment = brief.sentiment,
-                summary = brief.sentimentSummary,
-                onDismiss = { showSentimentSheet = false }
-            )
         }
 
         selectedKeyNumber?.let { keyNumber ->
@@ -388,7 +374,6 @@ private fun CompanyDetailBriefContent(
     bottomPadding: Dp,
     onEvent: (CompanyDetailEvent) -> Unit,
     onAction: (CompanyDetailAction) -> Unit,
-    onVerdictClick: (BriefSentiment) -> Unit,
     onKeyNumberClick: (KeyNumber) -> Unit
 ) {
     val footer = if (brief.news.isNotEmpty()) {
@@ -424,7 +409,6 @@ private fun CompanyDetailBriefContent(
     ) {
         companyBriefItems(
             brief = brief,
-            onVerdictClick = { brief.sentiment?.let(onVerdictClick) },
             onKeyNumberClick = onKeyNumberClick,
             onNewsClick = { onAction(CompanyDetailAction.OnNavigateToWebView(it)) }
         )

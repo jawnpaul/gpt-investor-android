@@ -69,11 +69,9 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.clear_search
-import com.thejawnpaul.gptinvestor.digest_sentiment_neutral
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumber
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefLayout
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefSentimentSheet
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefSkeleton
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyKeyNumberSheet
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.companyBriefItems
@@ -132,8 +130,6 @@ import com.thejawnpaul.gptinvestor.theme.components.GiListGroup
 import com.thejawnpaul.gptinvestor.theme.components.GiListRow
 import com.thejawnpaul.gptinvestor.theme.components.GiLogoTile
 import com.thejawnpaul.gptinvestor.theme.components.GiSearchField
-import com.thejawnpaul.gptinvestor.theme.components.GiSentiment
-import com.thejawnpaul.gptinvestor.theme.components.GiSentimentPill
 import com.thejawnpaul.gptinvestor.theme.components.GiStepDots
 import com.thejawnpaul.gptinvestor.theme.components.GiStockSummary
 import com.thejawnpaul.gptinvestor.theme.components.GiStockSummarySize
@@ -419,11 +415,6 @@ private fun ValuePreviewCard(modifier: Modifier = Modifier) {
                 tint = colors.ink
             )
             GiText(text = stringResource(Res.string.gpt_investor), style = GiTextStyle.Link, color = colors.muted)
-            Spacer(modifier = Modifier.weight(1f))
-            GiSentimentPill(
-                sentiment = GiSentiment.Neutral,
-                label = stringResource(Res.string.digest_sentiment_neutral)
-            )
         }
         GiText(text = stringResource(Res.string.onboarding_value_card_answer), style = GiTextStyle.Body)
     }
@@ -822,7 +813,6 @@ private fun BriefContent(
 ) {
     val brief = briefView.brief
     var selectedKeyNumber by remember { mutableStateOf<KeyNumber?>(null) }
-    var showSentimentSheet by remember { mutableStateOf(false) }
     val navigationBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val heroLogoModifier = sharedLogoModifier(briefLogoKey(brief.ticker), sharedScope, briefScope)
 
@@ -844,7 +834,6 @@ private fun BriefContent(
         }
         companyBriefItems(
             brief = brief,
-            onVerdictClick = { showSentimentSheet = true },
             onKeyNumberClick = { selectedKeyNumber = it },
             logoModifier = heroLogoModifier,
             layout = CompanyBriefLayout.Onboarding,
@@ -879,14 +868,6 @@ private fun BriefContent(
 
     selectedKeyNumber?.let { keyNumber ->
         CompanyKeyNumberSheet(keyNumber = keyNumber, onDismiss = { selectedKeyNumber = null })
-    }
-    val sentiment = brief.sentiment
-    if (showSentimentSheet && sentiment != null) {
-        CompanyBriefSentimentSheet(
-            sentiment = sentiment,
-            summary = brief.sentimentSummary,
-            onDismiss = { showSentimentSheet = false }
-        )
     }
 }
 

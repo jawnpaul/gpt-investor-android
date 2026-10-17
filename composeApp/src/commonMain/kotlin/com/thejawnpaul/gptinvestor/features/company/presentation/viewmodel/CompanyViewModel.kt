@@ -13,7 +13,6 @@ import com.thejawnpaul.gptinvestor.core.session.GuestSessionEvent
 import com.thejawnpaul.gptinvestor.core.session.GuestSessionNotifier
 import com.thejawnpaul.gptinvestor.core.session.GuestSessionReason
 import com.thejawnpaul.gptinvestor.core.session.GuestSessionSource
-import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSentiment
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumberType
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyFinancialsView
@@ -459,17 +458,6 @@ class CompanyViewModel(
                 sendFeedback(event.messageId, event.status, event.reason)
             }
 
-            is CompanyDetailEvent.BriefSentimentViewed -> {
-                analyticsLogger.logEvent(
-                    eventName = "brief-sentiment-viewed",
-                    params = mapOf(
-                        "ticker" to (_selectedCompany.value.brief?.ticker ?: ""),
-                        "sentiment" to event.sentiment.name.lowercase(),
-                        "user_type" to if (isGuestSession.value) "guest" else "authenticated"
-                    )
-                )
-            }
-
             is CompanyDetailEvent.BriefKeyNumberExpanded -> {
                 analyticsLogger.logEvent(
                     eventName = "brief-key-number-expanded",
@@ -664,7 +652,6 @@ sealed interface CompanyDetailEvent {
     data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : CompanyDetailEvent
 
     data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) : CompanyDetailEvent
-    data class BriefSentimentViewed(val sentiment: BriefSentiment) : CompanyDetailEvent
     data class BriefKeyNumberExpanded(val keyNumberType: KeyNumberType) : CompanyDetailEvent
     data class AskAboutKeyNumber(val keyNumberType: KeyNumberType, val question: String) : CompanyDetailEvent
     data object RetryLoad : CompanyDetailEvent

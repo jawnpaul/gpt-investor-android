@@ -9,15 +9,12 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,11 +27,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.digest_sentiment_negative
-import com.thejawnpaul.gptinvestor.digest_sentiment_neutral
-import com.thejawnpaul.gptinvestor.digest_sentiment_positive
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSection
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSentiment
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefTone
@@ -69,15 +62,12 @@ import com.thejawnpaul.gptinvestor.theme.components.GiKeyNumberRow
 import com.thejawnpaul.gptinvestor.theme.components.GiListGroup
 import com.thejawnpaul.gptinvestor.theme.components.GiPriceDisplay
 import com.thejawnpaul.gptinvestor.theme.components.GiSentiment
-import com.thejawnpaul.gptinvestor.theme.components.GiSentimentPill
 import com.thejawnpaul.gptinvestor.theme.components.GiStockSummary
 import com.thejawnpaul.gptinvestor.theme.components.GiStockSummarySize
 import com.thejawnpaul.gptinvestor.theme.components.GiText
 import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.today
 import com.thejawnpaul.gptinvestor.what_it_means
-import com.thejawnpaul.gptinvestor.why_sentiment
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /** Which screen the brief is laid out for. */
@@ -86,7 +76,7 @@ internal enum class CompanyBriefLayout {
     Company,
 
     /**
-     * Onboarding first brief: verdict as page text under a tappable sentiment pill; sections and the optional
+     * Onboarding first brief: verdict as page text; sections and the optional
      * footer on a full-bleed raised sheet docked to the bottom of the list.
      */
     Onboarding
@@ -105,7 +95,6 @@ internal enum class CompanyBriefLayout {
  */
 internal fun LazyListScope.companyBriefItems(
     brief: CompanyBrief,
-    onVerdictClick: () -> Unit,
     onKeyNumberClick: (KeyNumber) -> Unit,
     onNewsClick: ((String) -> Unit)? = null,
     logoModifier: Modifier = Modifier,
@@ -117,7 +106,6 @@ internal fun LazyListScope.companyBriefItems(
     when (layout) {
         CompanyBriefLayout.Company -> companyLayoutItems(
             brief = brief,
-            onVerdictClick = onVerdictClick,
             onKeyNumberClick = onKeyNumberClick,
             onNewsClick = onNewsClick,
             logoModifier = logoModifier,
@@ -126,7 +114,6 @@ internal fun LazyListScope.companyBriefItems(
 
         CompanyBriefLayout.Onboarding -> onboardingLayoutItems(
             brief = brief,
-            onVerdictClick = onVerdictClick,
             onKeyNumberClick = onKeyNumberClick,
             onNewsClick = onNewsClick,
             logoModifier = logoModifier,
@@ -139,17 +126,14 @@ internal fun LazyListScope.companyBriefItems(
 
 private fun LazyListScope.companyLayoutItems(
     brief: CompanyBrief,
-    onVerdictClick: () -> Unit,
     onKeyNumberClick: (KeyNumber) -> Unit,
     onNewsClick: ((String) -> Unit)?,
     logoModifier: Modifier,
     footer: (@Composable ColumnScope.() -> Unit)?
 ) {
     item(key = "hero", contentType = "hero") { BriefHero(brief = brief, logoModifier = logoModifier) }
-    brief.sentiment?.let { sentiment ->
-        item(key = "verdict", contentType = "verdict") {
-            BriefVerdictCard(sentiment = sentiment, summary = brief.sentimentSummary, onClick = onVerdictClick)
-        }
+    brief.sentimentSummary?.takeIf { it.isNotBlank() }?.let { summary ->
+        item(key = "verdict", contentType = "verdict") { BriefVerdictCard(summary = summary) }
     }
     item(key = "sections", contentType = "sections") {
         BriefSectionsGroup(brief = brief, onKeyNumberClick = onKeyNumberClick, onNewsClick = onNewsClick)
@@ -161,7 +145,6 @@ private fun LazyListScope.companyLayoutItems(
 
 private fun LazyListScope.onboardingLayoutItems(
     brief: CompanyBrief,
-    onVerdictClick: () -> Unit,
     onKeyNumberClick: (KeyNumber) -> Unit,
     onNewsClick: ((String) -> Unit)?,
     logoModifier: Modifier,
@@ -176,13 +159,12 @@ private fun LazyListScope.onboardingLayoutItems(
             logoModifier = logoModifier
         )
     }
-    brief.sentiment?.let { sentiment ->
+    brief.sentimentSummary?.takeIf { it.isNotBlank() }?.let { summary ->
         item(key = "verdict", contentType = "verdict") {
-            BriefVerdict(
-                sentiment = sentiment,
-                summary = brief.sentimentSummary,
-                onClick = onVerdictClick,
-                modifier = Modifier.padding(horizontal = horizontalPadding)
+            GiText(
+                text = summary,
+                style = GiTextStyle.PageTitle,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = horizontalPadding)
             )
         }
     }
@@ -225,65 +207,10 @@ private fun BriefHero(brief: CompanyBrief, modifier: Modifier = Modifier, logoMo
     }
 }
 
-// Company layout: the whole verdict is one tappable card.
 @Composable
-private fun BriefVerdictCard(
-    sentiment: BriefSentiment,
-    summary: String?,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val colors = GiTheme.colors
-    val label = stringResource(sentiment.labelRes())
-    val announcement = spokenSentences(label, summary, stringResource(Res.string.why_sentiment, label))
-    GiCard(
-        modifier = modifier
-            .fillMaxWidth()
-            .semantics(mergeDescendants = true) { contentDescription = announcement },
-        onClick = onClick,
-        spacing = GiSpace.x2
-    ) {
-        Row(modifier = Modifier.clearAndSetSemantics {}, verticalAlignment = Alignment.CenterVertically) {
-            GiSentimentPill(sentiment = sentiment.toGi(), label = label)
-            Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                imageVector = GiIcons.caretRight,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = colors.muted
-            )
-        }
-        if (!summary.isNullOrBlank()) {
-            Text(
-                text = summary,
-                modifier = Modifier.clearAndSetSemantics {},
-                color = colors.ink,
-                style = GiTheme.type.statNumber
-            )
-        }
-    }
-}
-
-// Onboarding layout: the verdict is page text; the sentiment pill above it opens the sentiment sheet.
-@Composable
-private fun BriefVerdict(
-    sentiment: BriefSentiment,
-    summary: String?,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
-        GiSentimentPill(
-            sentiment = sentiment.toGi(),
-            label = stringResource(sentiment.labelRes()),
-            modifier = Modifier
-                .minimumInteractiveComponentSize()
-                .clip(GiRadius.xs)
-                .clickable(role = Role.Button, onClick = onClick)
-        )
-        if (!summary.isNullOrBlank()) {
-            GiText(text = summary, style = GiTextStyle.PageTitle)
-        }
+private fun BriefVerdictCard(summary: String, modifier: Modifier = Modifier) {
+    GiCard(modifier = modifier.fillMaxWidth()) {
+        GiText(text = summary, style = GiTextStyle.StatNumber)
     }
 }
 
@@ -598,18 +525,6 @@ private fun spokenSentences(vararg parts: String?): String = parts
 
 private val SENTENCE_ENDS = setOf('.', '?', '!')
 
-internal fun BriefSentiment.toGi(): GiSentiment = when (this) {
-    BriefSentiment.Bullish -> GiSentiment.Positive
-    BriefSentiment.Neutral -> GiSentiment.Neutral
-    BriefSentiment.Bearish -> GiSentiment.Negative
-}
-
-internal fun BriefSentiment.labelRes(): StringResource = when (this) {
-    BriefSentiment.Bullish -> Res.string.digest_sentiment_positive
-    BriefSentiment.Neutral -> Res.string.digest_sentiment_neutral
-    BriefSentiment.Bearish -> Res.string.digest_sentiment_negative
-}
-
 internal fun BriefTone.toGi(): GiSentiment = when (this) {
     BriefTone.Positive -> GiSentiment.Positive
     BriefTone.Neutral -> GiSentiment.Neutral
@@ -686,7 +601,7 @@ private fun CompanyBriefContentPreview() {
             contentPadding = PaddingValues(GiSpace.gutter),
             verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
         ) {
-            companyBriefItems(brief = previewCompanyBrief, onVerdictClick = {}, onKeyNumberClick = {})
+            companyBriefItems(brief = previewCompanyBrief, onKeyNumberClick = {})
         }
     }
 }
@@ -703,7 +618,6 @@ private fun CompanyBriefContentOnboardingPreview() {
         ) {
             companyBriefItems(
                 brief = previewCompanyBrief,
-                onVerdictClick = {},
                 onKeyNumberClick = {},
                 layout = CompanyBriefLayout.Onboarding
             )

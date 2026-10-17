@@ -165,12 +165,11 @@ private fun LockedStocks(lockedStocks: List<LockedStockDigestPresentation>, onUn
     GiListGroup {
         lockedStocks.forEachIndexed { index, stock ->
             if (index > 0) GiDivider()
-            val sentimentLabel = stock.sentiment?.let { digestSentimentLabel(it) }
             GiStockRow(
                 stock = tickerStock(
                     ticker = stock.ticker,
                     title = stock.name,
-                    subtitle = sentimentLabel?.let { "${stock.ticker} · $it" } ?: stock.ticker,
+                    subtitle = stock.ticker,
                     percent = stock.priceChange
                 ),
                 onClick = onUnlockPremium,

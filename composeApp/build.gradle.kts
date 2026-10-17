@@ -237,12 +237,20 @@ buildkonfig {
         buildConfigField(FieldSpec.Type.BOOLEAN, "DEBUG", "false")
         buildConfigField(FieldSpec.Type.STRING, "BASE_URL", localProperties.getProperty("BASE_URL") ?: "")
         buildConfigField(FieldSpec.Type.STRING, "GEMINI_API_KEY", localProperties.getProperty("GEMINI_API_KEY") ?: "")
-        buildConfigField(FieldSpec.Type.STRING, "BILLING_PRODUCT_ID", localProperties.getProperty("BILLING_PRODUCT_ID") ?: "")
         buildConfigField(
             FieldSpec.Type.STRING,
             "WEB_CLIENT_ID",
             localProperties.getProperty("WEB_CLIENT_ID_PROD") ?: ""
         )
+    }
+
+    targetConfigs {
+        create("ios") {
+            buildConfigField(FieldSpec.Type.STRING, "BILLING_PRODUCT_ID", localProperties.getProperty("IOS_BILLING_PRODUCT_ID") ?: "")
+        }
+        create("android") {
+            buildConfigField(FieldSpec.Type.STRING, "BILLING_PRODUCT_ID", localProperties.getProperty("ANDROID_BILLING_PRODUCT_ID") ?: "")
+        }
     }
 
     defaultConfigs("dev") {

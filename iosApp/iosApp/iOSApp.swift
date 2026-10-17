@@ -100,6 +100,7 @@ struct iOSApp: App {
     private let googleSignInProvider = SwiftGoogleSignInProvider(
         webClientId: GoogleSignInProviderModuleKt.googleSignInWebClientId
     )
+    private let storeKitProvider = SwiftStoreKitProvider()
 
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
@@ -108,7 +109,8 @@ struct iOSApp: App {
             ContentView(
                 mixpanelProvider: mixpanelProvider,
                 youtubePlayerProvider: youtubePlayerProvider,
-                googleSignInProvider: googleSignInProvider
+                googleSignInProvider: googleSignInProvider,
+                storeKitProvider: storeKitProvider
             )
         }
     }

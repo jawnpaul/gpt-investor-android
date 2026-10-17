@@ -11,12 +11,14 @@ struct ComposeView: UIViewControllerRepresentable {
     let mixpanelProvider: any MixpanelProvider
     let youtubePlayerProvider: any YoutubePlayerProvider
     let googleSignInProvider: any GoogleSignInProvider
+    let storeKitProvider: any StoreKitProvider
 
     func makeUIViewController(context: Context) -> UIViewController {
         MainViewControllerKt.mainViewController(
             mixpanelProvider: mixpanelProvider,
             youtubePlayerProvider: youtubePlayerProvider,
-            googleSignInProvider: googleSignInProvider
+            googleSignInProvider: googleSignInProvider,
+            storeKitProvider: storeKitProvider
         )
     }
 
@@ -27,12 +29,14 @@ struct ContentView: View {
     let mixpanelProvider: any MixpanelProvider
     let youtubePlayerProvider: any YoutubePlayerProvider
     let googleSignInProvider: any GoogleSignInProvider
+    let storeKitProvider: any StoreKitProvider
 
     var body: some View {
         ComposeView(
             mixpanelProvider: mixpanelProvider,
             youtubePlayerProvider: youtubePlayerProvider,
-            googleSignInProvider: googleSignInProvider
+            googleSignInProvider: googleSignInProvider,
+            storeKitProvider: storeKitProvider
         )
         .ignoresSafeArea()
     }

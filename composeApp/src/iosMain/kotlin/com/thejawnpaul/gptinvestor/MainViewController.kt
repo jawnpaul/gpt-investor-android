@@ -11,6 +11,8 @@ import com.thejawnpaul.gptinvestor.core.platform.IosNotificationBridge
 import com.thejawnpaul.gptinvestor.core.platform.YoutubePlayerProvider
 import com.thejawnpaul.gptinvestor.core.platform.youtubePlayerProviderModule
 import com.thejawnpaul.gptinvestor.features.authentication.domain.googleSignInProviderModule
+import com.thejawnpaul.gptinvestor.features.billing.data.StoreKitProvider
+import com.thejawnpaul.gptinvestor.features.billing.data.storeKitProviderModule
 import org.koin.compose.KoinApplication
 import org.koin.plugin.module.dsl.koinConfiguration
 import platform.UIKit.UIViewController
@@ -29,7 +31,8 @@ import platform.UIKit.UIViewController
 fun mainViewController(
     mixpanelProvider: MixpanelProvider,
     youtubePlayerProvider: YoutubePlayerProvider,
-    googleSignInProvider: GoogleSignInProvider
+    googleSignInProvider: GoogleSignInProvider,
+    storeKitProvider: StoreKitProvider
 ): UIViewController = ComposeUIViewController {
     KoinApplication(
         configuration = koinConfiguration<GPTKoinApp> {
@@ -38,7 +41,8 @@ fun mainViewController(
             modules(
                 mixpanelProviderModule(mixpanelProvider),
                 youtubePlayerProviderModule(youtubePlayerProvider),
-                googleSignInProviderModule(googleSignInProvider)
+                googleSignInProviderModule(googleSignInProvider),
+                storeKitProviderModule(storeKitProvider)
             )
         }
     ) {

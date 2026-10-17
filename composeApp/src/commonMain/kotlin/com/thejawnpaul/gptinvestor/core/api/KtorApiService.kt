@@ -185,6 +185,11 @@ class KtorApiService(@Provided private val client: HttpClient) {
             setBody(request)
         }.toKtorResponse()
 
+    suspend fun verifyAppStorePurchase(request: VerifyPurchaseRequest): KtorResponse<VerifyPurchaseResponse> =
+        client.post("v1/app-store/verify") {
+            setBody(request)
+        }.toKtorResponse()
+
     suspend fun refreshAccessToken(refreshToken: String): KtorResponse<TokenResponse> = client.post("v1.1/refresh") {
         header("Authorization", "Bearer $refreshToken")
     }.toKtorResponse()

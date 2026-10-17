@@ -29,6 +29,7 @@ import com.mikepenz.markdown.model.rememberMarkdownState
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import org.intellij.markdown.MarkdownElementTypes
+import org.intellij.markdown.flavours.gfm.GFMElementTypes
 
 @Composable
 internal fun AnswerMarkdown(text: String, modifier: Modifier = Modifier, tail: AnswerTail? = null) {
@@ -43,11 +44,17 @@ internal fun AnswerMarkdown(text: String, modifier: Modifier = Modifier, tail: A
     val annotator = remember(strong) {
         markdownAnnotator { content, child ->
             val settings = settingsHolder[0]
-            if (child.type == MarkdownElementTypes.STRONG && settings != null) {
-                withStyle(strong) { buildMarkdownAnnotatedString(content, child, settings) }
-                true
-            } else {
-                false
+            when {
+                settings == null -> false
+                child.type == MarkdownElementTypes.STRONG -> {
+                    withStyle(strong) { buildMarkdownAnnotatedString(content, child, settings) }
+                    true
+                }
+                child.type == GFMElementTypes.INLINE_MATH -> {
+                    buildMarkdownAnnotatedString(content, child, settings)
+                    true
+                }
+                else -> false
             }
         }
     }

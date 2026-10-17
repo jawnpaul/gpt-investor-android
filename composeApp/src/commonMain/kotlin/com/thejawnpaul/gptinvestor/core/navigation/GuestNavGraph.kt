@@ -181,6 +181,10 @@ fun NavGraphBuilder.guestNavGraph(
                     DiscoveryAction.OnGoToBrowse -> {
                         navController.navigate(Screen.BrowseStocksScreen.route)
                     }
+
+                    DiscoveryAction.OnGoToAllTopPicks -> {
+                        navController.navigate(GuestScreen.GuestAllTopPicks.route)
+                    }
                 }
             }.launchIn(scope)
         }

@@ -84,6 +84,7 @@ class DiscoverViewModel(
             }
 
             DiscoveryEvent.GoToBrowse -> processAction(DiscoveryAction.OnGoToBrowse)
+            DiscoveryEvent.GoToAllTopPicks -> processAction(DiscoveryAction.OnGoToAllTopPicks)
             DiscoveryEvent.RetryTidbit -> getTodayTidbit()
             DiscoveryEvent.RetryTopPicks -> getTopPicks()
             is DiscoveryEvent.ClickTidbit -> {
@@ -192,7 +193,12 @@ data class DiscoveryScreenState(
     val isGuestSession: Boolean = false,
     val homeTidbitView: HomeTidbitView = HomeTidbitView(),
     val topPicksView: TopPicksView = TopPicksView()
-)
+) {
+    val previewTopPicks: List<TopPickPresentation>
+        get() = topPicksView.topPicks.take(PREVIEW_TOP_PICK_COUNT)
+}
+
+private const val PREVIEW_TOP_PICK_COUNT = 2
 
 sealed interface DiscoveryEvent {
     data class ClickTopPick(val id: String) : DiscoveryEvent
@@ -201,6 +207,7 @@ sealed interface DiscoveryEvent {
     data object GoToSignUp : DiscoveryEvent
     data object GoToSearch : DiscoveryEvent
     data object GoToBrowse : DiscoveryEvent
+    data object GoToAllTopPicks : DiscoveryEvent
     data object RetryTopPicks : DiscoveryEvent
     data object RetryTidbit : DiscoveryEvent
 }
@@ -212,5 +219,6 @@ sealed interface DiscoveryAction {
     data object OnGoToSignUp : DiscoveryAction
     data object OnGoToSearch : DiscoveryAction
     data object OnGoToBrowse : DiscoveryAction
+    data object OnGoToAllTopPicks : DiscoveryAction
     data class OnGoToTidbitDetail(val id: String) : DiscoveryAction
 }

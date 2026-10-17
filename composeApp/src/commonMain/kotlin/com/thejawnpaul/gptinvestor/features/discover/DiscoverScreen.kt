@@ -97,7 +97,8 @@ fun DiscoverScreen(state: DiscoveryScreenState, onEvent: (DiscoveryEvent) -> Uni
             item(key = "picks") {
                 TopPicksSection(
                     view = state.topPicksView,
-                    onSeeAll = { onEvent(DiscoveryEvent.GoToBrowse) },
+                    picks = state.previewTopPicks,
+                    onSeeAll = { onEvent(DiscoveryEvent.GoToAllTopPicks) },
                     onRetry = { onEvent(DiscoveryEvent.RetryTopPicks) },
                     onClickPick = { onEvent(DiscoveryEvent.ClickTopPick(id = it)) },
                     modifier = Modifier.padding(top = GiSpace.x2)
@@ -123,6 +124,7 @@ fun DiscoverScreen(state: DiscoveryScreenState, onEvent: (DiscoveryEvent) -> Uni
 @Composable
 private fun TopPicksSection(
     view: TopPicksView,
+    picks: List<TopPickPresentation>,
     onSeeAll: () -> Unit,
     onRetry: () -> Unit,
     onClickPick: (String) -> Unit,
@@ -143,7 +145,7 @@ private fun TopPicksSection(
                 body = stringResource(Res.string.check_connection_try_again),
                 onRetry = onRetry
             )
-            else -> view.topPicks.forEach { pick ->
+            else -> picks.forEach { pick ->
                 TopPickCard(pick = pick, onClick = { onClickPick(pick.id) })
             }
         }

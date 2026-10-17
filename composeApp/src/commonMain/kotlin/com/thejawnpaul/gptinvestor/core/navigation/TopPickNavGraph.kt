@@ -56,7 +56,8 @@ fun NavGraphBuilder.topPickNavGraph(navController: NavHostController, platformAc
             modifier = Modifier,
             state = state.value,
             onEvent = viewModel::handleEvent,
-            onAction = viewModel::processAction
+            onAction = viewModel::processAction,
+            onOpenSavedList = { navController.navigate(Screen.SavedTopPicksScreen.route) }
         )
     }
 
@@ -78,7 +79,8 @@ fun NavGraphBuilder.topPickNavGraph(navController: NavHostController, platformAc
             modifier = Modifier,
             state = state.value,
             onGoBack = { navController.navigateUp() },
-            onGoToDetail = { id -> navController.navigate(Screen.TopPickDetailScreen.createRoute(id)) }
+            onGoToDetail = { id -> navController.navigate(Screen.TopPickDetailScreen.createRoute(id)) },
+            onSeeTodaysPicks = { navController.navigate(Screen.AllTopPicksScreen.route) }
         )
     }
 }

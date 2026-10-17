@@ -339,6 +339,8 @@ class TopPickViewModel(
             TopPickEvent.GoToSignUp -> {
                 processAction(TopPickAction.OnGoToSignUp)
             }
+
+            TopPickEvent.Retry -> getTopPick()
         }
     }
 
@@ -367,4 +369,5 @@ sealed interface TopPickEvent {
     data object LikeTopPick : TopPickEvent
     data object RemoveLikeTopPick : TopPickEvent
     data object GoToSignUp : TopPickEvent
+    data object Retry : TopPickEvent
 }

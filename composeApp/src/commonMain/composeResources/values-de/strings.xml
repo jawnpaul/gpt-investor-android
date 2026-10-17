@@ -61,12 +61,9 @@
     <string name="sign_out">Abmelden</string>
     <string name="settings">Einstellungen</string>
     <string name="digest_delivery_time">Lieferzeit der Zusammenfassung</string>
-    <string name="digest_delivery_time_default">%1$s (Standard)</string>
     <string name="saved_picks">Gespeicherte Empfehlungen</string>
     <string name="delete">Löschen</string>
     <string name="cancel">Abbrechen</string>
-    <string name="delete_account">Konto löschen</string>
-    <string name="are_you_sure_you_want_to_delete_your_account">Möchten Sie Ihr Konto wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.</string>
     <string name="login">Anmelden</string>
     <string name="email_address">E-Mail-Adresse</string>
     <string name="password">Passwort</string>
@@ -236,7 +233,7 @@
     <string name="guest_session_expired_sign_up">Registrieren</string>
     <string name="guest_session_expired_have_account">Ich habe bereits ein Konto</string>
 
-    <string name="morning_brief">MORGENBERICHT</string>
+    <string name="morning_brief">Morgenbericht</string>
     <string name="build_your_digest">Aktien für Ihr Briefing auswählen</string>
     <string name="you_re_not_tracking_any_companies_yet">Fügen Sie einige Unternehmen hinzu, und Ihr erstes Briefing kommt innerhalb einer Stunde.</string>
     <string name="add">Hinzufügen</string>
@@ -423,4 +420,16 @@
     <string name="settings_off">Aus</string>
     <string name="sign_out_title">Abmelden?</string>
     <string name="sign_out_body">Ihre Watchlist, gespeicherte Inhalte und Ihr Verlauf bleiben in Ihrem Konto. Melden Sie sich wieder an, um dort weiterzumachen, wo Sie aufgehört haben.</string>
+    <string name="settings_digest_footnote">Ihr Briefing kommt jeden Tag um diese Uhrzeit, in der Zeitzone Ihres Telefons.</string>
+    <string name="settings_account">Konto</string>
+    <string name="settings_delete_account">Konto löschen</string>
+    <string name="settings_delete_footnote">Entfernt Ihr Konto, Ihre Watchlist und Ihren Verlauf dauerhaft.</string>
+    <string name="delete_account_title">Konto löschen?</string>
+    <string name="delete_account_body">Dadurch werden Ihre Watchlist, gespeicherte Empfehlungen und Wissenshäppchen sowie Ihr Fragenverlauf dauerhaft entfernt. Das lässt sich nicht rückgängig machen.</string>
+    <string name="keep_my_account">Konto behalten</string>
+    <string name="digest_picker_body">Wählen Sie, wann Ihr Morgenbericht ankommt.</string>
+    <string name="digest_picker_save">Uhrzeit speichern</string>
+    <string name="digest_picker_hour">Stunde</string>
+    <string name="digest_picker_minute">Minute</string>
+    <string name="digest_picker_hour_clock">Stunde, 24-Stunden-Format</string>
 </resources>

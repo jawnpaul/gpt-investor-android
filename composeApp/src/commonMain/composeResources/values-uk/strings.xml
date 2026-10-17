@@ -61,12 +61,9 @@
     <string name="sign_out">Вийти</string>
     <string name="settings">Налаштування</string>
     <string name="digest_delivery_time">Час доставки дайджесту</string>
-    <string name="digest_delivery_time_default">%1$s (за замовчуванням)</string>
     <string name="saved_picks">Збережені вибори</string>
     <string name="delete">Видалити</string>
     <string name="cancel">Скасувати</string>
-    <string name="delete_account">Видалити обліковий запис</string>
-    <string name="are_you_sure_you_want_to_delete_your_account">Ви впевнені, що хочете видалити свій обліковий запис? Цю дію неможливо скасувати.</string>
     <string name="login">Увійти</string>
     <string name="email_address">Електронна адреса</string>
     <string name="password">Пароль</string>
@@ -236,7 +233,7 @@
     <string name="guest_session_expired_sign_up">Зареєструватися</string>
     <string name="guest_session_expired_have_account">У мене є обліковий запис</string>
 
-    <string name="morning_brief">РАНКОВИЙ ОГЛЯД</string>
+    <string name="morning_brief">Ранковий огляд</string>
     <string name="build_your_digest">Оберіть акції для свого огляду</string>
     <string name="you_re_not_tracking_any_companies_yet">Додайте кілька компаній, і ваш перший огляд надійде протягом години.</string>
     <string name="add">Додати</string>
@@ -425,4 +422,16 @@
     <string name="settings_off">Вимк.</string>
     <string name="sign_out_title">Вийти?</string>
     <string name="sign_out_body">Ваш список спостереження, збережене та історія залишаться у вашому обліковому записі. Увійдіть знову, щоб продовжити з того самого місця.</string>
+    <string name="settings_digest_footnote">Ваш огляд надходить щодня в цей час за часовим поясом телефона.</string>
+    <string name="settings_account">Обліковий запис</string>
+    <string name="settings_delete_account">Видалити обліковий запис</string>
+    <string name="settings_delete_footnote">Назавжди видаляє ваш обліковий запис, список спостереження та історію.</string>
+    <string name="delete_account_title">Видалити обліковий запис?</string>
+    <string name="delete_account_body">Це назавжди видалить ваш список спостереження, збережені вибори й цікавинки та історію запитань. Цю дію не можна скасувати.</string>
+    <string name="keep_my_account">Залишити обліковий запис</string>
+    <string name="digest_picker_body">Виберіть, коли надходитиме ранковий огляд.</string>
+    <string name="digest_picker_save">Зберегти час</string>
+    <string name="digest_picker_hour">Година</string>
+    <string name="digest_picker_minute">Хвилина</string>
+    <string name="digest_picker_hour_clock">Година, 24-годинний формат</string>
 </resources>

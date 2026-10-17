@@ -61,12 +61,9 @@
     <string name="sign_out">Sign out</string>
     <string name="settings">Settings</string>
     <string name="digest_delivery_time">Digest delivery time</string>
-    <string name="digest_delivery_time_default">%1$s (default)</string>
     <string name="saved_picks">Saved picks</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
-    <string name="delete_account">Delete Account</string>
-    <string name="are_you_sure_you_want_to_delete_your_account">Are you sure you want to delete your account? This action cannot be undone.</string>
     <string name="login">Log in</string>
     <string name="email_address">Email address</string>
     <string name="password">Password</string>
@@ -441,4 +438,16 @@
     <string name="settings_off">Off</string>
     <string name="sign_out_title">Sign out?</string>
     <string name="sign_out_body">Your watchlist, saved items and history stay in your account. Log in again to pick up where you left off.</string>
+    <string name="settings_digest_footnote">Your brief arrives at this time each day, in your phone’s time zone.</string>
+    <string name="settings_account">Account</string>
+    <string name="settings_delete_account">Delete account</string>
+    <string name="settings_delete_footnote">Permanently removes your account, watchlist and history.</string>
+    <string name="delete_account_title">Delete your account?</string>
+    <string name="delete_account_body">This permanently removes your watchlist, saved picks and tidbits, and your question history. You can’t undo this.</string>
+    <string name="keep_my_account">Keep my account</string>
+    <string name="digest_picker_body">Pick when your morning brief arrives.</string>
+    <string name="digest_picker_save">Save time</string>
+    <string name="digest_picker_hour">Hour</string>
+    <string name="digest_picker_minute">Minute</string>
+    <string name="digest_picker_hour_clock">Hour, 24-hour clock</string>
 </resources>

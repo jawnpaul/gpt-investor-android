@@ -61,12 +61,9 @@
     <string name="sign_out">سائن آؤٹ</string>
     <string name="settings">ترتیبات</string>
     <string name="digest_delivery_time">ڈائجسٹ کی ترسیل کا وقت</string>
-    <string name="digest_delivery_time_default">%1$s (ڈیفالٹ)</string>
     <string name="saved_picks">محفوظ کردہ انتخاب</string>
     <string name="delete">حذف کریں</string>
     <string name="cancel">منسوخ کریں</string>
-    <string name="delete_account">اکاؤنٹ حذف کریں</string>
-    <string name="are_you_sure_you_want_to_delete_your_account">کیا آپ واقعی اپنا اکاؤنٹ حذف کرنا چاہتے ہیں؟ یہ کارروائی واپس نہیں کی جا سکتی۔</string>
     <string name="login">لاگ اِن</string>
     <string name="email_address">ای میل ایڈریس</string>
     <string name="password">پاس ورڈ</string>
@@ -423,4 +420,16 @@
     <string name="settings_off">آف</string>
     <string name="sign_out_title">سائن آؤٹ کریں؟</string>
     <string name="sign_out_body">آپ کی واچ لسٹ، محفوظ کردہ چیزیں اور ہسٹری آپ کے اکاؤنٹ میں رہیں گی۔ جہاں چھوڑا تھا وہیں سے جاری رکھنے کے لیے دوبارہ لاگ ان کریں۔</string>
+    <string name="settings_digest_footnote">آپ کا خلاصہ ہر روز اسی وقت، آپ کے فون کے ٹائم زون کے مطابق آتا ہے۔</string>
+    <string name="settings_account">اکاؤنٹ</string>
+    <string name="settings_delete_account">اکاؤنٹ حذف کریں</string>
+    <string name="settings_delete_footnote">آپ کا اکاؤنٹ، واچ لسٹ اور ہسٹری مستقل طور پر حذف کر دیتا ہے۔</string>
+    <string name="delete_account_title">اپنا اکاؤنٹ حذف کریں؟</string>
+    <string name="delete_account_body">اس سے آپ کی واچ لسٹ، محفوظ کردہ انتخاب اور مختصر معلومات، اور سوالات کی ہسٹری مستقل طور پر حذف ہو جائے گی۔ اسے واپس نہیں کیا جا سکتا۔</string>
+    <string name="keep_my_account">میرا اکاؤنٹ رکھیں</string>
+    <string name="digest_picker_body">منتخب کریں کہ آپ کا صبح کا خلاصہ کب آئے۔</string>
+    <string name="digest_picker_save">وقت محفوظ کریں</string>
+    <string name="digest_picker_hour">گھنٹہ</string>
+    <string name="digest_picker_minute">منٹ</string>
+    <string name="digest_picker_hour_clock">گھنٹہ، 24 گھنٹے کی گھڑی</string>
 </resources>

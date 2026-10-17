@@ -570,6 +570,7 @@ fun NavGraphBuilder.guestNavGraph(
     composable(route = GuestScreen.GuestSavedTidbitScreen.route) {
         val viewModel = koinViewModel<TidbitViewModel>()
         val scope = rememberCoroutineScope()
+        LaunchedEffect(viewModel) { viewModel.showSavedOnly() }
 
         LaunchedEffect(Unit) {
             viewModel.actions.onEach { action ->

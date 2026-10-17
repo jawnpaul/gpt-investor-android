@@ -15,11 +15,13 @@
 		517D80EF2F65B1D8003EC92D /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 517D80EE2F65B1D8003EC92D /* FirebaseRemoteConfig */; };
 		517D81032F65C411003EC92D /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = 517D81022F65C411003EC92D /* Mixpanel */; };
 		51996E722F6FF11100976C18 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 51996E712F6FF11100976C18 /* GoogleSignIn */; };
+		FF745EB1308400B700864C53 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF745EB0308400B700864C53 /* StoreKit.framework */; };
 		FF7D82E52FD7790000086065 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = FF7D82E42FD7790000086065 /* FirebaseCrashlytics */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		BE15D34BA5370888110A187D /* GPT Investor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "GPT Investor.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FF745EB0308400B700864C53 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -68,6 +70,7 @@
 				517D80E72F65B1D8003EC92D /* FirebaseAnalytics in Frameworks */,
 				517D80EB2F65B1D8003EC92D /* FirebaseCore in Frameworks */,
 				517D80E92F65B1D8003EC92D /* FirebaseAuth in Frameworks */,
+				FF745EB1308400B700864C53 /* StoreKit.framework in Frameworks */,
 				517D80EF2F65B1D8003EC92D /* FirebaseRemoteConfig in Frameworks */,
 				FF7D82E52FD7790000086065 /* FirebaseCrashlytics in Frameworks */,
 			);
@@ -81,6 +84,7 @@
 			children = (
 				D8A3197734984FB05145E741 /* Configuration */,
 				52EFE54A5C0E54258D6286B1 /* iosApp */,
+				FF745EAF308400B700864C53 /* Frameworks */,
 				ECEFFE98EDAF09A63182EEB4 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -91,6 +95,14 @@
 				BE15D34BA5370888110A187D /* GPT Investor.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		FF745EAF308400B700864C53 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FF745EB0308400B700864C53 /* StoreKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

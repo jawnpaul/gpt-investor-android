@@ -1,16 +1,19 @@
 package com.thejawnpaul.gptinvestor.features.search.presentation.ui
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.components.GiButton
+import com.thejawnpaul.gptinvestor.theme.components.GiButtonSize
+import com.thejawnpaul.gptinvestor.theme.components.GiButtonVariant
+import com.thejawnpaul.gptinvestor.theme.components.GiText
+import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 
 @Composable
 fun SearchSectionHeader(
@@ -21,20 +24,22 @@ fun SearchSectionHeader(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = title.uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-            color = LocalGPTInvestorColors.current.textColors.secondary50
+        GiText(
+            text = title,
+            modifier = Modifier
+                .weight(1f)
+                .semantics { heading() },
+            style = GiTextStyle.Eyebrow
         )
         if (actionLabel != null) {
-            Text(
+            GiButton(
                 text = actionLabel,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable(onClick = onAction)
+                onClick = onAction,
+                size = GiButtonSize.Small,
+                variant = GiButtonVariant.TextMuted
             )
         }
     }

@@ -420,4 +420,12 @@
     <string name="discover_picks_error_title">Couldn’t load picks</string>
     <string name="discover_lesson_error_title">Couldn’t load the lesson</string>
     <string name="discover_lesson_error_body">Your saved tidbits still work offline.</string>
+    <string name="discover_ask_about">Ask GPT Investor about “%1$s”</string>
+    <string name="discover_ask_subtitle">Get a plain-English answer with sources</string>
+    <string name="discover_no_matches_title">No matches for “%1$s”</string>
+    <string name="discover_no_matches_body">Check the spelling, or ask GPT Investor in plain English.</string>
+    <string name="discover_search_error_title">Couldn’t search for “%1$s”</string>
+    <string name="discover_search_error_title_generic">Couldn’t load search</string>
+    <string name="discover_search_error_body">Search needs a connection. Check your connection and try again.</string>
+    <string name="discover_loading_search">Loading search</string>
 </resources>

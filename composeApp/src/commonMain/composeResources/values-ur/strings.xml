@@ -399,4 +399,12 @@
     <string name="discover_picks_error_title">انتخاب لوڈ نہیں ہو سکے</string>
     <string name="discover_lesson_error_title">سبق لوڈ نہیں ہو سکا</string>
     <string name="discover_lesson_error_body">آپ کی محفوظ کردہ مختصر معلومات آف لائن بھی کام کرتی ہیں۔</string>
+    <string name="discover_ask_about">“%1$s” کے بارے میں GPT Investor سے پوچھیں</string>
+    <string name="discover_ask_subtitle">ذرائع کے ساتھ آسان زبان میں جواب حاصل کریں</string>
+    <string name="discover_no_matches_title">“%1$s” کے لیے کوئی نتیجہ نہیں</string>
+    <string name="discover_no_matches_body">ہجے چیک کریں، یا GPT Investor سے آسان الفاظ میں پوچھیں۔</string>
+    <string name="discover_search_error_title">“%1$s” تلاش نہیں ہو سکا</string>
+    <string name="discover_search_error_title_generic">تلاش لوڈ نہیں ہو سکی</string>
+    <string name="discover_search_error_body">تلاش کے لیے کنکشن ضروری ہے۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
+    <string name="discover_loading_search">تلاش لوڈ ہو رہی ہے</string>
 </resources>

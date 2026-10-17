@@ -2,29 +2,36 @@ package com.thejawnpaul.gptinvestor.features.search.presentation.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.clear
+import com.thejawnpaul.gptinvestor.discover_no_matches_body
+import com.thejawnpaul.gptinvestor.discover_no_matches_title
+import com.thejawnpaul.gptinvestor.features.search.domain.model.ChipItem
+import com.thejawnpaul.gptinvestor.features.search.domain.model.PromptItem
 import com.thejawnpaul.gptinvestor.features.search.domain.model.SearchSection
 import com.thejawnpaul.gptinvestor.features.search.domain.model.StockItem
 import com.thejawnpaul.gptinvestor.features.search.presentation.state.SearchEvent
 import com.thejawnpaul.gptinvestor.features.search.presentation.state.SearchUiState
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -37,6 +44,7 @@ fun SearchScreen(state: SearchUiState, onEvent: (SearchEvent) -> Unit, modifier:
 
     Scaffold(
         modifier = modifier,
+        containerColor = GiTheme.colors.bg,
         topBar = {
             SearchTopBar(
                 query = state.query,
@@ -51,131 +59,163 @@ fun SearchScreen(state: SearchUiState, onEvent: (SearchEvent) -> Unit, modifier:
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+                .imePadding()
         ) {
-            if (state.isLoading && state.sections.isEmpty()) {
-                SearchLoadingContent()
-            } else if (state.error != null && state.sections.isEmpty()) {
-                SearchErrorContent(
-                    message = state.error,
+            when {
+                state.isLoading && state.sections.isEmpty() -> SearchLoadingContent()
+                state.error != null && state.sections.isEmpty() -> SearchErrorContent(
+                    query = state.query,
                     onRetry = { onEvent(SearchEvent.OnRetry) }
                 )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(0.dp)
-                ) {
-                    state.sections.forEach { section ->
-                        when (section) {
-                            is SearchSection.RecentList -> {
-                                item(key = "header_${section.id}") {
-                                    SearchSectionHeader(
-                                        title = section.title,
-                                        actionLabel = if (section.clearable) stringResource(Res.string.clear) else null,
-                                        onAction = { onEvent(SearchEvent.OnClearHistory) },
-                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                                    )
-                                }
-                                items(section.items, key = { "recent_${it.ticker}" }) { stock ->
-                                    SearchStockRow(
-                                        stock = stock,
-                                        onClick = { onEvent(SearchEvent.OnStockClick(stock.ticker)) }
-                                    )
-                                }
-                                item(key = "spacer_${section.id}") { Spacer(modifier = Modifier.height(8.dp)) }
+                else -> SearchSections(state = state, onEvent = onEvent)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SearchSections(state: SearchUiState, onEvent: (SearchEvent) -> Unit) {
+    val isNoResults = state.sections.any { it is SearchSection.EmptyState }
+    val haptics = LocalHapticFeedback.current
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = GiSpace.gutter,
+            end = GiSpace.gutter,
+            top = GiSpace.sectionGap,
+            bottom = GiSpace.x10
+        ),
+        verticalArrangement = Arrangement.spacedBy(if (isNoResults) GiSpace.x8 else GiSpace.sectionGap)
+    ) {
+        state.sections.forEach { section ->
+            when (section) {
+                is SearchSection.RecentList -> if (section.items.isNotEmpty()) {
+                    item(key = section.id, contentType = "recent") {
+                        Column(
+                            verticalArrangement = if (section.clearable) {
+                                Arrangement.Top
+                            } else {
+                                Arrangement.spacedBy(GiSpace.titleToContent)
                             }
-                            is SearchSection.PromptList -> {
-                                item(key = "header_${section.id}") {
-                                    SearchSectionHeader(
-                                        title = section.title,
-                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                                    )
+                        ) {
+                            SearchSectionHeader(
+                                title = section.title,
+                                actionLabel = if (section.clearable) stringResource(Res.string.clear) else null,
+                                onAction = {
+                                    haptics.performHapticFeedback(GiHaptics.Reject)
+                                    onEvent(SearchEvent.OnClearHistory)
                                 }
-                                items(section.items, key = { "prompt_${it.label}" }) { prompt ->
+                            )
+                            SearchStockList(
+                                stocks = section.items,
+                                onClick = { onEvent(SearchEvent.OnStockClick(it.ticker)) }
+                            )
+                        }
+                    }
+                }
+
+                is SearchSection.PromptList -> if (section.items.isNotEmpty()) {
+                    item(key = section.id, contentType = "prompts") {
+                        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.titleToContent)) {
+                            SearchSectionHeader(title = section.title)
+                            Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
+                                section.items.forEach { prompt ->
                                     SearchPromptRow(
                                         prompt = prompt,
                                         onClick = { onEvent(SearchEvent.OnPromptClick(prompt.query)) }
                                     )
                                 }
-                                item(key = "spacer_${section.id}") { Spacer(modifier = Modifier.height(8.dp)) }
-                            }
-                            is SearchSection.ChipList -> {
-                                item(key = "header_${section.id}") {
-                                    SearchSectionHeader(
-                                        title = section.title,
-                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                                    )
-                                    ChipListSection(
-                                        chips = section.items,
-                                        onChipClick = { key -> onEvent(SearchEvent.OnSectorClick(key)) },
-                                        modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 12.dp)
-                                    )
-                                }
-                            }
-                            is SearchSection.StockList -> {
-                                item(key = "header_${section.id}") {
-                                    SearchSectionHeader(
-                                        title = section.title,
-                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                                    )
-                                }
-                                items(section.items, key = { "stock_${it.ticker}" }) { stock ->
-                                    SearchStockRow(
-                                        stock = stock,
-                                        onClick = { onEvent(SearchEvent.OnStockClick(stock.ticker)) }
-                                    )
-                                }
-                                item(key = "spacer_${section.id}") { Spacer(modifier = Modifier.height(8.dp)) }
-                            }
-                            is SearchSection.AskGpt -> {
-                                item(key = section.id) {
-                                    SearchAskGptRow(
-                                        title = section.title,
-                                        query = section.query,
-                                        onClick = { onEvent(SearchEvent.OnAskGptClick(section.query)) },
-                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                                    )
-                                }
-                            }
-                            is SearchSection.EmptyState -> {
-                                item(key = section.id) {
-                                    SearchEmptyStateSection(
-                                        message = section.message,
-                                        subtitle = section.subtitle,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 32.dp, vertical = 24.dp)
-                                    )
-                                }
                             }
                         }
                     }
-                    item { Spacer(modifier = Modifier.height(32.dp)) }
+                }
+
+                is SearchSection.ChipList -> if (section.items.isNotEmpty()) {
+                    item(key = section.id, contentType = "chips") {
+                        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.titleToContent)) {
+                            SearchSectionHeader(title = section.title)
+                            ChipListSection(
+                                chips = section.items,
+                                onChipClick = { key -> onEvent(SearchEvent.OnSectorClick(key)) }
+                            )
+                        }
+                    }
+                }
+
+                is SearchSection.StockList -> if (section.items.isNotEmpty()) {
+                    item(key = section.id, contentType = "stocks") {
+                        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.titleToContent)) {
+                            SearchSectionHeader(title = section.title)
+                            SearchStockList(
+                                stocks = section.items,
+                                onClick = { onEvent(SearchEvent.OnStockClick(it.ticker)) }
+                            )
+                        }
+                    }
+                }
+
+                is SearchSection.AskGpt -> item(key = section.id, contentType = "askGpt") {
+                    SearchAskGptRow(
+                        query = section.query,
+                        onClick = { onEvent(SearchEvent.OnAskGptClick(section.query)) }
+                    )
+                }
+
+                is SearchSection.EmptyState -> item(key = section.id, contentType = "empty") {
+                    val query = state.query.trim()
+                    SearchEmptyStateSection(
+                        message = if (query.isNotEmpty()) {
+                            stringResource(Res.string.discover_no_matches_title, query)
+                        } else {
+                            section.message
+                        },
+                        subtitle = if (query.isNotEmpty()) {
+                            stringResource(Res.string.discover_no_matches_body)
+                        } else {
+                            section.subtitle
+                        }
+                    )
                 }
             }
         }
     }
 }
 
-@PreviewLightDark
-@Composable
-private fun SearchScreenLoadingPreview() {
-    GPTInvestorTheme {
-        Surface {
-            SearchScreen(state = SearchUiState(isLoading = true), onEvent = {})
-        }
-    }
-}
+private val previewRecentsState = SearchUiState(
+    sections = listOf(
+        SearchSection.RecentList(
+            id = "recent",
+            title = "Recent",
+            clearable = true,
+            items = listOf(
+                StockItem("JNJ", "Johnson & Johnson", ""),
+                StockItem("TSLA", "Tesla, Inc.", ""),
+                StockItem("AMZN", "Amazon.com, Inc.", "")
+            )
+        ),
+        SearchSection.PromptList(
+            id = "prompts",
+            title = "Try asking",
+            items = listOf(
+                PromptItem("What makes a stock go up?", "What makes a stock go up?"),
+                PromptItem("Making sense of ESG investing", "Making sense of ESG investing")
+            )
+        ),
+        SearchSection.ChipList(
+            id = "sectors",
+            title = "Browse by sector",
+            items = listOf(ChipItem("healthcare", "Healthcare"), ChipItem("energy", "Energy"))
+        )
+    )
+)
 
 @PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
 @Composable
-private fun SearchScreenErrorPreview() {
+private fun SearchScreenRecentsPreview() {
     GPTInvestorTheme {
-        Surface {
-            SearchScreen(
-                state = SearchUiState(error = "Something went wrong. Please try again."),
-                onEvent = {}
-            )
-        }
+        SearchScreen(state = previewRecentsState, onEvent = {})
     }
 }
 
@@ -183,37 +223,60 @@ private fun SearchScreenErrorPreview() {
 @Composable
 private fun SearchScreenResultsPreview() {
     GPTInvestorTheme {
-        Surface {
-            SearchScreen(
-                state = SearchUiState(
-                    query = "apple",
-                    sections = listOf(
-                        SearchSection.RecentList(
-                            id = "recent",
-                            title = "Recent",
-                            clearable = true,
-                            items = listOf(
-                                StockItem("AAPL", "Apple Inc.", ""),
-                                StockItem("AMZN", "Amazon.com Inc.", "")
-                            )
-                        ),
-                        SearchSection.StockList(
-                            id = "stocks",
-                            title = "Stocks",
-                            items = listOf(
-                                StockItem("AAPL", "Apple Inc.", ""),
-                                StockItem("APLE", "Apple Hospitality REIT", "")
-                            )
-                        ),
-                        SearchSection.AskGpt(
-                            id = "ask_gpt",
-                            title = "Ask GPT Investor",
-                            query = "apple"
+        SearchScreen(
+            state = SearchUiState(
+                query = "nvi",
+                sections = listOf(
+                    SearchSection.StockList(
+                        id = "stocks",
+                        title = "Stocks",
+                        items = listOf(
+                            StockItem("NVDA", "NVIDIA Corporation", ""),
+                            StockItem("INVH", "Invitation Homes Inc.", "")
                         )
-                    )
-                ),
-                onEvent = {}
-            )
-        }
+                    ),
+                    SearchSection.ChipList(
+                        id = "themes",
+                        title = "Sectors and themes",
+                        items = listOf(ChipItem("technology", "Technology"), ChipItem("real-estate", "Real estate"))
+                    ),
+                    SearchSection.AskGpt(id = "ask_gpt", title = "Ask GPT Investor", query = "nvi")
+                )
+            ),
+            onEvent = {}
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun SearchScreenNoResultsPreview() {
+    GPTInvestorTheme {
+        SearchScreen(
+            state = SearchUiState(
+                query = "zzzzqq",
+                sections = listOf(
+                    SearchSection.EmptyState(id = "empty", message = "No results", subtitle = ""),
+                    SearchSection.AskGpt(id = "ask_gpt", title = "Ask GPT Investor", query = "zzzzqq")
+                )
+            ),
+            onEvent = {}
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun SearchScreenLoadingPreview() {
+    GPTInvestorTheme {
+        SearchScreen(state = SearchUiState(isLoading = true), onEvent = {})
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun SearchScreenErrorPreview() {
+    GPTInvestorTheme {
+        SearchScreen(state = SearchUiState(query = "msft", error = "Something went wrong"), onEvent = {})
     }
 }

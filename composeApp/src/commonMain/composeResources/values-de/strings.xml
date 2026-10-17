@@ -399,4 +399,12 @@
     <string name="discover_picks_error_title">Empfehlungen konnten nicht geladen werden</string>
     <string name="discover_lesson_error_title">Die Lektion konnte nicht geladen werden</string>
     <string name="discover_lesson_error_body">Ihre gespeicherten Wissenshäppchen funktionieren auch offline.</string>
+    <string name="discover_ask_about">GPT Investor zu „%1$s“ fragen</string>
+    <string name="discover_ask_subtitle">Erhalten Sie eine verständliche Antwort mit Quellen</string>
+    <string name="discover_no_matches_title">Keine Treffer für „%1$s“</string>
+    <string name="discover_no_matches_body">Prüfen Sie die Schreibweise oder fragen Sie GPT Investor in einfachen Worten.</string>
+    <string name="discover_search_error_title">Suche nach „%1$s“ fehlgeschlagen</string>
+    <string name="discover_search_error_title_generic">Suche konnte nicht geladen werden</string>
+    <string name="discover_search_error_body">Die Suche braucht eine Verbindung. Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.</string>
+    <string name="discover_loading_search">Suche wird geladen</string>
 </resources>

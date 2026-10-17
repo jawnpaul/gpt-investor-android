@@ -401,4 +401,12 @@
     <string name="discover_picks_error_title">Не вдалося завантажити вибори</string>
     <string name="discover_lesson_error_title">Не вдалося завантажити урок</string>
     <string name="discover_lesson_error_body">Збережені цікавинки працюють і офлайн.</string>
+    <string name="discover_ask_about">Запитати GPT Investor про «%1$s»</string>
+    <string name="discover_ask_subtitle">Отримайте зрозумілу відповідь із джерелами</string>
+    <string name="discover_no_matches_title">Немає збігів для «%1$s»</string>
+    <string name="discover_no_matches_body">Перевірте написання або запитайте GPT Investor простими словами.</string>
+    <string name="discover_search_error_title">Не вдалося знайти «%1$s»</string>
+    <string name="discover_search_error_title_generic">Не вдалося завантажити пошук</string>
+    <string name="discover_search_error_body">Для пошуку потрібне з’єднання. Перевірте з’єднання та спробуйте ще раз.</string>
+    <string name="discover_loading_search">Завантаження пошуку</string>
 </resources>

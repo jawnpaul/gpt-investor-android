@@ -133,4 +133,20 @@ class OnboardingViewModelBriefTest {
 
         verify(exactly = 1) { getCompanyBriefUseCase("TSLA", any()) }
     }
+
+    @Test
+    fun `retry after a rejected guest token fetches a new one`() = runTest(testDispatcher) {
+        stubBrief(Either.Left(Failure.GuestSessionExpired))
+        val vm = viewModel()
+
+        vm.onStockSelected("TSLA", "Tesla", "suggested", null)
+        advanceUntilIdle()
+        coVerify(exactly = 1) { authRepository.acquireGuestToken() }
+
+        vm.onRetryBrief()
+        advanceUntilIdle()
+
+        coVerify(exactly = 2) { authRepository.acquireGuestToken() }
+        verify(exactly = 2) { getCompanyBriefUseCase("TSLA", any()) }
+    }
 }

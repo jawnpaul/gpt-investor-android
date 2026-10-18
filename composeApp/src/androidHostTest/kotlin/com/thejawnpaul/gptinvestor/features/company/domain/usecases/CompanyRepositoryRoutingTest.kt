@@ -172,6 +172,21 @@ class CompanyRepositoryRoutingTest {
     }
 
     @Test
+    fun `401 during onboarding returns GuestSessionExpired`() = runTest {
+        stubGuest(isGuest = false, isRegistered = false)
+        coEvery { apiService.getCompanyBrief("AAPL") } returns briefResponse(
+            401,
+            """{"error":"token_expired","msg":"Token has expired"}"""
+        )
+
+        repository.getCompanyBrief("AAPL").test {
+            val result = awaitItem()
+            assertThat((result as Either.Left).a).isEqualTo(Failure.GuestSessionExpired)
+            awaitComplete()
+        }
+    }
+
+    @Test
     fun `no-code 429 returns RateLimitExceeded failure`() = runTest {
         stubGuest(isGuest = false)
         coEvery { apiService.getCompanyBrief("AAPL") } returns briefResponse(429, null)
@@ -184,11 +199,11 @@ class CompanyRepositoryRoutingTest {
     }
 
     @Test
-    fun `brief events label the session as registered, guest or onboarding`() = runTest {
+    fun `brief events label the session as authenticated, guest or onboarding`() = runTest {
         coEvery { apiService.getCompanyBrief("AAPL") } returns briefResponse(500, null)
 
         listOf(
-            SessionCase(isGuest = false, isRegistered = true, userType = "registered"),
+            SessionCase(isGuest = false, isRegistered = true, userType = "authenticated"),
             SessionCase(isGuest = true, isRegistered = false, userType = "guest"),
             SessionCase(isGuest = false, isRegistered = false, userType = "onboarding")
         ).forEach { (isGuest, isRegistered, userType) ->

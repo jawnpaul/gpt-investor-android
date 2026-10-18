@@ -7,14 +7,17 @@ import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
+import com.thejawnpaul.gptinvestor.core.session.rateLimitRetryMessage
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.ConversationPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.answerFailed
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.stopAnswer
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
 import com.thejawnpaul.gptinvestor.features.history.domain.usecases.GetAllHistoryUseCase
 import com.thejawnpaul.gptinvestor.features.history.domain.usecases.GetSingleHistoryUseCase
@@ -24,6 +27,7 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.Histo
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenAction.OnGoToHistoryDetail
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import kotlin.time.Clock
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -59,6 +63,10 @@ class HistoryViewModel(
     private var upgradeModelId: String? = null
 
     private var requestStartTime: Long = 0L
+
+    private var answerJob: Job? = null
+
+    private var answerGeneration = 0
 
     private val conversationId: Long?
         get() {
@@ -106,7 +114,6 @@ class HistoryViewModel(
     }
 
     private fun getConversation() {
-        conversationView.update { it.copy(loading = true) }
         conversationId?.let { id ->
 
             getSingleHistoryUseCase(id) {
@@ -119,13 +126,12 @@ class HistoryViewModel(
     }
 
     private fun handleGetSingleHistoryFailure(failure: Failure) {
-        conversationView.update { it.copy(loading = false) }
         Logger.e(failure.toString())
         processHistoryDetailAction(HistoryDetailAction.ShowToast("Failed to load conversation"))
     }
 
     private fun handleGetSingleHistorySuccess(conversation: StructuredConversation) {
-        conversationView.update { it.copy(loading = false, conversation = conversation) }
+        conversationView.update { it.copy(conversation = conversation) }
     }
 
     fun updateInput(input: String) {
@@ -133,19 +139,35 @@ class HistoryViewModel(
     }
 
     fun getInputResponse() {
-        if (conversation.value.query.trim().isNotEmpty()) {
-            conversationView.update {
-                it.copy(loading = true)
-            }
+        val query = conversation.value.query
+        if (query.trim().isNotEmpty()) ask(query = query, source = "user_input")
+    }
 
-            requestStartTime = Clock.System.now().toEpochMilliseconds()
-            logMessageSent(source = "user_input")
-            getInputPromptUseCase(
-                ConversationPrompt(
-                    conversationId = conversationId ?: -1L,
-                    query = conversation.value.query
-                )
-            ) {
+    private fun retryAnswer(query: String) {
+        if (query.isBlank() || conversation.value.loading) return
+        ask(query = query, source = null)
+    }
+
+    private fun ask(query: String, source: String?) {
+        answerGeneration++
+        val generation = answerGeneration
+        conversationView.update {
+            it.copy(
+                loading = true,
+                pendingQuery = query,
+                query = if (source == null) it.query else "",
+                answerOffline = false
+            )
+        }
+        requestStartTime = Clock.System.now().toEpochMilliseconds()
+        source?.let { logMessageSent(source = it) }
+        answerJob = getInputPromptUseCase(
+            ConversationPrompt(
+                conversationId = conversationId ?: -1L,
+                query = query
+            )
+        ) {
+            if (generation == answerGeneration) {
                 it.fold(
                     ::handleInputResponseFailure,
                     ::handleInputResponseSuccess
@@ -154,7 +176,27 @@ class HistoryViewModel(
         }
     }
 
+    private fun stopAnswering() {
+        answerGeneration++
+        answerJob?.cancel()
+        answerJob = null
+        conversationView.update { state ->
+            val conversation = state.conversation as? StructuredConversation
+            val stopped = conversation?.let { stopAnswer(it.messageList) }
+            val next = when {
+                state.pendingQuery != null || conversation == null || stopped == null ->
+                    state.copy(query = state.pendingQuery ?: state.query)
+                else -> state.copy(
+                    conversation = conversation.copy(messageList = stopped.messages.toMutableList()),
+                    query = stopped.restoredQuery ?: state.query
+                )
+            }
+            next.copy(pendingQuery = null, loading = false)
+        }
+    }
+
     private fun handleInputResponseFailure(failure: Failure) {
+        var shownInline = false
         conversationView.update { state ->
             val updatedConversation =
                 (state.conversation as? StructuredConversation)?.let { conversation ->
@@ -170,28 +212,44 @@ class HistoryViewModel(
                     }
                     conversation.copy(messageList = updatedMessages)
                 } ?: state.conversation
-            state.copy(loading = false, conversation = updatedConversation)
+            shownInline = state.pendingQuery == null &&
+                ((updatedConversation as? StructuredConversation)?.messageList?.lastOrNull() as? GenAiTextMessage)
+                    ?.answerFailed == true
+            state.copy(
+                loading = false,
+                conversation = updatedConversation,
+                pendingQuery = null,
+                query = state.pendingQuery ?: state.query,
+                answerOffline = failure is Failure.NetworkConnection
+            )
         }
         when (failure) {
             is GenAIException -> {
                 Logger.e("AI exception")
-                processHistoryDetailAction(HistoryDetailAction.ShowToast("An error occurred"))
+                if (!shownInline) processHistoryDetailAction(HistoryDetailAction.ShowToast("An error occurred"))
             }
 
             is Failure.RateLimitExceeded -> {
                 val isGuest = conversation.value.isGuest
                 analyticsLogger.logEvent(
                     eventName = "rate-limit-hit",
-                    params = mapOf("user_type" to if (isGuest) "guest" else "authenticated")
+                    params = mapOf(
+                        "user_type" to if (isGuest) "guest" else "authenticated",
+                        "upgrade" to failure.upgrade
+                    )
                 )
                 Logger.e("Rate limit exceeded")
                 conversationView.update { it.copy(showRateLimitBottomSheet = false) }
-                if (isGuest) {
-                    guestRateLimitNotifier.notifyRateLimit()
-                } else {
-                    processHistoryDetailAction(
-                        HistoryDetailAction.ShowToast("Rate limit exceeded. Please try again later.")
-                    )
+                when {
+                    isGuest -> guestRateLimitNotifier.notifyRateLimit()
+
+                    failure.upgrade -> premiumEventBus.requestPremium(source = "history_rate_limit")
+
+                    else -> viewModelScope.launch {
+                        processHistoryDetailAction(
+                            HistoryDetailAction.ShowToast(rateLimitRetryMessage(failure.retryAfterSeconds))
+                        )
+                    }
                 }
             }
 
@@ -202,18 +260,20 @@ class HistoryViewModel(
             }
 
             is Failure.NetworkConnection -> {
-                processHistoryDetailAction(HistoryDetailAction.ShowToast("No internet connection"))
+                if (!shownInline) processHistoryDetailAction(HistoryDetailAction.ShowToast("No internet connection"))
             }
 
             is Failure.ServerError -> {
-                processHistoryDetailAction(
-                    HistoryDetailAction.ShowToast("Server error. Please try again later.")
-                )
+                if (!shownInline) {
+                    processHistoryDetailAction(
+                        HistoryDetailAction.ShowToast("Server error. Please try again later.")
+                    )
+                }
             }
 
             else -> {
                 Logger.e(failure.toString())
-                processHistoryDetailAction(HistoryDetailAction.ShowToast("Something went wrong"))
+                if (!shownInline) processHistoryDetailAction(HistoryDetailAction.ShowToast("Something went wrong"))
             }
         }
     }
@@ -234,10 +294,10 @@ class HistoryViewModel(
 
         conversationView.update { state ->
             state.copy(
-                query = "",
-                loading = conversation.messageList.last().loading,
+                loading = !conversation.streamComplete &&
+                    conversation.messageList.lastOrNull { it is GenAiTextMessage }?.loading == true,
                 conversation = conversation,
-                genText = conversation.messageList.last().response.toString()
+                pendingQuery = null
             )
         }
     }
@@ -291,6 +351,10 @@ class HistoryViewModel(
         when (event) {
             is HistoryDetailEvent.ClickSuggestedPrompt -> {
                 getSuggestedPromptResponse(query = event.prompt)
+            }
+
+            is HistoryDetailEvent.RetryAnswer -> {
+                retryAnswer(event.query)
             }
 
             is HistoryDetailEvent.GetHistory -> {
@@ -351,6 +415,22 @@ class HistoryViewModel(
             HistoryDetailEvent.GoToSignUp -> {
                 processHistoryDetailAction(HistoryDetailAction.OnGoToSignUp)
             }
+
+            HistoryDetailEvent.StopAnswering -> {
+                stopAnswering()
+            }
+
+            is HistoryDetailEvent.ShareAnswer -> {
+                processHistoryDetailAction(HistoryDetailAction.OnShare(event.text))
+            }
+
+            HistoryDetailEvent.GoToHistory -> {
+                processHistoryDetailAction(HistoryDetailAction.OnGoToHistory)
+            }
+
+            is HistoryDetailEvent.OpenCompany -> {
+                processHistoryDetailAction(HistoryDetailAction.OnOpenCompany(event.ticker))
+            }
         }
     }
 
@@ -409,21 +489,7 @@ class HistoryViewModel(
     }
 
     private fun getSuggestedPromptResponse(query: String) {
-        conversationView.update {
-            it.copy(loading = true)
-        }
-        logMessageSent(source = "suggested_prompt")
-        getInputPromptUseCase(
-            ConversationPrompt(
-                conversationId = conversationId ?: -1L,
-                query = query
-            )
-        ) {
-            it.fold(
-                ::handleInputResponseFailure,
-                ::handleInputResponseSuccess
-            )
-        }
+        ask(query = query, source = "suggested_prompt")
     }
 
     private fun logMessageSent(source: String) {
@@ -466,6 +532,11 @@ sealed interface HistoryDetailEvent {
 
     data class ShowRateLimitBottomSheet(val showBottomSheet: Boolean) : HistoryDetailEvent
     data object GoToSignUp : HistoryDetailEvent
+    data object StopAnswering : HistoryDetailEvent
+    data class RetryAnswer(val query: String) : HistoryDetailEvent
+    data class ShareAnswer(val text: String) : HistoryDetailEvent
+    data object GoToHistory : HistoryDetailEvent
+    data class OpenCompany(val ticker: String) : HistoryDetailEvent
 }
 
 sealed interface HistoryDetailAction {
@@ -474,4 +545,7 @@ sealed interface HistoryDetailAction {
     data class OnCopy(val text: String) : HistoryDetailAction
     data class ShowToast(val message: String) : HistoryDetailAction
     data object OnGoToSignUp : HistoryDetailAction
+    data class OnShare(val text: String) : HistoryDetailAction
+    data object OnGoToHistory : HistoryDetailAction
+    data class OnOpenCompany(val ticker: String) : HistoryDetailAction
 }

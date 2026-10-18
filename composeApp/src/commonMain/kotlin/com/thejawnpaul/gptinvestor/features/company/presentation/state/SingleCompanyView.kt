@@ -11,10 +11,13 @@ data class SingleCompanyView(
     val conversation: Conversation = CompanyDetailDefaultConversation(id = 0, response = null),
     val error: String? = null,
     val companyName: String = "",
+    val ticker: String = "",
     val inputQuery: String = "",
     val header: CompanyHeaderPresentation = CompanyHeaderPresentation(),
     val brief: CompanyBrief? = null,
-    val genText: String = "",
+    val pendingQuery: String? = null,
+    val isAnswering: Boolean = false,
+    val answerOffline: Boolean = false,
     val availableModels: List<AvailableModel> = emptyList(),
     val selectedModel: AvailableModel = DefaultModel(),
     val waitlistAvailableOptions: List<String> = listOf(
@@ -28,7 +31,8 @@ data class SingleCompanyView(
     val selectedWaitlistOptions: List<String> = emptyList(),
     val showWaitListBottomSheet: Boolean = false,
     val isGuestSession: Boolean = false,
-    val showSpotlight: Boolean = false
+    val showSpotlight: Boolean = false,
+    val watchlistPending: Boolean = false
 ) {
     val enableSend = inputQuery.trim().isNotEmpty()
 }

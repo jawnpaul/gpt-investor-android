@@ -1,114 +1,67 @@
 package com.thejawnpaul.gptinvestor.features.toppick.presentation.ui
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
-import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.components.GiCard
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiLogoTile
+import com.thejawnpaul.gptinvestor.theme.components.GiSkeleton
+import com.thejawnpaul.gptinvestor.theme.components.GiText
+import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 
 @Composable
 fun SingleTopPickItem(pickPresentation: TopPickPresentation, onClick: (String) -> Unit, modifier: Modifier = Modifier) {
-    val gptInvestorColors = LocalGPTInvestorColors.current
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.97f else 1f,
-        animationSpec = spring(stiffness = Spring.StiffnessMedium),
-        label = "pressScale"
-    )
-
-    OutlinedCard(
-        modifier = modifier
-            .padding(horizontal = 16.dp)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            },
-        interactionSource = interactionSource,
-        onClick = { onClick(pickPresentation.id) }
+    GiCard(
+        modifier = modifier.fillMaxWidth(),
+        onClick = { onClick(pickPresentation.id) },
+        spacing = GiSpace.x3
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Surface(
-                    modifier = Modifier.size(32.dp),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    AsyncImage(
-                        model = pickPresentation.imageUrl,
-                        modifier = Modifier.fillMaxSize(),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        // Text - company ticker
-                        Text(
-                            text = pickPresentation.ticker,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        // Text - company name
-                        Text(
-                            modifier = Modifier,
-                            text = pickPresentation.companyName,
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = gptInvestorColors.textColors.secondary50
-                        )
-                    }
-                }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            GiLogoTile(initials = pickInitials(pickPresentation.ticker), imageUrl = pickPresentation.imageUrl)
+            Column(modifier = Modifier.weight(1f)) {
+                GiText(
+                    text = pickPresentation.companyName,
+                    style = GiTextStyle.Label,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                GiText(text = pickPresentation.ticker, style = GiTextStyle.Meta, maxLines = 1)
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                modifier = Modifier,
+            Icon(
+                imageVector = GiIcons.caretRight,
+                contentDescription = null,
+                modifier = Modifier.size(GiIconSize.md),
+                tint = GiTheme.colors.muted
+            )
+        }
+        if (pickPresentation.rationale.isNotBlank()) {
+            GiText(
                 text = pickPresentation.rationale,
-                style = MaterialTheme.typography.bodyMedium,
+                style = GiTextStyle.BodySmall,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
@@ -117,104 +70,54 @@ fun SingleTopPickItem(pickPresentation: TopPickPresentation, onClick: (String) -
 }
 
 @Composable
-fun HomeTopPickItem(pickPresentation: TopPickPresentation, onClick: (String) -> Unit, modifier: Modifier = Modifier) {
-    val gptInvestorColors = LocalGPTInvestorColors.current
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.97f else 1f,
-        animationSpec = spring(stiffness = Spring.StiffnessMedium),
-        label = "pressScale"
-    )
-
-    Surface(
-        modifier = modifier
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .clickable(interactionSource = interactionSource, indication = null, onClick = {
-                onClick(pickPresentation.id)
-            }),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+internal fun TopPickCardSkeleton(modifier: Modifier = Modifier) {
+    GiCard(modifier = modifier.fillMaxWidth(), spacing = GiSpace.x3) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Surface(
-                    modifier = Modifier.size(32.dp),
-                    shape = CircleShape
-                ) {
-                    AsyncImage(
-                        model = pickPresentation.imageUrl,
-                        modifier = Modifier.fillMaxSize(),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    // Text - company ticker
-                    Text(
-                        text = pickPresentation.ticker,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    // Text - company name
-                    Text(
-                        modifier = Modifier,
-                        text = pickPresentation.companyName,
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        color = gptInvestorColors.textColors.secondary50
-                    )
-                }
+            GiSkeleton(modifier = Modifier.size(GiIconSize.xl))
+            Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
+                GiSkeleton(modifier = Modifier.width(SKELETON_NAME_WIDTH).height(GiSpace.x4))
+                GiSkeleton(modifier = Modifier.width(SKELETON_TICKER_WIDTH).height(GiSpace.x3))
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                modifier = Modifier,
-                text = pickPresentation.rationale,
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis
-            )
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
+            GiSkeleton(modifier = Modifier.fillMaxWidth().height(GiSpace.x3))
+            GiSkeleton(modifier = Modifier.fillMaxWidth(SKELETON_LINE_FRACTION).height(GiSpace.x3))
         }
     }
 }
+
+internal fun pickInitials(ticker: String): String = ticker.filter { it.isLetterOrDigit() }.take(2).uppercase()
+
+private val SKELETON_NAME_WIDTH = 120.dp
+private val SKELETON_TICKER_WIDTH = 64.dp
+private const val SKELETON_LINE_FRACTION = 0.8f
+
+internal val previewPick = TopPickPresentation(
+    id = "1",
+    ticker = "GOOGL",
+    companyName = "Alphabet Inc.",
+    rationale = "Alphabet remains a cornerstone of the digital economy. Its dominance in search and advertising " +
+        "provides a massive cash engine to fund its aggressive AI infrastructure build-out.",
+    confidenceScore = 9,
+    metrics = listOf("Revenue: $445.87B", "Growth: +24.2%", "Gross margin: 60.9%"),
+    risks = listOf("High historical price volatility", "Regulatory scrutiny in antitrust matters"),
+    isSaved = false,
+    percentageChange = -0.18f,
+    currentPrice = 353.13f
+)
 
 @PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
 @Composable
-private fun SinglePickPreview(modifier: Modifier = Modifier) {
+private fun SingleTopPickItemPreview() {
     GPTInvestorTheme {
-        Surface {
-            Column(modifier = Modifier.fillMaxSize()) {
-                val pick = TopPickPresentation(
-                    id = "1",
-                    ticker = "AAPL",
-                    companyName = "Microsoft is the leader of the new leader in a new era",
-                    rationale = "This is the day that the Lord has made I will be glad and rejoice in it because, " +
-                        "oh well it is just blah lorem ipsum ",
-                    confidenceScore = 2,
-                    metrics = emptyList(),
-                    risks = emptyList(),
-                    isSaved = false,
-                    imageUrl = "",
-                    percentageChange = 0.0f,
-                    currentPrice = 0.0f
-                )
-
-                SingleTopPickItem(modifier = Modifier, pickPresentation = pick, onClick = {})
-                HomeTopPickItem(modifier = Modifier, pickPresentation = pick, onClick = {})
+        Box(modifier = Modifier.background(GiTheme.colors.bg).padding(GiSpace.gutter)) {
+            Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
+                SingleTopPickItem(pickPresentation = previewPick, onClick = {})
+                TopPickCardSkeleton()
             }
         }
     }

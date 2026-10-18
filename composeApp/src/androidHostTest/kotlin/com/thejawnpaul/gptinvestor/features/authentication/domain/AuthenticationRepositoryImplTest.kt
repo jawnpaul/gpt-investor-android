@@ -7,6 +7,7 @@ import com.thejawnpaul.gptinvestor.core.api.KtorResponse
 import com.thejawnpaul.gptinvestor.core.platform.AppConfig
 import com.thejawnpaul.gptinvestor.core.platform.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
+import com.thejawnpaul.gptinvestor.features.authentication.data.remote.ForgotPasswordResponse
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginResponse
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.User
 import com.thejawnpaul.gptinvestor.features.notification.domain.TokenSyncManager
@@ -177,5 +178,68 @@ class AuthenticationRepositoryImplTest {
         assertThat(result.isFailure).isTrue()
         assertThat(result.exceptionOrNull()).isInstanceOf(EmailNotVerifiedException::class.java)
         verify(exactly = 0) { bearerTokenManager.clearCache() }
+    }
+
+    private fun stubFailedLogin(code: Int) {
+        coEvery { apiService.loginWithEmailAndPassword(any()) } returns KtorResponse(
+            isSuccessful = false,
+            body = null,
+            errorBody = null,
+            code = code
+        )
+    }
+
+    private fun stubPasswordReset(code: Int) {
+        coEvery { apiService.requestPasswordReset(any()) } returns KtorResponse(
+            isSuccessful = code in 200..299,
+            body = ForgotPasswordResponse(status = "success"),
+            errorBody = null,
+            code = code
+        )
+    }
+
+    @Test
+    fun `should return InvalidCredentialsException when server returns 400`() = runTest {
+        stubFailedLogin(code = 400)
+
+        val result = repository.loginWithEmailAndPassword("user@test.com", "wrong")
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(InvalidCredentialsException::class.java)
+    }
+
+    @Test
+    fun `should return InvalidCredentialsException when server returns 401`() = runTest {
+        stubFailedLogin(code = 401)
+
+        val result = repository.loginWithEmailAndPassword("user@test.com", "wrong")
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(InvalidCredentialsException::class.java)
+    }
+
+    @Test
+    fun `should treat password reset 200 and 500 as sent`() = runTest {
+        stubPasswordReset(code = 200)
+        assertThat(repository.requestPasswordReset("user@test.com").isSuccess).isTrue()
+
+        stubPasswordReset(code = 500)
+        assertThat(repository.requestPasswordReset("user@test.com").isSuccess).isTrue()
+    }
+
+    @Test
+    fun `should return InvalidResetEmailException when password reset returns 400`() = runTest {
+        stubPasswordReset(code = 400)
+
+        val result = repository.requestPasswordReset("")
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(InvalidResetEmailException::class.java)
+    }
+
+    @Test
+    fun `should return TooManyResetRequestsException when password reset returns 429`() = runTest {
+        stubPasswordReset(code = 429)
+
+        val result = repository.requestPasswordReset("user@test.com")
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(TooManyResetRequestsException::class.java)
     }
 }

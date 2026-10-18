@@ -6,6 +6,8 @@ import com.thejawnpaul.gptinvestor.core.session.GuestSessionNotifier
 import com.thejawnpaul.gptinvestor.core.session.GuestSessionReason
 import com.thejawnpaul.gptinvestor.core.session.GuestSessionSource
 import com.thejawnpaul.gptinvestor.remote.UnauthorizedCallback
+import dev.gitlive.firebase.Firebase
+import dev.gitlive.firebase.installations.installations
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.core.annotation.Singleton
@@ -30,9 +32,15 @@ class UnauthorizedCallbackImpl :
                         source = GuestSessionSource.Request
                     )
                 )
-            } else {
+            } else if (appPreferences.isUserLoggedIn.first() == true) {
                 authenticationRepository.signOut()
             }
         }
+    }
+
+    override suspend fun guestUniqueId(): String? = try {
+        Firebase.installations.getId()
+    } catch (_: Exception) {
+        null
     }
 }

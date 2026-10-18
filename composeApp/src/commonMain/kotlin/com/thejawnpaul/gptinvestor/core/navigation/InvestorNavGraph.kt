@@ -4,6 +4,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -13,6 +14,7 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
+import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.compose.viewmodel.koinViewModel
@@ -21,6 +23,7 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
     composable(Screen.HomeTabScreen.route) {
         val homeViewModel = koinViewModel<HomeViewModel>()
         val state = homeViewModel.uiState.collectAsState()
+        val haptics = LocalHapticFeedback.current
         LaunchedEffect(Unit) {
             homeViewModel.actions.onEach { action ->
                 when (action) {
@@ -41,14 +44,14 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
                         platformActions.showMessage(action.message)
                     }
 
+                    is HomeAction.AddStockFinished -> {
+                        haptics.performHapticFeedback(if (action.added) GiHaptics.Confirm else GiHaptics.Reject)
+                    }
+
                     HomeAction.OnGoToSignUp -> {
                         navController.navigate(Screen.SignUpScreen.route) {
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
-                    }
-
-                    HomeAction.NavigateToAllTrending -> {
-                        navController.navigate(Screen.AllTrendingScreen.route)
                     }
 
                     HomeAction.NavigateToDiscover -> {
@@ -70,7 +73,8 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
         HomeScreen(
             modifier = Modifier,
             state = state.value,
-            onEvent = homeViewModel::handleEvent
+            onEvent = homeViewModel::handleEvent,
+            composerModifier = askComposerTransition()
         )
     }
 
@@ -84,13 +88,22 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
         LaunchedEffect(Unit) {
             homeViewModel.handleEvent(HomeEvent.DigestDetailViewed)
         }
+        LaunchedEffect(Unit) {
+            homeViewModel.actions.onEach { action ->
+                if (action is HomeAction.OnGoToCompanyDetail) {
+                    navController.navigate(Screen.CompanyDetailScreen.createRoute(action.ticker))
+                }
+            }.launchIn(this)
+        }
 
         DigestDetailScreen(
             digestView = state.value.dailyDigestView,
             onBack = { navController.popBackStack() },
+            onStockClick = { homeViewModel.handleEvent(HomeEvent.ClickDigestStock(it)) },
             onUnlockPremium = {
                 homeViewModel.handleEvent(HomeEvent.DigestDetailUnlockPremium)
-            }
+            },
+            onRetry = { homeViewModel.handleEvent(HomeEvent.RetryDailyDigest) }
         )
     }
 }

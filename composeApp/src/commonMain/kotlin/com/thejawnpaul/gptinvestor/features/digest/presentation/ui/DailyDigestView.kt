@@ -5,6 +5,7 @@ import com.thejawnpaul.gptinvestor.features.digest.presentation.DigestSentiment
 
 data class DailyDigestView(
     val loading: Boolean = false,
+    val error: Boolean = false,
     val status: DailyDigestStatus = DailyDigestStatus.READY,
     val stocks: List<StockDigestPresentation> = emptyList(),
     val suggestedStocks: List<RecommendedDigestCompany> = emptyList(),
@@ -30,7 +31,9 @@ data class StockDigestPresentation(
     val keyEvent: String? = null,
     val sentiment: DigestSentiment? = null,
     val priceChange: Double? = null,
-    val updatedLabel: String? = null
+    val updatedLabel: String? = null,
+    // Not sent by the digest API yet; the card falls back to the bare ticker.
+    val exchange: String? = null
 )
 
 data class LockedStockDigestPresentation(

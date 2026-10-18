@@ -61,15 +61,7 @@ class SettingsViewModel(
         }
     }
 
-    private fun formatHour(hour: Int): String {
-        val period = if (hour < 12) "AM" else "PM"
-        val displayHour = when {
-            hour == 0 -> 12
-            hour > 12 -> hour - 12
-            else -> hour
-        }
-        return "$displayHour:00 $period"
-    }
+    private fun formatHour(hour: Int): String = "${hour.toString().padStart(2, '0')}:00"
 
     private fun deleteAccount() {
         _uiState.update { it.copy(showDeleteDialog = false) }

@@ -1,5 +1,10 @@
 package com.thejawnpaul.gptinvestor
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,14 +36,21 @@ import com.thejawnpaul.gptinvestor.features.settings.domain.SettingsRepository
 import com.thejawnpaul.gptinvestor.features.splash.AnimatedSplashScreen
 import com.thejawnpaul.gptinvestor.remote.TokenStorage
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GiMotion
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 import org.koin.compose.koinInject
 
 @Composable
-fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLinkConsume: () -> Unit = {}) {
+fun App(
+    modifier: Modifier = Modifier,
+    deepLinkRoute: String? = null,
+    onDeepLinkConsume: () -> Unit = {},
+    onReady: () -> Unit = {}
+) {
     val preferences: AppPreferences = koinInject()
     val tokenSyncManager: TokenSyncManager = koinInject()
     val guestRateLimitNotifier: GuestRateLimitNotifier = koinInject()
@@ -46,7 +58,9 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
     val tokenStorage: TokenStorage = koinInject()
     val settingsRepository: SettingsRepository = koinInject()
 
-    val themePreference by preferences.themePreference.collectAsState(initial = "System")
+    val themePreference by remember(preferences) {
+        preferences.themePreference.map { it ?: "System" }
+    }.collectAsState(initial = null)
     val isUserSignedIn by preferences.isUserLoggedIn.collectAsState(initial = false)
     val isGuestSignedIn by preferences.isGuestLoggedIn.collectAsState(initial = false)
     val hasCompletedOnboarding by preferences.hasCompletedOnboarding.collectAsState(initial = null)
@@ -62,6 +76,11 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
     val navController = rememberNavController()
 
     val currentOnDeepLinkConsume by rememberUpdatedState(onDeepLinkConsume)
+    val currentOnReady by rememberUpdatedState(onReady)
+
+    LaunchedEffect(themePreference) {
+        if (themePreference != null) currentOnReady()
+    }
 
     LaunchedEffect(Unit) {
         tokenSyncManager.syncToken()
@@ -156,56 +175,66 @@ fun App(modifier: Modifier = Modifier, deepLinkRoute: String? = null, onDeepLink
             .build()
     }
 
+    if (themePreference == null) return
+
     GPTInvestorTheme(userThemePreference = themePreference) {
-        if (showSplash) {
-            AnimatedSplashScreen(
-                modifier = modifier,
-                onSplashFinish = {
-                    showSplash = false
+        AnimatedContent(
+            targetState = showSplash,
+            transitionSpec = {
+                fadeIn(tween(GiMotion.BASE)) togetherWith fadeOut(tween(GiMotion.FAST))
+            },
+            label = "appLaunch"
+        ) { splash ->
+            if (splash) {
+                AnimatedSplashScreen(
+                    modifier = modifier,
+                    onSplashFinish = {
+                        showSplash = false
+                    }
+                )
+            } else {
+                SetUpNavGraph(
+                    navController = navController,
+                    isUserSignedIn = isUserSignedIn == true,
+                    isGuestSignedIn = isGuestSignedIn == true,
+                    hasCompletedOnboarding = hasCompletedOnboarding ?: false,
+                    hasCompletedPostAuthOnboarding = hasCompletedPostAuthOnboarding ?: false
+                )
+
+                if (showGuestRateLimitSheet) {
+                    GuestRateLimitBottomSheet(
+                        onDismiss = { showGuestRateLimitSheet = false },
+                        onSignIn = {
+                            showGuestRateLimitSheet = false
+                            navController.navigate(Screen.SignUpScreen.route) {
+                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                            }
+                        }
+                    )
                 }
-            )
-        } else {
-            SetUpNavGraph(
-                navController = navController,
-                isUserSignedIn = isUserSignedIn == true,
-                isGuestSignedIn = isGuestSignedIn == true,
-                hasCompletedOnboarding = hasCompletedOnboarding ?: false,
-                hasCompletedPostAuthOnboarding = hasCompletedPostAuthOnboarding ?: false
-            )
 
-            if (showGuestRateLimitSheet) {
-                GuestRateLimitBottomSheet(
-                    onDismiss = { showGuestRateLimitSheet = false },
-                    onSignIn = {
-                        showGuestRateLimitSheet = false
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                if (showGuestSessionSheet) {
+                    GuestSessionExpiredSheet(
+                        reason = guestSessionReason,
+                        onDismiss = { showGuestSessionSheet = false },
+                        onSignUp = {
+                            showGuestSessionSheet = false
+                            navController.navigate(Screen.SignUpScreen.route) {
+                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                            }
+                        },
+                        onLogin = {
+                            showGuestSessionSheet = false
+                            navController.navigate(Screen.LoginScreen.route) {
+                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                            }
                         }
-                    }
-                )
-            }
+                    )
+                }
 
-            if (showGuestSessionSheet) {
-                GuestSessionExpiredSheet(
-                    reason = guestSessionReason,
-                    onDismiss = { showGuestSessionSheet = false },
-                    onSignUp = {
-                        showGuestSessionSheet = false
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
-                    },
-                    onLogin = {
-                        showGuestSessionSheet = false
-                        navController.navigate(Screen.LoginScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
-                    }
-                )
-            }
-
-            LaunchedEffect(Unit) {
-                isNavGraphReady = true
+                LaunchedEffect(Unit) {
+                    isNavGraphReady = true
+                }
             }
         }
     }

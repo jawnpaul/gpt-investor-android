@@ -1,0 +1,67 @@
+package com.thejawnpaul.gptinvestor.theme.components
+
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
+import com.thejawnpaul.gptinvestor.theme.GiTheme
+
+@Composable
+fun GiDigestCard(
+    stock: GiStock,
+    summary: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    keyEventLabel: String? = null,
+    keyEvent: String? = null,
+    updatedText: String? = null,
+    summaryMaxLines: Int = Int.MAX_VALUE
+) {
+    GiCard(modifier = modifier, onClick = onClick) {
+        GiStockSummary(stock = stock)
+        GiText(
+            text = summary,
+            style = GiTextStyle.Body,
+            maxLines = summaryMaxLines,
+            overflow = TextOverflow.Ellipsis
+        )
+        if (keyEventLabel != null && keyEvent != null) {
+            GiInfoTile(label = keyEventLabel, text = keyEvent)
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            GiText(
+                text = updatedText.orEmpty(),
+                modifier = Modifier.weight(1f),
+                style = GiTextStyle.Meta
+            )
+            Icon(
+                imageVector = GiIcons.caretRight,
+                contentDescription = null,
+                modifier = Modifier.size(GiIconSize.sm),
+                tint = GiTheme.colors.muted
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
+@Composable
+private fun GiDigestCardPreview() {
+    GiPreviewSurface {
+        GiDigestCard(
+            stock = previewStock.copy(initials = "AA", title = "Apple Inc.", subtitle = "AAPL · NASDAQ", percent = 0.1),
+            summary = "Apple rose 0.1% to $341.27 on Oct 13, while revenue grew 6.4% year over year.",
+            onClick = {},
+            updatedText = "Updated Wed 07:01",
+            keyEventLabel = "Key event",
+            keyEvent = "New HomeView tablet announced on 14 Oct."
+        )
+    }
+}

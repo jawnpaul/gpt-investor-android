@@ -49,8 +49,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import org.koin.core.annotation.KoinViewModel
 import org.koin.core.annotation.Provided
 
@@ -70,7 +72,12 @@ class HomeViewModel(
     private val billingRepository: IBillingRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(HomeUiState(timePeriod = computeTimePeriod()))
+    private val _uiState = MutableStateFlow(
+        HomeUiState(
+            timePeriod = computeTimePeriod(),
+            todayLabel = formatTodayLabel(Clock.System.todayIn(TimeZone.currentSystemDefault()))
+        )
+    )
     val uiState = combine(
         _uiState.asStateFlow(),
         preferences.userName,
@@ -306,8 +313,6 @@ class HomeViewModel(
 
                 HomeEvent.RetryTrendingCompanies -> getTrendingCompanies()
 
-                HomeEvent.GoToAllTrending -> _actions.emit(HomeAction.NavigateToAllTrending)
-
                 is HomeEvent.ClickTrendingCompany -> {
                     analyticsLogger.logEvent(
                         eventName = "trending-stock-tapped",
@@ -333,6 +338,7 @@ class HomeViewModel(
                                 eventName = "stock-added-to-watchlist",
                                 params = mapOf("ticker" to event.ticker, "source" to "digest_card")
                             )
+                            processAction(HomeAction.AddStockFinished(added = true))
                             _uiState.update { state ->
                                 state.copy(
                                     dailyDigestView = state.dailyDigestView.copy(
@@ -365,7 +371,8 @@ class HomeViewModel(
                                 is WatchlistFailure.WatchlistFull -> {
                                     premiumEventBus.requestPremium(
                                         source = PREMIUM_SOURCE_WATCHLIST_FULL,
-                                        watchlistCap = failure.cap
+                                        watchlistCap = failure.cap,
+                                        ticker = event.ticker
                                     )
                                 }
 
@@ -380,6 +387,11 @@ class HomeViewModel(
                                 else -> {
                                     processAction(HomeAction.ShowToast("Failed to add to watchlist"))
                                 }
+                            }
+                            if (failure !is WatchlistFailure.SignUpRequired &&
+                                failure !is WatchlistFailure.WatchlistFull
+                            ) {
+                                processAction(HomeAction.AddStockFinished(added = false))
                             }
                         }
                     }
@@ -424,6 +436,16 @@ class HomeViewModel(
                             "locked_stocks" to digest.lockedStocksCount
                         )
                     )
+                }
+
+                HomeEvent.RetryDailyDigest -> getDailyDigest()
+
+                is HomeEvent.ClickDigestStock -> {
+                    analyticsLogger.logEvent(
+                        eventName = "digest-stock-tapped",
+                        params = mapOf("ticker" to event.ticker, "source" to "digest_detail")
+                    )
+                    _actions.emit(HomeAction.OnGoToCompanyDetail(event.ticker))
                 }
 
                 HomeEvent.DigestDetailUnlockPremium -> {
@@ -492,9 +514,10 @@ class HomeViewModel(
 
     private fun getDailyDigest() {
         _uiState.update { state ->
-            state.copy(dailyDigestView = state.dailyDigestView.copy(loading = true))
+            state.copy(dailyDigestView = state.dailyDigestView.copy(loading = true, error = false))
         }
         viewModelScope.launch {
+            val isGuest = preferences.isGuestLoggedIn.first() == true
             digestRepository.getDailyDigest().onSuccess { digest ->
                 val unlockedItems = digest.items?.filter { !it.locked } ?: emptyList()
                 val lockedItems = digest.items?.filter { it.locked } ?: emptyList()
@@ -556,10 +579,11 @@ class HomeViewModel(
                 Logger.e(failure.stackTraceToString())
                 _uiState.update { state ->
                     state.copy(
-                        dailyDigestView = state.dailyDigestView.copy(
-                            loading = false,
-                            status = DailyDigestStatus.EMPTY
-                        )
+                        dailyDigestView = if (isGuest) {
+                            state.dailyDigestView.copy(loading = false, status = DailyDigestStatus.EMPTY)
+                        } else {
+                            state.dailyDigestView.copy(loading = false, error = true)
+                        }
                     )
                 }
             }
@@ -569,21 +593,34 @@ class HomeViewModel(
 
 enum class TimePeriod { MORNING, AFTERNOON, EVENING }
 
+private val FULL_DAY_NAMES = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+private val FULL_MONTH_NAMES = listOf(
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+)
+
+// "Wednesday, 14 October", shown above the greeting.
+internal fun formatTodayLabel(date: LocalDate): String =
+    "${FULL_DAY_NAMES[date.dayOfWeek.ordinal]}, ${date.day} ${FULL_MONTH_NAMES[date.month.ordinal]}"
+
 internal fun extractFirstName(userName: String?): String? =
     userName?.trim()?.split("\\s+".toRegex())?.firstOrNull()?.takeIf { it.isNotBlank() }
 
-// next_digest_at is an ISO-8601 UTC instant; show it as a local clock time, e.g. "8 AM" or "8:30 AM".
+// next_digest_at is an ISO-8601 UTC instant; show it as a local 24-hour time, e.g. "07:00" or "13:30".
 internal fun formatNextDigestTime(nextDigestAt: String?, timeZone: TimeZone): String? {
     val instant = nextDigestAt?.let { runCatching { Instant.parse(it) }.getOrNull() } ?: return null
     val local = instant.toLocalDateTime(timeZone)
-    val period = if (local.hour < 12) "AM" else "PM"
-    val hour = when {
-        local.hour == 0 -> 12
-        local.hour > 12 -> local.hour - 12
-        else -> local.hour
-    }
-    val minutes = if (local.minute == 0) "" else ":" + local.minute.toString().padStart(2, '0')
-    return "$hour$minutes $period"
+    return "${local.hour.toString().padStart(2, '0')}:${local.minute.toString().padStart(2, '0')}"
 }
 
 private fun computeTimePeriod(): TimePeriod {
@@ -618,6 +655,7 @@ data class HomeUiState(
     val homeTidbitView: HomeTidbitView = HomeTidbitView(),
     val isGuestSession: Boolean = false,
     val timePeriod: TimePeriod = TimePeriod.MORNING,
+    val todayLabel: String? = null,
     val firstName: String? = null,
     val dailyDigestView: DailyDigestView = DailyDigestView(loading = true)
 )
@@ -635,7 +673,6 @@ sealed interface HomeEvent {
     data object SignOut : HomeEvent
     data object GoToSignUp : HomeEvent
     data object RetryTrendingCompanies : HomeEvent
-    data object GoToAllTrending : HomeEvent
     data class ClickTrendingCompany(val ticker: String) : HomeEvent
     data class AddStockToDigest(val ticker: String) : HomeEvent
     data object BrowseAllCompanies : HomeEvent
@@ -644,6 +681,8 @@ sealed interface HomeEvent {
     data object SeeFullDigest : HomeEvent
     data object DigestDetailViewed : HomeEvent
     data object DigestDetailUnlockPremium : HomeEvent
+    data object RetryDailyDigest : HomeEvent
+    data class ClickDigestStock(val ticker: String) : HomeEvent
 }
 
 sealed interface HomeAction {
@@ -651,8 +690,8 @@ sealed interface HomeAction {
 
     data class OnGoToCompanyDetail(val ticker: String) : HomeAction
     data class ShowToast(val message: String) : HomeAction
+    data class AddStockFinished(val added: Boolean) : HomeAction
     data object OnGoToSignUp : HomeAction
-    data object NavigateToAllTrending : HomeAction
     data object NavigateToDiscover : HomeAction
     data object NavigateToDigestDetail : HomeAction
     data object NavigateToProfile : HomeAction

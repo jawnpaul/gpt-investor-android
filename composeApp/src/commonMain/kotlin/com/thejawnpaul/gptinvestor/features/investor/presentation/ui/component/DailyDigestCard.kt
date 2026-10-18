@@ -1,64 +1,30 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.add
 import com.thejawnpaul.gptinvestor.add_more_stocks
 import com.thejawnpaul.gptinvestor.browse_all_companies
 import com.thejawnpaul.gptinvestor.build_your_digest
+import com.thejawnpaul.gptinvestor.check_connection_try_again
+import com.thejawnpaul.gptinvestor.couldn_t_load_your_brief
 import com.thejawnpaul.gptinvestor.digest_pending_description
 import com.thejawnpaul.gptinvestor.digest_pending_description_at
 import com.thejawnpaul.gptinvestor.digest_pending_description_premium
@@ -67,41 +33,49 @@ import com.thejawnpaul.gptinvestor.digest_pending_notify_subtitle
 import com.thejawnpaul.gptinvestor.digest_pending_notify_title
 import com.thejawnpaul.gptinvestor.digest_pending_title
 import com.thejawnpaul.gptinvestor.done
-import com.thejawnpaul.gptinvestor.features.component.ShimmerBox
 import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.RecommendedDigestCompany
 import com.thejawnpaul.gptinvestor.features.digest.presentation.DigestSentiment
 import com.thejawnpaul.gptinvestor.features.digest.presentation.formatTickerList
+import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.BriefStockCard
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestStatus
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestView
-import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.PriceChangeChip
-import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.SentimentLabel
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.StockDigestPresentation
 import com.thejawnpaul.gptinvestor.full_summaries_with_premium
-import com.thejawnpaul.gptinvestor.ic_calendar
-import com.thejawnpaul.gptinvestor.ic_clock
-import com.thejawnpaul.gptinvestor.ic_lock
-import com.thejawnpaul.gptinvestor.ic_notification_bell
-import com.thejawnpaul.gptinvestor.ic_search
-import com.thejawnpaul.gptinvestor.key_event
 import com.thejawnpaul.gptinvestor.latest_digest
 import com.thejawnpaul.gptinvestor.morning_brief
 import com.thejawnpaul.gptinvestor.new_digest_on_the_way
 import com.thejawnpaul.gptinvestor.next_digest_by
+import com.thejawnpaul.gptinvestor.retry
 import com.thejawnpaul.gptinvestor.stocks_locked
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
-import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
+import com.thejawnpaul.gptinvestor.theme.GiMotion
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.components.GiBanner
+import com.thejawnpaul.gptinvestor.theme.components.GiBannerTone
+import com.thejawnpaul.gptinvestor.theme.components.GiButton
+import com.thejawnpaul.gptinvestor.theme.components.GiButtonSize
+import com.thejawnpaul.gptinvestor.theme.components.GiButtonVariant
+import com.thejawnpaul.gptinvestor.theme.components.GiCard
+import com.thejawnpaul.gptinvestor.theme.components.GiDivider
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiListGroup
+import com.thejawnpaul.gptinvestor.theme.components.GiListRow
+import com.thejawnpaul.gptinvestor.theme.components.GiPremiumBanner
+import com.thejawnpaul.gptinvestor.theme.components.GiSectionHeader
+import com.thejawnpaul.gptinvestor.theme.components.GiSkeleton
+import com.thejawnpaul.gptinvestor.theme.components.GiSpinner
+import com.thejawnpaul.gptinvestor.theme.components.GiText
+import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.today_s_digest
 import com.thejawnpaul.gptinvestor.tracking_stocks
 import com.thejawnpaul.gptinvestor.unlock
-import com.thejawnpaul.gptinvestor.updated_at
-import com.thejawnpaul.gptinvestor.x_more_stocks_in_your_digest
 import com.thejawnpaul.gptinvestor.you_re_not_tracking_any_companies_yet
 import com.thejawnpaul.gptinvestor.your_digest
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-private val EaseOutQuart = CubicBezierEasing(0.25f, 1f, 0.5f, 1f)
-private val EaseInOutQuart = CubicBezierEasing(0.76f, 0f, 0.24f, 1f)
+private enum class DigestDisplay { Loading, Error, Empty, Pending, Ready }
 
 @Composable
 fun DailyDigestCard(
@@ -111,802 +85,294 @@ fun DailyDigestCard(
     onSeeFullDigest: () -> Unit,
     onUnlockPremiumPending: () -> Unit,
     onUnlockPremiumReady: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_calendar),
-                contentDescription = null,
-                modifier = Modifier.size(16.dp)
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = stringResource(Res.string.morning_brief),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
+    val display = when {
+        view.loading -> DigestDisplay.Loading
+        view.error -> DigestDisplay.Error
+        view.status == DailyDigestStatus.PENDING -> DigestDisplay.Pending
+        view.status == DailyDigestStatus.READY -> DigestDisplay.Ready
+        else -> DigestDisplay.Empty
+    }
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(GiSpace.titleToContent)
+    ) {
+        GiSectionHeader(
+            title = stringResource(
+                when {
+                    view.status == DailyDigestStatus.EMPTY -> Res.string.build_your_digest
+                    view.status == DailyDigestStatus.PENDING -> Res.string.your_digest
+                    view.isStale -> Res.string.latest_digest
+                    else -> Res.string.today_s_digest
+                }
+            ),
+            eyebrow = stringResource(Res.string.morning_brief),
+            eyebrowIcon = GiIcons.calendarBlank,
+            trailingText = view.briefDateLabel.takeIf { view.status == DailyDigestStatus.READY }
+        )
+        if (view.isStale && view.status == DailyDigestStatus.READY) {
+            GiBanner(
+                title = view.nextDigestLabel?.let { stringResource(Res.string.next_digest_by, it) }
+                    ?: stringResource(Res.string.new_digest_on_the_way),
+                icon = GiIcons.clock
             )
         }
-        Spacer(Modifier.height(4.dp))
-        Row(
+        AnimatedContent(
+            targetState = display,
+            transitionSpec = {
+                fadeIn(tween(GiMotion.BASE)) togetherWith fadeOut(tween(GiMotion.FAST))
+            },
+            label = "DailyDigestContent"
+        ) { state ->
+            when (state) {
+                DigestDisplay.Loading -> DigestSkeleton()
+                DigestDisplay.Error -> GiBanner(
+                    title = stringResource(Res.string.couldn_t_load_your_brief),
+                    subtitle = stringResource(Res.string.check_connection_try_again),
+                    tone = GiBannerTone.Error
+                ) {
+                    GiButton(
+                        text = stringResource(Res.string.retry),
+                        onClick = onRetry,
+                        size = GiButtonSize.Small,
+                        variant = GiButtonVariant.Secondary
+                    )
+                }
+                DigestDisplay.Empty -> EmptyDigest(view = view, onAddStock = onAddStock, onBrowseAll = onBrowseAll)
+                DigestDisplay.Pending -> PendingDigest(
+                    view = view,
+                    onAddMoreStocks = onBrowseAll,
+                    onUnlockPremium = onUnlockPremiumPending
+                )
+                DigestDisplay.Ready -> ReadyDigest(
+                    view = view,
+                    onSeeFullDigest = onSeeFullDigest,
+                    onUnlockPremium = onUnlockPremiumReady
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmptyDigest(view: DailyDigestView, onAddStock: (String) -> Unit, onBrowseAll: () -> Unit) {
+    GiCard(spacing = GiSpace.x4) {
+        GiText(
+            text = stringResource(Res.string.you_re_not_tracking_any_companies_yet),
+            style = GiTextStyle.Body
+        )
+        // Guests get no recommendations; never render an empty list group.
+        if (view.suggestedStocks.isNotEmpty()) {
+            GiListGroup {
+                view.suggestedStocks.forEachIndexed { index, stock ->
+                    if (index > 0) GiDivider()
+                    GiListRow(title = stock.ticker, subtitle = stock.companyName) {
+                        AddStockAction(
+                            isAdding = stock.ticker in view.addingTickers,
+                            isAdded = stock.ticker in view.addedTickers,
+                            onAdd = { onAddStock(stock.ticker) }
+                        )
+                    }
+                }
+            }
+        }
+        GiButton(
+            text = stringResource(Res.string.browse_all_companies),
+            onClick = onBrowseAll,
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            size = GiButtonSize.Medium,
+            variant = GiButtonVariant.Secondary
+        )
+    }
+}
+
+@Composable
+private fun AddStockAction(isAdding: Boolean, isAdded: Boolean, onAdd: () -> Unit) {
+    when {
+        isAdding -> GiSpinner()
+        isAdded -> Row(
+            horizontalArrangement = Arrangement.spacedBy(GiSpace.x1),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = stringResource(
-                    when {
-                        view.status == DailyDigestStatus.EMPTY -> Res.string.build_your_digest
-                        view.status == DailyDigestStatus.PENDING -> Res.string.your_digest
-                        view.isStale -> Res.string.latest_digest
-                        else -> Res.string.today_s_digest
-                    }
-                ),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+            Icon(
+                imageVector = GiIcons.check,
+                contentDescription = null,
+                modifier = Modifier.size(GiIconSize.sm),
+                tint = GiTheme.colors.gain
             )
-            if (view.status == DailyDigestStatus.READY && view.briefDateLabel != null) {
-                Text(
-                    text = view.briefDateLabel,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = LocalGPTInvestorColors.current.textColors.secondary50
-                )
-            }
+            GiText(text = stringResource(Res.string.done), style = GiTextStyle.Link, color = GiTheme.colors.gain)
         }
-
-        if (view.isStale && view.status == DailyDigestStatus.READY) {
-            Spacer(Modifier.height(8.dp))
-            Surface(
-                color = MaterialTheme.colorScheme.tertiaryContainer,
-                shape = RoundedCornerShape(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_clock),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = view.nextDigestLabel?.let { stringResource(Res.string.next_digest_by, it) }
-                            ?: stringResource(Res.string.new_digest_on_the_way),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        val displayState = when {
-            view.loading -> 0
-            view.status == DailyDigestStatus.EMPTY -> 1
-            view.status == DailyDigestStatus.PENDING -> 2
-            view.status == DailyDigestStatus.READY -> 3
-            else -> 1
-        }
-        Surface(
-            onClick = { if (displayState == 3) onSeeFullDigest() },
-            shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.surface,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            AnimatedContent(
-                targetState = displayState,
-                transitionSpec = {
-                    fadeIn(tween(220, easing = EaseOutQuart)) togetherWith fadeOut(
-                        tween(150, easing = EaseInOutQuart)
-                    )
-                },
-                label = "DailyDigestContent"
-            ) { state ->
-                when (state) {
-                    0 -> DailyDigestShimmer()
-                    1 -> EmptyDigestContent(
-                        view = view,
-                        onAddStock = onAddStock,
-                        onBrowseAll = onBrowseAll
-                    )
-
-                    2 -> PendingDigestContent(
-                        isPremium = view.isPremium,
-                        nextDigestLabel = view.nextDigestLabel,
-                        trackedTickers = view.trackedTickers,
-                        onAddMoreStocks = onBrowseAll,
-                        onUnlockPremium = onUnlockPremiumPending
-                    )
-
-                    3 -> ReadyDigestContent(
-                        stocks = view.stocks,
-                        lockedStocksCount = view.lockedStocksCount,
-                        lockedStocksSummary = view.lockedStocksSummary,
-                        updatedLabel = view.updatedLabel,
-                        onSeeFullDigest = onSeeFullDigest,
-                        onUnlockPremium = onUnlockPremiumReady
-                    )
-                }
-            }
-        }
+        else -> GiButton(
+            text = stringResource(Res.string.add),
+            onClick = onAdd,
+            size = GiButtonSize.Small,
+            variant = GiButtonVariant.Secondary
+        )
     }
 }
 
 @Composable
-private fun EmptyDigestContent(view: DailyDigestView, onAddStock: (String) -> Unit, onBrowseAll: () -> Unit) {
-    val customColors = LocalGPTInvestorColors.current
-
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text(
-            text = stringResource(Res.string.you_re_not_tracking_any_companies_yet),
-            style = MaterialTheme.typography.bodyMedium,
-            color = customColors.textColors.secondary50
-        )
-        Spacer(Modifier.height(16.dp))
-        Column(
-            modifier = Modifier
-                .border(1.dp, customColors.utilColors.borderBright10, RoundedCornerShape(16.dp))
-                .clip(RoundedCornerShape(16.dp))
-        ) {
-            view.suggestedStocks.forEachIndexed { index, stock ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stock.ticker,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = stock.companyName,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = customColors.textColors.secondary50
-                        )
-                    }
-
-                    val isAdding = view.addingTickers.contains(stock.ticker)
-                    val isAdded = view.addedTickers.contains(stock.ticker)
-                    val addInteractionSource = remember { MutableInteractionSource() }
-                    val addPressed by addInteractionSource.collectIsPressedAsState()
-                    val addScale by animateFloatAsState(
-                        targetValue = if (addPressed) 0.95f else 1f,
-                        animationSpec = spring(stiffness = Spring.StiffnessMedium),
-                        label = "addButtonScale"
-                    )
-
-                    Surface(
-                        onClick = { onAddStock(stock.ticker) },
-                        enabled = !isAdding && !isAdded,
-                        shape = RoundedCornerShape(20.dp),
-                        color = when {
-                            isAdded -> customColors.greenColors.allGreen10
-                            isAdding -> Color.Transparent
-                            else -> customColors.accentColors.allAccent20
-                        },
-                        interactionSource = addInteractionSource,
-                        modifier = Modifier
-                            .minimumInteractiveComponentSize()
-                            .graphicsLayer {
-                                scaleX = addScale
-                                scaleY = addScale
-                            }
-                    ) {
-                        AnimatedContent(
-                            targetState = when {
-                                isAdding -> 0
-                                isAdded -> 1
-                                else -> 2
-                            },
-                            transitionSpec = {
-                                fadeIn(
-                                    tween(
-                                        200,
-                                        easing = EaseOutQuart
-                                    )
-                                ) togetherWith fadeOut(tween(150, easing = EaseInOutQuart))
-                            },
-                            label = "AddButtonState"
-                        ) { state ->
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                when (state) {
-                                    0 -> {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier.size(16.dp),
-                                            strokeWidth = 2.dp,
-                                            color = customColors.accentColors.allAccent
-                                        )
-                                    }
-
-                                    1 -> {
-                                        Icon(
-                                            imageVector = Icons.Default.CheckCircle,
-                                            contentDescription = null,
-                                            tint = customColors.greenColors.allGreen,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Spacer(Modifier.width(4.dp))
-                                        Text(
-                                            text = stringResource(Res.string.done),
-                                            style = MaterialTheme.typography.labelLarge,
-                                            color = customColors.greenColors.allGreen,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-
-                                    2 -> {
-                                        Icon(
-                                            imageVector = Icons.Default.Add,
-                                            contentDescription = null,
-                                            tint = customColors.accentColors.allAccent,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Spacer(Modifier.width(4.dp))
-                                        Text(
-                                            text = stringResource(Res.string.add),
-                                            style = MaterialTheme.typography.labelLarge,
-                                            color = customColors.accentColors.allAccent,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                if (index < view.suggestedStocks.size - 1) {
-                    HorizontalDivider(color = customColors.utilColors.borderBright10)
-                }
-            }
-        }
-        Spacer(Modifier.height(16.dp))
-        val browseAllInteractionSource = remember { MutableInteractionSource() }
-        val browseAllPressed by browseAllInteractionSource.collectIsPressedAsState()
-        val browseAllScale by animateFloatAsState(
-            targetValue = if (browseAllPressed) 0.97f else 1f,
-            animationSpec = spring(stiffness = Spring.StiffnessMedium),
-            label = "browseAllScale"
-        )
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .graphicsLayer {
-                    scaleX = browseAllScale
-                    scaleY = browseAllScale
+private fun PendingDigest(view: DailyDigestView, onAddMoreStocks: () -> Unit, onUnlockPremium: () -> Unit) {
+    val nextDigestLabel = view.nextDigestLabel
+    GiCard {
+        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x1)) {
+            GiText(
+                text = stringResource(Res.string.digest_pending_title),
+                style = GiTextStyle.Label
+            )
+            GiText(
+                text = when {
+                    nextDigestLabel == null && view.isPremium ->
+                        stringResource(Res.string.digest_pending_description_premium)
+                    nextDigestLabel == null -> stringResource(Res.string.digest_pending_description)
+                    view.isPremium -> stringResource(Res.string.digest_pending_description_premium_at, nextDigestLabel)
+                    else -> stringResource(Res.string.digest_pending_description_at, nextDigestLabel)
                 },
-            shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, customColors.utilColors.borderBright10),
-            onClick = onBrowseAll,
-            interactionSource = browseAllInteractionSource
-        ) {
-            Row(
-                modifier = Modifier.padding(vertical = 12.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_search),
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = stringResource(Res.string.browse_all_companies),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+                style = GiTextStyle.Body
+            )
         }
-    }
-}
-
-@Composable
-private fun PendingDigestContent(
-    isPremium: Boolean,
-    nextDigestLabel: String?,
-    trackedTickers: List<String>,
-    onAddMoreStocks: () -> Unit,
-    onUnlockPremium: () -> Unit
-) {
-    val customColors = LocalGPTInvestorColors.current
-
-    Column(
-        modifier = Modifier.padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            painter = painterResource(Res.drawable.ic_search),
-            contentDescription = null,
-            modifier = Modifier.size(32.dp)
-        )
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = stringResource(Res.string.digest_pending_title),
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = when {
-                nextDigestLabel == null && isPremium -> stringResource(Res.string.digest_pending_description_premium)
-                nextDigestLabel == null -> stringResource(Res.string.digest_pending_description)
-                isPremium -> stringResource(Res.string.digest_pending_description_premium_at, nextDigestLabel)
-                else -> stringResource(Res.string.digest_pending_description_at, nextDigestLabel)
-            },
-            style = MaterialTheme.typography.bodySmall,
-            color = customColors.textColors.secondary50,
-            textAlign = TextAlign.Center
-        )
-        if (trackedTickers.isNotEmpty()) {
-            Spacer(Modifier.height(16.dp))
-            HorizontalDivider(color = customColors.utilColors.borderBright10)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(Res.string.tracking_stocks, formatTickerList(trackedTickers)),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = customColors.textColors.secondary50,
+        if (view.trackedTickers.isNotEmpty()) {
+            GiDivider()
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                GiText(
+                    text = stringResource(Res.string.tracking_stocks, formatTickerList(view.trackedTickers)),
+                    modifier = Modifier.weight(1f),
+                    style = GiTextStyle.Meta,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
+                    overflow = TextOverflow.Ellipsis
                 )
-                TextButton(onClick = onAddMoreStocks) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        text = stringResource(Res.string.add_more_stocks),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                GiButton(
+                    text = stringResource(Res.string.add_more_stocks),
+                    onClick = onAddMoreStocks,
+                    size = GiButtonSize.Small,
+                    variant = GiButtonVariant.Text
+                )
             }
         }
-        if (!isPremium) {
-            Spacer(Modifier.height(20.dp))
-            Surface(
-                color = MaterialTheme.colorScheme.tertiaryContainer,
-                shape = RoundedCornerShape(16.dp),
-                onClick = onUnlockPremium,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_notification_bell),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.tertiary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                    Spacer(Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(Res.string.digest_pending_notify_title),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
-                        )
-                        Text(
-                            text = stringResource(Res.string.digest_pending_notify_subtitle),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
-                        )
-                    }
-                }
-            }
+        if (!view.isPremium) {
+            GiBanner(
+                title = stringResource(Res.string.digest_pending_notify_title),
+                subtitle = stringResource(Res.string.digest_pending_notify_subtitle),
+                icon = GiIcons.bell,
+                onClick = onUnlockPremium
+            )
         }
     }
 }
 
 @Composable
-private fun ReadyDigestContent(
-    stocks: List<StockDigestPresentation>,
-    lockedStocksCount: Int,
-    lockedStocksSummary: String?,
-    updatedLabel: String?,
-    onSeeFullDigest: () -> Unit,
-    onUnlockPremium: () -> Unit
-) {
-    val customColors = LocalGPTInvestorColors.current
-
-    Column(modifier = Modifier.padding(16.dp)) {
+private fun ReadyDigest(view: DailyDigestView, onSeeFullDigest: () -> Unit, onUnlockPremium: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
         // Home previews the first stock; the rest are one tap away in Digest Detail.
-        stocks.firstOrNull()?.let { stock ->
-            StockDigestCard(stock = stock)
-            Spacer(Modifier.height(16.dp))
+        view.stocks.firstOrNull()?.let { stock ->
+            BriefStockCard(stock = stock, updatedLabel = view.updatedLabel, onClick = onSeeFullDigest)
         }
-
-        if (updatedLabel != null) {
-            Text(
-                text = stringResource(Res.string.updated_at, updatedLabel),
-                style = MaterialTheme.typography.labelSmall,
-                color = customColors.textColors.secondary50
-            )
-        }
-
-        // Only unlocked stocks: locked ones get their own upsell card below, so they aren't counted twice.
-        val remainingStocks = stocks.size - 1
-
-        if (remainingStocks > 0) {
-            Spacer(Modifier.height(16.dp))
-
-            val seeFullInteractionSource = remember { MutableInteractionSource() }
-            val seeFullPressed by seeFullInteractionSource.collectIsPressedAsState()
-            val seeFullScale by animateFloatAsState(
-                targetValue = if (seeFullPressed) 0.97f else 1f,
-                animationSpec = spring(stiffness = Spring.StiffnessMedium),
-                label = "seeFullDigestScale"
-            )
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .graphicsLayer {
-                        scaleX = seeFullScale
-                        scaleY = seeFullScale
-                    },
-                shape = RoundedCornerShape(12.dp),
-                onClick = onSeeFullDigest,
-                interactionSource = seeFullInteractionSource
-            ) {
-                Row(
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = stringResource(
-                            Res.string.x_more_stocks_in_your_digest,
-                            remainingStocks
-                        ),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = null
-                    )
-                }
-            }
-        }
-
-        if (lockedStocksCount > 0) {
-            Spacer(Modifier.height(12.dp))
-            Surface(
-                color = MaterialTheme.colorScheme.tertiaryContainer,
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_lock),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.tertiary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                    Spacer(Modifier.width(16.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        if (lockedStocksSummary != null) {
-                            Text(
-                                text = stringResource(Res.string.stocks_locked, lockedStocksSummary),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        Text(
-                            text = stringResource(Res.string.full_summaries_with_premium),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
-                        )
-                    }
-                    Button(
-                        onClick = onUnlockPremium,
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.height(36.dp)
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.unlock),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun StockDigestCard(stock: StockDigestPresentation) {
-    val customColors = LocalGPTInvestorColors.current
-
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, customColors.utilColors.borderBright10),
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stock.ticker,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = stock.name,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = customColors.textColors.secondary50,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                if (stock.priceChange != null) {
-                    Spacer(Modifier.width(8.dp))
-                    PriceChangeChip(percent = stock.priceChange)
-                }
-            }
-            if (stock.sentiment != null) {
-                Spacer(Modifier.height(6.dp))
-                SentimentLabel(sentiment = stock.sentiment)
-            }
-            Spacer(Modifier.height(12.dp))
-            Text(
-                text = stock.summary,
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 4,
-                overflow = TextOverflow.Ellipsis
-            )
-            if (stock.keyEvent != null) {
-                Spacer(Modifier.height(16.dp))
-                Surface(
-                    color = customColors.utilColors.allDark2.copy(alpha = 0.05f),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(vertical = 12.dp)) {
-                        Text(
-                            text = stringResource(Res.string.key_event),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = customColors.textColors.secondary50,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.5.sp
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = stock.keyEvent,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun DailyDigestShimmer(modifier: Modifier = Modifier) {
-    Column(modifier = modifier.padding(16.dp)) {
-        repeat(2) {
-            StockDigestShimmer()
-            Spacer(Modifier.height(16.dp))
-        }
-    }
-}
-
-@Composable
-private fun StockDigestShimmer() {
-    val customColors = LocalGPTInvestorColors.current
-
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, customColors.utilColors.borderBright10),
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    ShimmerBox(width = 50.dp, height = 20.dp)
-                    Spacer(Modifier.width(8.dp))
-                    ShimmerBox(width = 80.dp, height = 14.dp)
-                }
-            }
-            Spacer(Modifier.height(12.dp))
-            ShimmerBox(modifier = Modifier.fillMaxWidth(), height = 14.dp)
-            Spacer(Modifier.height(4.dp))
-            ShimmerBox(modifier = Modifier.fillMaxWidth(0.7f), height = 14.dp)
-
-            Spacer(Modifier.height(16.dp))
-            ShimmerBox(
-                modifier = Modifier.fillMaxWidth(),
-                height = 48.dp,
-                shape = RoundedCornerShape(12.dp)
+        if (view.lockedStocksCount > 0) {
+            GiPremiumBanner(
+                title = view.lockedStocksSummary?.let { stringResource(Res.string.stocks_locked, it) }
+                    ?: stringResource(Res.string.full_summaries_with_premium),
+                subtitle = stringResource(Res.string.full_summaries_with_premium),
+                actionText = stringResource(Res.string.unlock),
+                onActionClick = onUnlockPremium
             )
         }
     }
 }
 
-@PreviewLightDark
+// Also the loading state of Digest Detail.
 @Composable
-private fun EmptyDigestPreview() {
+internal fun DigestSkeleton(modifier: Modifier = Modifier) {
+    GiCard(modifier = modifier) {
+        Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3), verticalAlignment = Alignment.CenterVertically) {
+            GiSkeleton(modifier = Modifier.size(40.dp))
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
+                GiSkeleton(modifier = Modifier.fillMaxWidth(0.5f).height(14.dp))
+                GiSkeleton(modifier = Modifier.fillMaxWidth(0.3f).height(12.dp))
+            }
+        }
+        GiSkeleton(modifier = Modifier.fillMaxWidth().height(14.dp))
+        GiSkeleton(modifier = Modifier.fillMaxWidth(0.7f).height(14.dp))
+        GiSkeleton(modifier = Modifier.fillMaxWidth().height(56.dp))
+    }
+}
+
+@Composable
+private fun DailyDigestCardPreviewHost(view: DailyDigestView) {
     GPTInvestorTheme {
-        Surface {
-            DailyDigestCard(
-                view = DailyDigestView(
-                    status = DailyDigestStatus.EMPTY,
-                    suggestedStocks = listOf(
-                        RecommendedDigestCompany("AAPL", "Apple Inc."),
-                        RecommendedDigestCompany("NVDA", "NVIDIA Corp."),
-                        RecommendedDigestCompany("TSLA", "Tesla, Inc.")
-                    )
-                ),
-                onAddStock = {},
-                onBrowseAll = {},
-                onSeeFullDigest = {},
-                onUnlockPremiumPending = {},
-                onUnlockPremiumReady = {},
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-    }
-}
-
-@PreviewLightDark
-@Composable
-private fun PendingDigestPreview() {
-    GPTInvestorTheme {
-        Surface {
-            DailyDigestCard(
-                view = DailyDigestView(status = DailyDigestStatus.PENDING, isPremium = false),
-                onAddStock = {},
-                onBrowseAll = {},
-                onSeeFullDigest = {},
-                onUnlockPremiumPending = {},
-                onUnlockPremiumReady = {},
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-    }
-}
-
-@PreviewLightDark
-@Composable
-private fun PendingDigestPremiumPreview() {
-    GPTInvestorTheme {
-        Surface {
-            DailyDigestCard(
-                view = DailyDigestView(status = DailyDigestStatus.PENDING, isPremium = true),
-                onAddStock = {},
-                onBrowseAll = {},
-                onSeeFullDigest = {},
-                onUnlockPremiumPending = {},
-                onUnlockPremiumReady = {},
-                modifier = Modifier.padding(16.dp)
-            )
-        }
+        DailyDigestCard(
+            view = view,
+            onAddStock = {},
+            onBrowseAll = {},
+            onSeeFullDigest = {},
+            onUnlockPremiumPending = {},
+            onUnlockPremiumReady = {},
+            onRetry = {}
+        )
     }
 }
 
 @PreviewLightDark
 @Composable
 private fun ReadyDigestPreview() {
-    GPTInvestorTheme {
-        Surface {
-            DailyDigestCard(
-                view = DailyDigestView(
-                    status = DailyDigestStatus.READY,
-                    stocks = listOf(
-                        StockDigestPresentation(
-                            ticker = "AAPL",
-                            name = "Apple Inc.",
-                            summary = "Apple firmed up overnight after an upbeat services read and" +
-                                " constructive supplier commentary out of Asia. Analyst notes " +
-                                "turned more positive into next week's print.",
-                            keyEvent = "iPhone 17 pre-orders beat Street estimates by roughly 12%.",
-                            sentiment = DigestSentiment.POSITIVE,
-                            priceChange = 1.5
-                        )
-                    ),
-                    lockedStocksCount = 2,
-                    lockedStocksSummary = "NVDA & TSLA",
-                    briefDateLabel = "Fri, Oct 9",
-                    updatedLabel = "Sat 7:01 AM"
+    DailyDigestCardPreviewHost(
+        DailyDigestView(
+            status = DailyDigestStatus.READY,
+            stocks = listOf(
+                StockDigestPresentation(
+                    ticker = "AAPL",
+                    name = "Apple Inc.",
+                    summary = "Apple rose 0.1% to $341.27 on Oct 13, while revenue grew 6.4% year over year.",
+                    keyEvent = "New HomeView tablet announced on Oct 14.",
+                    sentiment = DigestSentiment.POSITIVE,
+                    priceChange = 0.1
                 ),
-                onAddStock = {},
-                onBrowseAll = {},
-                onSeeFullDigest = {},
-                onUnlockPremiumPending = {},
-                onUnlockPremiumReady = {},
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-    }
+                StockDigestPresentation(ticker = "TSLA", name = "Tesla", summary = "")
+            ),
+            isStale = true,
+            briefDateLabel = "Tue, Oct 13",
+            updatedLabel = "Wed 7:01 AM",
+            nextDigestLabel = "7 AM",
+            lockedStocksCount = 4,
+            lockedStocksSummary = "NVDA, MSFT, GOOGL & AMZN",
+            isPremium = false
+        )
+    )
 }
 
 @PreviewLightDark
 @Composable
-private fun StaleDigestPreview() {
-    GPTInvestorTheme {
-        Surface {
-            DailyDigestCard(
-                view = DailyDigestView(
-                    status = DailyDigestStatus.READY,
-                    isStale = true,
-                    stocks = listOf(
-                        StockDigestPresentation(
-                            ticker = "AAPL",
-                            name = "Apple Inc.",
-                            summary = "Apple firmed up overnight after an upbeat services read and constructive " +
-                                "supplier commentary out of Asia. Analyst notes turned more positive into the print.",
-                            keyEvent = "iPhone 17 pre-orders beat Street estimates by roughly 12%.",
-                            sentiment = DigestSentiment.NEUTRAL,
-                            priceChange = -1.1
-                        )
-                    ),
-                    briefDateLabel = "Thu, Oct 8",
-                    updatedLabel = "Fri 7:01 AM",
-                    nextDigestLabel = "8 AM"
-                ),
-                onAddStock = {},
-                onBrowseAll = {},
-                onSeeFullDigest = {},
-                onUnlockPremiumPending = {},
-                onUnlockPremiumReady = {},
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-    }
+private fun EmptyDigestPreview() {
+    DailyDigestCardPreviewHost(
+        DailyDigestView(
+            status = DailyDigestStatus.EMPTY,
+            suggestedStocks = listOf(
+                RecommendedDigestCompany("AAPL", "Apple Inc."),
+                RecommendedDigestCompany("NVDA", "NVIDIA Corp."),
+                RecommendedDigestCompany("MSFT", "Microsoft")
+            ),
+            addingTickers = setOf("NVDA"),
+            addedTickers = setOf("MSFT")
+        )
+    )
+}
+
+@PreviewLightDark
+@Composable
+private fun PendingDigestPreview() {
+    DailyDigestCardPreviewHost(
+        DailyDigestView(
+            status = DailyDigestStatus.PENDING,
+            nextDigestLabel = "7 AM",
+            trackedTickers = listOf("AAPL", "NVDA"),
+            isPremium = false
+        )
+    )
+}
+
+@PreviewLightDark
+@Composable
+private fun LoadingDigestPreview() {
+    DailyDigestCardPreviewHost(DailyDigestView(loading = true))
 }

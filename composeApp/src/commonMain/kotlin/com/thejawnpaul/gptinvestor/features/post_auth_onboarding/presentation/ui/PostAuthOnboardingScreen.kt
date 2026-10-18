@@ -1,52 +1,56 @@
 package com.thejawnpaul.gptinvestor.features.postauthonboarding.presentation.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.EaseOutQuart
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.continue_
-import com.thejawnpaul.gptinvestor.core.navigation.BackButton
-import com.thejawnpaul.gptinvestor.features.component.GPTInvestorButton
 import com.thejawnpaul.gptinvestor.features.postauthonboarding.domain.model.InvestingExperience
 import com.thejawnpaul.gptinvestor.features.postauthonboarding.domain.model.InvestingGoal
 import com.thejawnpaul.gptinvestor.features.postauthonboarding.domain.model.RiskTolerance
 import com.thejawnpaul.gptinvestor.features.postauthonboarding.presentation.state.PostAuthOnboardingUiState
-import com.thejawnpaul.gptinvestor.onboarding_skip_for_now
+import com.thejawnpaul.gptinvestor.onboarding_step_of
 import com.thejawnpaul.gptinvestor.post_auth_onboarding_experience_beginner
 import com.thejawnpaul.gptinvestor.post_auth_onboarding_experience_experienced
 import com.thejawnpaul.gptinvestor.post_auth_onboarding_experience_intermediate
@@ -60,14 +64,36 @@ import com.thejawnpaul.gptinvestor.post_auth_onboarding_risk_aggressive
 import com.thejawnpaul.gptinvestor.post_auth_onboarding_risk_balanced
 import com.thejawnpaul.gptinvestor.post_auth_onboarding_risk_conservative
 import com.thejawnpaul.gptinvestor.post_auth_onboarding_risk_label
+import com.thejawnpaul.gptinvestor.post_auth_onboarding_save_error
 import com.thejawnpaul.gptinvestor.post_auth_onboarding_subtitle
 import com.thejawnpaul.gptinvestor.post_auth_onboarding_title
-import com.thejawnpaul.gptinvestor.something_went_wrong
+import com.thejawnpaul.gptinvestor.skip
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
-import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import com.thejawnpaul.gptinvestor.theme.GiMotion
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.components.GiBanner
+import com.thejawnpaul.gptinvestor.theme.components.GiBannerTone
+import com.thejawnpaul.gptinvestor.theme.components.GiButton
+import com.thejawnpaul.gptinvestor.theme.components.GiButtonSize
+import com.thejawnpaul.gptinvestor.theme.components.GiButtonVariant
+import com.thejawnpaul.gptinvestor.theme.components.GiChip
+import com.thejawnpaul.gptinvestor.theme.components.GiChipSize
+import com.thejawnpaul.gptinvestor.theme.components.GiEyebrow
+import com.thejawnpaul.gptinvestor.theme.components.GiFillScrollColumn
+import com.thejawnpaul.gptinvestor.theme.components.GiIconButton
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiStepBar
+import com.thejawnpaul.gptinvestor.theme.components.GiText
+import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
+import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
+import com.thejawnpaul.gptinvestor.theme.giAnimatePlacement
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
+import com.thejawnpaul.gptinvestor.theme.rememberGiSharedAxisTransition
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-private const val TOTAL_STEPS = 2
+private const val STEP_COUNT = 2
 
 @Composable
 fun PostAuthOnboardingScreen(
@@ -80,259 +106,226 @@ fun PostAuthOnboardingScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    AnimatedContent(
-        targetState = state.currentStep,
+    val transition = rememberGiSharedAxisTransition()
+    val experienceScrollState = rememberScrollState()
+    val goalsScrollState = rememberScrollState()
+    val scrollStateFor: (Int) -> ScrollState = { step -> if (step == 0) experienceScrollState else goalsScrollState }
+    val currentScrollState = scrollStateFor(state.currentStep)
+    val scrolled by remember(currentScrollState) { derivedStateOf { currentScrollState.canScrollBackward } }
+    NavigationBackHandler(
+        state = rememberNavigationEventState(currentInfo = NavigationEventInfo.None),
+        isBackEnabled = state.currentStep > 0,
+        onBackCompleted = { if (!state.isLoading) onBack() }
+    )
+    Scaffold(
         modifier = modifier,
-        transitionSpec = {
-            if (targetState > initialState) {
-                slideInHorizontally(tween(280)) { it } + fadeIn(tween(220)) togetherWith
-                    slideOutHorizontally(tween(220)) { -it } + fadeOut(tween(150))
-            } else {
-                slideInHorizontally(tween(280)) { -it } + fadeIn(tween(220)) togetherWith
-                    slideOutHorizontally(tween(220)) { it } + fadeOut(tween(150))
-            }
-        },
-        label = "postAuthOnboardingStep"
-    ) { step ->
-        when (step) {
-            0 -> StepOneContent(
+        containerColor = GiTheme.colors.bg,
+        contentWindowInsets = WindowInsets(0),
+        topBar = {
+            PersonaliseTopBar(
                 state = state,
-                onSelectExperience = onSelectExperience,
-                onContinue = onContinue,
-                onSkip = onSkip
-            )
-            else -> StepTwoContent(
-                state = state,
-                onSelectGoal = onSelectGoal,
-                onSelectRiskTolerance = onSelectRiskTolerance,
-                onContinue = onContinue,
+                scrolled = scrolled,
                 onSkip = onSkip,
                 onBack = onBack
             )
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun StepOneContent(
-    state: PostAuthOnboardingUiState,
-    onSelectExperience: (InvestingExperience) -> Unit,
-    onContinue: () -> Unit,
-    onSkip: () -> Unit
-) {
-    val gptInvestorColors = LocalGPTInvestorColors.current
-
-    Scaffold { padding ->
-        Column(
+        },
+        bottomBar = { PersonaliseFooter(state = state, onContinue = onContinue) }
+    ) { innerPadding ->
+        AnimatedContent(
+            targetState = state.currentStep,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(40.dp))
-
-            StepIndicator(currentStep = 0, totalSteps = TOTAL_STEPS)
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = stringResource(Res.string.post_auth_onboarding_title),
-                style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = stringResource(Res.string.post_auth_onboarding_subtitle),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            OnboardingSection(label = stringResource(Res.string.post_auth_onboarding_experience_label)) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    InvestingExperience.entries.forEach { option ->
-                        FilterChip(
-                            selected = state.experience == option,
-                            onClick = { onSelectExperience(option) },
-                            label = { Text(stringResource(option.labelRes())) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = gptInvestorColors.accentColors.allAccent,
-                                selectedLabelColor = Color.White
-                            )
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-            Spacer(modifier = Modifier.height(24.dp))
-
-            GPTInvestorButton(
-                text = stringResource(Res.string.continue_),
-                onClick = onContinue,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            TextButton(onClick = onSkip) {
-                Text(
-                    text = stringResource(Res.string.onboarding_skip_for_now),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun StepTwoContent(
-    state: PostAuthOnboardingUiState,
-    onSelectGoal: (InvestingGoal) -> Unit,
-    onSelectRiskTolerance: (RiskTolerance) -> Unit,
-    onContinue: () -> Unit,
-    onSkip: () -> Unit,
-    onBack: () -> Unit
-) {
-    val gptInvestorColors = LocalGPTInvestorColors.current
-
-    Scaffold { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Box(modifier = Modifier.fillMaxWidth()) {
-                BackButton(
-                    onClick = onBack,
-                    modifier = Modifier.align(Alignment.CenterStart)
-                )
-                StepIndicator(
-                    currentStep = 1,
-                    totalSteps = TOTAL_STEPS,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = stringResource(Res.string.post_auth_onboarding_title),
-                style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            OnboardingSection(label = stringResource(Res.string.post_auth_onboarding_goal_label)) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    InvestingGoal.entries.forEach { option ->
-                        FilterChip(
-                            selected = state.goal == option,
-                            onClick = { onSelectGoal(option) },
-                            label = { Text(stringResource(option.labelRes())) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = gptInvestorColors.accentColors.allAccent,
-                                selectedLabelColor = Color.White
-                            )
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            OnboardingSection(label = stringResource(Res.string.post_auth_onboarding_risk_label)) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    RiskTolerance.entries.forEach { option ->
-                        FilterChip(
-                            selected = state.riskTolerance == option,
-                            onClick = { onSelectRiskTolerance(option) },
-                            label = { Text(stringResource(option.labelRes())) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = gptInvestorColors.accentColors.allAccent,
-                                selectedLabelColor = Color.White
-                            )
-                        )
-                    }
-                }
-            }
-
-            if (state.error != null) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = stringResource(Res.string.something_went_wrong),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                    textAlign = TextAlign.Center
-                )
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-            Spacer(modifier = Modifier.height(24.dp))
-
-            if (state.isLoading) {
-                CircularProgressIndicator()
-            } else {
-                GPTInvestorButton(
-                    text = stringResource(Res.string.continue_),
-                    onClick = onContinue,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            TextButton(onClick = onSkip, enabled = !state.isLoading) {
-                Text(
-                    text = stringResource(Res.string.onboarding_skip_for_now),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-    }
-}
-
-@Composable
-private fun StepIndicator(currentStep: Int, totalSteps: Int, modifier: Modifier = Modifier) {
-    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        repeat(totalSteps) { index ->
-            val color = if (index == currentStep) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.outlineVariant
-            }
-            Surface(
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+                .fillMaxSize(),
+            transitionSpec = { transition(targetState > initialState) },
+            label = "postAuthOnboardingStep"
+        ) { step ->
+            GiFillScrollColumn(
                 modifier = Modifier
-                    .size(8.dp)
-                    .clip(CircleShape),
-                color = color,
-                content = {}
-            )
+                    .fillMaxSize()
+                    .padding(horizontal = GiSpace.gutter),
+                scrollState = scrollStateFor(step)
+            ) {
+                PersonaliseHeading(step = step)
+                if (step == 0) {
+                    PersonaliseQuestion(
+                        label = stringResource(Res.string.post_auth_onboarding_experience_label),
+                        options = InvestingExperience.entries,
+                        selected = state.experience,
+                        optionLabel = { it.labelRes() },
+                        onSelect = onSelectExperience,
+                        modifier = Modifier.padding(top = GiSpace.x8)
+                    )
+                } else {
+                    Column(
+                        modifier = Modifier.padding(top = GiSpace.x8),
+                        verticalArrangement = Arrangement.spacedBy(GiSpace.x7)
+                    ) {
+                        PersonaliseQuestion(
+                            label = stringResource(Res.string.post_auth_onboarding_goal_label),
+                            options = InvestingGoal.entries,
+                            selected = state.goal,
+                            optionLabel = { it.labelRes() },
+                            onSelect = onSelectGoal
+                        )
+                        PersonaliseQuestion(
+                            label = stringResource(Res.string.post_auth_onboarding_risk_label),
+                            options = RiskTolerance.entries,
+                            selected = state.riskTolerance,
+                            optionLabel = { it.labelRes() },
+                            onSelect = onSelectRiskTolerance
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun OnboardingSection(label: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(text = label, style = MaterialTheme.typography.titleSmall)
-        content()
+private fun PersonaliseTopBar(
+    state: PostAuthOnboardingUiState,
+    scrolled: Boolean,
+    onSkip: () -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val back = stringResource(Res.string.back)
+    GiTopBar(
+        title = null,
+        onBack = null,
+        backContentDescription = back,
+        modifier = modifier,
+        scrolled = scrolled,
+        center = {
+            AnimatedVisibility(
+                visible = state.currentStep > 0,
+                enter = expandHorizontally(GiMotion.smooth(), expandFrom = Alignment.Start) +
+                    fadeIn(tween(GiMotion.BASE, delayMillis = GiMotion.INSTANT, easing = EaseOutQuart)),
+                exit = shrinkHorizontally(GiMotion.smooth(), shrinkTowards = Alignment.Start) +
+                    fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing))
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    GiIconButton(
+                        icon = GiIcons.caretLeft,
+                        contentDescription = back,
+                        onClick = onBack,
+                        enabled = !state.isLoading
+                    )
+                    Spacer(modifier = Modifier.width(GiSpace.x4))
+                }
+            }
+            GiStepBar(
+                count = STEP_COUNT,
+                current = state.currentStep,
+                contentDescription = stringResource(Res.string.onboarding_step_of, state.currentStep + 1, STEP_COUNT),
+                modifier = Modifier.weight(1f)
+            )
+        }
+    ) {
+        GiButton(
+            text = stringResource(Res.string.skip),
+            onClick = onSkip,
+            size = GiButtonSize.Medium,
+            variant = GiButtonVariant.TextMuted,
+            enabled = !state.isLoading
+        )
+    }
+}
+
+@Composable
+private fun PersonaliseHeading(step: Int, modifier: Modifier = Modifier) {
+    val colors = GiTheme.colors
+    Column(
+        modifier = modifier.padding(top = GiSpace.x6),
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
+    ) {
+        GiEyebrow(text = stringResource(Res.string.onboarding_step_of, step + 1, STEP_COUNT))
+        GiText(
+            text = stringResource(Res.string.post_auth_onboarding_title),
+            modifier = Modifier.semantics { heading() },
+            style = GiTextStyle.Display,
+            color = colors.ink
+        )
+        GiText(
+            text = stringResource(Res.string.post_auth_onboarding_subtitle),
+            style = GiTextStyle.Input,
+            color = colors.muted
+        )
+    }
+}
+
+@Composable
+private fun <T> PersonaliseQuestion(
+    label: String,
+    options: List<T>,
+    selected: T?,
+    optionLabel: (T) -> StringResource,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val placement = if (isReducedMotionEnabled()) Modifier else Modifier.giAnimatePlacement()
+    Column(
+        modifier = modifier
+            .then(placement)
+            .semantics { isTraversalGroup = true },
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
+    ) {
+        // The question is a heading so each chip group is announced under (and navigable by) its question.
+        GiText(
+            text = label,
+            modifier = Modifier.semantics { heading() },
+            style = GiTextStyle.Label,
+            color = GiTheme.colors.ink
+        )
+        FlowRow(
+            modifier = Modifier.selectableGroup(),
+            horizontalArrangement = Arrangement.spacedBy(GiSpace.x2),
+            verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
+        ) {
+            options.forEach { option ->
+                GiChip(
+                    text = stringResource(optionLabel(option)),
+                    onClick = { onSelect(option) },
+                    modifier = placement,
+                    selected = option == selected,
+                    size = GiChipSize.Large,
+                    singleChoice = true
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PersonaliseFooter(state: PostAuthOnboardingUiState, onContinue: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x4, bottom = GiSpace.x4)
+    ) {
+        AnimatedVisibility(
+            visible = state.error != null,
+            enter = expandVertically(GiMotion.smooth()) +
+                fadeIn(tween(GiMotion.BASE, delayMillis = GiMotion.INSTANT, easing = EaseOutQuart)),
+            exit = shrinkVertically(GiMotion.smooth()) + fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing))
+        ) {
+            GiBanner(
+                title = stringResource(Res.string.post_auth_onboarding_save_error),
+                modifier = Modifier
+                    .padding(bottom = GiSpace.x4)
+                    .semantics { liveRegion = LiveRegionMode.Assertive },
+                icon = GiIcons.warningCircle,
+                tone = GiBannerTone.Error
+            )
+        }
+        GiButton(
+            text = stringResource(Res.string.continue_),
+            onClick = onContinue,
+            modifier = Modifier.fillMaxWidth(),
+            loading = state.isLoading
+        )
     }
 }
 
@@ -355,42 +348,50 @@ private fun RiskTolerance.labelRes() = when (this) {
     RiskTolerance.AGGRESSIVE -> Res.string.post_auth_onboarding_risk_aggressive
 }
 
+@Composable
+private fun PostAuthOnboardingScreenPreview(state: PostAuthOnboardingUiState) {
+    GPTInvestorTheme {
+        PostAuthOnboardingScreen(
+            state = state,
+            onSelectExperience = {},
+            onSelectGoal = {},
+            onSelectRiskTolerance = {},
+            onContinue = {},
+            onSkip = {},
+            onBack = {}
+        )
+    }
+}
+
+private val goalsPreviewState = PostAuthOnboardingUiState(
+    currentStep = 1,
+    goal = InvestingGoal.GROW_WEALTH,
+    riskTolerance = RiskTolerance.BALANCED
+)
+
 @PreviewLightDark
 @Composable
-private fun StepOnePreview() {
-    GPTInvestorTheme {
-        Surface {
-            PostAuthOnboardingScreen(
-                state = PostAuthOnboardingUiState(currentStep = 0, experience = InvestingExperience.BEGINNER),
-                onSelectExperience = {},
-                onSelectGoal = {},
-                onSelectRiskTolerance = {},
-                onContinue = {},
-                onSkip = {},
-                onBack = {}
-            )
-        }
-    }
+private fun ExperienceStepPreview() {
+    PostAuthOnboardingScreenPreview(
+        state = PostAuthOnboardingUiState(currentStep = 0, experience = InvestingExperience.INTERMEDIATE)
+    )
+}
+
+@PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
+@Composable
+private fun GoalsStepPreview() {
+    PostAuthOnboardingScreenPreview(state = goalsPreviewState)
 }
 
 @PreviewLightDark
 @Composable
-private fun StepTwoPreview() {
-    GPTInvestorTheme {
-        Surface {
-            PostAuthOnboardingScreen(
-                state = PostAuthOnboardingUiState(
-                    currentStep = 1,
-                    goal = InvestingGoal.GROW_WEALTH,
-                    riskTolerance = RiskTolerance.BALANCED
-                ),
-                onSelectExperience = {},
-                onSelectGoal = {},
-                onSelectRiskTolerance = {},
-                onContinue = {},
-                onSkip = {},
-                onBack = {}
-            )
-        }
-    }
+private fun SavingPreview() {
+    PostAuthOnboardingScreenPreview(state = goalsPreviewState.copy(isLoading = true))
+}
+
+@PreviewLightDark
+@Composable
+private fun SaveErrorPreview() {
+    PostAuthOnboardingScreenPreview(state = goalsPreviewState.copy(error = "Something went wrong."))
 }

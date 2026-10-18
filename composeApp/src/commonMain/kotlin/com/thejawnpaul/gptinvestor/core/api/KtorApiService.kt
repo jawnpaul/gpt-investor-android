@@ -1,6 +1,8 @@
 package com.thejawnpaul.gptinvestor.core.api
 
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.FirebaseLoginRequest
+import com.thejawnpaul.gptinvestor.features.authentication.data.remote.ForgotPasswordRequest
+import com.thejawnpaul.gptinvestor.features.authentication.data.remote.ForgotPasswordResponse
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginResponse
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpRequest
@@ -177,6 +179,11 @@ class KtorApiService(@Provided private val client: HttpClient) {
 
     suspend fun signUpWithEmailAndPassword(request: SignUpRequest): KtorResponse<SignUpResponse> =
         client.post("v1.1/register") {
+            setBody(request)
+        }.toKtorResponse()
+
+    suspend fun requestPasswordReset(request: ForgotPasswordRequest): KtorResponse<ForgotPasswordResponse> =
+        client.post("v1.1/forgot-password") {
             setBody(request)
         }.toKtorResponse()
 

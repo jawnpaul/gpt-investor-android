@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.features.conversation.data.repository
 import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.api.parseApiError
+import com.thejawnpaul.gptinvestor.core.api.toRateLimitExceeded
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
@@ -34,13 +35,17 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.utils.io.readUTF8Line
 import kotlin.time.Clock
 import kotlin.time.Clock.System
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
+import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Singleton
 
@@ -91,6 +96,7 @@ class ConversationRepository(
     override suspend fun getDefaultPromptResponse(prompt: DefaultPrompt): Flow<Either<Failure, Conversation>> = flow {
         var structuredConversation: StructuredConversation? = null
         var messageId: Long? = null
+        var streaming = false
         try {
             // Always create a new conversation entity
             val conversationId = conversationDao.insertConversation(
@@ -126,6 +132,7 @@ class ConversationRepository(
             val isGuest = appPreferences.isGuestLoggedIn.first() == true
             apiService.chatAiResponse(aiChatRequest) { chatResponse ->
                 if (chatResponse.status.value in 200..299) {
+                    streaming = true
                     handleSseStream(
                         response = chatResponse,
                         initialConversation = structuredConversation,
@@ -154,6 +161,10 @@ class ConversationRepository(
                 }
             }
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                messageId?.let { if (!streaming) saveStoppedAnswer(it, "") }
+                throw e
+            }
             Logger.e(e.stackTraceToString())
             structuredConversation?.let { conversation ->
                 val updatedMessages = ArrayList(conversation.messageList)
@@ -174,6 +185,7 @@ class ConversationRepository(
     override suspend fun getInputResponse(prompt: ConversationPrompt): Flow<Either<Failure, Conversation>> = flow {
         var currentConversation: StructuredConversation? = null
         var newMessageId: Long = -1L
+        var streaming = false
         try {
             // Use a non-null local var to allow safe reassignment of the conversation object
             var conversation: StructuredConversation = getConversation(prompt)
@@ -211,6 +223,7 @@ class ConversationRepository(
             val isGuestInput = appPreferences.isGuestLoggedIn.first() == true
             apiService.chatAiResponse(aiChatRequest) { chatResponse ->
                 if (chatResponse.status.value in 200..299) {
+                    streaming = true
                     handleSseStream(
                         chatResponse,
                         conversation,
@@ -237,6 +250,10 @@ class ConversationRepository(
                 }
             }
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                if (newMessageId != -1L && !streaming) saveStoppedAnswer(newMessageId, "")
+                throw e
+            }
             Logger.e(e.stackTraceToString())
             currentConversation?.let { conversation ->
                 val updatedMessages = ArrayList(conversation.messageList)
@@ -250,7 +267,7 @@ class ConversationRepository(
                     emit(Either.Right(conversation.copy(messageList = updatedMessages)))
                 }
             }
-            emit(Either.Left(Failure.ServerError))
+            emit(Either.Left(if (e is IOException) Failure.NetworkConnection else Failure.ServerError))
         }
     }.flowOn(Dispatchers.IO)
 
@@ -269,14 +286,14 @@ class ConversationRepository(
             // create new conversation
             val id = conversationDao.insertConversation(
                 ConversationEntity(
-                    title = "Default title",
+                    title = "",
                     createdAt = Clock.System.now().toEpochMilliseconds()
                 )
             )
 
             StructuredConversation(
                 id = id,
-                title = "Default title",
+                title = "",
                 messageList = mutableListOf()
             )
         }
@@ -468,7 +485,7 @@ class ConversationRepository(
                                             currentConversation.copy(messageList = updatedMessages)
                                         emit(Either.Right(currentConversation))
                                     }
-                                    emit(Either.Left(mapSseErrorToFailure(error)))
+                                    emit(Either.Left(mapSseErrorToFailure(data)))
                                 }
                             } catch (e: Exception) {
                                 Logger.e("Error parsing error event")
@@ -505,6 +522,10 @@ class ConversationRepository(
                 }
             }
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                saveStoppedAnswer(messageId, chunk.toString())
+                throw e
+            }
             Logger.e("Error during SSE stream")
             val updatedMessages = ArrayList(currentConversation.messageList)
             val index =
@@ -524,6 +545,27 @@ class ConversationRepository(
         }
     }
 
+    private suspend fun saveStoppedAnswer(messageId: Long, partialResponse: String) = withContext(NonCancellable) {
+        try {
+            val message = messageDao.getSingleMessage(messageId)
+            if (partialResponse.isNotBlank()) {
+                messageDao.updateMessage(message.copy(response = partialResponse))
+            } else {
+                messageDao.deleteMessage(message)
+                messageDao.getMessagesForConversation(message.conversationId)
+                    .filter { it.companyDetailRemoteResponse != null && it.messageId > messageId }
+                    .forEach { messageDao.deleteMessage(it) }
+                if (messageDao.getMessagesForConversation(message.conversationId).isEmpty()) {
+                    conversationDao.getSingleConversation(message.conversationId)?.let {
+                        conversationDao.deleteConversation(it)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Logger.e("Couldn't save stopped answer: ${e.message}")
+        }
+    }
+
     private fun mapHttpCodeToFailure(code: Int, errorBody: String?, isGuest: Boolean): Failure {
         val apiError = parseApiError(errorBody)
         return when {
@@ -532,11 +574,11 @@ class ConversationRepository(
 
             apiError.code == "guest_limit_reached" -> Failure.GuestLimitReached
 
-            apiError.code == "rate_limited" -> Failure.RateLimitExceeded
+            apiError.code == "rate_limited" -> apiError.toRateLimitExceeded()
 
             code == 401 && isGuest && apiError.code == null -> Failure.GuestSessionExpired
 
-            code == 429 -> Failure.RateLimitExceeded
+            code == 429 -> apiError.toRateLimitExceeded()
 
             code == 413 -> Failure.ContextLimitReached
 
@@ -545,21 +587,20 @@ class ConversationRepository(
     }
 
     private fun mapSseErrorToFailure(data: String): Failure {
-        // Try new structured format {"code":"...","message":"..."} first
         val apiError = parseApiError(data)
-        if (apiError.code != null) {
-            return when (apiError.code) {
-                "guest_session_expired", "invalid_guest_token" -> Failure.GuestSessionExpired
-                "guest_limit_reached" -> Failure.GuestLimitReached
-                "rate_limited" -> Failure.RateLimitExceeded
-                else -> Failure.ServerError
-            }
-        }
-        // Fall back to old {"error":"<message>"} string matching
         val normalized = data.lowercase()
         return when {
-            normalized.contains("429") || normalized.contains("rate_limit") -> Failure.RateLimitExceeded
+            apiError.code == "guest_session_expired" || apiError.code == "invalid_guest_token" ->
+                Failure.GuestSessionExpired
+
+            apiError.code == "guest_limit_reached" -> Failure.GuestLimitReached
+
+            apiError.code == "rate_limited" -> apiError.toRateLimitExceeded()
+
+            normalized.contains("429") || normalized.contains("rate_limit") -> Failure.RateLimitExceeded()
+
             normalized.contains("413") || normalized.contains("context_limit") -> Failure.ContextLimitReached
+
             else -> Failure.ServerError
         }
     }

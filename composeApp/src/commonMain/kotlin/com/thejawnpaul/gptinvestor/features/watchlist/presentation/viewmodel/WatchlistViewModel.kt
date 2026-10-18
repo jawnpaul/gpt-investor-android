@@ -1,6 +1,5 @@
 package com.thejawnpaul.gptinvestor.features.watchlist.presentation.viewmodel
 
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
@@ -15,6 +14,7 @@ import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.PopularStockUiModel
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.WatchlistLoadError
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.WatchlistUiState
+import kotlin.time.Clock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,17 +28,12 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.koin.core.annotation.KoinViewModel
 import org.koin.core.annotation.Provided
 
-private val recommendationColors = listOf(
-    Color(0xFF6366F1),
-    Color(0xFF10B981),
-    Color(0xFFF59E0B),
-    Color(0xFFEF4444),
-    Color(0xFF3B82F6),
-    Color(0xFF8B5CF6)
-)
+private const val PREMIUM_SOURCE_WATCHLIST = "watchlist"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @KoinViewModel
@@ -93,6 +88,7 @@ class WatchlistViewModel(
                 emitAction(WatchlistAction.NavigateToSearch)
             }
             WatchlistEvent.OnSignInClick -> emitAction(WatchlistAction.NavigateToSignUp)
+            WatchlistEvent.OnUpgradeClick -> premiumEventBus.requestPremium(source = PREMIUM_SOURCE_WATCHLIST)
             WatchlistEvent.OnBrowseTopPicksClick -> {
                 analyticsLogger.logEvent("watchlist-browse-top-picks-tapped", emptyMap())
                 emitAction(WatchlistAction.NavigateToTopPicks)
@@ -118,18 +114,14 @@ class WatchlistViewModel(
                 }
             },
             { data ->
-                val popularStocks = data.recommendations.mapIndexed { index, company ->
-                    PopularStockUiModel(
-                        company = company,
-                        color = recommendationColors[index % recommendationColors.size]
-                    )
-                }
+                val popularStocks = data.recommendations.map { company -> PopularStockUiModel(company = company) }
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         watchlistItems = data.items,
                         popularStocks = popularStocks,
-                        error = null
+                        error = null,
+                        pricesUpdatedAt = currentTimeLabel()
                     )
                 }
                 if (data.items.isEmpty() && popularStocks.isNotEmpty()) {
@@ -159,7 +151,7 @@ class WatchlistViewModel(
                 { failure ->
                     _uiState.update { it.copy(isLoading = false) }
                     if (failure is WatchlistFailure.WatchlistFull) {
-                        premiumEventBus.requestPremium(PREMIUM_SOURCE_WATCHLIST_FULL, failure.cap)
+                        premiumEventBus.requestPremium(PREMIUM_SOURCE_WATCHLIST_FULL, failure.cap, ticker)
                     }
                 },
                 {
@@ -189,6 +181,11 @@ class WatchlistViewModel(
         }
     }
 
+    private fun currentTimeLabel(): String {
+        val time = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        return "${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}"
+    }
+
     private fun emitAction(action: WatchlistAction) {
         viewModelScope.launch {
             _actions.emit(action)
@@ -204,6 +201,7 @@ sealed interface WatchlistEvent {
     data object OnSearchClick : WatchlistEvent
     data object OnBrowseTopPicksClick : WatchlistEvent
     data object OnSignInClick : WatchlistEvent
+    data object OnUpgradeClick : WatchlistEvent
 }
 
 sealed interface WatchlistAction {

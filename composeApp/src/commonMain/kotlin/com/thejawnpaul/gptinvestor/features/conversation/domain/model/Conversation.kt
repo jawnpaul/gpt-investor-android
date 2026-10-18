@@ -32,6 +32,13 @@ data class GenAiTextMessage(
     override val loading: Boolean = false
 ) : GenAiMessage
 
+const val ANSWER_FAILED_FALLBACK = "Couldn't generate a response"
+
+private const val MISSING_ANSWER = "null"
+
+val GenAiTextMessage.answerFailed: Boolean
+    get() = !loading && (response.isNullOrBlank() || response == ANSWER_FAILED_FALLBACK || response == MISSING_ANSWER)
+
 sealed interface GenAiMessage {
     val id: Long
     val response: String?

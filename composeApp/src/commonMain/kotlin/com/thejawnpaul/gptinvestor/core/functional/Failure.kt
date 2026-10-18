@@ -29,7 +29,7 @@ sealed class Failure {
 
     data object AlreadyExists : Failure()
 
-    data object RateLimitExceeded : Failure()
+    data class RateLimitExceeded(val upgrade: Boolean = true, val retryAfterSeconds: Long? = null) : Failure()
 
     data object ContextLimitReached : Failure()
 

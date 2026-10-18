@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.features.conversation.data.repository
 import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.api.parseApiError
+import com.thejawnpaul.gptinvestor.core.api.toRateLimitExceeded
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
@@ -484,7 +485,7 @@ class ConversationRepository(
                                             currentConversation.copy(messageList = updatedMessages)
                                         emit(Either.Right(currentConversation))
                                     }
-                                    emit(Either.Left(mapSseErrorToFailure(error)))
+                                    emit(Either.Left(mapSseErrorToFailure(data)))
                                 }
                             } catch (e: Exception) {
                                 Logger.e("Error parsing error event")
@@ -573,11 +574,11 @@ class ConversationRepository(
 
             apiError.code == "guest_limit_reached" -> Failure.GuestLimitReached
 
-            apiError.code == "rate_limited" -> Failure.RateLimitExceeded
+            apiError.code == "rate_limited" -> apiError.toRateLimitExceeded()
 
             code == 401 && isGuest && apiError.code == null -> Failure.GuestSessionExpired
 
-            code == 429 -> Failure.RateLimitExceeded
+            code == 429 -> apiError.toRateLimitExceeded()
 
             code == 413 -> Failure.ContextLimitReached
 
@@ -586,21 +587,20 @@ class ConversationRepository(
     }
 
     private fun mapSseErrorToFailure(data: String): Failure {
-        // Try new structured format {"code":"...","message":"..."} first
         val apiError = parseApiError(data)
-        if (apiError.code != null) {
-            return when (apiError.code) {
-                "guest_session_expired", "invalid_guest_token" -> Failure.GuestSessionExpired
-                "guest_limit_reached" -> Failure.GuestLimitReached
-                "rate_limited" -> Failure.RateLimitExceeded
-                else -> Failure.ServerError
-            }
-        }
-        // Fall back to old {"error":"<message>"} string matching
         val normalized = data.lowercase()
         return when {
-            normalized.contains("429") || normalized.contains("rate_limit") -> Failure.RateLimitExceeded
+            apiError.code == "guest_session_expired" || apiError.code == "invalid_guest_token" ->
+                Failure.GuestSessionExpired
+
+            apiError.code == "guest_limit_reached" -> Failure.GuestLimitReached
+
+            apiError.code == "rate_limited" -> apiError.toRateLimitExceeded()
+
+            normalized.contains("429") || normalized.contains("rate_limit") -> Failure.RateLimitExceeded()
+
             normalized.contains("413") || normalized.contains("context_limit") -> Failure.ContextLimitReached
+
             else -> Failure.ServerError
         }
     }

@@ -60,7 +60,7 @@ class CompanyRepositoryRoutingTest {
         stubGuest(isGuest = true)
         coEvery { apiService.getCompanyBrief("AAPL") } returns briefResponse(
             401,
-            """{"code":"guest_session_expired","message":"Session expired"}"""
+            """{"error":"guest_session_expired","message":"Session expired"}"""
         )
 
         repository.getCompanyBrief("AAPL").test {
@@ -76,7 +76,7 @@ class CompanyRepositoryRoutingTest {
         stubGuest(isGuest = true)
         coEvery { apiService.getCompanyBrief("AAPL") } returns briefResponse(
             429,
-            """{"code":"guest_limit_reached","message":"Limit reached","limit":5}"""
+            """{"error":"guest_limit_reached","limit":3,"upgrade":true}"""
         )
 
         repository.getCompanyBrief("AAPL").test {
@@ -91,12 +91,29 @@ class CompanyRepositoryRoutingTest {
         stubGuest(isGuest = false)
         coEvery { apiService.getCompanyBrief("AAPL") } returns briefResponse(
             429,
-            """{"code":"rate_limited","message":"Too many requests"}"""
+            """{"error":"rate_limited","tier":"normal","limit":"2 per 1 day","retry_after":43210,"upgrade":true}"""
         )
 
         repository.getCompanyBrief("AAPL").test {
             val result = awaitItem()
-            assertThat((result as Either.Left).a).isEqualTo(Failure.RateLimitExceeded)
+            assertThat((result as Either.Left).a)
+                .isEqualTo(Failure.RateLimitExceeded(upgrade = true, retryAfterSeconds = 43210))
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `premium rate_limited returns RateLimitExceeded without upgrade`() = runTest {
+        stubGuest(isGuest = false)
+        coEvery { apiService.getCompanyBrief("AAPL") } returns briefResponse(
+            429,
+            """{"error":"rate_limited","tier":"premium","limit":"10 per 1 minute","retry_after":42,"upgrade":false}"""
+        )
+
+        repository.getCompanyBrief("AAPL").test {
+            val result = awaitItem()
+            assertThat((result as Either.Left).a)
+                .isEqualTo(Failure.RateLimitExceeded(upgrade = false, retryAfterSeconds = 42))
             awaitComplete()
         }
     }
@@ -159,7 +176,7 @@ class CompanyRepositoryRoutingTest {
 
         repository.getCompanyBrief("AAPL").test {
             val result = awaitItem()
-            assertThat((result as Either.Left).a).isEqualTo(Failure.RateLimitExceeded)
+            assertThat((result as Either.Left).a).isEqualTo(Failure.RateLimitExceeded())
             awaitComplete()
         }
     }

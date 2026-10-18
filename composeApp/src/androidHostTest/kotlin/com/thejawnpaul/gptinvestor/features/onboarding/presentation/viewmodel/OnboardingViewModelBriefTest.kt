@@ -10,6 +10,8 @@ import com.thejawnpaul.gptinvestor.features.company.data.repository.CompanyRepos
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyBrief
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.BriefView
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -33,11 +35,13 @@ class OnboardingViewModelBriefTest {
     private val getCompanyBriefUseCase: GetCompanyBriefUseCase = mockk()
     private val appPreferences: AppPreferences = mockk(relaxed = true)
     private val analyticsLogger: AnalyticsLogger = mockk(relaxed = true)
+    private val authRepository: AuthenticationRepository = mockk(relaxed = true)
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         every { appPreferences.isUserLoggedIn } returns flowOf(false)
+        coEvery { authRepository.acquireGuestToken() } returns Result.success(Unit)
     }
 
     @After
@@ -49,7 +53,7 @@ class OnboardingViewModelBriefTest {
         getCompanyBriefUseCase = getCompanyBriefUseCase,
         companyRepository = mockk<CompanyRepository>(relaxed = true),
         appPreferences = appPreferences,
-        authRepository = mockk<AuthenticationRepository>(relaxed = true),
+        authRepository = authRepository,
         analyticsLogger = analyticsLogger
     )
 
@@ -87,5 +91,46 @@ class OnboardingViewModelBriefTest {
         advanceUntilIdle()
 
         assertThat(vm.uiState.value.briefView).isInstanceOf(BriefView.Error::class.java)
+    }
+
+    @Test
+    fun `a failed guest token is fetched again before the brief`() = runTest(testDispatcher) {
+        coEvery { authRepository.acquireGuestToken() } returnsMany listOf(
+            Result.failure(Exception("guest-login failed")),
+            Result.success(Unit)
+        )
+        stubBrief(Either.Left(Failure.ServerError))
+        val vm = viewModel()
+
+        vm.onStockSelected("TSLA", "Tesla", "suggested", null)
+        advanceUntilIdle()
+
+        coVerify(exactly = 2) { authRepository.acquireGuestToken() }
+        verify(exactly = 1) { getCompanyBriefUseCase("TSLA", any()) }
+    }
+
+    @Test
+    fun `no guest token shows the retryable error without requesting the brief`() = runTest(testDispatcher) {
+        coEvery { authRepository.acquireGuestToken() } returns Result.failure(Exception("guest-login failed"))
+        stubBrief(Either.Left(Failure.ServerError))
+        val vm = viewModel()
+
+        vm.onStockSelected("TSLA", "Tesla", "suggested", null)
+        advanceUntilIdle()
+
+        assertThat(vm.uiState.value.briefView).isInstanceOf(BriefView.Error::class.java)
+        verify(exactly = 0) { getCompanyBriefUseCase(any(), any()) }
+        verify {
+            analyticsLogger.logEvent(
+                "onboarding-brief-failed",
+                mapOf("ticker" to "TSLA", "error_type" to "guest_token")
+            )
+        }
+
+        coEvery { authRepository.acquireGuestToken() } returns Result.success(Unit)
+        vm.onRetryBrief()
+        advanceUntilIdle()
+
+        verify(exactly = 1) { getCompanyBriefUseCase("TSLA", any()) }
     }
 }

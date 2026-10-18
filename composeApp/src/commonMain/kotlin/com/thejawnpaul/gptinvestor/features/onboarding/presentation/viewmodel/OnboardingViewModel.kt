@@ -18,7 +18,9 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPr
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.BriefView
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.OnboardingUiState
 import kotlin.time.Clock
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,10 +67,12 @@ class OnboardingViewModel(
             }
         }.cachedIn(viewModelScope)
 
+    private var guestToken: Deferred<Result<Unit>> = viewModelScope.async { authRepository.acquireGuestToken() }
+
     init {
         logOnboardingStarted()
         viewModelScope.launch {
-            authRepository.acquireGuestToken()
+            guestToken.await()
             loadSuggestedStockLogos()
         }
     }
@@ -134,6 +138,23 @@ class OnboardingViewModel(
     }
 
     private fun fetchBrief(ticker: String) {
+        viewModelScope.launch {
+            if (guestToken.await().isFailure) {
+                guestToken = async { authRepository.acquireGuestToken() }
+            }
+            if (guestToken.await().isFailure) {
+                analyticsLogger.logEvent(
+                    eventName = "onboarding-brief-failed",
+                    params = mapOf("ticker" to ticker, "error_type" to "guest_token")
+                )
+                _uiState.update { it.copy(briefView = BriefView.Error("Something went wrong.")) }
+                return@launch
+            }
+            requestBrief(ticker)
+        }
+    }
+
+    private fun requestBrief(ticker: String) {
         getCompanyBriefUseCase(ticker) { result ->
             result.onFailure { failure ->
                 val errorType = when (failure) {

@@ -32,7 +32,7 @@ class UnauthorizedCallbackImpl :
                         source = GuestSessionSource.Request
                     )
                 )
-            } else {
+            } else if (appPreferences.isUserLoggedIn.first() == true) {
                 authenticationRepository.signOut()
             }
         }

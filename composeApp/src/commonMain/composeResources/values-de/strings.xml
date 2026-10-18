@@ -355,6 +355,7 @@
     <string name="thinking">Denkt nach…</string>
     <string name="splash_tagline">Klare Antworten rund um Ihr Geld</string>
     <string name="onboarding_brief_error_message">Beim Laden Ihres Briefings ist ein Fehler aufgetreten.</string>
+    <string name="onboarding_brief_limit_message">Sie haben Ihre kostenlosen Briefings für heute aufgebraucht. Registrieren Sie sich, um weiterzulesen.</string>
     <string name="try_again">Erneut versuchen</string>
     <string name="onboarding_cta_go_to_app_short">Zur App</string>
     <string name="guest_session_started">Gastsitzung gestartet</string>

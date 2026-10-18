@@ -179,6 +179,7 @@
     <string name="onboarding_error_message">Something went wrong. Let's take you to the app.</string>
     <string name="onboarding_cta_go_to_app">Go to GPT Investor</string>
     <string name="onboarding_brief_error_message">Something went wrong loading your brief.</string>
+    <string name="onboarding_brief_limit_message">You’ve used today’s free briefs. Sign up to keep reading.</string>
     <string name="try_again">Try again</string>
     <string name="onboarding_cta_go_to_app_short">Go to app</string>
     <string name="onboarding_value_plain_english_title">Plain English</string>

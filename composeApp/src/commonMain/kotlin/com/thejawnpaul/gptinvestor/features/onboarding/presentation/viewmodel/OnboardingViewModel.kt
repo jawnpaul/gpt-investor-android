@@ -139,13 +139,19 @@ class OnboardingViewModel(
                 val errorType = when (failure) {
                     is Failure.NetworkConnection -> "network"
                     is Failure.ServerError -> "server"
+                    is Failure.GuestLimitReached -> "guest_limit"
                     else -> "unknown"
                 }
                 analyticsLogger.logEvent(
                     eventName = "onboarding-brief-failed",
                     params = mapOf("ticker" to ticker, "error_type" to errorType)
                 )
-                _uiState.update { it.copy(briefView = BriefView.Error("Something went wrong.")) }
+                val briefView = if (failure is Failure.GuestLimitReached) {
+                    BriefView.LimitReached
+                } else {
+                    BriefView.Error("Something went wrong.")
+                }
+                _uiState.update { it.copy(briefView = briefView) }
             }
             result.onSuccess { brief ->
                 val durationMs = Clock.System.now().toEpochMilliseconds() - briefStartTime

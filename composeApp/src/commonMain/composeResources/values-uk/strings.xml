@@ -357,6 +357,7 @@
     <string name="thinking">Думаю…</string>
     <string name="splash_tagline">Чіткі відповіді про ваші гроші</string>
     <string name="onboarding_brief_error_message">Не вдалося завантажити ваш огляд.</string>
+    <string name="onboarding_brief_limit_message">Ви використали сьогоднішні безкоштовні огляди. Зареєструйтеся, щоб читати далі.</string>
     <string name="try_again">Повторити спробу</string>
     <string name="onboarding_cta_go_to_app_short">До застосунку</string>
     <string name="guest_session_started">Гостьовий сеанс розпочато</string>

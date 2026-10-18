@@ -67,6 +67,7 @@ object KtorClientFactory {
 
                         try {
                             val response = client.post("v1.1/refresh") {
+                                markAsRefreshTokenRequest()
                                 header("Authorization", "Bearer $refreshToken")
                             }
 

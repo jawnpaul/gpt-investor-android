@@ -145,7 +145,11 @@ class CompanyRepository(
 
     override suspend fun getCompanyBrief(ticker: String): Flow<Either<Failure, CompanyBrief>> = flow {
         val isGuest = appPreferences.isGuestLoggedIn.first() == true
-        val userType = if (isGuest) "guest" else "logged_in"
+        val userType = when {
+            appPreferences.isUserLoggedIn.first() == true -> "registered"
+            isGuest -> "guest"
+            else -> "onboarding"
+        }
 
         analyticsLogger.logEvent(
             eventName = "brief-started",

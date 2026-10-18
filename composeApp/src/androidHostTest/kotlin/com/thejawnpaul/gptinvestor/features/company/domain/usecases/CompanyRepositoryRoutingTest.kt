@@ -15,6 +15,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.justRun
+import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -43,8 +44,9 @@ class CompanyRepositoryRoutingTest {
         repository = CompanyRepository(apiService, companyDao, analyticsLogger, appPreferences)
     }
 
-    private fun stubGuest(isGuest: Boolean) {
+    private fun stubGuest(isGuest: Boolean, isRegistered: Boolean = !isGuest) {
         every { appPreferences.isGuestLoggedIn } returns flowOf(isGuest)
+        every { appPreferences.isUserLoggedIn } returns flowOf(isRegistered)
     }
 
     private fun briefResponse(code: Int, errorBody: String?) =
@@ -180,4 +182,26 @@ class CompanyRepositoryRoutingTest {
             awaitComplete()
         }
     }
+
+    @Test
+    fun `brief events label the session as registered, guest or onboarding`() = runTest {
+        coEvery { apiService.getCompanyBrief("AAPL") } returns briefResponse(500, null)
+
+        listOf(
+            SessionCase(isGuest = false, isRegistered = true, userType = "registered"),
+            SessionCase(isGuest = true, isRegistered = false, userType = "guest"),
+            SessionCase(isGuest = false, isRegistered = false, userType = "onboarding")
+        ).forEach { (isGuest, isRegistered, userType) ->
+            stubGuest(isGuest = isGuest, isRegistered = isRegistered)
+            repository.getCompanyBrief("AAPL").test {
+                awaitItem()
+                awaitComplete()
+            }
+            verify {
+                analyticsLogger.logEvent("brief-started", mapOf("ticker" to "AAPL", "user_type" to userType))
+            }
+        }
+    }
 }
+
+private data class SessionCase(val isGuest: Boolean, val isRegistered: Boolean, val userType: String)

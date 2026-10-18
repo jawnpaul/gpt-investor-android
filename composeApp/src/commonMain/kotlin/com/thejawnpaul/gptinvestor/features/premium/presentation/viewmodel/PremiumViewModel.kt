@@ -9,6 +9,7 @@ import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.premium.presentation.state.PremiumSheetState
+import com.thejawnpaul.gptinvestor.features.settings.domain.SettingsRepository
 import com.thejawnpaul.gptinvestor.shared.BuildConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,6 +25,7 @@ class PremiumViewModel(
     private val billingRepository: IBillingRepository,
     private val platformContext: PlatformContext,
     private val platformActions: PlatformActions,
+    private val settingsRepository: SettingsRepository,
     @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
@@ -35,6 +37,7 @@ class PremiumViewModel(
     init {
         viewModelScope.launch {
             premiumEventBus.events.collect { request ->
+                if (settingsRepository.isPremium.value) return@collect
                 analyticsLogger.logEvent("premium_sheet_shown", mapOf("source" to request.source))
                 trigger = paywallTriggerOf(request.source)
                 analyticsLogger.logEvent("paywall_viewed", mapOf("trigger" to trigger))

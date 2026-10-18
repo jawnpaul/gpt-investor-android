@@ -13,6 +13,7 @@ import com.thejawnpaul.gptinvestor.core.session.GuestSessionEvent
 import com.thejawnpaul.gptinvestor.core.session.GuestSessionNotifier
 import com.thejawnpaul.gptinvestor.core.session.GuestSessionReason
 import com.thejawnpaul.gptinvestor.core.session.GuestSessionSource
+import com.thejawnpaul.gptinvestor.core.session.rateLimitRetryMessage
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
@@ -257,17 +258,22 @@ class ConversationViewModel(
                 val isGuest = conversationViewMutableStateFlow.value.isGuest
                 analyticsLogger.logEvent(
                     eventName = "rate-limit-hit",
-                    params = mapOf("user_type" to if (isGuest) "guest" else "authenticated")
+                    params = mapOf(
+                        "user_type" to if (isGuest) "guest" else "authenticated",
+                        "upgrade" to failure.upgrade
+                    )
                 )
                 Logger.e("Rate limit exceeded")
-                if (isGuest) {
-                    guestSessionNotifier.notify(
+                when {
+                    isGuest -> guestSessionNotifier.notify(
                         GuestSessionEvent(reason = GuestSessionReason.Limit, source = GuestSessionSource.Stream)
                     )
-                } else {
-                    processAction(
-                        ConversationAction.ShowToast("Rate limit exceeded. Please try again later.")
-                    )
+
+                    failure.upgrade -> premiumEventBus.requestPremium(source = "conversation_rate_limit")
+
+                    else -> viewModelScope.launch {
+                        processAction(ConversationAction.ShowToast(rateLimitRetryMessage(failure.retryAfterSeconds)))
+                    }
                 }
                 conversationViewMutableStateFlow.update { it.copy(showRateLimitBottomSheet = false) }
             }

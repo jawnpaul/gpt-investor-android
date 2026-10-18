@@ -13,6 +13,7 @@ import com.thejawnpaul.gptinvestor.core.session.GuestSessionEvent
 import com.thejawnpaul.gptinvestor.core.session.GuestSessionNotifier
 import com.thejawnpaul.gptinvestor.core.session.GuestSessionReason
 import com.thejawnpaul.gptinvestor.core.session.GuestSessionSource
+import com.thejawnpaul.gptinvestor.core.session.rateLimitRetryMessage
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumberType
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyFinancialsView
@@ -143,6 +144,7 @@ class CompanyViewModel(
                                 )
                             )
                         }
+                        is Failure.RateLimitExceeded -> handleRateLimit(failure, source = "brief_rate_limit", ticker)
                         else -> { }
                     }
                 }
@@ -306,20 +308,12 @@ class CompanyViewModel(
                 val isGuest = isGuestSession.value
                 analyticsLogger.logEvent(
                     eventName = "rate-limit-hit",
-                    params = mapOf("user_type" to if (isGuest) "guest" else "authenticated")
+                    params = mapOf(
+                        "user_type" to if (isGuest) "guest" else "authenticated",
+                        "upgrade" to failure.upgrade
+                    )
                 )
-                if (isGuest) {
-                    guestSessionNotifier.notify(
-                        GuestSessionEvent(
-                            reason = GuestSessionReason.Limit,
-                            source = GuestSessionSource.Request
-                        )
-                    )
-                } else {
-                    processCompanyDetailAction(
-                        CompanyDetailAction.ShowToast("Rate limit exceeded. Please try again later.")
-                    )
-                }
+                handleRateLimit(failure, source = "company_rate_limit")
             }
 
             is GenAIException -> {
@@ -566,6 +560,26 @@ class CompanyViewModel(
     fun processCompanyDetailAction(action: CompanyDetailAction) {
         viewModelScope.launch {
             _companyDetailAction.emit(action)
+        }
+    }
+
+    private fun handleRateLimit(failure: Failure.RateLimitExceeded, source: String, ticker: String? = null) {
+        when {
+            isGuestSession.value -> guestSessionNotifier.notify(
+                GuestSessionEvent(
+                    reason = GuestSessionReason.Limit,
+                    source = GuestSessionSource.Request,
+                    ticker = ticker
+                )
+            )
+
+            failure.upgrade -> premiumEventBus.requestPremium(source = source, ticker = ticker)
+
+            else -> viewModelScope.launch {
+                _companyDetailAction.emit(
+                    CompanyDetailAction.ShowToast(rateLimitRetryMessage(failure.retryAfterSeconds))
+                )
+            }
         }
     }
 

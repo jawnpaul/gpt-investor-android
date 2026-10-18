@@ -506,4 +506,13 @@
     <string name="see_todays_picks">Heutige Empfehlungen ansehen</string>
     <string name="top_picks_empty_title">Heute noch keine Empfehlungen</string>
     <string name="top_picks_empty_body">Schauen Sie später nach den heutigen Empfehlungen.</string>
+    <string name="rate_limit_try_again_shortly">Etwas langsamer, bitte. Versuchen Sie es gleich noch einmal.</string>
+    <plurals name="rate_limit_try_again_minutes">
+        <item quantity="one">Etwas langsamer, bitte. Versuchen Sie es in %1$d Minute erneut.</item>
+        <item quantity="other">Etwas langsamer, bitte. Versuchen Sie es in %1$d Minuten erneut.</item>
+    </plurals>
+    <plurals name="rate_limit_try_again_hours">
+        <item quantity="one">Etwas langsamer, bitte. Versuchen Sie es in %1$d Stunde erneut.</item>
+        <item quantity="other">Etwas langsamer, bitte. Versuchen Sie es in %1$d Stunden erneut.</item>
+    </plurals>
 </resources>

@@ -33,6 +33,8 @@ private suspend fun HttpResponse.errorCode(): String? = try {
     null
 }
 
+private val GUEST_TOKEN_ERRORS = setOf("guest_session_expired", "invalid_guest_token")
+
 object KtorClientFactory {
     fun create(
         tokenStorage: TokenStorage,
@@ -72,7 +74,7 @@ object KtorClientFactory {
                     }
 
                     refreshTokens {
-                        if (response.errorCode() == "guest_session_expired") {
+                        if (response.errorCode() in GUEST_TOKEN_ERRORS) {
                             val uniqueId = unauthorizedCallback.guestUniqueId() ?: run {
                                 unauthorizedCallback.onUnauthorized()
                                 return@refreshTokens null

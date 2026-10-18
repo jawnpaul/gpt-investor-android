@@ -17,6 +17,7 @@ import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBr
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.BriefView
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.OnboardingUiState
+import kotlin.concurrent.Volatile
 import kotlin.time.Clock
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -68,6 +69,9 @@ class OnboardingViewModel(
         }.cachedIn(viewModelScope)
 
     private var guestToken: Deferred<Result<Unit>> = viewModelScope.async { authRepository.acquireGuestToken() }
+
+    @Volatile
+    private var guestTokenRejected = false
 
     init {
         logOnboardingStarted()
@@ -139,7 +143,8 @@ class OnboardingViewModel(
 
     private fun fetchBrief(ticker: String) {
         viewModelScope.launch {
-            if (guestToken.await().isFailure) {
+            if (guestTokenRejected || guestToken.await().isFailure) {
+                guestTokenRejected = false
                 guestToken = async { authRepository.acquireGuestToken() }
             }
             if (guestToken.await().isFailure) {
@@ -161,8 +166,10 @@ class OnboardingViewModel(
                     is Failure.NetworkConnection -> "network"
                     is Failure.ServerError -> "server"
                     is Failure.GuestLimitReached -> "guest_limit"
+                    is Failure.GuestSessionExpired -> "guest_session"
                     else -> "unknown"
                 }
+                if (failure is Failure.GuestSessionExpired) guestTokenRejected = true
                 analyticsLogger.logEvent(
                     eventName = "onboarding-brief-failed",
                     params = mapOf("ticker" to ticker, "error_type" to errorType)

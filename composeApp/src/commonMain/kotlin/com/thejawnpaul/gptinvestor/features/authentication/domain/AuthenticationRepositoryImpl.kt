@@ -23,6 +23,7 @@ import dev.gitlive.firebase.auth.AuthCredential
 import dev.gitlive.firebase.auth.FirebaseAuth
 import dev.gitlive.firebase.auth.auth
 import dev.gitlive.firebase.installations.installations
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -249,6 +250,7 @@ class AuthenticationRepositoryImpl(
         if (response.isSuccessful) {
             response.body?.let { loginResponse ->
                 tokenStorage.saveAccessToken(loginResponse.accessToken ?: "")
+                bearerTokenManager.clearCache()
                 Result.success(Unit)
             } ?: Result.failure(Exception("Empty response"))
         } else {
@@ -262,6 +264,7 @@ class AuthenticationRepositoryImpl(
             Result.failure(Exception(extractApiErrorMessage(response.errorBody, "Failed to acquire token")))
         }
     } catch (e: Exception) {
+        if (e is CancellationException) throw e
         analyticsLogger.logEvent(
             eventName = EVENT_GUEST_LOGIN_FAILED,
             params = mapOf("error_type" to e.message.toString(), "error_code" to "none")

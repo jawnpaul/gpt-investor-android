@@ -43,8 +43,9 @@ class CompanyRepositoryRoutingTest {
         repository = CompanyRepository(apiService, companyDao, analyticsLogger, appPreferences)
     }
 
-    private fun stubGuest(isGuest: Boolean) {
+    private fun stubGuest(isGuest: Boolean, isRegistered: Boolean = !isGuest) {
         every { appPreferences.isGuestLoggedIn } returns flowOf(isGuest)
+        every { appPreferences.isUserLoggedIn } returns flowOf(isRegistered)
     }
 
     private fun briefResponse(code: Int, errorBody: String?) =
@@ -165,6 +166,21 @@ class CompanyRepositoryRoutingTest {
         repository.getCompanyBrief("AAPL").test {
             val result = awaitItem()
             assertThat((result as Either.Left).a).isEqualTo(Failure.ServerError)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `401 during onboarding returns GuestSessionExpired`() = runTest {
+        stubGuest(isGuest = false, isRegistered = false)
+        coEvery { apiService.getCompanyBrief("AAPL") } returns briefResponse(
+            401,
+            """{"error":"token_expired","msg":"Token has expired"}"""
+        )
+
+        repository.getCompanyBrief("AAPL").test {
+            val result = awaitItem()
+            assertThat((result as Either.Left).a).isEqualTo(Failure.GuestSessionExpired)
             awaitComplete()
         }
     }

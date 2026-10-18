@@ -145,6 +145,7 @@ class CompanyRepository(
 
     override suspend fun getCompanyBrief(ticker: String): Flow<Either<Failure, CompanyBrief>> = flow {
         val isGuest = appPreferences.isGuestLoggedIn.first() == true
+        val isRegistered = appPreferences.isUserLoggedIn.first() == true
         val userType = if (isGuest) "guest" else "logged_in"
 
         analyticsLogger.logEvent(
@@ -168,7 +169,7 @@ class CompanyRepository(
                     emit(Either.Right(it.toBrief()))
                 }
             } else {
-                val failure = mapBriefError(response.code, response.errorBody, isGuest, ticker, userType)
+                val failure = mapBriefError(response.code, response.errorBody, !isRegistered, ticker, userType)
                 emit(Either.Left(failure))
             }
         } catch (e: Exception) {
@@ -188,7 +189,7 @@ class CompanyRepository(
     private fun mapBriefError(
         code: Int,
         errorBody: String?,
-        isGuest: Boolean,
+        hasGuestToken: Boolean,
         ticker: String,
         userType: String
     ): Failure {
@@ -245,8 +246,7 @@ class CompanyRepository(
                 apiError.toRateLimitExceeded()
             }
 
-            code == 401 && isGuest && errorCode == null -> {
-                // No code field: treat as session expired for guests
+            code == 401 && hasGuestToken -> {
                 analyticsLogger.logEvent(
                     eventName = "guest-session-expired",
                     params = mapOf(

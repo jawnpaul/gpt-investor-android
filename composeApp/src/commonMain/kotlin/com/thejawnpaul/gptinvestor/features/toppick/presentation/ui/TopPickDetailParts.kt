@@ -1,6 +1,8 @@
 package com.thejawnpaul.gptinvestor.features.toppick.presentation.ui
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -43,8 +45,10 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -79,6 +83,7 @@ import com.thejawnpaul.gptinvestor.read_article
 import com.thejawnpaul.gptinvestor.read_less
 import com.thejawnpaul.gptinvestor.read_more
 import com.thejawnpaul.gptinvestor.sources
+import com.thejawnpaul.gptinvestor.theme.GiEasing
 import com.thejawnpaul.gptinvestor.theme.GiEdge
 import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
@@ -346,24 +351,33 @@ private fun PriceChart(points: List<HistoricalData>, description: String, modifi
     val dotEdge = colors.raised
     val haptics = LocalHapticFeedback.current
     var scrubIndex by remember(points) { mutableStateOf<Int?>(null) }
-    LaunchedEffect(scrubIndex) {
-        if (scrubIndex != null) haptics.performHapticFeedback(GiHaptics.Selection)
+    val isReducedMotion = isReducedMotionEnabled()
+    val reveal = remember(points) { Animatable(if (isReducedMotion) 1f else 0f) }
+    var hasBeenSeen by remember { mutableStateOf(false) }
+    LaunchedEffect(reveal, hasBeenSeen) {
+        if (hasBeenSeen) reveal.animateTo(1f, tween(GiMotion.REVEAL, easing = GiEasing.standard))
     }
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(CHART_HEIGHT)
+            .onVisibilityChanged(minFractionVisible = CHART_VISIBLE_FRACTION) { if (it) hasBeenSeen = true }
     ) {
         Spacer(
             modifier = Modifier
                 .matchParentSize()
                 .semantics { contentDescription = description }
                 .pointerInput(points) {
-                    val step = size.width.toFloat() / points.lastIndex
-                    fun indexAt(x: Float) = (x / step).roundToInt().coerceIn(0, points.lastIndex)
+                    fun scrubTo(x: Float) {
+                        val index = (x * points.lastIndex / size.width).roundToInt().coerceIn(0, points.lastIndex)
+                        if (index != scrubIndex) {
+                            scrubIndex = index
+                            haptics.performHapticFeedback(GiHaptics.Selection)
+                        }
+                    }
                     detectDragGesturesAfterLongPress(
-                        onDragStart = { scrubIndex = indexAt(it.x) },
-                        onDrag = { change, _ -> scrubIndex = indexAt(change.position.x) },
+                        onDragStart = { scrubTo(it.x) },
+                        onDrag = { change, _ -> scrubTo(change.position.x) },
                         onDragEnd = { scrubIndex = null },
                         onDragCancel = { scrubIndex = null }
                     )
@@ -406,10 +420,12 @@ private fun PriceChart(points: List<HistoricalData>, description: String, modifi
                             val y = height * fraction
                             drawLine(gridColor, Offset(0f, y), Offset(width, y), gridWidth, pathEffect = dash)
                         }
-                        drawPath(path = fill, brush = fillBrush)
-                        drawPath(path = line, color = lineColor, style = lineStroke)
-                        drawCircle(color = lineColor, radius = inset, center = end)
-                        drawCircle(color = dotEdge, radius = inset, center = end, style = dotStroke)
+                        clipRect(left = -inset, right = -inset + (width + inset * 2f) * reveal.value) {
+                            drawPath(path = fill, brush = fillBrush)
+                            drawPath(path = line, color = lineColor, style = lineStroke)
+                            drawCircle(color = lineColor, radius = inset, center = end)
+                            drawCircle(color = dotEdge, radius = inset, center = end, style = dotStroke)
+                        }
                         scrubIndex?.let { i ->
                             val point = Offset(xs[i], ys[i])
                             drawLine(lineColor, Offset(point.x, 0f), Offset(point.x, height), gridWidth)
@@ -448,6 +464,7 @@ private fun ScrubLabel(point: HistoricalData, index: Int, lastIndex: Int) {
 }
 
 private val CHART_HEIGHT = 160.dp
+private const val CHART_VISIBLE_FRACTION = 0.5f
 private val CHART_LINE = 2.dp
 private val CHART_DOT_RADIUS = 5.dp
 private val CHART_DASH_ON = 2.dp

@@ -110,6 +110,7 @@ object GiMotion {
     const val FAST = 150
     const val BASE = 200
     const val SLOW = 300
+    const val REVEAL = 1000
 
     const val PRESSED_SCALE = 0.98f
     const val PRESSED_ALPHA = 0.12f
@@ -126,5 +127,6 @@ object GiMotion {
 object GiEasing {
     // Equivalent to EaseOutQuart: buttons, chips, fields, beam, step transitions.
     val emphasised: Easing = CubicBezierEasing(0.25f, 1f, 0.5f, 1f)
+    val standard: Easing = CubicBezierEasing(0.4f, 0f, 0.2f, 1f)
     val linear: Easing = LinearEasing
 }

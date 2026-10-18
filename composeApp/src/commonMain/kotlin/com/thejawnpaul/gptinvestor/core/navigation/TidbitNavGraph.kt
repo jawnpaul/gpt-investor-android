@@ -55,7 +55,8 @@ fun NavGraphBuilder.tidbitNavGraph(navController: NavHostController, platformAct
         TidbitDetailScreen(
             modifier = Modifier,
             onEvent = viewModel::handleDetailEvent,
-            state = state.value
+            state = state.value,
+            onOpenSavedList = { navController.navigate(Screen.SavedTidbitScreen.route) }
         )
     }
 
@@ -94,6 +95,7 @@ fun NavGraphBuilder.tidbitNavGraph(navController: NavHostController, platformAct
     composable(route = Screen.SavedTidbitScreen.route) {
         val viewModel = koinViewModel<TidbitViewModel>()
         val scope = rememberCoroutineScope()
+        LaunchedEffect(viewModel) { viewModel.showSavedOnly() }
 
         LaunchedEffect(Unit) {
             viewModel.actions.onEach { action ->

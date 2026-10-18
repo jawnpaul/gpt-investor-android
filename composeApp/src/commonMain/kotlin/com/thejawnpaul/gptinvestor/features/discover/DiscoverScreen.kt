@@ -1,315 +1,296 @@
 package com.thejawnpaul.gptinvestor.features.discover
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
-import androidx.paging.PagingData
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.back
+import com.thejawnpaul.gptinvestor.check_connection_try_again
+import com.thejawnpaul.gptinvestor.curated_for_you
+import com.thejawnpaul.gptinvestor.daily_learn_tidbit
 import com.thejawnpaul.gptinvestor.discover
-import com.thejawnpaul.gptinvestor.empty
-import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
-import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.SingleCompanyItem
+import com.thejawnpaul.gptinvestor.discover_lesson_error_body
+import com.thejawnpaul.gptinvestor.discover_lesson_error_title
+import com.thejawnpaul.gptinvestor.discover_picks_error_title
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
-import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.SectorChoiceQuestion
-import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SingleTopPickItem
-import com.thejawnpaul.gptinvestor.ic_search
-import com.thejawnpaul.gptinvestor.no_search_result
-import com.thejawnpaul.gptinvestor.retry
-import com.thejawnpaul.gptinvestor.search
-import com.thejawnpaul.gptinvestor.search_all_companies
-import com.thejawnpaul.gptinvestor.search_companies_in
-import com.thejawnpaul.gptinvestor.server_down
-import com.thejawnpaul.gptinvestor.something_went_wrong
-import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
-import kotlinx.coroutines.flow.Flow
-import org.jetbrains.compose.resources.painterResource
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
+import com.thejawnpaul.gptinvestor.search_a_stock_to_analyse
+import com.thejawnpaul.gptinvestor.see_all
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GiControlHeight
+import com.thejawnpaul.gptinvestor.theme.GiEdge
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
+import com.thejawnpaul.gptinvestor.theme.GiMotion
+import com.thejawnpaul.gptinvestor.theme.GiRadius
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.components.GiEyebrow
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiLargeTopBar
+import com.thejawnpaul.gptinvestor.theme.components.GiSectionHeader
+import com.thejawnpaul.gptinvestor.theme.components.GiText
+import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
+import com.thejawnpaul.gptinvestor.top_picks_today
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun DiscoverScreen(
-    state: DiscoveryScreenState,
-    paging: Flow<PagingData<CompanyPresentation>>,
-    onEvent: (DiscoveryEvent) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    // Discover Screen
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val gptInvestorColors = LocalGPTInvestorColors.current
-
-    val companiesList = paging.collectAsLazyPagingItems()
-
+fun DiscoverScreen(state: DiscoveryScreenState, onEvent: (DiscoveryEvent) -> Unit, modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier,
-        topBar = {
-            Column(
-                modifier = Modifier.statusBarsPadding().fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { onEvent(DiscoveryEvent.GoBack) }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = stringResource(Res.string.back)
-                        )
-                    }
-
-                    if (state.searchMode) {
-                        SearchBarCustom(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            query = state.query,
-                            placeHolder = state.selected?.let {
-                                when (it) {
-                                    SectorInput.AllSector -> stringResource(
-                                        Res.string.search_all_companies
-                                    )
-                                    is SectorInput.CustomSector -> {
-                                        stringResource(Res.string.search_companies_in, it.sectorName)
-                                    }
-                                }
-                            } ?: stringResource(Res.string.search),
-                            onQueryChange = { newQuery ->
-                                onEvent(DiscoveryEvent.SearchQueryChanged(newQuery))
-                            },
-                            onSearch = {
-                                keyboardController?.hide()
-                                onEvent(DiscoveryEvent.PerformSearch)
-                            },
-                            onClose = {
-                                keyboardController?.hide()
-                                onEvent(DiscoveryEvent.ToggleSearchMode(false))
-                            }
-                        )
-                    } else {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.discover),
-                                style = MaterialTheme.typography.titleLarge
-                            )
-
-                            Surface(
-                                modifier = Modifier,
-                                shape = RoundedCornerShape(corner = CornerSize(20.dp)),
-                                border = BorderStroke(
-                                    2.dp,
-                                    MaterialTheme.colorScheme.outlineVariant
-                                ),
-                                onClick = {
-                                    onEvent(DiscoveryEvent.ToggleSearchMode(true))
-                                }
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(
-                                        horizontal = 8.dp,
-                                        vertical = 12.dp
-                                    ),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        modifier = Modifier.size(16.dp),
-                                        painter = painterResource(Res.drawable.ic_search),
-                                        contentDescription = null
-                                    )
-                                    Text(
-                                        text = stringResource(Res.string.search),
-                                        style = MaterialTheme.typography.titleSmall,
-                                        color = gptInvestorColors.textColors.secondary50
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                HorizontalDivider(modifier = Modifier.padding(top = 12.dp))
-                if (state.isGuestSession) {
-                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {
-                        onEvent(DiscoveryEvent.GoToSignUp)
-                    })
-                }
-            }
-        }
+        containerColor = GiTheme.colors.bg,
+        contentWindowInsets = WindowInsets(0),
+        topBar = { GiLargeTopBar(title = stringResource(Res.string.discover)) }
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize()
+                .fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = GiSpace.gutter,
+                end = GiSpace.gutter,
+                top = GiSpace.x2,
+                bottom = GiSpace.sectionGap
+            ),
+            verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 0.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(vertical = 12.dp)
-            ) {
-                item {
-                    // row of sectors
-                    SectorChoiceQuestion(
-                        possibleAnswers = state.sectors,
-                        selectedAnswer = state.selected,
-                        onSelectOption = {
-                            onEvent(DiscoveryEvent.SelectSector(it))
-                        }
-                    )
-                }
-
-                if (state.showTopPicks) {
-                    items(
-                        items = state.topPicks,
-                        key = { topPickPresentation -> topPickPresentation.id }
-                    ) { pickPresentation ->
-                        SingleTopPickItem(
-                            modifier = Modifier,
-                            pickPresentation = pickPresentation,
-                            onClick = { topPickId ->
-                                onEvent(DiscoveryEvent.GoToTopPickDetail(topPickId))
-                            }
-                        )
-                    }
-                } else {
-                    if (companiesList.loadState.refresh is LoadState.Loading) {
-                        item {
-                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                        }
-                    }
-
-                    if (companiesList.loadState.refresh is LoadState.Error) {
-                        item {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                Column(modifier = Modifier.align(Alignment.Center)) {
-                                    Image(
-                                        painter = painterResource(Res.drawable.server_down),
-                                        contentDescription = "Server down",
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(
-                                                start = 8.dp,
-                                                end = 8.dp,
-                                                bottom = 8.dp,
-                                                top = 8.dp
-                                            )
-                                    )
-
-                                    Text(
-                                        text = stringResource(Res.string.something_went_wrong),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-
-                                    Spacer(modifier = Modifier.padding(8.dp))
-                                    OutlinedButton(onClick = {
-                                        companiesList.retry()
-                                        onEvent(DiscoveryEvent.RetryCompanies)
-                                    }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                                        Text(text = stringResource(Res.string.retry))
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (companiesList.loadState.refresh is LoadState.NotLoading &&
-                        companiesList.itemCount == 0 &&
-                        state.query.isNotBlank()
-                    ) {
-                        item {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                Column(modifier = Modifier.align(Alignment.Center)) {
-                                    Image(
-                                        painter = painterResource(Res.drawable.empty),
-                                        contentDescription = "Empty",
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(
-                                                start = 8.dp,
-                                                end = 8.dp,
-                                                bottom = 8.dp,
-                                                top = 8.dp
-                                            )
-                                    )
-
-                                    Text(
-                                        text = stringResource(Res.string.no_search_result),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    items(
-                        count = companiesList.itemCount,
-                        key = companiesList.itemKey { it.ticker }
-                    ) { index ->
-                        val company = companiesList[index]
-                        if (company != null) {
-                            SingleCompanyItem(
-                                modifier = Modifier.padding(
-                                    horizontal = 16.dp
-                                ),
-                                company = company,
-                                onClick = {
-                                    onEvent(DiscoveryEvent.GoToCompanyDetail(company.ticker))
-                                }
-                            )
-                        }
-                    }
-                    if (companiesList.loadState.append is LoadState.Loading) {
-                        item {
-                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                        }
-                    }
+            if (state.isGuestSession) {
+                item(key = "guest") {
+                    TopGuestLabel(onClick = { onEvent(DiscoveryEvent.GoToSignUp) })
                 }
             }
+            item(key = "search") {
+                DiscoverSearchEntry(onClick = { onEvent(DiscoveryEvent.GoToSearch) })
+            }
+            item(key = "browse") {
+                BrowseCompaniesCard(onClick = { onEvent(DiscoveryEvent.GoToBrowse) })
+            }
+            item(key = "picks") {
+                TopPicksSection(
+                    view = state.topPicksView,
+                    picks = state.previewTopPicks,
+                    onSeeAll = { onEvent(DiscoveryEvent.GoToAllTopPicks) },
+                    onRetry = { onEvent(DiscoveryEvent.RetryTopPicks) },
+                    onClickPick = { onEvent(DiscoveryEvent.ClickTopPick(id = it)) },
+                    modifier = Modifier.padding(top = GiSpace.x2)
+                )
+            }
+            item(key = "tidbit") {
+                val placement = if (isReducedMotionEnabled()) {
+                    Modifier
+                } else {
+                    Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null, placementSpec = GiMotion.smooth())
+                }
+                TidbitSection(
+                    tidbit = state.homeTidbitView,
+                    onRetry = { onEvent(DiscoveryEvent.RetryTidbit) },
+                    onClick = { onEvent(DiscoveryEvent.ClickTidbit(id = it)) },
+                    modifier = placement.padding(top = GiSpace.x2)
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun TopPicksSection(
+    view: TopPicksView,
+    picks: List<TopPickPresentation>,
+    onSeeAll: () -> Unit,
+    onRetry: () -> Unit,
+    onClickPick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.titleToContent)) {
+        GiSectionHeader(
+            title = stringResource(Res.string.curated_for_you),
+            modifier = Modifier.semantics { heading() },
+            eyebrow = stringResource(Res.string.top_picks_today),
+            trailingText = stringResource(Res.string.see_all),
+            onTrailingClick = onSeeAll
+        )
+        when {
+            view.loading && view.topPicks.isEmpty() -> TopPicksSkeleton()
+            view.showError -> DiscoverSectionError(
+                title = stringResource(Res.string.discover_picks_error_title),
+                body = stringResource(Res.string.check_connection_try_again),
+                onRetry = onRetry
+            )
+            else -> picks.forEach { pick ->
+                TopPickCard(pick = pick, onClick = { onClickPick(pick.id) })
+            }
+        }
+    }
+}
+
+@Composable
+private fun TidbitSection(
+    tidbit: HomeTidbitView,
+    onRetry: () -> Unit,
+    onClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val hasTidbit = tidbit.id.isNotBlank() || tidbit.title.isNotBlank()
+    if (!tidbit.loading && tidbit.error == null && !hasTidbit) return
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.titleToContent)) {
+        GiEyebrow(
+            text = stringResource(Res.string.daily_learn_tidbit),
+            modifier = Modifier.semantics { heading() }
+        )
+        when {
+            tidbit.loading -> TidbitSkeleton()
+            tidbit.error != null -> DiscoverSectionError(
+                title = stringResource(Res.string.discover_lesson_error_title),
+                body = stringResource(Res.string.discover_lesson_error_body),
+                onRetry = onRetry
+            )
+            else -> TidbitCard(tidbit = tidbit, onClick = { onClick(tidbit.id) })
+        }
+    }
+}
+
+@Composable
+private fun DiscoverSearchEntry(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val colors = GiTheme.colors
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = GiControlHeight.search)
+            .clip(GiRadius.sm)
+            .background(colors.raised)
+            .border(GiEdge.width, colors.line, GiRadius.sm)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                role = Role.Button,
+                onClick = onClick
+            )
+            .background(if (isPressed) colors.ink.copy(alpha = GiMotion.PRESSED_ALPHA) else Color.Transparent)
+            .padding(horizontal = GiSpace.x4, vertical = GiSpace.x2),
+        horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = GiIcons.magnifyingGlass,
+            contentDescription = null,
+            modifier = Modifier.size(GiIconSize.md),
+            tint = colors.muted
+        )
+        GiText(
+            text = stringResource(Res.string.search_a_stock_to_analyse),
+            modifier = Modifier.weight(1f),
+            style = GiTextStyle.Input,
+            color = colors.muted,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+private val previewPicks = listOf(
+    TopPickPresentation(
+        id = "1",
+        ticker = "GOOGL",
+        companyName = "Alphabet Inc.",
+        rationale = "Alphabet remains a cornerstone of the digital economy. Its dominance in search and " +
+            "advertising provides a massive cash engine to fund its aggressive AI infrastructure build-out.",
+        metrics = emptyList(),
+        risks = emptyList(),
+        confidenceScore = 80,
+        isSaved = false,
+        percentageChange = 1.2f,
+        currentPrice = 185.0f
+    ),
+    TopPickPresentation(
+        id = "2",
+        ticker = "AVGO",
+        companyName = "Broadcom Inc.",
+        rationale = "Broadcom is the primary beneficiary of the AI infrastructure boom.",
+        metrics = emptyList(),
+        risks = emptyList(),
+        confidenceScore = 75,
+        isSaved = false,
+        percentageChange = 0.4f,
+        currentPrice = 320.0f
+    )
+)
+
+private val previewTidbit = HomeTidbitView(
+    id = "t1",
+    title = "Rethink early retirement: lessons from the FIRE movement"
+)
+
+@PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
+@Composable
+private fun DiscoverScreenLoadedPreview() {
+    GPTInvestorTheme {
+        DiscoverScreen(
+            state = DiscoveryScreenState(
+                topPicksView = TopPicksView(topPicks = previewPicks),
+                homeTidbitView = previewTidbit
+            ),
+            onEvent = {}
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DiscoverScreenLoadingPreview() {
+    GPTInvestorTheme {
+        DiscoverScreen(
+            state = DiscoveryScreenState(
+                topPicksView = TopPicksView(loading = true),
+                homeTidbitView = HomeTidbitView(loading = true)
+            ),
+            onEvent = {}
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DiscoverScreenGuestErrorPreview() {
+    GPTInvestorTheme {
+        DiscoverScreen(
+            state = DiscoveryScreenState(
+                isGuestSession = true,
+                topPicksView = TopPicksView(error = "Something went wrong"),
+                homeTidbitView = HomeTidbitView(error = "Something went wrong")
+            ),
+            onEvent = {}
+        )
     }
 }

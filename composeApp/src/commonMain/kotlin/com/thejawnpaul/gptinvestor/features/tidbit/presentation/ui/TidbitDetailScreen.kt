@@ -1,343 +1,349 @@
-@file:OptIn(ExperimentalSharedTransitionApi::class)
-
 package com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui
 
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.outlined.Language
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
+import com.mikepenz.markdown.m3.Markdown
+import com.mikepenz.markdown.m3.markdownColor
+import com.mikepenz.markdown.m3.markdownTypography
+import com.mikepenz.markdown.model.markdownPadding
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.back
-import com.thejawnpaul.gptinvestor.bookmark
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CustomRichText
+import com.thejawnpaul.gptinvestor.check_connection_try_again
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.model.TidbitPresentation
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailEvent
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailState
-import com.thejawnpaul.gptinvestor.ic_bookmark
-import com.thejawnpaul.gptinvestor.ic_bookmark_filled
-import com.thejawnpaul.gptinvestor.ic_global
-import com.thejawnpaul.gptinvestor.ic_like
-import com.thejawnpaul.gptinvestor.ic_like_filled
-import com.thejawnpaul.gptinvestor.ic_top_pick_send
-import com.thejawnpaul.gptinvestor.like
-import com.thejawnpaul.gptinvestor.share
-import com.thejawnpaul.gptinvestor.source
+import com.thejawnpaul.gptinvestor.helpful
+import com.thejawnpaul.gptinvestor.meta_pair
+import com.thejawnpaul.gptinvestor.remove_from_saved
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
-import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
-import com.thejawnpaul.gptinvestor.theme.bodyChatBody
-import org.jetbrains.compose.resources.painterResource
+import com.thejawnpaul.gptinvestor.theme.GiEdge
+import com.thejawnpaul.gptinvestor.theme.GiRadius
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.components.GiButton
+import com.thejawnpaul.gptinvestor.theme.components.GiButtonSize
+import com.thejawnpaul.gptinvestor.theme.components.GiButtonVariant
+import com.thejawnpaul.gptinvestor.theme.components.GiErrorState
+import com.thejawnpaul.gptinvestor.theme.components.GiIconButton
+import com.thejawnpaul.gptinvestor.theme.components.GiIconToggleButton
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiReadingProgress
+import com.thejawnpaul.gptinvestor.theme.components.GiSkeleton
+import com.thejawnpaul.gptinvestor.theme.components.GiText
+import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
+import com.thejawnpaul.gptinvestor.theme.components.GiToastHost
+import com.thejawnpaul.gptinvestor.theme.components.GiToastResult
+import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
+import com.thejawnpaul.gptinvestor.tidbit_error_title
+import com.thejawnpaul.gptinvestor.tidbit_loading
+import com.thejawnpaul.gptinvestor.tidbit_read_minutes
+import com.thejawnpaul.gptinvestor.tidbit_read_source
+import com.thejawnpaul.gptinvestor.tidbit_save
+import com.thejawnpaul.gptinvestor.tidbit_saved_to_library
+import com.thejawnpaul.gptinvestor.tidbit_share
+import com.thejawnpaul.gptinvestor.tidbit_short_summary_body
+import com.thejawnpaul.gptinvestor.tidbit_short_summary_title
+import com.thejawnpaul.gptinvestor.try_again
+import com.thejawnpaul.gptinvestor.view
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TidbitDetailScreen(state: TidbitDetailState, onEvent: (TidbitDetailEvent) -> Unit, modifier: Modifier = Modifier) {
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            Column(modifier = Modifier.statusBarsPadding()) {
-                DetailTopAppBar(onBackClick = { onEvent(TidbitDetailEvent.GoBack) })
-                if (state.isGuestSession) {
-                    TopGuestLabel(modifier = Modifier.fillMaxWidth(), onClick = {
-                        onEvent(TidbitDetailEvent.GoToSignUp)
-                    })
-                }
-            }
-        }
-    ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
-            if (state.isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(193.dp)
-                )
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-            state.presentation?.let { presentation ->
-                when (presentation) {
-                    is TidbitPresentation.ArticlePresentation -> {
-                        TidbitArticleDetail(
-                            presentation = presentation,
-                            onEvent = onEvent,
-                            isGuest = state.isGuestSession
-                        )
-                    }
-
-                    is TidbitPresentation.AudioPresentation -> {
-                        TidbitAudioDetail(
-                            presentation = presentation,
-                            onEvent = onEvent,
-                            isGuest = state.isGuestSession
-                        )
-                    }
-
-                    is TidbitPresentation.VideoPresentation -> {
-                        TidbitVideoDetail(
-                            onEvent = onEvent,
-                            presentation = presentation,
-                            isGuest = state.isGuestSession
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun DetailTopAppBar(onBackClick: () -> Unit, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = onBackClick) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                contentDescription = stringResource(Res.string.back)
-            )
-        }
-    }
-}
-
-@Composable
-private fun AuthorCategoryInfo(author: String, category: String, modifier: Modifier = Modifier) {
-    val gptInvestorColors = LocalGPTInvestorColors.current
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = author,
-            style = MaterialTheme.typography.bodyChatBody
-        )
-
-        Surface(
-            shape = RoundedCornerShape(20.dp),
-            color = gptInvestorColors.accentColors.allAccent20,
-            contentColor = gptInvestorColors.accentColors.allAccent
-        ) {
-            Text(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                text = category,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.W400,
-                    lineHeight = 16.sp,
-                    letterSpacing = 0.5.sp
-                )
-            )
-        }
-    }
-}
-
-@Composable
-private fun TidbitActionRow(
-    isLiked: Boolean,
-    isBookmarked: Boolean,
-    onLikeClick: () -> Unit,
-    onBookmarkClick: () -> Unit,
-    onShareClick: () -> Unit,
-    onSourceClick: () -> Unit,
+fun TidbitDetailScreen(
+    state: TidbitDetailState,
+    onEvent: (TidbitDetailEvent) -> Unit,
     modifier: Modifier = Modifier,
-    isGuest: Boolean = false
+    onOpenSavedList: (() -> Unit)? = null
 ) {
-    val gptInvestorColors = LocalGPTInvestorColors.current
-    val likeIcon = if (isLiked) Res.drawable.ic_like_filled else Res.drawable.ic_like
-    val bookmarkIcon =
-        if (isBookmarked) Res.drawable.ic_bookmark_filled else Res.drawable.ic_bookmark
+    val colors = GiTheme.colors
+    val scrollState = rememberScrollState()
+    val toastState = rememberGiToastState()
+    val scope = rememberCoroutineScope()
+    val savedMessage = stringResource(Res.string.tidbit_saved_to_library)
+    val viewLabel = stringResource(Res.string.view)
+    val onSave: () -> Unit = {
+        scope.launch {
+            val result = toastState.show(
+                message = savedMessage,
+                icon = GiIcons.check,
+                actionText = if (onOpenSavedList != null) viewLabel else null
+            )
+            if (result == GiToastResult.ActionPerformed) onOpenSavedList?.invoke()
+        }
+    }
 
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(colors.raised)
     ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .background(colors.raised)
+                    .windowInsetsPadding(WindowInsets.statusBars)
+            ) {
+                GiReadingProgress(
+                    progress = {
+                        when {
+                            state.presentation == null || state.isLoading -> 0f
+                            scrollState.maxValue == 0 -> 1f
+                            else -> scrollState.value.toFloat() / scrollState.maxValue
+                        }
+                    }
+                )
+                Row(
+                    modifier = Modifier.padding(
+                        start = GiSpace.gutter,
+                        end = GiSpace.gutter,
+                        top = GiSpace.x2,
+                        bottom = GiSpace.x3
+                    )
+                ) {
+                    GiIconButton(
+                        icon = GiIcons.caretLeft,
+                        contentDescription = stringResource(Res.string.back),
+                        onClick = { onEvent(TidbitDetailEvent.GoBack) }
+                    )
+                }
+                if (state.isGuestSession) {
+                    TopGuestLabel(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = GiSpace.gutter, end = GiSpace.gutter, bottom = GiSpace.x2),
+                        onClick = { onEvent(TidbitDetailEvent.GoToSignUp) }
+                    )
+                }
+            }
+
+            val presentation = state.presentation
+            when {
+                state.isLoading -> TidbitDetailSkeleton()
+                presentation != null -> TidbitArticle(
+                    presentation = presentation,
+                    isGuest = state.isGuestSession,
+                    scrollState = scrollState,
+                    onEvent = onEvent,
+                    onSave = onSave
+                )
+                else -> GiErrorState(
+                    title = stringResource(Res.string.tidbit_error_title),
+                    body = stringResource(Res.string.check_connection_try_again),
+                    actionText = stringResource(Res.string.try_again),
+                    onAction = { onEvent(TidbitDetailEvent.Retry) }
+                )
+            }
+        }
+
+        GiToastHost(
+            state = toastState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(horizontal = GiSpace.gutter, vertical = GiSpace.x4)
+        )
+    }
+}
+
+@Composable
+private fun TidbitArticle(
+    presentation: TidbitPresentation,
+    isGuest: Boolean,
+    scrollState: androidx.compose.foundation.ScrollState,
+    onEvent: (TidbitDetailEvent) -> Unit,
+    onSave: () -> Unit
+) {
+    val colors = GiTheme.colors
+    val navBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    var isLiked by remember(presentation.id) { mutableStateOf(presentation.isLiked) }
+    var isBookmarked by remember(presentation.id) { mutableStateOf(presentation.isBookmarked) }
+    val sourceUrl = when (presentation) {
+        is TidbitPresentation.ArticlePresentation -> presentation.sourceUrl
+        is TidbitPresentation.VideoPresentation -> presentation.sourceUrl
+        is TidbitPresentation.AudioPresentation -> presentation.sourceUrl
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x2, bottom = GiSpace.x10 + navBottom),
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
+    ) {
+        TidbitMedia(presentation = presentation)
+
         Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (!isGuest) {
-                IconButton(modifier = Modifier.size(32.dp), onClick = onLikeClick) {
-                    Icon(
-                        painter = painterResource(likeIcon),
-                        contentDescription = stringResource(Res.string.like)
-                    )
-                }
-                IconButton(modifier = Modifier.size(32.dp), onClick = onBookmarkClick) {
-                    Icon(
-                        painter = painterResource(bookmarkIcon),
-                        contentDescription = stringResource(Res.string.bookmark)
-                    )
-                }
-            }
-            IconButton(modifier = Modifier.size(32.dp), onClick = onShareClick) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_top_pick_send),
-                    contentDescription = stringResource(Res.string.share)
+            val minutes =
+                stringResource(
+                    Res.string.tidbit_read_minutes,
+                    remember(presentation.content) {
+                        readMinutes(presentation.content)
+                    }
                 )
-            }
-        }
-        Surface(
-            shape = RoundedCornerShape(corner = CornerSize(20.dp)),
-            border = BorderStroke(
-                width = 2.dp,
-                color = gptInvestorColors.utilColors.borderBright10
-            ),
-            onClick = onSourceClick
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = stringResource(Res.string.source))
-                Icon(
-                    painter = painterResource(Res.drawable.ic_global),
-                    contentDescription = null
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun TidbitArticleDetail(
-    presentation: TidbitPresentation.ArticlePresentation,
-    onEvent: (TidbitDetailEvent) -> Unit,
-    modifier: Modifier = Modifier,
-    isGuest: Boolean = false
-) {
-    val isLiked = remember { mutableStateOf(presentation.isLiked) }
-    val isBookmarked = remember { mutableStateOf(presentation.isBookmarked) }
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
-    ) {
-        Spacer(modifier = Modifier)
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(193.dp),
-            shape = RoundedCornerShape(corner = CornerSize(20.dp))
-        ) {
-            AsyncImage(
-                modifier = Modifier.fillMaxSize(),
-                model = presentation.mediaUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Crop
+            GiText(
+                text = if (presentation.originalAuthor.isNotBlank()) {
+                    stringResource(Res.string.meta_pair, presentation.originalAuthor, minutes)
+                } else {
+                    minutes
+                },
+                modifier = Modifier.weight(1f),
+                style = GiTextStyle.MetaRelaxed
             )
+            if (presentation.category.isNotBlank()) {
+                ContentTag(text = presentation.category, container = colors.violetSoft, content = colors.violet)
+            }
         }
 
-        AuthorCategoryInfo(
-            modifier = Modifier.fillMaxWidth(),
-            author = presentation.originalAuthor,
-            category = presentation.category
+        GiText(
+            text = presentation.title,
+            modifier = Modifier.semantics { heading() },
+            style = GiTextStyle.ScreenTitle
         )
 
-        Text(text = presentation.title, style = MaterialTheme.typography.titleLarge)
-        CustomRichText(
-            modifier = Modifier.padding(horizontal = 4.dp),
-            text = presentation.content
-        )
+        ArticleBody(content = presentation.content)
 
-        TidbitActionRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            isLiked = isLiked.value,
-            isBookmarked = isBookmarked.value,
-            onLikeClick = {
-                onEvent(
-                    TidbitDetailEvent.OnClickLike(
-                        id = presentation.id,
-                        newValue = !isLiked.value
+        Spacer(modifier = Modifier.height(GiSpace.x2))
+
+        if (sourceUrl.isNotBlank()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(GiRadius.sm)
+                    .background(colors.tile)
+                    .padding(GiSpace.x4),
+                verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
+            ) {
+                GiText(text = stringResource(Res.string.tidbit_short_summary_title), style = GiTextStyle.FieldLabel)
+                GiText(text = stringResource(Res.string.tidbit_short_summary_body), style = GiTextStyle.BodySmall)
+            }
+        }
+
+        val actions: @Composable () -> Unit = {
+            Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
+                if (!isGuest) {
+                    GiIconToggleButton(
+                        checked = isLiked,
+                        onCheckedChange = {
+                            onEvent(TidbitDetailEvent.OnClickLike(id = presentation.id, newValue = it))
+                            isLiked = it
+                        },
+                        icon = GiIcons.thumbsUp,
+                        checkedIcon = GiIcons.thumbsUpFill,
+                        contentDescription = stringResource(Res.string.helpful)
                     )
-                )
-                isLiked.value = !isLiked.value
-            },
-            onBookmarkClick = {
-                onEvent(
-                    TidbitDetailEvent.OnClickBookmark(
-                        id = presentation.id,
-                        newValue = !isBookmarked.value
+                    GiIconToggleButton(
+                        checked = isBookmarked,
+                        onCheckedChange = {
+                            onEvent(TidbitDetailEvent.OnClickBookmark(id = presentation.id, newValue = it))
+                            isBookmarked = it
+                            if (it) onSave()
+                        },
+                        icon = GiIcons.bookmarkSimple,
+                        checkedIcon = ContentBookmarkFill,
+                        contentDescription = stringResource(
+                            if (isBookmarked) {
+                                Res.string.remove_from_saved
+                            } else {
+                                Res.string.tidbit_save
+                            }
+                        )
                     )
+                }
+                GiIconButton(
+                    icon = GiIcons.shareNetwork,
+                    contentDescription = stringResource(Res.string.tidbit_share),
+                    onClick = { onEvent(TidbitDetailEvent.OnClickShare) }
                 )
-                isBookmarked.value = !isBookmarked.value
-            },
-            onShareClick = { onEvent(TidbitDetailEvent.OnClickShare) },
-            onSourceClick = { onEvent(TidbitDetailEvent.OnClickSource) },
-            isGuest = isGuest
-        )
-        Spacer(modifier = Modifier)
+            }
+        }
+        val readSource: @Composable (Modifier) -> Unit = { buttonModifier ->
+            if (sourceUrl.isNotBlank()) {
+                GiButton(
+                    text = stringResource(Res.string.tidbit_read_source),
+                    onClick = { onEvent(TidbitDetailEvent.OnClickSource) },
+                    modifier = buttonModifier,
+                    size = GiButtonSize.Medium,
+                    variant = GiButtonVariant.Secondary,
+                    leadingIcon = Icons.Outlined.Language
+                )
+            }
+        }
+        if (isContentLargeText()) {
+            Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
+                actions()
+                readSource(Modifier.fillMaxWidth())
+            }
+        } else {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                actions()
+                Spacer(modifier = Modifier.weight(1f))
+                readSource(Modifier)
+            }
+        }
     }
 }
 
 @Composable
-private fun TidbitVideoDetail(
-    presentation: TidbitPresentation.VideoPresentation,
-    onEvent: (TidbitDetailEvent) -> Unit,
-    modifier: Modifier = Modifier,
-    isGuest: Boolean = false
-) {
-    val isLiked = remember { mutableStateOf(false) } // State managed here
-    val isBookmarked = remember { mutableStateOf(false) } // State managed here
+private fun TidbitMedia(presentation: TidbitPresentation) {
+    val heroModifier = Modifier
+        .fillMaxWidth()
+        .heightIn(min = HERO_HEIGHT)
+        .clip(GiRadius.md)
+        .border(GiEdge.width, GiTheme.colors.line, GiRadius.md)
+    when (presentation) {
+        is TidbitPresentation.ArticlePresentation -> TidbitCover(
+            title = presentation.title,
+            imageUrl = presentation.mediaUrl.ifBlank { presentation.previewUrl },
+            modifier = heroModifier.height(HERO_HEIGHT),
+            hero = true
+        )
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp) // Consistent spacing for children
-    ) {
-        Spacer(modifier = Modifier.height(16.dp)) // Initial spacer from top bar
-
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = 200.dp)
-                .padding(horizontal = 16.dp),
-            shape = RoundedCornerShape(corner = CornerSize(20.dp))
-        ) {
-            GptInvestorVideo( // Assuming this is a custom composable
+        is TidbitPresentation.VideoPresentation -> Box(modifier = heroModifier) {
+            GptInvestorVideo(
                 modifier = Modifier.fillMaxSize(),
                 youtubeVideoId = presentation.videoId,
                 url = presentation.mediaUrl,
@@ -346,136 +352,108 @@ private fun TidbitVideoDetail(
             )
         }
 
-        AuthorCategoryInfo(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp), // Consistent padding
-            author = presentation.originalAuthor,
-            category = presentation.category
-        )
-
-        Text(
-            modifier = Modifier.padding(horizontal = 16.dp), // Consistent padding
-            text = presentation.title, // Assuming VideoPresentation also has a title
-            style = MaterialTheme.typography.titleLarge // Video title, if exists
-        )
-
-        CustomRichText(
-            modifier = Modifier.padding(horizontal = 4.dp),
-            text = presentation.content
-        )
-
-        TidbitActionRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            isLiked = isLiked.value,
-            isBookmarked = isBookmarked.value,
-            onLikeClick = {
-                onEvent(
-                    TidbitDetailEvent.OnClickLike(
-                        id = presentation.id,
-                        newValue = !isLiked.value
-                    )
-                )
-                isLiked.value = !isLiked.value
-            },
-            onBookmarkClick = {
-                onEvent(
-                    TidbitDetailEvent.OnClickBookmark(
-                        id = presentation.id,
-                        newValue = !isBookmarked.value
-                    )
-                )
-                isBookmarked.value = !isBookmarked.value
-            },
-            onShareClick = { onEvent(TidbitDetailEvent.OnClickShare) },
-            onSourceClick = { onEvent(TidbitDetailEvent.OnClickSource) },
-            isGuest = isGuest
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+        is TidbitPresentation.AudioPresentation -> Box(modifier = heroModifier.height(HERO_HEIGHT)) {
+            GptInvestorVideo(
+                modifier = Modifier.fillMaxSize(),
+                url = presentation.mediaUrl,
+                autoplay = true,
+                showControls = true
+            )
+        }
     }
 }
 
 @Composable
-private fun TidbitAudioDetail(
-    presentation: TidbitPresentation.AudioPresentation,
-    onEvent: (TidbitDetailEvent) -> Unit,
-    modifier: Modifier = Modifier,
-    isGuest: Boolean = false
-) {
-    val isLiked = remember { mutableStateOf(presentation.isLiked) }
-    val isBookmarked = remember { mutableStateOf(presentation.isBookmarked) }
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp) // Consistent spacing for children
-    ) {
-        Spacer(modifier = Modifier.height(16.dp)) // Initial spacer from top bar
-
-        GptInvestorVideo(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp),
-            url = presentation.mediaUrl,
-            autoplay = true,
-            showControls = true
-        )
-
-        AuthorCategoryInfo(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            author = presentation.originalAuthor,
-            category = presentation.category
-        )
-
-        Text(
-            modifier = Modifier.padding(horizontal = 16.dp), // Consistent padding
-            text = presentation.title, // Assuming AudioPresentation also has a title
-            style = MaterialTheme.typography.titleLarge // Audio title, if exists
-        )
-
-        CustomRichText(
-            modifier = Modifier.padding(horizontal = 4.dp),
-            text = presentation.content
-        )
-
-        TidbitActionRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            isLiked = isLiked.value,
-            isBookmarked = isBookmarked.value,
-            onLikeClick = {
-                onEvent(
-                    TidbitDetailEvent.OnClickLike(
-                        id = presentation.id,
-                        newValue = !isLiked.value
-                    )
-                )
-                isLiked.value = !isLiked.value
-            },
-            onBookmarkClick = {
-                onEvent(
-                    TidbitDetailEvent.OnClickBookmark(
-                        id = presentation.id,
-                        newValue = !isBookmarked.value
-                    )
-                )
-                isBookmarked.value = !isBookmarked.value
-            },
-            onShareClick = { onEvent(TidbitDetailEvent.OnClickShare) },
-            onSourceClick = { onEvent(TidbitDetailEvent.OnClickSource) },
-            isGuest = isGuest
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+private fun ArticleBody(content: String) {
+    val colors = GiTheme.colors
+    val type = GiTheme.type
+    val body = articleBodyStyle()
+    val heading = type.sectionTitle.copy(color = colors.ink)
+    val typography = markdownTypography(
+        h1 = type.pageTitle.copy(color = colors.ink),
+        h2 = type.companyName.copy(color = colors.ink),
+        h3 = heading,
+        h4 = heading,
+        h5 = heading,
+        h6 = heading,
+        text = body,
+        code = body,
+        inlineCode = body,
+        quote = body,
+        paragraph = body,
+        ordered = body,
+        bullet = body,
+        list = body,
+        textLink = TextLinkStyles(style = SpanStyle(color = colors.violet, fontWeight = FontWeight.SemiBold)),
+        table = body
+    )
+    val markdownColors = markdownColor(
+        text = colors.body,
+        codeBackground = colors.tile,
+        inlineCodeBackground = colors.tile,
+        dividerColor = colors.line,
+        tableBackground = colors.tile
+    )
+    val blocks = remember(content) {
+        content.split(PARAGRAPH_BREAK).map { it.trim() }.filter { it.isNotEmpty() }
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
+        blocks.forEach { block ->
+            Markdown(
+                content = block,
+                colors = markdownColors,
+                typography = typography,
+                modifier = Modifier.fillMaxWidth(),
+                padding = markdownPadding(block = 0.dp)
+            )
+        }
     }
 }
 
-@Preview
+private val PARAGRAPH_BREAK = Regex("\\n\\s*\\n")
+
+@Composable
+private fun TidbitDetailSkeleton() {
+    val loading = stringResource(Res.string.tidbit_loading)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x2)
+            .semantics {
+                contentDescription = loading
+                liveRegion = LiveRegionMode.Polite
+            },
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
+    ) {
+        GiSkeleton(modifier = Modifier.fillMaxWidth().height(HERO_HEIGHT), shape = GiRadius.md)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            GiSkeleton(modifier = Modifier.width(SKELETON_BYLINE_WIDTH).height(SKELETON_LINE))
+            GiSkeleton(modifier = Modifier.width(SKELETON_TAG_WIDTH).height(GiSpace.x6), shape = GiRadius.xs)
+        }
+        GiSkeleton(modifier = Modifier.fillMaxWidth().height(GiSpace.x7))
+        GiSkeleton(modifier = Modifier.fillMaxWidth(SKELETON_TITLE_FRACTION).height(GiSpace.x7))
+        Spacer(modifier = Modifier.height(GiSpace.x1))
+        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
+            SKELETON_LINES.forEach { fraction ->
+                GiSkeleton(modifier = Modifier.fillMaxWidth(fraction).height(SKELETON_LINE))
+            }
+        }
+    }
+}
+
+private val HERO_HEIGHT = 200.dp
+private val SKELETON_LINE = 14.dp
+private val SKELETON_BYLINE_WIDTH = 140.dp
+private val SKELETON_TAG_WIDTH = 104.dp
+private const val SKELETON_TITLE_FRACTION = 0.7f
+private val SKELETON_LINES = listOf(1f, 1f, 1f, 1f, 0.62f, 1f, 1f, 1f, 1f, 0.62f)
+
+@PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
 @Composable
 private fun TidbitDetailScreenPreview() {
     GPTInvestorTheme {
@@ -483,18 +461,28 @@ private fun TidbitDetailScreenPreview() {
             onEvent = {},
             state = TidbitDetailState(
                 id = "1",
-                presentation = TidbitPresentation.AudioPresentation(
+                presentation = TidbitPresentation.ArticlePresentation(
                     id = "1",
-                    name = "GPT Investor",
-                    previewUrl = "https://example.com/image.jpg", // Example preview URL
-                    mediaUrl = "https://example.com/audio.mp3", // Example audio URL
-                    title = "Title",
-                    content = "Content",
-                    originalAuthor = "Original Author",
-                    category = "Category",
-                    sourceUrl = "Source URL"
+                    name = "FIRE",
+                    title = "Rethink early retirement: lessons from the FIRE movement",
+                    content =
+                    "The Financial Independence, Retire Early movement, known as FIRE, is built on the idea " +
+                        "that you can quit the traditional workforce decades ahead of schedule.\n\n" +
+                        "A more sustainable " +
+                        "approach is to find the middle path.",
+                    originalAuthor = "Aaron Tang",
+                    category = "Personal growth",
+                    sourceUrl = "https://example.com"
                 )
             )
         )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun TidbitDetailLoadingPreview() {
+    GPTInvestorTheme {
+        TidbitDetailScreen(onEvent = {}, state = TidbitDetailState(isLoading = true))
     }
 }

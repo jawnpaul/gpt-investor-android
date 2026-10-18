@@ -18,7 +18,8 @@ fun ConversationScreen(
     onEvent: (ConversationEvent) -> Unit,
     onAction: (ConversationAction) -> Unit,
     onUpgradeFromRateLimit: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    composerModifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         if (state.showWaitListBottomSheet) {
@@ -43,18 +44,43 @@ fun ConversationScreen(
         }
 
         if (state.showRateLimitBottomSheet) {
-            GptInvestorBottomSheet(modifier = Modifier, onDismiss = {
-                onEvent(ConversationEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
-            }) {
-                RateLimitBottomSheetContent(
-                    modifier = Modifier,
-                    onUpgrade = onUpgradeFromRateLimit
-                )
-            }
+            RateLimitBottomSheet(
+                onDismiss = { onEvent(ConversationEvent.ShowRateLimitBottomSheet(showBottomSheet = false)) },
+                onUpgrade = onUpgradeFromRateLimit
+            )
         }
 
-        when (state.conversation) {
-            is DefaultConversation -> {
+        val structured = state.conversation as? StructuredConversation
+        when {
+            structured != null || state.pendingQuery != null -> {
+                StructuredConversationScreen(
+                    title = conversationTitle(structured, state.pendingQuery),
+                    messages = structured?.messageList.orEmpty(),
+                    pendingQuery = state.pendingQuery,
+                    isAnswering = state.loading,
+                    inputQuery = state.query,
+                    suggestions = structured?.suggestedPrompts.orEmpty(),
+                    isGuest = state.isGuest,
+                    onNavigateUp = { onAction(ConversationAction.OnGoBack) },
+                    onOpenHistory = { onEvent(ConversationEvent.GoToHistory) },
+                    onInputQueryChange = { onEvent(ConversationEvent.UpdateInputQuery(it)) },
+                    onSendClick = { onEvent(ConversationEvent.SendPrompt(query = state.query)) },
+                    onStopClick = { onEvent(ConversationEvent.StopAnswering) },
+                    onSuggestionClick = { onEvent(ConversationEvent.SuggestedPromptClicked(it)) },
+                    onCopy = { onEvent(ConversationEvent.CopyToClipboard(it)) },
+                    onShare = { onEvent(ConversationEvent.ShareAnswer(it)) },
+                    onClickFeedback = { messageId, status, reason ->
+                        onEvent(ConversationEvent.SendFeedback(messageId, status, reason))
+                    },
+                    onRetry = { onEvent(ConversationEvent.RetryAnswer(it)) },
+                    onOpenCompany = { onEvent(ConversationEvent.OpenCompany(it)) },
+                    onSignUpClick = { onEvent(ConversationEvent.GoToSignUp) },
+                    composerModifier = composerModifier,
+                    answerOffline = state.answerOffline
+                )
+            }
+
+            state.conversation is DefaultConversation -> {
                 val default = state.conversation
                 DefaultConversationScreen(
                     modifier = Modifier,
@@ -85,52 +111,6 @@ fun ConversationScreen(
                         onEvent(ConversationEvent.GoToSignUp)
                     }
                 )
-            }
-
-            is StructuredConversation -> {
-                // Try to pass in the VM instance down
-                StructuredConversationScreen(
-                    modifier = Modifier,
-                    conversation = state.conversation,
-                    isGuest = state.isGuest,
-                    onNavigateUp = { onAction(ConversationAction.OnGoBack) },
-                    text = state.genText,
-                    onClickNews = {
-                        onAction(ConversationAction.OnGoToWebView(url = it))
-                    },
-                    onClickFeedback = { messageId, status, reason ->
-                        onEvent(ConversationEvent.SendFeedback(messageId, status, reason))
-                    },
-                    onCopy = { text ->
-
-                        onEvent(ConversationEvent.CopyToClipboard(text))
-                    },
-                    inputQuery = state.query,
-                    onInputQueryChange = { input ->
-                        onEvent(ConversationEvent.UpdateInputQuery(input))
-                    },
-                    onSendClick = {
-                        onEvent(ConversationEvent.SendPrompt(query = state.query))
-                    },
-                    companyName = "",
-                    onClickSuggestedPrompt = {
-                        onEvent(ConversationEvent.SuggestedPromptClicked(it))
-                    },
-                    availableModels = state.availableModels,
-                    selectedModel = state.selectedModel,
-                    onModelChange = {
-                        onEvent(ConversationEvent.ModelChanged(model = it))
-                    },
-                    onUpgradeModel = { showBottomSheet, modelId ->
-                        onEvent(ConversationEvent.UpgradeModel(showBottomSheet, modelId))
-                    },
-                    onSignUpClick = {
-                        onEvent(ConversationEvent.GoToSignUp)
-                    }
-                )
-            }
-
-            else -> {
             }
         }
     }

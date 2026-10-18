@@ -2,30 +2,43 @@ package com.thejawnpaul.gptinvestor.core.navigation
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.added_to_watchlist_error
+import com.thejawnpaul.gptinvestor.added_to_watchlist_success
+import com.thejawnpaul.gptinvestor.answer_copied
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
+import com.thejawnpaul.gptinvestor.failed_to_remove_from_watchlist
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.WebViewScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import com.thejawnpaul.gptinvestor.removed_from_watchlist
+import com.thejawnpaul.gptinvestor.share_brief_text
+import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiToastResult
+import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
+import com.thejawnpaul.gptinvestor.view
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.koin.compose.viewmodel.koinViewModel
 
 fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformActions: PlatformActions) {
     composable(route = Screen.CompanyDetailScreen.route) {
         val parentViewModel = koinViewModel<CompanyViewModel>()
         val state = parentViewModel.selectedCompany.collectAsState()
-        val scope = rememberCoroutineScope()
 
+        val haptics = LocalHapticFeedback.current
+        val toastState = rememberGiToastState()
         LaunchedEffect(Unit) {
-            parentViewModel.companyDetailAction.onEach { action ->
+            parentViewModel.companyDetailAction.collect { action ->
                 when (action) {
                     CompanyDetailAction.OnGoBack -> {
                         navController.navigateUp()
@@ -37,7 +50,20 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
 
                     is CompanyDetailAction.OnCopy -> {
                         platformActions.copyToClipboard("", action.text)
-                        platformActions.showMessage("Copied")
+                        launch {
+                            toastState.show(
+                                message = getString(Res.string.answer_copied),
+                                icon = GiIcons.checkCircle
+                            )
+                        }
+                    }
+
+                    is CompanyDetailAction.OnShareText -> {
+                        platformActions.shareText(action.text)
+                    }
+
+                    is CompanyDetailAction.OnOpenCompany -> {
+                        navController.navigate(Screen.CompanyDetailScreen.createRoute(action.ticker))
                     }
 
                     CompanyDetailAction.OnGoToSignUp -> {
@@ -49,15 +75,49 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
                     is CompanyDetailAction.ShowToast -> {
                         platformActions.showMessage(action.message)
                     }
+
+                    is CompanyDetailAction.OnShare -> {
+                        val message = getString(Res.string.share_brief_text, action.name, action.ticker, action.id)
+                        platformActions.shareText(message)
+                    }
+
+                    CompanyDetailAction.WatchlistAdded -> {
+                        haptics.performHapticFeedback(GiHaptics.Confirm)
+                        val message = getString(Res.string.added_to_watchlist_success)
+                        val view = getString(Res.string.view)
+                        launch {
+                            val result = toastState.show(message = message, icon = GiIcons.check, actionText = view)
+                            if (result == GiToastResult.ActionPerformed) {
+                                navController.navigateToTab(Screen.WatchlistTabScreen.route, Screen.HomeTabScreen.route)
+                            }
+                        }
+                    }
+
+                    CompanyDetailAction.WatchlistAddFailed -> {
+                        haptics.performHapticFeedback(GiHaptics.Reject)
+                        platformActions.showMessage(getString(Res.string.added_to_watchlist_error))
+                    }
+
+                    is CompanyDetailAction.WatchlistRemoved -> {
+                        platformActions.showMessage(getString(Res.string.removed_from_watchlist, action.ticker))
+                    }
+
+                    is CompanyDetailAction.WatchlistRemoveFailed -> {
+                        haptics.performHapticFeedback(GiHaptics.Reject)
+                        platformActions.showMessage(
+                            getString(Res.string.failed_to_remove_from_watchlist, action.ticker)
+                        )
+                    }
                 }
-            }.launchIn(scope)
+            }
         }
 
         CompanyDetailScreen(
             modifier = Modifier,
             state = state.value,
             onEvent = parentViewModel::handleCompanyDetailEvent,
-            onAction = parentViewModel::processCompanyDetailAction
+            onAction = parentViewModel::processCompanyDetailAction,
+            toastState = toastState
         )
     }
 

@@ -1,857 +1,1016 @@
 package com.thejawnpaul.gptinvestor.features.onboarding.presentation
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
-import coil3.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.back
-import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSection
-import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSentiment
-import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefTone
-import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyBrief
+import com.thejawnpaul.gptinvestor.clear_search
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumber
-import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumberType
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.GptInvestorBottomSheet
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.SingleCompanyItem
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.BriefCard
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.BriefSummaryCard
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefHeader
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefLayout
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefSkeleton
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.KeyNumbersCard
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.RiskOpportunityCard
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.SentimentBadge
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.SentimentBottomSheet
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.WhatsHappeningCard
-import com.thejawnpaul.gptinvestor.features.discover.SearchBarCustom
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyKeyNumberSheet
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.companyBriefItems
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.previewCompanyBrief
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.tickerStock
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.BriefView
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.OnboardingUiState
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.SuggestedStock
 import com.thejawnpaul.gptinvestor.gpt_investor
-import com.thejawnpaul.gptinvestor.input_logo
-import com.thejawnpaul.gptinvestor.mesh_background
 import com.thejawnpaul.gptinvestor.onboarding_body_value_prop
-import com.thejawnpaul.gptinvestor.onboarding_bullet_follow_up
-import com.thejawnpaul.gptinvestor.onboarding_bullet_plain_english
-import com.thejawnpaul.gptinvestor.onboarding_bullet_real_time
+import com.thejawnpaul.gptinvestor.onboarding_brief_disclaimer
+import com.thejawnpaul.gptinvestor.onboarding_brief_error_message
+import com.thejawnpaul.gptinvestor.onboarding_brief_limit_message
 import com.thejawnpaul.gptinvestor.onboarding_cta_get_started
-import com.thejawnpaul.gptinvestor.onboarding_cta_go_to_app
+import com.thejawnpaul.gptinvestor.onboarding_cta_go_to_app_short
 import com.thejawnpaul.gptinvestor.onboarding_cta_start_exploring
 import com.thejawnpaul.gptinvestor.onboarding_cta_try_it_now
-import com.thejawnpaul.gptinvestor.onboarding_error_message
 import com.thejawnpaul.gptinvestor.onboarding_headline_how_it_works
 import com.thejawnpaul.gptinvestor.onboarding_headline_stock_selection
 import com.thejawnpaul.gptinvestor.onboarding_headline_value_prop
 import com.thejawnpaul.gptinvestor.onboarding_loading_headline
+import com.thejawnpaul.gptinvestor.onboarding_loading_subtitle
 import com.thejawnpaul.gptinvestor.onboarding_search_placeholder
 import com.thejawnpaul.gptinvestor.onboarding_skip_for_now
+import com.thejawnpaul.gptinvestor.onboarding_step_of
 import com.thejawnpaul.gptinvestor.onboarding_subtext_stock_selection
 import com.thejawnpaul.gptinvestor.onboarding_success_body
 import com.thejawnpaul.gptinvestor.onboarding_success_headline
+import com.thejawnpaul.gptinvestor.onboarding_value_card_answer
+import com.thejawnpaul.gptinvestor.onboarding_value_card_question
+import com.thejawnpaul.gptinvestor.onboarding_value_follow_up_body
+import com.thejawnpaul.gptinvestor.onboarding_value_follow_up_title
+import com.thejawnpaul.gptinvestor.onboarding_value_plain_english_body
+import com.thejawnpaul.gptinvestor.onboarding_value_plain_english_title
+import com.thejawnpaul.gptinvestor.onboarding_value_real_time_body
+import com.thejawnpaul.gptinvestor.onboarding_value_real_time_title
+import com.thejawnpaul.gptinvestor.sign_up
+import com.thejawnpaul.gptinvestor.skip
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
-import com.thejawnpaul.gptinvestor.theme.linkMedium
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
+import com.thejawnpaul.gptinvestor.theme.GiMotion
+import com.thejawnpaul.gptinvestor.theme.GiRadius
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.components.GiBrandMark
+import com.thejawnpaul.gptinvestor.theme.components.GiBrandMarkSize
+import com.thejawnpaul.gptinvestor.theme.components.GiButton
+import com.thejawnpaul.gptinvestor.theme.components.GiButtonSize
+import com.thejawnpaul.gptinvestor.theme.components.GiButtonVariant
+import com.thejawnpaul.gptinvestor.theme.components.GiCard
+import com.thejawnpaul.gptinvestor.theme.components.GiDivider
+import com.thejawnpaul.gptinvestor.theme.components.GiFillScrollColumn
+import com.thejawnpaul.gptinvestor.theme.components.GiIconTile
+import com.thejawnpaul.gptinvestor.theme.components.GiIconTileSize
+import com.thejawnpaul.gptinvestor.theme.components.GiIconTileTone
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiListGroup
+import com.thejawnpaul.gptinvestor.theme.components.GiListRow
+import com.thejawnpaul.gptinvestor.theme.components.GiLogoTile
+import com.thejawnpaul.gptinvestor.theme.components.GiSearchField
+import com.thejawnpaul.gptinvestor.theme.components.GiStepDots
+import com.thejawnpaul.gptinvestor.theme.components.GiStockSummary
+import com.thejawnpaul.gptinvestor.theme.components.GiStockSummarySize
+import com.thejawnpaul.gptinvestor.theme.components.GiText
+import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
+import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
+import com.thejawnpaul.gptinvestor.theme.components.GiTopBarTitleStyle
+import com.thejawnpaul.gptinvestor.theme.components.GiUserMessage
+import com.thejawnpaul.gptinvestor.theme.components.GiWaveIllustration
+import com.thejawnpaul.gptinvestor.theme.components.giBeam
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
+import com.thejawnpaul.gptinvestor.theme.rememberGiSharedAxisTransition
+import com.thejawnpaul.gptinvestor.try_again
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 private val EaseOutQuart = CubicBezierEasing(0.25f, 1f, 0.5f, 1f)
-private val EaseInOutQuart = CubicBezierEasing(0.76f, 0f, 0.24f, 1f)
+
+private const val STEP_COUNT = 3
+private const val GRID_COLUMNS = 3
+private const val LARGE_TEXT_GRID_COLUMNS = 2
+private const val LARGE_TEXT_FONT_SCALE = 1.5f
+private const val BEAM_STRENGTH = 0.6f
+private const val PICK_STEP = 2
+private const val BRIEF_SCREEN = 3
+private const val MAX_SEARCH_RESULTS = 20
+private const val SOURCE_SUGGESTED = "suggested"
+private const val SOURCE_SEARCH = "search"
+
+@Immutable
+private data class LogoTransition(val sharedScope: SharedTransitionScope, val flowScope: AnimatedVisibilityScope)
 
 @Composable
 fun OnboardingScreen(
     state: OnboardingUiState,
     searchResults: Flow<PagingData<CompanyPresentation>>,
     onNextScreen: () -> Unit,
+    onBack: () -> Unit,
     onSkip: (Int) -> Unit,
-    onSelectStock: (ticker: String, companyName: String, source: String) -> Unit,
+    onSelectStock: (ticker: String, companyName: String, source: String, logoUrl: String?) -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onBackToStockSelection: () -> Unit,
+    onRetryBrief: () -> Unit,
     onFinish: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    AnimatedContent(
-        targetState = state.currentScreen,
-        modifier = modifier,
-        transitionSpec = {
-            if (targetState > initialState) {
-                slideInHorizontally(tween(280, easing = EaseOutQuart)) { it } +
-                    fadeIn(tween(220, easing = EaseOutQuart)) togetherWith
-                    slideOutHorizontally(tween(220)) { -it } +
-                    fadeOut(tween(150))
+    val transition = rememberGiSharedAxisTransition()
+    NavigationBackHandler(
+        state = rememberNavigationEventState(currentInfo = NavigationEventInfo.None),
+        isBackEnabled = state.currentScreen > 0,
+        onBackCompleted = {
+            if (state.currentScreen == BRIEF_SCREEN) onBackToStockSelection() else onBack()
+        }
+    )
+    SharedTransitionLayout(modifier = modifier) {
+        val sharedScope = this
+        AnimatedContent(
+            targetState = state.currentScreen == BRIEF_SCREEN,
+            transitionSpec = { transition(targetState) },
+            label = "onboardingFlow"
+        ) { showBrief ->
+            val logoTransition = LogoTransition(sharedScope = sharedScope, flowScope = this)
+            if (showBrief) {
+                BriefScreen(
+                    state = state,
+                    logoTransition = logoTransition,
+                    onBack = onBackToStockSelection,
+                    onRetry = onRetryBrief,
+                    onFinish = onFinish
+                )
             } else {
-                slideInHorizontally(tween(280, easing = EaseOutQuart)) { -it } +
-                    fadeIn(tween(220, easing = EaseOutQuart)) togetherWith
-                    slideOutHorizontally(tween(220)) { it } +
-                    fadeOut(tween(150))
-            }
-        },
-        label = "onboardingScreen"
-    ) { screen ->
-        when (screen) {
-            0 -> ValuePropositionScreen(
-                onStart = onNextScreen,
-                onSkip = { onSkip(0) }
-            )
-            1 -> HowItWorksScreen(
-                onTryItNow = onNextScreen,
-                onSkip = { onSkip(1) }
-            )
-            2 -> StockSelectionScreen(
-                state = state,
-                searchResults = searchResults,
-                onSelectStock = onSelectStock,
-                onSearchQueryChange = onSearchQueryChange
-            )
-            3 -> LiveBriefScreen(
-                state = state,
-                onBack = onBackToStockSelection,
-                onFinish = onFinish
-            )
-        }
-    }
-}
-
-@Composable
-private fun SkipText(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val pressed by interactionSource.collectIsPressedAsState()
-    val skipAlpha by animateFloatAsState(
-        targetValue = if (pressed) 0.5f else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
-        label = "skipAlpha"
-    )
-    Text(
-        modifier = modifier
-            .graphicsLayer { alpha = skipAlpha }
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
-        text = text,
-        textDecoration = TextDecoration.Underline,
-        style = MaterialTheme.typography.linkMedium
-    )
-}
-
-@Composable
-private fun ValuePropositionScreen(onStart: () -> Unit, onSkip: () -> Unit, modifier: Modifier = Modifier) {
-    Scaffold(modifier = modifier) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-        ) {
-            Image(
-                painter = painterResource(Res.drawable.mesh_background),
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 160.dp)
-                    .fillMaxHeight(0.4f)
-                    .align(Alignment.BottomCenter)
-                    .alpha(0.4f)
-            )
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.weight(1.2f))
-
-                Image(
-                    painter = painterResource(Res.drawable.input_logo),
-                    contentDescription = stringResource(Res.string.gpt_investor),
-                    modifier = Modifier.size(72.dp)
+                OnboardingSteps(
+                    state = state,
+                    searchResults = searchResults,
+                    logoTransition = logoTransition,
+                    onNextScreen = onNextScreen,
+                    onBack = onBack,
+                    onSkip = onSkip,
+                    onSelectStock = onSelectStock,
+                    onSearchQueryChange = onSearchQueryChange
                 )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Text(
-                    text = stringResource(Res.string.onboarding_headline_value_prop),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = stringResource(Res.string.onboarding_body_value_prop),
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(corner = CornerSize(20.dp)),
-                    onClick = onStart
-                ) {
-                    Text(
-                        text = stringResource(Res.string.onboarding_cta_get_started),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                SkipText(
-                    text = stringResource(Res.string.onboarding_skip_for_now),
-                    onClick = onSkip
-                )
-
-                Spacer(modifier = Modifier.weight(0.4f))
             }
         }
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun HowItWorksScreen(onTryItNow: () -> Unit, onSkip: () -> Unit, modifier: Modifier = Modifier) {
-    Scaffold(modifier = modifier) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.weight(0.5f))
-
-            BriefCardMock()
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Text(
-                text = stringResource(Res.string.onboarding_headline_how_it_works),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                BulletRow(stringResource(Res.string.onboarding_bullet_plain_english))
-                BulletRow(stringResource(Res.string.onboarding_bullet_real_time))
-                BulletRow(stringResource(Res.string.onboarding_bullet_follow_up))
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(corner = CornerSize(20.dp)),
-                onClick = onTryItNow
-            ) {
-                Text(
-                    text = stringResource(Res.string.onboarding_cta_try_it_now),
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            SkipText(
-                text = stringResource(Res.string.onboarding_skip_for_now),
-                onClick = onSkip
-            )
-
-            Spacer(modifier = Modifier.weight(0.3f))
-        }
+private fun sharedLogoModifier(
+    key: String,
+    sharedScope: SharedTransitionScope,
+    visibilityScope: AnimatedVisibilityScope
+): Modifier {
+    if (isReducedMotionEnabled()) return Modifier
+    return with(sharedScope) {
+        Modifier.sharedElement(
+            sharedContentState = rememberSharedContentState(key = key),
+            animatedVisibilityScope = visibilityScope,
+            boundsTransform = { _, _ -> GiMotion.smooth() }
+        )
     }
 }
 
-@Composable
-private fun BriefCardMock(modifier: Modifier = Modifier) {
-    BriefCard(modifier = modifier.fillMaxWidth()) {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            MockPlaceholderRow(widthFraction = 0.5f, height = 14.dp)
-            MockPlaceholderRow(widthFraction = 1f, height = 10.dp)
-            MockPlaceholderRow(widthFraction = 0.8f, height = 10.dp)
-            Spacer(modifier = Modifier.height(4.dp))
-            MockPlaceholderRow(widthFraction = 1f, height = 10.dp)
-            MockPlaceholderRow(widthFraction = 0.9f, height = 10.dp)
-            MockPlaceholderRow(widthFraction = 0.7f, height = 10.dp)
-        }
-    }
-}
+private fun pickLogoKey(ticker: String) = "onboarding-pick-logo-$ticker"
+
+private fun briefLogoKey(ticker: String) = "onboarding-brief-logo-$ticker"
 
 @Composable
-private fun MockPlaceholderRow(widthFraction: Float, height: Dp, modifier: Modifier = Modifier) {
-    val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
-    val shimmerAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.12f,
-        targetValue = 0.4f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 900, easing = EaseInOutQuart),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "shimmerAlpha"
-    )
-    Surface(
-        modifier = modifier
-            .fillMaxWidth(widthFraction)
-            .height(height),
-        shape = RoundedCornerShape(4.dp),
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = shimmerAlpha)
-    ) {}
-}
-
-@Composable
-private fun BulletRow(text: String, modifier: Modifier = Modifier) {
-    Row(modifier = modifier.fillMaxWidth()) {
-        Text(text = "✅", style = MaterialTheme.typography.bodyMedium)
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text = text, style = MaterialTheme.typography.bodyMedium)
-    }
-}
-
-@Composable
-private fun StockSelectionScreen(
+private fun OnboardingSteps(
     state: OnboardingUiState,
     searchResults: Flow<PagingData<CompanyPresentation>>,
-    onSelectStock: (ticker: String, companyName: String, source: String) -> Unit,
+    logoTransition: LogoTransition,
+    onNextScreen: () -> Unit,
+    onBack: () -> Unit,
+    onSkip: (Int) -> Unit,
+    onSelectStock: (ticker: String, companyName: String, source: String, logoUrl: String?) -> Unit,
+    onSearchQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val step = state.currentScreen.coerceAtMost(PICK_STEP)
+    val transition = rememberGiSharedAxisTransition()
+    Scaffold(
+        modifier = modifier,
+        containerColor = GiTheme.colors.bg,
+        contentWindowInsets = WindowInsets(0),
+        bottomBar = { OnboardingFooter(step = step, onNext = onNextScreen, onSkip = { onSkip(step) }) }
+    ) { innerPadding ->
+        AnimatedContent(
+            targetState = step,
+            modifier = Modifier
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+                .fillMaxSize(),
+            transitionSpec = { transition(targetState > initialState) },
+            label = "onboardingStep"
+        ) { current ->
+            when (current) {
+                0 -> WelcomeContent()
+                1 -> ValuePropsContent()
+                else -> PickStockContent(
+                    state = state,
+                    searchResults = searchResults,
+                    logoTransition = logoTransition,
+                    onBack = onBack,
+                    onSkip = { onSkip(PICK_STEP) },
+                    onSelectStock = onSelectStock,
+                    onSearchQueryChange = onSearchQueryChange
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun OnboardingFooter(step: Int, onNext: () -> Unit, onSkip: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x2, bottom = GiSpace.x4),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        OnboardingStepDots(current = step)
+        AnimatedVisibility(
+            visible = step < PICK_STEP,
+            enter = expandVertically(GiMotion.smooth()) + fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart)),
+            exit = shrinkVertically(GiMotion.smooth()) + fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing))
+        ) {
+            Column(
+                modifier = Modifier.padding(top = GiSpace.x4),
+                verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
+            ) {
+                GiButton(
+                    text = stringResource(
+                        if (step == 0) Res.string.onboarding_cta_get_started else Res.string.onboarding_cta_try_it_now
+                    ),
+                    onClick = onNext,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                GiButton(
+                    text = stringResource(Res.string.onboarding_skip_for_now),
+                    onClick = onSkip,
+                    modifier = Modifier.fillMaxWidth(),
+                    size = GiButtonSize.Medium,
+                    variant = GiButtonVariant.TextMuted
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun WelcomeContent(modifier: Modifier = Modifier) {
+    GiFillScrollColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .padding(top = GiSpace.x3)
+    ) {
+        Spacer(modifier = Modifier.weight(1f))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x10),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
+        ) {
+            GiBrandMark(modifier = Modifier.padding(bottom = GiSpace.x3))
+            GiText(
+                text = stringResource(Res.string.onboarding_headline_value_prop),
+                modifier = Modifier.semantics { heading() },
+                style = GiTextStyle.Hero,
+                textAlign = TextAlign.Center
+            )
+            GiText(
+                text = stringResource(Res.string.onboarding_body_value_prop),
+                style = GiTextStyle.Input,
+                color = GiTheme.colors.muted,
+                textAlign = TextAlign.Center
+            )
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        GiWaveIllustration()
+    }
+}
+
+@Composable
+private fun ValuePropsContent(modifier: Modifier = Modifier) {
+    GiFillScrollColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x3)
+    ) {
+        ValuePreviewCard(modifier = Modifier.padding(top = GiSpace.x6))
+        Column(
+            modifier = Modifier.padding(top = GiSpace.x8, bottom = GiSpace.x2),
+            verticalArrangement = Arrangement.spacedBy(GiSpace.x6)
+        ) {
+            GiText(
+                text = stringResource(Res.string.onboarding_headline_how_it_works),
+                modifier = Modifier.semantics { heading() },
+                style = GiTextStyle.Display
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
+                ValuePropRow(
+                    title = Res.string.onboarding_value_plain_english_title,
+                    body = Res.string.onboarding_value_plain_english_body
+                )
+                ValuePropRow(
+                    title = Res.string.onboarding_value_real_time_title,
+                    body = Res.string.onboarding_value_real_time_body
+                )
+                ValuePropRow(
+                    title = Res.string.onboarding_value_follow_up_title,
+                    body = Res.string.onboarding_value_follow_up_body
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ValuePreviewCard(modifier: Modifier = Modifier) {
+    val colors = GiTheme.colors
+    GiCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .clearAndSetSemantics {},
+        contentPadding = PaddingValues(GiSpace.x5)
+    ) {
+        GiUserMessage(text = stringResource(Res.string.onboarding_value_card_question))
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(GiSpace.x2),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = GiIcons.mark,
+                contentDescription = null,
+                modifier = Modifier.size(GiIconSize.md),
+                tint = colors.ink
+            )
+            GiText(text = stringResource(Res.string.gpt_investor), style = GiTextStyle.Link, color = colors.muted)
+        }
+        GiText(text = stringResource(Res.string.onboarding_value_card_answer), style = GiTextStyle.Body)
+    }
+}
+
+@Composable
+private fun ValuePropRow(title: StringResource, body: StringResource, modifier: Modifier = Modifier) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
+        GiIconTile(icon = GiIcons.check, size = GiIconTileSize.Small, tone = GiIconTileTone.Gain)
+        Column {
+            GiText(text = stringResource(title), style = GiTextStyle.Label)
+            GiText(text = stringResource(body), style = GiTextStyle.MetaRelaxed)
+        }
+    }
+}
+
+@Composable
+private fun OnboardingStepDots(current: Int, modifier: Modifier = Modifier) {
+    GiStepDots(
+        count = STEP_COUNT,
+        current = current,
+        modifier = modifier,
+        contentDescription = stringResource(Res.string.onboarding_step_of, current + 1, STEP_COUNT)
+    )
+}
+
+@Composable
+private fun PickStockContent(
+    state: OnboardingUiState,
+    searchResults: Flow<PagingData<CompanyPresentation>>,
+    logoTransition: LogoTransition,
+    onBack: () -> Unit,
+    onSkip: () -> Unit,
+    onSelectStock: (ticker: String, companyName: String, source: String, logoUrl: String?) -> Unit,
     onSearchQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val pagingItems = searchResults.collectAsLazyPagingItems()
-
-    Scaffold(modifier = modifier) { innerPadding ->
+    val results = if (state.searchQuery.isBlank()) {
+        emptyList()
+    } else {
+        pagingItems.itemSnapshotList.items.take(MAX_SEARCH_RESULTS)
+    }
+    val scrollState = rememberScrollState()
+    val scrolled by remember(scrollState) { derivedStateOf { scrollState.canScrollBackward } }
+    var tappedLogo by remember { mutableStateOf<String?>(null) }
+    val selectStock: (ticker: String, name: String, source: String, logoUrl: String?) -> Unit =
+        { ticker, name, source, logoUrl ->
+            tappedLogo = "$source:$ticker"
+            onSelectStock(ticker, name, source, logoUrl)
+        }
+    Column(modifier = modifier.fillMaxSize()) {
+        GiTopBar(
+            title = null,
+            onBack = onBack,
+            backContentDescription = stringResource(Res.string.back),
+            scrolled = scrolled
+        ) {
+            GiButton(
+                text = stringResource(Res.string.skip),
+                onClick = onSkip,
+                size = GiButtonSize.Medium,
+                variant = GiButtonVariant.TextMuted
+            )
+        }
         Column(
             modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(horizontal = 24.dp)
+                .weight(1f)
+                .imePadding()
+                .verticalScroll(scrollState)
+                .padding(start = GiSpace.gutter, end = GiSpace.gutter, bottom = GiSpace.x4)
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = stringResource(Res.string.onboarding_headline_stock_selection),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = stringResource(Res.string.onboarding_subtext_stock_selection),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
+            Column(
+                // The top bar already adds 8 below the back button.
+                modifier = Modifier.padding(top = GiSpace.x4),
+                verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
+            ) {
+                GiText(
+                    text = stringResource(Res.string.onboarding_headline_stock_selection),
+                    modifier = Modifier.semantics { heading() },
+                    style = GiTextStyle.Display
+                )
+                GiText(
+                    text = stringResource(Res.string.onboarding_subtext_stock_selection),
+                    style = GiTextStyle.Input,
+                    color = GiTheme.colors.muted
+                )
+            }
             SuggestedStocksGrid(
                 stocks = state.suggestedStocks,
-                onSelectStock = { stock ->
-                    onSelectStock(stock.ticker, stock.name, "suggested")
-                }
+                onSelectStock = {
+                    selectStock(it.ticker, it.name, SOURCE_SUGGESTED, it.logoUrl.ifBlank { null })
+                },
+                logoModifierFor = { ticker ->
+                    if (tappedLogo == "$SOURCE_SUGGESTED:$ticker") {
+                        sharedLogoModifier(
+                            pickLogoKey(ticker),
+                            logoTransition.sharedScope,
+                            logoTransition.flowScope
+                        )
+                    } else {
+                        Modifier
+                    }
+                },
+                modifier = Modifier.padding(top = GiSpace.x7)
             )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            SearchBarCustom(
-                query = state.searchQuery,
-                placeHolder = stringResource(Res.string.onboarding_search_placeholder),
-                onClose = { onSearchQueryChange("") },
-                onQueryChange = onSearchQueryChange,
-                onSearch = {},
-                modifier = Modifier.fillMaxWidth()
+            GiSearchField(
+                value = state.searchQuery,
+                onValueChange = onSearchQueryChange,
+                placeholder = stringResource(Res.string.onboarding_search_placeholder),
+                clearContentDescription = stringResource(Res.string.clear_search),
+                modifier = Modifier.padding(top = GiSpace.x5)
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(vertical = 8.dp)
-            ) {
-                items(
-                    count = pagingItems.itemCount,
-                    key = pagingItems.itemKey { it.ticker }
-                ) { index ->
-                    val company = pagingItems[index]
-                    if (company != null) {
-                        SingleCompanyItem(
+            if (results.isNotEmpty()) {
+                GiListGroup(modifier = Modifier.padding(top = GiSpace.x3)) {
+                    results.forEachIndexed { index, company ->
+                        if (index > 0) GiDivider()
+                        SearchResultRow(
                             company = company,
-                            onClick = { ticker ->
-                                onSelectStock(ticker, company.name, "search")
+                            onClick = {
+                                selectStock(
+                                    company.ticker,
+                                    company.name,
+                                    SOURCE_SEARCH,
+                                    company.logo.ifBlank {
+                                        null
+                                    }
+                                )
                             },
-                            modifier = Modifier.animateItem(
-                                fadeInSpec = tween(220, easing = EaseOutQuart),
-                                placementSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                                fadeOutSpec = tween(150)
-                            )
+                            logoModifier = if (tappedLogo == "$SOURCE_SEARCH:${company.ticker}") {
+                                sharedLogoModifier(
+                                    pickLogoKey(company.ticker),
+                                    logoTransition.sharedScope,
+                                    logoTransition.flowScope
+                                )
+                            } else {
+                                Modifier
+                            }
                         )
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun SearchResultRow(
+    company: CompanyPresentation,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    logoModifier: Modifier = Modifier
+) {
+    val logo = tickerStock(
+        ticker = company.ticker,
+        title = company.name,
+        subtitle = company.ticker,
+        percent = null,
+        imageUrl = company.logo.ifBlank { null }
+    )
+    GiListRow(
+        title = company.name,
+        modifier = modifier,
+        subtitle = company.ticker,
+        leading = {
+            GiLogoTile(
+                initials = logo.initials,
+                brandColor = logo.brandColor,
+                modifier = logoModifier,
+                imageUrl = logo.imageUrl
+            )
+        },
+        onClick = onClick,
+        trailing = {
+            Icon(
+                imageVector = GiIcons.caretRight,
+                contentDescription = null,
+                modifier = Modifier.size(GiIconSize.sm),
+                tint = GiTheme.colors.muted
+            )
+        }
+    )
 }
 
 @Composable
 private fun SuggestedStocksGrid(
     stocks: List<SuggestedStock>,
     onSelectStock: (SuggestedStock) -> Unit,
+    logoModifierFor: @Composable (ticker: String) -> Modifier,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        stocks.chunked(3).forEach { rowStocks ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+    val columns = if (isLargeText()) LARGE_TEXT_GRID_COLUMNS else GRID_COLUMNS
+    val rows = remember(stocks, columns) { stocks.chunked(columns) }
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
+        rows.forEach { rowStocks ->
+            Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
                 rowStocks.forEach { stock ->
-                    SuggestedStockChip(
+                    SuggestedStockTile(
                         stock = stock,
                         onClick = { onSelectStock(stock) },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        logoModifier = logoModifierFor(stock.ticker)
                     )
                 }
+                // Keep a short last row on the grid instead of stretching its tiles.
+                repeat(columns - rowStocks.size) { Spacer(modifier = Modifier.weight(1f)) }
             }
         }
     }
 }
 
 @Composable
-private fun SuggestedStockChip(stock: SuggestedStock, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val pressed by interactionSource.collectIsPressedAsState()
+private fun SuggestedStockTile(
+    stock: SuggestedStock,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    logoModifier: Modifier = Modifier
+) {
     val haptics = LocalHapticFeedback.current
-    val chipScale by animateFloatAsState(
-        targetValue = if (pressed) 0.95f else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
-        label = "chipScale"
+    val logo = tickerStock(
+        ticker = stock.ticker,
+        title = stock.name,
+        subtitle = stock.ticker,
+        percent = null,
+        imageUrl = stock.logoUrl.ifBlank { null }
     )
-
-    Surface(
-        modifier = modifier
-            .graphicsLayer {
-                scaleX = chipScale
-                scaleY = chipScale
-            }
-            .clickable(
-                interactionSource = interactionSource,
-                indication = LocalIndication.current,
-                onClick = {
-                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onClick()
-                }
-            ),
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant
+    GiCard(
+        modifier = modifier,
+        onClick = {
+            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            onClick()
+        },
+        contentPadding = PaddingValues(horizontal = GiSpace.x2, vertical = GiSpace.x4)
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
         ) {
-            if (stock.logoUrl.isNotBlank()) {
-                AsyncImage(
-                    model = stock.logoUrl,
-                    contentDescription = stock.name,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                )
-            } else {
-                Surface(
-                    modifier = Modifier.size(32.dp),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primaryContainer
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = stock.ticker.take(1),
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
-
-            Text(
-                text = stock.ticker,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
+            GiLogoTile(
+                initials = logo.initials,
+                brandColor = logo.brandColor,
+                modifier = logoModifier,
+                imageUrl = logo.imageUrl
             )
-
-            Text(
+            GiText(text = stock.ticker, style = GiTextStyle.Label)
+            GiText(
                 text = stock.name,
-                style = MaterialTheme.typography.bodySmall,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                maxLines = 1
+                style = GiTextStyle.Meta,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
 }
 
 @Composable
-private fun LiveBriefScreen(
+private fun BriefScreen(
     state: OnboardingUiState,
+    logoTransition: LogoTransition,
     onBack: () -> Unit,
+    onRetry: () -> Unit,
     onFinish: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val companyName = state.selectedCompanyName.orEmpty()
-    var showSentimentSheet by remember { mutableStateOf(false) }
-
+    val listState = rememberLazyListState()
+    val listScrolled by remember(listState) { derivedStateOf { listState.canScrollBackward } }
+    val reducedMotion = isReducedMotionEnabled()
+    val briefRise = with(LocalDensity.current) { GiSpace.x4.roundToPx() }
     Scaffold(
         modifier = modifier,
+        containerColor = GiTheme.colors.bg,
+        contentWindowInsets = WindowInsets(0),
         topBar = {
-            IconButton(modifier = Modifier.statusBarsPadding(), onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(Res.string.back)
-                )
-            }
+            GiTopBar(
+                // The exchange isn't in the onboarding state yet; the board's "TSLA · NASDAQ" falls back to the ticker.
+                title = state.briefTitle,
+                onBack = onBack,
+                backContentDescription = stringResource(Res.string.back),
+                scrolled = state.briefView is BriefView.Success && listScrolled,
+                titleStyle = GiTopBarTitleStyle.Centered
+            )
         }
     ) { innerPadding ->
         AnimatedContent(
             targetState = state.briefView,
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
+            contentKey = { it::class },
             transitionSpec = {
-                fadeIn(tween(300, easing = EaseOutQuart)) togetherWith fadeOut(tween(150))
+                val enter = fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart))
+                val rise = if (reducedMotion || targetState !is BriefView.Success) {
+                    EnterTransition.None
+                } else {
+                    slideInVertically(tween(GiMotion.SLOW, easing = EaseOutQuart)) { briefRise }
+                }
+                (enter + rise) togetherWith fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing))
             },
-            modifier = Modifier.fillMaxSize(),
             label = "briefView"
         ) { briefView ->
+            val briefScope = this
             when (briefView) {
-                is BriefView.Loading -> {
-                    LazyColumn(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .fillMaxSize(),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        item {
-                            Text(
-                                text = stringResource(Res.string.onboarding_loading_headline, companyName),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        item { CompanyBriefSkeleton(modifier = Modifier.fillMaxWidth()) }
-                    }
-                }
-
-                is BriefView.Success -> {
-                    val brief = briefView.brief
-                    LazyColumn(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .fillMaxSize(),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        item {
-                            Text(
-                                text = stringResource(Res.string.onboarding_success_headline, companyName),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-
-                        item { CompanyBriefHeader(brief = brief) }
-
-                        brief.sentiment?.let { sentiment ->
-                            item {
-                                SentimentBadge(
-                                    sentiment = sentiment,
-                                    summary = brief.sentimentSummary,
-                                    onClick = {
-                                        showSentimentSheet = true
-                                    }
-                                )
-                            }
-                        }
-
-                        brief.summary?.let { summary ->
-                            item { BriefSummaryCard(summary = summary) }
-                        }
-
-                        if (brief.keyNumbers.isNotEmpty()) {
-                            item { KeyNumbersCard(keyNumbers = brief.keyNumbers) }
-                        }
-
-                        if (brief.news.isNotEmpty()) {
-                            item {
-                                WhatsHappeningCard(
-                                    news = brief.news,
-                                    onNewsClick = {}
-                                )
-                            }
-                        }
-
-                        if (brief.risk != null || brief.opportunity != null) {
-                            item {
-                                RiskOpportunityCard(
-                                    risk = brief.risk,
-                                    opportunity = brief.opportunity
-                                )
-                            }
-                        }
-
-                        item {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = stringResource(Res.string.onboarding_success_body),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    textAlign = TextAlign.Center,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                )
-
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                Button(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(52.dp),
-                                    shape = RoundedCornerShape(corner = CornerSize(20.dp)),
-                                    onClick = onFinish
-                                ) {
-                                    Text(
-                                        text = stringResource(Res.string.onboarding_cta_start_exploring),
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                is BriefView.Error -> {
-                    Column(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .fillMaxSize()
-                            .padding(horizontal = 24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.onboarding_error_message),
-                            style = MaterialTheme.typography.bodyLarge,
-                            textAlign = TextAlign.Center
-                        )
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        Button(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(52.dp),
-                            shape = RoundedCornerShape(corner = CornerSize(20.dp)),
-                            onClick = onFinish
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.onboarding_cta_go_to_app),
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        if (showSentimentSheet) {
-            if (state.briefView is BriefView.Success) {
-                state.briefView.brief.sentiment?.let { sentiment ->
-                    GptInvestorBottomSheet(onDismiss = { showSentimentSheet = false }) {
-                        SentimentBottomSheet(
-                            sentiment = sentiment,
-                            summary = state.briefView.brief.sentimentSummary
-                        )
-                    }
-                }
+                is BriefView.Loading -> BriefLoading(
+                    state = state,
+                    logoTransition = logoTransition,
+                    briefScope = briefScope
+                )
+                is BriefView.Success -> BriefContent(
+                    state = state,
+                    briefView = briefView,
+                    listState = listState,
+                    onFinish = onFinish,
+                    sharedScope = logoTransition.sharedScope,
+                    briefScope = briefScope
+                )
+                is BriefView.Error -> BriefError(onRetry = onRetry, onFinish = onFinish)
+                is BriefView.LimitReached -> BriefLimitReached(onSignUp = onFinish)
             }
         }
     }
 }
 
-@PreviewLightDark
 @Composable
-private fun OnboardingScreen_ValueProp_Preview() {
-    GPTInvestorTheme {
-        Surface {
-            OnboardingScreen(
-                state = OnboardingUiState(currentScreen = 0),
-                searchResults = flowOf(PagingData.from(emptyList())),
-                onNextScreen = {},
-                onSkip = {},
-                onSelectStock = { _, _, _ -> },
-                onSearchQueryChange = {},
-                onBackToStockSelection = {},
-                onFinish = {}
+private fun BriefLoading(
+    state: OnboardingUiState,
+    logoTransition: LogoTransition,
+    briefScope: AnimatedVisibilityScope,
+    modifier: Modifier = Modifier
+) {
+    val companyName = state.selectedCompanyName.orEmpty()
+    val ticker = state.selectedTicker.orEmpty()
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .navigationBarsPadding()
+            .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x3, bottom = GiSpace.x6),
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x5)
+    ) {
+        GiCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .giBeam(active = true, shape = GiRadius.md, strength = BEAM_STRENGTH)
+                .semantics { liveRegion = LiveRegionMode.Polite },
+            contentPadding = PaddingValues(horizontal = GiSpace.x4, vertical = GiSpace.x3)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                GiBrandMark(size = GiBrandMarkSize.Small, spinning = true)
+                Column {
+                    GiText(
+                        text = stringResource(Res.string.onboarding_loading_headline, companyName),
+                        style = GiTextStyle.Label
+                    )
+                    GiText(
+                        text = stringResource(Res.string.onboarding_loading_subtitle),
+                        style = GiTextStyle.MetaRelaxed
+                    )
+                }
+            }
+        }
+        CompanyBriefSkeleton(
+            announce = false,
+            header = {
+                GiStockSummary(
+                    stock = tickerStock(
+                        ticker = ticker,
+                        title = companyName,
+                        subtitle = ticker,
+                        percent = null,
+                        imageUrl = state.selectedLogoUrl
+                    ),
+                    size = GiStockSummarySize.Header,
+                    logoModifier = sharedLogoModifier(
+                        pickLogoKey(ticker),
+                        logoTransition.sharedScope,
+                        logoTransition.flowScope
+                    ).then(sharedLogoModifier(briefLogoKey(ticker), logoTransition.sharedScope, briefScope))
+                )
+            }
+        )
+    }
+}
+
+@Composable
+private fun BriefContent(
+    state: OnboardingUiState,
+    briefView: BriefView.Success,
+    listState: LazyListState,
+    onFinish: () -> Unit,
+    sharedScope: SharedTransitionScope,
+    briefScope: AnimatedVisibilityScope,
+    modifier: Modifier = Modifier
+) {
+    val brief = briefView.brief
+    var selectedKeyNumber by remember { mutableStateOf<KeyNumber?>(null) }
+    val navigationBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val heroLogoModifier = sharedLogoModifier(briefLogoKey(brief.ticker), sharedScope, briefScope)
+
+    LazyColumn(
+        state = listState,
+        modifier = modifier.fillMaxSize(),
+        // The sections sheet is full-bleed and docks to the bottom, so only the page items are inset.
+        contentPadding = PaddingValues(top = GiSpace.x3),
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
+    ) {
+        item(key = "title", contentType = "title") {
+            GiText(
+                text = stringResource(Res.string.onboarding_success_headline, state.selectedCompanyName.orEmpty()),
+                modifier = Modifier
+                    .padding(horizontal = GiSpace.gutter)
+                    .semantics { heading() },
+                style = GiTextStyle.PageTitle
+            )
+        }
+        companyBriefItems(
+            brief = brief,
+            onKeyNumberClick = { selectedKeyNumber = it },
+            logoModifier = heroLogoModifier,
+            layout = CompanyBriefLayout.Onboarding,
+            sheetBottomPadding = GiSpace.safeArea + navigationBarBottom
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = GiSpace.x2),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
+            ) {
+                GiText(
+                    text = stringResource(Res.string.onboarding_success_body),
+                    style = GiTextStyle.Body,
+                    color = GiTheme.colors.muted,
+                    textAlign = TextAlign.Center
+                )
+                GiButton(
+                    text = stringResource(Res.string.onboarding_cta_start_exploring),
+                    onClick = onFinish,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                GiText(
+                    text = stringResource(Res.string.onboarding_brief_disclaimer),
+                    style = GiTextStyle.Meta,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+
+    selectedKeyNumber?.let { keyNumber ->
+        CompanyKeyNumberSheet(keyNumber = keyNumber, onDismiss = { selectedKeyNumber = null })
+    }
+}
+
+@Composable
+private fun BriefError(onRetry: () -> Unit, onFinish: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .navigationBarsPadding()
+            .padding(horizontal = GiSpace.gutter),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x6, Alignment.CenterVertically)
+    ) {
+        GiText(
+            text = stringResource(Res.string.onboarding_brief_error_message),
+            style = GiTextStyle.Body,
+            textAlign = TextAlign.Center
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
+            GiButton(
+                text = stringResource(Res.string.try_again),
+                onClick = onRetry,
+                modifier = Modifier.fillMaxWidth()
+            )
+            GiButton(
+                text = stringResource(Res.string.onboarding_cta_go_to_app_short),
+                onClick = onFinish,
+                modifier = Modifier.fillMaxWidth(),
+                size = GiButtonSize.Medium,
+                variant = GiButtonVariant.TextMuted
             )
         }
     }
 }
 
-@PreviewLightDark
 @Composable
-private fun OnboardingScreen_HowItWorks_Preview() {
+private fun BriefLimitReached(onSignUp: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .navigationBarsPadding()
+            .padding(horizontal = GiSpace.gutter),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x6, Alignment.CenterVertically)
+    ) {
+        GiText(
+            text = stringResource(Res.string.onboarding_brief_limit_message),
+            style = GiTextStyle.Body,
+            textAlign = TextAlign.Center
+        )
+        GiButton(
+            text = stringResource(Res.string.sign_up),
+            onClick = onSignUp,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+@ReadOnlyComposable
+private fun isLargeText(): Boolean = LocalDensity.current.fontScale >= LARGE_TEXT_FONT_SCALE
+
+@Composable
+private fun OnboardingScreenPreview(state: OnboardingUiState) {
     GPTInvestorTheme {
-        Surface {
-            OnboardingScreen(
-                state = OnboardingUiState(currentScreen = 1),
-                searchResults = flowOf(PagingData.from(emptyList())),
-                onNextScreen = {},
-                onSkip = {},
-                onSelectStock = { _, _, _ -> },
-                onSearchQueryChange = {},
-                onBackToStockSelection = {},
-                onFinish = {}
-            )
-        }
+        OnboardingScreen(
+            state = state,
+            searchResults = flowOf(PagingData.from(emptyList())),
+            onNextScreen = {},
+            onBack = {},
+            onSkip = {},
+            onSelectStock = { _, _, _, _ -> },
+            onSearchQueryChange = {},
+            onBackToStockSelection = {},
+            onRetryBrief = {},
+            onFinish = {}
+        )
     }
 }
 
 @PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
 @Composable
-private fun OnboardingScreen_StockSelection_Preview() {
-    GPTInvestorTheme {
-        Surface {
-            OnboardingScreen(
-                state = OnboardingUiState(currentScreen = 2),
-                searchResults = flowOf(PagingData.from(emptyList())),
-                onNextScreen = {},
-                onSkip = {},
-                onSelectStock = { _, _, _ -> },
-                onSearchQueryChange = {},
-                onBackToStockSelection = {},
-                onFinish = {}
-            )
-        }
-    }
+private fun OnboardingWelcomePreview() {
+    OnboardingScreenPreview(state = OnboardingUiState(currentScreen = 0))
+}
+
+@PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
+@Composable
+private fun OnboardingValuePropsPreview() {
+    OnboardingScreenPreview(state = OnboardingUiState(currentScreen = 1))
+}
+
+@PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
+@Composable
+private fun OnboardingPickStockPreview() {
+    OnboardingScreenPreview(state = OnboardingUiState(currentScreen = 2))
 }
 
 @PreviewLightDark
 @Composable
-private fun OnboardingScreen_LiveBrief_Preview() {
-    val sampleBrief = CompanyBrief(
-        ticker = "AAPL",
-        name = "Apple Inc.",
-        logoUrl = "",
-        price = 220.50f,
-        change = 1.2f,
-        sentiment = BriefSentiment.Bullish,
-        sentimentSummary = "Apple's outlook remains strong due to AI integration.",
-        summary = "Apple Inc. is showing strong performance in its services sector.",
-        keyNumbers = listOf(
-            KeyNumber(KeyNumberType.MarketCap, "$3.5T", "Largest market cap", BriefTone.Positive),
-            KeyNumber(KeyNumberType.PeRatio, "30.5", "Fairly valued", BriefTone.Neutral)
-        ),
-        news = emptyList(),
-        risk = BriefSection("Regulatory risk", "Ongoing antitrust investigations in multiple regions."),
-        opportunity = BriefSection("AI Growth", "Integration of AI across the product lineup.")
+private fun OnboardingBriefLoadingPreview() {
+    OnboardingScreenPreview(
+        state = OnboardingUiState(
+            currentScreen = 3,
+            selectedTicker = "TSLA",
+            selectedCompanyName = "Tesla",
+            briefView = BriefView.Loading
+        )
     )
+}
 
-    GPTInvestorTheme {
-        Surface {
-            OnboardingScreen(
-                state = OnboardingUiState(
-                    currentScreen = 3,
-                    selectedCompanyName = "Apple Inc.",
-                    briefView = BriefView.Success(sampleBrief)
-                ),
-                searchResults = flowOf(PagingData.from(emptyList())),
-                onNextScreen = {},
-                onSkip = {},
-                onSelectStock = { _, _, _ -> },
-                onSearchQueryChange = {},
-                onBackToStockSelection = {},
-                onFinish = {}
-            )
-        }
-    }
+@PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
+@Composable
+private fun OnboardingBriefPreview() {
+    OnboardingScreenPreview(
+        state = OnboardingUiState(
+            currentScreen = 3,
+            selectedTicker = "TSLA",
+            selectedCompanyName = "Tesla",
+            briefView = BriefView.Success(previewCompanyBrief)
+        )
+    )
+}
+
+@PreviewLightDark
+@Composable
+private fun OnboardingBriefErrorPreview() {
+    OnboardingScreenPreview(
+        state = OnboardingUiState(currentScreen = 3, briefView = BriefView.Error("Something went wrong."))
+    )
+}
+
+@PreviewLightDark
+@Composable
+private fun OnboardingBriefLimitReachedPreview() {
+    OnboardingScreenPreview(
+        state = OnboardingUiState(currentScreen = 3, selectedTicker = "TSLA", briefView = BriefView.LimitReached)
+    )
 }

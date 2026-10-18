@@ -37,4 +37,9 @@ class CompositeLogger(
         firebaseLogger.resetUser(eventName)
         mixpanelLogger.resetUser(eventName)
     }
+
+    override fun setUserProperty(name: String, value: String) {
+        firebaseLogger.setUserProperty(name, value)
+        mixpanelLogger.setUserProperty(name, value)
+    }
 }

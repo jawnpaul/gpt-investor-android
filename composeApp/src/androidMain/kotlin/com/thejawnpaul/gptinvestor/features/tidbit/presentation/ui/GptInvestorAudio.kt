@@ -5,19 +5,19 @@ package com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -29,7 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -45,14 +44,19 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.baseline_pause_24
-import com.thejawnpaul.gptinvestor.baseline_play_arrow_24
-import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
+import com.thejawnpaul.gptinvestor.audio_pause
+import com.thejawnpaul.gptinvestor.audio_play
+import com.thejawnpaul.gptinvestor.theme.GiRadius
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.components.GiIconButton
+import com.thejawnpaul.gptinvestor.theme.components.GiText
+import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import java.net.URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import timber.log.Timber
 
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -165,7 +169,6 @@ fun AndroidGptInvestorAudioCompact(
     var isPlaying by remember { mutableStateOf(false) }
     var duration by remember { mutableLongStateOf(0L) }
     var currentPosition by remember { mutableLongStateOf(0L) }
-    val gptInvestorColors = LocalGPTInvestorColors.current
 
     val exoPlayer = remember(audioUrl) {
         ExoPlayer.Builder(context).build().apply {
@@ -219,8 +222,10 @@ fun AndroidGptInvestorAudioCompact(
         }
     }
 
+    val colors = GiTheme.colors
     Column(
-        modifier = modifier.padding(16.dp)
+        modifier = modifier.padding(GiSpace.cardPad),
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
     ) {
         // Artwork display
         artworkUrl?.let { url ->
@@ -229,34 +234,31 @@ fun AndroidGptInvestorAudioCompact(
                     .data(url)
                     .crossfade(true)
                     .build(),
-                contentDescription = "Audio artwork",
+                contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(193.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop,
-                error = painterResource(Res.drawable.baseline_play_arrow_24),
-                placeholder = painterResource(Res.drawable.baseline_play_arrow_24)
+                    .height(ARTWORK_HEIGHT)
+                    .clip(GiRadius.md)
+                    .background(colors.violetSoft),
+                contentScale = ContentScale.Crop
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(GiSpace.x2))
         }
 
-        // Title
         title?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            GiText(text = it, style = GiTextStyle.SectionTitle)
         }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(GiSpace.x2),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Play/Pause button
-            IconButton(
+            GiIconButton(
+                icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                contentDescription = stringResource(
+                    if (isPlaying) Res.string.audio_pause else Res.string.audio_play
+                ),
                 onClick = {
                     if (isPlaying) {
                         exoPlayer.pause()
@@ -264,48 +266,38 @@ fun AndroidGptInvestorAudioCompact(
                         exoPlayer.play()
                     }
                 }
-            ) {
-                val icon =
-                    if (isPlaying) Res.drawable.baseline_pause_24 else Res.drawable.baseline_play_arrow_24
-                Icon(
-                    painter = painterResource(icon),
-                    contentDescription = if (isPlaying) "Pause" else "Play"
-                )
-            }
-
-            Text(
-                modifier = Modifier.padding(end = 8.dp),
-                text = formatTime(currentPosition),
-                style = MaterialTheme.typography.bodySmall
             )
 
-            val animatedProgress by
-                animateFloatAsState(
-                    targetValue = currentPosition.toFloat() / duration.toFloat(),
-                    animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
-                )
+            GiText(text = formatTime(currentPosition), style = GiTextStyle.Meta)
 
-            // Progress bar
+            val animatedProgress by animateFloatAsState(
+                targetValue = if (duration > 0) currentPosition.toFloat() / duration.toFloat() else 0f,
+                animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
+            )
+
             if (duration > 0) {
                 LinearProgressIndicator(
                     progress = { animatedProgress },
                     modifier = Modifier
                         .weight(1f)
-                        .height(8.dp),
-                    trackColor = Color.Gray,
+                        .height(GiSpace.x1)
+                        .clip(GiRadius.full),
+                    color = colors.violet,
+                    trackColor = colors.track,
                     strokeCap = StrokeCap.Round,
-                    color = gptInvestorColors.accentColors.allAccent20
+                    gapSize = GiSpace.x0_5,
+                    drawStopIndicator = {}
                 )
+            } else {
+                Spacer(modifier = Modifier.weight(1f))
             }
 
-            Text(
-                modifier = Modifier.padding(start = 8.dp),
-                text = if (duration > 0) formatTime(duration) else "--:--",
-                style = MaterialTheme.typography.bodySmall
-            )
+            GiText(text = if (duration > 0) formatTime(duration) else "--:--", style = GiTextStyle.Meta)
         }
     }
 }
+
+private val ARTWORK_HEIGHT = 193.dp
 
 private fun formatTime(timeMs: Long): String {
     val seconds = (timeMs / 1000) % 60

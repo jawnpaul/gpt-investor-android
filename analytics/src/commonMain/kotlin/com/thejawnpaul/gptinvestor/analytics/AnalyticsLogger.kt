@@ -5,4 +5,5 @@ interface AnalyticsLogger {
     fun logViewEvent(screenName: String)
     fun identifyUser(eventName: String, params: Map<String, Any>)
     fun resetUser(eventName: String)
+    fun setUserProperty(name: String, value: String) {}
 }

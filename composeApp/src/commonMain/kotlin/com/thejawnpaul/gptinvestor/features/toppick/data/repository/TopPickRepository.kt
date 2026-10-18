@@ -47,7 +47,8 @@ class TopPickRepository(
                                 confidenceScore = confidenceScore,
                                 date = date,
                                 price = price ?: 0.0f,
-                                change = percentageChange ?: 0.0f
+                                change = percentageChange ?: 0.0f,
+                                imageUrl = imageUrl?.toHttpsUrl().orEmpty()
                             )
                         }
                     }
@@ -72,7 +73,7 @@ class TopPickRepository(
                     emit(Either.Right(picks))
                 } ?: emit(Either.Left(Failure.DataError))
             } else {
-                emit(Either.Left(if (response.code == 429) Failure.RateLimitExceeded else Failure.ServerError))
+                emit(Either.Left(if (response.code == 429) Failure.RateLimitExceeded() else Failure.ServerError))
             }
         } catch (e: Exception) {
             Logger.e(e.stackTraceToString())
@@ -195,7 +196,7 @@ class TopPickRepository(
         }
     }
 
-    override suspend fun getSavedTopPicks(): Flow<Either<Failure, List<TopPick>>> = flow {
+    override fun getSavedTopPicks(): Flow<Either<Failure, List<TopPick>>> = flow {
         try {
             emit(
                 Either.Right(
@@ -225,7 +226,9 @@ class TopPickRepository(
         }
     }
 
-    override suspend fun getLocalTopPicks(): Flow<Either<Failure, List<TopPick>>> = flow {
+    override fun getSavedTopPicksCount(): Flow<Int> = topPickDao.getSavedTopPicksCountFlow()
+
+    override fun getLocalTopPicks(): Flow<Either<Failure, List<TopPick>>> = flow {
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
         val local = topPickDao.getAllTopPicks().map { entity ->
             with(entity) {
@@ -247,7 +250,7 @@ class TopPickRepository(
         emit(Either.Right(local))
     }
 
-    override suspend fun getTopPicksByDate(): Flow<List<TopPick>> {
+    override fun getTopPicksByDate(): Flow<List<TopPick>> {
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
         return try {
             topPickDao.getTopPicksFlow(today).map { list ->
@@ -275,7 +278,7 @@ class TopPickRepository(
         }
     }
 
-    override suspend fun searchTopPicks(query: String): Flow<List<TopPick>> = try {
+    override fun searchTopPicks(query: String): Flow<List<TopPick>> = try {
         topPickDao.searchTopPicks(query).map { list ->
             list.map { entity ->
                 with(entity) {

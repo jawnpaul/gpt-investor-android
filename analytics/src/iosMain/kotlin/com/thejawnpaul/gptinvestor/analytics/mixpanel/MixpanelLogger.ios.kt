@@ -27,4 +27,8 @@ actual class MixpanelLogger(
     actual override fun resetUser(eventName: String) {
         provider.resetUser()
     }
+
+    actual override fun setUserProperty(name: String, value: String) {
+        provider.setUserProperty(name, value)
+    }
 }

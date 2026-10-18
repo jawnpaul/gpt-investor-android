@@ -1,42 +1,67 @@
 package com.thejawnpaul.gptinvestor.features.company.presentation.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.EaseOutQuart
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.add_to_watchlist
+import com.thejawnpaul.gptinvestor.ask_about_company
 import com.thejawnpaul.gptinvestor.ask_anything_about
+import com.thejawnpaul.gptinvestor.back
+import com.thejawnpaul.gptinvestor.brief_footer_sources
+import com.thejawnpaul.gptinvestor.check_connection_try_again
+import com.thejawnpaul.gptinvestor.company_context_title
+import com.thejawnpaul.gptinvestor.couldn_t_load_brief
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSection
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSentiment
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefTone
@@ -45,25 +70,56 @@ import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumber
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumberType
 import com.thejawnpaul.gptinvestor.features.company.domain.model.NewsBrief
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCompanyView
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.BriefSummaryCard
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefHeader
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefSkeleton
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefTopBar
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.KeyNumbersCard
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.RiskOpportunityCard
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.SentimentBadge
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.SentimentBottomSheet
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.WhatsHappeningCard
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefTip
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyKeyNumberSheet
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.companyBriefItems
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.questionRes
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailEvent
-import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
-import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.SingleStructuredResponse
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.AnswerStopSignal
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ScrollToNewQuestionEffect
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ThreadMessage
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.answerStrings
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.answerThreadItems
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.rememberAnswerThreadState
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.rememberThreadMessages
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.WaitlistBottomSheetContent
-import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.QuestionInput
-import com.thejawnpaul.gptinvestor.sources
+import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.tickerStock
+import com.thejawnpaul.gptinvestor.features.watchlist.presentation.ui.RemoveFromWatchlistDialog
+import com.thejawnpaul.gptinvestor.loading_brief
+import com.thejawnpaul.gptinvestor.loading_company_brief
+import com.thejawnpaul.gptinvestor.not_financial_advice
+import com.thejawnpaul.gptinvestor.reading_company_data
+import com.thejawnpaul.gptinvestor.remove_from_watchlist
+import com.thejawnpaul.gptinvestor.send
+import com.thejawnpaul.gptinvestor.share_brief
+import com.thejawnpaul.gptinvestor.stop_answering
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GiMotion
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.components.GiAskComposer
+import com.thejawnpaul.gptinvestor.theme.components.GiComposerBar
+import com.thejawnpaul.gptinvestor.theme.components.GiComposerStop
+import com.thejawnpaul.gptinvestor.theme.components.GiDivider
+import com.thejawnpaul.gptinvestor.theme.components.GiErrorState
+import com.thejawnpaul.gptinvestor.theme.components.GiIconButton
+import com.thejawnpaul.gptinvestor.theme.components.GiIconToggleButton
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiStockSummary
+import com.thejawnpaul.gptinvestor.theme.components.GiStockSummarySize
+import com.thejawnpaul.gptinvestor.theme.components.GiToastHost
+import com.thejawnpaul.gptinvestor.theme.components.GiToastState
+import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
+import com.thejawnpaul.gptinvestor.theme.components.GiTopBarTitleStyle
+import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
+import com.thejawnpaul.gptinvestor.try_again
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,76 +128,195 @@ fun CompanyDetailScreen(
     state: SingleCompanyView,
     onEvent: (CompanyDetailEvent) -> Unit,
     onAction: (CompanyDetailAction) -> Unit,
+    toastState: GiToastState,
     modifier: Modifier = Modifier
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    var showSourcesSheet by remember { mutableStateOf(false) }
-    var showSentimentSheet by remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
+    var showRemoveFromWatchlistDialog by remember { mutableStateOf(false) }
+    var selectedKeyNumber by remember { mutableStateOf<KeyNumber?>(null) }
+    var composerFocused by remember { mutableStateOf(false) }
+    val composerBarHeight = remember { mutableIntStateOf(0) }
+    val brief = state.brief
+    val isWatched = brief?.isWatched == true
+    val messages = rememberThreadMessages((state.conversation as? StructuredConversation)?.messageList.orEmpty())
+    val askMode = composerFocused || messages.isNotEmpty() || state.pendingQuery != null
+    val heroScrolledAway by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
+    val showPinnedRow = askMode && brief != null && heroScrolledAway
+    val companyName = state.companyName.ifEmpty { state.ticker }
+    val display = when {
+        brief != null -> CompanyDisplay.Brief
+        state.error != null && !state.loading -> CompanyDisplay.Error
+        else -> CompanyDisplay.Loading
+    }
+    val onWatchlistClick = {
+        if (isWatched) {
+            showRemoveFromWatchlistDialog = true
+        } else {
+            onEvent(CompanyDetailEvent.AddToWatchlist)
+        }
+    }
 
     Box(modifier = modifier) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
+            containerColor = GiTheme.colors.bg,
+            contentWindowInsets = WindowInsets(0),
             topBar = {
                 Column {
-                    CompanyBriefTopBar(
+                    GiTopBar(
+                        title = if (askMode) {
+                            stringResource(Res.string.company_context_title, companyName, brief?.ticker ?: state.ticker)
+                        } else {
+                            null
+                        },
                         onBack = { onAction(CompanyDetailAction.OnGoBack) },
-                        onFavorite = {},
-                        onMore = {}
-                    )
+                        backContentDescription = stringResource(Res.string.back),
+                        scrolled = !showPinnedRow && listState.canScrollBackward,
+                        titleStyle = if (askMode) GiTopBarTitleStyle.Centered else GiTopBarTitleStyle.Start
+                    ) {
+                        GiIconButton(
+                            icon = GiIcons.shareNetwork,
+                            contentDescription = stringResource(Res.string.share_brief),
+                            onClick = { onEvent(CompanyDetailEvent.ShareBrief) },
+                            enabled = brief != null
+                        )
+                        GiIconToggleButton(
+                            checked = isWatched,
+                            onCheckedChange = { onWatchlistClick() },
+                            icon = GiIcons.star,
+                            checkedIcon = GiIcons.starFill,
+                            checkedHaptic = null,
+                            contentDescription = stringResource(
+                                if (isWatched) Res.string.remove_from_watchlist else Res.string.add_to_watchlist
+                            ),
+                            enabled = brief != null,
+                            loading = state.watchlistPending
+                        )
+                    }
                     if (state.isGuestSession) {
                         TopGuestLabel(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = { onEvent(CompanyDetailEvent.SignUpClicked) }
+                            onClick = { onEvent(CompanyDetailEvent.SignUpClicked) },
+                            modifier = Modifier.padding(
+                                start = GiSpace.gutter,
+                                end = GiSpace.gutter,
+                                bottom = GiSpace.x3
+                            )
                         )
                     }
                 }
             },
             bottomBar = {
-                QuestionInput(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .windowInsetsPadding(insets = WindowInsets.ime),
-                    onSendClick = {
-                        keyboardController?.hide()
-                        onEvent(CompanyDetailEvent.SendClick)
-                    },
-                    hint = stringResource(Res.string.ask_anything_about, state.companyName),
-                    onTextChange = { onEvent(CompanyDetailEvent.QueryInputChanged(it)) },
-                    text = state.inputQuery
-                )
+                if (display != CompanyDisplay.Error) {
+                    GiComposerBar(
+                        modifier = Modifier
+                            .onSizeChanged { composerBarHeight.intValue = it.height }
+                            .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime)),
+                        docked = askMode
+                    ) {
+                        GiAskComposer(
+                            value = state.inputQuery,
+                            onValueChange = { onEvent(CompanyDetailEvent.QueryInputChanged(it)) },
+                            onSend = {
+                                keyboardController?.hide()
+                                onEvent(CompanyDetailEvent.SendClick)
+                            },
+                            placeholder = if (askMode) {
+                                stringResource(Res.string.ask_about_company, companyName)
+                            } else {
+                                stringResource(Res.string.ask_anything_about, companyName)
+                            },
+                            sendContentDescription = stringResource(Res.string.send),
+                            floating = !askMode,
+                            stop = if (state.isAnswering) {
+                                GiComposerStop(
+                                    contentDescription = stringResource(Res.string.stop_answering),
+                                    onStop = {
+                                        AnswerStopSignal.count++
+                                        onEvent(CompanyDetailEvent.StopAnswering)
+                                    }
+                                )
+                            } else {
+                                null
+                            },
+                            largeTextMaxLines = COMPOSER_LARGE_TEXT_LINES,
+                            onFocusChange = { composerFocused = it }
+                        )
+                    }
+                }
             }
         ) { innerPadding ->
-            CompanyDetailBody(
-                state = state,
-                contentPadding = innerPadding,
-                onEvent = onEvent,
-                onAction = onAction,
-                onShowSources = { showSourcesSheet = true },
-                onShowSentiment = { sentiment ->
-                    showSentimentSheet = true
-                    onEvent(CompanyDetailEvent.BriefSentimentViewed(sentiment))
+            val loadingStatus = if (companyName.isNotBlank()) {
+                stringResource(Res.string.loading_company_brief, companyName)
+            } else {
+                stringResource(Res.string.loading_brief)
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = innerPadding.calculateTopPadding())
+            ) {
+                AnimatedContent(
+                    targetState = display,
+                    modifier = Modifier.fillMaxSize(),
+                    transitionSpec = {
+                        fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart)) togetherWith
+                            fadeOut(tween(GiMotion.FAST, easing = LinearEasing))
+                    }
+                ) { current ->
+                    when (current) {
+                        CompanyDisplay.Loading -> Column(
+                            modifier = Modifier
+                                .semantics {
+                                    liveRegion = LiveRegionMode.Polite
+                                    contentDescription = loadingStatus
+                                }
+                                .padding(horizontal = GiSpace.gutter, vertical = GiSpace.x1)
+                        ) {
+                            CompanyBriefSkeleton(announce = false)
+                        }
+                        CompanyDisplay.Error -> GiErrorState(
+                            title = stringResource(Res.string.couldn_t_load_brief),
+                            body = stringResource(Res.string.check_connection_try_again),
+                            actionText = stringResource(Res.string.try_again),
+                            onAction = { onEvent(CompanyDetailEvent.RetryLoad) },
+                            modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+                        )
+                        CompanyDisplay.Brief -> if (brief != null) {
+                            CompanyDetailBriefContent(
+                                brief = brief,
+                                state = state,
+                                messages = messages,
+                                listState = listState,
+                                bottomPadding = innerPadding.calculateBottomPadding(),
+                                onEvent = onEvent,
+                                onAction = onAction,
+                                onKeyNumberClick = { keyNumber ->
+                                    selectedKeyNumber = keyNumber
+                                    onEvent(CompanyDetailEvent.BriefKeyNumberExpanded(keyNumber.key))
+                                }
+                            )
+                        }
+                    }
+                }
+                CompanyPinnedRow(visible = showPinnedRow, brief = brief)
+            }
+        }
+
+        selectedKeyNumber?.let { keyNumber ->
+            val question = stringResource(
+                keyNumber.key.questionRes(),
+                keyNumber.value,
+                state.companyName.ifEmpty { state.ticker }
+            )
+            CompanyKeyNumberSheet(
+                keyNumber = keyNumber,
+                onDismiss = { selectedKeyNumber = null },
+                onAsk = {
+                    selectedKeyNumber = null
+                    onEvent(CompanyDetailEvent.AskAboutKeyNumber(keyNumber.key, question))
                 }
             )
-        }
-
-        if (showSentimentSheet) {
-            state.brief?.sentiment?.let { sentiment ->
-                GptInvestorBottomSheet(onDismiss = { showSentimentSheet = false }) {
-                    SentimentBottomSheet(
-                        sentiment = sentiment,
-                        summary = state.brief.sentimentSummary
-                    )
-                }
-            }
-        }
-
-        if (showSourcesSheet) {
-            GptInvestorBottomSheet(
-                modifier = Modifier,
-                onDismiss = { showSourcesSheet = false }
-            ) {
-                SourcesSheetContent(brief = state.brief)
-            }
         }
 
         if (state.showWaitListBottomSheet) {
@@ -161,180 +336,172 @@ fun CompanyDetailScreen(
                 )
             }
         }
-    }
-}
 
-@Composable
-private fun CompanyDetailBody(
-    state: SingleCompanyView,
-    contentPadding: PaddingValues,
-    onEvent: (CompanyDetailEvent) -> Unit,
-    onAction: (CompanyDetailAction) -> Unit,
-    onShowSources: () -> Unit,
-    onShowSentiment: (BriefSentiment) -> Unit
-) {
-    val brief = state.brief
-    val messages = (state.conversation as? StructuredConversation)
-        ?.messageList
-        ?.filterIsInstance<GenAiTextMessage>()
-        .orEmpty()
+        if (showRemoveFromWatchlistDialog) {
+            brief?.let {
+                RemoveFromWatchlistDialog(
+                    ticker = it.ticker,
+                    onConfirm = {
+                        showRemoveFromWatchlistDialog = false
+                        onEvent(CompanyDetailEvent.RemoveFromWatchlist)
+                    },
+                    onDismiss = { showRemoveFromWatchlistDialog = false }
+                )
+            }
+        }
 
-    if (state.loading && brief == null) {
-        CompanyDetailLoadingContent(contentPadding = contentPadding)
-    } else if (brief != null) {
-        CompanyDetailBriefContent(
-            brief = brief,
-            messages = messages,
-            genText = state.genText,
-            isGuestSession = state.isGuestSession,
-            contentPadding = contentPadding,
-            onEvent = onEvent,
-            onAction = onAction,
-            onShowSources = onShowSources,
-            onShowSentiment = onShowSentiment
+        GiToastHost(
+            state = toastState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = GiSpace.gutter)
+                .offset { IntOffset(0, -(composerBarHeight.intValue + GiSpace.x4.roundToPx())) }
+        )
+
+        CompanyBriefTip(
+            visible = state.showSpotlight && brief != null,
+            onDismiss = { onEvent(CompanyDetailEvent.DismissSpotlight) },
+            onShare = { onEvent(CompanyDetailEvent.ShareBrief) },
+            onWatchlist = onWatchlistClick,
+            isWatched = isWatched
         )
     }
 }
 
-@Composable
-private fun CompanyDetailLoadingContent(contentPadding: PaddingValues) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(contentPadding),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
-    ) {
-        item(key = "skeleton") {
-            CompanyBriefSkeleton(modifier = Modifier.fillMaxWidth())
-        }
-    }
-}
+private enum class CompanyDisplay { Loading, Error, Brief }
 
 @Composable
 private fun CompanyDetailBriefContent(
     brief: CompanyBrief,
-    messages: List<GenAiTextMessage>,
-    genText: String,
-    isGuestSession: Boolean,
-    contentPadding: PaddingValues,
+    state: SingleCompanyView,
+    messages: List<ThreadMessage>,
+    listState: LazyListState,
+    bottomPadding: Dp,
     onEvent: (CompanyDetailEvent) -> Unit,
     onAction: (CompanyDetailAction) -> Unit,
-    onShowSources: () -> Unit,
-    onShowSentiment: (BriefSentiment) -> Unit
+    onKeyNumberClick: (KeyNumber) -> Unit
 ) {
+    val footer = if (brief.news.isNotEmpty()) {
+        pluralStringResource(Res.plurals.brief_footer_sources, brief.news.size, brief.news.size)
+    } else {
+        stringResource(Res.string.not_financial_advice)
+    }
+    val companyName = state.companyName.ifEmpty { brief.name }
+    val strings = answerStrings()
+    val thinkingStatus = stringResource(Res.string.reading_company_data, companyName)
+    val thread = rememberAnswerThreadState()
+    val scope = rememberCoroutineScope()
+    val reducedMotion = isReducedMotionEnabled()
+    val itemSizes = remember { mutableMapOf<Int, Int>() }
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo }
+            .collect { items -> items.forEach { itemSizes[it.index] = it.size } }
+    }
+    ScrollToNewQuestionEffect(
+        listState = listState,
+        questionCount = messages.size + if (state.pendingQuery != null) 1 else 0
+    )
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(contentPadding),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        state = listState,
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = GiSpace.gutter,
+            end = GiSpace.gutter,
+            top = GiSpace.x1,
+            bottom = bottomPadding + GiSpace.x6
+        ),
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
     ) {
-        item(key = "header") { CompanyBriefHeader(brief = brief) }
-
-        brief.sentiment?.let { sentiment ->
-            item(key = "sentiment") {
-                SentimentBadge(
-                    sentiment = sentiment,
-                    summary = brief.sentimentSummary,
-                    onClick = { onShowSentiment(sentiment) }
-                )
-            }
+        companyBriefItems(
+            brief = brief,
+            onKeyNumberClick = onKeyNumberClick,
+            onNewsClick = { onAction(CompanyDetailAction.OnNavigateToWebView(it)) }
+        )
+        item(key = "footer", contentType = "footer") {
+            Text(text = footer, color = GiTheme.colors.muted, style = GiTheme.type.meta)
         }
-
-        brief.summary?.let { summary ->
-            item(key = "summary") { BriefSummaryCard(summary = summary) }
-        }
-
-        if (brief.keyNumbers.isNotEmpty()) {
-            item(key = "keyNumbers") {
-                KeyNumbersCard(
-                    keyNumbers = brief.keyNumbers,
-                    onKeyNumberExpand = { onEvent(CompanyDetailEvent.BriefKeyNumberExpanded(it)) }
-                )
-            }
-        }
-
-        if (brief.news.isNotEmpty()) {
-            item(key = "news") {
-                WhatsHappeningCard(
-                    news = brief.news,
-                    onNewsClick = { url ->
-                        onAction(CompanyDetailAction.OnNavigateToWebView(url))
-                    }
-                )
-            }
-        }
-
-        if (brief.risk != null || brief.opportunity != null) {
-            item(key = "riskOpportunity") {
-                RiskOpportunityCard(
-                    risk = brief.risk,
-                    opportunity = brief.opportunity
-                )
-            }
-        }
-
-        items(
-            items = messages,
-            key = { it.id },
-            contentType = { "conversationMessage" }
-        ) { message ->
-            SingleStructuredResponse(
-                genAiMessage = message,
-                text = genText,
-                onClickNews = { url -> onAction(CompanyDetailAction.OnNavigateToWebView(url)) },
-                onClickFeedback = { messageId, status, reason ->
-                    onEvent(CompanyDetailEvent.SendFeedback(messageId, status, reason))
-                },
-                onCopy = { onEvent(CompanyDetailEvent.CopyToClipboard(it)) },
-                onClickSource = onShowSources,
-                isGuest = isGuestSession
-            )
-        }
-
-        item(key = "footerSpace") {
-            Spacer(modifier = Modifier.height(24.dp))
-        }
+        answerThreadItems(
+            messages = messages,
+            pendingQuery = state.pendingQuery,
+            thinkingStatus = thinkingStatus,
+            strings = strings,
+            thread = thread,
+            listState = listState,
+            isGuest = state.isGuestSession,
+            answerOffline = state.answerOffline,
+            onCompanyClick = { ticker ->
+                if (ticker.equals(brief.ticker, ignoreCase = true)) {
+                    scope.launch { listState.scrollToTop(itemSizes, animate = !reducedMotion) }
+                } else {
+                    onAction(CompanyDetailAction.OnOpenCompany(ticker))
+                }
+            },
+            onCopy = { onEvent(CompanyDetailEvent.CopyToClipboard(it)) },
+            onShare = { onEvent(CompanyDetailEvent.ShareAnswer(it)) },
+            onFeedback = { messageId, status, reason ->
+                onEvent(CompanyDetailEvent.SendFeedback(messageId, status, reason))
+            },
+            onRetry = { onEvent(CompanyDetailEvent.RetryAnswer(it)) }
+        )
     }
 }
 
 @Composable
-private fun SourcesSheetContent(brief: CompanyBrief?) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+private fun BoxScope.CompanyPinnedRow(visible: Boolean, brief: CompanyBrief?) {
+    val reducedMotion = isReducedMotionEnabled()
+    val enterFade = fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart))
+    val exitFade = fadeOut(tween(GiMotion.FAST, easing = EaseOutQuart))
+    AnimatedVisibility(
+        visible = visible && brief != null,
+        modifier = Modifier.align(Alignment.TopCenter),
+        enter = if (reducedMotion) {
+            enterFade
+        } else {
+            enterFade + slideInVertically(tween(GiMotion.BASE, easing = EaseOutQuart)) { -it / PINNED_SLIDE_DIVISOR }
+        },
+        exit = if (reducedMotion) {
+            exitFade
+        } else {
+            exitFade + slideOutVertically(tween(GiMotion.FAST, easing = EaseOutQuart)) { -it / PINNED_SLIDE_DIVISOR }
+        }
     ) {
-        Text(
-            text = stringResource(Res.string.sources),
-            style = MaterialTheme.typography.labelMedium
-        )
-        brief?.news?.forEachIndexed { index, item ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                AsyncImage(
-                    model = "",
+        if (brief != null) {
+            Column(modifier = Modifier.background(GiTheme.colors.bg)) {
+                GiStockSummary(
+                    stock = tickerStock(
+                        ticker = brief.ticker,
+                        title = brief.name,
+                        subtitle = brief.ticker,
+                        percent = brief.change.toDouble(),
+                        imageUrl = brief.logoUrl.ifBlank { null }
+                    ),
                     modifier = Modifier
-                        .size(20.dp)
-                        .clip(CircleShape),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
+                        .fillMaxWidth()
+                        .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x2, bottom = GiSpace.x3),
+                    size = GiStockSummarySize.Header
                 )
-                Text(
-                    text = item.publisher,
-                    style = MaterialTheme.typography.titleSmall
-                )
-            }
-            if (brief.news.isNotEmpty() && index != brief.news.lastIndex) {
-                HorizontalDivider()
+                GiDivider()
             }
         }
     }
 }
+
+private suspend fun LazyListState.scrollToTop(itemSizes: Map<Int, Int>, animate: Boolean) {
+    if (!animate) {
+        scrollToItem(0)
+        return
+    }
+    val visible = layoutInfo.visibleItemsInfo
+    val averageSize = if (visible.isEmpty()) 0 else visible.sumOf { it.size } / visible.size
+    val spacing = layoutInfo.mainAxisItemSpacing
+    val distance = (0 until firstVisibleItemIndex).sumOf { (itemSizes[it] ?: averageSize) + spacing } +
+        firstVisibleItemScrollOffset
+    animateScrollBy(-distance.toFloat(), GiMotion.smooth())
+    if (firstVisibleItemIndex != 0 || firstVisibleItemScrollOffset != 0) animateScrollToItem(0)
+}
+
+private const val PINNED_SLIDE_DIVISOR = 4
+private const val COMPOSER_LARGE_TEXT_LINES = 3
 
 @PreviewLightDark
 @Composable
@@ -345,6 +512,7 @@ private fun CompanyDetailScreenPreview() {
             state = SingleCompanyView(
                 companyName = "Apple Inc.",
                 brief = CompanyBrief(
+                    id = "",
                     ticker = "AAPL",
                     name = "Apple Inc.",
                     logoUrl = "",
@@ -416,7 +584,8 @@ private fun CompanyDetailScreenPreview() {
                 )
             ),
             onEvent = {},
-            onAction = {}
+            onAction = {},
+            toastState = rememberGiToastState()
         )
     }
 }
@@ -431,7 +600,8 @@ private fun CompanyDetailScreenLoadingPreview() {
                 loading = true
             ),
             onEvent = {},
-            onAction = {}
+            onAction = {},
+            toastState = rememberGiToastState()
         )
     }
 }

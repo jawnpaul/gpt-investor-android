@@ -135,6 +135,8 @@ class TidbitViewModel(
                 handleDetailAction(action = OnGoBack)
             }
 
+            TidbitDetailEvent.Retry -> getTidbit()
+
             is TidbitDetailEvent.OnClickShare -> {
                 viewModelScope.launch {
                     repository.getShareableLink(_tidbitDetailState.value.id).onSuccess {
@@ -353,6 +355,10 @@ class TidbitViewModel(
         }
     }
 
+    fun showSavedOnly() {
+        _currentPagingFilter.value = TidbitPagingFilterType.Saved
+    }
+
     private fun handleFilter(filter: SectorInput) {
         val newFilterType = when (filter) {
             SectorInput.AllSector -> TidbitPagingFilterType.All
@@ -441,6 +447,7 @@ sealed interface TidbitAction {
 sealed interface TidbitDetailEvent {
     data class GetTidbit(val id: String) : TidbitDetailEvent
     data object GoBack : TidbitDetailEvent
+    data object Retry : TidbitDetailEvent
     data class OnClickLike(val id: String, val newValue: Boolean) : TidbitDetailEvent
     data class OnClickBookmark(val id: String, val newValue: Boolean) : TidbitDetailEvent
     data object OnClickSource : TidbitDetailEvent

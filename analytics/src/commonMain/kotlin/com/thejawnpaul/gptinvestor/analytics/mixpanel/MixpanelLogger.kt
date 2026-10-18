@@ -15,4 +15,6 @@ expect class MixpanelLogger : AnalyticsLogger {
 
     override fun resetUser(eventName: String)
 
+    override fun setUserProperty(name: String, value: String)
+
 }

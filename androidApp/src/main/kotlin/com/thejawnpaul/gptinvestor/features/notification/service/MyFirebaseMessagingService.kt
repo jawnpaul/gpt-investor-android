@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.features.notification.service
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -34,32 +35,35 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        // Handle FCM message
-        remoteMessage.data.let { data ->
-            val deepLinkRoute = data["deep_link"]
-            val title = data["title"] ?: "Notification"
-            val body = data["body"] ?: "You have a new notification"
-            val notificationData = data["notification_data"]
-            val imageUrl = data["image_url"]
+        val data = remoteMessage.data
+        val deepLinkRoute = data["deep_link"]
+        val notificationData = data["notification_data"]
+        val notification = remoteMessage.notification
 
-            showNotification(title, body, deepLinkRoute, notificationData, imageUrl)
-        }
-
-        // Handle notification payload (if sent from Firebase Console)
-        remoteMessage.notification?.let { notification ->
-            val title = notification.title ?: "Notification"
-            val body = notification.body ?: "You have a new notification"
-            val deepLinkRoute = remoteMessage.data["deep_link"]
-            val notificationData = remoteMessage.data["notification_data"]
-            val imageUrl = notification.imageUrl?.toString()
-
-            showNotification(title, body, deepLinkRoute, notificationData, imageUrl)
+        // Messages with a notification block also carry data; post them once, not once per part.
+        if (notification != null) {
+            showNotification(
+                title = notification.title ?: "Notification",
+                body = notification.body ?: "You have a new notification",
+                deepLinkRoute = deepLinkRoute,
+                notificationData = notificationData,
+                imageUrl = notification.imageUrl?.toString()
+            )
+        } else {
+            showNotification(
+                title = data["title"] ?: "Notification",
+                body = data["body"] ?: "You have a new notification",
+                deepLinkRoute = deepLinkRoute,
+                notificationData = notificationData,
+                imageUrl = data["image_url"]
+            )
         }
     }
 
     override fun onNewToken(token: String) {
         scope.launch {
             notificationRepository.saveToken(token)
+            notificationRepository.syncTokenIfNeeded()
         }
     }
 
@@ -77,15 +81,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     ) {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Default Channel",
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            notificationManager.createNotificationChannel(channel)
-        }
-
         // Create intent for when notification is clicked
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -97,9 +92,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             }
         }
 
+        // Distinct per deep link so alerts for different tickers don't replace each other or share a tap target.
+        val notificationId = deepLinkRoute?.hashCode() ?: NOTIFICATION_ID
+
         val pendingIntent = PendingIntent.getActivity(
             this,
-            0,
+            notificationId,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -114,14 +112,15 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         if (imageUrl.isNullOrEmpty()) {
             // Show notification without image
-            notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+            notificationManager.notify(notificationId, notificationBuilder.build())
         } else {
             // Load image with injected Coil ImageLoader
             scope.launch {
                 loadImageAndShowNotification(
                     imageUrl,
                     notificationBuilder,
-                    notificationManager
+                    notificationManager,
+                    notificationId
                 )
             }
         }
@@ -130,7 +129,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     private suspend fun loadImageAndShowNotification(
         imageUrl: String,
         notificationBuilder: NotificationCompat.Builder,
-        notificationManager: NotificationManager
+        notificationManager: NotificationManager,
+        notificationId: Int
     ) {
         try {
             val request = ImageRequest.Builder(this)
@@ -152,26 +152,38 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                             )
                             .build()
 
-                        notificationManager.notify(NOTIFICATION_ID, notification)
-                    } ?: showFallbackNotification(notificationBuilder, notificationManager)
+                        notificationManager.notify(notificationId, notification)
+                    } ?: showFallbackNotification(notificationBuilder, notificationManager, notificationId)
                 }
 
-                else -> showFallbackNotification(notificationBuilder, notificationManager)
+                else -> showFallbackNotification(notificationBuilder, notificationManager, notificationId)
             }
         } catch (_: Exception) {
-            showFallbackNotification(notificationBuilder, notificationManager)
+            showFallbackNotification(notificationBuilder, notificationManager, notificationId)
         }
     }
 
     private fun showFallbackNotification(
         notificationBuilder: NotificationCompat.Builder,
-        notificationManager: NotificationManager
+        notificationManager: NotificationManager,
+        notificationId: Int
     ) {
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+        notificationManager.notify(notificationId, notificationBuilder.build())
     }
 
     companion object {
         private const val CHANNEL_ID = "fcm_default_channel"
         private const val NOTIFICATION_ID = 1001
+
+        fun createDefaultChannel(context: Context) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(
+                    CHANNEL_ID,
+                    "Default Channel",
+                    NotificationManager.IMPORTANCE_DEFAULT
+                )
+                context.getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+            }
+        }
     }
 }

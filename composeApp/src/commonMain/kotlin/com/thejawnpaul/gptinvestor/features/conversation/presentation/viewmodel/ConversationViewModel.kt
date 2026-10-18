@@ -8,12 +8,12 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
-import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
-import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
-import com.thejawnpaul.gptinvestor.features.billing.domain.BillingConstants
-import com.thejawnpaul.gptinvestor.features.billing.domain.model.BillingResult
-import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionEvent
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionNotifier
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionReason
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionSource
+import com.thejawnpaul.gptinvestor.core.session.rateLimitRetryMessage
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
@@ -22,6 +22,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultCon
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
+import com.thejawnpaul.gptinvestor.features.conversation.domain.model.answerFailed
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefaultPromptResponseUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefaultPromptsUseCase
@@ -29,7 +30,9 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInpu
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.state.ConversationView
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction.OnCopy
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
+import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import kotlin.time.Clock
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -45,10 +48,10 @@ class ConversationViewModel(
     private val getInputPromptUseCase: GetInputPromptUseCase,
     private val feedBackRepository: FeedbackRepository,
     private val modelsRepository: ModelsRepository,
-    private val billingRepository: IBillingRepository,
+    private val premiumEventBus: PremiumEventBus,
     private val appPreferences: AppPreferences,
     @Provided private val analyticsLogger: AnalyticsLogger,
-    private val guestRateLimitNotifier: GuestRateLimitNotifier
+    private val guestSessionNotifier: GuestSessionNotifier
 ) : ViewModel() {
 
     private val conversationViewMutableStateFlow = MutableStateFlow(ConversationView())
@@ -68,6 +71,10 @@ class ConversationViewModel(
     val chatInput: String? = savedStateHandle["chatInput"]
 
     private var requestStartTime: Long = 0L
+
+    private var answerJob: Job? = null
+
+    private var answerGeneration = 0
 
     init {
         getDefaultPrompts()
@@ -106,93 +113,91 @@ class ConversationViewModel(
     }
 
     private fun getDefaultPromptResponse(prompt: DefaultPrompt) {
-        conversationViewMutableStateFlow.update {
-            it.copy(loading = true)
-        }
-        requestStartTime = Clock.System.now().toEpochMilliseconds()
-
+        startAnswer(prompt.query)
         logMessageSent(source = "default_prompt", title = prompt.title)
-        getDefaultPromptResponseUseCase(prompt) {
-            it.onFailure {
-                handleConversationFailure(it)
+        val generation = answerGeneration
+        answerJob = getDefaultPromptResponseUseCase(prompt) {
+            if (generation == answerGeneration) {
+                it.fold(::handleConversationFailure, ::handleDefaultPromptResponseSuccess)
             }
-            it.onSuccess { result ->
-                result as StructuredConversation
-                // update the id of the conversation
-                selectedConversationId.update {
-                    Logger.e(result.id.toString())
-                    result.id
-                }
+        }
+    }
 
-                conversationViewMutableStateFlow.update { state ->
-                    state.copy(
-                        loading = result.messageList.last().loading,
-                        conversation = result,
-                        genText = result.messageList.first().response.toString()
-                    )
-                }
-            }
+    private fun handleDefaultPromptResponseSuccess(result: Conversation) {
+        result as StructuredConversation
+        selectedConversationId.update { result.id }
+        conversationViewMutableStateFlow.update { state ->
+            state.copy(
+                loading = !result.streamComplete &&
+                    result.messageList.lastOrNull { it is GenAiTextMessage }?.loading == true,
+                conversation = result,
+                pendingQuery = null
+            )
         }
     }
 
     private fun getInputResponse(query: String? = null) {
-        if (query != null && query.trim().isNotBlank()) {
-            conversationViewMutableStateFlow.update {
-                it.copy(loading = true)
-            }
-            requestStartTime = Clock.System.now().toEpochMilliseconds()
-
-            logMessageSent(source = "user_input")
-            getInputPromptUseCase(
-                ConversationPrompt(
-                    conversationId = selectedConversationId.value,
-                    query = query
-                )
-            ) {
-                it.fold(
-                    ::handleInputResponseFailure,
-                    ::handleInputResponseSuccess
-                )
-            }
-        } else {
-            if (conversation.value.query.trim().isNotEmpty()) {
-                conversationViewMutableStateFlow.update {
-                    it.copy(loading = true)
-                }
-                requestStartTime = Clock.System.now().toEpochMilliseconds()
-                logMessageSent(source = "user_input")
-                getInputPromptUseCase(
-                    ConversationPrompt(
-                        conversationId = selectedConversationId.value,
-                        query = conversation.value.query
-                    )
-                ) {
-                    it.fold(
-                        ::handleInputResponseFailure,
-                        ::handleInputResponseSuccess
-                    )
-                }
-            }
-        }
+        val prompt = query?.takeIf { it.isNotBlank() } ?: conversation.value.query
+        if (prompt.trim().isNotEmpty()) ask(query = prompt, source = "user_input")
     }
 
     private fun getSuggestedPromptResponse(query: String) {
-        conversationViewMutableStateFlow.update {
-            it.copy(loading = true)
-        }
-        requestStartTime = Clock.System.now().toEpochMilliseconds()
+        ask(query = query, source = "suggested_prompt")
+    }
 
-        logMessageSent(source = "suggested_prompt")
-        getInputPromptUseCase(
+    private fun retryAnswer(query: String) {
+        if (query.isBlank() || conversation.value.loading) return
+        ask(query = query, source = null)
+    }
+
+    private fun ask(query: String, source: String?) {
+        startAnswer(query, keepDraft = source == null)
+        source?.let { logMessageSent(source = it) }
+        val generation = answerGeneration
+        answerJob = getInputPromptUseCase(
             ConversationPrompt(
                 conversationId = selectedConversationId.value,
                 query = query
             )
         ) {
-            it.fold(
-                ::handleInputResponseFailure,
-                ::handleInputResponseSuccess
+            if (generation == answerGeneration) {
+                it.fold(
+                    ::handleInputResponseFailure,
+                    ::handleInputResponseSuccess
+                )
+            }
+        }
+    }
+
+    private fun startAnswer(query: String, keepDraft: Boolean = false) {
+        answerGeneration++
+        conversationViewMutableStateFlow.update {
+            it.copy(
+                loading = true,
+                pendingQuery = query,
+                query = if (keepDraft) it.query else "",
+                answerOffline = false
             )
+        }
+        requestStartTime = Clock.System.now().toEpochMilliseconds()
+    }
+
+    private fun stopAnswering() {
+        answerGeneration++
+        answerJob?.cancel()
+        answerJob = null
+        conversationViewMutableStateFlow.update { state ->
+            val conversation = state.conversation as? StructuredConversation
+            val stopped = conversation?.let { stopAnswer(it.messageList) }
+            val next = when {
+                state.pendingQuery != null || conversation == null || stopped == null ->
+                    state.copy(query = state.pendingQuery ?: state.query)
+                else -> state.copy(
+                    conversation = conversation.copy(messageList = stopped.messages.toMutableList()),
+                    query = stopped.restoredQuery ?: state.query
+                )
+            }
+            next.copy(pendingQuery = null, loading = false)
         }
     }
 
@@ -201,6 +206,7 @@ class ConversationViewModel(
     }
 
     private fun handleConversationFailure(failure: Failure) {
+        var shownInline = false
         conversationViewMutableStateFlow.update { state ->
             val updatedConversation =
                 (state.conversation as? StructuredConversation)?.let { conversation ->
@@ -216,27 +222,58 @@ class ConversationViewModel(
                     }
                     conversation.copy(messageList = updatedMessages)
                 } ?: state.conversation
-            state.copy(loading = false, conversation = updatedConversation)
+            shownInline = state.pendingQuery == null &&
+                ((updatedConversation as? StructuredConversation)?.messageList?.lastOrNull() as? GenAiTextMessage)
+                    ?.answerFailed == true
+            state.copy(
+                loading = false,
+                conversation = updatedConversation,
+                pendingQuery = null,
+                query = state.pendingQuery ?: state.query,
+                answerOffline = failure is Failure.NetworkConnection
+            )
         }
         when (failure) {
             is GenAIException -> {
                 Logger.e("AI exception")
-                processAction(ConversationAction.ShowToast("An error occurred"))
+                if (!shownInline) processAction(ConversationAction.ShowToast("An error occurred"))
+            }
+
+            is Failure.GuestSessionExpired -> {
+                guestSessionNotifier.notify(
+                    GuestSessionEvent(reason = GuestSessionReason.Expired, source = GuestSessionSource.Stream)
+                )
+            }
+
+            is Failure.GuestLimitReached -> {
+                val isGuest = conversationViewMutableStateFlow.value.isGuest
+                if (isGuest) {
+                    guestSessionNotifier.notify(
+                        GuestSessionEvent(reason = GuestSessionReason.Limit, source = GuestSessionSource.Stream)
+                    )
+                }
             }
 
             is Failure.RateLimitExceeded -> {
                 val isGuest = conversationViewMutableStateFlow.value.isGuest
                 analyticsLogger.logEvent(
                     eventName = "rate-limit-hit",
-                    params = mapOf("user_type" to if (isGuest) "guest" else "authenticated")
+                    params = mapOf(
+                        "user_type" to if (isGuest) "guest" else "authenticated",
+                        "upgrade" to failure.upgrade
+                    )
                 )
                 Logger.e("Rate limit exceeded")
-                if (isGuest) {
-                    guestRateLimitNotifier.notifyRateLimit()
-                } else {
-                    processAction(
-                        ConversationAction.ShowToast("Rate limit exceeded. Please try again later.")
+                when {
+                    isGuest -> guestSessionNotifier.notify(
+                        GuestSessionEvent(reason = GuestSessionReason.Limit, source = GuestSessionSource.Stream)
                     )
+
+                    failure.upgrade -> premiumEventBus.requestPremium(source = "conversation_rate_limit")
+
+                    else -> viewModelScope.launch {
+                        processAction(ConversationAction.ShowToast(rateLimitRetryMessage(failure.retryAfterSeconds)))
+                    }
                 }
                 conversationViewMutableStateFlow.update { it.copy(showRateLimitBottomSheet = false) }
             }
@@ -252,16 +289,16 @@ class ConversationViewModel(
             }
 
             is Failure.NetworkConnection -> {
-                processAction(ConversationAction.ShowToast("No internet connection"))
+                if (!shownInline) processAction(ConversationAction.ShowToast("No internet connection"))
             }
 
             is Failure.ServerError -> {
-                processAction(ConversationAction.ShowToast("Server error. Please try again later."))
+                if (!shownInline) processAction(ConversationAction.ShowToast("Server error. Please try again later."))
             }
 
             else -> {
                 Logger.e(failure.toString())
-                processAction(ConversationAction.ShowToast("Something went wrong"))
+                if (!shownInline) processAction(ConversationAction.ShowToast("Something went wrong"))
             }
         }
     }
@@ -286,10 +323,10 @@ class ConversationViewModel(
 
         conversationViewMutableStateFlow.update { state ->
             state.copy(
-                query = "",
-                loading = conversation.messageList.last().loading,
+                loading = !conversation.streamComplete &&
+                    conversation.messageList.lastOrNull { it is GenAiTextMessage }?.loading == true,
                 conversation = conversation,
-                genText = conversation.messageList.last().response.toString()
+                pendingQuery = null
             )
         }
     }
@@ -318,6 +355,10 @@ class ConversationViewModel(
 
             is ConversationEvent.SuggestedPromptClicked -> {
                 getSuggestedPromptResponse(event.prompt)
+            }
+
+            is ConversationEvent.RetryAnswer -> {
+                retryAnswer(event.query)
             }
 
             is ConversationEvent.UpdateInputQuery -> {
@@ -361,6 +402,22 @@ class ConversationViewModel(
 
             ConversationEvent.GoToSignUp -> {
                 processAction(ConversationAction.OnGoToSignUp)
+            }
+
+            ConversationEvent.StopAnswering -> {
+                stopAnswering()
+            }
+
+            is ConversationEvent.ShareAnswer -> {
+                processAction(ConversationAction.OnShare(event.text))
+            }
+
+            ConversationEvent.GoToHistory -> {
+                processAction(ConversationAction.OnGoToHistory)
+            }
+
+            is ConversationEvent.OpenCompany -> {
+                processAction(ConversationAction.OnOpenCompany(event.ticker))
             }
         }
     }
@@ -443,20 +500,14 @@ class ConversationViewModel(
         }
     }
 
-    fun launchPurchaseFlow(platformContext: PlatformContext) {
+    fun handleUpgradeClick() {
         viewModelScope.launch {
             if (conversationViewMutableStateFlow.value.isGuest) {
                 appPreferences.setIsGuestLoggedIn(false)
                 processAction(ConversationAction.OnSignOutGuest)
             } else {
-                val result = billingRepository.launchPurchaseFlow(
-                    platformContext = platformContext,
-                    productId = BillingConstants.PRO_SUBSCRIPTION_PRODUCT_ID
-                )
                 handleEvent(ConversationEvent.ShowRateLimitBottomSheet(showBottomSheet = false))
-                if (result is BillingResult.Error) {
-                    processAction(ConversationAction.ShowToast("Billing Error: ${result.message}"))
-                }
+                premiumEventBus.requestPremium(source = "conversation_rate_limit")
             }
         }
     }
@@ -510,6 +561,11 @@ sealed interface ConversationEvent {
 
     data class ShowRateLimitBottomSheet(val showBottomSheet: Boolean) : ConversationEvent
     data object GoToSignUp : ConversationEvent
+    data object StopAnswering : ConversationEvent
+    data class RetryAnswer(val query: String) : ConversationEvent
+    data class ShareAnswer(val text: String) : ConversationEvent
+    data object GoToHistory : ConversationEvent
+    data class OpenCompany(val ticker: String) : ConversationEvent
 }
 
 sealed interface ConversationAction {
@@ -519,6 +575,9 @@ sealed interface ConversationAction {
     data class ShowToast(val message: String) : ConversationAction
     data object OnSignOutGuest : ConversationAction
     data object OnGoToSignUp : ConversationAction
+    data class OnShare(val text: String) : ConversationAction
+    data object OnGoToHistory : ConversationAction
+    data class OnOpenCompany(val ticker: String) : ConversationAction
 }
 
 data class HomeChatInput(val title: String? = null, val input: String? = null)

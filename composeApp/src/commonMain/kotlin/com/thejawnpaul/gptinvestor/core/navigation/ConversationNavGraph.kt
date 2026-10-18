@@ -10,7 +10,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
-import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ConversationScreen
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationViewModel
@@ -18,11 +17,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.compose.viewmodel.koinViewModel
 
-fun NavGraphBuilder.conversationNavGraph(
-    navController: NavHostController,
-    platformActions: PlatformActions,
-    platformContext: PlatformContext
-) {
+fun NavGraphBuilder.conversationNavGraph(navController: NavHostController, platformActions: PlatformActions) {
     composable(
         route = Screen.ConversationScreen.route,
         arguments = listOf(
@@ -65,6 +60,18 @@ fun NavGraphBuilder.conversationNavGraph(
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
                     }
+
+                    is ConversationAction.OnShare -> {
+                        platformActions.shareText(action.text)
+                    }
+
+                    ConversationAction.OnGoToHistory -> {
+                        navController.navigate(Screen.HistoryTabScreen.route) { launchSingleTop = true }
+                    }
+
+                    is ConversationAction.OnOpenCompany -> {
+                        navController.navigate(Screen.CompanyDetailScreen.createRoute(action.ticker))
+                    }
                 }
             }.launchIn(scope)
         }
@@ -75,8 +82,9 @@ fun NavGraphBuilder.conversationNavGraph(
             onEvent = viewModel::handleEvent,
             onAction = viewModel::processAction,
             onUpgradeFromRateLimit = {
-                viewModel.launchPurchaseFlow(platformContext)
-            }
+                viewModel.handleUpgradeClick()
+            },
+            composerModifier = askComposerTransition()
         )
     }
 }

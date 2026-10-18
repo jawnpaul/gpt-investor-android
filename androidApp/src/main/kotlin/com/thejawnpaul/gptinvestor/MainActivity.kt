@@ -25,6 +25,8 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var appUpdateManager: AppUpdateManager
 
+    private var isAppReady = false
+
     private val updateResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode != RESULT_OK) {
@@ -33,7 +35,7 @@ class MainActivity : ComponentActivity() {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        installSplashScreen().setKeepOnScreenCondition { !isAppReady }
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         ActivityContextHolder.set(this)
@@ -48,7 +50,8 @@ class MainActivity : ComponentActivity() {
             var deepLinkRoute by deepLinkRouteState
             App(
                 deepLinkRoute = deepLinkRoute,
-                onDeepLinkConsume = { deepLinkRoute = null }
+                onDeepLinkConsume = { deepLinkRoute = null },
+                onReady = { isAppReady = true }
             )
         }
     }

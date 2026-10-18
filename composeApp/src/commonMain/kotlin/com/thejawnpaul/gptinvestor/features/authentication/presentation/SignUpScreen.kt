@@ -1,287 +1,303 @@
 package com.thejawnpaul.gptinvestor.features.authentication.presentation
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.EaseOutQuart
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.already_have_an_account
+import com.thejawnpaul.gptinvestor.apple_icon
+import com.thejawnpaul.gptinvestor.auth_have_account
 import com.thejawnpaul.gptinvestor.back
-import com.thejawnpaul.gptinvestor.baseline_visibility_off_24
+import com.thejawnpaul.gptinvestor.core.platform.Platform
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
+import com.thejawnpaul.gptinvestor.core.platform.PlatformType
 import com.thejawnpaul.gptinvestor.email_address
 import com.thejawnpaul.gptinvestor.email_conflict_body
 import com.thejawnpaul.gptinvestor.email_conflict_title
-import com.thejawnpaul.gptinvestor.features.component.GPTInvestorButton
+import com.thejawnpaul.gptinvestor.email_placeholder
+import com.thejawnpaul.gptinvestor.error_email_invalid
 import com.thejawnpaul.gptinvestor.google_icon
-import com.thejawnpaul.gptinvestor.ic_email
-import com.thejawnpaul.gptinvestor.ic_lock
-import com.thejawnpaul.gptinvestor.ic_profile
+import com.thejawnpaul.gptinvestor.hide_password
 import com.thejawnpaul.gptinvestor.login
 import com.thejawnpaul.gptinvestor.name
 import com.thejawnpaul.gptinvestor.or
-import com.thejawnpaul.gptinvestor.outline_visibility_24
 import com.thejawnpaul.gptinvestor.password
+import com.thejawnpaul.gptinvestor.show_password
 import com.thejawnpaul.gptinvestor.sign_up
+import com.thejawnpaul.gptinvestor.sign_up_with_apple
 import com.thejawnpaul.gptinvestor.sign_up_with_google
+import com.thejawnpaul.gptinvestor.signup_error_name
+import com.thejawnpaul.gptinvestor.signup_error_password_short
+import com.thejawnpaul.gptinvestor.signup_name_placeholder
+import com.thejawnpaul.gptinvestor.signup_password_placeholder
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
-import com.thejawnpaul.gptinvestor.theme.linkMedium
+import com.thejawnpaul.gptinvestor.theme.GiMotion
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.components.GiBanner
+import com.thejawnpaul.gptinvestor.theme.components.GiBannerTone
+import com.thejawnpaul.gptinvestor.theme.components.GiButton
+import com.thejawnpaul.gptinvestor.theme.components.GiButtonSize
+import com.thejawnpaul.gptinvestor.theme.components.GiButtonVariant
+import com.thejawnpaul.gptinvestor.theme.components.GiFillScrollColumn
+import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiLink
+import com.thejawnpaul.gptinvestor.theme.components.GiLinkText
+import com.thejawnpaul.gptinvestor.theme.components.GiOrDivider
+import com.thejawnpaul.gptinvestor.theme.components.GiTextField
+import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
+import com.thejawnpaul.gptinvestor.theme.components.GiTopBarTitleStyle
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpScreen(state: SignUpUiState, onEvent: (SignUpUiEvent) -> Unit, modifier: Modifier = Modifier) {
-    var passwordHidden by remember { mutableStateOf(true) }
-    val platformContext: PlatformContext = koinInject()
-
-    Scaffold(modifier = modifier, topBar = {
-        Row(
-            modifier = Modifier.statusBarsPadding().fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { onEvent(SignUpUiEvent.GoBack) }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                    contentDescription = stringResource(Res.string.back)
-                )
-            }
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(Res.string.sign_up),
-                style = MaterialTheme.typography.headlineMedium
+fun SignUpScreen(
+    state: SignUpUiState,
+    onEvent: (SignUpUiEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    invalidSubmits: Flow<SignUpField> = emptyFlow(),
+    platformContext: PlatformContext = koinInject()
+) {
+    val scrollState = rememberScrollState()
+    val scrolled by remember { derivedStateOf { scrollState.value > 0 } }
+    val haptics = LocalHapticFeedback.current
+    val focusRequesters = remember { SignUpField.entries.associateWith { FocusRequester() } }
+    LaunchedEffect(invalidSubmits) {
+        invalidSubmits.collect { field ->
+            haptics.performHapticFeedback(GiHaptics.Reject)
+            focusRequesters.getValue(field).requestFocus()
+        }
+    }
+    val loadingMethod = state.loadingMethod
+    val loginText = stringResource(Res.string.login)
+    Scaffold(
+        modifier = modifier,
+        containerColor = GiTheme.colors.bg,
+        contentWindowInsets = WindowInsets(0),
+        topBar = {
+            GiTopBar(
+                title = stringResource(Res.string.sign_up),
+                onBack = { onEvent(SignUpUiEvent.GoBack) },
+                backContentDescription = stringResource(Res.string.back),
+                scrolled = scrolled,
+                titleStyle = GiTopBarTitleStyle.Page
             )
         }
-    }) { paddingValues ->
-
-        Box(
-            modifier = Modifier.padding(paddingValues)
+    ) { innerPadding ->
+        GiFillScrollColumn(
+            modifier = Modifier
+                .padding(innerPadding)
                 .fillMaxSize()
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x4, bottom = GiSpace.x4),
+            scrollState = scrollState
         ) {
-            if (state.loading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Input
-                OutlinedTextField(
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
-                    ),
+            Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
+                GiTextField(
                     value = state.name,
                     onValueChange = { onEvent(SignUpUiEvent.NameChanged(it)) },
-                    label = {
-                        Text(text = stringResource(Res.string.name))
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_profile),
-                            contentDescription = null
-                        )
-                    }
-                )
-
-                // Input
-                OutlinedTextField(
+                    label = stringResource(Res.string.name),
+                    modifier = Modifier.focusRequester(focusRequesters.getValue(SignUpField.Name)),
+                    placeholder = stringResource(Res.string.signup_name_placeholder),
+                    errorText = if (state.nameError) stringResource(Res.string.signup_error_name) else null,
                     keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Email,
+                        capitalization = KeyboardCapitalization.Words,
                         imeAction = ImeAction.Next
                     ),
+                    leadingIcon = GiIcons.user
+                )
+                GiTextField(
                     value = state.email,
                     onValueChange = { onEvent(SignUpUiEvent.EmailChanged(it)) },
-                    label = {
-                        Text(text = stringResource(Res.string.email_address))
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_email),
-                            contentDescription = null
-                        )
-                    }
+                    label = stringResource(Res.string.email_address),
+                    modifier = Modifier.focusRequester(focusRequesters.getValue(SignUpField.Email)),
+                    placeholder = stringResource(Res.string.email_placeholder),
+                    errorText = if (state.emailError) stringResource(Res.string.error_email_invalid) else null,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
+                    leadingIcon = GiIcons.envelopeSimple
                 )
-                // Input
-                OutlinedTextField(
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                GiTextField(
                     value = state.password,
                     onValueChange = { onEvent(SignUpUiEvent.PasswordChanged(it)) },
-                    label = {
-                        Text(text = stringResource(Res.string.password))
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    visualTransformation = if (passwordHidden) {
-                        PasswordVisualTransformation()
+                    label = stringResource(Res.string.password),
+                    modifier = Modifier.focusRequester(focusRequesters.getValue(SignUpField.Password)),
+                    placeholder = stringResource(Res.string.signup_password_placeholder),
+                    errorText = if (state.passwordError) {
+                        stringResource(
+                            Res.string.signup_error_password_short
+                        )
                     } else {
-                        VisualTransformation.None
+                        null
                     },
-                    trailingIcon = {
-                        IconButton(onClick = {
-                            passwordHidden = !passwordHidden
-                        }) {
-                            val visibilityIcon =
-                                if (passwordHidden) {
-                                    Res.drawable.outline_visibility_24
-                                } else {
-                                    Res.drawable.baseline_visibility_off_24
-                                }
-
-                            Icon(
-                                painter = painterResource(visibilityIcon),
-                                contentDescription = null
-                            )
-                        }
-                    },
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_lock),
-                            contentDescription = null
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { onEvent(SignUpUiEvent.SignUpClick) }),
+                    leadingIcon = GiIcons.lock,
+                    isPassword = true,
+                    showPasswordContentDescription = stringResource(Res.string.show_password),
+                    hidePasswordContentDescription = stringResource(Res.string.hide_password)
+                )
+                AnimatedVisibility(
+                    visible = state.showEmailConflictPrompt,
+                    enter = expandVertically(GiMotion.smooth()) +
+                        fadeIn(tween(GiMotion.BASE, delayMillis = GiMotion.INSTANT, easing = EaseOutQuart)),
+                    exit = shrinkVertically(GiMotion.smooth()) + fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing))
+                ) {
+                    GiBanner(
+                        title = stringResource(Res.string.email_conflict_title),
+                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Assertive },
+                        subtitle = stringResource(Res.string.email_conflict_body),
+                        icon = GiIcons.warningCircle,
+                        tone = GiBannerTone.Error
+                    ) {
+                        GiButton(
+                            text = loginText,
+                            onClick = { onEvent(SignUpUiEvent.GoToLogin) },
+                            size = GiButtonSize.Small
                         )
                     }
-                )
-
-                if (state.showEmailConflictPrompt) {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_email),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onErrorContainer
-                            )
-                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text(
-                                    text = stringResource(Res.string.email_conflict_title),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onErrorContainer
-                                )
-                                Text(
-                                    text = stringResource(Res.string.email_conflict_body),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onErrorContainer
-                                )
-                            }
-                        }
-                    }
                 }
-
-                // Done button
-                GPTInvestorButton(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                GiButton(
                     text = stringResource(Res.string.sign_up),
-                    enabled = state.enableButton,
-                    onClick = { onEvent(SignUpUiEvent.SignUpClick) }
+                    onClick = { onEvent(SignUpUiEvent.SignUpClick) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = GiSpace.x2),
+                    enabled = state.isSignUpEnabled,
+                    loading = loadingMethod == AuthMethod.Email
                 )
-
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(Res.string.or).uppercase(),
-                    textAlign = TextAlign.Center
-                )
-
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { onEvent(SignUpUiEvent.SignUpWithGoogle(platformContext = platformContext)) },
-                    enabled = !state.loading
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Image(
-                            modifier = Modifier.size(20.dp),
-                            painter = painterResource(Res.drawable.google_icon),
-                            contentDescription = null
-                        )
-                        Text(text = stringResource(Res.string.sign_up_with_google))
-                    }
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        modifier = Modifier.padding(end = 8.dp),
-                        text = stringResource(Res.string.already_have_an_account),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-
-                    Text(
-                        modifier = Modifier.clickable(
-                            indication = null,
-                            interactionSource = null,
-                            onClick = { onEvent(SignUpUiEvent.GoToLogin) }
-                        ),
-                        text = stringResource(Res.string.login),
-                        textDecoration = TextDecoration.Underline,
-                        style = MaterialTheme.typography.linkMedium
-                    )
-                }
             }
+            GiOrDivider(text = stringResource(Res.string.or), modifier = Modifier.padding(top = GiSpace.x6))
+            Column(
+                modifier = Modifier.padding(top = GiSpace.x4),
+                verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
+            ) {
+                if (Platform.type == PlatformType.IOS) {
+                    GiButton(
+                        text = stringResource(Res.string.sign_up_with_apple),
+                        onClick = { onEvent(SignUpUiEvent.SingUpWithApple) },
+                        modifier = Modifier.fillMaxWidth(),
+                        variant = GiButtonVariant.Secondary,
+                        leadingPainter = painterResource(Res.drawable.apple_icon),
+                        enabled = state.isAppleEnabled,
+                        loading = loadingMethod == AuthMethod.Apple
+                    )
+                }
+                GiButton(
+                    text = stringResource(Res.string.sign_up_with_google),
+                    onClick = { onEvent(SignUpUiEvent.SignUpWithGoogle(platformContext = platformContext)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    variant = GiButtonVariant.Secondary,
+                    leadingPainter = painterResource(Res.drawable.google_icon),
+                    tintLeadingIcon = false,
+                    enabled = state.isGoogleEnabled,
+                    loading = loadingMethod == AuthMethod.Google
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            GiLinkText(
+                text = stringResource(Res.string.auth_have_account, loginText),
+                links = listOf(GiLink(loginText) { onEvent(SignUpUiEvent.GoToLogin) }),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = GiSpace.x8)
+            )
         }
     }
 }
 
-@PreviewLightDark
 @Composable
-private fun SignUpPreview() {
+private fun SignUpScreenPreview(state: SignUpUiState) {
     GPTInvestorTheme {
         SignUpScreen(
-            modifier = Modifier,
-            state = SignUpUiState(),
-            onEvent = {}
+            state = state,
+            onEvent = {},
+            platformContext = object : PlatformContext {}
         )
     }
+}
+
+@PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
+@Composable
+private fun SignUpEmptyPreview() {
+    SignUpScreenPreview(state = SignUpUiState())
+}
+
+@PreviewLightDark
+@Composable
+private fun SignUpInvalidPreview() {
+    SignUpScreenPreview(
+        state = SignUpUiState(
+            name = "Test",
+            email = "notanemail",
+            password = "abc",
+            emailError = true,
+            passwordError = true
+        )
+    )
+}
+
+@PreviewLightDark
+@Composable
+private fun SignUpExistsPreview() {
+    SignUpScreenPreview(
+        state = SignUpUiState(
+            name = "Test",
+            email = "diogo@example.com",
+            password = "investor2026",
+            showEmailConflictPrompt = true
+        )
+    )
+}
+
+@PreviewLightDark
+@Composable
+private fun SignUpLoadingPreview() {
+    SignUpScreenPreview(
+        state = SignUpUiState(
+            name = "Test",
+            email = "diogo@example.com",
+            password = "investor2026",
+            loadingMethod = AuthMethod.Email
+        )
+    )
 }

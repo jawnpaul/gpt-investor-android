@@ -15,4 +15,5 @@ interface MixpanelProvider {
     fun logViewEvent(screenName: String)
     fun identifyUser(userId: String, params: Map<String, Any>)
     fun resetUser()
+    fun setUserProperty(name: String, value: String)
 }

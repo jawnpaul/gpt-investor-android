@@ -1,83 +1,92 @@
 package com.thejawnpaul.gptinvestor.features.search.presentation.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.ask_ai_icon
-import com.thejawnpaul.gptinvestor.ic_arrow_right
+import com.thejawnpaul.gptinvestor.discover_ask_about
+import com.thejawnpaul.gptinvestor.discover_ask_subtitle
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
-import org.jetbrains.compose.resources.painterResource
+import com.thejawnpaul.gptinvestor.theme.GiIconSize
+import com.thejawnpaul.gptinvestor.theme.GiMotion
+import com.thejawnpaul.gptinvestor.theme.GiRadius
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiText
+import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
+import org.jetbrains.compose.resources.stringResource
+
+private val AskRowPaddingVertical = 14.dp
 
 @Composable
-fun SearchAskGptRow(title: String, query: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        onClick = onClick
+fun SearchAskGptRow(query: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val colors = GiTheme.colors
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(GiRadius.md)
+            .background(colors.violetSoft)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                role = Role.Button,
+                onClick = onClick
+            )
+            .background(if (isPressed) colors.ink.copy(alpha = GiMotion.PRESSED_ALPHA) else Color.Transparent)
+            .padding(horizontal = GiSpace.x4, vertical = AskRowPaddingVertical),
+        horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(Res.drawable.ask_ai_icon),
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title.uppercase(),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-                Text(
-                    text = "\"$query\"",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            Icon(
-                painter = painterResource(Res.drawable.ic_arrow_right),
-                contentDescription = null,
-                modifier = Modifier.size(16.dp).rotate(-45f),
-                tint = MaterialTheme.colorScheme.onSurface
-            )
+        Icon(
+            imageVector = GiIcons.mark,
+            contentDescription = null,
+            modifier = Modifier.size(GiIconSize.lg),
+            tint = colors.ink
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            GiText(text = stringResource(Res.string.discover_ask_about, query), style = GiTextStyle.Label)
+            GiText(text = stringResource(Res.string.discover_ask_subtitle), style = GiTextStyle.MetaRelaxed)
         }
+        Icon(
+            imageVector = GiIcons.caretRight,
+            contentDescription = null,
+            modifier = Modifier.size(GiIconSize.sm),
+            tint = colors.muted
+        )
     }
 }
 
 @PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
 @Composable
 private fun SearchAskGptRowPreview() {
     GPTInvestorTheme {
         SearchAskGptRow(
-            title = "Ask GPT Investor",
-            query = "Is Tesla overvalued?",
+            query = "nvi",
             onClick = {},
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.background(GiTheme.colors.bg).padding(GiSpace.gutter)
         )
     }
 }

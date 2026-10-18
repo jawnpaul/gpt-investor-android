@@ -9,7 +9,7 @@ data class HistoryConversationView(
     val conversation: Conversation = DefaultConversation(),
     val query: String = "",
     val loading: Boolean = false,
-    val genText: String = "",
+    val pendingQuery: String? = null,
     val availableModels: List<AvailableModel> = emptyList(),
     val selectedModel: AvailableModel = DefaultModel(),
     val waitlistAvailableOptions: List<String> = listOf(
@@ -23,7 +23,8 @@ data class HistoryConversationView(
     val selectedWaitlistOptions: List<String> = emptyList(),
     val showWaitListBottomSheet: Boolean = false,
     val showRateLimitBottomSheet: Boolean = false,
-    val isGuest: Boolean = false
+    val isGuest: Boolean = false,
+    val answerOffline: Boolean = false
 ) {
     val enableSend = !loading && query.trim().isNotEmpty()
 }

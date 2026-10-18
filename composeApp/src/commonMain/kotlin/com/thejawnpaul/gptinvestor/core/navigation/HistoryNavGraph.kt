@@ -10,7 +10,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
-import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryDetailScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryScreen
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction
@@ -20,11 +19,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.compose.viewmodel.koinViewModel
 
-fun NavGraphBuilder.historyNavGraph(
-    navController: NavHostController,
-    platformActions: PlatformActions,
-    platformContext: PlatformContext
-) {
+fun NavGraphBuilder.historyNavGraph(navController: NavHostController, platformActions: PlatformActions) {
     composable(Screen.HistoryTabScreen.route) {
         val viewModel = koinViewModel<HistoryViewModel>()
         val state = viewModel.historyScreenViewState.collectAsState()
@@ -87,6 +82,20 @@ fun NavGraphBuilder.historyNavGraph(
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
                     }
+
+                    is HistoryDetailAction.OnShare -> {
+                        platformActions.shareText(action.text)
+                    }
+
+                    HistoryDetailAction.OnGoToHistory -> {
+                        if (!navController.popBackStack(Screen.HistoryTabScreen.route, inclusive = false)) {
+                            navController.navigate(Screen.HistoryTabScreen.route)
+                        }
+                    }
+
+                    is HistoryDetailAction.OnOpenCompany -> {
+                        navController.navigate(Screen.CompanyDetailScreen.createRoute(action.ticker))
+                    }
                 }
             }.launchIn(scope)
         }
@@ -97,7 +106,7 @@ fun NavGraphBuilder.historyNavGraph(
             onEvent = viewModel::handleHistoryDetailEvent,
             onAction = viewModel::processHistoryDetailAction,
             onUpgradeFromRateLimit = {
-                viewModel.launchPurchaseFlow(platformContext)
+                viewModel.handleUpgradeClick()
             }
         )
     }

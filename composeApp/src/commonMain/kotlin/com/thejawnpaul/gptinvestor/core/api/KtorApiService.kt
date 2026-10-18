@@ -1,10 +1,13 @@
 package com.thejawnpaul.gptinvestor.core.api
 
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.FirebaseLoginRequest
+import com.thejawnpaul.gptinvestor.features.authentication.data.remote.ForgotPasswordRequest
+import com.thejawnpaul.gptinvestor.features.authentication.data.remote.ForgotPasswordResponse
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.LoginResponse
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpRequest
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.SignUpResponse
+import com.thejawnpaul.gptinvestor.features.billing.data.remote.AppleVerifyRequest
 import com.thejawnpaul.gptinvestor.features.billing.data.remote.VerifyPurchaseRequest
 import com.thejawnpaul.gptinvestor.features.billing.data.remote.VerifyPurchaseResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyBriefRemote
@@ -24,11 +27,16 @@ import com.thejawnpaul.gptinvestor.features.conversation.data.remote.AiChatReque
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.DefaultPromptRemote
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityRequest
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityResponse
+import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.DigestResponse
 import com.thejawnpaul.gptinvestor.features.guest.data.remote.GuestLoginRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenResponse
+import com.thejawnpaul.gptinvestor.features.postauthonboarding.data.remote.SaveOnboardingAnswersRequest
+import com.thejawnpaul.gptinvestor.features.postauthonboarding.data.remote.SaveOnboardingAnswersResponse
 import com.thejawnpaul.gptinvestor.features.search.data.remote.ClearHistoryResponse
 import com.thejawnpaul.gptinvestor.features.search.data.remote.SearchResponse
+import com.thejawnpaul.gptinvestor.features.settings.data.remote.model.UpdateUserSettingsRequest
+import com.thejawnpaul.gptinvestor.features.settings.data.remote.model.UserSettingsResponse
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.AllTidbitResponse
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitBookmarkRequest
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitBookmarkResponse
@@ -36,6 +44,11 @@ import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitLikeRequest
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitLikeResponse
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitRemote
 import com.thejawnpaul.gptinvestor.features.toppick.data.remote.TopPickRemote
+import com.thejawnpaul.gptinvestor.features.trial.data.remote.model.StartTrialResponse
+import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistRequest
+import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistResponse
+import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.RemoveWatchlistResponse
+import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.WatchlistResponse
 import com.thejawnpaul.gptinvestor.remote.TokenResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -45,6 +58,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.preparePost
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
@@ -168,6 +182,11 @@ class KtorApiService(@Provided private val client: HttpClient) {
             setBody(request)
         }.toKtorResponse()
 
+    suspend fun requestPasswordReset(request: ForgotPasswordRequest): KtorResponse<ForgotPasswordResponse> =
+        client.post("v1.1/forgot-password") {
+            setBody(request)
+        }.toKtorResponse()
+
     suspend fun verifyPlayPurchase(request: VerifyPurchaseRequest): KtorResponse<VerifyPurchaseResponse> =
         client.post("v1/google-play/verify") {
             setBody(request)
@@ -208,6 +227,42 @@ class KtorApiService(@Provided private val client: HttpClient) {
 
     suspend fun clearSearchHistory(): KtorResponse<ClearHistoryResponse> =
         client.delete("v1.1/search/history").toKtorResponse()
+
+    suspend fun saveOnboardingAnswers(
+        request: SaveOnboardingAnswersRequest
+    ): KtorResponse<SaveOnboardingAnswersResponse> = client.post("v1/user/onboarding") {
+        setBody(request)
+    }.toKtorResponse()
+
+    suspend fun getWatchlist(page: Int = 1, pageSize: Int = 20): KtorResponse<WatchlistResponse> =
+        client.get("v1/watchlist") {
+            parameter("page", page)
+            parameter("page_size", pageSize)
+        }.toKtorResponse()
+
+    suspend fun addToWatchlist(request: AddWatchlistRequest): KtorResponse<AddWatchlistResponse> =
+        client.post("v1/watchlist") {
+            setBody(request)
+        }.toKtorResponse()
+
+    suspend fun removeFromWatchlist(ticker: String): KtorResponse<RemoveWatchlistResponse> =
+        client.delete("v1/watchlist/$ticker").toKtorResponse()
+
+    suspend fun getDailyDigest(): KtorResponse<DigestResponse> = client.get("v1/digest").toKtorResponse()
+
+    suspend fun startFreeTrial(): KtorResponse<StartTrialResponse> = client.post("v1/trial/start").toKtorResponse()
+
+    suspend fun getUserSettings(): KtorResponse<UserSettingsResponse> = client.get("v1/user/settings").toKtorResponse()
+
+    suspend fun updateUserSettings(request: UpdateUserSettingsRequest): KtorResponse<UserSettingsResponse> =
+        client.put("v1/user/settings") {
+            setBody(request)
+        }.toKtorResponse()
+
+    suspend fun verifyApplePurchase(request: AppleVerifyRequest): KtorResponse<VerifyPurchaseResponse> =
+        client.post("v1/apple/verify") {
+            setBody(request)
+        }.toKtorResponse()
 }
 
 class KtorResponse<T>(val isSuccessful: Boolean, val body: T?, val errorBody: String?, val code: Int)

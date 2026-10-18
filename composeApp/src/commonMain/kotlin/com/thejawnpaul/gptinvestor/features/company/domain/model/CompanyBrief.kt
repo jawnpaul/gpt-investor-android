@@ -6,10 +6,12 @@ import com.thejawnpaul.gptinvestor.core.utility.toReadable
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.BriefNewsItem
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.BriefOpportunityRisk
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyBriefRemote
+import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.time.Clock
 
 data class CompanyBrief(
+    val id: String,
     val ticker: String,
     val name: String,
     val logoUrl: String,
@@ -21,7 +23,8 @@ data class CompanyBrief(
     val keyNumbers: List<KeyNumber>,
     val news: List<NewsBrief>,
     val risk: BriefSection?,
-    val opportunity: BriefSection?
+    val opportunity: BriefSection?,
+    val isWatched: Boolean = false
 )
 
 enum class BriefSentiment { Bullish, Bearish, Neutral }
@@ -71,8 +74,12 @@ private fun Float.formatRatio(): String {
 
 private fun Float.formatSignedPercent(): String {
     val rounded = (this * 10).roundToInt() / 10f
-    val sign = if (rounded > 0f) "+" else ""
-    return "$sign$rounded%"
+    val sign = when {
+        rounded > 0f -> "+"
+        rounded < 0f -> "\u2212"
+        else -> ""
+    }
+    return "$sign${abs(rounded)}%"
 }
 
 private fun Float.formatPercent(): String {
@@ -81,6 +88,7 @@ private fun Float.formatPercent(): String {
 }
 
 fun CompanyBriefRemote.toBrief(now: Long = Clock.System.now().epochSeconds): CompanyBrief = CompanyBrief(
+    id = id.orEmpty(),
     ticker = ticker.orEmpty(),
     name = companyName.orEmpty(),
     logoUrl = logoUrl?.toHttpsUrl().orEmpty(),
@@ -92,7 +100,8 @@ fun CompanyBriefRemote.toBrief(now: Long = Clock.System.now().epochSeconds): Com
     keyNumbers = buildBriefKeyNumbers(),
     news = news.orEmpty().map { it.toBrief(now) },
     risk = risk?.toSection(),
-    opportunity = opportunity?.toSection()
+    opportunity = opportunity?.toSection(),
+    isWatched = isWatched ?: false
 )
 
 private fun CompanyBriefRemote.buildBriefKeyNumbers(): List<KeyNumber> = buildList {

@@ -2,26 +2,39 @@ package com.thejawnpaul.gptinvestor.core.navigation
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DefaultAuthenticationAction
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DefaultAuthenticationScreen
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.DefaultAuthenticationViewModel
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.FORGOT_PASSWORD_EMAIL_ARG
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.ForgotPasswordScreen
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.ForgotPasswordUiAction
+import com.thejawnpaul.gptinvestor.features.authentication.presentation.ForgotPasswordViewModel
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.LoginScreen
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.LoginUiAction
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.LoginViewModel
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.SignUpScreen
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.SignUpUiAction
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.SignUpViewModel
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import org.koin.compose.viewmodel.koinViewModel
 
-fun NavGraphBuilder.authenticationNavGraph(navController: NavHostController, platformActions: PlatformActions) {
+fun NavGraphBuilder.authenticationNavGraph(
+    navController: NavHostController,
+    platformActions: PlatformActions,
+    hasCompletedPostAuthOnboarding: Boolean
+) {
     composable(route = Screen.DefaultAuthenticationScreen.route) {
         val viewModel = koinViewModel<DefaultAuthenticationViewModel>()
         val state = viewModel.loading.collectAsState()
@@ -30,7 +43,11 @@ fun NavGraphBuilder.authenticationNavGraph(navController: NavHostController, pla
             viewModel.actions.onEach { action ->
                 when (action) {
                     DefaultAuthenticationAction.OnGoToHome -> {
-                        navigateToHome(navController, Screen.DefaultAuthenticationScreen.route)
+                        navigateAfterAuth(
+                            navController,
+                            Screen.DefaultAuthenticationScreen.route,
+                            hasCompletedPostAuthOnboarding
+                        )
                     }
 
                     DefaultAuthenticationAction.OnGoToSignUp -> {
@@ -39,6 +56,10 @@ fun NavGraphBuilder.authenticationNavGraph(navController: NavHostController, pla
 
                     is DefaultAuthenticationAction.ShowToast -> {
                         platformActions.showMessage(action.message)
+                    }
+
+                    is DefaultAuthenticationAction.OpenUrl -> {
+                        platformActions.openUrl(action.url)
                     }
                 }
             }.launchIn(scope)
@@ -71,13 +92,50 @@ fun NavGraphBuilder.authenticationNavGraph(navController: NavHostController, pla
                     }
 
                     LoginUiAction.OnGoToHome -> {
-                        navigateToHome(navController, Screen.LoginScreen.route)
+                        navigateAfterAuth(navController, Screen.LoginScreen.route, hasCompletedPostAuthOnboarding)
+                    }
+
+                    is LoginUiAction.OnGoToForgotPassword -> {
+                        navController.navigate(Screen.ForgotPasswordScreen.createRoute(action.email))
+                    }
+
+                    is LoginUiAction.InvalidSubmit -> Unit
+                }
+            }.launchIn(scope)
+        }
+        val invalidSubmits = remember(viewModel) {
+            viewModel.actions.filterIsInstance<LoginUiAction.InvalidSubmit>().map { it.firstInvalid }
+        }
+        LoginScreen(state = state.value, onEvent = viewModel::handleEvent, invalidSubmits = invalidSubmits)
+    }
+
+    composable(
+        route = Screen.ForgotPasswordScreen.route,
+        arguments = listOf(
+            navArgument(FORGOT_PASSWORD_EMAIL_ARG) {
+                type = NavType.StringType
+                defaultValue = ""
+            }
+        )
+    ) {
+        val viewModel = koinViewModel<ForgotPasswordViewModel>()
+        val state = viewModel.uiState.collectAsState()
+        val scope = rememberCoroutineScope()
+        LaunchedEffect(Unit) {
+            viewModel.actions.onEach { action ->
+                when (action) {
+                    ForgotPasswordUiAction.OnGoBack -> {
+                        navController.navigateUp()
+                    }
+
+                    is ForgotPasswordUiAction.OnShowToast -> {
+                        platformActions.showMessage(action.message)
                     }
                 }
             }.launchIn(scope)
         }
 
-        LoginScreen(state = state.value, onEvent = viewModel::handleEvent)
+        ForgotPasswordScreen(state = state.value, onEvent = viewModel::handleEvent)
     }
 
     composable(route = Screen.SignUpScreen.route) {
@@ -92,7 +150,7 @@ fun NavGraphBuilder.authenticationNavGraph(navController: NavHostController, pla
                     }
 
                     SignUpUiAction.OnGoToHome -> {
-                        navigateToHome(navController, Screen.SignUpScreen.route)
+                        navigateAfterAuth(navController, Screen.SignUpScreen.route, hasCompletedPostAuthOnboarding)
                     }
 
                     SignUpUiAction.OnGoToLogin -> {
@@ -102,13 +160,33 @@ fun NavGraphBuilder.authenticationNavGraph(navController: NavHostController, pla
                     is SignUpUiAction.OnShowToast -> {
                         platformActions.showMessage(action.message)
                     }
+
+                    is SignUpUiAction.InvalidSubmit -> Unit
                 }
             }.launchIn(scope)
+        }
+        val invalidSubmits = remember(viewModel) {
+            viewModel.actions.filterIsInstance<SignUpUiAction.InvalidSubmit>().map { it.firstInvalid }
         }
         SignUpScreen(
             modifier = Modifier,
             state = state.value,
-            onEvent = viewModel::handleEvent
+            onEvent = viewModel::handleEvent,
+            invalidSubmits = invalidSubmits
         )
+    }
+}
+
+private fun navigateAfterAuth(
+    navController: androidx.navigation.NavHostController,
+    popUpToRoute: String,
+    hasCompletedPostAuthOnboarding: Boolean
+) {
+    if (!hasCompletedPostAuthOnboarding) {
+        navController.navigate(Screen.PostAuthOnboardingScreen.route) {
+            popUpTo(popUpToRoute) { inclusive = true }
+        }
+    } else {
+        navigateToHome(navController, popUpToRoute)
     }
 }

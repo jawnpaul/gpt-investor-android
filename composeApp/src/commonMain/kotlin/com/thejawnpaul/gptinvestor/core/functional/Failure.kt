@@ -29,9 +29,13 @@ sealed class Failure {
 
     data object AlreadyExists : Failure()
 
-    data object RateLimitExceeded : Failure()
+    data class RateLimitExceeded(val upgrade: Boolean = true, val retryAfterSeconds: Long? = null) : Failure()
 
     data object ContextLimitReached : Failure()
+
+    data object GuestSessionExpired : Failure()
+
+    data object GuestLimitReached : Failure()
 
     /** * Extend this class for feature specific failures.*/
     abstract class FeatureFailure : Failure()

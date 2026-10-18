@@ -26,6 +26,13 @@ fun NavGraphBuilder.onboardingNavGraph(navController: NavHostController) {
                             popUpTo(0) { inclusive = true }
                         }
                     }
+
+                    OnboardingAction.NavigateToSignUp -> {
+                        navController.navigate(Screen.DefaultAuthenticationScreen.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                        navController.navigate(Screen.SignUpScreen.route)
+                    }
                 }
             }.launchIn(scope)
         }
@@ -33,10 +40,12 @@ fun NavGraphBuilder.onboardingNavGraph(navController: NavHostController) {
             state = state.value,
             searchResults = viewModel.searchResults,
             onNextScreen = viewModel::onNextScreen,
+            onBack = viewModel::onPreviousScreen,
             onSkip = viewModel::onSkip,
             onSelectStock = viewModel::onStockSelected,
             onSearchQueryChange = viewModel::onSearchQueryChanged,
             onBackToStockSelection = viewModel::onBackToStockSelection,
+            onRetryBrief = viewModel::onRetryBrief,
             onFinish = viewModel::onFinish
         )
     }

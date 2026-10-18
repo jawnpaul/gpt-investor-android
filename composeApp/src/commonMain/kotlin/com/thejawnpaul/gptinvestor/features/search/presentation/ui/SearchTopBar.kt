@@ -1,41 +1,30 @@
 package com.thejawnpaul.gptinvestor.features.search.presentation.ui
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.back
-import com.thejawnpaul.gptinvestor.ic_search
+import com.thejawnpaul.gptinvestor.clear_search
 import com.thejawnpaul.gptinvestor.search_a_stock_to_analyse
-import com.thejawnpaul.gptinvestor.theme.LocalGPTInvestorColors
-import org.jetbrains.compose.resources.painterResource
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.components.GiIconButton
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiSearchField
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -47,75 +36,44 @@ fun SearchTopBar(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val gptInvestorColors = LocalGPTInvestorColors.current
-
-    Column(
+    Row(
         modifier = modifier
-            .statusBarsPadding()
             .fillMaxWidth()
+            .windowInsetsPadding(WindowInsets.statusBars)
+            .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x2, bottom = GiSpace.x3),
+        horizontalArrangement = Arrangement.spacedBy(GiSpace.x2),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        GiIconButton(
+            icon = GiIcons.caretLeft,
+            contentDescription = stringResource(Res.string.back),
+            onClick = onBack
+        )
+        GiSearchField(
+            value = query,
+            onValueChange = onQueryChange,
+            placeholder = stringResource(Res.string.search_a_stock_to_analyse),
+            clearContentDescription = stringResource(Res.string.clear_search),
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                    contentDescription = stringResource(Res.string.back)
-                )
-            }
+                .weight(1f)
+                .focusRequester(focusRequester),
+            onSearch = onSearch
+        )
+    }
+}
 
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(corner = CornerSize(20.dp)),
-                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        modifier = Modifier.size(16.dp),
-                        painter = painterResource(Res.drawable.ic_search),
-                        contentDescription = null
-                    )
-                    BasicTextField(
-                        modifier = Modifier
-                            .weight(1f)
-                            .focusRequester(focusRequester),
-                        value = query,
-                        onValueChange = onQueryChange,
-                        maxLines = 1,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Search
-                        ),
-                        keyboardActions = KeyboardActions(onSearch = { onSearch() }),
-                        decorationBox = { innerTextField ->
-                            Box {
-                                if (query.isBlank()) {
-                                    Text(
-                                        text = stringResource(Res.string.search_a_stock_to_analyse),
-                                        style = MaterialTheme.typography.titleSmall,
-                                        color = gptInvestorColors.textColors.secondary50
-                                    )
-                                }
-                                innerTextField()
-                            }
-                        },
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
-                        cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface)
-                    )
-                }
-            }
-        }
+@PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
+@Composable
+private fun SearchTopBarPreview() {
+    GPTInvestorTheme {
+        SearchTopBar(
+            query = "nvi",
+            focusRequester = FocusRequester(),
+            onQueryChange = {},
+            onSearch = {},
+            onBack = {},
+            modifier = Modifier.background(GiTheme.colors.bg)
+        )
     }
 }

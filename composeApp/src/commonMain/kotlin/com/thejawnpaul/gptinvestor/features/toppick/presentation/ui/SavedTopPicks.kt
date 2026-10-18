@@ -1,35 +1,19 @@
 package com.thejawnpaul.gptinvestor.features.toppick.presentation.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.back
+import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.ContentEmptyState
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
+import com.thejawnpaul.gptinvestor.saved_count
 import com.thejawnpaul.gptinvestor.saved_picks
+import com.thejawnpaul.gptinvestor.saved_picks_empty_body
+import com.thejawnpaul.gptinvestor.saved_picks_empty_title
+import com.thejawnpaul.gptinvestor.see_todays_picks
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -37,62 +21,41 @@ fun SavedTopPicksScreen(
     state: TopPicksView,
     onGoBack: () -> Unit,
     onGoToDetail: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onSeeTodaysPicks: (() -> Unit)? = null
 ) {
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            Row(
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { onGoBack() }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = stringResource(Res.string.back)
-                    )
-                }
+    val count = state.topPicks.size
+    TopPickListScaffold(
+        title = stringResource(Res.string.saved_picks),
+        subtitle = if (count > 0) stringResource(Res.string.saved_count, count) else null,
+        state = state,
+        onGoBack = onGoBack,
+        onGoToDetail = onGoToDetail,
+        modifier = modifier
+    ) {
+        ContentEmptyState(
+            icon = GiIcons.bookmarkSimple,
+            title = stringResource(Res.string.saved_picks_empty_title),
+            body = stringResource(Res.string.saved_picks_empty_body),
+            actionText = stringResource(Res.string.see_todays_picks),
+            onAction = onSeeTodaysPicks
+        )
+    }
+}
 
-                Text(
-                    text = stringResource(Res.string.saved_picks),
-                    style = MaterialTheme.typography.headlineSmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    ) { innerPadding ->
+@PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
+@Composable
+private fun SavedTopPicksEmptyPreview() {
+    GPTInvestorTheme {
+        SavedTopPicksScreen(state = TopPicksView(), onGoBack = {}, onGoToDetail = {}, onSeeTodaysPicks = {})
+    }
+}
 
-        Box(modifier = Modifier.padding(innerPadding).fillMaxSize(), contentAlignment = Alignment.TopStart) {
-            Column(modifier = Modifier) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(horizontal = 0.dp)
-                ) {
-                    if (state.loading) {
-                        item {
-                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                        }
-                    }
-
-                    items(
-                        items = state.topPicks,
-                        key = { topPickPresentation -> topPickPresentation.id }
-                    ) { pickPresentation ->
-                        SingleTopPickItem(
-                            modifier = Modifier,
-                            pickPresentation = pickPresentation,
-                            onClick = {
-                                onGoToDetail(pickPresentation.id)
-                            }
-                        )
-                        Spacer(modifier = Modifier.size(16.dp))
-                    }
-                }
-            }
-        }
+@PreviewLightDark
+@Composable
+private fun SavedTopPicksPreview() {
+    GPTInvestorTheme {
+        SavedTopPicksScreen(state = TopPicksView(topPicks = listOf(previewPick)), onGoBack = {}, onGoToDetail = {})
     }
 }

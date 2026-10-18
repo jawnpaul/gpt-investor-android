@@ -53,12 +53,15 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
     }
 
     data object HomeTabScreen : Screen("home_tab_screen", true)
-    data object DiscoverTabScreen : Screen("discover_tab_screen?sector={sector}", true) {
+    data object DiscoverTabScreen : Screen("discover_home_tab_screen", true)
+    data object BrowseStocksScreen : Screen("discover_tab_screen?sector={sector}", false) {
         const val DEEP_LINK = "app://gpt-investor/discover_tab_screen"
         fun createRoute(sectorKey: String? = null) =
             if (sectorKey != null) "discover_tab_screen?sector=$sectorKey" else "discover_tab_screen"
     }
-    data object HistoryTabScreen : Screen("history_tab_screen", true)
+    data object HistoryTabScreen : Screen("history_tab_screen", false)
+    data object WatchlistTabScreen : Screen("watchlist_tab_screen", true)
+    data object ProfileTabScreen : Screen("profile_tab_screen", true)
 
     data object TidbitDetailScreen : Screen("tidbit_detail_screen/{tidbitId}", false) {
         fun createRoute(tidbitId: String) = "tidbit_detail_screen/$tidbitId"
@@ -70,7 +73,12 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
     data object DefaultAuthenticationScreen : Screen("default_authentication_screen", false)
     data object SignUpScreen : Screen("sign_up_screen", false)
     data object LoginScreen : Screen("login_screen", false)
+    data object ForgotPasswordScreen : Screen("forgot_password_screen?email={email}", false) {
+        fun createRoute(email: String) = "forgot_password_screen?email=${email.encodeURLParameter()}"
+    }
     data object OnboardingScreen : Screen("onboarding_screen", false)
+    data object PostAuthOnboardingScreen : Screen("post_auth_onboarding_screen", false)
     data object SearchScreen : Screen("search_screen", false)
     data object AllTrendingScreen : Screen("all_trending_screen", false)
+    data object DigestDetailScreen : Screen("digest_detail_screen", false)
 }

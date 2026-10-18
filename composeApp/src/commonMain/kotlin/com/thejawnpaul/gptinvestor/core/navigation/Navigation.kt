@@ -4,16 +4,26 @@ package com.thejawnpaul.gptinvestor.core.navigation
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
 import com.thejawnpaul.gptinvestor.features.guest.presentation.GuestScreen
+import com.thejawnpaul.gptinvestor.features.premium.presentation.ui.PremiumSheet
+import com.thejawnpaul.gptinvestor.features.premium.presentation.viewmodel.PremiumViewModel
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun SetUpNavGraph(
@@ -21,33 +31,63 @@ fun SetUpNavGraph(
     modifier: Modifier = Modifier,
     isUserSignedIn: Boolean = false,
     isGuestSignedIn: Boolean = false,
-    hasCompletedOnboarding: Boolean = false
+    hasCompletedOnboarding: Boolean = false,
+    hasCompletedPostAuthOnboarding: Boolean = false
 ) {
     val platformContext: PlatformContext = koinInject()
     val platformActions: PlatformActions = koinInject()
+    val premiumViewModel = koinViewModel<PremiumViewModel>()
+    val premiumState by premiumViewModel.state.collectAsState()
 
-    val startDestination = initialDestination(isUserSignedIn, isGuestSignedIn, hasCompletedOnboarding)
+    val startDestination = initialDestination(
+        isUserSignedIn,
+        isGuestSignedIn,
+        hasCompletedOnboarding,
+        hasCompletedPostAuthOnboarding
+    )
 
-    SharedTransitionLayout {
-        CompositionLocalProvider(LocalSharedTransitionScope provides this) {
-            NavHost(
-                navController = navController,
-                startDestination = startDestination,
-                modifier = modifier
-            ) {
-                onboardingNavGraph(navController)
-                authenticationNavGraph(navController, platformActions)
-                investorNavGraph(navController, platformActions)
-                discoverNavGraph(navController)
-                companyNavGraph(navController, platformActions)
-                conversationNavGraph(navController, platformActions, platformContext)
-                historyNavGraph(navController, platformActions, platformContext)
-                topPickNavGraph(navController, platformActions)
-                tidbitNavGraph(navController, platformActions)
-                settingsNavGraph(navController)
-                searchNavGraph(navController)
-                trendingNavGraph(navController)
-                guestNavGraph(navController, platformActions, platformContext)
+    if (premiumState.isVisible) {
+        PremiumSheet(
+            state = premiumState,
+            onDismiss = premiumViewModel::dismiss,
+            onPurchase = premiumViewModel::purchase
+        )
+    }
+
+    Scaffold(
+        modifier = modifier,
+        contentWindowInsets = WindowInsets(0),
+        bottomBar = { BottomNavBar(navController) }
+    ) { innerPadding ->
+        SharedTransitionLayout {
+            CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+                NavHost(
+                    navController = navController,
+                    startDestination = startDestination,
+                    enterTransition = navEnterTransition,
+                    exitTransition = navExitTransition,
+                    popEnterTransition = navPopEnterTransition,
+                    popExitTransition = navPopExitTransition,
+                    modifier = Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding)
+                ) {
+                    onboardingNavGraph(navController)
+                    postAuthOnboardingNavGraph(navController)
+                    authenticationNavGraph(navController, platformActions, hasCompletedPostAuthOnboarding)
+                    investorNavGraph(navController, platformActions)
+                    discoverNavGraph(navController)
+                    browseStocksNavGraph(navController)
+                    companyNavGraph(navController, platformActions)
+                    conversationNavGraph(navController, platformActions)
+                    historyNavGraph(navController, platformActions)
+                    topPickNavGraph(navController, platformActions)
+                    tidbitNavGraph(navController, platformActions)
+                    settingsNavGraph(navController)
+                    searchNavGraph(navController)
+                    trendingNavGraph(navController)
+                    watchlistNavGraph(navController, platformActions)
+                    profileNavGraph(navController, platformActions)
+                    guestNavGraph(navController, platformActions, platformContext)
+                }
             }
         }
     }
@@ -60,6 +100,10 @@ fun SetUpNavGraph(
             ) {
                 if (isGuestSignedIn) {
                     navController.navigate(GuestScreen.GuestHomeTab.route) {
+                        popUpTo(currentRoute) { inclusive = true }
+                    }
+                } else if (!hasCompletedPostAuthOnboarding) {
+                    navController.navigate(Screen.PostAuthOnboardingScreen.route) {
                         popUpTo(currentRoute) { inclusive = true }
                     }
                 } else {
@@ -80,8 +124,10 @@ fun SetUpNavGraph(
 private fun initialDestination(
     isUserSignedIn: Boolean,
     isGuestSignedIn: Boolean,
-    hasCompletedOnboarding: Boolean
+    hasCompletedOnboarding: Boolean,
+    hasCompletedPostAuthOnboarding: Boolean
 ): String = when {
+    isUserSignedIn && !hasCompletedPostAuthOnboarding -> Screen.PostAuthOnboardingScreen.route
     isUserSignedIn -> Screen.HomeTabScreen.route
     isGuestSignedIn -> GuestScreen.GuestHomeTab.route
     !hasCompletedOnboarding -> Screen.OnboardingScreen.route

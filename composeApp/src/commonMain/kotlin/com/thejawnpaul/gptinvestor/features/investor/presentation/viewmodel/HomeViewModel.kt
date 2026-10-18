@@ -11,25 +11,35 @@ import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfigClient
 import com.thejawnpaul.gptinvestor.core.utility.toTwoDecimalPlaces
 import com.thejawnpaul.gptinvestor.features.authentication.data.remote.User
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
-import com.thejawnpaul.gptinvestor.features.authentication.presentation.DrawerState
+import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetTrendingCompaniesUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultPrompt
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
-import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetDefaultPromptsUseCase
+import com.thejawnpaul.gptinvestor.features.digest.domain.DigestRepository
+import com.thejawnpaul.gptinvestor.features.digest.presentation.digestSentimentOf
+import com.thejawnpaul.gptinvestor.features.digest.presentation.formatMarketDate
+import com.thejawnpaul.gptinvestor.features.digest.presentation.formatTickerList
+import com.thejawnpaul.gptinvestor.features.digest.presentation.formatUpdatedAt
+import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestStatus
+import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DailyDigestView
+import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.LockedStockDigestPresentation
+import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.StockDigestPresentation
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
-import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.OnGoToAllTidbits
-import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.OnGoToTidbitDetail
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.OnStartConversation
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
-import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
+import com.thejawnpaul.gptinvestor.features.premium.domain.PREMIUM_SOURCE_WATCHLIST_FULL
+import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistFailure
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -39,8 +49,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import org.koin.core.annotation.KoinViewModel
 import org.koin.core.annotation.Provided
 
@@ -49,23 +61,29 @@ class HomeViewModel(
     private val getTopPicksUseCase: GetTopPicksUseCase,
     private val getTrendingCompaniesUseCase: GetTrendingCompaniesUseCase,
     private val authenticationRepository: AuthenticationRepository,
-    private val getDefaultPromptsUseCase: GetDefaultPromptsUseCase,
     remoteConfig: RemoteConfigClient,
     private val preferences: AppPreferences,
     @Provided private val analyticsLogger: AnalyticsLogger,
     private val notificationRepository: NotificationRepository,
     private val modelsRepository: ModelsRepository,
-    private val tidbitRepository: TidbitRepository
+    private val digestRepository: DigestRepository,
+    private val watchlistRepository: WatchlistRepository,
+    private val premiumEventBus: PremiumEventBus,
+    private val billingRepository: IBillingRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(HomeUiState(timePeriod = computeTimePeriod()))
+    private val _uiState = MutableStateFlow(
+        HomeUiState(
+            timePeriod = computeTimePeriod(),
+            todayLabel = formatTodayLabel(Clock.System.todayIn(TimeZone.currentSystemDefault()))
+        )
+    )
     val uiState = combine(
         _uiState.asStateFlow(),
         preferences.userName,
         preferences.isGuestLoggedIn
     ) { state, userName, isGuestLoggedIn ->
         state.copy(
-            drawerState = state.drawerState.copy(user = userName),
             isGuestSession = isGuestLoggedIn == true,
             firstName = extractFirstName(userName)
         )
@@ -88,18 +106,19 @@ class HomeViewModel(
         getTopPicks()
         getTrendingCompanies()
         getCurrentUser()
-        getTodayTidbit()
         logHomeScreenViewed()
+        getDailyDigest()
+
+        viewModelScope.launch {
+            billingRepository.purchaseVerified.collect { getDailyDigest() }
+        }
 
         viewModelScope.launch {
             preferences.themePreference.collect { theme ->
-                _uiState.update {
-                    it.copy(
-                        theme = theme,
-                        drawerState = it.drawerState.copy(theme = theme)
-                    )
-                }
+                _uiState.update { it.copy(theme = theme) }
             }
+        }
+        viewModelScope.launch {
             preferences.notificationPermission.collect { permission ->
                 _uiState.update { it.copy(requestForNotificationPermission = permission) }
             }
@@ -107,11 +126,23 @@ class HomeViewModel(
     }
 
     private fun getTopPicks() {
-        _uiState.update { it.copy(topPicksView = it.topPicksView.copy(loading = true, error = null)) }
+        _uiState.update {
+            it.copy(
+                topPicksView = it.topPicksView.copy(
+                    loading = true,
+                    error = null
+                )
+            )
+        }
         getTopPicksUseCase(GetTopPicksUseCase.None()) { result ->
             result.onFailure {
                 _uiState.update { state ->
-                    state.copy(topPicksView = state.topPicksView.copy(loading = false, error = "Something went wrong"))
+                    state.copy(
+                        topPicksView = state.topPicksView.copy(
+                            loading = false,
+                            error = "Something went wrong"
+                        )
+                    )
                 }
             }
             result.onSuccess { picks ->
@@ -143,7 +174,14 @@ class HomeViewModel(
     }
 
     private fun getTrendingCompanies() {
-        _uiState.update { it.copy(trendingCompaniesView = it.trendingCompaniesView.copy(loading = true, error = null)) }
+        _uiState.update {
+            it.copy(
+                trendingCompaniesView = it.trendingCompaniesView.copy(
+                    loading = true,
+                    error = null
+                )
+            )
+        }
         getTrendingCompaniesUseCase(GetTrendingCompaniesUseCase.None()) { result ->
             result.onFailure {
                 _uiState.update { state ->
@@ -198,14 +236,6 @@ class HomeViewModel(
                 is HomeEvent.SendClick -> {
                     _actions.emit(OnStartConversation(_uiState.value.chatInput))
                     _uiState.update { it.copy(chatInput = null) }
-                }
-
-                is HomeEvent.ChangeTheme -> {
-                    preferences.setThemePreference(event.theme)
-                    analyticsLogger.logEvent(
-                        eventName = "theme-changed",
-                        params = mapOf("theme" to event.theme)
-                    )
                 }
 
                 HomeEvent.NotificationPermissionDenied -> {
@@ -277,84 +307,11 @@ class HomeViewModel(
                     }
                 }
 
-                is HomeEvent.ClickTidbit -> {
-                    logNavigationEvent(destination = "tidbit_detail", tidbitId = event.id)
-                    _actions.emit(OnGoToTidbitDetail(event.id))
-                }
-
-                HomeEvent.GoToAllTidbits -> {
-                    logNavigationEvent(destination = "all_tidbits")
-
-                    _actions.emit(OnGoToAllTidbits)
-                }
-
-                HomeEvent.GoToDiscover -> {
-                    logNavigationEvent(destination = "discover")
-                    _actions.emit(HomeAction.OnGoToDiscover)
-                }
-
-                HomeEvent.GoToHistory -> {
-                    if (uiState.value.isGuestSession) {
-                        _actions.emit(HomeAction.ShowToast(message = "You can only see history after signing in"))
-                    } else {
-                        logNavigationEvent(destination = "history")
-                        _actions.emit(HomeAction.OnGoToHistory)
-                    }
-                }
-
-                HomeEvent.GoToSavedPicks -> {
-                    if (uiState.value.isGuestSession) {
-                        _actions.emit(HomeAction.ShowToast(message = "You can only see saved picks after signing in"))
-                    } else {
-                        logNavigationEvent(destination = "saved_picks")
-                        _actions.emit(HomeAction.OnGoToSavedPicks)
-                    }
-                }
-
-                HomeEvent.GoToSavedTidbits -> {
-                    if (uiState.value.isGuestSession) {
-                        _actions.emit(HomeAction.ShowToast(message = "You can only see saved tidbits after signing in"))
-                    } else {
-                        logNavigationEvent(destination = "saved_tidbits")
-
-                        _actions.emit(HomeAction.OnGoToSavedTidbits)
-                    }
-                }
-
-                HomeEvent.GoToSettings -> {
-                    if (uiState.value.isGuestSession) {
-                        _actions.emit(HomeAction.ShowToast(message = "You can only see settings after signing in"))
-                    } else {
-                        logNavigationEvent(destination = "settings")
-
-                        _actions.emit(HomeAction.OnGoToSettings)
-                    }
-                }
-
                 HomeEvent.GoToSignUp -> {
                     _actions.emit(HomeAction.OnGoToSignUp)
                 }
 
                 HomeEvent.RetryTrendingCompanies -> getTrendingCompanies()
-
-                HomeEvent.RetryTopPicks -> getTopPicks()
-
-                HomeEvent.RetryTidbit -> {
-                    _uiState.update { it.copy(homeTidbitView = HomeTidbitView(loading = true)) }
-                    getTodayTidbit()
-                }
-
-                HomeEvent.GoToSearch -> {
-                    analyticsLogger.logEvent(
-                        eventName = "home-search-tapped",
-                        params = mapOf("user_type" to if (uiState.value.isGuestSession) "guest" else "authenticated")
-                    )
-                    _actions.emit(HomeAction.NavigateToSearch)
-                }
-
-                HomeEvent.GoToAllTrending -> _actions.emit(HomeAction.NavigateToAllTrending)
-
-                HomeEvent.GoToAllTopPicks -> _actions.emit(HomeAction.OnGoToAllTopPicks)
 
                 is HomeEvent.ClickTrendingCompany -> {
                     analyticsLogger.logEvent(
@@ -367,15 +324,136 @@ class HomeViewModel(
                     _actions.emit(HomeAction.OnGoToCompanyDetail(event.ticker))
                 }
 
-                is HomeEvent.ClickTopPick -> {
+                is HomeEvent.AddStockToDigest -> {
+                    _uiState.update { state ->
+                        state.copy(
+                            dailyDigestView = state.dailyDigestView.copy(
+                                addingTickers = state.dailyDigestView.addingTickers + event.ticker
+                            )
+                        )
+                    }
+                    viewModelScope.launch {
+                        watchlistRepository.addStockToWatchList(event.ticker).onSuccess {
+                            analyticsLogger.logEvent(
+                                eventName = "stock-added-to-watchlist",
+                                params = mapOf("ticker" to event.ticker, "source" to "digest_card")
+                            )
+                            processAction(HomeAction.AddStockFinished(added = true))
+                            _uiState.update { state ->
+                                state.copy(
+                                    dailyDigestView = state.dailyDigestView.copy(
+                                        addingTickers = state.dailyDigestView.addingTickers - event.ticker,
+                                        addedTickers = state.dailyDigestView.addedTickers + event.ticker
+                                    )
+                                )
+                            }
+                            getDailyDigest()
+                            _uiState.update { state ->
+                                state.copy(
+                                    dailyDigestView = state.dailyDigestView.copy(
+                                        addedTickers = state.dailyDigestView.addedTickers - event.ticker
+                                    )
+                                )
+                            }
+                        }.onFailure { failure ->
+                            _uiState.update { state ->
+                                state.copy(
+                                    dailyDigestView = state.dailyDigestView.copy(
+                                        addingTickers = state.dailyDigestView.addingTickers - event.ticker
+                                    )
+                                )
+                            }
+                            when (failure) {
+                                is WatchlistFailure.SignUpRequired -> {
+                                    processAction(HomeAction.OnGoToSignUp)
+                                }
+
+                                is WatchlistFailure.WatchlistFull -> {
+                                    premiumEventBus.requestPremium(
+                                        source = PREMIUM_SOURCE_WATCHLIST_FULL,
+                                        watchlistCap = failure.cap,
+                                        ticker = event.ticker
+                                    )
+                                }
+
+                                is WatchlistFailure.TickerNotFound -> {
+                                    processAction(HomeAction.ShowToast("Ticker not found"))
+                                }
+
+                                is WatchlistFailure.GeneralError -> {
+                                    processAction(HomeAction.ShowToast(failure.message))
+                                }
+
+                                else -> {
+                                    processAction(HomeAction.ShowToast("Failed to add to watchlist"))
+                                }
+                            }
+                            if (failure !is WatchlistFailure.SignUpRequired &&
+                                failure !is WatchlistFailure.WatchlistFull
+                            ) {
+                                processAction(HomeAction.AddStockFinished(added = false))
+                            }
+                        }
+                    }
+                }
+
+                HomeEvent.GoToProfile -> {
+                    analyticsLogger.logEvent("home-profile-avatar-tapped", emptyMap())
+                    _actions.emit(HomeAction.NavigateToProfile)
+                }
+
+                HomeEvent.BrowseAllCompanies -> {
+                    analyticsLogger.logEvent("digest-browse-all-companies-tapped", emptyMap())
+                    _actions.emit(HomeAction.NavigateToDiscover)
+                }
+
+                is HomeEvent.UnlockPremium -> {
                     analyticsLogger.logEvent(
-                        eventName = "home-top-pick-tapped",
+                        eventName = "unlock-premium-tapped",
+                        params = mapOf("source" to event.source)
+                    )
+                    premiumEventBus.requestPremium(source = event.source)
+                }
+
+                HomeEvent.SeeFullDigest -> {
+                    val digest = _uiState.value.dailyDigestView
+                    analyticsLogger.logEvent(
+                        eventName = "digest-see-full-tapped",
                         params = mapOf(
-                            "top_pick_id" to event.id,
-                            "user_type" to if (uiState.value.isGuestSession) "guest" else "authenticated"
+                            "visible_stocks" to digest.stocks.size,
+                            "locked_stocks" to digest.lockedStocksCount
                         )
                     )
-                    _actions.emit(HomeAction.OnGoToTopPickDetail(event.id))
+                    _actions.emit(HomeAction.NavigateToDigestDetail)
+                }
+
+                HomeEvent.DigestDetailViewed -> {
+                    val digest = _uiState.value.dailyDigestView
+                    analyticsLogger.logEvent(
+                        eventName = "digest-detail-screen-viewed",
+                        params = mapOf(
+                            "total_stocks" to digest.stocks.size,
+                            "locked_stocks" to digest.lockedStocksCount
+                        )
+                    )
+                }
+
+                HomeEvent.RetryDailyDigest -> getDailyDigest()
+
+                is HomeEvent.ClickDigestStock -> {
+                    analyticsLogger.logEvent(
+                        eventName = "digest-stock-tapped",
+                        params = mapOf("ticker" to event.ticker, "source" to "digest_detail")
+                    )
+                    _actions.emit(HomeAction.OnGoToCompanyDetail(event.ticker))
+                }
+
+                HomeEvent.DigestDetailUnlockPremium -> {
+                    analyticsLogger.logEvent(
+                        eventName = "unlock-premium-tapped",
+                        params = mapOf("source" to "digest_detail_screen")
+                    )
+                    premiumEventBus.requestPremium(source = "digest_detail_screen")
                 }
             }
         }
@@ -420,44 +498,6 @@ class HomeViewModel(
         }
     }
 
-    private fun getDefaultPrompts() {
-        getDefaultPromptsUseCase(GetDefaultPromptsUseCase.None()) {
-            it.onFailure {
-            }
-
-            it.onSuccess { result ->
-                _uiState.update { state -> state.copy(defaultPrompts = result) }
-            }
-        }
-    }
-
-    private fun getTodayTidbit() {
-        _uiState.update { it.copy(homeTidbitView = HomeTidbitView(loading = true)) }
-        viewModelScope.launch {
-            tidbitRepository.getTodayTidbit()
-                .onSuccess { tidbit ->
-                    _uiState.update {
-                        it.copy(
-                            homeTidbitView = HomeTidbitView(
-                                loading = false,
-                                id = tidbit.id,
-                                previewUrl = tidbit.previewUrl,
-                                title = tidbit.title,
-                                description = tidbit.summary
-                            )
-                        )
-                    }
-                }
-                .onFailure {
-                    _uiState.update { state ->
-                        state.copy(
-                            homeTidbitView = state.homeTidbitView.copy(loading = false, error = "Something went wrong")
-                        )
-                    }
-                }
-        }
-    }
-
     private fun logHomeScreenViewed() {
         viewModelScope.launch {
             val isGuest = preferences.isGuestLoggedIn.first() == true
@@ -472,22 +512,116 @@ class HomeViewModel(
         }
     }
 
-    private fun logNavigationEvent(destination: String, tidbitId: String? = null) {
-        val params = buildMap {
-            tidbitId?.let { put("tidbit_id", it) }
-            put("destination", destination)
+    private fun getDailyDigest() {
+        _uiState.update { state ->
+            state.copy(dailyDigestView = state.dailyDigestView.copy(loading = true, error = false))
         }
-        analyticsLogger.logEvent(
-            eventName = "navigation-clicked",
-            params = params
-        )
+        viewModelScope.launch {
+            val isGuest = preferences.isGuestLoggedIn.first() == true
+            digestRepository.getDailyDigest().onSuccess { digest ->
+                val unlockedItems = digest.items?.filter { !it.locked } ?: emptyList()
+                val lockedItems = digest.items?.filter { it.locked } ?: emptyList()
+
+                val timeZone = TimeZone.currentSystemDefault()
+                val digestStatus = when {
+                    digest.status?.lowercase() == "pending" -> DailyDigestStatus.PENDING
+                    digest.items.isNullOrEmpty() -> DailyDigestStatus.EMPTY
+                    else -> DailyDigestStatus.READY
+                }
+
+                _uiState.update { state ->
+                    state.copy(
+                        dailyDigestView = state.dailyDigestView.copy(
+                            loading = false,
+                            status = digestStatus,
+                            // Sent in every state now: the pending card's ETA and the stale banner's next time.
+                            nextDigestLabel = formatNextDigestTime(digest.nextDigestAt, timeZone),
+                            stocks = unlockedItems.map { item ->
+                                StockDigestPresentation(
+                                    ticker = item.ticker,
+                                    name = item.companyName,
+                                    summary = item.summary ?: "",
+                                    keyEvent = item.keyEvent,
+                                    sentiment = digestSentimentOf(item.sentiment),
+                                    priceChange = item.priceChange,
+                                    updatedLabel = formatUpdatedAt(item.generatedAt, timeZone)
+                                )
+                            },
+                            lockedStocks = lockedItems.map { item ->
+                                LockedStockDigestPresentation(
+                                    ticker = item.ticker,
+                                    name = item.companyName,
+                                    sentiment = digestSentimentOf(item.sentiment),
+                                    priceChange = item.priceChange
+                                )
+                            },
+                            suggestedStocks = digest.recommendations ?: emptyList(),
+                            isStale = digest.isStale == true,
+                            // Older backends only send digest_date (the UTC generation date); close enough as a label.
+                            briefDateLabel = formatMarketDate(digest.marketDate ?: digest.digestDate),
+                            updatedLabel = formatUpdatedAt(digest.generatedAt, timeZone),
+                            lockedStocksCount = lockedItems.size,
+                            lockedStocksSummary = formatTickerList(lockedItems.map { it.ticker }).ifEmpty { null },
+                            trackedTickers = emptyList()
+                        )
+                    )
+                }
+                if (digestStatus == DailyDigestStatus.PENDING) {
+                    // The pending card lists what the brief will cover; that's only known from the watchlist.
+                    watchlistRepository.getWatchlist().onSuccess { watchlist ->
+                        val tickers = watchlist.items.filterNot { it.locked }.map { it.ticker }
+                        _uiState.update { state ->
+                            state.copy(dailyDigestView = state.dailyDigestView.copy(trackedTickers = tickers))
+                        }
+                    }
+                }
+            }.onFailure { failure ->
+                Logger.e(failure.stackTraceToString())
+                _uiState.update { state ->
+                    state.copy(
+                        dailyDigestView = if (isGuest) {
+                            state.dailyDigestView.copy(loading = false, status = DailyDigestStatus.EMPTY)
+                        } else {
+                            state.dailyDigestView.copy(loading = false, error = true)
+                        }
+                    )
+                }
+            }
+        }
     }
 }
 
 enum class TimePeriod { MORNING, AFTERNOON, EVENING }
 
+private val FULL_DAY_NAMES = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+private val FULL_MONTH_NAMES = listOf(
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+)
+
+// "Wednesday, 14 October", shown above the greeting.
+internal fun formatTodayLabel(date: LocalDate): String =
+    "${FULL_DAY_NAMES[date.dayOfWeek.ordinal]}, ${date.day} ${FULL_MONTH_NAMES[date.month.ordinal]}"
+
 internal fun extractFirstName(userName: String?): String? =
     userName?.trim()?.split("\\s+".toRegex())?.firstOrNull()?.takeIf { it.isNotBlank() }
+
+// next_digest_at is an ISO-8601 UTC instant; show it as a local 24-hour time, e.g. "07:00" or "13:30".
+internal fun formatNextDigestTime(nextDigestAt: String?, timeZone: TimeZone): String? {
+    val instant = nextDigestAt?.let { runCatching { Instant.parse(it) }.getOrNull() } ?: return null
+    val local = instant.toLocalDateTime(timeZone)
+    return "${local.hour.toString().padStart(2, '0')}:${local.minute.toString().padStart(2, '0')}"
+}
 
 private fun computeTimePeriod(): TimePeriod {
     val hour = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
@@ -518,17 +652,17 @@ data class HomeUiState(
     ),
     val selectedWaitlistOptions: List<String> = emptyList(),
     val defaultPrompts: List<DefaultPrompt> = emptyList(),
-    val drawerState: DrawerState = DrawerState(),
     val homeTidbitView: HomeTidbitView = HomeTidbitView(),
     val isGuestSession: Boolean = false,
     val timePeriod: TimePeriod = TimePeriod.MORNING,
-    val firstName: String? = null
+    val todayLabel: String? = null,
+    val firstName: String? = null,
+    val dailyDigestView: DailyDigestView = DailyDigestView(loading = true)
 )
 
 sealed interface HomeEvent {
     data class ChatInputChanged(val input: String) : HomeEvent
     data object SendClick : HomeEvent
-    data class ChangeTheme(val theme: String) : HomeEvent
     data object NotificationPermissionGranted : HomeEvent
     data object NotificationPermissionDenied : HomeEvent
     data class ModelChanged(val model: AvailableModel) : HomeEvent
@@ -537,39 +671,28 @@ sealed interface HomeEvent {
     data object JoinWaitlist : HomeEvent
     data class DefaultPromptClicked(val prompt: DefaultPrompt) : HomeEvent
     data object SignOut : HomeEvent
-    data class ClickTidbit(val id: String) : HomeEvent
-    data object GoToAllTidbits : HomeEvent
-    data object GoToSavedPicks : HomeEvent
-    data object GoToSavedTidbits : HomeEvent
-    data object GoToDiscover : HomeEvent
-    data object GoToSettings : HomeEvent
-    data object GoToHistory : HomeEvent
     data object GoToSignUp : HomeEvent
     data object RetryTrendingCompanies : HomeEvent
-    data object RetryTopPicks : HomeEvent
-    data object RetryTidbit : HomeEvent
-    data object GoToSearch : HomeEvent
-    data object GoToAllTrending : HomeEvent
-    data object GoToAllTopPicks : HomeEvent
     data class ClickTrendingCompany(val ticker: String) : HomeEvent
-    data class ClickTopPick(val id: String) : HomeEvent
+    data class AddStockToDigest(val ticker: String) : HomeEvent
+    data object BrowseAllCompanies : HomeEvent
+    data object GoToProfile : HomeEvent
+    data class UnlockPremium(val source: String) : HomeEvent
+    data object SeeFullDigest : HomeEvent
+    data object DigestDetailViewed : HomeEvent
+    data object DigestDetailUnlockPremium : HomeEvent
+    data object RetryDailyDigest : HomeEvent
+    data class ClickDigestStock(val ticker: String) : HomeEvent
 }
 
 sealed interface HomeAction {
     data class OnStartConversation(val input: String? = null, val title: String? = null) : HomeAction
 
-    data object OnGoToAllTopPicks : HomeAction
-    data class OnGoToTopPickDetail(val id: String) : HomeAction
     data class OnGoToCompanyDetail(val ticker: String) : HomeAction
-    data object OnGoToDiscover : HomeAction
-    data object OnGoToSettings : HomeAction
-    data object OnGoToHistory : HomeAction
-    data object OnGoToSavedPicks : HomeAction
-    data class OnGoToTidbitDetail(val id: String) : HomeAction
-    data object OnGoToAllTidbits : HomeAction
-    data object OnGoToSavedTidbits : HomeAction
     data class ShowToast(val message: String) : HomeAction
+    data class AddStockFinished(val added: Boolean) : HomeAction
     data object OnGoToSignUp : HomeAction
-    data object NavigateToSearch : HomeAction
-    data object NavigateToAllTrending : HomeAction
+    data object NavigateToDiscover : HomeAction
+    data object NavigateToDigestDetail : HomeAction
+    data object NavigateToProfile : HomeAction
 }

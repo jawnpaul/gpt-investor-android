@@ -4,6 +4,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +43,9 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -84,6 +89,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiButton
 import com.thejawnpaul.gptinvestor.theme.components.GiButtonSize
 import com.thejawnpaul.gptinvestor.theme.components.GiButtonVariant
 import com.thejawnpaul.gptinvestor.theme.components.GiDivider
+import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
 import com.thejawnpaul.gptinvestor.theme.components.GiSegmentedControl
 import com.thejawnpaul.gptinvestor.theme.components.GiText
@@ -94,6 +100,7 @@ import com.thejawnpaul.gptinvestor.top_pick_no_news
 import com.thejawnpaul.gptinvestor.top_pick_revenue
 import com.thejawnpaul.gptinvestor.top_pick_score
 import kotlin.math.abs
+import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -305,9 +312,8 @@ internal fun PriceChartSection(companyName: String, history: List<HistoricalData
                     else -> Res.string.chart_trend_flat
                 }
             )
-            val closes = remember(points) { points.map { it.close } }
             PriceChart(
-                values = closes,
+                points = points,
                 description = stringResource(
                     Res.string.chart_description,
                     companyName,
@@ -330,63 +336,115 @@ internal fun PriceChartSection(companyName: String, history: List<HistoricalData
 }
 
 @Composable
-private fun PriceChart(values: List<Float>, description: String, modifier: Modifier = Modifier) {
+private fun PriceChart(points: List<HistoricalData>, description: String, modifier: Modifier = Modifier) {
     val colors = GiTheme.colors
+    val values = remember(points) { points.map { it.close } }
     val rising = values.last() >= values.first()
     val lineColor = if (rising) colors.gainVivid else colors.lossVivid
     val fillAlpha = if (colors.isDark) CHART_FILL_DARK else CHART_FILL_LIGHT
     val gridColor = colors.line
     val dotEdge = colors.raised
-    Spacer(
+    val haptics = LocalHapticFeedback.current
+    var scrubIndex by remember(points) { mutableStateOf<Int?>(null) }
+    LaunchedEffect(scrubIndex) {
+        if (scrubIndex != null) haptics.performHapticFeedback(GiHaptics.Selection)
+    }
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .height(CHART_HEIGHT)
-            .semantics { contentDescription = description }
-            .drawWithCache {
-                val inset = CHART_DOT_RADIUS.toPx()
-                val width = size.width
-                val height = size.height
-                val dash = PathEffect.dashPathEffect(floatArrayOf(CHART_DASH_ON.toPx(), CHART_DASH_OFF.toPx()))
-                val gridWidth = GiEdge.width.toPx()
-                val min = values.min()
-                val max = values.max()
-                val span = (max - min).takeIf { it > 0f }
-                val step = width / (values.size - 1)
-                val xs = values.indices.map { it * step }
-                val ys = values.map { value ->
-                    if (span == null) height / 2f else inset + (1f - (value - min) / span) * (height - inset * 2f)
+    ) {
+        Spacer(
+            modifier = Modifier
+                .matchParentSize()
+                .semantics { contentDescription = description }
+                .pointerInput(points) {
+                    val step = size.width.toFloat() / points.lastIndex
+                    fun indexAt(x: Float) = (x / step).roundToInt().coerceIn(0, points.lastIndex)
+                    detectDragGesturesAfterLongPress(
+                        onDragStart = { scrubIndex = indexAt(it.x) },
+                        onDrag = { change, _ -> scrubIndex = indexAt(change.position.x) },
+                        onDragEnd = { scrubIndex = null },
+                        onDragCancel = { scrubIndex = null }
+                    )
                 }
-                val line = Path().apply {
-                    moveTo(xs[0], ys[0])
-                    for (i in 1 until values.size) {
-                        val midX = (xs[i - 1] + xs[i]) / 2f
-                        cubicTo(midX, ys[i - 1], midX, ys[i], xs[i], ys[i])
+                .drawWithCache {
+                    val inset = CHART_DOT_RADIUS.toPx()
+                    val width = size.width
+                    val height = size.height
+                    val dash = PathEffect.dashPathEffect(floatArrayOf(CHART_DASH_ON.toPx(), CHART_DASH_OFF.toPx()))
+                    val gridWidth = GiEdge.width.toPx()
+                    val min = values.min()
+                    val max = values.max()
+                    val span = (max - min).takeIf { it > 0f }
+                    val step = width / (values.size - 1)
+                    val xs = values.indices.map { it * step }
+                    val ys = values.map { value ->
+                        if (span == null) height / 2f else inset + (1f - (value - min) / span) * (height - inset * 2f)
+                    }
+                    val line = Path().apply {
+                        moveTo(xs[0], ys[0])
+                        for (i in 1 until values.size) {
+                            val midX = (xs[i - 1] + xs[i]) / 2f
+                            cubicTo(midX, ys[i - 1], midX, ys[i], xs[i], ys[i])
+                        }
+                    }
+                    val fill = Path().apply {
+                        addPath(line)
+                        lineTo(xs.last(), height)
+                        lineTo(xs.first(), height)
+                        close()
+                    }
+                    val fillBrush = Brush.verticalGradient(
+                        listOf(lineColor.copy(alpha = fillAlpha), lineColor.copy(alpha = 0f))
+                    )
+                    val lineStroke = Stroke(width = CHART_LINE.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
+                    val dotStroke = Stroke(width = CHART_LINE.toPx())
+                    val end = Offset(xs.last(), ys.last())
+                    onDrawBehind {
+                        GRID_LINES.forEach { fraction ->
+                            val y = height * fraction
+                            drawLine(gridColor, Offset(0f, y), Offset(width, y), gridWidth, pathEffect = dash)
+                        }
+                        drawPath(path = fill, brush = fillBrush)
+                        drawPath(path = line, color = lineColor, style = lineStroke)
+                        drawCircle(color = lineColor, radius = inset, center = end)
+                        drawCircle(color = dotEdge, radius = inset, center = end, style = dotStroke)
+                        scrubIndex?.let { i ->
+                            val point = Offset(xs[i], ys[i])
+                            drawLine(lineColor, Offset(point.x, 0f), Offset(point.x, height), gridWidth)
+                            drawCircle(color = lineColor, radius = inset, center = point)
+                            drawCircle(color = dotEdge, radius = inset, center = point, style = dotStroke)
+                        }
                     }
                 }
-                val fill = Path().apply {
-                    addPath(line)
-                    lineTo(xs.last(), height)
-                    lineTo(xs.first(), height)
-                    close()
-                }
-                val fillBrush = Brush.verticalGradient(
-                    listOf(lineColor.copy(alpha = fillAlpha), lineColor.copy(alpha = 0f))
-                )
-                val lineStroke = Stroke(width = CHART_LINE.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
-                val dotStroke = Stroke(width = CHART_LINE.toPx())
-                val end = Offset(xs.last(), ys.last())
-                onDrawBehind {
-                    GRID_LINES.forEach { fraction ->
-                        val y = height * fraction
-                        drawLine(gridColor, Offset(0f, y), Offset(width, y), gridWidth, pathEffect = dash)
-                    }
-                    drawPath(path = fill, brush = fillBrush)
-                    drawPath(path = line, color = lineColor, style = lineStroke)
-                    drawCircle(color = lineColor, radius = inset, center = end)
-                    drawCircle(color = dotEdge, radius = inset, center = end, style = dotStroke)
+        )
+        scrubIndex?.let { i -> ScrubLabel(point = points[i], index = i, lastIndex = points.lastIndex) }
+    }
+}
+
+@Composable
+private fun ScrubLabel(point: HistoricalData, index: Int, lastIndex: Int) {
+    val colors = GiTheme.colors
+    Column(
+        modifier = Modifier
+            .layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
+                val maxX = (constraints.maxWidth - placeable.width).coerceAtLeast(0)
+                val centerX = constraints.maxWidth * index / lastIndex
+                layout(constraints.maxWidth, placeable.height) {
+                    placeable.place((centerX - placeable.width / 2).coerceIn(0, maxX), 0)
                 }
             }
-    )
+            .clearAndSetSemantics { }
+            .clip(GiRadius.sm)
+            .background(colors.raised)
+            .border(GiEdge.width, colors.line, GiRadius.sm)
+            .padding(horizontal = GiSpace.x2, vertical = GiSpace.x1)
+    ) {
+        GiText(text = formatPrice(point.close.toDouble()), style = GiTextStyle.Label)
+        GiText(text = shortDate(point.date), style = GiTextStyle.Meta)
+    }
 }
 
 private val CHART_HEIGHT = 160.dp

@@ -108,10 +108,6 @@ fun NavGraphBuilder.guestNavGraph(
                         }
                     }
 
-                    HomeAction.NavigateToAllTrending -> {
-                        navController.navigate(Screen.AllTrendingScreen.route)
-                    }
-
                     HomeAction.NavigateToDiscover -> {
                         navController.navigateToTab(
                             route = GuestScreen.GuestDiscoverTab.createRoute(),

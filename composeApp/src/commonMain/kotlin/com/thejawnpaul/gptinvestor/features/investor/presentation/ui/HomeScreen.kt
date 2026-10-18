@@ -50,7 +50,6 @@ import com.thejawnpaul.gptinvestor.join_list
 import com.thejawnpaul.gptinvestor.join_the_waitlist
 import com.thejawnpaul.gptinvestor.movers_right_now
 import com.thejawnpaul.gptinvestor.profile
-import com.thejawnpaul.gptinvestor.see_all
 import com.thejawnpaul.gptinvestor.send
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.GiSpace
@@ -171,9 +170,7 @@ private fun HomeScreenContent(
                         title = stringResource(Res.string.movers_right_now),
                         modifier = gutter,
                         eyebrow = stringResource(Res.string.trending_today),
-                        eyebrowIcon = GiIcons.fire,
-                        trailingText = stringResource(Res.string.see_all),
-                        onTrailingClick = { onEvent(HomeEvent.GoToAllTrending) }
+                        eyebrowIcon = GiIcons.fire
                     )
                     HomeTrendingSection(
                         view = state.trendingCompaniesView,

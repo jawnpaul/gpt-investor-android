@@ -313,8 +313,6 @@ class HomeViewModel(
 
                 HomeEvent.RetryTrendingCompanies -> getTrendingCompanies()
 
-                HomeEvent.GoToAllTrending -> _actions.emit(HomeAction.NavigateToAllTrending)
-
                 is HomeEvent.ClickTrendingCompany -> {
                     analyticsLogger.logEvent(
                         eventName = "trending-stock-tapped",
@@ -675,7 +673,6 @@ sealed interface HomeEvent {
     data object SignOut : HomeEvent
     data object GoToSignUp : HomeEvent
     data object RetryTrendingCompanies : HomeEvent
-    data object GoToAllTrending : HomeEvent
     data class ClickTrendingCompany(val ticker: String) : HomeEvent
     data class AddStockToDigest(val ticker: String) : HomeEvent
     data object BrowseAllCompanies : HomeEvent
@@ -695,7 +692,6 @@ sealed interface HomeAction {
     data class ShowToast(val message: String) : HomeAction
     data class AddStockFinished(val added: Boolean) : HomeAction
     data object OnGoToSignUp : HomeAction
-    data object NavigateToAllTrending : HomeAction
     data object NavigateToDiscover : HomeAction
     data object NavigateToDigestDetail : HomeAction
     data object NavigateToProfile : HomeAction

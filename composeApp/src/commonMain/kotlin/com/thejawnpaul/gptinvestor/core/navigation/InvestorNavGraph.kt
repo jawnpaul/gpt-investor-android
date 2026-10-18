@@ -54,10 +54,6 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
                         }
                     }
 
-                    HomeAction.NavigateToAllTrending -> {
-                        navController.navigate(Screen.AllTrendingScreen.route)
-                    }
-
                     HomeAction.NavigateToDiscover -> {
                         navController.navigateToTab(Screen.DiscoverTabScreen.route, Screen.HomeTabScreen.route)
                     }

@@ -13,13 +13,25 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.accept
 import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.encodedPath
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import co.touchlab.kermit.Logger as Log
+
+private suspend fun HttpResponse.errorCode(): String? = try {
+    Json.parseToJsonElement(bodyAsText()).jsonObject["error"]?.jsonPrimitive?.contentOrNull
+} catch (_: Exception) {
+    null
+}
 
 object KtorClientFactory {
     fun create(
@@ -60,6 +72,30 @@ object KtorClientFactory {
                     }
 
                     refreshTokens {
+                        if (response.errorCode() == "guest_session_expired") {
+                            val uniqueId = unauthorizedCallback.guestUniqueId() ?: run {
+                                unauthorizedCallback.onUnauthorized()
+                                return@refreshTokens null
+                            }
+                            return@refreshTokens try {
+                                val guestResponse = client.post("v1/guest-login") {
+                                    markAsRefreshTokenRequest()
+                                    setBody(GuestTokenRequest(uniqueId))
+                                }
+                                if (guestResponse.status == HttpStatusCode.OK) {
+                                    val accessToken = guestResponse.body<TokenResponse>().accessToken
+                                    tokenStorage.saveAccessToken(accessToken)
+                                    BearerTokens(accessToken, null)
+                                } else {
+                                    unauthorizedCallback.onUnauthorized()
+                                    null
+                                }
+                            } catch (e: Exception) {
+                                Log.e(e) { "Guest token refresh failed" }
+                                null
+                            }
+                        }
+
                         val refreshToken = tokenStorage.getRefreshToken() ?: run {
                             unauthorizedCallback.onUnauthorized()
                             return@refreshTokens null

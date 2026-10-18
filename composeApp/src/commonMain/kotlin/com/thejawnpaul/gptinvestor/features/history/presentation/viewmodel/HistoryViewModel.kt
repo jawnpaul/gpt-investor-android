@@ -7,6 +7,7 @@ import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
+import com.thejawnpaul.gptinvestor.core.session.rateLimitRetryMessage
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
@@ -232,16 +233,23 @@ class HistoryViewModel(
                 val isGuest = conversation.value.isGuest
                 analyticsLogger.logEvent(
                     eventName = "rate-limit-hit",
-                    params = mapOf("user_type" to if (isGuest) "guest" else "authenticated")
+                    params = mapOf(
+                        "user_type" to if (isGuest) "guest" else "authenticated",
+                        "upgrade" to failure.upgrade
+                    )
                 )
                 Logger.e("Rate limit exceeded")
                 conversationView.update { it.copy(showRateLimitBottomSheet = false) }
-                if (isGuest) {
-                    guestRateLimitNotifier.notifyRateLimit()
-                } else {
-                    processHistoryDetailAction(
-                        HistoryDetailAction.ShowToast("Rate limit exceeded. Please try again later.")
-                    )
+                when {
+                    isGuest -> guestRateLimitNotifier.notifyRateLimit()
+
+                    failure.upgrade -> premiumEventBus.requestPremium(source = "history_rate_limit")
+
+                    else -> viewModelScope.launch {
+                        processHistoryDetailAction(
+                            HistoryDetailAction.ShowToast(rateLimitRetryMessage(failure.retryAfterSeconds))
+                        )
+                    }
                 }
             }
 

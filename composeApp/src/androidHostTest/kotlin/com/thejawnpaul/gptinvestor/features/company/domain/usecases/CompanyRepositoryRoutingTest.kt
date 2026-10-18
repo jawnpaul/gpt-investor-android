@@ -15,6 +15,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.justRun
+import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -43,8 +44,9 @@ class CompanyRepositoryRoutingTest {
         repository = CompanyRepository(apiService, companyDao, analyticsLogger, appPreferences)
     }
 
-    private fun stubGuest(isGuest: Boolean) {
+    private fun stubGuest(isGuest: Boolean, isRegistered: Boolean = !isGuest) {
         every { appPreferences.isGuestLoggedIn } returns flowOf(isGuest)
+        every { appPreferences.isUserLoggedIn } returns flowOf(isRegistered)
     }
 
     private fun briefResponse(code: Int, errorBody: String?) =
@@ -60,7 +62,7 @@ class CompanyRepositoryRoutingTest {
         stubGuest(isGuest = true)
         coEvery { apiService.getCompanyBrief("AAPL") } returns briefResponse(
             401,
-            """{"code":"guest_session_expired","message":"Session expired"}"""
+            """{"error":"guest_session_expired","message":"Session expired"}"""
         )
 
         repository.getCompanyBrief("AAPL").test {
@@ -76,7 +78,7 @@ class CompanyRepositoryRoutingTest {
         stubGuest(isGuest = true)
         coEvery { apiService.getCompanyBrief("AAPL") } returns briefResponse(
             429,
-            """{"code":"guest_limit_reached","message":"Limit reached","limit":5}"""
+            """{"error":"guest_limit_reached","limit":3,"upgrade":true}"""
         )
 
         repository.getCompanyBrief("AAPL").test {
@@ -91,12 +93,29 @@ class CompanyRepositoryRoutingTest {
         stubGuest(isGuest = false)
         coEvery { apiService.getCompanyBrief("AAPL") } returns briefResponse(
             429,
-            """{"code":"rate_limited","message":"Too many requests"}"""
+            """{"error":"rate_limited","tier":"normal","limit":"2 per 1 day","retry_after":43210,"upgrade":true}"""
         )
 
         repository.getCompanyBrief("AAPL").test {
             val result = awaitItem()
-            assertThat((result as Either.Left).a).isEqualTo(Failure.RateLimitExceeded)
+            assertThat((result as Either.Left).a)
+                .isEqualTo(Failure.RateLimitExceeded(upgrade = true, retryAfterSeconds = 43210))
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `premium rate_limited returns RateLimitExceeded without upgrade`() = runTest {
+        stubGuest(isGuest = false)
+        coEvery { apiService.getCompanyBrief("AAPL") } returns briefResponse(
+            429,
+            """{"error":"rate_limited","tier":"premium","limit":"10 per 1 minute","retry_after":42,"upgrade":false}"""
+        )
+
+        repository.getCompanyBrief("AAPL").test {
+            val result = awaitItem()
+            assertThat((result as Either.Left).a)
+                .isEqualTo(Failure.RateLimitExceeded(upgrade = false, retryAfterSeconds = 42))
             awaitComplete()
         }
     }
@@ -153,14 +172,51 @@ class CompanyRepositoryRoutingTest {
     }
 
     @Test
+    fun `401 during onboarding returns GuestSessionExpired`() = runTest {
+        stubGuest(isGuest = false, isRegistered = false)
+        coEvery { apiService.getCompanyBrief("AAPL") } returns briefResponse(
+            401,
+            """{"error":"token_expired","msg":"Token has expired"}"""
+        )
+
+        repository.getCompanyBrief("AAPL").test {
+            val result = awaitItem()
+            assertThat((result as Either.Left).a).isEqualTo(Failure.GuestSessionExpired)
+            awaitComplete()
+        }
+    }
+
+    @Test
     fun `no-code 429 returns RateLimitExceeded failure`() = runTest {
         stubGuest(isGuest = false)
         coEvery { apiService.getCompanyBrief("AAPL") } returns briefResponse(429, null)
 
         repository.getCompanyBrief("AAPL").test {
             val result = awaitItem()
-            assertThat((result as Either.Left).a).isEqualTo(Failure.RateLimitExceeded)
+            assertThat((result as Either.Left).a).isEqualTo(Failure.RateLimitExceeded())
             awaitComplete()
         }
     }
+
+    @Test
+    fun `brief events label the session as authenticated, guest or onboarding`() = runTest {
+        coEvery { apiService.getCompanyBrief("AAPL") } returns briefResponse(500, null)
+
+        listOf(
+            SessionCase(isGuest = false, isRegistered = true, userType = "authenticated"),
+            SessionCase(isGuest = true, isRegistered = false, userType = "guest"),
+            SessionCase(isGuest = false, isRegistered = false, userType = "onboarding")
+        ).forEach { (isGuest, isRegistered, userType) ->
+            stubGuest(isGuest = isGuest, isRegistered = isRegistered)
+            repository.getCompanyBrief("AAPL").test {
+                awaitItem()
+                awaitComplete()
+            }
+            verify {
+                analyticsLogger.logEvent("brief-started", mapOf("ticker" to "AAPL", "user_type" to userType))
+            }
+        }
+    }
 }
+
+private data class SessionCase(val isGuest: Boolean, val isRegistered: Boolean, val userType: String)

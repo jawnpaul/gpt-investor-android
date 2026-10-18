@@ -355,6 +355,7 @@
     <string name="thinking">سوچ رہا ہے…</string>
     <string name="splash_tagline">آپ کے پیسوں کے بارے میں واضح جوابات</string>
     <string name="onboarding_brief_error_message">آپ کا خلاصہ لوڈ کرتے وقت کچھ غلط ہو گیا۔</string>
+    <string name="onboarding_brief_limit_message">آپ آج کے مفت خلاصے استعمال کر چکے ہیں۔ پڑھنا جاری رکھنے کے لیے سائن اپ کریں۔</string>
     <string name="try_again">دوبارہ کوشش کریں</string>
     <string name="onboarding_cta_go_to_app_short">ایپ پر جائیں</string>
     <string name="guest_session_started">مہمان سیشن شروع ہو گیا</string>
@@ -506,4 +507,13 @@
     <string name="see_todays_picks">آج کے انتخاب دیکھیں</string>
     <string name="top_picks_empty_title">آج ابھی کوئی انتخاب نہیں</string>
     <string name="top_picks_empty_body">آج کے انتخاب کے لیے بعد میں دوبارہ دیکھیں۔</string>
+    <string name="rate_limit_try_again_shortly">تھوڑا آہستہ چلیں۔ کچھ دیر میں دوبارہ کوشش کریں۔</string>
+    <plurals name="rate_limit_try_again_minutes">
+        <item quantity="one">تھوڑا آہستہ چلیں۔ %1$d منٹ میں دوبارہ کوشش کریں۔</item>
+        <item quantity="other">تھوڑا آہستہ چلیں۔ %1$d منٹ میں دوبارہ کوشش کریں۔</item>
+    </plurals>
+    <plurals name="rate_limit_try_again_hours">
+        <item quantity="one">تھوڑا آہستہ چلیں۔ %1$d گھنٹے میں دوبارہ کوشش کریں۔</item>
+        <item quantity="other">تھوڑا آہستہ چلیں۔ %1$d گھنٹے میں دوبارہ کوشش کریں۔</item>
+    </plurals>
 </resources>

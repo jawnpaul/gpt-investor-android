@@ -8,3 +8,6 @@ data class TokenResponse(
     @SerialName("access_token") val accessToken: String,
 )
 
+@Serializable
+data class GuestTokenRequest(@SerialName("unique_id") val uniqueId: String)
+

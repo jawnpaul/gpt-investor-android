@@ -357,6 +357,7 @@
     <string name="thinking">Думаю…</string>
     <string name="splash_tagline">Чіткі відповіді про ваші гроші</string>
     <string name="onboarding_brief_error_message">Не вдалося завантажити ваш огляд.</string>
+    <string name="onboarding_brief_limit_message">Ви використали сьогоднішні безкоштовні огляди. Зареєструйтеся, щоб читати далі.</string>
     <string name="try_again">Повторити спробу</string>
     <string name="onboarding_cta_go_to_app_short">До застосунку</string>
     <string name="guest_session_started">Гостьовий сеанс розпочато</string>
@@ -512,4 +513,17 @@
     <string name="see_todays_picks">Переглянути сьогоднішні вибори</string>
     <string name="top_picks_empty_title">Сьогодні ще немає виборів</string>
     <string name="top_picks_empty_body">Загляньте пізніше по сьогоднішні вибори.</string>
+    <string name="rate_limit_try_again_shortly">Трохи повільніше. Спробуйте ще раз незабаром.</string>
+    <plurals name="rate_limit_try_again_minutes">
+        <item quantity="one">Трохи повільніше. Спробуйте ще раз через %1$d хвилину.</item>
+        <item quantity="few">Трохи повільніше. Спробуйте ще раз через %1$d хвилини.</item>
+        <item quantity="many">Трохи повільніше. Спробуйте ще раз через %1$d хвилин.</item>
+        <item quantity="other">Трохи повільніше. Спробуйте ще раз через %1$d хвилини.</item>
+    </plurals>
+    <plurals name="rate_limit_try_again_hours">
+        <item quantity="one">Трохи повільніше. Спробуйте ще раз через %1$d годину.</item>
+        <item quantity="few">Трохи повільніше. Спробуйте ще раз через %1$d години.</item>
+        <item quantity="many">Трохи повільніше. Спробуйте ще раз через %1$d годин.</item>
+        <item quantity="other">Трохи повільніше. Спробуйте ще раз через %1$d години.</item>
+    </plurals>
 </resources>

@@ -17,8 +17,11 @@ import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBr
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.BriefView
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.OnboardingUiState
+import kotlin.concurrent.Volatile
 import kotlin.time.Clock
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,10 +68,15 @@ class OnboardingViewModel(
             }
         }.cachedIn(viewModelScope)
 
+    private var guestToken: Deferred<Result<Unit>> = viewModelScope.async { authRepository.acquireGuestToken() }
+
+    @Volatile
+    private var guestTokenRejected = false
+
     init {
         logOnboardingStarted()
         viewModelScope.launch {
-            authRepository.acquireGuestToken()
+            guestToken.await()
             loadSuggestedStockLogos()
         }
     }
@@ -134,18 +142,44 @@ class OnboardingViewModel(
     }
 
     private fun fetchBrief(ticker: String) {
+        viewModelScope.launch {
+            if (guestTokenRejected || guestToken.await().isFailure) {
+                guestTokenRejected = false
+                guestToken = async { authRepository.acquireGuestToken() }
+            }
+            if (guestToken.await().isFailure) {
+                analyticsLogger.logEvent(
+                    eventName = "onboarding-brief-failed",
+                    params = mapOf("ticker" to ticker, "error_type" to "guest_token")
+                )
+                _uiState.update { it.copy(briefView = BriefView.Error("Something went wrong.")) }
+                return@launch
+            }
+            requestBrief(ticker)
+        }
+    }
+
+    private fun requestBrief(ticker: String) {
         getCompanyBriefUseCase(ticker) { result ->
             result.onFailure { failure ->
                 val errorType = when (failure) {
                     is Failure.NetworkConnection -> "network"
                     is Failure.ServerError -> "server"
+                    is Failure.GuestLimitReached -> "guest_limit"
+                    is Failure.GuestSessionExpired -> "guest_session"
                     else -> "unknown"
                 }
+                if (failure is Failure.GuestSessionExpired) guestTokenRejected = true
                 analyticsLogger.logEvent(
                     eventName = "onboarding-brief-failed",
                     params = mapOf("ticker" to ticker, "error_type" to errorType)
                 )
-                _uiState.update { it.copy(briefView = BriefView.Error("Something went wrong.")) }
+                val briefView = if (failure is Failure.GuestLimitReached) {
+                    BriefView.LimitReached
+                } else {
+                    BriefView.Error("Something went wrong.")
+                }
+                _uiState.update { it.copy(briefView = briefView) }
             }
             result.onSuccess { brief ->
                 val durationMs = Clock.System.now().toEpochMilliseconds() - briefStartTime

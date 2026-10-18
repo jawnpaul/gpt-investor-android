@@ -84,6 +84,7 @@ import com.thejawnpaul.gptinvestor.gpt_investor
 import com.thejawnpaul.gptinvestor.onboarding_body_value_prop
 import com.thejawnpaul.gptinvestor.onboarding_brief_disclaimer
 import com.thejawnpaul.gptinvestor.onboarding_brief_error_message
+import com.thejawnpaul.gptinvestor.onboarding_brief_limit_message
 import com.thejawnpaul.gptinvestor.onboarding_cta_get_started
 import com.thejawnpaul.gptinvestor.onboarding_cta_go_to_app_short
 import com.thejawnpaul.gptinvestor.onboarding_cta_start_exploring
@@ -107,6 +108,7 @@ import com.thejawnpaul.gptinvestor.onboarding_value_plain_english_body
 import com.thejawnpaul.gptinvestor.onboarding_value_plain_english_title
 import com.thejawnpaul.gptinvestor.onboarding_value_real_time_body
 import com.thejawnpaul.gptinvestor.onboarding_value_real_time_title
+import com.thejawnpaul.gptinvestor.sign_up
 import com.thejawnpaul.gptinvestor.skip
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.GiIconSize
@@ -691,7 +693,7 @@ private fun BriefScreen(
         topBar = {
             GiTopBar(
                 // The exchange isn't in the onboarding state yet; the board's "TSLA · NASDAQ" falls back to the ticker.
-                title = state.selectedTicker?.takeIf { state.briefView !is BriefView.Error },
+                title = state.briefTitle,
                 onBack = onBack,
                 backContentDescription = stringResource(Res.string.back),
                 scrolled = state.briefView is BriefView.Success && listScrolled,
@@ -732,6 +734,7 @@ private fun BriefScreen(
                     briefScope = briefScope
                 )
                 is BriefView.Error -> BriefError(onRetry = onRetry, onFinish = onFinish)
+                is BriefView.LimitReached -> BriefLimitReached(onSignUp = onFinish)
             }
         }
     }
@@ -904,6 +907,29 @@ private fun BriefError(onRetry: () -> Unit, onFinish: () -> Unit, modifier: Modi
 }
 
 @Composable
+private fun BriefLimitReached(onSignUp: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .navigationBarsPadding()
+            .padding(horizontal = GiSpace.gutter),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x6, Alignment.CenterVertically)
+    ) {
+        GiText(
+            text = stringResource(Res.string.onboarding_brief_limit_message),
+            style = GiTextStyle.Body,
+            textAlign = TextAlign.Center
+        )
+        GiButton(
+            text = stringResource(Res.string.sign_up),
+            onClick = onSignUp,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
 @ReadOnlyComposable
 private fun isLargeText(): Boolean = LocalDensity.current.fontScale >= LARGE_TEXT_FONT_SCALE
 
@@ -978,5 +1004,13 @@ private fun OnboardingBriefPreview() {
 private fun OnboardingBriefErrorPreview() {
     OnboardingScreenPreview(
         state = OnboardingUiState(currentScreen = 3, briefView = BriefView.Error("Something went wrong."))
+    )
+}
+
+@PreviewLightDark
+@Composable
+private fun OnboardingBriefLimitReachedPreview() {
+    OnboardingScreenPreview(
+        state = OnboardingUiState(currentScreen = 3, selectedTicker = "TSLA", briefView = BriefView.LimitReached)
     )
 }

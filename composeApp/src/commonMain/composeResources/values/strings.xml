@@ -179,6 +179,7 @@
     <string name="onboarding_error_message">Something went wrong. Let's take you to the app.</string>
     <string name="onboarding_cta_go_to_app">Go to GPT Investor</string>
     <string name="onboarding_brief_error_message">Something went wrong loading your brief.</string>
+    <string name="onboarding_brief_limit_message">You’ve used today’s free briefs. Sign up to keep reading.</string>
     <string name="try_again">Try again</string>
     <string name="onboarding_cta_go_to_app_short">Go to app</string>
     <string name="onboarding_value_plain_english_title">Plain English</string>
@@ -524,4 +525,13 @@
     <string name="see_todays_picks">See today’s picks</string>
     <string name="top_picks_empty_title">No picks yet today</string>
     <string name="top_picks_empty_body">Check back later for today’s picks.</string>
+    <string name="rate_limit_try_again_shortly">Slow down a little. Try again shortly.</string>
+    <plurals name="rate_limit_try_again_minutes">
+        <item quantity="one">Slow down a little. Try again in %1$d minute.</item>
+        <item quantity="other">Slow down a little. Try again in %1$d minutes.</item>
+    </plurals>
+    <plurals name="rate_limit_try_again_hours">
+        <item quantity="one">Slow down a little. Try again in %1$d hour.</item>
+        <item quantity="other">Slow down a little. Try again in %1$d hours.</item>
+    </plurals>
 </resources>

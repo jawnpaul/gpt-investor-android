@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.features.authentication.domain
 import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
+import com.thejawnpaul.gptinvestor.core.api.parseApiError
 import com.thejawnpaul.gptinvestor.core.platform.AppConfig
 import com.thejawnpaul.gptinvestor.core.platform.GoogleSignInProvider
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
@@ -22,6 +23,7 @@ import dev.gitlive.firebase.auth.AuthCredential
 import dev.gitlive.firebase.auth.FirebaseAuth
 import dev.gitlive.firebase.auth.auth
 import dev.gitlive.firebase.installations.installations
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -31,6 +33,7 @@ import org.koin.core.annotation.Singleton
 private const val EVENT_LOG_IN = "log-in"
 private const val EVENT_SIGN_UP = "sign-up"
 private const val EVENT_LOG_OUT = "log-out"
+private const val EVENT_GUEST_LOGIN_FAILED = "guest-login-failed"
 private const val EVENT_DELETE_ACCOUNT = "delete-account"
 private const val EVENT_GUEST_SESSION_START = "guest-session-start"
 
@@ -247,12 +250,25 @@ class AuthenticationRepositoryImpl(
         if (response.isSuccessful) {
             response.body?.let { loginResponse ->
                 tokenStorage.saveAccessToken(loginResponse.accessToken ?: "")
+                bearerTokenManager.clearCache()
                 Result.success(Unit)
             } ?: Result.failure(Exception("Empty response"))
         } else {
+            analyticsLogger.logEvent(
+                eventName = EVENT_GUEST_LOGIN_FAILED,
+                params = mapOf(
+                    "error_type" to response.code,
+                    "error_code" to (parseApiError(response.errorBody).code ?: "none")
+                )
+            )
             Result.failure(Exception(extractApiErrorMessage(response.errorBody, "Failed to acquire token")))
         }
     } catch (e: Exception) {
+        if (e is CancellationException) throw e
+        analyticsLogger.logEvent(
+            eventName = EVENT_GUEST_LOGIN_FAILED,
+            params = mapOf("error_type" to e.message.toString(), "error_code" to "none")
+        )
         Result.failure(e)
     }
 

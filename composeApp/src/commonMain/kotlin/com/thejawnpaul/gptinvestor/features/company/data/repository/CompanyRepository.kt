@@ -7,6 +7,7 @@ import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.api.parseApiError
+import com.thejawnpaul.gptinvestor.core.api.toRateLimitExceeded
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
@@ -134,7 +135,7 @@ class CompanyRepository(
                     emit(Either.Right(trendingCompanies))
                 }
             } else {
-                emit(Either.Left(if (response.code == 429) Failure.RateLimitExceeded else Failure.ServerError))
+                emit(Either.Left(if (response.code == 429) Failure.RateLimitExceeded() else Failure.ServerError))
             }
         } catch (e: Exception) {
             Logger.e(e.stackTraceToString())
@@ -144,7 +145,12 @@ class CompanyRepository(
 
     override suspend fun getCompanyBrief(ticker: String): Flow<Either<Failure, CompanyBrief>> = flow {
         val isGuest = appPreferences.isGuestLoggedIn.first() == true
-        val userType = if (isGuest) "guest" else "logged_in"
+        val isRegistered = appPreferences.isUserLoggedIn.first() == true
+        val userType = when {
+            isRegistered -> "authenticated"
+            isGuest -> "guest"
+            else -> "onboarding"
+        }
 
         analyticsLogger.logEvent(
             eventName = "brief-started",
@@ -167,7 +173,7 @@ class CompanyRepository(
                     emit(Either.Right(it.toBrief()))
                 }
             } else {
-                val failure = mapBriefError(response.code, response.errorBody, isGuest, ticker, userType)
+                val failure = mapBriefError(response.code, response.errorBody, !isRegistered, ticker, userType)
                 emit(Either.Left(failure))
             }
         } catch (e: Exception) {
@@ -187,7 +193,7 @@ class CompanyRepository(
     private fun mapBriefError(
         code: Int,
         errorBody: String?,
-        isGuest: Boolean,
+        hasGuestToken: Boolean,
         ticker: String,
         userType: String
     ): Failure {
@@ -221,13 +227,15 @@ class CompanyRepository(
                 Failure.GuestLimitReached
             }
 
-            errorCode == "rate_limited" -> {
+            errorCode == "rate_limited" || code == 429 -> {
                 analyticsLogger.logEvent(
                     eventName = "rate-limit-hit",
                     params = mapOf(
                         "ticker" to ticker,
                         "source" to "brief",
-                        "user_type" to userType
+                        "user_type" to userType,
+                        "error_code" to (errorCode ?: "none"),
+                        "upgrade" to (apiError.upgrade ?: true)
                     )
                 )
                 analyticsLogger.logEvent(
@@ -235,14 +243,14 @@ class CompanyRepository(
                     params = mapOf(
                         "ticker" to ticker,
                         "error_type" to code,
+                        "error_code" to (errorCode ?: "none"),
                         "user_type" to userType
                     )
                 )
-                Failure.RateLimitExceeded
+                apiError.toRateLimitExceeded()
             }
 
-            code == 401 && isGuest && errorCode == null -> {
-                // No code field: treat as session expired for guests
+            code == 401 && hasGuestToken -> {
                 analyticsLogger.logEvent(
                     eventName = "guest-session-expired",
                     params = mapOf(
@@ -255,32 +263,13 @@ class CompanyRepository(
                 Failure.GuestSessionExpired
             }
 
-            code == 429 -> {
-                analyticsLogger.logEvent(
-                    eventName = "rate-limit-hit",
-                    params = mapOf(
-                        "ticker" to ticker,
-                        "source" to "brief",
-                        "user_type" to userType
-                    )
-                )
-                analyticsLogger.logEvent(
-                    eventName = "brief-failed",
-                    params = mapOf(
-                        "ticker" to ticker,
-                        "error_type" to code,
-                        "user_type" to userType
-                    )
-                )
-                Failure.RateLimitExceeded
-            }
-
             else -> {
                 analyticsLogger.logEvent(
                     eventName = "brief-failed",
                     params = mapOf(
                         "ticker" to ticker,
                         "error_type" to code,
+                        "error_code" to (errorCode ?: "none"),
                         "user_type" to userType
                     )
                 )
@@ -340,7 +329,7 @@ class CompanyRepository(
             } ?: emptyList()
             emit(Either.Right(companies))
         } else {
-            emit(Either.Left(if (response.code == 429) Failure.RateLimitExceeded else Failure.ServerError))
+            emit(Either.Left(if (response.code == 429) Failure.RateLimitExceeded() else Failure.ServerError))
         }
     }
 
@@ -349,7 +338,7 @@ class CompanyRepository(
         if (response.isSuccessful) {
             Either.Right(response.body?.associate { it.ticker to (it.logoUrl?.toHttpsUrl() ?: "") } ?: emptyMap())
         } else {
-            Either.Left(if (response.code == 429) Failure.RateLimitExceeded else Failure.ServerError)
+            Either.Left(if (response.code == 429) Failure.RateLimitExceeded() else Failure.ServerError)
         }
     } catch (e: Exception) {
         Either.Left(Failure.NetworkConnection)

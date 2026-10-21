@@ -3,7 +3,6 @@ package com.thejawnpaul.gptinvestor.core.navigation
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.navigation.NavGraphBuilder
@@ -26,7 +25,6 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController) {
         val homeViewModel = koinViewModel<HomeViewModel>()
         val state = homeViewModel.uiState.collectAsState()
         val haptics = LocalHapticFeedback.current
-        val scope = rememberCoroutineScope()
         val toastState = rememberGiToastState()
         LaunchedEffect(Unit) {
             homeViewModel.actions.onEach { action ->
@@ -45,7 +43,7 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController) {
                     }
 
                     is HomeAction.ShowToast -> {
-                        scope.launch { toastState.show(message = action.message) }
+                        launch { toastState.show(message = action.message) }
                     }
 
                     is HomeAction.AddStockFinished -> {

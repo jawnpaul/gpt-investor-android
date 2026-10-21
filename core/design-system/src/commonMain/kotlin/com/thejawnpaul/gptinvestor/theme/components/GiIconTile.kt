@@ -35,7 +35,8 @@ fun GiIconTile(
     icon: ImageVector,
     modifier: Modifier = Modifier,
     size: GiIconTileSize = GiIconTileSize.Medium,
-    tone: GiIconTileTone = GiIconTileTone.Violet
+    tone: GiIconTileTone = GiIconTileTone.Violet,
+    iconTint: Color? = null
 ) {
     val colors = GiTheme.colors
     val tileColors = when (tone) {
@@ -57,7 +58,7 @@ fun GiIconTile(
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(size.icon),
-            tint = tileColors.content
+            tint = iconTint ?: tileColors.content
         )
     }
 }

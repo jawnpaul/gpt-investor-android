@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -73,19 +75,23 @@ fun GiSectionHeader(
                     GiText(text = trailingText, style = GiTextStyle.Link, maxLines = 1)
                 }
             } else if (trailingText != null) {
-                GiText(text = trailingText, modifier = trailingModifier, style = GiTextStyle.Meta, maxLines = 1)
+                GiText(text = trailingText, modifier = trailingModifier, style = GiTextStyle.MetaRelaxed, maxLines = 1)
             }
         }
         if (isLargeText()) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
-                GiText(text = title, modifier = Modifier.alignByBaseline(), style = GiTextStyle.SectionTitle)
+                GiText(
+                    text = title,
+                    modifier = Modifier.alignByBaseline().semantics { heading() },
+                    style = GiTextStyle.SectionTitle
+                )
                 trailing(Modifier.alignByBaseline())
             }
         } else {
             Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
                 GiText(
                     text = title,
-                    modifier = Modifier.weight(1f).alignByBaseline(),
+                    modifier = Modifier.weight(1f).alignByBaseline().semantics { heading() },
                     style = GiTextStyle.SectionTitle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -66,7 +64,7 @@ internal fun BrowseCompaniesCard(onClick: () -> Unit, modifier: Modifier = Modif
             horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            GiIconTile(icon = Icons.AutoMirrored.Outlined.List)
+            GiIconTile(icon = GiIcons.listBullets)
             Column(modifier = Modifier.weight(1f)) {
                 GiText(text = stringResource(Res.string.browse_all_companies), style = GiTextStyle.Label)
                 GiText(
@@ -124,8 +122,15 @@ internal fun TidbitCard(tidbit: HomeTidbitView, onClick: () -> Unit, modifier: M
                     .size(TidbitThumbSize)
                     .clip(GiRadius.sm)
                     .background(GiTheme.colors.violetSoft)
-                    .clearAndSetSemantics {}
+                    .clearAndSetSemantics {},
+                contentAlignment = Alignment.Center
             ) {
+                Icon(
+                    imageVector = GiIcons.mark,
+                    contentDescription = null,
+                    modifier = Modifier.size(GiIconSize.lg),
+                    tint = GiTheme.colors.violet
+                )
                 if (tidbit.previewUrl.isNotBlank()) {
                     AsyncImage(
                         model = tidbit.previewUrl,

@@ -278,10 +278,12 @@ class TopPickViewModel(
                             }
                         )
                     }
+                    processAction(TopPickAction.PickSaved)
                 }
 
                 it.onFailure { failure ->
                     Logger.e(failure.toString())
+                    processAction(TopPickAction.PickSaveFailed)
                 }
             }
         }
@@ -383,9 +385,9 @@ class TopPickViewModel(
                 saveTopPick()
             }
 
-            TopPickEvent.LikeTopPick -> {
-                // Like top pick
-            }
+            TopPickEvent.LikeTopPick -> logLike(liked = true)
+
+            TopPickEvent.RemoveLikeTopPick -> logLike(liked = false)
 
             TopPickEvent.RemoveBookmarkTopPick -> {
                 removeTopPickFromSaved()
@@ -393,10 +395,6 @@ class TopPickViewModel(
 
             TopPickEvent.ShareTopPick -> {
                 shareTopPick()
-            }
-
-            TopPickEvent.RemoveLikeTopPick -> {
-                // Remove like top pick
             }
 
             TopPickEvent.GoToLogin -> {
@@ -423,6 +421,14 @@ class TopPickViewModel(
         }
     }
 
+    private fun logLike(liked: Boolean) {
+        val pick = _topPickView.value.topPick ?: return
+        analyticsLogger.logEvent(
+            eventName = if (liked) "top-pick-liked" else "top-pick-unliked",
+            params = mapOf("top_pick_id" to pick.id, "ticker" to pick.ticker)
+        )
+    }
+
     fun processAction(action: TopPickAction) {
         viewModelScope.launch {
             _actions.emit(action)
@@ -439,6 +445,8 @@ sealed interface TopPickAction {
     data object WatchlistAddFailed : TopPickAction
     data class WatchlistRemoved(val ticker: String) : TopPickAction
     data class WatchlistRemoveFailed(val ticker: String) : TopPickAction
+    data object PickSaved : TopPickAction
+    data object PickSaveFailed : TopPickAction
 }
 
 sealed interface TopPickEvent {

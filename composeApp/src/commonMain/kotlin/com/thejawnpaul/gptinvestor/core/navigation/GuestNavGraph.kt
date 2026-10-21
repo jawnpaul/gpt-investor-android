@@ -487,7 +487,9 @@ fun NavGraphBuilder.guestNavGraph(
                     is TopPickAction.OpenCompanyAsk,
                     TopPickAction.WatchlistAddFailed,
                     is TopPickAction.WatchlistRemoved,
-                    is TopPickAction.WatchlistRemoveFailed -> Unit
+                    is TopPickAction.WatchlistRemoveFailed,
+                    TopPickAction.PickSaved,
+                    TopPickAction.PickSaveFailed -> Unit
                 }
             }.launchIn(scope)
         }

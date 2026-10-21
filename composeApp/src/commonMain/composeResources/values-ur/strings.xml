@@ -503,6 +503,7 @@
     <string name="top_pick_save">انتخاب محفوظ کریں</string>
     <string name="top_pick_share">انتخاب شیئر کریں</string>
     <string name="top_pick_saved_to_picks">آپ کے انتخاب میں محفوظ ہو گیا</string>
+    <string name="top_pick_save_failed">یہ انتخاب محفوظ نہیں ہو سکا۔ دوبارہ کوشش کریں۔</string>
     <string name="top_pick_loading">بہترین انتخاب لوڈ ہو رہا ہے</string>
     <string name="top_picks_loading">بہترین انتخاب لوڈ ہو رہے ہیں</string>
     <string name="top_pick_error_title">یہ انتخاب لوڈ نہیں ہو سکا</string>

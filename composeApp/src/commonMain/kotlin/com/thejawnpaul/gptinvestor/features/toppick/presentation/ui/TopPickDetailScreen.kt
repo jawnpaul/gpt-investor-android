@@ -32,7 +32,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -106,7 +105,6 @@ import com.thejawnpaul.gptinvestor.theme.components.GiSkeleton
 import com.thejawnpaul.gptinvestor.theme.components.GiText
 import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.theme.components.GiToastHost
-import com.thejawnpaul.gptinvestor.theme.components.GiToastResult
 import com.thejawnpaul.gptinvestor.theme.components.GiToastState
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
 import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
@@ -116,14 +114,11 @@ import com.thejawnpaul.gptinvestor.top_pick_error_title
 import com.thejawnpaul.gptinvestor.top_pick_label
 import com.thejawnpaul.gptinvestor.top_pick_loading
 import com.thejawnpaul.gptinvestor.top_pick_save
-import com.thejawnpaul.gptinvestor.top_pick_saved_to_picks
 import com.thejawnpaul.gptinvestor.top_pick_score
 import com.thejawnpaul.gptinvestor.top_pick_share
 import com.thejawnpaul.gptinvestor.top_pick_sources_subtitle
 import com.thejawnpaul.gptinvestor.try_again
-import com.thejawnpaul.gptinvestor.view
 import com.thejawnpaul.gptinvestor.yahoo_finance
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -133,12 +128,10 @@ fun TopPickDetailScreen(
     onEvent: (TopPickEvent) -> Unit,
     onAction: (TopPickAction) -> Unit,
     toastState: GiToastState,
-    modifier: Modifier = Modifier,
-    onOpenSavedList: (() -> Unit)? = null
+    modifier: Modifier = Modifier
 ) {
     val colors = GiTheme.colors
     val listState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
     val uriHandler = LocalUriHandler.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val haptics = LocalHapticFeedback.current
@@ -148,9 +141,7 @@ fun TopPickDetailScreen(
     val isWatched = brief?.isWatched == true
     val signedIn = state.isLoggedIn && !state.isGuestSession
     val companyName = brief?.name ?: company?.name ?: pick?.companyName.orEmpty()
-    val savedMessage = stringResource(Res.string.top_pick_saved_to_picks)
     val watchedMessage = stringResource(Res.string.added_to_watchlist_success)
-    val viewLabel = stringResource(Res.string.view)
     var isLiked by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
     var selectedKeyNumber by remember { mutableStateOf<KeyNumber?>(null) }
@@ -271,16 +262,6 @@ fun TopPickDetailScreen(
                                             TopPickEvent.RemoveBookmarkTopPick
                                         }
                                         onEvent(event)
-                                        if (save) {
-                                            scope.launch {
-                                                val result = toastState.show(
-                                                    message = savedMessage,
-                                                    icon = GiIcons.check,
-                                                    actionText = if (onOpenSavedList != null) viewLabel else null
-                                                )
-                                                if (result == GiToastResult.ActionPerformed) onOpenSavedList?.invoke()
-                                            }
-                                        }
                                     },
                                     onReadMore = if (state.isLoggedIn) {
                                         null

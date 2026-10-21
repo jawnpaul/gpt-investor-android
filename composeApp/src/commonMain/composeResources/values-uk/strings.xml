@@ -511,6 +511,7 @@
     <string name="top_pick_save">Зберегти вибір</string>
     <string name="top_pick_share">Поділитися вибором</string>
     <string name="top_pick_saved_to_picks">Збережено у ваших виборах</string>
+    <string name="top_pick_save_failed">Не вдалося зберегти цей вибір. Спробуйте ще раз.</string>
     <string name="top_pick_loading">Завантаження найкращого вибору</string>
     <string name="top_picks_loading">Завантаження найкращих виборів</string>
     <string name="top_pick_error_title">Не вдалося завантажити цей вибір</string>

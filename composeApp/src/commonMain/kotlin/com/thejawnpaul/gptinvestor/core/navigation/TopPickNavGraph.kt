@@ -15,13 +15,20 @@ import com.thejawnpaul.gptinvestor.added_to_watchlist_error
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.failed_to_remove_from_watchlist
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickAction
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickEvent
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewModel
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.AllTopPicksScreen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SavedTopPicksScreen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPickDetailScreen
 import com.thejawnpaul.gptinvestor.removed_from_watchlist
+import com.thejawnpaul.gptinvestor.retry
 import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiToastResult
 import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
+import com.thejawnpaul.gptinvestor.top_pick_save_failed
+import com.thejawnpaul.gptinvestor.top_pick_saved_to_picks
+import com.thejawnpaul.gptinvestor.view
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -81,6 +88,33 @@ fun NavGraphBuilder.topPickNavGraph(navController: NavHostController, platformAc
                             )
                         }
                     }
+
+                    TopPickAction.PickSaved -> {
+                        scope.launch {
+                            val result = toastState.show(
+                                message = getString(Res.string.top_pick_saved_to_picks),
+                                icon = GiIcons.check,
+                                actionText = getString(Res.string.view)
+                            )
+                            if (result == GiToastResult.ActionPerformed) {
+                                navController.navigate(Screen.SavedTopPicksScreen.route)
+                            }
+                        }
+                    }
+
+                    TopPickAction.PickSaveFailed -> {
+                        haptics.performHapticFeedback(GiHaptics.Reject)
+                        scope.launch {
+                            val result = toastState.show(
+                                message = getString(Res.string.top_pick_save_failed),
+                                icon = GiIcons.warningCircle,
+                                actionText = getString(Res.string.retry)
+                            )
+                            if (result == GiToastResult.ActionPerformed) {
+                                viewModel.handleEvent(TopPickEvent.BookmarkTopPick)
+                            }
+                        }
+                    }
                 }
             }.launchIn(scope)
         }
@@ -90,8 +124,7 @@ fun NavGraphBuilder.topPickNavGraph(navController: NavHostController, platformAc
             state = state.value,
             onEvent = viewModel::handleEvent,
             onAction = viewModel::processAction,
-            toastState = toastState,
-            onOpenSavedList = { navController.navigate(Screen.SavedTopPicksScreen.route) }
+            toastState = toastState
         )
     }
 

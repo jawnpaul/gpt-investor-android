@@ -19,6 +19,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -53,12 +54,14 @@ fun SetUpNavGraph(
     val premiumViewModel = koinViewModel<PremiumViewModel>()
     val premiumState by premiumViewModel.state.collectAsState()
 
-    val startDestination = initialDestination(
-        isUserSignedIn,
-        isGuestSignedIn,
-        hasCompletedOnboarding,
-        hasCompletedPostAuthOnboarding
-    )
+    val startDestination = remember {
+        initialDestination(
+            isUserSignedIn,
+            isGuestSignedIn,
+            hasCompletedOnboarding,
+            hasCompletedPostAuthOnboarding
+        )
+    }
 
     LaunchedEffect(toastMessenger, toastState) {
         toastMessenger.messages.collect { toast ->

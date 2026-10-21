@@ -24,6 +24,7 @@ import com.thejawnpaul.gptinvestor.features.authentication.presentation.LoginVie
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.SignUpScreen
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.SignUpUiAction
 import com.thejawnpaul.gptinvestor.features.authentication.presentation.SignUpViewModel
+import com.thejawnpaul.gptinvestor.features.guest.presentation.GuestScreen
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -43,7 +44,7 @@ fun NavGraphBuilder.authenticationNavGraph(
             viewModel.actions.onEach { action ->
                 when (action) {
                     DefaultAuthenticationAction.OnGoToHome -> {
-                        navigateAfterAuth(navController, hasCompletedPostAuthOnboarding)
+                        navController.navigateClearingBackStack(GuestScreen.GuestHomeTab.route)
                     }
 
                     DefaultAuthenticationAction.OnGoToSignUp -> {

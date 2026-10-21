@@ -19,6 +19,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
@@ -71,7 +74,7 @@ fun HomeTrendingSection(
             }
             TrendingDisplay.Error -> GiBanner(
                 title = stringResource(Res.string.couldn_t_load),
-                modifier = Modifier.padding(rowPadding),
+                modifier = Modifier.padding(rowPadding).semantics { liveRegion = LiveRegionMode.Polite },
                 subtitle = stringResource(Res.string.live_prices_unavailable),
                 tone = GiBannerTone.Error
             ) {

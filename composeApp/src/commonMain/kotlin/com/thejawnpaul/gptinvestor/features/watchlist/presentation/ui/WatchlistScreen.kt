@@ -41,6 +41,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -270,9 +277,33 @@ private fun ListSheet(modifier: Modifier = Modifier, content: @Composable Column
             .fillMaxWidth()
             .clip(ListSheetShape)
             .background(GiTheme.colors.raised)
-            .border(GiEdge.width, GiTheme.colors.line, ListSheetShape),
+            .topEdge(GiTheme.colors.line),
         content = content
     )
+}
+
+private fun Modifier.topEdge(color: Color): Modifier = drawWithCache {
+    val stroke = GiEdge.width.toPx()
+    val corner = ListSheetShape.topStart.toPx(size, this)
+    val edgeStroke = Stroke(width = stroke)
+    val edge = Path().apply {
+        addRoundRect(
+            RoundRect(
+                left = stroke / 2f,
+                top = stroke / 2f,
+                right = size.width - stroke / 2f,
+                bottom = size.height + corner,
+                topLeftCornerRadius = CornerRadius(corner),
+                topRightCornerRadius = CornerRadius(corner)
+            )
+        )
+    }
+    onDrawWithContent {
+        drawContent()
+        clipRect(left = 0f, top = 0f, right = size.width, bottom = corner) {
+            drawPath(path = edge, color = color, style = edgeStroke)
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

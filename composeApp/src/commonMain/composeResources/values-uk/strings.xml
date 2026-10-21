@@ -382,7 +382,8 @@
     <string name="browse_empty_sector">У секторі %1$s ще немає компаній. Спробуйте інший сектор.</string>
     <string name="browse_empty_all">Поки що немає компаній для показу. Спробуйте трохи згодом.</string>
     <string name="browse_search_all_sectors">Шукати в усіх секторах</string>
-    <string name="browse_error_title">Не вдалося завантажити компанії</string>
+    <string name="browse_error_title">Не вдалося завантажити акції</string>
+    <string name="browse_error_body">Щоб показати список компаній, потрібне з’єднання. Перевірте з’єднання та спробуйте ще раз.</string>
     <string name="browse_more_error">Не вдалося завантажити більше компаній.</string>
     <string name="history_title">Ваша історія GPT Investor</string>
     <string name="history_empty_title">Ще немає чатів</string>

@@ -398,7 +398,8 @@
     <string name="browse_empty_sector">There are no companies in %1$s yet. Try another sector.</string>
     <string name="browse_empty_all">There are no companies to show yet. Try again in a moment.</string>
     <string name="browse_search_all_sectors">Search all sectors</string>
-    <string name="browse_error_title">We couldn’t load companies</string>
+    <string name="browse_error_title">Couldn’t load stocks</string>
+    <string name="browse_error_body">We need a connection to show the company list. Check your connection and try again.</string>
     <string name="browse_more_error">We couldn’t load more companies.</string>
     <string name="history_title">Your GPT Investor history</string>
     <string name="history_empty_title">No chats yet</string>

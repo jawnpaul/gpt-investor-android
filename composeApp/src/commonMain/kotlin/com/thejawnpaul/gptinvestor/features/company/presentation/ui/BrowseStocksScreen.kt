@@ -17,10 +17,12 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -30,8 +32,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -48,6 +52,7 @@ import com.thejawnpaul.gptinvestor.browse_empty_all
 import com.thejawnpaul.gptinvestor.browse_empty_in_sector
 import com.thejawnpaul.gptinvestor.browse_empty_query
 import com.thejawnpaul.gptinvestor.browse_empty_sector
+import com.thejawnpaul.gptinvestor.browse_error_body
 import com.thejawnpaul.gptinvestor.browse_error_title
 import com.thejawnpaul.gptinvestor.browse_loading
 import com.thejawnpaul.gptinvestor.browse_more_error
@@ -56,7 +61,6 @@ import com.thejawnpaul.gptinvestor.browse_search_placeholder
 import com.thejawnpaul.gptinvestor.browse_sector
 import com.thejawnpaul.gptinvestor.browse_sector_all
 import com.thejawnpaul.gptinvestor.browse_stocks_empty
-import com.thejawnpaul.gptinvestor.check_connection_try_again
 import com.thejawnpaul.gptinvestor.clear_search
 import com.thejawnpaul.gptinvestor.features.company.data.local.model.PriceChange
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
@@ -64,6 +68,8 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPr
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.BrowseStocksEvent
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.BrowseStocksState
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.tickerStock
+import com.thejawnpaul.gptinvestor.features.search.presentation.ui.SearchArtTile
+import com.thejawnpaul.gptinvestor.features.search.presentation.ui.SearchCopyMaxWidth
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
@@ -72,9 +78,8 @@ import com.thejawnpaul.gptinvestor.theme.components.GiButtonSize
 import com.thejawnpaul.gptinvestor.theme.components.GiButtonVariant
 import com.thejawnpaul.gptinvestor.theme.components.GiChip
 import com.thejawnpaul.gptinvestor.theme.components.GiDivider
-import com.thejawnpaul.gptinvestor.theme.components.GiEmptyState
-import com.thejawnpaul.gptinvestor.theme.components.GiErrorState
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiListGroup
 import com.thejawnpaul.gptinvestor.theme.components.GiSearchField
 import com.thejawnpaul.gptinvestor.theme.components.GiSkeleton
 import com.thejawnpaul.gptinvestor.theme.components.GiSpinner
@@ -82,6 +87,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiStockRow
 import com.thejawnpaul.gptinvestor.theme.components.GiText
 import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
+import com.thejawnpaul.gptinvestor.theme.components.giLazyListGroup
 import com.thejawnpaul.gptinvestor.try_again
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -147,7 +153,17 @@ private fun BrowseStocksContent(
 ) {
     val refresh = companies.loadState.refresh
     val isEmpty = companies.itemCount == 0
-    LazyColumn(modifier = modifier, contentPadding = PaddingValues(top = GiSpace.x3)) {
+    val listState = rememberLazyListState()
+    LazyColumn(
+        modifier = modifier.giLazyListGroup(
+            state = listState,
+            contentType = COMPANY_CONTENT_TYPE,
+            inset = GiSpace.gutter,
+            colors = GiTheme.colors
+        ),
+        state = listState,
+        contentPadding = PaddingValues(top = GiSpace.x3)
+    ) {
         item(key = "sectors", contentType = "sectors") {
             if (state.sectors.isNotEmpty()) {
                 SectorChips(
@@ -165,12 +181,9 @@ private fun BrowseStocksContent(
             }
 
             isEmpty && refresh is LoadState.Error -> item(key = "error", contentType = "state") {
-                GiErrorState(
-                    title = stringResource(Res.string.browse_error_title),
-                    body = stringResource(Res.string.check_connection_try_again),
-                    actionText = stringResource(Res.string.try_again),
-                    onAction = { companies.retry() },
-                    modifier = Modifier.padding(horizontal = GiSpace.gutter, vertical = GiSpace.x10)
+                BrowseErrorState(
+                    onRetry = { companies.retry() },
+                    modifier = Modifier.padding(start = GiSpace.gutter, end = GiSpace.gutter, top = BrowseErrorTop)
                 )
             }
 
@@ -181,33 +194,31 @@ private fun BrowseStocksContent(
                     onRetry = { companies.refresh() },
                     modifier = Modifier
                         .padding(horizontal = GiSpace.gutter)
-                        .padding(top = GiSpace.x10)
+                        .padding(top = BrowseEmptyTop)
                 )
             }
 
             else -> items(
                 count = companies.itemCount,
                 key = companies.itemKey { it.ticker },
-                contentType = { "company" }
+                contentType = { COMPANY_CONTENT_TYPE }
             ) { index ->
                 val company = companies[index]
-                Column {
-                    if (company != null) {
-                        GiStockRow(
-                            stock = tickerStock(
-                                ticker = company.ticker,
-                                title = company.name,
-                                subtitle = company.ticker,
-                                percent = null,
-                                imageUrl = company.logo.ifBlank { null }
-                            ),
-                            onClick = { onEvent(BrowseStocksEvent.GoToCompanyDetail(company.ticker)) },
-                            showCaret = true
-                        )
-                    } else {
-                        BrowseSkeletonRow()
-                    }
-                    GiDivider(modifier = Modifier.padding(horizontal = GiSpace.gutter))
+                if (company != null) {
+                    GiStockRow(
+                        stock = tickerStock(
+                            ticker = company.ticker,
+                            title = company.name,
+                            subtitle = company.ticker,
+                            percent = null,
+                            imageUrl = company.logo.ifBlank { null }
+                        ),
+                        onClick = { onEvent(BrowseStocksEvent.GoToCompanyDetail(company.ticker)) },
+                        modifier = Modifier.padding(horizontal = GiSpace.gutter),
+                        showCaret = true
+                    )
+                } else {
+                    BrowseSkeletonRow(modifier = Modifier.padding(horizontal = GiSpace.gutter))
                 }
             }
         }
@@ -344,15 +355,82 @@ private fun BrowseEmptyState(
             onAction = onRetry
         }
     }
-    GiEmptyState(
-        icon = GiIcons.magnifyingGlass,
-        title = stringResource(Res.string.browse_stocks_empty),
-        body = body,
-        actionText = actionText,
-        onAction = onAction,
-        modifier = modifier.semantics { liveRegion = LiveRegionMode.Polite }
-    )
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics { liveRegion = LiveRegionMode.Polite },
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
+    ) {
+        SearchArtTile(
+            icon = GiIcons.magnifyingGlass,
+            container = GiTheme.colors.violetSoft,
+            content = GiTheme.colors.violet
+        )
+        GiText(
+            text = stringResource(Res.string.browse_stocks_empty),
+            modifier = Modifier
+                .padding(top = GiSpace.x2)
+                .semantics { heading() },
+            style = GiTextStyle.PageTitle,
+            textAlign = TextAlign.Center
+        )
+        GiText(
+            text = body,
+            modifier = Modifier.widthIn(max = SearchCopyMaxWidth),
+            style = GiTextStyle.Body,
+            textAlign = TextAlign.Center
+        )
+        GiButton(
+            text = actionText,
+            onClick = onAction,
+            modifier = Modifier.padding(top = GiSpace.x2),
+            size = GiButtonSize.Large
+        )
+    }
 }
+
+@Composable
+private fun BrowseErrorState(onRetry: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics { liveRegion = LiveRegionMode.Polite },
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x5)
+    ) {
+        SearchArtTile(icon = GiIcons.wifiSlash, container = GiTheme.colors.tile, content = GiTheme.colors.muted)
+        Column(
+            modifier = Modifier.widthIn(max = SearchCopyMaxWidth),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
+        ) {
+            GiText(
+                text = stringResource(Res.string.browse_error_title),
+                modifier = Modifier.semantics { heading() },
+                style = GiTextStyle.StatNumber,
+                textAlign = TextAlign.Center
+            )
+            GiText(
+                text = stringResource(Res.string.browse_error_body),
+                style = GiTextStyle.Body,
+                textAlign = TextAlign.Center
+            )
+        }
+        GiButton(
+            text = stringResource(Res.string.try_again),
+            onClick = onRetry,
+            modifier = Modifier.fillMaxWidth(),
+            size = GiButtonSize.Large,
+            leadingIcon = GiIcons.arrowClockwise
+        )
+    }
+}
+
+private const val COMPANY_CONTENT_TYPE = "company"
+
+private val BrowseEmptyTop = 56.dp
+private val BrowseErrorTop = 72.dp
 
 @Composable
 private fun BrowseSkeleton(modifier: Modifier = Modifier) {
@@ -364,17 +442,19 @@ private fun BrowseSkeleton(modifier: Modifier = Modifier) {
                 contentDescription = description
             }
     ) {
-        repeat(SKELETON_ROWS) { index ->
-            BrowseSkeletonRow(nameWidthIndex = index)
-            GiDivider(modifier = Modifier.padding(horizontal = GiSpace.gutter))
+        GiListGroup(modifier = Modifier.padding(horizontal = GiSpace.gutter)) {
+            repeat(SKELETON_ROWS) { index ->
+                if (index > 0) GiDivider()
+                BrowseSkeletonRow(nameWidthIndex = index)
+            }
         }
     }
 }
 
 @Composable
-private fun BrowseSkeletonRow(nameWidthIndex: Int = 0) {
+private fun BrowseSkeletonRow(modifier: Modifier = Modifier, nameWidthIndex: Int = 0) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = GiSpace.x4, vertical = GiSpace.x3),
         horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),

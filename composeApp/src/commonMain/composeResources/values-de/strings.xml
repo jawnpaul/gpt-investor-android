@@ -380,7 +380,8 @@
     <string name="browse_empty_sector">In %1$s gibt es noch keine Unternehmen. Versuchen Sie einen anderen Sektor.</string>
     <string name="browse_empty_all">Es gibt noch keine Unternehmen anzuzeigen. Versuchen Sie es gleich noch einmal.</string>
     <string name="browse_search_all_sectors">Alle Sektoren durchsuchen</string>
-    <string name="browse_error_title">Unternehmen konnten nicht geladen werden</string>
+    <string name="browse_error_title">Aktien konnten nicht geladen werden</string>
+    <string name="browse_error_body">Für die Unternehmensliste brauchen wir eine Verbindung. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.</string>
     <string name="browse_more_error">Weitere Unternehmen konnten nicht geladen werden.</string>
     <string name="history_title">Ihr GPT Investor-Verlauf</string>
     <string name="history_empty_title">Noch keine Chats</string>

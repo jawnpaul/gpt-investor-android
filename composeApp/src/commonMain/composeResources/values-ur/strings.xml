@@ -380,7 +380,8 @@
     <string name="browse_empty_sector">%1$s میں ابھی کوئی کمپنی نہیں ہے۔ کوئی اور شعبہ آزمائیں۔</string>
     <string name="browse_empty_all">ابھی دکھانے کے لیے کوئی کمپنی نہیں ہے۔ تھوڑی دیر میں دوبارہ کوشش کریں۔</string>
     <string name="browse_search_all_sectors">تمام شعبوں میں تلاش کریں</string>
-    <string name="browse_error_title">ہم کمپنیاں لوڈ نہیں کر سکے</string>
+    <string name="browse_error_title">اسٹاکس لوڈ نہیں ہو سکے</string>
+    <string name="browse_error_body">کمپنیوں کی فہرست دکھانے کے لیے کنکشن ضروری ہے۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
     <string name="browse_more_error">ہم مزید کمپنیاں لوڈ نہیں کر سکے۔</string>
     <string name="history_title">آپ کی GPT Investor ہسٹری</string>
     <string name="history_empty_title">ابھی کوئی چیٹ نہیں</string>

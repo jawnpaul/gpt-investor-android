@@ -80,7 +80,6 @@
     <string name="read_more">Read more</string>
     <string name="read_less">Read less</string>
     <string name="sources">Sources</string>
-    <string name="top_pick_rationale">Top pick rationale</string>
     <string name="sign_up">Sign up</string>
     <string name="verify_email_title">Check your email</string>
     <string name="verify_email_body">Please verify your email address before logging in. Check your inbox for a verification link.</string>
@@ -491,11 +490,6 @@
     <string name="audio_pause">Pause</string>
     <string name="top_pick_label">Top pick</string>
     <string name="top_pick_score">Score %1$d/10</string>
-    <string name="top_pick_key_metrics">Key metrics</string>
-    <string name="top_pick_key_risks">Key risks</string>
-    <string name="top_pick_tab_overview">Overview</string>
-    <string name="top_pick_tab_key_ratios">Key ratios</string>
-    <string name="top_pick_tab_news">News</string>
     <string name="chart_range_1w">1W</string>
     <string name="chart_range_1m">1M</string>
     <string name="chart_range_3m">3M</string>
@@ -511,7 +505,7 @@
     <string name="chart_range">Chart range</string>
     <string name="top_pick_revenue">Revenue</string>
     <string name="read_article">Read article</string>
-    <string name="top_pick_no_news">No recent news for %1$s.</string>
+    <string name="top_pick_no_news">%1$s has no recent news.</string>
     <string name="top_pick_sources_subtitle">Where this pick’s facts come from</string>
     <string name="yahoo_finance">Yahoo Finance</string>
     <string name="top_pick_disclaimer">Picks explain why a stock is interesting; they are not advice to buy. Not financial advice.</string>

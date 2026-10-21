@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.toppick.presentation.state
 
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
+import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyBrief
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 
 data class TopPickDetailView(
@@ -11,5 +12,9 @@ data class TopPickDetailView(
     val companyPresentation: CompanyDetailRemoteResponse? = null,
     val showAuthenticateDialog: Boolean = false,
     val showNewsSourcesBottomSheet: Boolean = false,
-    val isGuestSession: Boolean = false
+    val isGuestSession: Boolean = false,
+    val brief: CompanyBrief? = null,
+    val briefLoading: Boolean = false,
+    val briefFailed: Boolean = false,
+    val watchlistPending: Boolean = false
 )

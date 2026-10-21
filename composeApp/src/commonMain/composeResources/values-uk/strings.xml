@@ -80,7 +80,6 @@
     <string name="read_more">Читати далі</string>
     <string name="read_less">Згорнути</string>
     <string name="sources">Джерела</string>
-    <string name="top_pick_rationale">Обґрунтування найкращого вибору</string>
     <string name="sign_up">Зареєструватися</string>
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
     <string name="continue_with_google">Продовжити з Google</string>
@@ -479,11 +478,6 @@
     <string name="audio_pause">Пауза</string>
     <string name="top_pick_label">Найкращий вибір</string>
     <string name="top_pick_score">Оцінка %1$d/10</string>
-    <string name="top_pick_key_metrics">Ключові показники</string>
-    <string name="top_pick_key_risks">Ключові ризики</string>
-    <string name="top_pick_tab_overview">Огляд</string>
-    <string name="top_pick_tab_key_ratios">Ключові коефіцієнти</string>
-    <string name="top_pick_tab_news">Новини</string>
     <string name="chart_range_1w">1Т</string>
     <string name="chart_range_1m">1М</string>
     <string name="chart_range_3m">3М</string>
@@ -499,7 +493,7 @@
     <string name="chart_range">Період графіка</string>
     <string name="top_pick_revenue">Виручка</string>
     <string name="read_article">Читати статтю</string>
-    <string name="top_pick_no_news">Немає свіжих новин про %1$s.</string>
+    <string name="top_pick_no_news">Про %1$s поки немає свіжих новин.</string>
     <string name="top_pick_sources_subtitle">Звідки взято факти для цього вибору</string>
     <string name="yahoo_finance">Yahoo Finance</string>
     <string name="top_pick_disclaimer">Вибори пояснюють, чим цікава акція; це не порада купувати. Не є фінансовою порадою.</string>

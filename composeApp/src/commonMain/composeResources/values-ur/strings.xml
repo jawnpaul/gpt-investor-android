@@ -80,7 +80,6 @@
     <string name="read_more">مزید پڑھیں</string>
     <string name="read_less">کم پڑھیں</string>
     <string name="sources">ذرائع</string>
-    <string name="top_pick_rationale">بہترین انتخاب کی وجہ</string>
     <string name="sign_up">Sign up</string>
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
     <string name="continue_with_google">Google کے ساتھ جاری رکھیں</string>
@@ -473,11 +472,6 @@
     <string name="audio_pause">روکیں</string>
     <string name="top_pick_label">بہترین انتخاب</string>
     <string name="top_pick_score">اسکور %1$d/10</string>
-    <string name="top_pick_key_metrics">اہم اعداد و شمار</string>
-    <string name="top_pick_key_risks">اہم خطرات</string>
-    <string name="top_pick_tab_overview">جائزہ</string>
-    <string name="top_pick_tab_key_ratios">اہم تناسب</string>
-    <string name="top_pick_tab_news">خبریں</string>
     <string name="chart_range_1w">1W</string>
     <string name="chart_range_1m">1M</string>
     <string name="chart_range_3m">3M</string>

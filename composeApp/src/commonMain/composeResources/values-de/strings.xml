@@ -80,7 +80,6 @@
     <string name="read_more">Mehr lesen</string>
     <string name="read_less">Weniger lesen</string>
     <string name="sources">Quellen</string>
-    <string name="top_pick_rationale">Begründung der Top-Empfehlung</string>
     <string name="sign_up">Registrieren</string>
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
     <string name="continue_with_google">Mit Google fortfahren</string>
@@ -473,11 +472,6 @@
     <string name="audio_pause">Pausieren</string>
     <string name="top_pick_label">Top-Empfehlung</string>
     <string name="top_pick_score">Bewertung %1$d/10</string>
-    <string name="top_pick_key_metrics">Wichtige Kennzahlen</string>
-    <string name="top_pick_key_risks">Wichtige Risiken</string>
-    <string name="top_pick_tab_overview">Überblick</string>
-    <string name="top_pick_tab_key_ratios">Kennzahlen</string>
-    <string name="top_pick_tab_news">Nachrichten</string>
     <string name="chart_range_1w">1W</string>
     <string name="chart_range_1m">1M</string>
     <string name="chart_range_3m">3M</string>
@@ -493,7 +487,7 @@
     <string name="chart_range">Zeitraum des Diagramms</string>
     <string name="top_pick_revenue">Umsatz</string>
     <string name="read_article">Artikel lesen</string>
-    <string name="top_pick_no_news">Keine aktuellen Nachrichten zu %1$s.</string>
+    <string name="top_pick_no_news">Zu %1$s gibt es keine aktuellen Nachrichten.</string>
     <string name="top_pick_sources_subtitle">Woher die Fakten zu dieser Empfehlung stammen</string>
     <string name="yahoo_finance">Yahoo Finance</string>
     <string name="top_pick_disclaimer">Empfehlungen erklären, warum eine Aktie interessant ist; sie sind keine Kaufempfehlung. Keine Finanzberatung.</string>

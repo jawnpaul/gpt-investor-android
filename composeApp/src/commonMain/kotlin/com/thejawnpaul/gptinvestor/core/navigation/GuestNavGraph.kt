@@ -459,6 +459,11 @@ fun NavGraphBuilder.guestNavGraph(
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
                     }
+
+                    is TopPickAction.OpenCompanyAsk,
+                    TopPickAction.WatchlistAddFailed,
+                    is TopPickAction.WatchlistRemoved,
+                    is TopPickAction.WatchlistRemoveFailed -> Unit
                 }
             }.launchIn(scope)
         }

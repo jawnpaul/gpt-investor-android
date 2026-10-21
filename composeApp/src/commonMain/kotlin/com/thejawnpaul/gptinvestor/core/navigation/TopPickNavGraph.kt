@@ -4,19 +4,26 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.added_to_watchlist_error
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
+import com.thejawnpaul.gptinvestor.failed_to_remove_from_watchlist
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickAction
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewModel
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.AllTopPicksScreen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SavedTopPicksScreen
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPickDetailScreen
+import com.thejawnpaul.gptinvestor.removed_from_watchlist
+import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.jetbrains.compose.resources.getString
 import org.koin.compose.viewmodel.koinViewModel
 
 fun NavGraphBuilder.topPickNavGraph(navController: NavHostController, platformActions: PlatformActions) {
@@ -27,6 +34,7 @@ fun NavGraphBuilder.topPickNavGraph(navController: NavHostController, platformAc
         val viewModel = koinViewModel<TopPickViewModel>()
         val state = viewModel.topPickView.collectAsState()
         val scope = rememberCoroutineScope()
+        val haptics = LocalHapticFeedback.current
 
         LaunchedEffect(Unit) {
             viewModel.actions.onEach { action ->
@@ -47,6 +55,26 @@ fun NavGraphBuilder.topPickNavGraph(navController: NavHostController, platformAc
                         navController.navigate(Screen.SignUpScreen.route) {
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
+                    }
+
+                    is TopPickAction.OpenCompanyAsk -> {
+                        navController.navigate(Screen.CompanyDetailScreen.createRoute(action.ticker, action.query))
+                    }
+
+                    TopPickAction.WatchlistAddFailed -> {
+                        haptics.performHapticFeedback(GiHaptics.Reject)
+                        platformActions.showMessage(getString(Res.string.added_to_watchlist_error))
+                    }
+
+                    is TopPickAction.WatchlistRemoved -> {
+                        platformActions.showMessage(getString(Res.string.removed_from_watchlist, action.ticker))
+                    }
+
+                    is TopPickAction.WatchlistRemoveFailed -> {
+                        haptics.performHapticFeedback(GiHaptics.Reject)
+                        platformActions.showMessage(
+                            getString(Res.string.failed_to_remove_from_watchlist, action.ticker)
+                        )
                     }
                 }
             }.launchIn(scope)

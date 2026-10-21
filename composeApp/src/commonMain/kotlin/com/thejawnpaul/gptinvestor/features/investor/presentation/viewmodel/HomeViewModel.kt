@@ -307,8 +307,8 @@ class HomeViewModel(
                     }
                 }
 
-                HomeEvent.GoToSignUp -> {
-                    _actions.emit(HomeAction.OnGoToSignUp)
+                HomeEvent.GoToLogin -> {
+                    _actions.emit(HomeAction.OnGoToLogin)
                 }
 
                 HomeEvent.RetryTrendingCompanies -> getTrendingCompanies()
@@ -671,7 +671,7 @@ sealed interface HomeEvent {
     data object JoinWaitlist : HomeEvent
     data class DefaultPromptClicked(val prompt: DefaultPrompt) : HomeEvent
     data object SignOut : HomeEvent
-    data object GoToSignUp : HomeEvent
+    data object GoToLogin : HomeEvent
     data object RetryTrendingCompanies : HomeEvent
     data class ClickTrendingCompany(val ticker: String) : HomeEvent
     data class AddStockToDigest(val ticker: String) : HomeEvent
@@ -692,6 +692,7 @@ sealed interface HomeAction {
     data class ShowToast(val message: String) : HomeAction
     data class AddStockFinished(val added: Boolean) : HomeAction
     data object OnGoToSignUp : HomeAction
+    data object OnGoToLogin : HomeAction
     data object NavigateToDiscover : HomeAction
     data object NavigateToDigestDetail : HomeAction
     data object NavigateToProfile : HomeAction

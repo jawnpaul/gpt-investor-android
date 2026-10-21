@@ -210,7 +210,7 @@ fun TopPickDetailScreen(
                                 .fillMaxWidth()
                                 .background(colors.bg)
                                 .padding(start = GiSpace.gutter, end = GiSpace.gutter, bottom = GiSpace.x3),
-                            onClick = { onEvent(TopPickEvent.GoToSignUp) }
+                            onClick = { onEvent(TopPickEvent.GoToLogin) }
                         )
                     }
                 }

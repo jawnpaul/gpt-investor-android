@@ -198,7 +198,7 @@ fun CompanyDetailScreen(
                     }
                     if (state.isGuestSession) {
                         TopGuestLabel(
-                            onClick = { onEvent(CompanyDetailEvent.SignUpClicked) },
+                            onClick = { onEvent(CompanyDetailEvent.LoginClicked) },
                             modifier = Modifier.padding(
                                 start = GiSpace.gutter,
                                 end = GiSpace.gutter,

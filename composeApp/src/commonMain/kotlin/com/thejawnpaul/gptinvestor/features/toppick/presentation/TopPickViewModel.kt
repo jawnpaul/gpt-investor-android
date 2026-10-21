@@ -399,8 +399,8 @@ class TopPickViewModel(
                 // Remove like top pick
             }
 
-            TopPickEvent.GoToSignUp -> {
-                processAction(TopPickAction.OnGoToSignUp)
+            TopPickEvent.GoToLogin -> {
+                processAction(TopPickAction.OnGoToLogin)
             }
 
             TopPickEvent.Retry -> getTopPick()
@@ -434,7 +434,7 @@ sealed interface TopPickAction {
     data class OnShare(val url: String) : TopPickAction
     data class ShowToast(val message: String) : TopPickAction
     data object OnGoBack : TopPickAction
-    data object OnGoToSignUp : TopPickAction
+    data object OnGoToLogin : TopPickAction
     data class OpenCompanyAsk(val ticker: String, val query: String) : TopPickAction
     data object WatchlistAddFailed : TopPickAction
     data class WatchlistRemoved(val ticker: String) : TopPickAction
@@ -451,7 +451,7 @@ sealed interface TopPickEvent {
     data object RemoveBookmarkTopPick : TopPickEvent
     data object LikeTopPick : TopPickEvent
     data object RemoveLikeTopPick : TopPickEvent
-    data object GoToSignUp : TopPickEvent
+    data object GoToLogin : TopPickEvent
     data object Retry : TopPickEvent
     data object RetryBrief : TopPickEvent
     data object AddToWatchlist : TopPickEvent

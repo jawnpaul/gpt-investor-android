@@ -76,7 +76,7 @@ fun ConversationScreen(
                     },
                     onRetry = { onEvent(ConversationEvent.RetryAnswer(it)) },
                     onOpenCompany = { onEvent(ConversationEvent.OpenCompany(it)) },
-                    onSignUpClick = { onEvent(ConversationEvent.GoToSignUp) },
+                    onSignInClick = { onEvent(ConversationEvent.GoToLogin) },
                     composerModifier = composerModifier,
                     answerOffline = state.answerOffline,
                     toastState = toastState
@@ -110,8 +110,8 @@ fun ConversationScreen(
                     onUpgradeModel = { showBottomSheet, modelId ->
                         onEvent(ConversationEvent.UpgradeModel(showBottomSheet, modelId))
                     },
-                    onSignUpClick = {
-                        onEvent(ConversationEvent.GoToSignUp)
+                    onSignInClick = {
+                        onEvent(ConversationEvent.GoToLogin)
                     },
                     toastState = toastState
                 )

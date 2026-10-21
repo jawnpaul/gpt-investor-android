@@ -169,7 +169,9 @@ class ProfileViewModel(
                 processAction(ProfileAction.NavigateToSettings)
             }
 
-            ProfileEvent.SignInClicked -> processAction(ProfileAction.NavigateToSignUp)
+            ProfileEvent.SignInClicked -> processAction(ProfileAction.NavigateToLogin)
+
+            ProfileEvent.CreateAccountClicked -> processAction(ProfileAction.NavigateToSignUp)
         }
     }
 

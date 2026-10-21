@@ -43,10 +43,8 @@ fun NavGraphBuilder.tidbitNavGraph(navController: NavHostController, platformAct
                         platformActions.shareText(action.shareText)
                     }
 
-                    TidbitDetailAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    TidbitDetailAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
                 }
             }.launchIn(scope)

@@ -174,3 +174,9 @@ internal fun navigateToHome(navController: NavHostController, popUpToRoute: Stri
         popUpTo(popUpToRoute) { inclusive = true }
     }
 }
+
+internal fun NavHostController.navigateClearingBackStack(route: String) {
+    navigate(route) {
+        popUpTo(graph.id) { inclusive = true }
+    }
+}

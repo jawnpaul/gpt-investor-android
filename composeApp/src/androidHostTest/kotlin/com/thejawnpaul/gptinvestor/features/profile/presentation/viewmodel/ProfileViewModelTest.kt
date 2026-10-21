@@ -100,11 +100,21 @@ class ProfileViewModelTest {
     }
 
     @Test
-    fun `SignInClicked emits NavigateToSignUp`() = runTest(testDispatcher) {
+    fun `SignInClicked emits NavigateToLogin`() = runTest(testDispatcher) {
         val vm = buildViewModel()
 
         vm.actions.test {
             vm.handleEvent(ProfileEvent.SignInClicked)
+            assertThat(awaitItem()).isEqualTo(ProfileAction.NavigateToLogin)
+        }
+    }
+
+    @Test
+    fun `CreateAccountClicked emits NavigateToSignUp`() = runTest(testDispatcher) {
+        val vm = buildViewModel()
+
+        vm.actions.test {
+            vm.handleEvent(ProfileEvent.CreateAccountClicked)
             assertThat(awaitItem()).isEqualTo(ProfileAction.NavigateToSignUp)
         }
     }

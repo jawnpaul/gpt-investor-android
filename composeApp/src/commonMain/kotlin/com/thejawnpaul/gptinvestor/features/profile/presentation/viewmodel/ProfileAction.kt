@@ -10,5 +10,6 @@ sealed interface ProfileAction {
     data object NavigateToUpgrade : ProfileAction
     data object NavigateToSettings : ProfileAction
     data object NavigateToSignUp : ProfileAction
+    data object NavigateToLogin : ProfileAction
     data class ShowToast(val message: String) : ProfileAction
 }

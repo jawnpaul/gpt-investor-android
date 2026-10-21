@@ -58,10 +58,8 @@ fun NavGraphBuilder.conversationNavGraph(navController: NavHostController, platf
                     }
 
                     ConversationAction.OnSignOutGuest -> {}
-                    ConversationAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    ConversationAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     is ConversationAction.OnShare -> {

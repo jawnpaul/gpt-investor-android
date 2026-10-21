@@ -36,10 +36,8 @@ fun NavGraphBuilder.discoverNavGraph(navController: NavHostController) {
                         )
                     }
 
-                    DiscoveryAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    DiscoveryAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     DiscoveryAction.OnGoToSearch -> {

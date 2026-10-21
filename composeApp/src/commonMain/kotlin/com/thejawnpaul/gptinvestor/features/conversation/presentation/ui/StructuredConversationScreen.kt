@@ -87,7 +87,7 @@ fun StructuredConversationScreen(
     onClickFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
     onRetry: (query: String) -> Unit,
     onOpenCompany: (ticker: String) -> Unit,
-    onSignUpClick: () -> Unit,
+    onSignInClick: () -> Unit,
     toastState: GiToastState,
     modifier: Modifier = Modifier,
     composerModifier: Modifier = Modifier,
@@ -131,7 +131,7 @@ fun StructuredConversationScreen(
                 }
                 if (isGuest) {
                     TopGuestLabel(
-                        onClick = onSignUpClick,
+                        onClick = onSignInClick,
                         modifier = Modifier.padding(
                             start = GiSpace.gutter,
                             end = GiSpace.gutter,
@@ -320,7 +320,7 @@ private fun StructuredConversationScreenPreview() {
             onClickFeedback = { _, _, _ -> },
             onRetry = {},
             onOpenCompany = {},
-            onSignUpClick = {},
+            onSignInClick = {},
             toastState = rememberGiToastState()
         )
     }
@@ -352,7 +352,7 @@ private fun StructuredConversationScreenIdlePreview() {
             onClickFeedback = { _, _, _ -> },
             onRetry = {},
             onOpenCompany = {},
-            onSignUpClick = {},
+            onSignInClick = {},
             toastState = rememberGiToastState()
         )
     }

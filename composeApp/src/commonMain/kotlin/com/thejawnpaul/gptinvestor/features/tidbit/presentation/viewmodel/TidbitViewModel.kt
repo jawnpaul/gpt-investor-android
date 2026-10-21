@@ -203,8 +203,8 @@ class TidbitViewModel(
                 }
             }
 
-            TidbitDetailEvent.GoToSignUp -> {
-                handleDetailAction(action = TidbitDetailAction.OnGoToSignUp)
+            TidbitDetailEvent.GoToLogin -> {
+                handleDetailAction(action = TidbitDetailAction.OnGoToLogin)
             }
         }
     }
@@ -452,14 +452,14 @@ sealed interface TidbitDetailEvent {
     data class OnClickBookmark(val id: String, val newValue: Boolean) : TidbitDetailEvent
     data object OnClickSource : TidbitDetailEvent
     data object OnClickShare : TidbitDetailEvent
-    data object GoToSignUp : TidbitDetailEvent
+    data object GoToLogin : TidbitDetailEvent
 }
 
 sealed interface TidbitDetailAction {
     data object OnGoBack : TidbitDetailAction
     data class OnOpenSource(val url: String) : TidbitDetailAction
     data class OnShare(val shareText: String) : TidbitDetailAction
-    data object OnGoToSignUp : TidbitDetailAction
+    data object OnGoToLogin : TidbitDetailAction
 }
 
 sealed interface TidbitPagingFilterType {

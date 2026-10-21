@@ -75,10 +75,8 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
                         navController.navigate(Screen.CompanyDetailScreen.createRoute(action.ticker))
                     }
 
-                    CompanyDetailAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    CompanyDetailAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     is CompanyDetailAction.ShowToast -> {

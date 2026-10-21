@@ -412,8 +412,8 @@ class HistoryViewModel(
                 }
             }
 
-            HistoryDetailEvent.GoToSignUp -> {
-                processHistoryDetailAction(HistoryDetailAction.OnGoToSignUp)
+            HistoryDetailEvent.GoToLogin -> {
+                processHistoryDetailAction(HistoryDetailAction.OnGoToLogin)
             }
 
             HistoryDetailEvent.StopAnswering -> {
@@ -531,7 +531,7 @@ sealed interface HistoryDetailEvent {
     data class SelectWaitlistOption(val option: String) : HistoryDetailEvent
 
     data class ShowRateLimitBottomSheet(val showBottomSheet: Boolean) : HistoryDetailEvent
-    data object GoToSignUp : HistoryDetailEvent
+    data object GoToLogin : HistoryDetailEvent
     data object StopAnswering : HistoryDetailEvent
     data class RetryAnswer(val query: String) : HistoryDetailEvent
     data class ShareAnswer(val text: String) : HistoryDetailEvent
@@ -544,7 +544,7 @@ sealed interface HistoryDetailAction {
     data class OnGoToWebView(val url: String) : HistoryDetailAction
     data class OnCopy(val text: String) : HistoryDetailAction
     data class ShowToast(val message: String) : HistoryDetailAction
-    data object OnGoToSignUp : HistoryDetailAction
+    data object OnGoToLogin : HistoryDetailAction
     data class OnShare(val text: String) : HistoryDetailAction
     data object OnGoToHistory : HistoryDetailAction
     data class OnOpenCompany(val ticker: String) : HistoryDetailAction

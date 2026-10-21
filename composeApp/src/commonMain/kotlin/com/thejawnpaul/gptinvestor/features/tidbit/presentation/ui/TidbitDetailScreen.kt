@@ -150,7 +150,7 @@ fun TidbitDetailScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = GiSpace.gutter, end = GiSpace.gutter, bottom = GiSpace.x2),
-                        onClick = { onEvent(TidbitDetailEvent.GoToSignUp) }
+                        onClick = { onEvent(TidbitDetailEvent.GoToLogin) }
                     )
                 }
             }

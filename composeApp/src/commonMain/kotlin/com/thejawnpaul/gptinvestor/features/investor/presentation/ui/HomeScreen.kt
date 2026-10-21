@@ -160,7 +160,7 @@ private fun HomeScreenContent(
                 )
 
                 if (state.isGuestSession) {
-                    TopGuestLabel(modifier = gutter, onClick = { onEvent(HomeEvent.GoToSignUp) })
+                    TopGuestLabel(modifier = gutter, onClick = { onEvent(HomeEvent.GoToLogin) })
                 }
 
                 DailyDigestCard(

@@ -71,7 +71,7 @@ fun DefaultConversationScreen(
     inputQuery: String,
     onInputQueryChange: (String) -> Unit,
     onSendClick: () -> Unit,
-    onSignUpClick: () -> Unit,
+    onSignInClick: () -> Unit,
     availableModels: List<AvailableModel>,
     selectedModel: AvailableModel,
     onModelChange: (AvailableModel) -> Unit,
@@ -96,7 +96,7 @@ fun DefaultConversationScreen(
             )
             if (isGuest) {
                 TopGuestLabel(
-                    onClick = onSignUpClick,
+                    onClick = onSignInClick,
                     modifier = Modifier
                         .padding(horizontal = GiSpace.gutter)
                         .padding(bottom = GiSpace.x3)
@@ -207,7 +207,7 @@ private fun DefaultConversationScreenPreview() {
             inputQuery = "",
             onInputQueryChange = {},
             onSendClick = {},
-            onSignUpClick = {},
+            onSignInClick = {},
             availableModels = emptyList(),
             selectedModel = DefaultModel(),
             onModelChange = {},

@@ -80,10 +80,8 @@ fun NavGraphBuilder.historyNavGraph(navController: NavHostController, platformAc
                         scope.launch { toastState.show(message = action.message) }
                     }
 
-                    HistoryDetailAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    HistoryDetailAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     is HistoryDetailAction.OnShare -> {

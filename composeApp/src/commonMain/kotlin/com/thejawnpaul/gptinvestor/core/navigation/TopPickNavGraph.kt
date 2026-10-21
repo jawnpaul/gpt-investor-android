@@ -54,10 +54,8 @@ fun NavGraphBuilder.topPickNavGraph(navController: NavHostController, platformAc
                         scope.launch { toastState.show(message = action.message) }
                     }
 
-                    TopPickAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    TopPickAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     is TopPickAction.OpenCompanyAsk -> {

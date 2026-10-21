@@ -86,7 +86,7 @@ fun DiscoverScreen(state: DiscoveryScreenState, onEvent: (DiscoveryEvent) -> Uni
         ) {
             if (state.isGuestSession) {
                 item(key = "guest") {
-                    TopGuestLabel(onClick = { onEvent(DiscoveryEvent.GoToSignUp) })
+                    TopGuestLabel(onClick = { onEvent(DiscoveryEvent.GoToLogin) })
                 }
             }
             item(key = "search") {

@@ -43,11 +43,7 @@ fun NavGraphBuilder.authenticationNavGraph(
             viewModel.actions.onEach { action ->
                 when (action) {
                     DefaultAuthenticationAction.OnGoToHome -> {
-                        navigateAfterAuth(
-                            navController,
-                            Screen.DefaultAuthenticationScreen.route,
-                            hasCompletedPostAuthOnboarding
-                        )
+                        navigateAfterAuth(navController, hasCompletedPostAuthOnboarding)
                     }
 
                     DefaultAuthenticationAction.OnGoToSignUp -> {
@@ -92,7 +88,7 @@ fun NavGraphBuilder.authenticationNavGraph(
                     }
 
                     LoginUiAction.OnGoToHome -> {
-                        navigateAfterAuth(navController, Screen.LoginScreen.route, hasCompletedPostAuthOnboarding)
+                        navigateAfterAuth(navController, hasCompletedPostAuthOnboarding)
                     }
 
                     is LoginUiAction.OnGoToForgotPassword -> {
@@ -150,7 +146,7 @@ fun NavGraphBuilder.authenticationNavGraph(
                     }
 
                     SignUpUiAction.OnGoToHome -> {
-                        navigateAfterAuth(navController, Screen.SignUpScreen.route, hasCompletedPostAuthOnboarding)
+                        navigateAfterAuth(navController, hasCompletedPostAuthOnboarding)
                     }
 
                     SignUpUiAction.OnGoToLogin -> {
@@ -177,16 +173,11 @@ fun NavGraphBuilder.authenticationNavGraph(
     }
 }
 
-private fun navigateAfterAuth(
-    navController: androidx.navigation.NavHostController,
-    popUpToRoute: String,
-    hasCompletedPostAuthOnboarding: Boolean
-) {
-    if (!hasCompletedPostAuthOnboarding) {
-        navController.navigate(Screen.PostAuthOnboardingScreen.route) {
-            popUpTo(popUpToRoute) { inclusive = true }
-        }
+private fun navigateAfterAuth(navController: NavHostController, hasCompletedPostAuthOnboarding: Boolean) {
+    val route = if (hasCompletedPostAuthOnboarding) {
+        Screen.HomeTabScreen.route
     } else {
-        navigateToHome(navController, popUpToRoute)
+        Screen.PostAuthOnboardingScreen.route
     }
+    navController.navigateClearingBackStack(route)
 }

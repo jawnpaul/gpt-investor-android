@@ -56,6 +56,8 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController) {
                         }
                     }
 
+                    HomeAction.OnGoToLogin -> {}
+
                     HomeAction.NavigateToDiscover -> {
                         navController.navigateToTab(Screen.DiscoverTabScreen.route, Screen.HomeTabScreen.route)
                     }

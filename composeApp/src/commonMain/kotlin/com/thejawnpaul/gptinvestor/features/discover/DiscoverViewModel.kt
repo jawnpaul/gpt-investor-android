@@ -69,8 +69,8 @@ class DiscoverViewModel(
                 processAction(DiscoveryAction.OnGoToPickDetail(id = event.id))
             }
 
-            DiscoveryEvent.GoToSignUp -> {
-                processAction(DiscoveryAction.OnGoToSignUp)
+            DiscoveryEvent.GoToLogin -> {
+                processAction(DiscoveryAction.OnGoToLogin)
             }
 
             DiscoveryEvent.GoToSearch -> {
@@ -204,7 +204,7 @@ sealed interface DiscoveryEvent {
     data class ClickTopPick(val id: String) : DiscoveryEvent
     data class ClickTidbit(val id: String) : DiscoveryEvent
     data class GoToCompanyDetail(val ticker: String) : DiscoveryEvent
-    data object GoToSignUp : DiscoveryEvent
+    data object GoToLogin : DiscoveryEvent
     data object GoToSearch : DiscoveryEvent
     data object GoToBrowse : DiscoveryEvent
     data object GoToAllTopPicks : DiscoveryEvent
@@ -216,7 +216,7 @@ sealed interface DiscoveryAction {
     data class OnNavigateToCompanyDetail(val ticker: String) : DiscoveryAction
     data object OnGoBack : DiscoveryAction
     data class OnGoToPickDetail(val id: String) : DiscoveryAction
-    data object OnGoToSignUp : DiscoveryAction
+    data object OnGoToLogin : DiscoveryAction
     data object OnGoToSearch : DiscoveryAction
     data object OnGoToBrowse : DiscoveryAction
     data object OnGoToAllTopPicks : DiscoveryAction

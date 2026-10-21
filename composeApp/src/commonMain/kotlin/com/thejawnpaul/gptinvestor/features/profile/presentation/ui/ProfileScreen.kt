@@ -110,7 +110,10 @@ fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, modifi
             verticalArrangement = Arrangement.spacedBy(GiSpace.sectionGap)
         ) {
             if (state.isGuestSession) {
-                GuestAccountCard(onSignIn = { onEvent(ProfileEvent.SignInClicked) })
+                GuestAccountCard(
+                    onSignIn = { onEvent(ProfileEvent.SignInClicked) },
+                    onCreateAccount = { onEvent(ProfileEvent.CreateAccountClicked) }
+                )
             } else {
                 UserHeader(userName = state.userName, isPremium = state.isPremiumUser)
                 if (!state.isPremiumUser) {
@@ -330,7 +333,7 @@ private fun StatTile(label: String, count: Int, modifier: Modifier = Modifier, o
 }
 
 @Composable
-private fun GuestAccountCard(onSignIn: () -> Unit) {
+private fun GuestAccountCard(onSignIn: () -> Unit, onCreateAccount: () -> Unit) {
     val colors = GiTheme.colors
     Column(
         modifier = Modifier
@@ -361,7 +364,7 @@ private fun GuestAccountCard(onSignIn: () -> Unit) {
             )
             GiButton(
                 text = stringResource(Res.string.create_an_account),
-                onClick = onSignIn,
+                onClick = onCreateAccount,
                 modifier = Modifier.fillMaxWidth(),
                 variant = GiButtonVariant.Text
             )

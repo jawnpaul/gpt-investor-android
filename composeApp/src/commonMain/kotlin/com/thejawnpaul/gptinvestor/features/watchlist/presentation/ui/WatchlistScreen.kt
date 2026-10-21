@@ -172,7 +172,8 @@ fun WatchlistScreen(state: WatchlistUiState, onEvent: (WatchlistEvent) -> Unit, 
             WatchlistScreenState.Loading -> WatchlistLoading(onSearch = onSearch)
             WatchlistScreenState.SignUpRequired -> WatchlistGuest(
                 onSearch = onSearch,
-                onSignIn = { onEvent(WatchlistEvent.OnSignInClick) }
+                onSignIn = { onEvent(WatchlistEvent.OnSignInClick) },
+                onCreateAccount = { onEvent(WatchlistEvent.OnCreateAccountClick) }
             )
             WatchlistScreenState.Error -> Column(modifier = Modifier.fillMaxSize()) {
                 WatchlistHeader(onSearch = onSearch)
@@ -597,7 +598,7 @@ private val GUEST_ART_HEIGHT = 140.dp
 private val GUEST_BODY_MAX = 300.dp
 
 @Composable
-private fun WatchlistGuest(onSearch: () -> Unit, onSignIn: () -> Unit) {
+private fun WatchlistGuest(onSearch: () -> Unit, onSignIn: () -> Unit, onCreateAccount: () -> Unit) {
     val colors = GiTheme.colors
     Column(modifier = Modifier.fillMaxSize()) {
         WatchlistHeader(onSearch = onSearch)
@@ -647,7 +648,7 @@ private fun WatchlistGuest(onSearch: () -> Unit, onSignIn: () -> Unit) {
                 )
                 GiButton(
                     text = stringResource(Res.string.create_an_account),
-                    onClick = onSignIn,
+                    onClick = onCreateAccount,
                     modifier = Modifier.fillMaxWidth(),
                     variant = GiButtonVariant.Text
                 )

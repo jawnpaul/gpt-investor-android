@@ -463,8 +463,8 @@ class CompanyViewModel(
                 }
             }
 
-            CompanyDetailEvent.SignUpClicked -> {
-                processCompanyDetailAction(CompanyDetailAction.OnGoToSignUp)
+            CompanyDetailEvent.LoginClicked -> {
+                processCompanyDetailAction(CompanyDetailAction.OnGoToLogin)
             }
 
             is CompanyDetailEvent.SendFeedback -> {
@@ -681,7 +681,7 @@ sealed interface CompanyDetailEvent {
     data class ModelChange(val model: AvailableModel) : CompanyDetailEvent
     data class SelectWaitlistOption(val option: String) : CompanyDetailEvent
     data object JoinWaitList : CompanyDetailEvent
-    data object SignUpClicked : CompanyDetailEvent
+    data object LoginClicked : CompanyDetailEvent
     data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : CompanyDetailEvent
 
     data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) : CompanyDetailEvent
@@ -701,7 +701,7 @@ sealed interface CompanyDetailAction {
     data object OnGoBack : CompanyDetailAction
     data class OnNavigateToWebView(val url: String) : CompanyDetailAction
     data class OnCopy(val text: String) : CompanyDetailAction
-    data object OnGoToSignUp : CompanyDetailAction
+    data object OnGoToLogin : CompanyDetailAction
     data class ShowToast(val message: String) : CompanyDetailAction
     data class OnShare(val name: String, val ticker: String, val id: String) : CompanyDetailAction
     data object WatchlistAdded : CompanyDetailAction

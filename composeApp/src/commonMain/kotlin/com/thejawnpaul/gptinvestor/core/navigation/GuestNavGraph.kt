@@ -18,8 +18,12 @@ import com.thejawnpaul.gptinvestor.added_to_watchlist_success
 import com.thejawnpaul.gptinvestor.answer_copied
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
+import com.thejawnpaul.gptinvestor.core.utility.Constants
 import com.thejawnpaul.gptinvestor.failed_to_remove_from_watchlist
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.BrowseStocksScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
+import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.BrowseStocksAction
+import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.BrowseStocksViewModel
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ConversationScreen
@@ -104,9 +108,11 @@ fun NavGraphBuilder.guestNavGraph(
                     }
 
                     HomeAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                        navController.navigateClearingBackStack(Screen.SignUpScreen.route)
+                    }
+
+                    HomeAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     HomeAction.NavigateToDiscover -> {
@@ -163,13 +169,12 @@ fun NavGraphBuilder.guestNavGraph(
                         navController.navigate(GuestScreen.GuestTopPickDetail.createRoute(action.id))
                     }
 
-                    DiscoveryAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    DiscoveryAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     DiscoveryAction.OnGoToSearch -> {
+                        navController.navigate(GuestScreen.GuestSearch.route)
                     }
 
                     is DiscoveryAction.OnGoToTidbitDetail -> {
@@ -177,7 +182,7 @@ fun NavGraphBuilder.guestNavGraph(
                     }
 
                     DiscoveryAction.OnGoToBrowse -> {
-                        navController.navigate(Screen.BrowseStocksScreen.route)
+                        navController.navigate(GuestScreen.GuestBrowseStocks.createRoute())
                     }
 
                     DiscoveryAction.OnGoToAllTopPicks -> {
@@ -262,10 +267,8 @@ fun NavGraphBuilder.guestNavGraph(
                     }
 
                     ConversationAction.OnSignOutGuest -> {}
-                    ConversationAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    ConversationAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     is ConversationAction.OnShare -> {
@@ -322,10 +325,8 @@ fun NavGraphBuilder.guestNavGraph(
                         scope.launch { toastState.show(message = action.message) }
                     }
 
-                    HistoryDetailAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    HistoryDetailAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     is HistoryDetailAction.OnShare -> {
@@ -389,10 +390,8 @@ fun NavGraphBuilder.guestNavGraph(
                         navController.navigate(GuestScreen.GuestCompanyDetail.createRoute(action.ticker))
                     }
 
-                    CompanyDetailAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    CompanyDetailAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     is CompanyDetailAction.ShowToast -> {
@@ -465,10 +464,8 @@ fun NavGraphBuilder.guestNavGraph(
                         scope.launch { toastState.show(message = action.message) }
                     }
 
-                    TopPickAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    TopPickAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     is TopPickAction.OpenCompanyAsk,
@@ -532,10 +529,8 @@ fun NavGraphBuilder.guestNavGraph(
                         platformActions.shareText(action.shareText)
                     }
 
-                    TidbitDetailAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    TidbitDetailAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
                 }
             }.launchIn(scope)
@@ -622,9 +617,9 @@ fun NavGraphBuilder.guestNavGraph(
                 when (action) {
                     WatchlistAction.NavigateToSearch -> navController.navigate(GuestScreen.GuestSearch.route)
                     WatchlistAction.NavigateToTopPicks -> navController.navigate(GuestScreen.GuestAllTopPicks.route)
-                    WatchlistAction.NavigateToSignUp -> navController.navigate(Screen.SignUpScreen.route) {
-                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                    }
+                    WatchlistAction.NavigateToSignUp ->
+                        navController.navigateClearingBackStack(Screen.SignUpScreen.route)
+                    WatchlistAction.NavigateToLogin -> navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     is WatchlistAction.NavigateToCompanyDetail -> navController.navigate(
                         GuestScreen.GuestCompanyDetail.createRoute(action.ticker)
                     )
@@ -651,10 +646,11 @@ fun NavGraphBuilder.guestNavGraph(
         val state by viewModel.state.collectAsState()
         LaunchedEffect(Unit) {
             viewModel.actions.collect { action ->
-                if (action == ProfileAction.NavigateToSignUp) {
-                    navController.navigate(Screen.SignUpScreen.route) {
-                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                    }
+                when (action) {
+                    ProfileAction.NavigateToSignUp -> navController.navigateClearingBackStack(Screen.SignUpScreen.route)
+                    ProfileAction.NavigateToLogin -> navController.navigateClearingBackStack(Screen.LoginScreen.route)
+                    ProfileAction.NavigateToPrivacy -> platformActions.openUrl(Constants.PRIVACY_POLICY_URL)
+                    else -> Unit
                 }
             }
         }
@@ -677,10 +673,39 @@ fun NavGraphBuilder.guestNavGraph(
                     is SearchAction.OnNavigateToConversation ->
                         navController.navigate(GuestScreen.GuestConversation.createRoute(chatInput = action.query))
                     is SearchAction.OnNavigateToSector ->
-                        navController.navigate(GuestScreen.GuestDiscoverTab.createRoute(action.sectorKey))
+                        navController.navigate(GuestScreen.GuestBrowseStocks.createRoute(action.sectorKey))
                 }
             }.launchIn(scope)
         }
         SearchScreen(state = state.value, onEvent = viewModel::handleEvent)
+    }
+
+    composable(
+        route = GuestScreen.GuestBrowseStocks.route,
+        arguments = listOf(
+            navArgument("sector") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) {
+        val viewModel = koinViewModel<BrowseStocksViewModel>()
+        val state = viewModel.state.collectAsState()
+        val scope = rememberCoroutineScope()
+        LaunchedEffect(Unit) {
+            viewModel.actions.onEach { action ->
+                when (action) {
+                    is BrowseStocksAction.NavigateToCompanyDetail ->
+                        navController.navigate(GuestScreen.GuestCompanyDetail.createRoute(action.ticker))
+                    BrowseStocksAction.GoBack -> navController.popBackStack()
+                }
+            }.launchIn(scope)
+        }
+        BrowseStocksScreen(
+            state = state.value,
+            companiesPaging = viewModel.companiesPaging,
+            onEvent = viewModel::handleEvent
+        )
     }
 }

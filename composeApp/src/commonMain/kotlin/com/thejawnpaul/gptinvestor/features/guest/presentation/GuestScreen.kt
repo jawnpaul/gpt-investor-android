@@ -57,4 +57,12 @@ sealed class GuestScreen(val route: String) {
     data object GuestSavedTidbitScreen : GuestScreen("guest_saved_tidbits_screen")
 
     data object GuestSearch : GuestScreen("guest_search_screen")
+
+    data object GuestBrowseStocks : GuestScreen("guest_browse_stocks_screen?sector={sector}") {
+        fun createRoute(sectorKey: String? = null) = if (sectorKey != null) {
+            "guest_browse_stocks_screen?sector=$sectorKey"
+        } else {
+            "guest_browse_stocks_screen"
+        }
+    }
 }

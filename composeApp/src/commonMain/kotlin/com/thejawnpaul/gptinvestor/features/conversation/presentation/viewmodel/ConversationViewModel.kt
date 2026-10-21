@@ -400,8 +400,8 @@ class ConversationViewModel(
                 }
             }
 
-            ConversationEvent.GoToSignUp -> {
-                processAction(ConversationAction.OnGoToSignUp)
+            ConversationEvent.GoToLogin -> {
+                processAction(ConversationAction.OnGoToLogin)
             }
 
             ConversationEvent.StopAnswering -> {
@@ -560,7 +560,7 @@ sealed interface ConversationEvent {
     data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : ConversationEvent
 
     data class ShowRateLimitBottomSheet(val showBottomSheet: Boolean) : ConversationEvent
-    data object GoToSignUp : ConversationEvent
+    data object GoToLogin : ConversationEvent
     data object StopAnswering : ConversationEvent
     data class RetryAnswer(val query: String) : ConversationEvent
     data class ShareAnswer(val text: String) : ConversationEvent
@@ -574,7 +574,7 @@ sealed interface ConversationAction {
     data class OnCopy(val text: String) : ConversationAction
     data class ShowToast(val message: String) : ConversationAction
     data object OnSignOutGuest : ConversationAction
-    data object OnGoToSignUp : ConversationAction
+    data object OnGoToLogin : ConversationAction
     data class OnShare(val text: String) : ConversationAction
     data object OnGoToHistory : ConversationAction
     data class OnOpenCompany(val ticker: String) : ConversationAction

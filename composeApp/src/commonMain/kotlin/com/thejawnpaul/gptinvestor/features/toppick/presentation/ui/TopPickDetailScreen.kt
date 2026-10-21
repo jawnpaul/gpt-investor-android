@@ -404,7 +404,7 @@ private fun PickHeader(
     modifier: Modifier = Modifier
 ) {
     val price = (company?.price ?: pick.currentPrice).toDouble()
-    val change = (company?.change ?: pick.percentageChange).toDouble()
+    val change = company?.change?.toDouble()
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
         Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3), verticalAlignment = Alignment.CenterVertically) {
             GiLogoTile(
@@ -426,7 +426,7 @@ private fun PickHeader(
             itemVerticalAlignment = Alignment.CenterVertically
         ) {
             GiPriceDisplay(price = price)
-            GiDeltaPill(percent = change, suffix = stringResource(Res.string.today))
+            if (change != null) GiDeltaPill(percent = change, suffix = stringResource(Res.string.today))
         }
     }
 }

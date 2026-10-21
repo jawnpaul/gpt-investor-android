@@ -66,6 +66,13 @@ class DiscoverViewModel(
             }
 
             is DiscoveryEvent.ClickTopPick -> {
+                analyticsLogger.logEvent(
+                    eventName = "discover-top-pick-tapped",
+                    params = mapOf(
+                        "top_pick_id" to event.id,
+                        "user_type" to if (discoveryScreenState.value.isGuestSession) "guest" else "authenticated"
+                    )
+                )
                 processAction(DiscoveryAction.OnGoToPickDetail(id = event.id))
             }
 
@@ -89,9 +96,9 @@ class DiscoverViewModel(
             DiscoveryEvent.RetryTopPicks -> getTopPicks()
             is DiscoveryEvent.ClickTidbit -> {
                 analyticsLogger.logEvent(
-                    eventName = "discover-top-pick-tapped",
+                    eventName = "discover-tidbit-tapped",
                     params = mapOf(
-                        "top_pick_id" to event.id,
+                        "tidbit_id" to event.id,
                         "user_type" to if (discoveryScreenState.value.isGuestSession) "guest" else "authenticated"
                     )
                 )

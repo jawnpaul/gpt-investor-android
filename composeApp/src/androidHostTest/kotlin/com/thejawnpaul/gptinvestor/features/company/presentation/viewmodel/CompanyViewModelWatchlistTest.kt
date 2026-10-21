@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Either
@@ -102,6 +103,18 @@ class CompanyViewModelWatchlistTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { watchlistRepository.addStockToWatchList("AAPL") }
+    }
+
+    @Test
+    fun `a guest tap asks to sign in and sends no request`() = runTest(testDispatcher) {
+        every { appPreferences.isGuestLoggedIn } returns flowOf(true)
+        val vm = subscribedViewModel()
+
+        vm.companyDetailAction.test {
+            vm.handleCompanyDetailEvent(CompanyDetailEvent.AddToWatchlist)
+            assertThat(awaitItem()).isEqualTo(CompanyDetailAction.WatchlistSignInRequired)
+        }
+        coVerify(exactly = 0) { watchlistRepository.addStockToWatchList(any()) }
     }
 
     @Test

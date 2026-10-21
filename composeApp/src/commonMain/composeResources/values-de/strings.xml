@@ -420,6 +420,7 @@
     <string name="watchlist_remove_body">%1$s wird aus Ihrer Watchlist entfernt und erscheint nicht mehr in Ihren Updates. Sie können die Aktie jederzeit wieder hinzufügen.</string>
     <string name="watchlist_daily_summary_title">Tägliche Zusammenfassung für jede Aktie</string>
     <string name="watchlist_guest_body">Melden Sie sich an, um Aktien in Ihrer Watchlist zu speichern und ihre Entwicklung zu verfolgen.</string>
+    <string name="watchlist_sign_in_required">Anmelden, um Aktien zu speichern.</string>
     <string name="create_an_account">Konto erstellen</string>
     <string name="watchlist_popular">Diese Woche beliebt</string>
     <string name="watchlist_watch_cd">%1$s beobachten</string>

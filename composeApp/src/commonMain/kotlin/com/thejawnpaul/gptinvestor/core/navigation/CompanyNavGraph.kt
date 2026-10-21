@@ -105,6 +105,8 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
                         launch { toastState.show(message = getString(Res.string.added_to_watchlist_error)) }
                     }
 
+                    CompanyDetailAction.WatchlistSignInRequired -> Unit
+
                     is CompanyDetailAction.WatchlistRemoved -> {
                         launch {
                             toastState.show(message = getString(Res.string.removed_from_watchlist, action.ticker))

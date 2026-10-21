@@ -426,6 +426,7 @@
     <string name="watchlist_remove_body">%1$s зникне зі списку спостереження й більше не з’являтиметься в оновленнях. Ви можете додати її знову будь-коли.</string>
     <string name="watchlist_daily_summary_title">Щоденний підсумок для кожної акції</string>
     <string name="watchlist_guest_body">Увійдіть, щоб зберігати акції у списку спостереження та стежити за їхньою динамікою.</string>
+    <string name="watchlist_sign_in_required">Увійдіть, щоб зберігати акції.</string>
     <string name="create_an_account">Створити обліковий запис</string>
     <string name="watchlist_popular">Популярне цього тижня</string>
     <string name="watchlist_watch_cd">Стежити за %1$s</string>

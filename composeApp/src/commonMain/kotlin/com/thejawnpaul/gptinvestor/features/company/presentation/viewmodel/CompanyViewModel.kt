@@ -513,6 +513,10 @@ class CompanyViewModel(
 
             CompanyDetailEvent.AddToWatchlist -> {
                 if (_selectedCompany.value.watchlistPending) return
+                if (isGuestSession.value) {
+                    processCompanyDetailAction(CompanyDetailAction.WatchlistSignInRequired)
+                    return
+                }
                 val ticker = _selectedCompany.value.header.companyTicker.ifEmpty { selectedCompanyTicker.orEmpty() }
                 _selectedCompany.update { it.copy(watchlistPending = true) }
                 viewModelScope.launch {
@@ -708,6 +712,7 @@ sealed interface CompanyDetailAction {
     data class OnShare(val name: String, val ticker: String, val id: String) : CompanyDetailAction
     data object WatchlistAdded : CompanyDetailAction
     data object WatchlistAddFailed : CompanyDetailAction
+    data object WatchlistSignInRequired : CompanyDetailAction
     data class WatchlistRemoved(val ticker: String) : CompanyDetailAction
     data class WatchlistRemoveFailed(val ticker: String) : CompanyDetailAction
     data class OnShareText(val text: String) : CompanyDetailAction

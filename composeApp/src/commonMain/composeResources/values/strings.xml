@@ -438,6 +438,7 @@
     <string name="watchlist_remove_body">%1$s will leave your watchlist and stop showing up in your updates. You can add it back any time.</string>
     <string name="watchlist_daily_summary_title">Get a daily summary for every stock</string>
     <string name="watchlist_guest_body">Sign in to save stocks to your watchlist and track how they perform.</string>
+    <string name="watchlist_sign_in_required">Sign in to save stocks.</string>
     <string name="create_an_account">Create an account</string>
     <string name="watchlist_popular">Popular this week</string>
     <string name="watchlist_watch_cd">Watch %1$s</string>

@@ -420,6 +420,7 @@
     <string name="watchlist_remove_body">%1$s آپ کی واچ لسٹ سے ہٹ جائے گا اور آپ کی اپ ڈیٹس میں نظر نہیں آئے گا۔ آپ اسے کسی بھی وقت دوبارہ شامل کر سکتے ہیں۔</string>
     <string name="watchlist_daily_summary_title">ہر اسٹاک کا روزانہ خلاصہ حاصل کریں</string>
     <string name="watchlist_guest_body">اسٹاکس کو اپنی واچ لسٹ میں محفوظ کرنے اور ان کی کارکردگی پر نظر رکھنے کے لیے سائن ان کریں۔</string>
+    <string name="watchlist_sign_in_required">اسٹاکس محفوظ کرنے کے لیے سائن ان کریں۔</string>
     <string name="create_an_account">اکاؤنٹ بنائیں</string>
     <string name="watchlist_popular">اس ہفتے مقبول</string>
     <string name="watchlist_watch_cd">%1$s کو واچ لسٹ میں شامل کریں</string>

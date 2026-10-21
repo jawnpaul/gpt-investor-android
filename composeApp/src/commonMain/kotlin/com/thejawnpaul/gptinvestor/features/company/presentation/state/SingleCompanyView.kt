@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.company.presentation.state
 
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.HistoricalData
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyBrief
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyDetailDefaultConversation
@@ -12,6 +13,7 @@ data class SingleCompanyView(
     val error: String? = null,
     val companyName: String = "",
     val ticker: String = "",
+    val priceHistory: List<HistoricalData> = emptyList(),
     val inputQuery: String = "",
     val header: CompanyHeaderPresentation = CompanyHeaderPresentation(),
     val brief: CompanyBrief? = null,

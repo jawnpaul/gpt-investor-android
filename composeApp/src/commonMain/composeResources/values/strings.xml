@@ -368,7 +368,7 @@
     <string name="forgot_password_back_to_login">Back to log in</string>
     <string name="forgot_password_error_rate_limited">Too many attempts. Try again later.</string>
     <string name="company_context_title">%1$s · %2$s</string>
-    <string name="ask_about_company">Ask about %1$s…</string>
+    <string name="ask_about_company">Ask anything about %1$s</string>
     <string name="reading_company_data">Reading %1$s’s latest data…</string>
     <string name="answer_copied">Answer copied</string>
     <string name="helpful">Helpful</string>
@@ -383,7 +383,8 @@
     <string name="offline_opening_saved">No connection. Opening your saved data…</string>
     <string name="loading_company_brief">Loading the %1$s brief</string>
     <string name="why_sentiment">Why %1$s?</string>
-    <string name="answer_error">We couldn’t answer that. Check your connection and try again.</string>
+    <string name="answer_error_title">We couldn’t answer that.</string>
+    <string name="answer_error_body">Something went wrong on our side. Check your connection and try again.</string>
     <string name="answer_offline_title">Couldn’t generate an answer.</string>
     <string name="answer_offline_body">You’re offline. Check your connection and try again.</string>
     <string name="try_asking">Try asking</string>

@@ -31,7 +31,16 @@ import org.jetbrains.compose.resources.getString
 import org.koin.compose.viewmodel.koinViewModel
 
 fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformActions: PlatformActions) {
-    composable(route = Screen.CompanyDetailScreen.route) {
+    composable(
+        route = Screen.CompanyDetailScreen.route,
+        arguments = listOf(
+            navArgument("ask") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) {
         val parentViewModel = koinViewModel<CompanyViewModel>()
         val state = parentViewModel.selectedCompany.collectAsState()
 

@@ -73,6 +73,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCom
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefSkeleton
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefTip
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyKeyNumberSheet
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.briefChartMotion
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.companyBriefItems
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.questionRes
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
@@ -88,6 +89,7 @@ import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.remembe
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.WaitlistBottomSheetContent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.tickerStock
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.PriceChartSection
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.ui.RemoveFromWatchlistDialog
 import com.thejawnpaul.gptinvestor.loading_brief
 import com.thejawnpaul.gptinvestor.loading_company_brief
@@ -415,7 +417,18 @@ private fun CompanyDetailBriefContent(
         companyBriefItems(
             brief = brief,
             onKeyNumberClick = onKeyNumberClick,
-            onNewsClick = { onAction(CompanyDetailAction.OnNavigateToWebView(it)) }
+            onNewsClick = { onAction(CompanyDetailAction.OnNavigateToWebView(it)) },
+            beforeSections = {
+                if (state.priceHistory.isNotEmpty()) {
+                    item(key = "chart", contentType = "chart") {
+                        PriceChartSection(
+                            companyName = brief.name,
+                            history = state.priceHistory,
+                            modifier = briefChartMotion().padding(vertical = GiSpace.x2)
+                        )
+                    }
+                }
+            }
         )
         item(key = "footer", contentType = "footer") {
             Text(text = footer, color = GiTheme.colors.muted, style = GiTheme.type.meta)
@@ -441,7 +454,8 @@ private fun CompanyDetailBriefContent(
             onFeedback = { messageId, status, reason ->
                 onEvent(CompanyDetailEvent.SendFeedback(messageId, status, reason))
             },
-            onRetry = { onEvent(CompanyDetailEvent.RetryAnswer(it)) }
+            onRetry = { onEvent(CompanyDetailEvent.RetryAnswer(it)) },
+            extraGap = GiSpace.x1
         )
     }
 }

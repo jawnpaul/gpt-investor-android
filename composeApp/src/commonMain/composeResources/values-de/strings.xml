@@ -345,7 +345,7 @@
         <item quantity="other">%1$d Quellen. Keine Finanzberatung.</item>
     </plurals>
     <string name="company_context_title">%1$s · %2$s</string>
-    <string name="ask_about_company">Fragen Sie zu %1$s …</string>
+    <string name="ask_about_company">Fragen Sie alles zu %1$s</string>
     <string name="reading_company_data">Lese die neuesten Daten zu %1$s …</string>
     <string name="answer_copied">Antwort kopiert</string>
     <string name="helpful">Hilfreich</string>
@@ -365,7 +365,8 @@
     <string name="offline_opening_saved">Keine Verbindung. Ihre gespeicherten Daten werden geöffnet…</string>
     <string name="loading_company_brief">Kurzanalyse zu %1$s wird geladen</string>
     <string name="why_sentiment">Warum %1$s?</string>
-    <string name="answer_error">Wir konnten das nicht beantworten. Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.</string>
+    <string name="answer_error_title">Wir konnten das nicht beantworten.</string>
+    <string name="answer_error_body">Bei uns ist etwas schiefgelaufen. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.</string>
     <string name="answer_offline_title">Antwort konnte nicht erstellt werden.</string>
     <string name="answer_offline_body">Sie sind offline. Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.</string>
     <string name="try_asking">Fragen Sie zum Beispiel</string>

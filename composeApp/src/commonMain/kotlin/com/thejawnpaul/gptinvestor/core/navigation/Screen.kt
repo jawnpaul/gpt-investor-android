@@ -4,8 +4,12 @@ import io.ktor.http.encodeURLParameter
 
 sealed class Screen(val route: String, val isTopLevel: Boolean) {
     data object HomeScreen : Screen("home_screen", false)
-    data object CompanyDetailScreen : Screen("company_detail_screen/{ticker}", false) {
-        fun createRoute(ticker: String) = "company_detail_screen/$ticker"
+    data object CompanyDetailScreen : Screen("company_detail_screen/{ticker}?ask={ask}", false) {
+        fun createRoute(ticker: String, ask: String? = null) = if (ask.isNullOrBlank()) {
+            "company_detail_screen/$ticker"
+        } else {
+            "company_detail_screen/$ticker?ask=${ask.encodeURLParameter()}"
+        }
     }
 
     data object WebViewScreen : Screen("web_view_screen/{url}", false) {

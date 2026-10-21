@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
@@ -26,9 +27,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.answer_error
+import com.thejawnpaul.gptinvestor.answer_error_body
+import com.thejawnpaul.gptinvestor.answer_error_title
 import com.thejawnpaul.gptinvestor.answer_offline_body
 import com.thejawnpaul.gptinvestor.answer_offline_title
 import com.thejawnpaul.gptinvestor.copy
@@ -127,7 +131,8 @@ data class AnswerStrings(
     val showLess: String,
     val labels: GiAnswerActionLabels,
     val reasons: List<String>,
-    val answerError: String,
+    val answerErrorTitle: String,
+    val answerErrorBody: String,
     val offlineTitle: String,
     val offlineBody: String,
     val tryAgain: String
@@ -151,7 +156,8 @@ fun answerStrings(): AnswerStrings = AnswerStrings(
         stringResource(Res.string.not_actionable),
         stringResource(Res.string.others)
     ),
-    answerError = stringResource(Res.string.answer_error),
+    answerErrorTitle = stringResource(Res.string.answer_error_title),
+    answerErrorBody = stringResource(Res.string.answer_error_body),
     offlineTitle = stringResource(Res.string.answer_offline_title),
     offlineBody = stringResource(Res.string.answer_offline_body),
     tryAgain = stringResource(Res.string.try_again)
@@ -211,22 +217,26 @@ fun LazyListScope.answerThreadItems(
     onCopy: (String) -> Unit,
     onShare: (String) -> Unit,
     onFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
-    onRetry: (query: String) -> Unit
+    onRetry: (query: String) -> Unit,
+    extraGap: Dp = 0.dp
 ) {
     messages.forEachIndexed { index, threadMessage ->
         val message = threadMessage.message
         val isLatest = index == messages.lastIndex && pendingQuery == null
         item(key = "q-$index", contentType = "question") {
-            GiUserMessage(text = message.query, modifier = threadItem(thread.itemSpec))
+            GiUserMessage(text = message.query, modifier = threadItem(thread.itemSpec).padding(top = extraGap))
         }
         if (message.loading && message.response.isNullOrBlank() && threadMessage.companies.isEmpty()) {
             item(key = "t-$index", contentType = "thinking") {
-                GiThinkingIndicator(status = thinkingStatus, modifier = threadItem(thread.itemSpec))
+                GiThinkingIndicator(
+                    status = thinkingStatus,
+                    modifier = threadItem(thread.itemSpec).padding(top = extraGap)
+                )
             }
         } else {
             item(key = "a-$index", contentType = "answer") {
                 ThreadAnswer(
-                    modifier = threadItem(thread.itemSpec),
+                    modifier = threadItem(thread.itemSpec).padding(top = extraGap),
                     message = message,
                     companies = threadMessage.companies,
                     strings = strings,
@@ -255,10 +265,10 @@ fun LazyListScope.answerThreadItems(
     }
     if (pendingQuery != null) {
         item(key = "q-${messages.size}", contentType = "question") {
-            GiUserMessage(text = pendingQuery, modifier = threadItem(thread.itemSpec))
+            GiUserMessage(text = pendingQuery, modifier = threadItem(thread.itemSpec).padding(top = extraGap))
         }
         item(key = "t-${messages.size}", contentType = "thinking") {
-            GiThinkingIndicator(status = thinkingStatus, modifier = threadItem(thread.itemSpec))
+            GiThinkingIndicator(status = thinkingStatus, modifier = threadItem(thread.itemSpec).padding(top = extraGap))
         }
     }
 }
@@ -293,9 +303,9 @@ private fun ThreadAnswer(
             name = strings.name,
             streaming = presentation.revealing,
             disclaimer = if (failed) null else strings.disclaimer,
-            collapsed = collapsed,
+            collapsed = collapsed && !failed,
             animateCollapse = animateCollapse,
-            onToggleCollapse = onToggleCollapse,
+            onToggleCollapse = onToggleCollapse.takeUnless { failed },
             showMoreText = strings.showMore,
             showLessText = strings.showLess,
             actions = {
@@ -335,8 +345,8 @@ private fun ThreadAnswer(
                 }
                 if (failed) {
                     GiAnswerError(
-                        title = if (offline) strings.offlineTitle else null,
-                        message = if (offline) strings.offlineBody else strings.answerError,
+                        title = if (offline) strings.offlineTitle else strings.answerErrorTitle,
+                        message = if (offline) strings.offlineBody else strings.answerErrorBody,
                         retryText = strings.tryAgain,
                         onRetry = onRetry
                     )

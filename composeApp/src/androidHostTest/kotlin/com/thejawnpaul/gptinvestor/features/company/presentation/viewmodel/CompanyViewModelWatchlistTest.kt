@@ -8,6 +8,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.session.GuestSessionNotifier
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
+import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
@@ -62,6 +63,7 @@ class CompanyViewModelWatchlistTest {
 
     private fun viewModel() = CompanyViewModel(
         getCompanyBriefUseCase = mockk<GetCompanyBriefUseCase>(relaxed = true),
+        getCompanyUseCase = mockk<GetCompanyUseCase>(relaxed = true),
         savedStateHandle = SavedStateHandle(mapOf("ticker" to "AAPL")),
         getInputPromptUseCase = mockk<GetInputPromptUseCase>(relaxed = true),
         modelsRepository = modelsRepository,

@@ -345,7 +345,7 @@
         <item quantity="other">%1$d ذرائع۔ مالی مشورہ نہیں۔</item>
     </plurals>
     <string name="company_context_title">%1$s · %2$s</string>
-    <string name="ask_about_company">%1$s کے بارے میں پوچھیں…</string>
+    <string name="ask_about_company">%1$s کے بارے میں کچھ بھی پوچھیں</string>
     <string name="reading_company_data">%1$s کا تازہ ترین ڈیٹا پڑھ رہا ہے…</string>
     <string name="answer_copied">جواب کاپی ہو گیا</string>
     <string name="helpful">مددگار</string>
@@ -365,7 +365,8 @@
     <string name="offline_opening_saved">کنکشن نہیں ہے۔ آپ کا محفوظ ڈیٹا کھولا جا رہا ہے…</string>
     <string name="loading_company_brief">%1$s کی مختصر رپورٹ لوڈ ہو رہی ہے</string>
     <string name="why_sentiment">%1$s کیوں؟</string>
-    <string name="answer_error">ہم اس کا جواب نہیں دے سکے۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
+    <string name="answer_error_title">ہم اس کا جواب نہیں دے سکے۔</string>
+    <string name="answer_error_body">ہماری طرف سے کچھ غلط ہو گیا۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
     <string name="answer_offline_title">جواب تیار نہیں ہو سکا۔</string>
     <string name="answer_offline_body">آپ آف لائن ہیں۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
     <string name="try_asking">یہ پوچھ کر دیکھیں</string>

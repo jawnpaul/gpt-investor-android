@@ -16,6 +16,7 @@ import com.thejawnpaul.gptinvestor.core.session.GuestSessionSource
 import com.thejawnpaul.gptinvestor.core.session.rateLimitRetryMessage
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumberType
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
+import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyFinancialsView
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCompanyView
@@ -53,6 +54,7 @@ import org.koin.core.annotation.Provided
 @KoinViewModel
 class CompanyViewModel(
     private val getCompanyBriefUseCase: GetCompanyBriefUseCase,
+    private val getCompanyUseCase: GetCompanyUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val getInputPromptUseCase: GetInputPromptUseCase,
     private val modelsRepository: ModelsRepository,
@@ -115,8 +117,17 @@ class CompanyViewModel(
         getCompany()
     }
 
+    private fun getPriceHistory(ticker: String) {
+        getCompanyUseCase(ticker) {
+            it.onSuccess { company ->
+                _selectedCompany.update { state -> state.copy(priceHistory = company.historicalData.orEmpty()) }
+            }
+        }
+    }
+
     private fun getCompany() {
         selectedCompanyTicker?.let { ticker ->
+            if (_selectedCompany.value.priceHistory.isEmpty()) getPriceHistory(ticker)
             _selectedCompany.update { it.copy(loading = true) }
             getCompanyBriefUseCase(ticker) {
                 it.onFailure { failure ->
@@ -167,9 +178,17 @@ class CompanyViewModel(
                             brief = company
                         )
                     }
+                    askPendingQuestion()
                 }
             }
         }
+    }
+
+    private fun askPendingQuestion() {
+        val question = savedStateHandle.get<String>("ask")?.takeIf { it.isNotBlank() } ?: return
+        savedStateHandle["ask"] = null
+        getQuery(question)
+        getInputResponse()
     }
 
     fun getQuery(query: String) {

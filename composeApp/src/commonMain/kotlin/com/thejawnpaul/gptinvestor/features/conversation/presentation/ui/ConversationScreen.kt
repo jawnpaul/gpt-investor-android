@@ -78,7 +78,7 @@ fun ConversationScreen(
                     onOpenCompany = { onEvent(ConversationEvent.OpenCompany(it)) },
                     onSignInClick = { onEvent(ConversationEvent.GoToLogin) },
                     composerModifier = composerModifier,
-                    answerOffline = state.answerOffline,
+                    offlineAnswerIds = state.offlineAnswerIds,
                     toastState = toastState
                 )
             }

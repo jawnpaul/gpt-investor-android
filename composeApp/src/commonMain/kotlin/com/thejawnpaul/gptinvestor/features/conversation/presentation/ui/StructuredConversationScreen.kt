@@ -91,7 +91,7 @@ fun StructuredConversationScreen(
     toastState: GiToastState,
     modifier: Modifier = Modifier,
     composerModifier: Modifier = Modifier,
-    answerOffline: Boolean = false
+    offlineAnswerIds: Set<Long> = emptySet()
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val listState = rememberLazyListState()
@@ -200,7 +200,7 @@ fun StructuredConversationScreen(
                 thread = thread,
                 listState = listState,
                 isGuest = isGuest,
-                answerOffline = answerOffline,
+                offlineAnswerIds = offlineAnswerIds,
                 onCompanyClick = onOpenCompany,
                 onCopy = onCopy,
                 onShare = onShare,

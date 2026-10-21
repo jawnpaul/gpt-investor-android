@@ -187,6 +187,7 @@ class ConversationRepository(
         var newMessageId: Long = -1L
         var streaming = false
         try {
+            prompt.replacesMessageId?.let { saveStoppedAnswer(it, "") }
             // Use a non-null local var to allow safe reassignment of the conversation object
             var conversation: StructuredConversation = getConversation(prompt)
             currentConversation = conversation

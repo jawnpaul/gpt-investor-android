@@ -395,7 +395,7 @@ private fun GiGlowingMark() {
 fun GiAnswerError(
     message: String,
     retryText: String,
-    onRetry: () -> Unit,
+    onRetry: (() -> Unit)?,
     modifier: Modifier = Modifier,
     title: String? = null
 ) {
@@ -429,13 +429,15 @@ fun GiAnswerError(
             }
             Text(text = text, style = GiTextStyle.BodySmall.textStyle(), color = colors.ink)
         }
-        GiButton(
-            text = retryText,
-            onClick = onRetry,
-            size = GiButtonSize.Small,
-            variant = GiButtonVariant.Secondary,
-            leadingIcon = GiIcons.arrowClockwise
-        )
+        if (onRetry != null) {
+            GiButton(
+                text = retryText,
+                onClick = onRetry,
+                size = GiButtonSize.Small,
+                variant = GiButtonVariant.Secondary,
+                leadingIcon = GiIcons.arrowClockwise
+            )
+        }
     }
 }
 

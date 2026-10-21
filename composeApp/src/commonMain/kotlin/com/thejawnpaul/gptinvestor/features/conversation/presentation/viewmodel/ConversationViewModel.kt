@@ -147,17 +147,25 @@ class ConversationViewModel(
 
     private fun retryAnswer(query: String) {
         if (query.isBlank() || conversation.value.loading) return
-        ask(query = query, source = null)
+        val current = conversation.value.conversation as? StructuredConversation
+        val failed = current?.let { withdrawFailedAnswer(it.messageList, query) }
+        if (current != null && failed != null) {
+            conversationViewMutableStateFlow.update {
+                it.copy(conversation = current.copy(messageList = failed.messages.toMutableList()))
+            }
+        }
+        ask(query = query, source = null, replacesMessageId = failed?.messageId)
     }
 
-    private fun ask(query: String, source: String?) {
+    private fun ask(query: String, source: String?, replacesMessageId: Long? = null) {
         startAnswer(query, keepDraft = source == null)
         source?.let { logMessageSent(source = it) }
         val generation = answerGeneration
         answerJob = getInputPromptUseCase(
             ConversationPrompt(
                 conversationId = selectedConversationId.value,
-                query = query
+                query = query,
+                replacesMessageId = replacesMessageId
             )
         ) {
             if (generation == answerGeneration) {
@@ -175,8 +183,7 @@ class ConversationViewModel(
             it.copy(
                 loading = true,
                 pendingQuery = query,
-                query = if (keepDraft) it.query else "",
-                answerOffline = false
+                query = if (keepDraft) it.query else ""
             )
         }
         requestStartTime = Clock.System.now().toEpochMilliseconds()
@@ -243,7 +250,10 @@ class ConversationViewModel(
                 conversation = updatedConversation,
                 pendingQuery = null,
                 query = state.pendingQuery ?: state.query,
-                answerOffline = failure is Failure.NetworkConnection
+                offlineAnswerIds = state.offlineAnswerIds.withFailedAnswer(
+                    updatedConversation,
+                    offline = failure is Failure.NetworkConnection
+                )
             )
         }
         when (failure) {

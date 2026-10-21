@@ -212,7 +212,7 @@ fun LazyListScope.answerThreadItems(
     thread: AnswerThreadState,
     listState: LazyListState,
     isGuest: Boolean,
-    answerOffline: Boolean,
+    offlineAnswerIds: Set<Long>,
     onCompanyClick: (String) -> Unit,
     onCopy: (String) -> Unit,
     onShare: (String) -> Unit,
@@ -251,12 +251,16 @@ fun LazyListScope.answerThreadItems(
                         thread.expanded[message.id] = !expandedNow
                     },
                     isGuest = isGuest,
-                    offline = answerOffline && isLatest,
+                    offline = message.id in offlineAnswerIds,
                     showReasons = thread.showReasonsFor == message.id,
                     onCopy = onCopy,
                     onShare = onShare,
                     onFeedback = onFeedback,
-                    onRetry = { onRetry(message.query) },
+                    onRetry = if (isLatest) {
+                        { onRetry(message.query) }
+                    } else {
+                        null
+                    },
                     onNotHelpful = { thread.showReasonsFor = message.id },
                     onReasonPick = { thread.showReasonsFor = null }
                 )
@@ -289,7 +293,7 @@ private fun ThreadAnswer(
     onCopy: (String) -> Unit,
     onShare: (String) -> Unit,
     onFeedback: (messageId: Long, status: Int, reason: String?) -> Unit,
-    onRetry: () -> Unit,
+    onRetry: (() -> Unit)?,
     onNotHelpful: () -> Unit,
     onReasonPick: () -> Unit,
     modifier: Modifier = Modifier

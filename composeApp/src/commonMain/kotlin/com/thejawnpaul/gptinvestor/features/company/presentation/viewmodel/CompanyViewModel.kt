@@ -33,6 +33,8 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.answerFail
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.stopAnswer
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.withFailedAnswer
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.withdrawFailedAnswer
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
 import com.thejawnpaul.gptinvestor.features.premium.domain.PREMIUM_SOURCE_WATCHLIST_FULL
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
@@ -199,7 +201,7 @@ class CompanyViewModel(
         val query = _selectedCompany.value.inputQuery
         if (query.trim().isNotEmpty()) {
             _selectedCompany.update {
-                it.copy(pendingQuery = query, isAnswering = true, inputQuery = "", answerOffline = false)
+                it.copy(pendingQuery = query, isAnswering = true, inputQuery = "")
             }
             requestStartTime = Clock.System.now().toEpochMilliseconds()
             analyticsLogger.logEvent(
@@ -214,25 +216,46 @@ class CompanyViewModel(
 
     private fun retryAnswer(query: String) {
         if (query.isBlank() || _selectedCompany.value.isAnswering) return
-        _selectedCompany.update { it.copy(pendingQuery = query, isAnswering = true, answerOffline = false) }
+        val current = _selectedCompany.value.conversation as? StructuredConversation
+        val failed = current?.let { withdrawFailedAnswer(it.messageList, query) }
+        if (current != null && failed != null) {
+            _selectedCompany.update {
+                it.copy(
+                    conversation = if (failed.messages.isEmpty()) {
+                        CompanyDetailDefaultConversation(id = 0, response = null)
+                    } else {
+                        current.copy(messageList = failed.messages.toMutableList())
+                    }
+                )
+            }
+            if (failed.messages.isEmpty()) selectedConversationId.value = -1L
+        }
+        _selectedCompany.update { it.copy(pendingQuery = query, isAnswering = true) }
         requestStartTime = Clock.System.now().toEpochMilliseconds()
-        askQuery(query)
+        askQuery(query, replacesMessageId = failed?.messageId)
     }
 
-    private fun askQuery(query: String) {
+    private fun askQuery(query: String, replacesMessageId: Long? = null) {
         when (_selectedCompany.value.conversation) {
             is CompanyDetailDefaultConversation -> {
                 ask(
                     ConversationPrompt(
                         query = query,
                         tickerSymbol = _selectedCompany.value.header.companyTicker,
-                        conversationId = -1L
+                        conversationId = -1L,
+                        replacesMessageId = replacesMessageId
                     )
                 )
             }
 
             is StructuredConversation -> {
-                ask(ConversationPrompt(query = query, conversationId = selectedConversationId.value))
+                ask(
+                    ConversationPrompt(
+                        query = query,
+                        conversationId = selectedConversationId.value,
+                        replacesMessageId = replacesMessageId
+                    )
+                )
             }
 
             else -> {
@@ -242,7 +265,7 @@ class CompanyViewModel(
 
     fun getSuggestedPromptResponse(query: String) {
         _selectedCompany.update {
-            it.copy(pendingQuery = query, isAnswering = true, inputQuery = "", answerOffline = false)
+            it.copy(pendingQuery = query, isAnswering = true, inputQuery = "")
         }
         requestStartTime = Clock.System.now().toEpochMilliseconds()
         analyticsLogger.logEvent(
@@ -382,7 +405,10 @@ class CompanyViewModel(
                 inputQuery = "",
                 pendingQuery = null,
                 isAnswering = false,
-                answerOffline = failure is Failure.NetworkConnection
+                offlineAnswerIds = it.offlineAnswerIds.withFailedAnswer(
+                    it.conversation,
+                    offline = failure is Failure.NetworkConnection
+                )
             )
         }
     }

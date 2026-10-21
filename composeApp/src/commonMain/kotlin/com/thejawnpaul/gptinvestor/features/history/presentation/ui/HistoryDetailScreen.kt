@@ -77,7 +77,7 @@ fun HistoryDetailScreen(
                 onRetry = { onEvent(HistoryDetailEvent.RetryAnswer(it)) },
                 onOpenCompany = { onEvent(HistoryDetailEvent.OpenCompany(it)) },
                 onSignInClick = { onEvent(HistoryDetailEvent.GoToLogin) },
-                answerOffline = state.answerOffline,
+                offlineAnswerIds = state.offlineAnswerIds,
                 toastState = toastState
             )
         }

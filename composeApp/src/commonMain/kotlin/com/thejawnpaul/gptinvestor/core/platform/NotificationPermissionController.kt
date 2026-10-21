@@ -5,4 +5,6 @@ import androidx.compose.runtime.Composable
 interface NotificationPermissionController {
     @Composable
     fun RequestPermissionIfNeeded(shouldRequest: Boolean, onGrant: () -> Unit, onDeny: () -> Unit)
+
+    suspend fun areNotificationsEnabled(): Boolean
 }

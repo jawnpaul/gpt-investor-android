@@ -221,7 +221,11 @@
     <string name="search_a_stock_to_analyse">Search a stock to analyse</string>
     <string name="sign_in_action">Sign in</string>
     <string name="activity">Activity</string>
-    <string name="questions_count">%1$d questions</string>
+    <plurals name="questions_count">
+        <item quantity="one">%1$d question</item>
+        <item quantity="other">%1$d questions</item>
+    </plurals>
+    <string name="notifications_turn_on_in_settings">Turn on notifications in Settings.</string>
     <string name="preferences">Preferences</string>
     <string name="notifications">Notifications</string>
     <string name="appearance">Appearance</string>

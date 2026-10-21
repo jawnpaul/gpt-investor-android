@@ -11,6 +11,10 @@ sealed interface ProfileEvent {
     data object SavedPicksClicked : ProfileEvent
     data object SavedTidbitsClicked : ProfileEvent
     data object NotificationsClicked : ProfileEvent
+    data object NotificationPermissionGranted : ProfileEvent
+    data object NotificationPermissionDenied : ProfileEvent
+    data object ScreenShown : ProfileEvent
+    data object WatchingClicked : ProfileEvent
     data object AppearanceClicked : ProfileEvent
     data object PrivacyClicked : ProfileEvent
     data object SettingsClicked : ProfileEvent

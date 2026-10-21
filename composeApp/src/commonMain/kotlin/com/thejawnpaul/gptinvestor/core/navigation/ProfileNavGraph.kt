@@ -4,16 +4,25 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.core.platform.NotificationPermissionController
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.core.utility.Constants
 import com.thejawnpaul.gptinvestor.features.profile.presentation.ui.ProfileScreen
 import com.thejawnpaul.gptinvestor.features.profile.presentation.viewmodel.ProfileAction
+import com.thejawnpaul.gptinvestor.features.profile.presentation.viewmodel.ProfileEvent
 import com.thejawnpaul.gptinvestor.features.profile.presentation.viewmodel.ProfileViewModel
+import com.thejawnpaul.gptinvestor.notifications_turn_on_in_settings
+import com.thejawnpaul.gptinvestor.settings
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.jetbrains.compose.resources.getString
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 fun NavGraphBuilder.profileNavGraph(navController: NavHostController, platformActions: PlatformActions) {
@@ -32,7 +41,16 @@ fun NavGraphBuilder.profileNavGraph(navController: NavHostController, platformAc
                             route = Screen.HistoryTabScreen.route
                         )
                     }
-                    ProfileAction.NavigateToNotifications -> {
+                    ProfileAction.NavigateToWatchlist -> {
+                        navController.navigateToTab(Screen.WatchlistTabScreen.route, Screen.HomeTabScreen.route)
+                    }
+                    ProfileAction.ShowNotificationSettingsHint -> {
+                        platformActions.showMessage(
+                            message = getString(Res.string.notifications_turn_on_in_settings),
+                            icon = GiIcons.bell,
+                            actionText = getString(Res.string.settings),
+                            onAction = platformActions::openNotificationSettings
+                        )
                     }
                     ProfileAction.NavigateToPrivacy -> {
                         platformActions.openUrl(Constants.PRIVACY_POLICY_URL)
@@ -65,6 +83,17 @@ fun NavGraphBuilder.profileNavGraph(navController: NavHostController, platformAc
                 }
             }.launchIn(scope)
         }
+
+        LifecycleResumeEffect(viewModel) {
+            viewModel.handleEvent(ProfileEvent.ScreenShown)
+            onPauseOrDispose { }
+        }
+        val notificationPermissionController: NotificationPermissionController = koinInject()
+        notificationPermissionController.RequestPermissionIfNeeded(
+            shouldRequest = state.requestNotificationPermission,
+            onGrant = { viewModel.handleEvent(ProfileEvent.NotificationPermissionGranted) },
+            onDeny = { viewModel.handleEvent(ProfileEvent.NotificationPermissionDenied) }
+        )
 
         ProfileScreen(
             state = state,

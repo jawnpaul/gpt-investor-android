@@ -15,9 +15,11 @@ data class ProfileUiState(
     val isPremiumUser: Boolean = false,
     val isGuestSession: Boolean = false,
     val isNotificationsEnabled: Boolean = false,
+    val requestNotificationPermission: Boolean = false,
     val currentTheme: StringResource = Res.string.system,
     val themeList: List<StringResource> = emptyList()
 ) {
     val savedPicksCountString: String = savedPicksCount.toString()
     val savedTidbitsCountString: String = savedTidbitsCount.toString()
+    val canTurnOnNotifications: Boolean get() = !isNotificationsEnabled && !isGuestSession
 }

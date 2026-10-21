@@ -402,6 +402,11 @@
     <string name="discover_search_error_title_generic">Suche konnte nicht geladen werden</string>
     <string name="discover_search_error_body">Die Suche braucht eine Verbindung. Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.</string>
     <string name="discover_loading_search">Suche wird geladen</string>
+    <plurals name="questions_count">
+        <item quantity="one">%1$d Frage</item>
+        <item quantity="other">%1$d Fragen</item>
+    </plurals>
+    <string name="notifications_turn_on_in_settings">Aktivieren Sie Benachrichtigungen in den Einstellungen.</string>
     <plurals name="watchlist_stocks_count">
         <item quantity="one">%1$d Aktie</item>
         <item quantity="other">%1$d Aktien</item>

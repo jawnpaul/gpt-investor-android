@@ -14,6 +14,7 @@ import platform.UIKit.registerForRemoteNotifications
 import platform.UserNotifications.UNAuthorizationOptionAlert
 import platform.UserNotifications.UNAuthorizationOptionBadge
 import platform.UserNotifications.UNAuthorizationOptionSound
+import platform.UserNotifications.UNAuthorizationStatusAuthorized
 import platform.UserNotifications.UNUserNotificationCenter
 
 @Singleton(binds = [NotificationPermissionController::class])
@@ -40,6 +41,12 @@ class IosNotificationPermissionController : NotificationPermissionController {
                     currentOnDeny()
                 }
             }
+        }
+    }
+
+    override suspend fun areNotificationsEnabled(): Boolean = suspendCancellableCoroutine { continuation ->
+        UNUserNotificationCenter.currentNotificationCenter().getNotificationSettingsWithCompletionHandler { settings ->
+            continuation.resume(settings?.authorizationStatus == UNAuthorizationStatusAuthorized)
         }
     }
 }

@@ -3,13 +3,19 @@ package com.thejawnpaul.gptinvestor.features.profile.presentation.viewmodel
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.core.functional.Either
+import com.thejawnpaul.gptinvestor.core.platform.NotificationPermissionController
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
+import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.settings.domain.SettingsRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistData
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistItem
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -42,6 +48,9 @@ class ProfileViewModelTest {
     private val isPremium = MutableStateFlow(false)
     private val premiumEventBus: PremiumEventBus = mockk(relaxed = true)
     private val analyticsLogger: AnalyticsLogger = mockk(relaxed = true)
+    private val watchlistRepository: WatchlistRepository = mockk()
+    private val notificationRepository: NotificationRepository = mockk(relaxed = true)
+    private val notificationPermissionController: NotificationPermissionController = mockk()
 
     @Before
     fun setUp() {
@@ -56,6 +65,10 @@ class ProfileViewModelTest {
         every { tidbitRepository.getSavedTidbitsCount() } returns flowOf(0)
         every { appPreferences.themePreference } returns flowOf("System")
         every { appPreferences.isGuestLoggedIn } returns flowOf(false)
+        coEvery { notificationPermissionController.areNotificationsEnabled() } returns false
+        coEvery { watchlistRepository.getWatchlist() } returns
+            Either.Right(WatchlistData(items = emptyList(), recommendations = emptyList()))
+        coEvery { appPreferences.setNotificationPermission(any()) } returns Unit
     }
 
     @After
@@ -71,6 +84,9 @@ class ProfileViewModelTest {
         tidbitRepository,
         settingsRepository,
         premiumEventBus,
+        watchlistRepository,
+        notificationRepository,
+        notificationPermissionController,
         analyticsLogger
     )
 
@@ -205,5 +221,114 @@ class ProfileViewModelTest {
 
         assertThat(vm.state.value.savedPicksCount).isEqualTo(5)
         assertThat(vm.state.value.savedTidbitsCount).isEqualTo(12)
+    }
+
+    @Test
+    fun `tapping notifications when they are on does not ask again`() = runTest(testDispatcher) {
+        every { appPreferences.notificationPermission } returns flowOf(true)
+        val vm = buildViewModel()
+        backgroundScope.launch { vm.state.collect { } }
+        advanceUntilIdle()
+
+        vm.handleEvent(ProfileEvent.NotificationsClicked)
+        advanceUntilIdle()
+
+        assertThat(vm.state.value.requestNotificationPermission).isFalse()
+    }
+
+    @Test
+    fun `tapping notifications when they are off asks for permission`() = runTest(testDispatcher) {
+        val vm = buildViewModel()
+        backgroundScope.launch { vm.state.collect { } }
+        advanceUntilIdle()
+
+        vm.handleEvent(ProfileEvent.NotificationsClicked)
+        advanceUntilIdle()
+
+        assertThat(vm.state.value.requestNotificationPermission).isTrue()
+    }
+
+    @Test
+    fun `granting notifications saves it and syncs the token`() = runTest(testDispatcher) {
+        coEvery { appPreferences.setNotificationPermission(any()) } returns Unit
+        val vm = buildViewModel()
+        backgroundScope.launch { vm.state.collect { } }
+        vm.handleEvent(ProfileEvent.NotificationsClicked)
+        advanceUntilIdle()
+
+        vm.handleEvent(ProfileEvent.NotificationPermissionGranted)
+        advanceUntilIdle()
+
+        assertThat(vm.state.value.requestNotificationPermission).isFalse()
+        coVerify { appPreferences.setNotificationPermission(true) }
+        coVerify { notificationRepository.syncTokenIfNeeded() }
+    }
+
+    @Test
+    fun `denying notifications points to settings`() = runTest(testDispatcher) {
+        coEvery { appPreferences.setNotificationPermission(any()) } returns Unit
+        val vm = buildViewModel()
+
+        vm.actions.test {
+            vm.handleEvent(ProfileEvent.NotificationPermissionDenied)
+            assertThat(awaitItem()).isEqualTo(ProfileAction.ShowNotificationSettingsHint)
+        }
+        coVerify { appPreferences.setNotificationPermission(false) }
+    }
+
+    @Test
+    fun `showing the screen loads the watching count`() = runTest(testDispatcher) {
+        coEvery { watchlistRepository.getWatchlist() } returns
+            Either.Right(WatchlistData(items = List(2) { mockk<WatchlistItem>() }, recommendations = emptyList()))
+        val vm = buildViewModel()
+        backgroundScope.launch { vm.state.collect { } }
+
+        vm.handleEvent(ProfileEvent.ScreenShown)
+        advanceUntilIdle()
+
+        assertThat(vm.state.value.watchingCount).isEqualTo(2)
+    }
+
+    @Test
+    fun `tapping watching opens the watchlist`() = runTest(testDispatcher) {
+        val vm = buildViewModel()
+
+        vm.actions.test {
+            vm.handleEvent(ProfileEvent.WatchingClicked)
+            assertThat(awaitItem()).isEqualTo(ProfileAction.NavigateToWatchlist)
+        }
+    }
+
+    @Test
+    fun `notifications turned off in system settings show as off`() = runTest(testDispatcher) {
+        every { appPreferences.notificationPermission } returns flowOf(true)
+        val vm = buildViewModel()
+
+        vm.handleEvent(ProfileEvent.ScreenShown)
+        advanceUntilIdle()
+
+        coVerify { appPreferences.setNotificationPermission(false) }
+    }
+
+    @Test
+    fun `notifications turned on in system settings show as on and sync the token`() = runTest(testDispatcher) {
+        coEvery { notificationPermissionController.areNotificationsEnabled() } returns true
+        val vm = buildViewModel()
+
+        vm.handleEvent(ProfileEvent.ScreenShown)
+        advanceUntilIdle()
+
+        coVerify { appPreferences.setNotificationPermission(true) }
+        coVerify { notificationRepository.syncTokenIfNeeded() }
+    }
+
+    @Test
+    fun `matching system state leaves the stored permission alone`() = runTest(testDispatcher) {
+        val vm = buildViewModel()
+
+        vm.handleEvent(ProfileEvent.ScreenShown)
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { appPreferences.setNotificationPermission(any()) }
     }
 }

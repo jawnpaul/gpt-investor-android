@@ -404,6 +404,13 @@
     <string name="discover_search_error_title_generic">Не вдалося завантажити пошук</string>
     <string name="discover_search_error_body">Для пошуку потрібне з’єднання. Перевірте з’єднання та спробуйте ще раз.</string>
     <string name="discover_loading_search">Завантаження пошуку</string>
+    <plurals name="questions_count">
+        <item quantity="one">%1$d запитання</item>
+        <item quantity="few">%1$d запитання</item>
+        <item quantity="many">%1$d запитань</item>
+        <item quantity="other">%1$d запитання</item>
+    </plurals>
+    <string name="notifications_turn_on_in_settings">Увімкніть сповіщення в налаштуваннях.</string>
     <plurals name="watchlist_stocks_count">
         <item quantity="one">%1$d акція</item>
         <item quantity="few">%1$d акції</item>

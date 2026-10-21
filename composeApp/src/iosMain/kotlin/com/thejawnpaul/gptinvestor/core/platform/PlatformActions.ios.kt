@@ -8,6 +8,7 @@ import platform.Foundation.NSURL
 import platform.SafariServices.SFSafariViewController
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
+import platform.UIKit.UIApplicationOpenSettingsURLString
 import platform.UIKit.UIPasteboard
 
 @Factory
@@ -44,5 +45,10 @@ actual class PlatformActions(private val toastMessenger: ToastMessenger) {
             animated = true,
             completion = null
         )
+    }
+
+    actual fun openNotificationSettings() {
+        val url = NSURL.URLWithString(UIApplicationOpenSettingsURLString) ?: return
+        UIApplication.sharedApplication.openURL(url, options = emptyMap<Any?, Any>(), completionHandler = null)
     }
 }

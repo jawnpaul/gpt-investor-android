@@ -86,6 +86,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.theme.components.giBeam
 import com.thejawnpaul.gptinvestor.watching
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val PREMIUM_BEAM_STRENGTH = 0.6f
@@ -165,7 +166,7 @@ private fun ActivitySection(state: ProfileUiState, onEvent: (ProfileEvent) -> Un
         AccountSettingsRow(
             icon = GiIcons.clock,
             label = stringResource(Res.string.history),
-            value = stringResource(Res.string.questions_count, state.queryCount),
+            value = pluralStringResource(Res.plurals.questions_count, state.queryCount, state.queryCount),
             onClick = { onEvent(ProfileEvent.HistoryClicked) }
         )
         GiDivider()
@@ -195,7 +196,8 @@ private fun PreferencesSection(state: ProfileUiState, onEvent: (ProfileEvent) ->
             value = stringResource(
                 if (state.isNotificationsEnabled) Res.string.settings_on else Res.string.settings_off
             ),
-            onClick = { onEvent(ProfileEvent.NotificationsClicked) }
+            onClick = { onEvent(ProfileEvent.NotificationsClicked) },
+            showCaret = state.canTurnOnNotifications
         )
         GiDivider()
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -274,7 +276,12 @@ private fun PremiumCard(onClick: () -> Unit) {
 @Composable
 private fun StatsRow(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit) {
     val tiles = @Composable { tileModifier: Modifier ->
-        StatTile(label = stringResource(Res.string.watching), count = state.watchingCount, modifier = tileModifier)
+        StatTile(
+            label = stringResource(Res.string.watching),
+            count = state.watchingCount,
+            onClick = { onEvent(ProfileEvent.WatchingClicked) },
+            modifier = tileModifier
+        )
         StatTile(
             label = stringResource(Res.string.saved),
             count = state.savedTidbitsCount,

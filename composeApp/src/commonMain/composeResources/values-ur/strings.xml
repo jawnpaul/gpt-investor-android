@@ -402,6 +402,11 @@
     <string name="discover_search_error_title_generic">تلاش لوڈ نہیں ہو سکی</string>
     <string name="discover_search_error_body">تلاش کے لیے کنکشن ضروری ہے۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
     <string name="discover_loading_search">تلاش لوڈ ہو رہی ہے</string>
+    <plurals name="questions_count">
+        <item quantity="one">%1$d سوال</item>
+        <item quantity="other">%1$d سوالات</item>
+    </plurals>
+    <string name="notifications_turn_on_in_settings">ترتیبات میں اطلاعات آن کریں۔</string>
     <plurals name="watchlist_stocks_count">
         <item quantity="one">%1$d اسٹاک</item>
         <item quantity="other">%1$d اسٹاکس</item>

@@ -393,6 +393,8 @@ private fun HomeScreenPreview() {
                     onDeny: () -> Unit
                 ) {
                 }
+
+                override suspend fun areNotificationsEnabled(): Boolean = true
             }
         )
     }

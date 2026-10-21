@@ -51,7 +51,10 @@ import com.thejawnpaul.gptinvestor.theme.components.GiListGroup
 import com.thejawnpaul.gptinvestor.theme.components.GiListRow
 import com.thejawnpaul.gptinvestor.theme.components.GiText
 import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
+import com.thejawnpaul.gptinvestor.theme.components.GiToastHost
+import com.thejawnpaul.gptinvestor.theme.components.GiToastState
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
+import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
 import com.thejawnpaul.gptinvestor.try_asking
 import com.thejawnpaul.gptinvestor.what_do_you_want_to_know
 import org.jetbrains.compose.resources.stringResource
@@ -73,6 +76,7 @@ fun DefaultConversationScreen(
     selectedModel: AvailableModel,
     onModelChange: (AvailableModel) -> Unit,
     onUpgradeModel: (showBottomSheet: Boolean, modelId: String) -> Unit,
+    toastState: GiToastState,
     modifier: Modifier = Modifier
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -156,6 +160,13 @@ fun DefaultConversationScreen(
                     }
                 }
             }
+
+            GiToastHost(
+                state = toastState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = GiSpace.gutter, vertical = GiSpace.x4)
+            )
         }
 
         GiComposerBar(
@@ -200,7 +211,8 @@ private fun DefaultConversationScreenPreview() {
             availableModels = emptyList(),
             selectedModel = DefaultModel(),
             onModelChange = {},
-            onUpgradeModel = { _, _ -> }
+            onUpgradeModel = { _, _ -> },
+            toastState = rememberGiToastState()
         )
     }
 }

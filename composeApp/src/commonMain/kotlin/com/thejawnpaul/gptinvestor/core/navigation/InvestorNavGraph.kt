@@ -3,27 +3,31 @@ package com.thejawnpaul.gptinvestor.core.navigation
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DigestDetailScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
 import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
+import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
-fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformActions: PlatformActions) {
+fun NavGraphBuilder.investorNavGraph(navController: NavHostController) {
     composable(Screen.HomeTabScreen.route) {
         val homeViewModel = koinViewModel<HomeViewModel>()
         val state = homeViewModel.uiState.collectAsState()
         val haptics = LocalHapticFeedback.current
+        val scope = rememberCoroutineScope()
+        val toastState = rememberGiToastState()
         LaunchedEffect(Unit) {
             homeViewModel.actions.onEach { action ->
                 when (action) {
@@ -41,7 +45,7 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
                     }
 
                     is HomeAction.ShowToast -> {
-                        platformActions.showMessage(action.message)
+                        scope.launch { toastState.show(message = action.message) }
                     }
 
                     is HomeAction.AddStockFinished -> {
@@ -74,6 +78,7 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController, platformA
             modifier = Modifier,
             state = state.value,
             onEvent = homeViewModel::handleEvent,
+            toastState = toastState,
             composerModifier = askComposerTransition()
         )
     }

@@ -77,6 +77,7 @@ fun NavGraphBuilder.guestNavGraph(
         val viewModel = koinViewModel<HomeViewModel>()
         val state = viewModel.uiState.collectAsState()
         val scope = rememberCoroutineScope()
+        val toastState = rememberGiToastState()
         val haptics = LocalHapticFeedback.current
         LaunchedEffect(Unit) {
             viewModel.actions.onEach { action ->
@@ -95,7 +96,7 @@ fun NavGraphBuilder.guestNavGraph(
                     }
 
                     is HomeAction.ShowToast -> {
-                        platformActions.showMessage(action.message)
+                        scope.launch { toastState.show(message = action.message) }
                     }
 
                     is HomeAction.AddStockFinished -> {
@@ -130,6 +131,7 @@ fun NavGraphBuilder.guestNavGraph(
             modifier = Modifier,
             state = state.value,
             onEvent = viewModel::handleEvent,
+            toastState = toastState,
             composerModifier = askComposerTransition()
         )
     }
@@ -238,6 +240,7 @@ fun NavGraphBuilder.guestNavGraph(
         val viewModel = koinViewModel<ConversationViewModel>()
         val state = viewModel.conversation.collectAsState()
         val scope = rememberCoroutineScope()
+        val toastState = rememberGiToastState()
         LaunchedEffect(Unit) {
             viewModel.actions.onEach { action ->
                 when (action) {
@@ -251,11 +254,11 @@ fun NavGraphBuilder.guestNavGraph(
 
                     is ConversationAction.OnCopy -> {
                         platformActions.copyToClipboard("", action.text)
-                        platformActions.showMessage("Copied")
+                        scope.launch { toastState.show(message = "Copied") }
                     }
 
                     is ConversationAction.ShowToast -> {
-                        platformActions.showMessage(action.message)
+                        scope.launch { toastState.show(message = action.message) }
                     }
 
                     ConversationAction.OnSignOutGuest -> {}
@@ -285,6 +288,7 @@ fun NavGraphBuilder.guestNavGraph(
             state = state.value,
             onEvent = viewModel::handleEvent,
             onAction = viewModel::processAction,
+            toastState = toastState,
             onUpgradeFromRateLimit = {},
             composerModifier = askComposerTransition()
         )
@@ -297,6 +301,7 @@ fun NavGraphBuilder.guestNavGraph(
         val viewModel = koinViewModel<HistoryViewModel>()
         val state = viewModel.conversation.collectAsState()
         val scope = rememberCoroutineScope()
+        val toastState = rememberGiToastState()
         LaunchedEffect(Unit) {
             viewModel.historyDetailAction.onEach { action ->
                 when (action) {
@@ -310,11 +315,11 @@ fun NavGraphBuilder.guestNavGraph(
 
                     is HistoryDetailAction.OnCopy -> {
                         platformActions.copyToClipboard("", action.text)
-                        platformActions.showMessage("Copied")
+                        scope.launch { toastState.show(message = "Copied") }
                     }
 
                     is HistoryDetailAction.ShowToast -> {
-                        platformActions.showMessage(action.message)
+                        scope.launch { toastState.show(message = action.message) }
                     }
 
                     HistoryDetailAction.OnGoToSignUp -> {
@@ -345,6 +350,7 @@ fun NavGraphBuilder.guestNavGraph(
             state = state.value,
             onEvent = viewModel::handleHistoryDetailEvent,
             onAction = viewModel::processHistoryDetailAction,
+            toastState = toastState,
             onUpgradeFromRateLimit = {}
         )
     }
@@ -390,7 +396,7 @@ fun NavGraphBuilder.guestNavGraph(
                     }
 
                     is CompanyDetailAction.ShowToast -> {
-                        platformActions.showMessage(action.message)
+                        launch { toastState.show(message = action.message) }
                     }
 
                     is CompanyDetailAction.OnShare -> {
@@ -400,23 +406,27 @@ fun NavGraphBuilder.guestNavGraph(
 
                     CompanyDetailAction.WatchlistAdded -> {
                         haptics.performHapticFeedback(GiHaptics.Confirm)
-                        platformActions.showMessage(getString(Res.string.added_to_watchlist_success))
+                        launch { toastState.show(message = getString(Res.string.added_to_watchlist_success)) }
                     }
 
                     CompanyDetailAction.WatchlistAddFailed -> {
                         haptics.performHapticFeedback(GiHaptics.Reject)
-                        platformActions.showMessage(getString(Res.string.added_to_watchlist_error))
+                        launch { toastState.show(message = getString(Res.string.added_to_watchlist_error)) }
                     }
 
                     is CompanyDetailAction.WatchlistRemoved -> {
-                        platformActions.showMessage(getString(Res.string.removed_from_watchlist, action.ticker))
+                        launch {
+                            toastState.show(message = getString(Res.string.removed_from_watchlist, action.ticker))
+                        }
                     }
 
                     is CompanyDetailAction.WatchlistRemoveFailed -> {
                         haptics.performHapticFeedback(GiHaptics.Reject)
-                        platformActions.showMessage(
-                            getString(Res.string.failed_to_remove_from_watchlist, action.ticker)
-                        )
+                        launch {
+                            toastState.show(
+                                message = getString(Res.string.failed_to_remove_from_watchlist, action.ticker)
+                            )
+                        }
                     }
                 }
             }
@@ -438,6 +448,7 @@ fun NavGraphBuilder.guestNavGraph(
         val viewModel = koinViewModel<TopPickViewModel>()
         val state = viewModel.topPickView.collectAsState()
         val scope = rememberCoroutineScope()
+        val toastState = rememberGiToastState()
 
         LaunchedEffect(Unit) {
             viewModel.actions.onEach { action ->
@@ -451,7 +462,7 @@ fun NavGraphBuilder.guestNavGraph(
                     }
 
                     is TopPickAction.ShowToast -> {
-                        platformActions.showMessage(action.message)
+                        scope.launch { toastState.show(message = action.message) }
                     }
 
                     TopPickAction.OnGoToSignUp -> {
@@ -472,7 +483,8 @@ fun NavGraphBuilder.guestNavGraph(
             modifier = Modifier,
             state = state.value,
             onEvent = viewModel::handleEvent,
-            onAction = viewModel::processAction
+            onAction = viewModel::processAction,
+            toastState = toastState
         )
     }
 

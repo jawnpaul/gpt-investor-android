@@ -58,7 +58,10 @@ import com.thejawnpaul.gptinvestor.theme.components.GiComposerBar
 import com.thejawnpaul.gptinvestor.theme.components.GiComposerStop
 import com.thejawnpaul.gptinvestor.theme.components.GiIconButton
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiToastHost
+import com.thejawnpaul.gptinvestor.theme.components.GiToastState
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
+import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 import com.thejawnpaul.gptinvestor.thinking
 import kotlinx.coroutines.delay
@@ -85,6 +88,7 @@ fun StructuredConversationScreen(
     onRetry: (query: String) -> Unit,
     onOpenCompany: (ticker: String) -> Unit,
     onSignUpClick: () -> Unit,
+    toastState: GiToastState,
     modifier: Modifier = Modifier,
     composerModifier: Modifier = Modifier,
     answerOffline: Boolean = false
@@ -105,6 +109,12 @@ fun StructuredConversationScreen(
         modifier = modifier.fillMaxSize(),
         containerColor = GiTheme.colors.bg,
         contentWindowInsets = WindowInsets(0),
+        snackbarHost = {
+            GiToastHost(
+                state = toastState,
+                modifier = Modifier.padding(horizontal = GiSpace.gutter, vertical = GiSpace.x4)
+            )
+        },
         topBar = {
             Column {
                 GiTopBar(
@@ -310,7 +320,8 @@ private fun StructuredConversationScreenPreview() {
             onClickFeedback = { _, _, _ -> },
             onRetry = {},
             onOpenCompany = {},
-            onSignUpClick = {}
+            onSignUpClick = {},
+            toastState = rememberGiToastState()
         )
     }
 }
@@ -341,7 +352,8 @@ private fun StructuredConversationScreenIdlePreview() {
             onClickFeedback = { _, _, _ -> },
             onRetry = {},
             onOpenCompany = {},
-            onSignUpClick = {}
+            onSignUpClick = {},
+            toastState = rememberGiToastState()
         )
     }
 }

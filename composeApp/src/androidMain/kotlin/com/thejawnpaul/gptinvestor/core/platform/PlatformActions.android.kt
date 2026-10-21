@@ -4,15 +4,15 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.widget.Toast
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.net.toUri
 import org.koin.core.annotation.Factory
 
 @Factory
-actual class PlatformActions(private val context: Context) {
-    actual fun showMessage(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+actual class PlatformActions(private val context: Context, private val toastMessenger: ToastMessenger) {
+    actual fun showMessage(message: String, icon: ImageVector?, actionText: String?, onAction: () -> Unit) {
+        toastMessenger.show(message, icon, actionText, onAction)
     }
 
     actual fun copyToClipboard(label: String, text: String) {
@@ -29,7 +29,7 @@ actual class PlatformActions(private val context: Context) {
             customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             customTabsIntent.launchUrl(context, parsedUri)
         }.onFailure {
-            Toast.makeText(context, "No browser available to open this link", Toast.LENGTH_SHORT).show()
+            showMessage("No browser available to open this link")
         }
     }
 

@@ -107,6 +107,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiText
 import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.theme.components.GiToastHost
 import com.thejawnpaul.gptinvestor.theme.components.GiToastResult
+import com.thejawnpaul.gptinvestor.theme.components.GiToastState
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
 import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
 import com.thejawnpaul.gptinvestor.today
@@ -131,12 +132,12 @@ fun TopPickDetailScreen(
     state: TopPickDetailView,
     onEvent: (TopPickEvent) -> Unit,
     onAction: (TopPickAction) -> Unit,
+    toastState: GiToastState,
     modifier: Modifier = Modifier,
     onOpenSavedList: (() -> Unit)? = null
 ) {
     val colors = GiTheme.colors
     val listState = rememberLazyListState()
-    val toastState = rememberGiToastState()
     val scope = rememberCoroutineScope()
     val uriHandler = LocalUriHandler.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -653,7 +654,8 @@ private fun TopPickDetailScreenPreview() {
                 )
             ),
             onEvent = {},
-            onAction = {}
+            onAction = {},
+            toastState = rememberGiToastState()
         )
     }
 }
@@ -662,6 +664,11 @@ private fun TopPickDetailScreenPreview() {
 @Composable
 private fun TopPickDetailLoadingPreview() {
     GPTInvestorTheme {
-        TopPickDetailScreen(state = TopPickDetailView(loading = true), onEvent = {}, onAction = {})
+        TopPickDetailScreen(
+            state = TopPickDetailView(loading = true),
+            onEvent = {},
+            onAction = {},
+            toastState = rememberGiToastState()
+        )
     }
 }

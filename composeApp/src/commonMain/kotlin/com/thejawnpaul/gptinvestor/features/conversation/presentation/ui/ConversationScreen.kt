@@ -11,12 +11,14 @@ import com.thejawnpaul.gptinvestor.features.conversation.presentation.state.Conv
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.WaitlistBottomSheetContent
+import com.thejawnpaul.gptinvestor.theme.components.GiToastState
 
 @Composable
 fun ConversationScreen(
     state: ConversationView,
     onEvent: (ConversationEvent) -> Unit,
     onAction: (ConversationAction) -> Unit,
+    toastState: GiToastState,
     onUpgradeFromRateLimit: () -> Unit = {},
     modifier: Modifier = Modifier,
     composerModifier: Modifier = Modifier
@@ -76,7 +78,8 @@ fun ConversationScreen(
                     onOpenCompany = { onEvent(ConversationEvent.OpenCompany(it)) },
                     onSignUpClick = { onEvent(ConversationEvent.GoToSignUp) },
                     composerModifier = composerModifier,
-                    answerOffline = state.answerOffline
+                    answerOffline = state.answerOffline,
+                    toastState = toastState
                 )
             }
 
@@ -109,7 +112,8 @@ fun ConversationScreen(
                     },
                     onSignUpClick = {
                         onEvent(ConversationEvent.GoToSignUp)
-                    }
+                    },
+                    toastState = toastState
                 )
             }
         }

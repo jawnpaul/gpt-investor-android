@@ -82,7 +82,7 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
                     }
 
                     is CompanyDetailAction.ShowToast -> {
-                        platformActions.showMessage(action.message)
+                        launch { toastState.show(message = action.message) }
                     }
 
                     is CompanyDetailAction.OnShare -> {
@@ -104,18 +104,22 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
 
                     CompanyDetailAction.WatchlistAddFailed -> {
                         haptics.performHapticFeedback(GiHaptics.Reject)
-                        platformActions.showMessage(getString(Res.string.added_to_watchlist_error))
+                        launch { toastState.show(message = getString(Res.string.added_to_watchlist_error)) }
                     }
 
                     is CompanyDetailAction.WatchlistRemoved -> {
-                        platformActions.showMessage(getString(Res.string.removed_from_watchlist, action.ticker))
+                        launch {
+                            toastState.show(message = getString(Res.string.removed_from_watchlist, action.ticker))
+                        }
                     }
 
                     is CompanyDetailAction.WatchlistRemoveFailed -> {
                         haptics.performHapticFeedback(GiHaptics.Reject)
-                        platformActions.showMessage(
-                            getString(Res.string.failed_to_remove_from_watchlist, action.ticker)
-                        )
+                        launch {
+                            toastState.show(
+                                message = getString(Res.string.failed_to_remove_from_watchlist, action.ticker)
+                            )
+                        }
                     }
                 }
             }

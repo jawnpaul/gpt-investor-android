@@ -21,8 +21,10 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.SavedTopPick
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPickDetailScreen
 import com.thejawnpaul.gptinvestor.removed_from_watchlist
 import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
+import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -34,6 +36,7 @@ fun NavGraphBuilder.topPickNavGraph(navController: NavHostController, platformAc
         val viewModel = koinViewModel<TopPickViewModel>()
         val state = viewModel.topPickView.collectAsState()
         val scope = rememberCoroutineScope()
+        val toastState = rememberGiToastState()
         val haptics = LocalHapticFeedback.current
 
         LaunchedEffect(Unit) {
@@ -48,7 +51,7 @@ fun NavGraphBuilder.topPickNavGraph(navController: NavHostController, platformAc
                     }
 
                     is TopPickAction.ShowToast -> {
-                        platformActions.showMessage(action.message)
+                        scope.launch { toastState.show(message = action.message) }
                     }
 
                     TopPickAction.OnGoToSignUp -> {
@@ -63,18 +66,22 @@ fun NavGraphBuilder.topPickNavGraph(navController: NavHostController, platformAc
 
                     TopPickAction.WatchlistAddFailed -> {
                         haptics.performHapticFeedback(GiHaptics.Reject)
-                        platformActions.showMessage(getString(Res.string.added_to_watchlist_error))
+                        scope.launch { toastState.show(message = getString(Res.string.added_to_watchlist_error)) }
                     }
 
                     is TopPickAction.WatchlistRemoved -> {
-                        platformActions.showMessage(getString(Res.string.removed_from_watchlist, action.ticker))
+                        scope.launch {
+                            toastState.show(message = getString(Res.string.removed_from_watchlist, action.ticker))
+                        }
                     }
 
                     is TopPickAction.WatchlistRemoveFailed -> {
                         haptics.performHapticFeedback(GiHaptics.Reject)
-                        platformActions.showMessage(
-                            getString(Res.string.failed_to_remove_from_watchlist, action.ticker)
-                        )
+                        scope.launch {
+                            toastState.show(
+                                message = getString(Res.string.failed_to_remove_from_watchlist, action.ticker)
+                            )
+                        }
                     }
                 }
             }.launchIn(scope)
@@ -85,6 +92,7 @@ fun NavGraphBuilder.topPickNavGraph(navController: NavHostController, platformAc
             state = state.value,
             onEvent = viewModel::handleEvent,
             onAction = viewModel::processAction,
+            toastState = toastState,
             onOpenSavedList = { navController.navigate(Screen.SavedTopPicksScreen.route) }
         )
     }

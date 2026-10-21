@@ -221,6 +221,8 @@
     <string name="guest_session_expired_body_expired">مزید خلاصے پڑھنے اور اپنی تاریخ محفوظ کرنے کے لیے مفت سائن اپ کریں۔</string>
     <string name="guest_session_expired_title_limit">آپ نے اپنے مفت مہمان خلاصے استعمال کر لیے</string>
     <string name="guest_session_expired_body_limit">جاری رکھنے کے لیے مفت سائن اپ کریں۔</string>
+    <string name="guest_session_expired_title_questions">آپ نے اپنے مفت مہمان سوالات استعمال کر لیے</string>
+    <string name="guest_session_expired_body_questions">مزید سوالات پوچھنے کے لیے مفت سائن اپ کریں۔</string>
     <string name="guest_session_expired_sign_up">سائن اپ</string>
     <string name="guest_session_expired_have_account">میرا اکاؤنٹ ہے</string>
 

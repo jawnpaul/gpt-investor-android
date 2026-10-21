@@ -7,6 +7,10 @@ import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionEvent
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionNotifier
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionReason
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionSource
 import com.thejawnpaul.gptinvestor.core.session.rateLimitRetryMessage
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
@@ -45,7 +49,8 @@ class HistoryViewModel(
     private val modelsRepository: ModelsRepository,
     private val premiumEventBus: PremiumEventBus,
     @Provided private val analyticsLogger: AnalyticsLogger,
-    private val guestRateLimitNotifier: GuestRateLimitNotifier
+    private val guestRateLimitNotifier: GuestRateLimitNotifier,
+    private val guestSessionNotifier: GuestSessionNotifier
 ) : ViewModel() {
 
     private val _historyScreenViewState = MutableStateFlow(HistoryScreenView())
@@ -180,6 +185,10 @@ class HistoryViewModel(
         answerGeneration++
         answerJob?.cancel()
         answerJob = null
+        withdrawAnswer()
+    }
+
+    private fun withdrawAnswer() {
         conversationView.update { state ->
             val conversation = state.conversation as? StructuredConversation
             val stopped = conversation?.let { stopAnswer(it.messageList) }
@@ -196,6 +205,15 @@ class HistoryViewModel(
     }
 
     private fun handleInputResponseFailure(failure: Failure) {
+        if (failure is Failure.GuestLimitReached) {
+            withdrawAnswer()
+            if (conversation.value.isGuest) {
+                guestSessionNotifier.notify(
+                    GuestSessionEvent(reason = GuestSessionReason.QuestionLimit, source = GuestSessionSource.Stream)
+                )
+            }
+            return
+        }
         var shownInline = false
         conversationView.update { state ->
             val updatedConversation =

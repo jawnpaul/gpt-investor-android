@@ -270,6 +270,14 @@ class CompanyViewModel(
         askGeneration++
         askJob?.cancel()
         askJob = null
+        withdrawAnswer()
+        analyticsLogger.logEvent(
+            eventName = "answer-stopped",
+            params = mapOf("ticker" to (_selectedCompany.value.brief?.ticker ?: ""))
+        )
+    }
+
+    private fun withdrawAnswer() {
         var conversationCleared = false
         _selectedCompany.update { state ->
             val conversation = state.conversation as? StructuredConversation
@@ -292,14 +300,17 @@ class CompanyViewModel(
             next.copy(pendingQuery = null, isAnswering = false)
         }
         if (conversationCleared) selectedConversationId.value = -1L
-        analyticsLogger.logEvent(
-            eventName = "answer-stopped",
-            params = mapOf("ticker" to (_selectedCompany.value.brief?.ticker ?: ""))
-        )
     }
 
     private fun handleCompanyInputResponseFailure(failure: Failure) {
         Logger.e(failure.toString())
+        if (failure is Failure.GuestLimitReached) {
+            withdrawAnswer()
+            guestSessionNotifier.notify(
+                GuestSessionEvent(reason = GuestSessionReason.QuestionLimit, source = GuestSessionSource.Request)
+            )
+            return
+        }
         val shownInline = _selectedCompany.value.let { state ->
             val last = (state.conversation as? StructuredConversation)?.messageList?.lastOrNull()
             state.pendingQuery == null && (last as? GenAiTextMessage)?.answerFailed == true
@@ -309,15 +320,6 @@ class CompanyViewModel(
                 guestSessionNotifier.notify(
                     GuestSessionEvent(
                         reason = GuestSessionReason.Expired,
-                        source = GuestSessionSource.Request
-                    )
-                )
-            }
-
-            is Failure.GuestLimitReached -> {
-                guestSessionNotifier.notify(
-                    GuestSessionEvent(
-                        reason = GuestSessionReason.Limit,
                         source = GuestSessionSource.Request
                     )
                 )

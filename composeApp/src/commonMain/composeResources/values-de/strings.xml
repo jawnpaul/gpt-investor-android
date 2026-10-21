@@ -221,6 +221,8 @@
     <string name="guest_session_expired_body_expired">Jetzt kostenlos registrieren, um weiter Analysen zu lesen und Ihren Verlauf zu speichern.</string>
     <string name="guest_session_expired_title_limit">Sie haben Ihre kostenlosen Gastzusammenfassungen aufgebraucht</string>
     <string name="guest_session_expired_body_limit">Jetzt kostenlos registrieren, um weiterzumachen.</string>
+    <string name="guest_session_expired_title_questions">Sie haben Ihre kostenlosen Gastfragen aufgebraucht</string>
+    <string name="guest_session_expired_body_questions">Jetzt kostenlos registrieren, um weiter Fragen zu stellen.</string>
     <string name="guest_session_expired_sign_up">Registrieren</string>
     <string name="guest_session_expired_have_account">Ich habe bereits ein Konto</string>
 

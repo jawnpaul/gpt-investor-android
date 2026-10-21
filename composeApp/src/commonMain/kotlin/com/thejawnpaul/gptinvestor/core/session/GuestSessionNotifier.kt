@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import org.koin.core.annotation.Singleton
 
-enum class GuestSessionReason { Expired, Limit }
+enum class GuestSessionReason { Expired, Limit, QuestionLimit }
 enum class GuestSessionSource { Request, Launch, Stream }
 
 data class GuestSessionEvent(val reason: GuestSessionReason, val source: GuestSessionSource, val ticker: String? = null)

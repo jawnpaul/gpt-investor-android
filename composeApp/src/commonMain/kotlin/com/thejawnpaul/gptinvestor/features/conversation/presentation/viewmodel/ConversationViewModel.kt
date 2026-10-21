@@ -186,6 +186,10 @@ class ConversationViewModel(
         answerGeneration++
         answerJob?.cancel()
         answerJob = null
+        withdrawAnswer()
+    }
+
+    private fun withdrawAnswer() {
         conversationViewMutableStateFlow.update { state ->
             val conversation = state.conversation as? StructuredConversation
             val stopped = conversation?.let { stopAnswer(it.messageList) }
@@ -206,6 +210,15 @@ class ConversationViewModel(
     }
 
     private fun handleConversationFailure(failure: Failure) {
+        if (failure is Failure.GuestLimitReached) {
+            withdrawAnswer()
+            if (conversationViewMutableStateFlow.value.isGuest) {
+                guestSessionNotifier.notify(
+                    GuestSessionEvent(reason = GuestSessionReason.QuestionLimit, source = GuestSessionSource.Stream)
+                )
+            }
+            return
+        }
         var shownInline = false
         conversationViewMutableStateFlow.update { state ->
             val updatedConversation =
@@ -243,15 +256,6 @@ class ConversationViewModel(
                 guestSessionNotifier.notify(
                     GuestSessionEvent(reason = GuestSessionReason.Expired, source = GuestSessionSource.Stream)
                 )
-            }
-
-            is Failure.GuestLimitReached -> {
-                val isGuest = conversationViewMutableStateFlow.value.isGuest
-                if (isGuest) {
-                    guestSessionNotifier.notify(
-                        GuestSessionEvent(reason = GuestSessionReason.Limit, source = GuestSessionSource.Stream)
-                    )
-                }
             }
 
             is Failure.RateLimitExceeded -> {

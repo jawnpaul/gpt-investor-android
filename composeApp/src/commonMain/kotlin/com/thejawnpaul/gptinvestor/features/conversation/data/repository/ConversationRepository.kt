@@ -236,17 +236,22 @@ class ConversationRepository(
                     } catch (_: Exception) {
                         null
                     }
-                    val updatedMessages = ArrayList(conversation.messageList)
-                    val index = updatedMessages.indexOfFirst { it.id == newMessageId }
-                    if (index != -1) {
-                        val original = updatedMessages[index] as GenAiTextMessage
-                        updatedMessages[index] = original.copy(
-                            loading = false,
-                            response = original.response ?: "Couldn't generate a response"
-                        )
-                        emit(Either.Right(conversation.copy(messageList = updatedMessages)))
+                    val failure = mapHttpCodeToFailure(chatResponse.status.value, errorBody, isGuestInput)
+                    if (failure is Failure.GuestLimitReached) {
+                        saveStoppedAnswer(newMessageId, "")
+                    } else {
+                        val updatedMessages = ArrayList(conversation.messageList)
+                        val index = updatedMessages.indexOfFirst { it.id == newMessageId }
+                        if (index != -1) {
+                            val original = updatedMessages[index] as GenAiTextMessage
+                            updatedMessages[index] = original.copy(
+                                loading = false,
+                                response = original.response ?: "Couldn't generate a response"
+                            )
+                            emit(Either.Right(conversation.copy(messageList = updatedMessages)))
+                        }
                     }
-                    emit(Either.Left(mapHttpCodeToFailure(chatResponse.status.value, errorBody, isGuestInput)))
+                    emit(Either.Left(failure))
                 }
             }
         } catch (e: Exception) {

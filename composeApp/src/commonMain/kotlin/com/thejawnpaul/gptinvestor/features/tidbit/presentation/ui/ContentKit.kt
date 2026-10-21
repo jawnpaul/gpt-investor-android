@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyItemScope
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
@@ -43,6 +41,7 @@ import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.components.GiButton
 import com.thejawnpaul.gptinvestor.theme.components.GiButtonSize
+import com.thejawnpaul.gptinvestor.theme.components.GiIcons
 import com.thejawnpaul.gptinvestor.theme.components.GiText
 import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
@@ -53,7 +52,7 @@ private const val LARGE_TEXT_FONT_SCALE = 1.5f
 @ReadOnlyComposable
 internal fun isContentLargeText(): Boolean = LocalDensity.current.fontScale >= LARGE_TEXT_FONT_SCALE
 
-internal val ContentBookmarkFill: ImageVector get() = Icons.Filled.Bookmark
+internal val ContentBookmarkFill: ImageVector get() = GiIcons.bookmarkSimpleFill
 
 @Composable
 internal fun articleBodyStyle(): TextStyle =

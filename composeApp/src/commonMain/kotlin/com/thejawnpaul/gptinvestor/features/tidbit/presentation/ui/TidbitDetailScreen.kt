@@ -20,8 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Language
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -308,7 +306,7 @@ private fun TidbitArticle(
                     modifier = buttonModifier,
                     size = GiButtonSize.Medium,
                     variant = GiButtonVariant.Secondary,
-                    leadingIcon = Icons.Outlined.Language
+                    leadingIcon = GiIcons.globe
                 )
             }
         }

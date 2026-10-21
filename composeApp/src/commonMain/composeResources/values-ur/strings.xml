@@ -465,6 +465,8 @@
     <string name="tidbit_share">مختصر معلومات شیئر کریں</string>
     <string name="remove_from_saved">محفوظ کردہ سے ہٹائیں</string>
     <string name="tidbit_saved_to_library">آپ کی لائبریری میں محفوظ ہو گیا</string>
+    <string name="tidbit_save_failed">محفوظ نہیں ہو سکا۔</string>
+    <string name="tidbit_remove_failed">ہٹایا نہیں جا سکا۔</string>
     <string name="tidbit_loading">مختصر معلومات لوڈ ہو رہی ہیں</string>
     <string name="tidbits_loading">مختصر معلومات لوڈ ہو رہی ہیں</string>
     <string name="tidbit_error_title">یہ مختصر معلومات لوڈ نہیں ہو سکیں</string>
@@ -503,7 +505,7 @@
     <string name="top_pick_save">انتخاب محفوظ کریں</string>
     <string name="top_pick_share">انتخاب شیئر کریں</string>
     <string name="top_pick_saved_to_picks">آپ کے انتخاب میں محفوظ ہو گیا</string>
-    <string name="top_pick_save_failed">یہ انتخاب محفوظ نہیں ہو سکا۔ دوبارہ کوشش کریں۔</string>
+    <string name="top_pick_save_failed">محفوظ نہیں ہو سکا۔</string>
     <string name="top_pick_loading">بہترین انتخاب لوڈ ہو رہا ہے</string>
     <string name="top_picks_loading">بہترین انتخاب لوڈ ہو رہے ہیں</string>
     <string name="top_pick_error_title">یہ انتخاب لوڈ نہیں ہو سکا</string>

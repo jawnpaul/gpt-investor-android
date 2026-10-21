@@ -106,7 +106,8 @@ class TidbitViewModel(
                         it.copy(
                             id = tidbit.id,
                             isLoading = false,
-                            presentation = mapTidbitToPresentation(tidbit)
+                            presentation = mapTidbitToPresentation(tidbit),
+                            isBookmarked = tidbit.isBookmarked
                         )
                     }
                     _tidbitDetailState.value.presentation?.let { presentation ->
@@ -177,11 +178,19 @@ class TidbitViewModel(
 
                 val action = if (event.newValue) "bookmark" else "remove_bookmark"
                 logTidbitActionEvent(action = action, tidbitId = event.id)
+                val previous = _tidbitDetailState.value.isBookmarked
+                _tidbitDetailState.update { it.copy(isBookmarked = event.newValue) }
                 viewModelScope.launch {
-                    if (event.newValue) {
+                    val result = if (event.newValue) {
                         repository.bookmarkTidbit(tidbitId = event.id)
                     } else {
                         repository.removeBookmark(tidbitId = event.id)
+                    }
+                    result.onSuccess {
+                        if (event.newValue) handleDetailAction(TidbitDetailAction.Saved)
+                    }.onFailure {
+                        _tidbitDetailState.update { it.copy(isBookmarked = previous) }
+                        handleDetailAction(TidbitDetailAction.SaveFailed(id = event.id, newValue = event.newValue))
                     }
                 }
             }
@@ -395,7 +404,8 @@ data class TidbitDetailState(
     val id: String = "",
     val isLoading: Boolean = false,
     val presentation: TidbitPresentation? = null,
-    val isGuestSession: Boolean = false
+    val isGuestSession: Boolean = false,
+    val isBookmarked: Boolean = false
 )
 
 data class TidbitScreenState(
@@ -460,6 +470,8 @@ sealed interface TidbitDetailAction {
     data class OnOpenSource(val url: String) : TidbitDetailAction
     data class OnShare(val shareText: String) : TidbitDetailAction
     data object OnGoToLogin : TidbitDetailAction
+    data object Saved : TidbitDetailAction
+    data class SaveFailed(val id: String, val newValue: Boolean) : TidbitDetailAction
 }
 
 sealed interface TidbitPagingFilterType {

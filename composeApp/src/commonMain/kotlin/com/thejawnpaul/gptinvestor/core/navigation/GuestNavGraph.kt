@@ -550,6 +550,8 @@ fun NavGraphBuilder.guestNavGraph(
                     TidbitDetailAction.OnGoToLogin -> {
                         navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
+
+                    TidbitDetailAction.Saved, is TidbitDetailAction.SaveFailed -> Unit
                 }
             }.launchIn(scope)
         }

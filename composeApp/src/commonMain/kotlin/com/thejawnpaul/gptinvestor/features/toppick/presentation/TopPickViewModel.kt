@@ -198,10 +198,17 @@ class TopPickViewModel(
 
     fun getAllTopPicks() {
         _allTopPicks.update { it.copy(loading = true) }
+        _savedTopPicks.update { it.copy(loading = true) }
 
         getLocalTopPicksUseCase(GetLocalTopPicksUseCase.None()) {
             it.onFailure {
                 _allTopPicks.update { state ->
+                    state.copy(
+                        loading = false,
+                        error = "Something went wrong."
+                    )
+                }
+                _savedTopPicks.update { state ->
                     state.copy(
                         loading = false,
                         error = "Something went wrong."

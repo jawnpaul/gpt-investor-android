@@ -13,12 +13,14 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.state.HistoryCo
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.WaitlistBottomSheetContent
+import com.thejawnpaul.gptinvestor.theme.components.GiToastState
 
 @Composable
 fun HistoryDetailScreen(
     state: HistoryConversationView,
     onEvent: (HistoryDetailEvent) -> Unit,
     onAction: (HistoryDetailAction) -> Unit,
+    toastState: GiToastState,
     onUpgradeFromRateLimit: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -74,8 +76,9 @@ fun HistoryDetailScreen(
                 },
                 onRetry = { onEvent(HistoryDetailEvent.RetryAnswer(it)) },
                 onOpenCompany = { onEvent(HistoryDetailEvent.OpenCompany(it)) },
-                onSignUpClick = { onEvent(HistoryDetailEvent.GoToSignUp) },
-                answerOffline = state.answerOffline
+                onSignInClick = { onEvent(HistoryDetailEvent.GoToLogin) },
+                offlineAnswerIds = state.offlineAnswerIds,
+                toastState = toastState
             )
         }
     }

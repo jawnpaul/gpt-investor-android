@@ -147,17 +147,25 @@ class ConversationViewModel(
 
     private fun retryAnswer(query: String) {
         if (query.isBlank() || conversation.value.loading) return
-        ask(query = query, source = null)
+        val current = conversation.value.conversation as? StructuredConversation
+        val failed = current?.let { withdrawFailedAnswer(it.messageList, query) }
+        if (current != null && failed != null) {
+            conversationViewMutableStateFlow.update {
+                it.copy(conversation = current.copy(messageList = failed.messages.toMutableList()))
+            }
+        }
+        ask(query = query, source = null, replacesMessageId = failed?.messageId)
     }
 
-    private fun ask(query: String, source: String?) {
+    private fun ask(query: String, source: String?, replacesMessageId: Long? = null) {
         startAnswer(query, keepDraft = source == null)
         source?.let { logMessageSent(source = it) }
         val generation = answerGeneration
         answerJob = getInputPromptUseCase(
             ConversationPrompt(
                 conversationId = selectedConversationId.value,
-                query = query
+                query = query,
+                replacesMessageId = replacesMessageId
             )
         ) {
             if (generation == answerGeneration) {
@@ -175,8 +183,7 @@ class ConversationViewModel(
             it.copy(
                 loading = true,
                 pendingQuery = query,
-                query = if (keepDraft) it.query else "",
-                answerOffline = false
+                query = if (keepDraft) it.query else ""
             )
         }
         requestStartTime = Clock.System.now().toEpochMilliseconds()
@@ -186,6 +193,10 @@ class ConversationViewModel(
         answerGeneration++
         answerJob?.cancel()
         answerJob = null
+        withdrawAnswer()
+    }
+
+    private fun withdrawAnswer() {
         conversationViewMutableStateFlow.update { state ->
             val conversation = state.conversation as? StructuredConversation
             val stopped = conversation?.let { stopAnswer(it.messageList) }
@@ -206,6 +217,15 @@ class ConversationViewModel(
     }
 
     private fun handleConversationFailure(failure: Failure) {
+        if (failure is Failure.GuestLimitReached) {
+            withdrawAnswer()
+            if (conversationViewMutableStateFlow.value.isGuest) {
+                guestSessionNotifier.notify(
+                    GuestSessionEvent(reason = GuestSessionReason.QuestionLimit, source = GuestSessionSource.Stream)
+                )
+            }
+            return
+        }
         var shownInline = false
         conversationViewMutableStateFlow.update { state ->
             val updatedConversation =
@@ -230,7 +250,10 @@ class ConversationViewModel(
                 conversation = updatedConversation,
                 pendingQuery = null,
                 query = state.pendingQuery ?: state.query,
-                answerOffline = failure is Failure.NetworkConnection
+                offlineAnswerIds = state.offlineAnswerIds.withFailedAnswer(
+                    updatedConversation,
+                    offline = failure is Failure.NetworkConnection
+                )
             )
         }
         when (failure) {
@@ -243,15 +266,6 @@ class ConversationViewModel(
                 guestSessionNotifier.notify(
                     GuestSessionEvent(reason = GuestSessionReason.Expired, source = GuestSessionSource.Stream)
                 )
-            }
-
-            is Failure.GuestLimitReached -> {
-                val isGuest = conversationViewMutableStateFlow.value.isGuest
-                if (isGuest) {
-                    guestSessionNotifier.notify(
-                        GuestSessionEvent(reason = GuestSessionReason.Limit, source = GuestSessionSource.Stream)
-                    )
-                }
             }
 
             is Failure.RateLimitExceeded -> {
@@ -400,8 +414,8 @@ class ConversationViewModel(
                 }
             }
 
-            ConversationEvent.GoToSignUp -> {
-                processAction(ConversationAction.OnGoToSignUp)
+            ConversationEvent.GoToLogin -> {
+                processAction(ConversationAction.OnGoToLogin)
             }
 
             ConversationEvent.StopAnswering -> {
@@ -560,7 +574,7 @@ sealed interface ConversationEvent {
     data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : ConversationEvent
 
     data class ShowRateLimitBottomSheet(val showBottomSheet: Boolean) : ConversationEvent
-    data object GoToSignUp : ConversationEvent
+    data object GoToLogin : ConversationEvent
     data object StopAnswering : ConversationEvent
     data class RetryAnswer(val query: String) : ConversationEvent
     data class ShareAnswer(val text: String) : ConversationEvent
@@ -574,7 +588,7 @@ sealed interface ConversationAction {
     data class OnCopy(val text: String) : ConversationAction
     data class ShowToast(val message: String) : ConversationAction
     data object OnSignOutGuest : ConversationAction
-    data object OnGoToSignUp : ConversationAction
+    data object OnGoToLogin : ConversationAction
     data class OnShare(val text: String) : ConversationAction
     data object OnGoToHistory : ConversationAction
     data class OnOpenCompany(val ticker: String) : ConversationAction

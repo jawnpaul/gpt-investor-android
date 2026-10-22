@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.check_connection_try_again
 import com.thejawnpaul.gptinvestor.curated_for_you
@@ -81,11 +82,11 @@ fun DiscoverScreen(state: DiscoveryScreenState, onEvent: (DiscoveryEvent) -> Uni
                 top = GiSpace.x2,
                 bottom = GiSpace.sectionGap
             ),
-            verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
+            verticalArrangement = Arrangement.spacedBy(if (state.isGuestSession) GiSpace.x5 else GiSpace.x4)
         ) {
             if (state.isGuestSession) {
                 item(key = "guest") {
-                    TopGuestLabel(onClick = { onEvent(DiscoveryEvent.GoToSignUp) })
+                    TopGuestLabel(onClick = { onEvent(DiscoveryEvent.GoToLogin) })
                 }
             }
             item(key = "search") {
@@ -101,7 +102,7 @@ fun DiscoverScreen(state: DiscoveryScreenState, onEvent: (DiscoveryEvent) -> Uni
                     onSeeAll = { onEvent(DiscoveryEvent.GoToAllTopPicks) },
                     onRetry = { onEvent(DiscoveryEvent.RetryTopPicks) },
                     onClickPick = { onEvent(DiscoveryEvent.ClickTopPick(id = it)) },
-                    modifier = Modifier.padding(top = GiSpace.x2)
+                    modifier = Modifier.padding(top = if (state.isGuestSession) 0.dp else GiSpace.x2)
                 )
             }
             item(key = "tidbit") {

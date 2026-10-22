@@ -11,12 +11,14 @@ import com.thejawnpaul.gptinvestor.features.conversation.presentation.state.Conv
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.WaitlistBottomSheetContent
+import com.thejawnpaul.gptinvestor.theme.components.GiToastState
 
 @Composable
 fun ConversationScreen(
     state: ConversationView,
     onEvent: (ConversationEvent) -> Unit,
     onAction: (ConversationAction) -> Unit,
+    toastState: GiToastState,
     onUpgradeFromRateLimit: () -> Unit = {},
     modifier: Modifier = Modifier,
     composerModifier: Modifier = Modifier
@@ -74,9 +76,10 @@ fun ConversationScreen(
                     },
                     onRetry = { onEvent(ConversationEvent.RetryAnswer(it)) },
                     onOpenCompany = { onEvent(ConversationEvent.OpenCompany(it)) },
-                    onSignUpClick = { onEvent(ConversationEvent.GoToSignUp) },
+                    onSignInClick = { onEvent(ConversationEvent.GoToLogin) },
                     composerModifier = composerModifier,
-                    answerOffline = state.answerOffline
+                    offlineAnswerIds = state.offlineAnswerIds,
+                    toastState = toastState
                 )
             }
 
@@ -107,9 +110,10 @@ fun ConversationScreen(
                     onUpgradeModel = { showBottomSheet, modelId ->
                         onEvent(ConversationEvent.UpgradeModel(showBottomSheet, modelId))
                     },
-                    onSignUpClick = {
-                        onEvent(ConversationEvent.GoToSignUp)
-                    }
+                    onSignInClick = {
+                        onEvent(ConversationEvent.GoToLogin)
+                    },
+                    toastState = toastState
                 )
             }
         }

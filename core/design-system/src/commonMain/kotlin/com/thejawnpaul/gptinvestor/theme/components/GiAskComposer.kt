@@ -120,8 +120,8 @@ fun GiAskComposer(
                         color = if (isFocused || value.isNotEmpty()) colors.violet else colors.line,
                         shape = GiRadius.md
                     )
-                    .padding(start = if (floating) 14.dp else 16.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(if (floating) 10.dp else GiSpace.x2),
+                    .padding(start = GiSpace.x4, end = 6.dp, top = 6.dp, bottom = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
                 verticalAlignment = Alignment.Bottom
             ) {
                 // Padding centres the mark and each text line on the 40 button, so one line still sits mid-field.

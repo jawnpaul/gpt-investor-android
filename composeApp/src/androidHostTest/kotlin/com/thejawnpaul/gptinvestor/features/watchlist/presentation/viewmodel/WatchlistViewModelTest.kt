@@ -144,7 +144,7 @@ class WatchlistViewModelTest {
     }
 
     @Test
-    fun `OnSignInClick emits NavigateToSignUp`() = runTest(testDispatcher) {
+    fun `OnSignInClick emits NavigateToLogin`() = runTest(testDispatcher) {
         val vm =
             WatchlistViewModel(
                 watchlistRepository,
@@ -156,6 +156,23 @@ class WatchlistViewModelTest {
 
         vm.actions.test {
             vm.onEvent(WatchlistEvent.OnSignInClick)
+            assertThat(awaitItem()).isEqualTo(WatchlistAction.NavigateToLogin)
+        }
+    }
+
+    @Test
+    fun `OnCreateAccountClick emits NavigateToSignUp`() = runTest(testDispatcher) {
+        val vm =
+            WatchlistViewModel(
+                watchlistRepository,
+                companyRepository,
+                premiumEventBus,
+                billingRepository,
+                analyticsLogger
+            )
+
+        vm.actions.test {
+            vm.onEvent(WatchlistEvent.OnCreateAccountClick)
             assertThat(awaitItem()).isEqualTo(WatchlistAction.NavigateToSignUp)
         }
     }

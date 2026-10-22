@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -213,6 +214,7 @@ fun GiCoachMark(
                         size = GiButtonSize.Medium,
                         variant = GiButtonVariant.TextMuted
                     )
+                    Spacer(modifier = Modifier.width(GiSpace.x5))
                 }
                 GiButton(
                     text = actionText,

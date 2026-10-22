@@ -204,6 +204,17 @@ class DataStoreAppPreferences(private val dataStore: DataStore<Preferences>) : A
         }
     }
 
+    override suspend fun replaceAccessToken(expected: String?, token: String): Boolean {
+        var replaced = false
+        dataStore.edit { preferences ->
+            if (preferences[ACCESS_TOKEN_KEY] == expected) {
+                preferences[ACCESS_TOKEN_KEY] = token
+                replaced = true
+            }
+        }
+        return replaced
+    }
+
     override suspend fun clearAccessToken() {
         dataStore.edit { preferences ->
             preferences.remove(ACCESS_TOKEN_KEY)

@@ -94,7 +94,7 @@ private fun SearchSections(state: SearchUiState, onEvent: (SearchEvent) -> Unit)
                     item(key = section.id, contentType = "recent") {
                         Column(
                             verticalArrangement = if (section.clearable) {
-                                Arrangement.Top
+                                Arrangement.spacedBy(GiSpace.x2)
                             } else {
                                 Arrangement.spacedBy(GiSpace.titleToContent)
                             }

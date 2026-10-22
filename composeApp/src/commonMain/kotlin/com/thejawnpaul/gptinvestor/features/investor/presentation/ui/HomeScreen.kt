@@ -68,6 +68,9 @@ import com.thejawnpaul.gptinvestor.theme.components.GiListGroup
 import com.thejawnpaul.gptinvestor.theme.components.GiSectionHeader
 import com.thejawnpaul.gptinvestor.theme.components.GiText
 import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
+import com.thejawnpaul.gptinvestor.theme.components.GiToastHost
+import com.thejawnpaul.gptinvestor.theme.components.GiToastState
+import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
 import com.thejawnpaul.gptinvestor.trending_today
 import com.thejawnpaul.gptinvestor.you_re_on_the_list
 import com.thejawnpaul.gptinvestor.you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge
@@ -78,6 +81,7 @@ import org.koin.compose.koinInject
 fun HomeScreen(
     state: HomeUiState,
     onEvent: (HomeEvent) -> Unit,
+    toastState: GiToastState,
     modifier: Modifier = Modifier,
     composerModifier: Modifier = Modifier
 ) {
@@ -87,6 +91,7 @@ fun HomeScreen(
         state = state,
         onEvent = onEvent,
         notificationPermissionController = notificationPermissionController,
+        toastState = toastState,
         modifier = modifier,
         composerModifier = composerModifier
     )
@@ -97,6 +102,7 @@ private fun HomeScreenContent(
     state: HomeUiState,
     onEvent: (HomeEvent) -> Unit,
     notificationPermissionController: NotificationPermissionController,
+    toastState: GiToastState,
     modifier: Modifier = Modifier,
     composerModifier: Modifier = Modifier
 ) {
@@ -110,6 +116,9 @@ private fun HomeScreenContent(
         modifier = modifier,
         containerColor = GiTheme.colors.bg,
         contentWindowInsets = WindowInsets(0),
+        snackbarHost = {
+            GiToastHost(state = toastState, modifier = Modifier.padding(horizontal = GiSpace.gutter))
+        },
         bottomBar = {
             // Floats over the scrolling content; the fade keeps cards from colliding with the composer.
             Box(
@@ -151,7 +160,7 @@ private fun HomeScreenContent(
                 )
 
                 if (state.isGuestSession) {
-                    TopGuestLabel(modifier = gutter, onClick = { onEvent(HomeEvent.GoToSignUp) })
+                    TopGuestLabel(modifier = gutter, onClick = { onEvent(HomeEvent.GoToLogin) })
                 }
 
                 DailyDigestCard(
@@ -375,6 +384,7 @@ private fun HomeScreenPreview() {
                 )
             ),
             onEvent = {},
+            toastState = rememberGiToastState(),
             notificationPermissionController = object : NotificationPermissionController {
                 @Composable
                 override fun RequestPermissionIfNeeded(
@@ -383,6 +393,8 @@ private fun HomeScreenPreview() {
                     onDeny: () -> Unit
                 ) {
                 }
+
+                override suspend fun areNotificationsEnabled(): Boolean = true
             }
         )
     }

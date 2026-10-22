@@ -11,6 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiTextMessage
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.conversationTitle
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiSpace
@@ -27,12 +28,13 @@ fun SingleHistoryItem(
     onClick: (id: Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val title = conversationTitle(conversation, pendingQuery = null)
     val firstQuestion = conversation.messageList
         .firstNotNullOfOrNull { it as? GenAiTextMessage }
         ?.query
-        ?.takeIf { it.isNotBlank() && it != conversation.title }
+        ?.takeIf { it.isNotBlank() && it != title }
     GiListRow(
-        title = conversation.title,
+        title = title,
         modifier = modifier,
         subtitle = firstQuestion,
         onClick = { onClick(conversation.id) },

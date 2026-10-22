@@ -18,8 +18,12 @@ import com.thejawnpaul.gptinvestor.added_to_watchlist_success
 import com.thejawnpaul.gptinvestor.answer_copied
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
+import com.thejawnpaul.gptinvestor.core.utility.Constants
 import com.thejawnpaul.gptinvestor.failed_to_remove_from_watchlist
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.BrowseStocksScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetailScreen
+import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.BrowseStocksAction
+import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.BrowseStocksViewModel
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ConversationScreen
@@ -57,11 +61,14 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.TopPickDetai
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.ui.WatchlistScreen
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.viewmodel.WatchlistAction
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.viewmodel.WatchlistViewModel
+import com.thejawnpaul.gptinvestor.login
 import com.thejawnpaul.gptinvestor.removed_from_watchlist
 import com.thejawnpaul.gptinvestor.share_brief_text
 import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiToastResult
 import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
+import com.thejawnpaul.gptinvestor.watchlist_sign_in_required
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -77,6 +84,7 @@ fun NavGraphBuilder.guestNavGraph(
         val viewModel = koinViewModel<HomeViewModel>()
         val state = viewModel.uiState.collectAsState()
         val scope = rememberCoroutineScope()
+        val toastState = rememberGiToastState()
         val haptics = LocalHapticFeedback.current
         LaunchedEffect(Unit) {
             viewModel.actions.onEach { action ->
@@ -95,7 +103,7 @@ fun NavGraphBuilder.guestNavGraph(
                     }
 
                     is HomeAction.ShowToast -> {
-                        platformActions.showMessage(action.message)
+                        scope.launch { toastState.show(message = action.message) }
                     }
 
                     is HomeAction.AddStockFinished -> {
@@ -103,9 +111,11 @@ fun NavGraphBuilder.guestNavGraph(
                     }
 
                     HomeAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                        navController.navigateClearingBackStack(Screen.SignUpScreen.route)
+                    }
+
+                    HomeAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     HomeAction.NavigateToDiscover -> {
@@ -130,6 +140,7 @@ fun NavGraphBuilder.guestNavGraph(
             modifier = Modifier,
             state = state.value,
             onEvent = viewModel::handleEvent,
+            toastState = toastState,
             composerModifier = askComposerTransition()
         )
     }
@@ -161,13 +172,12 @@ fun NavGraphBuilder.guestNavGraph(
                         navController.navigate(GuestScreen.GuestTopPickDetail.createRoute(action.id))
                     }
 
-                    DiscoveryAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    DiscoveryAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     DiscoveryAction.OnGoToSearch -> {
+                        navController.navigate(GuestScreen.GuestSearch.route)
                     }
 
                     is DiscoveryAction.OnGoToTidbitDetail -> {
@@ -175,7 +185,7 @@ fun NavGraphBuilder.guestNavGraph(
                     }
 
                     DiscoveryAction.OnGoToBrowse -> {
-                        navController.navigate(Screen.BrowseStocksScreen.route)
+                        navController.navigate(GuestScreen.GuestBrowseStocks.createRoute())
                     }
 
                     DiscoveryAction.OnGoToAllTopPicks -> {
@@ -238,6 +248,7 @@ fun NavGraphBuilder.guestNavGraph(
         val viewModel = koinViewModel<ConversationViewModel>()
         val state = viewModel.conversation.collectAsState()
         val scope = rememberCoroutineScope()
+        val toastState = rememberGiToastState()
         LaunchedEffect(Unit) {
             viewModel.actions.onEach { action ->
                 when (action) {
@@ -251,18 +262,16 @@ fun NavGraphBuilder.guestNavGraph(
 
                     is ConversationAction.OnCopy -> {
                         platformActions.copyToClipboard("", action.text)
-                        platformActions.showMessage("Copied")
+                        scope.launch { toastState.show(message = "Copied") }
                     }
 
                     is ConversationAction.ShowToast -> {
-                        platformActions.showMessage(action.message)
+                        scope.launch { toastState.show(message = action.message) }
                     }
 
                     ConversationAction.OnSignOutGuest -> {}
-                    ConversationAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    ConversationAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     is ConversationAction.OnShare -> {
@@ -285,6 +294,7 @@ fun NavGraphBuilder.guestNavGraph(
             state = state.value,
             onEvent = viewModel::handleEvent,
             onAction = viewModel::processAction,
+            toastState = toastState,
             onUpgradeFromRateLimit = {},
             composerModifier = askComposerTransition()
         )
@@ -297,6 +307,7 @@ fun NavGraphBuilder.guestNavGraph(
         val viewModel = koinViewModel<HistoryViewModel>()
         val state = viewModel.conversation.collectAsState()
         val scope = rememberCoroutineScope()
+        val toastState = rememberGiToastState()
         LaunchedEffect(Unit) {
             viewModel.historyDetailAction.onEach { action ->
                 when (action) {
@@ -310,17 +321,15 @@ fun NavGraphBuilder.guestNavGraph(
 
                     is HistoryDetailAction.OnCopy -> {
                         platformActions.copyToClipboard("", action.text)
-                        platformActions.showMessage("Copied")
+                        scope.launch { toastState.show(message = "Copied") }
                     }
 
                     is HistoryDetailAction.ShowToast -> {
-                        platformActions.showMessage(action.message)
+                        scope.launch { toastState.show(message = action.message) }
                     }
 
-                    HistoryDetailAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    HistoryDetailAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     is HistoryDetailAction.OnShare -> {
@@ -345,6 +354,7 @@ fun NavGraphBuilder.guestNavGraph(
             state = state.value,
             onEvent = viewModel::handleHistoryDetailEvent,
             onAction = viewModel::processHistoryDetailAction,
+            toastState = toastState,
             onUpgradeFromRateLimit = {}
         )
     }
@@ -383,14 +393,12 @@ fun NavGraphBuilder.guestNavGraph(
                         navController.navigate(GuestScreen.GuestCompanyDetail.createRoute(action.ticker))
                     }
 
-                    CompanyDetailAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    CompanyDetailAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     is CompanyDetailAction.ShowToast -> {
-                        platformActions.showMessage(action.message)
+                        launch { toastState.show(message = action.message) }
                     }
 
                     is CompanyDetailAction.OnShare -> {
@@ -400,23 +408,40 @@ fun NavGraphBuilder.guestNavGraph(
 
                     CompanyDetailAction.WatchlistAdded -> {
                         haptics.performHapticFeedback(GiHaptics.Confirm)
-                        platformActions.showMessage(getString(Res.string.added_to_watchlist_success))
+                        launch { toastState.show(message = getString(Res.string.added_to_watchlist_success)) }
                     }
 
                     CompanyDetailAction.WatchlistAddFailed -> {
                         haptics.performHapticFeedback(GiHaptics.Reject)
-                        platformActions.showMessage(getString(Res.string.added_to_watchlist_error))
+                        launch { toastState.show(message = getString(Res.string.added_to_watchlist_error)) }
+                    }
+
+                    CompanyDetailAction.WatchlistSignInRequired -> {
+                        launch {
+                            val result = toastState.show(
+                                message = getString(Res.string.watchlist_sign_in_required),
+                                icon = GiIcons.star,
+                                actionText = getString(Res.string.login)
+                            )
+                            if (result == GiToastResult.ActionPerformed) {
+                                navController.navigateClearingBackStack(Screen.LoginScreen.route)
+                            }
+                        }
                     }
 
                     is CompanyDetailAction.WatchlistRemoved -> {
-                        platformActions.showMessage(getString(Res.string.removed_from_watchlist, action.ticker))
+                        launch {
+                            toastState.show(message = getString(Res.string.removed_from_watchlist, action.ticker))
+                        }
                     }
 
                     is CompanyDetailAction.WatchlistRemoveFailed -> {
                         haptics.performHapticFeedback(GiHaptics.Reject)
-                        platformActions.showMessage(
-                            getString(Res.string.failed_to_remove_from_watchlist, action.ticker)
-                        )
+                        launch {
+                            toastState.show(
+                                message = getString(Res.string.failed_to_remove_from_watchlist, action.ticker)
+                            )
+                        }
                     }
                 }
             }
@@ -438,6 +463,7 @@ fun NavGraphBuilder.guestNavGraph(
         val viewModel = koinViewModel<TopPickViewModel>()
         val state = viewModel.topPickView.collectAsState()
         val scope = rememberCoroutineScope()
+        val toastState = rememberGiToastState()
 
         LaunchedEffect(Unit) {
             viewModel.actions.onEach { action ->
@@ -451,14 +477,19 @@ fun NavGraphBuilder.guestNavGraph(
                     }
 
                     is TopPickAction.ShowToast -> {
-                        platformActions.showMessage(action.message)
+                        scope.launch { toastState.show(message = action.message) }
                     }
 
-                    TopPickAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    TopPickAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
+
+                    is TopPickAction.OpenCompanyAsk,
+                    TopPickAction.WatchlistAddFailed,
+                    is TopPickAction.WatchlistRemoved,
+                    is TopPickAction.WatchlistRemoveFailed,
+                    TopPickAction.PickSaved,
+                    TopPickAction.PickSaveFailed -> Unit
                 }
             }.launchIn(scope)
         }
@@ -467,7 +498,8 @@ fun NavGraphBuilder.guestNavGraph(
             modifier = Modifier,
             state = state.value,
             onEvent = viewModel::handleEvent,
-            onAction = viewModel::processAction
+            onAction = viewModel::processAction,
+            toastState = toastState
         )
     }
 
@@ -515,11 +547,11 @@ fun NavGraphBuilder.guestNavGraph(
                         platformActions.shareText(action.shareText)
                     }
 
-                    TidbitDetailAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    TidbitDetailAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
+
+                    TidbitDetailAction.Saved, is TidbitDetailAction.SaveFailed -> Unit
                 }
             }.launchIn(scope)
         }
@@ -605,9 +637,9 @@ fun NavGraphBuilder.guestNavGraph(
                 when (action) {
                     WatchlistAction.NavigateToSearch -> navController.navigate(GuestScreen.GuestSearch.route)
                     WatchlistAction.NavigateToTopPicks -> navController.navigate(GuestScreen.GuestAllTopPicks.route)
-                    WatchlistAction.NavigateToSignUp -> navController.navigate(Screen.SignUpScreen.route) {
-                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                    }
+                    WatchlistAction.NavigateToSignUp ->
+                        navController.navigateClearingBackStack(Screen.SignUpScreen.route)
+                    WatchlistAction.NavigateToLogin -> navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     is WatchlistAction.NavigateToCompanyDetail -> navController.navigate(
                         GuestScreen.GuestCompanyDetail.createRoute(action.ticker)
                     )
@@ -634,10 +666,11 @@ fun NavGraphBuilder.guestNavGraph(
         val state by viewModel.state.collectAsState()
         LaunchedEffect(Unit) {
             viewModel.actions.collect { action ->
-                if (action == ProfileAction.NavigateToSignUp) {
-                    navController.navigate(Screen.SignUpScreen.route) {
-                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                    }
+                when (action) {
+                    ProfileAction.NavigateToSignUp -> navController.navigateClearingBackStack(Screen.SignUpScreen.route)
+                    ProfileAction.NavigateToLogin -> navController.navigateClearingBackStack(Screen.LoginScreen.route)
+                    ProfileAction.NavigateToPrivacy -> platformActions.openUrl(Constants.PRIVACY_POLICY_URL)
+                    else -> Unit
                 }
             }
         }
@@ -660,10 +693,39 @@ fun NavGraphBuilder.guestNavGraph(
                     is SearchAction.OnNavigateToConversation ->
                         navController.navigate(GuestScreen.GuestConversation.createRoute(chatInput = action.query))
                     is SearchAction.OnNavigateToSector ->
-                        navController.navigate(GuestScreen.GuestDiscoverTab.createRoute(action.sectorKey))
+                        navController.navigate(GuestScreen.GuestBrowseStocks.createRoute(action.sectorKey))
                 }
             }.launchIn(scope)
         }
         SearchScreen(state = state.value, onEvent = viewModel::handleEvent)
+    }
+
+    composable(
+        route = GuestScreen.GuestBrowseStocks.route,
+        arguments = listOf(
+            navArgument("sector") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) {
+        val viewModel = koinViewModel<BrowseStocksViewModel>()
+        val state = viewModel.state.collectAsState()
+        val scope = rememberCoroutineScope()
+        LaunchedEffect(Unit) {
+            viewModel.actions.onEach { action ->
+                when (action) {
+                    is BrowseStocksAction.NavigateToCompanyDetail ->
+                        navController.navigate(GuestScreen.GuestCompanyDetail.createRoute(action.ticker))
+                    BrowseStocksAction.GoBack -> navController.popBackStack()
+                }
+            }.launchIn(scope)
+        }
+        BrowseStocksScreen(
+            state = state.value,
+            companiesPaging = viewModel.companiesPaging,
+            onEvent = viewModel::handleEvent
+        )
     }
 }

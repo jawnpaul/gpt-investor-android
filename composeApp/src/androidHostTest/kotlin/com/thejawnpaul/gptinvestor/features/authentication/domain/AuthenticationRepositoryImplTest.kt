@@ -155,6 +155,22 @@ class AuthenticationRepositoryImplTest {
     }
 
     @Test
+    fun `should save tokens and clear bearer cache before marking user logged in after email login`() = runTest {
+        val callOrder = mutableListOf<String>()
+        stubSuccessfulLogin()
+        every { tokenStorage.saveAccessToken(any()) } answers { callOrder.add("saveAccessToken") }
+        every { tokenStorage.saveRefreshToken(any()) } answers { callOrder.add("saveRefreshToken") }
+        every { bearerTokenManager.clearCache() } answers { callOrder.add("clearCache") }
+        coEvery { gptInvestorPreferences.setIsUserLoggedIn(any()) } coAnswers { callOrder.add("setIsUserLoggedIn") }
+
+        repository.loginWithEmailAndPassword("user@test.com", "password")
+
+        assertThat(callOrder)
+            .containsExactly("saveAccessToken", "saveRefreshToken", "clearCache", "setIsUserLoggedIn")
+            .inOrder()
+    }
+
+    @Test
     fun `should return failure when email login throws exception`() = runTest {
         coEvery { apiService.loginWithEmailAndPassword(any()) } throws RuntimeException("Network error")
 

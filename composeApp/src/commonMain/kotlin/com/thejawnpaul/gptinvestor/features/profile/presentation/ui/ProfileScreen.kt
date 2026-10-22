@@ -14,12 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Login
-import androidx.compose.material.icons.automirrored.outlined.Logout
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.Palette
-import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -85,7 +78,6 @@ import com.thejawnpaul.gptinvestor.theme.components.GiButtonSize
 import com.thejawnpaul.gptinvestor.theme.components.GiButtonVariant
 import com.thejawnpaul.gptinvestor.theme.components.GiDialog
 import com.thejawnpaul.gptinvestor.theme.components.GiDivider
-import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
 import com.thejawnpaul.gptinvestor.theme.components.GiLargeTopBar
 import com.thejawnpaul.gptinvestor.theme.components.GiProTag
@@ -94,6 +86,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.theme.components.giBeam
 import com.thejawnpaul.gptinvestor.watching
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val PREMIUM_BEAM_STRENGTH = 0.6f
@@ -103,7 +96,6 @@ private const val LARGE_TEXT_FONT_SCALE = 1.5f
 
 @Composable
 fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, modifier: Modifier = Modifier) {
-    val haptics = LocalHapticFeedback.current
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -119,7 +111,10 @@ fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, modifi
             verticalArrangement = Arrangement.spacedBy(GiSpace.sectionGap)
         ) {
             if (state.isGuestSession) {
-                GuestAccountCard(onSignIn = { onEvent(ProfileEvent.SignInClicked) })
+                GuestAccountCard(
+                    onSignIn = { onEvent(ProfileEvent.SignInClicked) },
+                    onCreateAccount = { onEvent(ProfileEvent.CreateAccountClicked) }
+                )
             } else {
                 UserHeader(userName = state.userName, isPremium = state.isPremiumUser)
                 if (!state.isPremiumUser) {
@@ -140,7 +135,7 @@ fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, modifi
                     )
                     GiDivider()
                     AccountSettingsRow(
-                        icon = Icons.AutoMirrored.Outlined.Logout,
+                        icon = GiIcons.signOut,
                         label = stringResource(Res.string.sign_out),
                         showCaret = false,
                         destructive = true,
@@ -156,13 +151,10 @@ fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, modifi
             title = stringResource(Res.string.sign_out_title),
             body = stringResource(Res.string.sign_out_body),
             confirmText = stringResource(Res.string.sign_out),
-            onConfirm = {
-                haptics.performHapticFeedback(GiHaptics.Reject)
-                onEvent(ProfileEvent.ConfirmSignOut)
-            },
+            onConfirm = { onEvent(ProfileEvent.ConfirmSignOut) },
             dismissText = stringResource(Res.string.cancel),
             onDismiss = { onEvent(ProfileEvent.DismissSignOutDialog) },
-            icon = Icons.AutoMirrored.Outlined.Logout,
+            icon = GiIcons.signOut,
             destructive = false
         )
     }
@@ -174,7 +166,7 @@ private fun ActivitySection(state: ProfileUiState, onEvent: (ProfileEvent) -> Un
         AccountSettingsRow(
             icon = GiIcons.clock,
             label = stringResource(Res.string.history),
-            value = stringResource(Res.string.questions_count, state.queryCount),
+            value = pluralStringResource(Res.plurals.questions_count, state.queryCount, state.queryCount),
             onClick = { onEvent(ProfileEvent.HistoryClicked) }
         )
         GiDivider()
@@ -186,7 +178,7 @@ private fun ActivitySection(state: ProfileUiState, onEvent: (ProfileEvent) -> Un
         )
         GiDivider()
         AccountSettingsRow(
-            icon = Icons.Outlined.Description,
+            icon = GiIcons.fileText,
             label = stringResource(Res.string.saved_tidbits),
             value = state.savedTidbitsCountString,
             onClick = { onEvent(ProfileEvent.SavedTidbitsClicked) }
@@ -204,12 +196,13 @@ private fun PreferencesSection(state: ProfileUiState, onEvent: (ProfileEvent) ->
             value = stringResource(
                 if (state.isNotificationsEnabled) Res.string.settings_on else Res.string.settings_off
             ),
-            onClick = { onEvent(ProfileEvent.NotificationsClicked) }
+            onClick = { onEvent(ProfileEvent.NotificationsClicked) },
+            showCaret = state.canTurnOnNotifications
         )
         GiDivider()
         Box(modifier = Modifier.fillMaxWidth()) {
             AccountSettingsRow(
-                icon = Icons.Outlined.Palette,
+                icon = GiIcons.palette,
                 label = stringResource(Res.string.appearance),
                 value = stringResource(state.currentTheme),
                 highlighted = appearanceExpanded,
@@ -225,7 +218,7 @@ private fun PreferencesSection(state: ProfileUiState, onEvent: (ProfileEvent) ->
         }
         GiDivider()
         AccountSettingsRow(
-            icon = Icons.Outlined.VerifiedUser,
+            icon = GiIcons.shieldCheck,
             label = stringResource(Res.string.privacy),
             onClick = { onEvent(ProfileEvent.PrivacyClicked) }
         )
@@ -283,7 +276,12 @@ private fun PremiumCard(onClick: () -> Unit) {
 @Composable
 private fun StatsRow(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit) {
     val tiles = @Composable { tileModifier: Modifier ->
-        StatTile(label = stringResource(Res.string.watching), count = state.watchingCount, modifier = tileModifier)
+        StatTile(
+            label = stringResource(Res.string.watching),
+            count = state.watchingCount,
+            onClick = { onEvent(ProfileEvent.WatchingClicked) },
+            modifier = tileModifier
+        )
         StatTile(
             label = stringResource(Res.string.saved),
             count = state.savedTidbitsCount,
@@ -342,7 +340,7 @@ private fun StatTile(label: String, count: Int, modifier: Modifier = Modifier, o
 }
 
 @Composable
-private fun GuestAccountCard(onSignIn: () -> Unit) {
+private fun GuestAccountCard(onSignIn: () -> Unit, onCreateAccount: () -> Unit) {
     val colors = GiTheme.colors
     Column(
         modifier = Modifier
@@ -369,11 +367,11 @@ private fun GuestAccountCard(onSignIn: () -> Unit) {
                 text = stringResource(Res.string.sign_in_action),
                 onClick = onSignIn,
                 modifier = Modifier.fillMaxWidth(),
-                leadingIcon = Icons.AutoMirrored.Outlined.Login
+                leadingIcon = GiIcons.signIn
             )
             GiButton(
                 text = stringResource(Res.string.create_an_account),
-                onClick = onSignIn,
+                onClick = onCreateAccount,
                 modifier = Modifier.fillMaxWidth(),
                 variant = GiButtonVariant.Text
             )

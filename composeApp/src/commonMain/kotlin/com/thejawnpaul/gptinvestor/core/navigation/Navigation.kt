@@ -4,24 +4,37 @@ package com.thejawnpaul.gptinvestor.core.navigation
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.core.platform.PlatformContext
+import com.thejawnpaul.gptinvestor.core.platform.ToastMessenger
 import com.thejawnpaul.gptinvestor.features.guest.presentation.GuestScreen
 import com.thejawnpaul.gptinvestor.features.premium.presentation.ui.PremiumSheet
 import com.thejawnpaul.gptinvestor.features.premium.presentation.viewmodel.PremiumViewModel
+import com.thejawnpaul.gptinvestor.theme.GiSpace
+import com.thejawnpaul.gptinvestor.theme.components.GiToastHost
+import com.thejawnpaul.gptinvestor.theme.components.GiToastResult
+import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -36,15 +49,28 @@ fun SetUpNavGraph(
 ) {
     val platformContext: PlatformContext = koinInject()
     val platformActions: PlatformActions = koinInject()
+    val toastMessenger: ToastMessenger = koinInject()
+    val toastState = rememberGiToastState()
     val premiumViewModel = koinViewModel<PremiumViewModel>()
     val premiumState by premiumViewModel.state.collectAsState()
 
-    val startDestination = initialDestination(
-        isUserSignedIn,
-        isGuestSignedIn,
-        hasCompletedOnboarding,
-        hasCompletedPostAuthOnboarding
-    )
+    val startDestination = remember {
+        initialDestination(
+            isUserSignedIn,
+            isGuestSignedIn,
+            hasCompletedOnboarding,
+            hasCompletedPostAuthOnboarding
+        )
+    }
+
+    LaunchedEffect(toastMessenger, toastState) {
+        toastMessenger.messages.collect { toast ->
+            launch {
+                val result = toastState.show(message = toast.message, icon = toast.icon, actionText = toast.actionText)
+                if (result == GiToastResult.ActionPerformed) toast.onAction()
+            }
+        }
+    }
 
     if (premiumState.isVisible) {
         PremiumSheet(
@@ -59,36 +85,48 @@ fun SetUpNavGraph(
         contentWindowInsets = WindowInsets(0),
         bottomBar = { BottomNavBar(navController) }
     ) { innerPadding ->
-        SharedTransitionLayout {
-            CompositionLocalProvider(LocalSharedTransitionScope provides this) {
-                NavHost(
-                    navController = navController,
-                    startDestination = startDestination,
-                    enterTransition = navEnterTransition,
-                    exitTransition = navExitTransition,
-                    popEnterTransition = navPopEnterTransition,
-                    popExitTransition = navPopExitTransition,
-                    modifier = Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding)
-                ) {
-                    onboardingNavGraph(navController)
-                    postAuthOnboardingNavGraph(navController)
-                    authenticationNavGraph(navController, platformActions, hasCompletedPostAuthOnboarding)
-                    investorNavGraph(navController, platformActions)
-                    discoverNavGraph(navController)
-                    browseStocksNavGraph(navController)
-                    companyNavGraph(navController, platformActions)
-                    conversationNavGraph(navController, platformActions)
-                    historyNavGraph(navController, platformActions)
-                    topPickNavGraph(navController, platformActions)
-                    tidbitNavGraph(navController, platformActions)
-                    settingsNavGraph(navController)
-                    searchNavGraph(navController)
-                    trendingNavGraph(navController)
-                    watchlistNavGraph(navController, platformActions)
-                    profileNavGraph(navController, platformActions)
-                    guestNavGraph(navController, platformActions, platformContext)
+        Box(modifier = Modifier.fillMaxSize()) {
+            SharedTransitionLayout {
+                CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+                    NavHost(
+                        navController = navController,
+                        startDestination = startDestination,
+                        enterTransition = navEnterTransition,
+                        exitTransition = navExitTransition,
+                        popEnterTransition = navPopEnterTransition,
+                        popExitTransition = navPopExitTransition,
+                        modifier = Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding)
+                    ) {
+                        onboardingNavGraph(navController)
+                        postAuthOnboardingNavGraph(navController)
+                        authenticationNavGraph(navController, platformActions, hasCompletedPostAuthOnboarding)
+                        investorNavGraph(navController)
+                        discoverNavGraph(navController)
+                        browseStocksNavGraph(navController)
+                        companyNavGraph(navController, platformActions)
+                        conversationNavGraph(navController, platformActions)
+                        historyNavGraph(navController, platformActions)
+                        topPickNavGraph(navController, platformActions)
+                        tidbitNavGraph(navController, platformActions)
+                        settingsNavGraph(navController)
+                        searchNavGraph(navController)
+                        trendingNavGraph(navController)
+                        watchlistNavGraph(navController, platformActions)
+                        profileNavGraph(navController, platformActions)
+                        guestNavGraph(navController, platformActions, platformContext)
+                    }
                 }
             }
+
+            GiToastHost(
+                state = toastState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
+                    .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
+                    .padding(horizontal = GiSpace.gutter, vertical = GiSpace.x4)
+            )
         }
     }
 
@@ -137,5 +175,11 @@ private fun initialDestination(
 internal fun navigateToHome(navController: NavHostController, popUpToRoute: String) {
     navController.navigate(Screen.HomeTabScreen.route) {
         popUpTo(popUpToRoute) { inclusive = true }
+    }
+}
+
+internal fun NavHostController.navigateClearingBackStack(route: String) {
+    navigate(route) {
+        popUpTo(graph.id) { inclusive = true }
     }
 }

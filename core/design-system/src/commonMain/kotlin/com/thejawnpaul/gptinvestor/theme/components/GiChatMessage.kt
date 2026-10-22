@@ -18,6 +18,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -80,6 +81,7 @@ import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.sp
 import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
+import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
@@ -137,6 +139,7 @@ fun GiAssistantMessage(
     val clamped = collapsed && !streaming
     val metrics = remember { CollapseMetrics() }
     val reducedMotion = isReducedMotionEnabled()
+    val actionsRisePx = with(LocalDensity.current) { ACTIONS_RISE.roundToPx() }
     val gap = if (clamped) GiSpace.x2 else GiSpace.x3
     val bodyLineHeight = with(LocalDensity.current) { GiTheme.type.body.lineHeight.toDp() }
     val clampHeight = if (collapsedHeight.isSpecified) collapsedHeight else bodyLineHeight * COLLAPSED_LINES
@@ -206,7 +209,7 @@ fun GiAssistantMessage(
             AnimatedVisibility(
                 visible = !streaming,
                 modifier = Modifier.layoutId(AssistantSlot.Actions),
-                enter = foldIn(reducedMotion),
+                enter = actionsIn(reducedMotion, actionsRisePx),
                 exit = foldOut(reducedMotion)
             ) {
                 Row(modifier = Modifier.offset(x = -ACTIONS_INSET), content = actions)
@@ -263,15 +266,28 @@ private class CollapseMetrics {
 
 private enum class AssistantSlot { Header, Body, Disclaimer, Toggle, Actions }
 
-private fun foldIn(reducedMotion: Boolean): EnterTransition {
-    val fade = fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart))
-    return if (reducedMotion) fade else fade + expandVertically(GiMotion.smooth())
+private fun foldIn(reducedMotion: Boolean): EnterTransition = if (reducedMotion) {
+    EnterTransition.None
+} else {
+    fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart)) + expandVertically(GiMotion.smooth())
 }
 
-private fun foldOut(reducedMotion: Boolean): ExitTransition {
-    val fade = fadeOut(tween(GiMotion.FAST, easing = EaseOutQuart))
-    return if (reducedMotion) fade else fade + shrinkVertically(GiMotion.smooth())
+private fun foldOut(reducedMotion: Boolean): ExitTransition = if (reducedMotion) {
+    ExitTransition.None
+} else {
+    fadeOut(tween(GiMotion.FAST, easing = EaseOutQuart)) + shrinkVertically(GiMotion.smooth())
 }
+
+private fun actionsIn(reducedMotion: Boolean, risePx: Int): EnterTransition = if (reducedMotion) {
+    EnterTransition.None
+} else {
+    val timing = tween<Float>(GiMotion.BASE, delayMillis = GiMotion.INSTANT, easing = EaseOutQuart)
+    fadeIn(timing) +
+        slideInVertically(tween(GiMotion.BASE, delayMillis = GiMotion.INSTANT, easing = EaseOutQuart)) { risePx } +
+        expandVertically(GiMotion.smooth())
+}
+
+private val ACTIONS_RISE = 4.dp
 
 @Composable
 internal fun GiAssistantHeader(name: String, modifier: Modifier = Modifier) {
@@ -324,11 +340,11 @@ private fun GiStreamingText(text: String) {
 fun GiThinkingIndicator(status: String, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
         verticalAlignment = Alignment.CenterVertically
     ) {
         GiGlowingMark()
-        GiText(text = status, style = GiTextStyle.BodySmall, color = GiTheme.colors.muted)
+        GiText(text = status, style = GiTextStyle.MetaRelaxed, color = GiTheme.colors.muted)
     }
 }
 
@@ -352,7 +368,7 @@ private fun GiGlowingMark() {
             animation = tween(durationMillis = ROTATION_PERIOD_MS, easing = FastOutSlowInEasing)
         )
     )
-    Box(modifier = Modifier.size(24.dp), contentAlignment = Alignment.Center) {
+    Box(modifier = Modifier.size(32.dp), contentAlignment = Alignment.Center) {
         Box(
             modifier = Modifier
                 .size(48.dp)
@@ -379,47 +395,49 @@ private fun GiGlowingMark() {
 fun GiAnswerError(
     message: String,
     retryText: String,
-    onRetry: () -> Unit,
+    onRetry: (() -> Unit)?,
     modifier: Modifier = Modifier,
     title: String? = null
 ) {
     val colors = GiTheme.colors
     Column(
-        modifier = modifier.semantics { liveRegion = LiveRegionMode.Assertive },
-        verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(GiRadius.md)
+            .background(colors.errorSoft)
+            .padding(horizontal = GiSpace.x4, vertical = GiSpace.x3)
+            .semantics { liveRegion = LiveRegionMode.Assertive },
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = if (title == null) Alignment.CenterVertically else Alignment.Top
-        ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x2), verticalAlignment = Alignment.Top) {
             Icon(
                 imageVector = GiIcons.warningCircle,
                 contentDescription = null,
                 modifier = Modifier
-                    .padding(top = if (title == null) 0.dp else GiSpace.x0_5)
+                    .padding(top = GiSpace.x0_5)
                     .size(GiIconSize.sm),
                 tint = colors.error
             )
-            if (title == null) {
-                GiText(text = message, style = GiTextStyle.BodySmall, color = colors.error)
-            } else {
-                val text = remember(title, message) {
-                    buildAnnotatedString {
+            val text = remember(title, message) {
+                buildAnnotatedString {
+                    if (title != null) {
                         withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append(title) }
                         append(" ")
-                        append(message)
                     }
+                    append(message)
                 }
-                Text(text = text, style = GiTextStyle.BodySmall.textStyle(), color = colors.ink)
             }
+            Text(text = text, style = GiTextStyle.BodySmall.textStyle(), color = colors.ink)
         }
-        GiButton(
-            text = retryText,
-            onClick = onRetry,
-            size = GiButtonSize.Small,
-            variant = GiButtonVariant.Secondary,
-            leadingIcon = GiIcons.arrowClockwise
-        )
+        if (onRetry != null) {
+            GiButton(
+                text = retryText,
+                onClick = onRetry,
+                size = GiButtonSize.Small,
+                variant = GiButtonVariant.Secondary,
+                leadingIcon = GiIcons.arrowClockwise
+            )
+        }
     }
 }
 

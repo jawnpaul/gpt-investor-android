@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.core.platform
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -9,13 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import org.koin.core.annotation.Singleton
 
 @Singleton(binds = [NotificationPermissionController::class])
-class AndroidNotificationPermissionController : NotificationPermissionController {
+class AndroidNotificationPermissionController(private val context: Context) : NotificationPermissionController {
     @Composable
     override fun RequestPermissionIfNeeded(shouldRequest: Boolean, onGrant: () -> Unit, onDeny: () -> Unit) {
         if (!shouldRequest) return
@@ -23,7 +23,6 @@ class AndroidNotificationPermissionController : NotificationPermissionController
         val currentOnGrant by rememberUpdatedState(onGrant)
         val currentOnDeny by rememberUpdatedState(onDeny)
 
-        val context = LocalContext.current
         val notificationPermissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission()
         ) { isGranted ->
@@ -47,4 +46,7 @@ class AndroidNotificationPermissionController : NotificationPermissionController
             }
         }
     }
+
+    override suspend fun areNotificationsEnabled(): Boolean =
+        NotificationManagerCompat.from(context).areNotificationsEnabled()
 }

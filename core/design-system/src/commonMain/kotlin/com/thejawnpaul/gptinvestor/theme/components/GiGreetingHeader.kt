@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,6 +40,7 @@ fun GiGreetingHeader(
             }
             GiText(
                 text = greeting,
+                modifier = Modifier.semantics { heading() },
                 style = GiTextStyle.ScreenTitle,
                 maxLines = if (isLargeText) Int.MAX_VALUE else 1,
                 overflow = TextOverflow.Ellipsis

@@ -80,7 +80,6 @@
     <string name="read_more">مزید پڑھیں</string>
     <string name="read_less">کم پڑھیں</string>
     <string name="sources">ذرائع</string>
-    <string name="top_pick_rationale">بہترین انتخاب کی وجہ</string>
     <string name="sign_up">Sign up</string>
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
     <string name="continue_with_google">Google کے ساتھ جاری رکھیں</string>
@@ -222,6 +221,8 @@
     <string name="guest_session_expired_body_expired">مزید خلاصے پڑھنے اور اپنی تاریخ محفوظ کرنے کے لیے مفت سائن اپ کریں۔</string>
     <string name="guest_session_expired_title_limit">آپ نے اپنے مفت مہمان خلاصے استعمال کر لیے</string>
     <string name="guest_session_expired_body_limit">جاری رکھنے کے لیے مفت سائن اپ کریں۔</string>
+    <string name="guest_session_expired_title_questions">آپ نے اپنے مفت مہمان سوالات استعمال کر لیے</string>
+    <string name="guest_session_expired_body_questions">مزید سوالات پوچھنے کے لیے مفت سائن اپ کریں۔</string>
     <string name="guest_session_expired_sign_up">سائن اپ</string>
     <string name="guest_session_expired_have_account">میرا اکاؤنٹ ہے</string>
 
@@ -345,7 +346,7 @@
         <item quantity="other">%1$d ذرائع۔ مالی مشورہ نہیں۔</item>
     </plurals>
     <string name="company_context_title">%1$s · %2$s</string>
-    <string name="ask_about_company">%1$s کے بارے میں پوچھیں…</string>
+    <string name="ask_about_company">%1$s کے بارے میں کچھ بھی پوچھیں</string>
     <string name="reading_company_data">%1$s کا تازہ ترین ڈیٹا پڑھ رہا ہے…</string>
     <string name="answer_copied">جواب کاپی ہو گیا</string>
     <string name="helpful">مددگار</string>
@@ -365,7 +366,8 @@
     <string name="offline_opening_saved">کنکشن نہیں ہے۔ آپ کا محفوظ ڈیٹا کھولا جا رہا ہے…</string>
     <string name="loading_company_brief">%1$s کی مختصر رپورٹ لوڈ ہو رہی ہے</string>
     <string name="why_sentiment">%1$s کیوں؟</string>
-    <string name="answer_error">ہم اس کا جواب نہیں دے سکے۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
+    <string name="answer_error_title">ہم اس کا جواب نہیں دے سکے۔</string>
+    <string name="answer_error_body">ہماری طرف سے کچھ غلط ہو گیا۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
     <string name="answer_offline_title">جواب تیار نہیں ہو سکا۔</string>
     <string name="answer_offline_body">آپ آف لائن ہیں۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
     <string name="try_asking">یہ پوچھ کر دیکھیں</string>
@@ -380,7 +382,8 @@
     <string name="browse_empty_sector">%1$s میں ابھی کوئی کمپنی نہیں ہے۔ کوئی اور شعبہ آزمائیں۔</string>
     <string name="browse_empty_all">ابھی دکھانے کے لیے کوئی کمپنی نہیں ہے۔ تھوڑی دیر میں دوبارہ کوشش کریں۔</string>
     <string name="browse_search_all_sectors">تمام شعبوں میں تلاش کریں</string>
-    <string name="browse_error_title">ہم کمپنیاں لوڈ نہیں کر سکے</string>
+    <string name="browse_error_title">اسٹاکس لوڈ نہیں ہو سکے</string>
+    <string name="browse_error_body">کمپنیوں کی فہرست دکھانے کے لیے کنکشن ضروری ہے۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
     <string name="browse_more_error">ہم مزید کمپنیاں لوڈ نہیں کر سکے۔</string>
     <string name="history_title">آپ کی GPT Investor ہسٹری</string>
     <string name="history_empty_title">ابھی کوئی چیٹ نہیں</string>
@@ -399,6 +402,11 @@
     <string name="discover_search_error_title_generic">تلاش لوڈ نہیں ہو سکی</string>
     <string name="discover_search_error_body">تلاش کے لیے کنکشن ضروری ہے۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
     <string name="discover_loading_search">تلاش لوڈ ہو رہی ہے</string>
+    <plurals name="questions_count">
+        <item quantity="one">%1$d سوال</item>
+        <item quantity="other">%1$d سوالات</item>
+    </plurals>
+    <string name="notifications_turn_on_in_settings">ترتیبات میں اطلاعات آن کریں۔</string>
     <plurals name="watchlist_stocks_count">
         <item quantity="one">%1$d اسٹاک</item>
         <item quantity="other">%1$d اسٹاکس</item>
@@ -417,6 +425,7 @@
     <string name="watchlist_remove_body">%1$s آپ کی واچ لسٹ سے ہٹ جائے گا اور آپ کی اپ ڈیٹس میں نظر نہیں آئے گا۔ آپ اسے کسی بھی وقت دوبارہ شامل کر سکتے ہیں۔</string>
     <string name="watchlist_daily_summary_title">ہر اسٹاک کا روزانہ خلاصہ حاصل کریں</string>
     <string name="watchlist_guest_body">اسٹاکس کو اپنی واچ لسٹ میں محفوظ کرنے اور ان کی کارکردگی پر نظر رکھنے کے لیے سائن ان کریں۔</string>
+    <string name="watchlist_sign_in_required">اسٹاکس محفوظ کرنے کے لیے سائن ان کریں۔</string>
     <string name="create_an_account">اکاؤنٹ بنائیں</string>
     <string name="watchlist_popular">اس ہفتے مقبول</string>
     <string name="watchlist_watch_cd">%1$s کو واچ لسٹ میں شامل کریں</string>
@@ -424,7 +433,7 @@
     <string name="profile_free_plan">مفت پلان</string>
     <string name="profile_premium_plan">Premium پلان</string>
     <string name="profile_upgrade_title">Premium پر اپ گریڈ کریں</string>
-    <string name="profile_upgrade_body">لامحدود واچ لسٹ، Thesis Tracker اور آپ کے ہر فالو کردہ اسٹاک کا روزانہ خلاصہ۔</string>
+    <string name="profile_upgrade_body">لامحدود AI سوالات، آپ کی واچ لسٹ کے لیے مکمل بریف، اور پریمیم ریسرچ۔</string>
     <string name="profile_see_premium">Premium دیکھیں</string>
     <string name="profile_questions">سوالات</string>
     <string name="settings_on">آن</string>
@@ -456,6 +465,8 @@
     <string name="tidbit_share">مختصر معلومات شیئر کریں</string>
     <string name="remove_from_saved">محفوظ کردہ سے ہٹائیں</string>
     <string name="tidbit_saved_to_library">آپ کی لائبریری میں محفوظ ہو گیا</string>
+    <string name="tidbit_save_failed">محفوظ نہیں ہو سکا۔</string>
+    <string name="tidbit_remove_failed">ہٹایا نہیں جا سکا۔</string>
     <string name="tidbit_loading">مختصر معلومات لوڈ ہو رہی ہیں</string>
     <string name="tidbits_loading">مختصر معلومات لوڈ ہو رہی ہیں</string>
     <string name="tidbit_error_title">یہ مختصر معلومات لوڈ نہیں ہو سکیں</string>
@@ -472,11 +483,6 @@
     <string name="audio_pause">روکیں</string>
     <string name="top_pick_label">بہترین انتخاب</string>
     <string name="top_pick_score">اسکور %1$d/10</string>
-    <string name="top_pick_key_metrics">اہم اعداد و شمار</string>
-    <string name="top_pick_key_risks">اہم خطرات</string>
-    <string name="top_pick_tab_overview">جائزہ</string>
-    <string name="top_pick_tab_key_ratios">اہم تناسب</string>
-    <string name="top_pick_tab_news">خبریں</string>
     <string name="chart_range_1w">1W</string>
     <string name="chart_range_1m">1M</string>
     <string name="chart_range_3m">3M</string>
@@ -499,6 +505,7 @@
     <string name="top_pick_save">انتخاب محفوظ کریں</string>
     <string name="top_pick_share">انتخاب شیئر کریں</string>
     <string name="top_pick_saved_to_picks">آپ کے انتخاب میں محفوظ ہو گیا</string>
+    <string name="top_pick_save_failed">محفوظ نہیں ہو سکا۔</string>
     <string name="top_pick_loading">بہترین انتخاب لوڈ ہو رہا ہے</string>
     <string name="top_picks_loading">بہترین انتخاب لوڈ ہو رہے ہیں</string>
     <string name="top_pick_error_title">یہ انتخاب لوڈ نہیں ہو سکا</string>

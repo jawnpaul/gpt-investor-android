@@ -13,8 +13,10 @@ import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ConversationScreen
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationViewModel
+import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 fun NavGraphBuilder.conversationNavGraph(navController: NavHostController, platformActions: PlatformActions) {
@@ -34,6 +36,7 @@ fun NavGraphBuilder.conversationNavGraph(navController: NavHostController, platf
         val viewModel = koinViewModel<ConversationViewModel>()
         val state = viewModel.conversation.collectAsState()
         val scope = rememberCoroutineScope()
+        val toastState = rememberGiToastState()
         LaunchedEffect(Unit) {
             viewModel.actions.onEach { action ->
                 when (action) {
@@ -47,18 +50,16 @@ fun NavGraphBuilder.conversationNavGraph(navController: NavHostController, platf
 
                     is ConversationAction.OnCopy -> {
                         platformActions.copyToClipboard("", action.text)
-                        platformActions.showMessage("Copied")
+                        scope.launch { toastState.show(message = "Copied") }
                     }
 
                     is ConversationAction.ShowToast -> {
-                        platformActions.showMessage(action.message)
+                        scope.launch { toastState.show(message = action.message) }
                     }
 
                     ConversationAction.OnSignOutGuest -> {}
-                    ConversationAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    ConversationAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     is ConversationAction.OnShare -> {
@@ -81,6 +82,7 @@ fun NavGraphBuilder.conversationNavGraph(navController: NavHostController, platf
             state = state.value,
             onEvent = viewModel::handleEvent,
             onAction = viewModel::processAction,
+            toastState = toastState,
             onUpgradeFromRateLimit = {
                 viewModel.handleUpgradeClick()
             },

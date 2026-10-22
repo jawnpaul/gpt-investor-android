@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,6 +48,8 @@ import com.thejawnpaul.gptinvestor.tap_to_explain
 import com.thejawnpaul.gptinvestor.the_opportunity
 import com.thejawnpaul.gptinvestor.the_risk
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GiEasing
+import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
@@ -66,6 +70,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiStockSummary
 import com.thejawnpaul.gptinvestor.theme.components.GiStockSummarySize
 import com.thejawnpaul.gptinvestor.theme.components.GiText
 import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 import com.thejawnpaul.gptinvestor.today
 import com.thejawnpaul.gptinvestor.what_it_means
 import org.jetbrains.compose.resources.stringResource
@@ -101,6 +106,9 @@ internal fun LazyListScope.companyBriefItems(
     layout: CompanyBriefLayout = CompanyBriefLayout.Company,
     horizontalPadding: Dp = GiSpace.gutter,
     sheetBottomPadding: Dp = GiSpace.safeArea,
+    afterHero: (LazyListScope.() -> Unit)? = null,
+    showVerdict: Boolean = true,
+    beforeSections: (LazyListScope.() -> Unit)? = null,
     footer: (@Composable ColumnScope.() -> Unit)? = null
 ) {
     when (layout) {
@@ -109,7 +117,10 @@ internal fun LazyListScope.companyBriefItems(
             onKeyNumberClick = onKeyNumberClick,
             onNewsClick = onNewsClick,
             logoModifier = logoModifier,
-            footer = footer
+            footer = footer,
+            afterHero = afterHero,
+            showVerdict = showVerdict,
+            beforeSections = beforeSections
         )
 
         CompanyBriefLayout.Onboarding -> onboardingLayoutItems(
@@ -129,18 +140,46 @@ private fun LazyListScope.companyLayoutItems(
     onKeyNumberClick: (KeyNumber) -> Unit,
     onNewsClick: ((String) -> Unit)?,
     logoModifier: Modifier,
-    footer: (@Composable ColumnScope.() -> Unit)?
+    footer: (@Composable ColumnScope.() -> Unit)?,
+    afterHero: (LazyListScope.() -> Unit)?,
+    showVerdict: Boolean,
+    beforeSections: (LazyListScope.() -> Unit)?
 ) {
     item(key = "hero", contentType = "hero") { BriefHero(brief = brief, logoModifier = logoModifier) }
-    brief.sentimentSummary?.takeIf { it.isNotBlank() }?.let { summary ->
+    afterHero?.invoke(this)
+    brief.sentimentSummary?.takeIf { showVerdict && it.isNotBlank() }?.let { summary ->
         item(key = "verdict", contentType = "verdict") { BriefVerdictCard(summary = summary) }
     }
+    beforeSections?.invoke(this)
     item(key = "sections", contentType = "sections") {
-        BriefSectionsGroup(brief = brief, onKeyNumberClick = onKeyNumberClick, onNewsClick = onNewsClick)
+        BriefSectionsGroup(
+            brief = brief,
+            onKeyNumberClick = onKeyNumberClick,
+            onNewsClick = onNewsClick,
+            modifier = briefItemMotion()
+        )
     }
     footer?.let { content ->
-        item(key = "footer", contentType = "footer") { Column { content() } }
+        item(key = "footer", contentType = "footer") { Column(modifier = briefItemMotion()) { content() } }
     }
+}
+
+@Composable
+internal fun LazyItemScope.briefItemMotion(): Modifier = if (isReducedMotionEnabled()) {
+    Modifier.animateItem(fadeInSpec = null, placementSpec = null, fadeOutSpec = null)
+} else {
+    Modifier.animateItem(fadeInSpec = null, placementSpec = GiMotion.smooth(), fadeOutSpec = null)
+}
+
+@Composable
+internal fun LazyItemScope.briefChartMotion(): Modifier = if (isReducedMotionEnabled()) {
+    Modifier.animateItem(fadeInSpec = null, placementSpec = null, fadeOutSpec = null)
+} else {
+    Modifier.animateItem(
+        fadeInSpec = tween(GiMotion.BASE, easing = GiEasing.emphasised),
+        placementSpec = GiMotion.smooth(),
+        fadeOutSpec = null
+    )
 }
 
 private fun LazyListScope.onboardingLayoutItems(
@@ -156,7 +195,8 @@ private fun LazyListScope.onboardingLayoutItems(
         BriefHero(
             brief = brief,
             modifier = Modifier.padding(horizontal = horizontalPadding),
-            logoModifier = logoModifier
+            logoModifier = logoModifier,
+            layout = CompanyBriefLayout.Onboarding
         )
     }
     brief.sentimentSummary?.takeIf { it.isNotBlank() }?.let { summary ->
@@ -183,8 +223,17 @@ private fun LazyListScope.onboardingLayoutItems(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun BriefHero(brief: CompanyBrief, modifier: Modifier = Modifier, logoModifier: Modifier = Modifier) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
+private fun BriefHero(
+    brief: CompanyBrief,
+    modifier: Modifier = Modifier,
+    logoModifier: Modifier = Modifier,
+    layout: CompanyBriefLayout = CompanyBriefLayout.Company
+) {
+    val onboarding = layout == CompanyBriefLayout.Onboarding
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(if (onboarding) GiSpace.x4 else GiSpace.x3)
+    ) {
         GiStockSummary(
             stock = tickerStock(
                 ticker = brief.ticker,
@@ -197,7 +246,7 @@ private fun BriefHero(brief: CompanyBrief, modifier: Modifier = Modifier, logoMo
             logoModifier = logoModifier
         )
         FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(GiSpace.x2),
+            horizontalArrangement = Arrangement.spacedBy(if (onboarding) GiSpace.x3 else GiSpace.x2),
             verticalArrangement = Arrangement.spacedBy(GiSpace.x2),
             itemVerticalAlignment = Alignment.CenterVertically
         ) {

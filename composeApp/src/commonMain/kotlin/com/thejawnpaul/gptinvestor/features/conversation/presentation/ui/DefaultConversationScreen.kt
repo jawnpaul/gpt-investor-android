@@ -51,7 +51,10 @@ import com.thejawnpaul.gptinvestor.theme.components.GiListGroup
 import com.thejawnpaul.gptinvestor.theme.components.GiListRow
 import com.thejawnpaul.gptinvestor.theme.components.GiText
 import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
+import com.thejawnpaul.gptinvestor.theme.components.GiToastHost
+import com.thejawnpaul.gptinvestor.theme.components.GiToastState
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
+import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
 import com.thejawnpaul.gptinvestor.try_asking
 import com.thejawnpaul.gptinvestor.what_do_you_want_to_know
 import org.jetbrains.compose.resources.stringResource
@@ -68,11 +71,12 @@ fun DefaultConversationScreen(
     inputQuery: String,
     onInputQueryChange: (String) -> Unit,
     onSendClick: () -> Unit,
-    onSignUpClick: () -> Unit,
+    onSignInClick: () -> Unit,
     availableModels: List<AvailableModel>,
     selectedModel: AvailableModel,
     onModelChange: (AvailableModel) -> Unit,
     onUpgradeModel: (showBottomSheet: Boolean, modelId: String) -> Unit,
+    toastState: GiToastState,
     modifier: Modifier = Modifier
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -92,7 +96,7 @@ fun DefaultConversationScreen(
             )
             if (isGuest) {
                 TopGuestLabel(
-                    onClick = onSignUpClick,
+                    onClick = onSignInClick,
                     modifier = Modifier
                         .padding(horizontal = GiSpace.gutter)
                         .padding(bottom = GiSpace.x3)
@@ -156,6 +160,13 @@ fun DefaultConversationScreen(
                     }
                 }
             }
+
+            GiToastHost(
+                state = toastState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = GiSpace.gutter, vertical = GiSpace.x4)
+            )
         }
 
         GiComposerBar(
@@ -196,11 +207,12 @@ private fun DefaultConversationScreenPreview() {
             inputQuery = "",
             onInputQueryChange = {},
             onSendClick = {},
-            onSignUpClick = {},
+            onSignInClick = {},
             availableModels = emptyList(),
             selectedModel = DefaultModel(),
             onModelChange = {},
-            onUpgradeModel = { _, _ -> }
+            onUpgradeModel = { _, _ -> },
+            toastState = rememberGiToastState()
         )
     }
 }

@@ -217,7 +217,7 @@ fun GiToast(
     }
 }
 
-private const val DURATION_MS = 4_000L
+private const val DURATION_MS = 2_000L
 private const val ACTION_DURATION_MS = 6_000L
 
 @PreviewLightDark

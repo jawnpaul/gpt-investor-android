@@ -1,7 +1,13 @@
 package com.thejawnpaul.gptinvestor
 
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.window.ComposeUIViewController
 import com.thejawnpaul.gptinvestor.analytics.mixpanel.MixpanelProvider
 import com.thejawnpaul.gptinvestor.analytics.mixpanel.mixpanelProviderModule
@@ -43,6 +49,13 @@ fun mainViewController(
         }
     ) {
         val deepLinkRoute by IosNotificationBridge.pendingDeepLink.collectAsState()
-        App(deepLinkRoute = deepLinkRoute, onDeepLinkConsume = IosNotificationBridge::consumeDeepLink)
+        val focusManager = LocalFocusManager.current
+        Box(
+            Modifier.fillMaxSize().pointerInput(Unit) {
+                detectTapGestures(onTap = { focusManager.clearFocus() })
+            }
+        ) {
+            App(deepLinkRoute = deepLinkRoute, onDeepLinkConsume = IosNotificationBridge::consumeDeepLink)
+        }
     }
 }

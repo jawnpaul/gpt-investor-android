@@ -46,6 +46,7 @@ interface AppPreferences {
 
     val accessToken: Flow<String?>
     suspend fun setAccessToken(token: String)
+    suspend fun replaceAccessToken(expected: String?, token: String): Boolean
     suspend fun clearAccessToken()
 
     val refreshToken: Flow<String?>

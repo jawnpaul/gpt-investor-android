@@ -5,4 +5,5 @@ interface TokenStorage {
     fun getRefreshToken(): String?
     fun saveAccessToken(token: String)
     fun saveRefreshToken(token: String)
+    fun replaceAccessToken(expected: String?, token: String): Boolean
 }

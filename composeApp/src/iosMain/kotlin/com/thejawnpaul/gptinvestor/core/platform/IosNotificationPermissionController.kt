@@ -15,6 +15,8 @@ import platform.UserNotifications.UNAuthorizationOptionAlert
 import platform.UserNotifications.UNAuthorizationOptionBadge
 import platform.UserNotifications.UNAuthorizationOptionSound
 import platform.UserNotifications.UNAuthorizationStatusAuthorized
+import platform.UserNotifications.UNAuthorizationStatusEphemeral
+import platform.UserNotifications.UNAuthorizationStatusProvisional
 import platform.UserNotifications.UNUserNotificationCenter
 
 @Singleton(binds = [NotificationPermissionController::class])
@@ -46,7 +48,13 @@ class IosNotificationPermissionController : NotificationPermissionController {
 
     override suspend fun areNotificationsEnabled(): Boolean = suspendCancellableCoroutine { continuation ->
         UNUserNotificationCenter.currentNotificationCenter().getNotificationSettingsWithCompletionHandler { settings ->
-            continuation.resume(settings?.authorizationStatus == UNAuthorizationStatusAuthorized)
+            continuation.resume(
+                settings?.authorizationStatus in setOf(
+                    UNAuthorizationStatusAuthorized,
+                    UNAuthorizationStatusProvisional,
+                    UNAuthorizationStatusEphemeral
+                )
+            )
         }
     }
 }

@@ -139,7 +139,7 @@ fun TopPickDetailScreen(
     val company = state.companyPresentation
     val brief = state.brief
     val isWatched = brief?.isWatched == true
-    val signedIn = state.isLoggedIn && !state.isGuestSession
+    val signedIn = state.isSignedIn
     val companyName = brief?.name ?: company?.name ?: pick?.companyName.orEmpty()
     val watchedMessage = stringResource(Res.string.added_to_watchlist_success)
     var isLiked by remember { mutableStateOf(false) }

@@ -17,4 +17,6 @@ data class TopPickDetailView(
     val briefLoading: Boolean = false,
     val briefFailed: Boolean = false,
     val watchlistPending: Boolean = false
-)
+) {
+    val isSignedIn: Boolean get() = isLoggedIn && !isGuestSession
+}

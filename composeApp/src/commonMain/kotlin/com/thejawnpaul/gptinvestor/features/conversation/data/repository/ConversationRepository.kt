@@ -472,26 +472,31 @@ class ConversationRepository(
                                 val errorResponse = json.decodeFromString<ErrorResponse>(data)
                                 errorResponse.error.let { error ->
                                     Logger.e("SSE Error: $error")
-                                    val updatedMessages = ArrayList(currentConversation.messageList)
-                                    val index =
-                                        updatedMessages.indexOfFirst {
-                                            it.id == messageId &&
-                                                it is GenAiTextMessage
+                                    val failure = mapSseErrorToFailure(data)
+                                    if (failure is Failure.GuestLimitReached) {
+                                        saveStoppedAnswer(messageId, "")
+                                    } else {
+                                        val updatedMessages = ArrayList(currentConversation.messageList)
+                                        val index =
+                                            updatedMessages.indexOfFirst {
+                                                it.id == messageId &&
+                                                    it is GenAiTextMessage
+                                            }
+                                        if (index != -1) {
+                                            val original = updatedMessages[index] as GenAiTextMessage
+                                            updatedMessages[index] =
+                                                original.copy(
+                                                    loading = false,
+                                                    response =
+                                                    original.response
+                                                        ?: "Couldn't generate a response"
+                                                )
+                                            currentConversation =
+                                                currentConversation.copy(messageList = updatedMessages)
+                                            emit(Either.Right(currentConversation))
                                         }
-                                    if (index != -1) {
-                                        val original = updatedMessages[index] as GenAiTextMessage
-                                        updatedMessages[index] =
-                                            original.copy(
-                                                loading = false,
-                                                response =
-                                                original.response
-                                                    ?: "Couldn't generate a response"
-                                            )
-                                        currentConversation =
-                                            currentConversation.copy(messageList = updatedMessages)
-                                        emit(Either.Right(currentConversation))
                                     }
-                                    emit(Either.Left(mapSseErrorToFailure(data)))
+                                    emit(Either.Left(failure))
                                 }
                             } catch (e: Exception) {
                                 Logger.e("Error parsing error event")

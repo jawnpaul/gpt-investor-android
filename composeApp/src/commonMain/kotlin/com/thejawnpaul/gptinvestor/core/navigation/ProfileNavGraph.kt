@@ -4,7 +4,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -84,9 +84,9 @@ fun NavGraphBuilder.profileNavGraph(navController: NavHostController, platformAc
             }.launchIn(scope)
         }
 
-        LifecycleResumeEffect(viewModel) {
+        LifecycleStartEffect(viewModel) {
             viewModel.handleEvent(ProfileEvent.ScreenShown)
-            onPauseOrDispose { }
+            onStopOrDispose { }
         }
         val notificationPermissionController: NotificationPermissionController = koinInject()
         notificationPermissionController.RequestPermissionIfNeeded(

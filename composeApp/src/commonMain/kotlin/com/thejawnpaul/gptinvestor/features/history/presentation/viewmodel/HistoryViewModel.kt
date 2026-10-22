@@ -310,6 +310,7 @@ class HistoryViewModel(
 
     private fun handleInputResponseSuccess(conversation: Conversation) {
         conversation as StructuredConversation
+        if (conversationId != conversation.id) savedStateHandle["conversationId"] = conversation.id
 
         if (conversation.streamComplete) {
             val duration = Clock.System.now().toEpochMilliseconds() - requestStartTime

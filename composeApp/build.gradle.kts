@@ -166,6 +166,7 @@ kotlin {
             implementation(libs.androidx.junit.ktx)
             implementation(libs.mockk)
             implementation(libs.junit)
+            implementation(libs.ktor.client.mock)
         }
         val androidDeviceTest = findByName("androidDeviceTest")
         androidDeviceTest?.dependencies {

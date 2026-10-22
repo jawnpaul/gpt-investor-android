@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.remote
 
 import com.google.common.truth.Truth.assertThat
+import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.HttpClientEngineFactory
@@ -43,30 +44,69 @@ class KtorClientFactoryTest {
         override suspend fun guestUniqueId(): String = "installation-id"
     }
 
+    private class Backend(
+        val onExpiredTokenSent: () -> Unit = {},
+        val onGuestLogin: () -> Unit = {},
+        val guestLoginStatus: HttpStatusCode = HttpStatusCode.OK,
+        val onRefresh: () -> Unit = {}
+    )
+
     private val tokenStorage = InMemoryTokenStorage(storedAccessToken = "expired-guest-token")
     private val unauthorizedCallback = FakeUnauthorizedCallback()
     private val onboardingAuthHeaders = mutableListOf<String?>()
+    private lateinit var client: HttpClient
 
-    private fun mockEngineFactory(onGuestLogin: () -> Unit) = object : HttpClientEngineFactory<HttpClientEngineConfig> {
+    private fun createClient(backend: Backend) {
+        client = KtorClientFactory.create(
+            tokenStorage = tokenStorage,
+            unauthorizedCallback = unauthorizedCallback,
+            engineFactory = mockEngineFactory(backend)
+        )
+    }
+
+    private fun mockEngineFactory(backend: Backend) = object : HttpClientEngineFactory<HttpClientEngineConfig> {
         override fun create(block: HttpClientEngineConfig.() -> Unit): HttpClientEngine = MockEngine { request ->
-            handle(request, onGuestLogin)
+            handle(request, backend)
         }
     }
 
-    private fun MockRequestHandleScope.handle(request: HttpRequestData, onGuestLogin: () -> Unit): HttpResponseData {
+    private fun logIn() {
+        tokenStorage.saveAccessToken("user-access-token")
+        tokenStorage.saveRefreshToken("user-refresh-token")
+        BearerTokenManager(client).clearCache()
+    }
+
+    private fun signOut() {
+        tokenStorage.storedAccessToken = null
+        tokenStorage.storedRefreshToken = null
+        BearerTokenManager(client).clearCache()
+    }
+
+    private fun MockRequestHandleScope.handle(request: HttpRequestData, backend: Backend): HttpResponseData {
         val jsonHeaders = headersOf(HttpHeaders.ContentType, "application/json")
         return when {
             request.url.encodedPath.endsWith("v1/guest-login") -> {
-                onGuestLogin()
-                respond("""{"access_token":"new-guest-token"}""", HttpStatusCode.OK, jsonHeaders)
+                backend.onGuestLogin()
+                respond("""{"access_token":"new-guest-token"}""", backend.guestLoginStatus, jsonHeaders)
+            }
+
+            request.url.encodedPath.endsWith("v1.1/refresh") -> {
+                backend.onRefresh()
+                respond("""{"access_token":"new-user-token"}""", HttpStatusCode.OK, jsonHeaders)
             }
 
             else -> {
                 val authorization = request.headers[HttpHeaders.Authorization]
                 onboardingAuthHeaders.add(authorization)
-                if (authorization == "Bearer expired-guest-token") {
+                val error = when (authorization) {
+                    "Bearer expired-guest-token" -> "guest_session_expired"
+                    "Bearer expired-user-token" -> "token_expired"
+                    else -> null
+                }
+                if (error != null) {
+                    backend.onExpiredTokenSent()
                     respond(
-                        """{"error":"guest_session_expired"}""",
+                        """{"error":"$error"}""",
                         HttpStatusCode.Unauthorized,
                         headersOf(
                             HttpHeaders.ContentType to listOf("application/json"),
@@ -82,16 +122,7 @@ class KtorClientFactoryTest {
 
     @Test
     fun `should retry with user token when guest refresh finishes after login`() = runTest {
-        val client = KtorClientFactory.create(
-            tokenStorage = tokenStorage,
-            unauthorizedCallback = unauthorizedCallback,
-            engineFactory = mockEngineFactory(
-                onGuestLogin = {
-                    tokenStorage.saveAccessToken("user-access-token")
-                    tokenStorage.saveRefreshToken("user-refresh-token")
-                }
-            )
-        )
+        createClient(Backend(onGuestLogin = ::logIn))
 
         val response = client.post("v1/user/onboarding")
 
@@ -105,12 +136,46 @@ class KtorClientFactoryTest {
     }
 
     @Test
+    fun `should keep user token when login finishes before guest expiry is handled`() = runTest {
+        createClient(Backend(onExpiredTokenSent = ::logIn))
+
+        val response = client.post("v1/user/onboarding")
+
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(onboardingAuthHeaders)
+            .containsExactly("Bearer expired-guest-token", "Bearer user-access-token")
+            .inOrder()
+        assertThat(tokenStorage.storedAccessToken).isEqualTo("user-access-token")
+        assertThat(unauthorizedCallback.unauthorizedCalls).isEqualTo(0)
+    }
+
+    @Test
+    fun `should not sign out user when guest refresh fails after login`() = runTest {
+        createClient(Backend(onGuestLogin = ::logIn, guestLoginStatus = HttpStatusCode.InternalServerError))
+
+        val response = client.post("v1/user/onboarding")
+
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(onboardingAuthHeaders)
+            .containsExactly("Bearer expired-guest-token", "Bearer user-access-token")
+            .inOrder()
+        assertThat(tokenStorage.storedAccessToken).isEqualTo("user-access-token")
+        assertThat(unauthorizedCallback.unauthorizedCalls).isEqualTo(0)
+    }
+
+    @Test
+    fun `should report unauthorized when guest refresh fails`() = runTest {
+        createClient(Backend(guestLoginStatus = HttpStatusCode.InternalServerError))
+
+        val response = client.post("v1/user/onboarding")
+
+        assertThat(response.status).isEqualTo(HttpStatusCode.Unauthorized)
+        assertThat(unauthorizedCallback.unauthorizedCalls).isEqualTo(1)
+    }
+
+    @Test
     fun `should save and use new guest token when guest session expires`() = runTest {
-        val client = KtorClientFactory.create(
-            tokenStorage = tokenStorage,
-            unauthorizedCallback = unauthorizedCallback,
-            engineFactory = mockEngineFactory(onGuestLogin = {})
-        )
+        createClient(Backend())
 
         val response = client.post("v1/user/onboarding")
 
@@ -119,5 +184,34 @@ class KtorClientFactoryTest {
             .containsExactly("Bearer expired-guest-token", "Bearer new-guest-token")
             .inOrder()
         assertThat(tokenStorage.storedAccessToken).isEqualTo("new-guest-token")
+    }
+
+    @Test
+    fun `should not restore user token when refresh finishes after sign out`() = runTest {
+        tokenStorage.storedAccessToken = "expired-user-token"
+        tokenStorage.storedRefreshToken = "user-refresh-token"
+        createClient(Backend(onRefresh = ::signOut))
+
+        val response = client.post("v1/user/onboarding")
+
+        assertThat(response.status).isEqualTo(HttpStatusCode.Unauthorized)
+        assertThat(onboardingAuthHeaders).containsExactly("Bearer expired-user-token")
+        assertThat(tokenStorage.storedAccessToken).isNull()
+        assertThat(unauthorizedCallback.unauthorizedCalls).isEqualTo(0)
+    }
+
+    @Test
+    fun `should save and use new user token when access token expires`() = runTest {
+        tokenStorage.storedAccessToken = "expired-user-token"
+        tokenStorage.storedRefreshToken = "user-refresh-token"
+        createClient(Backend())
+
+        val response = client.post("v1/user/onboarding")
+
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(onboardingAuthHeaders)
+            .containsExactly("Bearer expired-user-token", "Bearer new-user-token")
+            .inOrder()
+        assertThat(tokenStorage.storedAccessToken).isEqualTo("new-user-token")
     }
 }

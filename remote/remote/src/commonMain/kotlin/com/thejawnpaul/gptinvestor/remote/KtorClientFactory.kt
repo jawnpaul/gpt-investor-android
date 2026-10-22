@@ -17,7 +17,9 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.request
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.encodedPath
@@ -38,6 +40,9 @@ private val GUEST_TOKEN_ERRORS = setOf("guest_session_expired", "invalid_guest_t
 
 private fun TokenStorage.loadBearerTokens(): BearerTokens? =
     getAccessToken()?.let { BearerTokens(accessToken = it, refreshToken = getRefreshToken()) }
+
+private fun HttpResponse.sentAccessToken(): String? =
+    request.headers[HttpHeaders.Authorization]?.removePrefix("Bearer ")
 
 object KtorClientFactory {
     fun create(
@@ -73,11 +78,17 @@ object KtorClientFactory {
                     }
 
                     refreshTokens {
+                        val sentToken = response.sentAccessToken()
+
+                        fun unauthorizedUnlessTokenChanged(): BearerTokens? {
+                            if (tokenStorage.getAccessToken() != sentToken) return tokenStorage.loadBearerTokens()
+                            unauthorizedCallback.onUnauthorized()
+                            return null
+                        }
+
                         if (response.errorCode() in GUEST_TOKEN_ERRORS) {
-                            val uniqueId = unauthorizedCallback.guestUniqueId() ?: run {
-                                unauthorizedCallback.onUnauthorized()
-                                return@refreshTokens null
-                            }
+                            val uniqueId = unauthorizedCallback.guestUniqueId()
+                                ?: return@refreshTokens unauthorizedUnlessTokenChanged()
                             return@refreshTokens try {
                                 val guestResponse = client.post("v1/guest-login") {
                                     markAsRefreshTokenRequest()
@@ -85,14 +96,13 @@ object KtorClientFactory {
                                 }
                                 if (guestResponse.status == HttpStatusCode.OK) {
                                     val accessToken = guestResponse.body<TokenResponse>().accessToken
-                                    if (tokenStorage.replaceAccessToken(oldTokens?.accessToken, accessToken)) {
+                                    if (tokenStorage.replaceAccessToken(sentToken, accessToken)) {
                                         BearerTokens(accessToken, null)
                                     } else {
                                         tokenStorage.loadBearerTokens()
                                     }
                                 } else {
-                                    unauthorizedCallback.onUnauthorized()
-                                    null
+                                    unauthorizedUnlessTokenChanged()
                                 }
                             } catch (e: Exception) {
                                 Log.e(e) { "Guest token refresh failed" }
@@ -100,10 +110,8 @@ object KtorClientFactory {
                             }
                         }
 
-                        val refreshToken = tokenStorage.getRefreshToken() ?: run {
-                            unauthorizedCallback.onUnauthorized()
-                            return@refreshTokens null
-                        }
+                        val refreshToken = tokenStorage.getRefreshToken()
+                            ?: return@refreshTokens unauthorizedUnlessTokenChanged()
 
                         try {
                             val response = client.post("v1.1/refresh") {
@@ -112,13 +120,14 @@ object KtorClientFactory {
                             }
 
                             if (response.status == HttpStatusCode.OK) {
-                                val tokenResponse = response.body<TokenResponse>()
-                                tokenStorage.saveAccessToken(tokenResponse.accessToken)
-                                BearerTokens(tokenResponse.accessToken, refreshToken)
+                                val accessToken = response.body<TokenResponse>().accessToken
+                                if (tokenStorage.replaceAccessToken(sentToken, accessToken)) {
+                                    BearerTokens(accessToken, refreshToken)
+                                } else {
+                                    tokenStorage.loadBearerTokens()
+                                }
                             } else {
-
-                                unauthorizedCallback.onUnauthorized()
-                                null
+                                unauthorizedUnlessTokenChanged()
                             }
                         } catch (e: Exception) {
                             Log.e(e) { "Token refresh failed" }

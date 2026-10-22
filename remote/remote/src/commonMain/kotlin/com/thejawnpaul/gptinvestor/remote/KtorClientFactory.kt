@@ -2,6 +2,7 @@ package com.thejawnpaul.gptinvestor.remote
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
@@ -35,12 +36,16 @@ private suspend fun HttpResponse.errorCode(): String? = try {
 
 private val GUEST_TOKEN_ERRORS = setOf("guest_session_expired", "invalid_guest_token")
 
+private fun TokenStorage.loadBearerTokens(): BearerTokens? =
+    getAccessToken()?.let { BearerTokens(accessToken = it, refreshToken = getRefreshToken()) }
+
 object KtorClientFactory {
     fun create(
         tokenStorage: TokenStorage,
-        unauthorizedCallback: UnauthorizedCallback
+        unauthorizedCallback: UnauthorizedCallback,
+        engineFactory: HttpClientEngineFactory<*> = getHttpClientEngine()
     ): HttpClient {
-        return HttpClient(getHttpClientEngine()) {
+        return HttpClient(engineFactory) {
             expectSuccess = false
 
             install(ContentNegotiation) {
@@ -64,13 +69,7 @@ object KtorClientFactory {
             install(Auth) {
                 bearer {
                     loadTokens {
-                        val token = tokenStorage.getAccessToken()
-                        val refreshToken = tokenStorage.getRefreshToken()
-                        if (token != null) {
-                            BearerTokens(accessToken = token, refreshToken = refreshToken)
-                        } else {
-                            null
-                        }
+                        tokenStorage.loadBearerTokens()
                     }
 
                     refreshTokens {
@@ -86,8 +85,11 @@ object KtorClientFactory {
                                 }
                                 if (guestResponse.status == HttpStatusCode.OK) {
                                     val accessToken = guestResponse.body<TokenResponse>().accessToken
-                                    tokenStorage.saveAccessToken(accessToken)
-                                    BearerTokens(accessToken, null)
+                                    if (tokenStorage.replaceAccessToken(oldTokens?.accessToken, accessToken)) {
+                                        BearerTokens(accessToken, null)
+                                    } else {
+                                        tokenStorage.loadBearerTokens()
+                                    }
                                 } else {
                                     unauthorizedCallback.onUnauthorized()
                                     null

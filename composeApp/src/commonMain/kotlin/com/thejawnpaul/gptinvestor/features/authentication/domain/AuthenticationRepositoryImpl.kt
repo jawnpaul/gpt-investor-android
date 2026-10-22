@@ -71,6 +71,7 @@ class AuthenticationRepositoryImpl(
             gptInvestorPreferences = gptInvestorPreferences,
             tokenStorage = tokenStorage,
             tokenSyncManager = tokenSyncManager,
+            bearerTokenManager = bearerTokenManager,
             appConfig = appConfig
         )
 
@@ -132,12 +133,12 @@ class AuthenticationRepositoryImpl(
         )
         if (response.isSuccessful) {
             response.body?.let { loginResponse ->
-                gptInvestorPreferences.setUserId(loginResponse.user?.uid.toString())
-                gptInvestorPreferences.setIsUserLoggedIn(true)
-                gptInvestorPreferences.setUserName(loginResponse.user?.name.toString())
                 tokenStorage.saveAccessToken(loginResponse.accessToken ?: "")
                 tokenStorage.saveRefreshToken(loginResponse.refreshToken ?: "")
                 bearerTokenManager.clearCache()
+                gptInvestorPreferences.setUserId(loginResponse.user?.uid.toString())
+                gptInvestorPreferences.setIsUserLoggedIn(true)
+                gptInvestorPreferences.setUserName(loginResponse.user?.name.toString())
                 gptInvestorPreferences.clearIsGuestLoggedIn()
                 tokenSyncManager.syncToken()
 
@@ -204,14 +205,12 @@ class AuthenticationRepositoryImpl(
         googleSignInProvider = googleSignInProvider,
         platformContext = platformContext
     ).onSuccess {
-        bearerTokenManager.clearCache()
         trackAuthEvent(isSignUp = false, method = METHOD_GOOGLE)
     }
 
     override suspend fun loginWithApple(): Result<Unit> = loginWithApplePlatform(
         dependencies = authDependencies
     ).onSuccess {
-        bearerTokenManager.clearCache()
         trackAuthEvent(isSignUp = false, method = METHOD_APPLE)
     }
 
@@ -220,14 +219,12 @@ class AuthenticationRepositoryImpl(
         googleSignInProvider = googleSignInProvider,
         platformContext = platformContext
     ).onSuccess {
-        bearerTokenManager.clearCache()
         trackAuthEvent(isSignUp = true, method = METHOD_GOOGLE)
     }
 
     override suspend fun signUpWithApple(): Result<Unit> = loginWithApplePlatform(
         dependencies = authDependencies
     ).onSuccess {
-        bearerTokenManager.clearCache()
         trackAuthEvent(isSignUp = true, method = METHOD_APPLE)
     }
 
@@ -323,6 +320,7 @@ data class PlatformAuthDependencies(
     val gptInvestorPreferences: AppPreferences,
     val tokenStorage: TokenStorage,
     val tokenSyncManager: TokenSyncManager,
+    val bearerTokenManager: BearerTokenManager,
     val appConfig: AppConfig
 )
 
@@ -332,7 +330,8 @@ internal suspend fun completeLogin(
     providerName: String,
     displayName: String? = null
 ) {
-    val (auth, apiService, gptInvestorPreferences, tokenStorage, tokenSyncManager, _) = dependencies
+    val (auth, apiService, gptInvestorPreferences, tokenStorage, tokenSyncManager, bearerTokenManager, _) =
+        dependencies
 
     auth.signInWithCredential(authCredential = credential)
 
@@ -352,11 +351,12 @@ internal suspend fun completeLogin(
     val body = loginResponse.body ?: throw Exception("Empty response body")
 
     val nameToSet = body.user?.name ?: displayName ?: currentUser.displayName ?: "null"
+    tokenStorage.saveAccessToken(token = body.accessToken ?: "")
+    tokenStorage.saveRefreshToken(token = body.refreshToken ?: "")
+    bearerTokenManager.clearCache()
     gptInvestorPreferences.setUserName(name = nameToSet)
     gptInvestorPreferences.setUserId(id = body.user?.uid.toString())
     gptInvestorPreferences.setIsUserLoggedIn(isLoggedIn = true)
-    tokenStorage.saveAccessToken(token = body.accessToken ?: "")
-    tokenStorage.saveRefreshToken(token = body.refreshToken ?: "")
     gptInvestorPreferences.clearIsGuestLoggedIn()
     tokenSyncManager.syncToken()
 }

@@ -26,4 +26,8 @@ class TokenStorageImpl(private val gptInvestorPreferences: AppPreferences) : Tok
             gptInvestorPreferences.setRefreshToken(token)
         }
     }
+
+    override fun replaceAccessToken(expected: String?, token: String): Boolean = runBlocking {
+        gptInvestorPreferences.replaceAccessToken(expected, token)
+    }
 }

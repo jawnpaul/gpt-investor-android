@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.heading
@@ -37,6 +38,8 @@ import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import kotlinx.coroutines.launch
 
+enum class GiSheetSubtitle { Beside, Caption, Below }
+
 // The close button stays even though dragging works.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +50,7 @@ fun GiBottomSheet(
     modifier: Modifier = Modifier,
     eyebrow: (@Composable () -> Unit)? = null,
     subtitle: String? = null,
+    subtitleStyle: GiSheetSubtitle = GiSheetSubtitle.Beside,
     sheetState: SheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
         enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
@@ -74,6 +78,7 @@ fun GiBottomSheet(
             closeContentDescription = closeContentDescription,
             eyebrow = eyebrow,
             subtitle = subtitle,
+            subtitleStyle = subtitleStyle,
             onClose = {
                 scope.launch { sheetState.hide() }.invokeOnCompletion {
                     if (!sheetState.isVisible) onDismissRequest()
@@ -96,6 +101,7 @@ private fun GiBottomSheetContent(
     modifier: Modifier = Modifier,
     eyebrow: (@Composable () -> Unit)? = null,
     subtitle: String? = null,
+    subtitleStyle: GiSheetSubtitle = GiSheetSubtitle.Beside,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
@@ -108,13 +114,24 @@ private fun GiBottomSheetContent(
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
-            verticalAlignment = if (eyebrow == null && subtitle == null) Alignment.CenterVertically else Alignment.Top
+            verticalAlignment = if (eyebrow == null && (subtitle == null || subtitleStyle != GiSheetSubtitle.Beside)) {
+                Alignment.CenterVertically
+            } else {
+                Alignment.Top
+            }
         ) {
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    if (subtitleStyle == GiSheetSubtitle.Caption) 0.dp else GiSpace.x2
+                )
+            ) {
                 eyebrow?.invoke()
                 GiText(text = title, modifier = Modifier.semantics { heading() }, style = GiTextStyle.StatNumber)
-                if (subtitle != null) {
+                if (subtitle != null && subtitleStyle == GiSheetSubtitle.Beside) {
                     GiText(text = subtitle, style = GiTextStyle.Body, color = GiTheme.colors.body)
+                } else if (subtitle != null && subtitleStyle == GiSheetSubtitle.Caption) {
+                    GiText(text = subtitle, style = GiTextStyle.MetaRelaxed, color = GiTheme.colors.muted)
                 }
             }
             GiIconButton(
@@ -122,6 +139,18 @@ private fun GiBottomSheetContent(
                 contentDescription = closeContentDescription,
                 onClick = onClose,
                 variant = GiIconButtonVariant.Default
+            )
+        }
+        if (subtitle != null && subtitleStyle == GiSheetSubtitle.Below) {
+            GiText(
+                text = subtitle,
+                modifier = Modifier.layout { measurable, constraints ->
+                    val placeable = measurable.measure(constraints)
+                    val pull = GiSpace.x2.roundToPx()
+                    layout(placeable.width, placeable.height - pull) { placeable.place(0, -pull) }
+                },
+                style = GiTextStyle.Body,
+                color = GiTheme.colors.body
             )
         }
         content()

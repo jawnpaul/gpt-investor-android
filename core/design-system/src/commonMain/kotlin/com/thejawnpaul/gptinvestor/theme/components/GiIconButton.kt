@@ -56,12 +56,13 @@ fun GiIconButton(
     modifier: Modifier = Modifier,
     variant: GiIconButtonVariant = GiIconButtonVariant.Default,
     enabled: Boolean = true,
-    loading: Boolean = false
+    loading: Boolean = false,
+    iconColor: Color? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     GiIconButtonLayout(
         icon = icon,
-        contentColor = if (variant == GiIconButtonVariant.Ghost) GiTheme.colors.muted else GiTheme.colors.ink,
+        contentColor = iconColor ?: defaultIconColor(variant),
         variant = variant,
         enabled = enabled,
         loading = loading,
@@ -79,6 +80,10 @@ fun GiIconButton(
 }
 
 @Composable
+private fun defaultIconColor(variant: GiIconButtonVariant): Color =
+    if (variant == GiIconButtonVariant.Ghost) GiTheme.colors.muted else GiTheme.colors.ink
+
+@Composable
 fun GiIconToggleButton(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
@@ -89,12 +94,13 @@ fun GiIconToggleButton(
     variant: GiIconButtonVariant = GiIconButtonVariant.Default,
     enabled: Boolean = true,
     loading: Boolean = false,
-    checkedHaptic: HapticFeedbackType? = GiHaptics.Confirm
+    checkedHaptic: HapticFeedbackType? = GiHaptics.Confirm,
+    iconColor: Color? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val haptics = LocalHapticFeedback.current
     val reducedMotion = isReducedMotionEnabled()
-    val uncheckedColor = if (variant == GiIconButtonVariant.Ghost) GiTheme.colors.muted else GiTheme.colors.ink
+    val uncheckedColor = iconColor ?: defaultIconColor(variant)
     val checkedColor = GiTheme.colors.violet
     val fill = animateFloatAsState(
         targetValue = if (checked) 1f else 0f,

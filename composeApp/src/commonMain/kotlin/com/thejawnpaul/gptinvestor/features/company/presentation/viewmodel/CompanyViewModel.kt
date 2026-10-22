@@ -16,6 +16,7 @@ import com.thejawnpaul.gptinvestor.core.session.GuestSessionSource
 import com.thejawnpaul.gptinvestor.core.session.rateLimitRetryMessage
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumberType
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
+import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyFinancialsView
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.CompanyHeaderPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.state.SingleCompanyView
@@ -32,6 +33,8 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.answerFail
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.stopAnswer
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.withFailedAnswer
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.withdrawFailedAnswer
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
 import com.thejawnpaul.gptinvestor.features.premium.domain.PREMIUM_SOURCE_WATCHLIST_FULL
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
@@ -53,6 +56,7 @@ import org.koin.core.annotation.Provided
 @KoinViewModel
 class CompanyViewModel(
     private val getCompanyBriefUseCase: GetCompanyBriefUseCase,
+    private val getCompanyUseCase: GetCompanyUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val getInputPromptUseCase: GetInputPromptUseCase,
     private val modelsRepository: ModelsRepository,
@@ -115,8 +119,17 @@ class CompanyViewModel(
         getCompany()
     }
 
+    private fun getPriceHistory(ticker: String) {
+        getCompanyUseCase(ticker) {
+            it.onSuccess { company ->
+                _selectedCompany.update { state -> state.copy(priceHistory = company.historicalData.orEmpty()) }
+            }
+        }
+    }
+
     private fun getCompany() {
         selectedCompanyTicker?.let { ticker ->
+            if (_selectedCompany.value.priceHistory.isEmpty()) getPriceHistory(ticker)
             _selectedCompany.update { it.copy(loading = true) }
             getCompanyBriefUseCase(ticker) {
                 it.onFailure { failure ->
@@ -167,9 +180,17 @@ class CompanyViewModel(
                             brief = company
                         )
                     }
+                    askPendingQuestion()
                 }
             }
         }
+    }
+
+    private fun askPendingQuestion() {
+        val question = savedStateHandle.get<String>("ask")?.takeIf { it.isNotBlank() } ?: return
+        savedStateHandle["ask"] = null
+        getQuery(question)
+        getInputResponse()
     }
 
     fun getQuery(query: String) {
@@ -180,7 +201,7 @@ class CompanyViewModel(
         val query = _selectedCompany.value.inputQuery
         if (query.trim().isNotEmpty()) {
             _selectedCompany.update {
-                it.copy(pendingQuery = query, isAnswering = true, inputQuery = "", answerOffline = false)
+                it.copy(pendingQuery = query, isAnswering = true, inputQuery = "")
             }
             requestStartTime = Clock.System.now().toEpochMilliseconds()
             analyticsLogger.logEvent(
@@ -195,25 +216,46 @@ class CompanyViewModel(
 
     private fun retryAnswer(query: String) {
         if (query.isBlank() || _selectedCompany.value.isAnswering) return
-        _selectedCompany.update { it.copy(pendingQuery = query, isAnswering = true, answerOffline = false) }
+        val current = _selectedCompany.value.conversation as? StructuredConversation
+        val failed = current?.let { withdrawFailedAnswer(it.messageList, query) }
+        if (current != null && failed != null) {
+            _selectedCompany.update {
+                it.copy(
+                    conversation = if (failed.messages.isEmpty()) {
+                        CompanyDetailDefaultConversation(id = 0, response = null)
+                    } else {
+                        current.copy(messageList = failed.messages.toMutableList())
+                    }
+                )
+            }
+            if (failed.messages.isEmpty()) selectedConversationId.value = -1L
+        }
+        _selectedCompany.update { it.copy(pendingQuery = query, isAnswering = true) }
         requestStartTime = Clock.System.now().toEpochMilliseconds()
-        askQuery(query)
+        askQuery(query, replacesMessageId = failed?.messageId)
     }
 
-    private fun askQuery(query: String) {
+    private fun askQuery(query: String, replacesMessageId: Long? = null) {
         when (_selectedCompany.value.conversation) {
             is CompanyDetailDefaultConversation -> {
                 ask(
                     ConversationPrompt(
                         query = query,
                         tickerSymbol = _selectedCompany.value.header.companyTicker,
-                        conversationId = -1L
+                        conversationId = -1L,
+                        replacesMessageId = replacesMessageId
                     )
                 )
             }
 
             is StructuredConversation -> {
-                ask(ConversationPrompt(query = query, conversationId = selectedConversationId.value))
+                ask(
+                    ConversationPrompt(
+                        query = query,
+                        conversationId = selectedConversationId.value,
+                        replacesMessageId = replacesMessageId
+                    )
+                )
             }
 
             else -> {
@@ -223,7 +265,7 @@ class CompanyViewModel(
 
     fun getSuggestedPromptResponse(query: String) {
         _selectedCompany.update {
-            it.copy(pendingQuery = query, isAnswering = true, inputQuery = "", answerOffline = false)
+            it.copy(pendingQuery = query, isAnswering = true, inputQuery = "")
         }
         requestStartTime = Clock.System.now().toEpochMilliseconds()
         analyticsLogger.logEvent(
@@ -251,6 +293,14 @@ class CompanyViewModel(
         askGeneration++
         askJob?.cancel()
         askJob = null
+        withdrawAnswer()
+        analyticsLogger.logEvent(
+            eventName = "answer-stopped",
+            params = mapOf("ticker" to (_selectedCompany.value.brief?.ticker ?: ""))
+        )
+    }
+
+    private fun withdrawAnswer() {
         var conversationCleared = false
         _selectedCompany.update { state ->
             val conversation = state.conversation as? StructuredConversation
@@ -273,14 +323,17 @@ class CompanyViewModel(
             next.copy(pendingQuery = null, isAnswering = false)
         }
         if (conversationCleared) selectedConversationId.value = -1L
-        analyticsLogger.logEvent(
-            eventName = "answer-stopped",
-            params = mapOf("ticker" to (_selectedCompany.value.brief?.ticker ?: ""))
-        )
     }
 
     private fun handleCompanyInputResponseFailure(failure: Failure) {
         Logger.e(failure.toString())
+        if (failure is Failure.GuestLimitReached) {
+            withdrawAnswer()
+            guestSessionNotifier.notify(
+                GuestSessionEvent(reason = GuestSessionReason.QuestionLimit, source = GuestSessionSource.Request)
+            )
+            return
+        }
         val shownInline = _selectedCompany.value.let { state ->
             val last = (state.conversation as? StructuredConversation)?.messageList?.lastOrNull()
             state.pendingQuery == null && (last as? GenAiTextMessage)?.answerFailed == true
@@ -290,15 +343,6 @@ class CompanyViewModel(
                 guestSessionNotifier.notify(
                     GuestSessionEvent(
                         reason = GuestSessionReason.Expired,
-                        source = GuestSessionSource.Request
-                    )
-                )
-            }
-
-            is Failure.GuestLimitReached -> {
-                guestSessionNotifier.notify(
-                    GuestSessionEvent(
-                        reason = GuestSessionReason.Limit,
                         source = GuestSessionSource.Request
                     )
                 )
@@ -361,7 +405,10 @@ class CompanyViewModel(
                 inputQuery = "",
                 pendingQuery = null,
                 isAnswering = false,
-                answerOffline = failure is Failure.NetworkConnection
+                offlineAnswerIds = it.offlineAnswerIds.withFailedAnswer(
+                    it.conversation,
+                    offline = failure is Failure.NetworkConnection
+                )
             )
         }
     }
@@ -444,8 +491,8 @@ class CompanyViewModel(
                 }
             }
 
-            CompanyDetailEvent.SignUpClicked -> {
-                processCompanyDetailAction(CompanyDetailAction.OnGoToSignUp)
+            CompanyDetailEvent.LoginClicked -> {
+                processCompanyDetailAction(CompanyDetailAction.OnGoToLogin)
             }
 
             is CompanyDetailEvent.SendFeedback -> {
@@ -492,6 +539,10 @@ class CompanyViewModel(
 
             CompanyDetailEvent.AddToWatchlist -> {
                 if (_selectedCompany.value.watchlistPending) return
+                if (isGuestSession.value) {
+                    processCompanyDetailAction(CompanyDetailAction.WatchlistSignInRequired)
+                    return
+                }
                 val ticker = _selectedCompany.value.header.companyTicker.ifEmpty { selectedCompanyTicker.orEmpty() }
                 _selectedCompany.update { it.copy(watchlistPending = true) }
                 viewModelScope.launch {
@@ -662,7 +713,7 @@ sealed interface CompanyDetailEvent {
     data class ModelChange(val model: AvailableModel) : CompanyDetailEvent
     data class SelectWaitlistOption(val option: String) : CompanyDetailEvent
     data object JoinWaitList : CompanyDetailEvent
-    data object SignUpClicked : CompanyDetailEvent
+    data object LoginClicked : CompanyDetailEvent
     data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : CompanyDetailEvent
 
     data class SendFeedback(val messageId: Long, val status: Int, val reason: String?) : CompanyDetailEvent
@@ -682,11 +733,12 @@ sealed interface CompanyDetailAction {
     data object OnGoBack : CompanyDetailAction
     data class OnNavigateToWebView(val url: String) : CompanyDetailAction
     data class OnCopy(val text: String) : CompanyDetailAction
-    data object OnGoToSignUp : CompanyDetailAction
+    data object OnGoToLogin : CompanyDetailAction
     data class ShowToast(val message: String) : CompanyDetailAction
     data class OnShare(val name: String, val ticker: String, val id: String) : CompanyDetailAction
     data object WatchlistAdded : CompanyDetailAction
     data object WatchlistAddFailed : CompanyDetailAction
+    data object WatchlistSignInRequired : CompanyDetailAction
     data class WatchlistRemoved(val ticker: String) : CompanyDetailAction
     data class WatchlistRemoveFailed(val ticker: String) : CompanyDetailAction
     data class OnShareText(val text: String) : CompanyDetailAction

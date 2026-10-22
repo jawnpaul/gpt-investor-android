@@ -80,7 +80,6 @@
     <string name="read_more">Читати далі</string>
     <string name="read_less">Згорнути</string>
     <string name="sources">Джерела</string>
-    <string name="top_pick_rationale">Обґрунтування найкращого вибору</string>
     <string name="sign_up">Зареєструватися</string>
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
     <string name="continue_with_google">Продовжити з Google</string>
@@ -222,6 +221,8 @@
     <string name="guest_session_expired_body_expired">Зареєструйтеся безкоштовно, щоб продовжити читати огляди та зберігати історію.</string>
     <string name="guest_session_expired_title_limit">Ви використали безкоштовні гостьові огляди</string>
     <string name="guest_session_expired_body_limit">Зареєструйтеся безкоштовно, щоб продовжити.</string>
+    <string name="guest_session_expired_title_questions">Ви використали безкоштовні гостьові запитання</string>
+    <string name="guest_session_expired_body_questions">Зареєструйтеся безкоштовно, щоб і далі ставити запитання.</string>
     <string name="guest_session_expired_sign_up">Зареєструватися</string>
     <string name="guest_session_expired_have_account">У мене є обліковий запис</string>
 
@@ -347,7 +348,7 @@
         <item quantity="other">%1$d джерела. Не є фінансовою порадою.</item>
     </plurals>
     <string name="company_context_title">%1$s · %2$s</string>
-    <string name="ask_about_company">Запитайте про %1$s…</string>
+    <string name="ask_about_company">Запитайте будь-що про %1$s</string>
     <string name="reading_company_data">Читаю останні дані %1$s…</string>
     <string name="answer_copied">Відповідь скопійовано</string>
     <string name="helpful">Корисно</string>
@@ -367,7 +368,8 @@
     <string name="offline_opening_saved">Немає з’єднання. Відкриваємо ваші збережені дані…</string>
     <string name="loading_company_brief">Завантажуємо огляд %1$s</string>
     <string name="why_sentiment">Чому %1$s?</string>
-    <string name="answer_error">Не вдалося відповісти. Перевірте з’єднання та спробуйте ще раз.</string>
+    <string name="answer_error_title">Не вдалося відповісти.</string>
+    <string name="answer_error_body">Щось пішло не так на нашому боці. Перевірте з’єднання та спробуйте ще раз.</string>
     <string name="answer_offline_title">Не вдалося створити відповідь.</string>
     <string name="answer_offline_body">Ви офлайн. Перевірте з’єднання та спробуйте ще раз.</string>
     <string name="try_asking">Спробуйте запитати</string>
@@ -382,7 +384,8 @@
     <string name="browse_empty_sector">У секторі %1$s ще немає компаній. Спробуйте інший сектор.</string>
     <string name="browse_empty_all">Поки що немає компаній для показу. Спробуйте трохи згодом.</string>
     <string name="browse_search_all_sectors">Шукати в усіх секторах</string>
-    <string name="browse_error_title">Не вдалося завантажити компанії</string>
+    <string name="browse_error_title">Не вдалося завантажити акції</string>
+    <string name="browse_error_body">Щоб показати список компаній, потрібне з’єднання. Перевірте з’єднання та спробуйте ще раз.</string>
     <string name="browse_more_error">Не вдалося завантажити більше компаній.</string>
     <string name="history_title">Ваша історія GPT Investor</string>
     <string name="history_empty_title">Ще немає чатів</string>
@@ -401,6 +404,13 @@
     <string name="discover_search_error_title_generic">Не вдалося завантажити пошук</string>
     <string name="discover_search_error_body">Для пошуку потрібне з’єднання. Перевірте з’єднання та спробуйте ще раз.</string>
     <string name="discover_loading_search">Завантаження пошуку</string>
+    <plurals name="questions_count">
+        <item quantity="one">%1$d запитання</item>
+        <item quantity="few">%1$d запитання</item>
+        <item quantity="many">%1$d запитань</item>
+        <item quantity="other">%1$d запитання</item>
+    </plurals>
+    <string name="notifications_turn_on_in_settings">Увімкніть сповіщення в налаштуваннях.</string>
     <plurals name="watchlist_stocks_count">
         <item quantity="one">%1$d акція</item>
         <item quantity="few">%1$d акції</item>
@@ -423,6 +433,7 @@
     <string name="watchlist_remove_body">%1$s зникне зі списку спостереження й більше не з’являтиметься в оновленнях. Ви можете додати її знову будь-коли.</string>
     <string name="watchlist_daily_summary_title">Щоденний підсумок для кожної акції</string>
     <string name="watchlist_guest_body">Увійдіть, щоб зберігати акції у списку спостереження та стежити за їхньою динамікою.</string>
+    <string name="watchlist_sign_in_required">Увійдіть, щоб зберігати акції.</string>
     <string name="create_an_account">Створити обліковий запис</string>
     <string name="watchlist_popular">Популярне цього тижня</string>
     <string name="watchlist_watch_cd">Стежити за %1$s</string>
@@ -430,7 +441,7 @@
     <string name="profile_free_plan">Безкоштовний план</string>
     <string name="profile_premium_plan">План Premium</string>
     <string name="profile_upgrade_title">Перейти на Premium</string>
-    <string name="profile_upgrade_body">Необмежений список спостереження, Thesis Tracker і щоденний підсумок для кожної акції, за якою ви стежите.</string>
+    <string name="profile_upgrade_body">Необмежені запитання до ШІ, повні брифінги для вашого списку спостереження та преміум-аналітика.</string>
     <string name="profile_see_premium">Переглянути Premium</string>
     <string name="profile_questions">Запитання</string>
     <string name="settings_on">Увімк.</string>
@@ -462,6 +473,8 @@
     <string name="tidbit_share">Поділитися цікавинкою</string>
     <string name="remove_from_saved">Видалити зі збереженого</string>
     <string name="tidbit_saved_to_library">Збережено у вашій бібліотеці</string>
+    <string name="tidbit_save_failed">Не вдалося зберегти.</string>
+    <string name="tidbit_remove_failed">Не вдалося видалити.</string>
     <string name="tidbit_loading">Завантаження цікавинки</string>
     <string name="tidbits_loading">Завантаження цікавинок</string>
     <string name="tidbit_error_title">Не вдалося завантажити цю цікавинку</string>
@@ -478,11 +491,6 @@
     <string name="audio_pause">Пауза</string>
     <string name="top_pick_label">Найкращий вибір</string>
     <string name="top_pick_score">Оцінка %1$d/10</string>
-    <string name="top_pick_key_metrics">Ключові показники</string>
-    <string name="top_pick_key_risks">Ключові ризики</string>
-    <string name="top_pick_tab_overview">Огляд</string>
-    <string name="top_pick_tab_key_ratios">Ключові коефіцієнти</string>
-    <string name="top_pick_tab_news">Новини</string>
     <string name="chart_range_1w">1Т</string>
     <string name="chart_range_1m">1М</string>
     <string name="chart_range_3m">3М</string>
@@ -498,13 +506,14 @@
     <string name="chart_range">Період графіка</string>
     <string name="top_pick_revenue">Виручка</string>
     <string name="read_article">Читати статтю</string>
-    <string name="top_pick_no_news">Немає свіжих новин про %1$s.</string>
+    <string name="top_pick_no_news">Про %1$s поки немає свіжих новин.</string>
     <string name="top_pick_sources_subtitle">Звідки взято факти для цього вибору</string>
     <string name="yahoo_finance">Yahoo Finance</string>
     <string name="top_pick_disclaimer">Вибори пояснюють, чим цікава акція; це не порада купувати. Не є фінансовою порадою.</string>
     <string name="top_pick_save">Зберегти вибір</string>
     <string name="top_pick_share">Поділитися вибором</string>
     <string name="top_pick_saved_to_picks">Збережено у ваших виборах</string>
+    <string name="top_pick_save_failed">Не вдалося зберегти.</string>
     <string name="top_pick_loading">Завантаження найкращого вибору</string>
     <string name="top_picks_loading">Завантаження найкращих виборів</string>
     <string name="top_pick_error_title">Не вдалося завантажити цей вибір</string>

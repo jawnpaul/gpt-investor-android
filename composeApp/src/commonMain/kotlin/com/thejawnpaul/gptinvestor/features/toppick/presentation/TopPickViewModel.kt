@@ -4,13 +4,17 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
+import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
+import com.thejawnpaul.gptinvestor.features.premium.domain.PREMIUM_SOURCE_WATCHLIST_FULL
+import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetLocalTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetSingleTopPickUseCase
@@ -21,14 +25,18 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickAction.S
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPickDetailView
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistFailure
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.koin.core.annotation.Provided
 
 @KoinViewModel
 class TopPickViewModel(
@@ -41,7 +49,11 @@ class TopPickViewModel(
     private val shareTopPickUseCase: ShareTopPickUseCase,
     private val getCompanyUseCase: GetCompanyUseCase,
     private val appPreferences: AppPreferences,
-    private val guestRateLimitNotifier: GuestRateLimitNotifier
+    private val guestRateLimitNotifier: GuestRateLimitNotifier,
+    private val getCompanyBriefUseCase: GetCompanyBriefUseCase,
+    private val watchlistRepository: WatchlistRepository,
+    private val premiumEventBus: PremiumEventBus,
+    @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
     private val topPickId: String?
@@ -130,15 +142,73 @@ class TopPickViewModel(
             )
         }
         getCompanyFinancials(ticker = topPick.ticker)
+        viewModelScope.launch {
+            if (appPreferences.isGuestLoggedIn.first() != true) getBrief(ticker = topPick.ticker)
+        }
         Logger.e(topPick.toString())
+    }
+
+    private fun getBrief(ticker: String) {
+        _topPickView.update { it.copy(briefLoading = true, briefFailed = false) }
+        getCompanyBriefUseCase(ticker) {
+            it.fold(
+                { failure ->
+                    Logger.e(failure.toString())
+                    _topPickView.update { state -> state.copy(briefLoading = false, briefFailed = true) }
+                },
+                { brief -> _topPickView.update { state -> state.copy(briefLoading = false, brief = brief) } }
+            )
+        }
+    }
+
+    private fun setWatched(watch: Boolean) {
+        val state = _topPickView.value
+        val ticker = state.brief?.ticker ?: state.topPick?.ticker ?: return
+        if (state.watchlistPending) return
+        _topPickView.update { it.copy(watchlistPending = true) }
+        viewModelScope.launch {
+            val result = if (watch) {
+                watchlistRepository.addStockToWatchList(ticker)
+            } else {
+                watchlistRepository.removeFromWatchlist(ticker)
+            }
+            _topPickView.update { it.copy(watchlistPending = false) }
+            result.fold(
+                { failure ->
+                    when {
+                        watch && failure is WatchlistFailure.WatchlistFull ->
+                            premiumEventBus.requestPremium(PREMIUM_SOURCE_WATCHLIST_FULL, failure.cap, ticker)
+
+                        watch -> processAction(TopPickAction.WatchlistAddFailed)
+
+                        else -> processAction(TopPickAction.WatchlistRemoveFailed(ticker))
+                    }
+                },
+                {
+                    analyticsLogger.logEvent(
+                        eventName = if (watch) "stock-added-to-watchlist" else "stock-removed-from-watchlist",
+                        params = mapOf("ticker" to ticker, "source" to "top_pick")
+                    )
+                    _topPickView.update { it.copy(brief = it.brief?.copy(isWatched = watch)) }
+                    if (!watch) processAction(TopPickAction.WatchlistRemoved(ticker))
+                }
+            )
+        }
     }
 
     fun getAllTopPicks() {
         _allTopPicks.update { it.copy(loading = true) }
+        _savedTopPicks.update { it.copy(loading = true) }
 
         getLocalTopPicksUseCase(GetLocalTopPicksUseCase.None()) {
             it.onFailure {
                 _allTopPicks.update { state ->
+                    state.copy(
+                        loading = false,
+                        error = "Something went wrong."
+                    )
+                }
+                _savedTopPicks.update { state ->
                     state.copy(
                         loading = false,
                         error = "Something went wrong."
@@ -215,10 +285,12 @@ class TopPickViewModel(
                             }
                         )
                     }
+                    processAction(TopPickAction.PickSaved)
                 }
 
                 it.onFailure { failure ->
                     Logger.e(failure.toString())
+                    processAction(TopPickAction.PickSaveFailed)
                 }
             }
         }
@@ -320,9 +392,9 @@ class TopPickViewModel(
                 saveTopPick()
             }
 
-            TopPickEvent.LikeTopPick -> {
-                // Like top pick
-            }
+            TopPickEvent.LikeTopPick -> logLike(liked = true)
+
+            TopPickEvent.RemoveLikeTopPick -> logLike(liked = false)
 
             TopPickEvent.RemoveBookmarkTopPick -> {
                 removeTopPickFromSaved()
@@ -332,16 +404,36 @@ class TopPickViewModel(
                 shareTopPick()
             }
 
-            TopPickEvent.RemoveLikeTopPick -> {
-                // Remove like top pick
-            }
-
-            TopPickEvent.GoToSignUp -> {
-                processAction(TopPickAction.OnGoToSignUp)
+            TopPickEvent.GoToLogin -> {
+                processAction(TopPickAction.OnGoToLogin)
             }
 
             TopPickEvent.Retry -> getTopPick()
+
+            TopPickEvent.RetryBrief -> _topPickView.value.topPick?.ticker?.let { ticker ->
+                getBrief(ticker)
+                if (_topPickView.value.companyPresentation == null) getCompanyFinancials(ticker)
+            }
+
+            TopPickEvent.AddToWatchlist -> setWatched(true)
+
+            TopPickEvent.RemoveFromWatchlist -> setWatched(false)
+
+            is TopPickEvent.AskAboutPick -> {
+                val ticker = _topPickView.value.brief?.ticker ?: _topPickView.value.topPick?.ticker
+                if (ticker != null && event.query.isNotBlank()) {
+                    processAction(TopPickAction.OpenCompanyAsk(ticker = ticker, query = event.query.trim()))
+                }
+            }
         }
+    }
+
+    private fun logLike(liked: Boolean) {
+        val pick = _topPickView.value.topPick ?: return
+        analyticsLogger.logEvent(
+            eventName = if (liked) "top-pick-liked" else "top-pick-unliked",
+            params = mapOf("top_pick_id" to pick.id, "ticker" to pick.ticker)
+        )
     }
 
     fun processAction(action: TopPickAction) {
@@ -355,7 +447,13 @@ sealed interface TopPickAction {
     data class OnShare(val url: String) : TopPickAction
     data class ShowToast(val message: String) : TopPickAction
     data object OnGoBack : TopPickAction
-    data object OnGoToSignUp : TopPickAction
+    data object OnGoToLogin : TopPickAction
+    data class OpenCompanyAsk(val ticker: String, val query: String) : TopPickAction
+    data object WatchlistAddFailed : TopPickAction
+    data class WatchlistRemoved(val ticker: String) : TopPickAction
+    data class WatchlistRemoveFailed(val ticker: String) : TopPickAction
+    data object PickSaved : TopPickAction
+    data object PickSaveFailed : TopPickAction
 }
 
 sealed interface TopPickEvent {
@@ -368,6 +466,10 @@ sealed interface TopPickEvent {
     data object RemoveBookmarkTopPick : TopPickEvent
     data object LikeTopPick : TopPickEvent
     data object RemoveLikeTopPick : TopPickEvent
-    data object GoToSignUp : TopPickEvent
+    data object GoToLogin : TopPickEvent
     data object Retry : TopPickEvent
+    data object RetryBrief : TopPickEvent
+    data object AddToWatchlist : TopPickEvent
+    data object RemoveFromWatchlist : TopPickEvent
+    data class AskAboutPick(val query: String) : TopPickEvent
 }

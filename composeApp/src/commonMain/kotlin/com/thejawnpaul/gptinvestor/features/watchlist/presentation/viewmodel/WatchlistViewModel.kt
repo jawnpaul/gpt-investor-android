@@ -87,7 +87,8 @@ class WatchlistViewModel(
                 )
                 emitAction(WatchlistAction.NavigateToSearch)
             }
-            WatchlistEvent.OnSignInClick -> emitAction(WatchlistAction.NavigateToSignUp)
+            WatchlistEvent.OnSignInClick -> emitAction(WatchlistAction.NavigateToLogin)
+            WatchlistEvent.OnCreateAccountClick -> emitAction(WatchlistAction.NavigateToSignUp)
             WatchlistEvent.OnUpgradeClick -> premiumEventBus.requestPremium(source = PREMIUM_SOURCE_WATCHLIST)
             WatchlistEvent.OnBrowseTopPicksClick -> {
                 analyticsLogger.logEvent("watchlist-browse-top-picks-tapped", emptyMap())
@@ -201,6 +202,7 @@ sealed interface WatchlistEvent {
     data object OnSearchClick : WatchlistEvent
     data object OnBrowseTopPicksClick : WatchlistEvent
     data object OnSignInClick : WatchlistEvent
+    data object OnCreateAccountClick : WatchlistEvent
     data object OnUpgradeClick : WatchlistEvent
 }
 
@@ -208,6 +210,7 @@ sealed interface WatchlistAction {
     data object NavigateToSearch : WatchlistAction
     data object NavigateToTopPicks : WatchlistAction
     data object NavigateToSignUp : WatchlistAction
+    data object NavigateToLogin : WatchlistAction
     data class NavigateToCompanyDetail(val ticker: String) : WatchlistAction
     data class ShowAddedMessage(val ticker: String) : WatchlistAction
     data class ShowRemovedMessage(val ticker: String) : WatchlistAction

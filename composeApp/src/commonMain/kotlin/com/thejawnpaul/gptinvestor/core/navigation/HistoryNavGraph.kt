@@ -15,8 +15,10 @@ import com.thejawnpaul.gptinvestor.features.history.presentation.ui.HistoryScree
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryDetailAction
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryScreenAction
 import com.thejawnpaul.gptinvestor.features.history.presentation.viewmodel.HistoryViewModel
+import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 fun NavGraphBuilder.historyNavGraph(navController: NavHostController, platformActions: PlatformActions) {
@@ -57,6 +59,7 @@ fun NavGraphBuilder.historyNavGraph(navController: NavHostController, platformAc
         val viewModel = koinViewModel<HistoryViewModel>()
         val state = viewModel.conversation.collectAsState()
         val scope = rememberCoroutineScope()
+        val toastState = rememberGiToastState()
         LaunchedEffect(Unit) {
             viewModel.historyDetailAction.onEach { action ->
                 when (action) {
@@ -70,17 +73,15 @@ fun NavGraphBuilder.historyNavGraph(navController: NavHostController, platformAc
 
                     is HistoryDetailAction.OnCopy -> {
                         platformActions.copyToClipboard("", action.text)
-                        platformActions.showMessage("Copied")
+                        scope.launch { toastState.show(message = "Copied") }
                     }
 
                     is HistoryDetailAction.ShowToast -> {
-                        platformActions.showMessage(action.message)
+                        scope.launch { toastState.show(message = action.message) }
                     }
 
-                    HistoryDetailAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    HistoryDetailAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     is HistoryDetailAction.OnShare -> {
@@ -105,6 +106,7 @@ fun NavGraphBuilder.historyNavGraph(navController: NavHostController, platformAc
             state = state.value,
             onEvent = viewModel::handleHistoryDetailEvent,
             onAction = viewModel::processHistoryDetailAction,
+            toastState = toastState,
             onUpgradeFromRateLimit = {
                 viewModel.handleUpgradeClick()
             }

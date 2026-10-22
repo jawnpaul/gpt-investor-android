@@ -4,15 +4,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.core.functional.onSuccess
+import com.thejawnpaul.gptinvestor.core.platform.NotificationPermissionController
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.dark
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
+import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.profile.presentation.state.ProfileUiState
 import com.thejawnpaul.gptinvestor.features.settings.domain.SettingsRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.repository.ITopPickRepository
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import com.thejawnpaul.gptinvestor.light
 import com.thejawnpaul.gptinvestor.system
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,6 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -38,6 +43,9 @@ class ProfileViewModel(
     private val tidbitRepository: TidbitRepository,
     private val settingsRepository: SettingsRepository,
     private val premiumEventBus: PremiumEventBus,
+    private val watchlistRepository: WatchlistRepository,
+    private val notificationRepository: NotificationRepository,
+    private val notificationPermissionController: NotificationPermissionController,
     @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
@@ -113,12 +121,41 @@ class ProfileViewModel(
             }
 
             ProfileEvent.NotificationsClicked -> {
+                if (!state.value.canTurnOnNotifications) return
                 analyticsLogger.logEvent(
                     eventName = "notifications-clicked",
                     params = mapOf("source" to "profile_screen")
                 )
-                processAction(ProfileAction.NavigateToNotifications)
+                _state.update { it.copy(requestNotificationPermission = true) }
             }
+
+            ProfileEvent.NotificationPermissionGranted -> {
+                _state.update { it.copy(requestNotificationPermission = false) }
+                viewModelScope.launch {
+                    appPreferences.setNotificationPermission(true)
+                    analyticsLogger.logEvent(
+                        eventName = "notification-permission-granted",
+                        params = mapOf("permission" to true, "source" to "profile_screen")
+                    )
+                    notificationRepository.syncTokenIfNeeded()
+                }
+            }
+
+            ProfileEvent.NotificationPermissionDenied -> {
+                _state.update { it.copy(requestNotificationPermission = false) }
+                viewModelScope.launch { appPreferences.setNotificationPermission(false) }
+                processAction(ProfileAction.ShowNotificationSettingsHint)
+            }
+
+            ProfileEvent.ScreenShown -> viewModelScope.launch {
+                if (appPreferences.isGuestLoggedIn.first() == true) return@launch
+                launch { syncNotificationPermission() }
+                watchlistRepository.getWatchlist().onSuccess { watchlist ->
+                    _state.update { it.copy(watchingCount = watchlist.items.size) }
+                }
+            }
+
+            ProfileEvent.WatchingClicked -> processAction(ProfileAction.NavigateToWatchlist)
 
             ProfileEvent.PrivacyClicked -> {
                 analyticsLogger.logEvent(
@@ -169,8 +206,17 @@ class ProfileViewModel(
                 processAction(ProfileAction.NavigateToSettings)
             }
 
-            ProfileEvent.SignInClicked -> processAction(ProfileAction.NavigateToSignUp)
+            ProfileEvent.SignInClicked -> processAction(ProfileAction.NavigateToLogin)
+
+            ProfileEvent.CreateAccountClicked -> processAction(ProfileAction.NavigateToSignUp)
         }
+    }
+
+    private suspend fun syncNotificationPermission() {
+        val enabled = notificationPermissionController.areNotificationsEnabled()
+        if (appPreferences.notificationPermission.first() == enabled) return
+        appPreferences.setNotificationPermission(enabled)
+        if (enabled) notificationRepository.syncTokenIfNeeded()
     }
 
     private fun processAction(action: ProfileAction) {

@@ -231,7 +231,7 @@ private fun GiStockRowPrice(price: String) {
 @Composable
 private fun RowScope.GiStockRowEnd(trailing: (@Composable () -> Unit)?, showCaret: Boolean) {
     if (trailing != null) {
-        Row(modifier = Modifier.align(Alignment.Top)) { trailing() }
+        Row(modifier = Modifier.align(if (isLargeText()) Alignment.Top else Alignment.CenterVertically)) { trailing() }
     }
     if (showCaret) {
         Icon(

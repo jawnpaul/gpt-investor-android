@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,9 +22,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.OpenInNew
-import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -130,7 +128,13 @@ private const val GOOD_SCORE = 7
 private const val FAIR_SCORE = 4
 
 @Composable
-internal fun ClampedText(text: String, maxLines: Int, modifier: Modifier = Modifier, onReadMore: (() -> Unit)? = null) {
+internal fun ClampedText(
+    text: String,
+    maxLines: Int,
+    modifier: Modifier = Modifier,
+    onReadMore: (() -> Unit)? = null,
+    trailing: (@Composable RowScope.() -> Unit)? = null
+) {
     val colors = GiTheme.colors
     var expanded by remember(text) { mutableStateOf(false) }
     var overflowing by remember(text) { mutableStateOf(false) }
@@ -144,14 +148,33 @@ internal fun ClampedText(text: String, maxLines: Int, modifier: Modifier = Modif
             overflow = TextOverflow.Ellipsis,
             onTextLayout = { if (!expanded) overflowing = it.hasVisualOverflow }
         )
-        if (overflowing || expanded) {
+        val showToggle = overflowing || expanded
+        val toggle = @Composable {
             GiButton(
                 text = stringResource(if (expanded) Res.string.read_less else Res.string.read_more),
                 onClick = { if (onReadMore != null) onReadMore() else expanded = !expanded },
-                modifier = Modifier.overlapMargin(top = GiSpace.x3, bottom = GiSpace.x3),
+                modifier = if (trailing == null) {
+                    Modifier.overlapMargin(top = GiSpace.x3, bottom = GiSpace.x3)
+                } else {
+                    Modifier
+                },
                 size = GiButtonSize.Small,
                 variant = GiButtonVariant.Text
             )
+        }
+        if (trailing != null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .overlapMargin(top = GiSpace.x3, bottom = GiSpace.x3),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (showToggle) toggle()
+                Spacer(modifier = Modifier.weight(1f))
+                trailing()
+            }
+        } else if (showToggle) {
+            toggle()
         }
     }
 }
@@ -204,15 +227,25 @@ internal fun displayMetric(metric: Pair<String?, String>): Pair<String?, String>
     val key = label?.lowercase().orEmpty()
     val shortLabel = METRIC_LABELS[key] ?: label?.let(::sentenceCase)
     val number = value.replace(",", "").toDoubleOrNull()
+    val signedKey = "growth" in key || "change" in key
     val shownValue = when {
+        number != null && PERCENT_WORDS.any { it in key } && "%" !in value && abs(number) <= MAX_FRACTION -> {
+            val percent = decimal(number * HUNDRED, 1) + "%"
+            if (signedKey && number > 0) "+$percent" else percent
+        }
         number != null && abs(number) >= THOUSAND -> {
             val money = MONEY_WORDS.any { it in key }
             (if (money) "$" else "") + abbreviate(number)
         }
-        ("growth" in key || "change" in key) && value.endsWith("%") && value.first().isDigit() -> "+$value"
+        signedKey && value.endsWith("%") && value.first().isDigit() -> "+$value"
         else -> value
     }
-    return shortLabel to shownValue
+    val signed = when {
+        shownValue.startsWith("$-") -> "\u2212$" + shownValue.drop(2)
+        shownValue.startsWith("-") -> "\u2212" + shownValue.drop(1)
+        else -> shownValue
+    }
+    return shortLabel to signed
 }
 
 private fun abbreviate(value: Double): String {
@@ -245,6 +278,11 @@ private val MONEY_WORDS =
     listOf("revenue", "income", "cap", "cash", "earnings", "profit", "sales", "debt", "ebitda", "value")
 
 private const val THOUSAND = 1_000.0
+
+private val PERCENT_WORDS = listOf("growth", "margin", "yield", "return", "change")
+private const val HUNDRED = 100.0
+
+private const val MAX_FRACTION = 5.0
 
 internal fun parseMetric(metric: String): Pair<String?, String> {
     val index = metric.indexOf(':')
@@ -502,7 +540,7 @@ internal fun SourcesRow(count: Int, onClick: () -> Unit, modifier: Modifier = Mo
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            Icons.Outlined.Language,
+            GiIcons.globe,
             contentDescription = null,
             modifier = Modifier.size(GiIconSize.md),
             tint = colors.muted
@@ -581,7 +619,7 @@ internal fun PickNews(company: CompanyDetailRemoteResponse, onOpen: (String) -> 
                 ) {
                     GiText(text = stringResource(Res.string.read_article), style = GiTextStyle.Link)
                     Icon(
-                        Icons.AutoMirrored.Outlined.OpenInNew,
+                        GiIcons.arrowSquareOut,
                         contentDescription = null,
                         modifier = Modifier.size(GiIconSize.sm),
                         tint = colors.violet
@@ -623,7 +661,7 @@ internal fun SourceRows(sources: List<PickSource>, onOpen: (String) -> Unit) {
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        Icons.Outlined.Language,
+                        GiIcons.globe,
                         contentDescription = null,
                         modifier = Modifier.size(GiIconSize.sm),
                         tint = colors.muted
@@ -631,7 +669,7 @@ internal fun SourceRows(sources: List<PickSource>, onOpen: (String) -> Unit) {
                 }
                 GiText(text = source.name, modifier = Modifier.weight(1f), style = GiTextStyle.LabelRegular)
                 Icon(
-                    Icons.AutoMirrored.Outlined.OpenInNew,
+                    GiIcons.arrowSquareOut,
                     contentDescription = null,
                     modifier = Modifier.size(GiIconSize.sm),
                     tint = colors.muted

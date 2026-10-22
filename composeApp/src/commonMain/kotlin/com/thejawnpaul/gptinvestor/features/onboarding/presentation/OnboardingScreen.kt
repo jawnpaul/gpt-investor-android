@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -61,6 +62,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
@@ -72,7 +74,6 @@ import com.thejawnpaul.gptinvestor.clear_search
 import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumber
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefLayout
-import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyBriefSkeleton
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyKeyNumberSheet
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.companyBriefItems
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.previewCompanyBrief
@@ -122,6 +123,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiButton
 import com.thejawnpaul.gptinvestor.theme.components.GiButtonSize
 import com.thejawnpaul.gptinvestor.theme.components.GiButtonVariant
 import com.thejawnpaul.gptinvestor.theme.components.GiCard
+import com.thejawnpaul.gptinvestor.theme.components.GiContentSheet
 import com.thejawnpaul.gptinvestor.theme.components.GiDivider
 import com.thejawnpaul.gptinvestor.theme.components.GiFillScrollColumn
 import com.thejawnpaul.gptinvestor.theme.components.GiIconTile
@@ -132,6 +134,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiListGroup
 import com.thejawnpaul.gptinvestor.theme.components.GiListRow
 import com.thejawnpaul.gptinvestor.theme.components.GiLogoTile
 import com.thejawnpaul.gptinvestor.theme.components.GiSearchField
+import com.thejawnpaul.gptinvestor.theme.components.GiSkeleton
 import com.thejawnpaul.gptinvestor.theme.components.GiStepDots
 import com.thejawnpaul.gptinvestor.theme.components.GiStockSummary
 import com.thejawnpaul.gptinvestor.theme.components.GiStockSummarySize
@@ -490,8 +493,7 @@ private fun PickStockContent(
                 .padding(start = GiSpace.gutter, end = GiSpace.gutter, bottom = GiSpace.x4)
         ) {
             Column(
-                // The top bar already adds 8 below the back button.
-                modifier = Modifier.padding(top = GiSpace.x4),
+                modifier = Modifier.padding(top = GiSpace.x3),
                 verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
             ) {
                 GiText(
@@ -749,41 +751,36 @@ private fun BriefLoading(
 ) {
     val companyName = state.selectedCompanyName.orEmpty()
     val ticker = state.selectedTicker.orEmpty()
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .navigationBarsPadding()
-            .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x3, bottom = GiSpace.x6),
-        verticalArrangement = Arrangement.spacedBy(GiSpace.x5)
-    ) {
-        GiCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .giBeam(active = true, shape = GiRadius.md, strength = BEAM_STRENGTH)
-                .semantics { liveRegion = LiveRegionMode.Polite },
-            contentPadding = PaddingValues(horizontal = GiSpace.x4, vertical = GiSpace.x3)
+    Column(modifier = modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GiSpace.x5)) {
+        Column(
+            modifier = Modifier.padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x2),
+            verticalArrangement = Arrangement.spacedBy(GiSpace.x5)
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
-                verticalAlignment = Alignment.CenterVertically
+            GiCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .giBeam(active = true, shape = GiRadius.md, strength = BEAM_STRENGTH)
+                    .semantics { liveRegion = LiveRegionMode.Polite },
+                contentPadding = PaddingValues(horizontal = GiSpace.x4, vertical = GiSpace.x3)
             ) {
-                GiBrandMark(size = GiBrandMarkSize.Small, spinning = true)
-                Column {
-                    GiText(
-                        text = stringResource(Res.string.onboarding_loading_headline, companyName),
-                        style = GiTextStyle.Label
-                    )
-                    GiText(
-                        text = stringResource(Res.string.onboarding_loading_subtitle),
-                        style = GiTextStyle.MetaRelaxed
-                    )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    GiBrandMark(size = GiBrandMarkSize.Small, spinning = true)
+                    Column {
+                        GiText(
+                            text = stringResource(Res.string.onboarding_loading_headline, companyName),
+                            style = GiTextStyle.Label
+                        )
+                        GiText(
+                            text = stringResource(Res.string.onboarding_loading_subtitle),
+                            style = GiTextStyle.MetaRelaxed
+                        )
+                    }
                 }
             }
-        }
-        CompanyBriefSkeleton(
-            announce = false,
-            header = {
+            Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
                 GiStockSummary(
                     stock = tickerStock(
                         ticker = ticker,
@@ -799,8 +796,39 @@ private fun BriefLoading(
                         logoTransition.flowScope
                     ).then(sharedLogoModifier(briefLogoKey(ticker), logoTransition.sharedScope, briefScope))
                 )
+                GiSkeleton(modifier = Modifier.size(width = 150.dp, height = 32.dp))
+                GiSkeleton(modifier = Modifier.fillMaxWidth().height(64.dp), shape = GiRadius.md)
             }
-        )
+        }
+        OnboardingSheetSkeleton(modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun OnboardingSheetSkeleton(modifier: Modifier = Modifier) {
+    GiContentSheet(
+        modifier = modifier.clearAndSetSemantics {},
+        contentPadding = PaddingValues(GiSpace.x5),
+        verticalSpacing = GiSpace.x6
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
+            GiSkeleton(modifier = Modifier.size(width = 96.dp, height = 18.dp))
+            listOf(1f, 1f, 0.64f).forEach { width ->
+                GiSkeleton(modifier = Modifier.fillMaxWidth(width).height(12.dp))
+            }
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
+            GiSkeleton(modifier = Modifier.size(width = 120.dp, height = 18.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
+                repeat(3) { GiSkeleton(modifier = Modifier.weight(1f).height(76.dp)) }
+            }
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
+            GiSkeleton(modifier = Modifier.size(width = 140.dp, height = 18.dp))
+            GiSkeleton(modifier = Modifier.fillMaxWidth().height(14.dp))
+            GiSkeleton(modifier = Modifier.fillMaxWidth(0.82f).height(14.dp))
+            GiSkeleton(modifier = Modifier.fillMaxWidth().height(48.dp))
+        }
     }
 }
 
@@ -823,7 +851,7 @@ private fun BriefContent(
         state = listState,
         modifier = modifier.fillMaxSize(),
         // The sections sheet is full-bleed and docks to the bottom, so only the page items are inset.
-        contentPadding = PaddingValues(top = GiSpace.x3),
+        contentPadding = PaddingValues(top = GiSpace.x2),
         verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
     ) {
         item(key = "title", contentType = "title") {

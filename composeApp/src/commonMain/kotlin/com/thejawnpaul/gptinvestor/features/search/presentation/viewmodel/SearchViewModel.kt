@@ -99,7 +99,13 @@ class SearchViewModel(
             result.onSuccess { sections ->
                 _uiState.update { it.copy(isLoading = false, sections = sections) }
             }.onFailure {
-                _uiState.update { it.copy(isLoading = false, error = "Something went wrong. Please try again.") }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        sections = emptyList(),
+                        error = "Something went wrong. Please try again."
+                    )
+                }
             }
         }
     }

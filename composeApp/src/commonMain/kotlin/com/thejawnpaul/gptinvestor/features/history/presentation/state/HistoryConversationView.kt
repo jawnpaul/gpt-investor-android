@@ -24,7 +24,7 @@ data class HistoryConversationView(
     val showWaitListBottomSheet: Boolean = false,
     val showRateLimitBottomSheet: Boolean = false,
     val isGuest: Boolean = false,
-    val answerOffline: Boolean = false
+    val offlineAnswerIds: Set<Long> = emptySet()
 ) {
     val enableSend = !loading && query.trim().isNotEmpty()
 }

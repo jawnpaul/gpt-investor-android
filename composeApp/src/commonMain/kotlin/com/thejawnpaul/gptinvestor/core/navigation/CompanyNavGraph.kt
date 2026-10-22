@@ -31,7 +31,16 @@ import org.jetbrains.compose.resources.getString
 import org.koin.compose.viewmodel.koinViewModel
 
 fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformActions: PlatformActions) {
-    composable(route = Screen.CompanyDetailScreen.route) {
+    composable(
+        route = Screen.CompanyDetailScreen.route,
+        arguments = listOf(
+            navArgument("ask") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) {
         val parentViewModel = koinViewModel<CompanyViewModel>()
         val state = parentViewModel.selectedCompany.collectAsState()
 
@@ -66,14 +75,12 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
                         navController.navigate(Screen.CompanyDetailScreen.createRoute(action.ticker))
                     }
 
-                    CompanyDetailAction.OnGoToSignUp -> {
-                        navController.navigate(Screen.SignUpScreen.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        }
+                    CompanyDetailAction.OnGoToLogin -> {
+                        navController.navigateClearingBackStack(Screen.LoginScreen.route)
                     }
 
                     is CompanyDetailAction.ShowToast -> {
-                        platformActions.showMessage(action.message)
+                        launch { toastState.show(message = action.message) }
                     }
 
                     is CompanyDetailAction.OnShare -> {
@@ -95,18 +102,24 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
 
                     CompanyDetailAction.WatchlistAddFailed -> {
                         haptics.performHapticFeedback(GiHaptics.Reject)
-                        platformActions.showMessage(getString(Res.string.added_to_watchlist_error))
+                        launch { toastState.show(message = getString(Res.string.added_to_watchlist_error)) }
                     }
 
+                    CompanyDetailAction.WatchlistSignInRequired -> Unit
+
                     is CompanyDetailAction.WatchlistRemoved -> {
-                        platformActions.showMessage(getString(Res.string.removed_from_watchlist, action.ticker))
+                        launch {
+                            toastState.show(message = getString(Res.string.removed_from_watchlist, action.ticker))
+                        }
                     }
 
                     is CompanyDetailAction.WatchlistRemoveFailed -> {
                         haptics.performHapticFeedback(GiHaptics.Reject)
-                        platformActions.showMessage(
-                            getString(Res.string.failed_to_remove_from_watchlist, action.ticker)
-                        )
+                        launch {
+                            toastState.show(
+                                message = getString(Res.string.failed_to_remove_from_watchlist, action.ticker)
+                            )
+                        }
                     }
                 }
             }

@@ -20,10 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.DarkMode
-import androidx.compose.material.icons.outlined.LightMode
-import androidx.compose.material.icons.outlined.SettingsBrightness
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -193,7 +189,7 @@ private fun AppearanceMenuItem(label: String, icon: ImageVector, selected: Boole
 }
 
 private fun appearanceIcon(option: StringResource): ImageVector = when (option) {
-    Res.string.light -> Icons.Outlined.LightMode
-    Res.string.dark -> Icons.Outlined.DarkMode
-    else -> Icons.Outlined.SettingsBrightness
+    Res.string.light -> GiIcons.sun
+    Res.string.dark -> GiIcons.moon
+    else -> GiIcons.circleHalf
 }

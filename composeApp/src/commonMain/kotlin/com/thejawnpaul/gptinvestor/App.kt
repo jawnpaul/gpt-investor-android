@@ -20,6 +20,7 @@ import coil3.SingletonImageLoader
 import coil3.request.crossfade
 import com.thejawnpaul.gptinvestor.core.navigation.Screen
 import com.thejawnpaul.gptinvestor.core.navigation.SetUpNavGraph
+import com.thejawnpaul.gptinvestor.core.navigation.navigateClearingBackStack
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
 import com.thejawnpaul.gptinvestor.core.session.GuestSessionEvent
@@ -206,9 +207,7 @@ fun App(
                         onDismiss = { showGuestRateLimitSheet = false },
                         onSignIn = {
                             showGuestRateLimitSheet = false
-                            navController.navigate(Screen.SignUpScreen.route) {
-                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                            }
+                            navController.navigateClearingBackStack(Screen.SignUpScreen.route)
                         }
                     )
                 }
@@ -219,15 +218,11 @@ fun App(
                         onDismiss = { showGuestSessionSheet = false },
                         onSignUp = {
                             showGuestSessionSheet = false
-                            navController.navigate(Screen.SignUpScreen.route) {
-                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                            }
+                            navController.navigateClearingBackStack(Screen.SignUpScreen.route)
                         },
                         onLogin = {
                             showGuestSessionSheet = false
-                            navController.navigate(Screen.LoginScreen.route) {
-                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                            }
+                            navController.navigateClearingBackStack(Screen.LoginScreen.route)
                         }
                     )
                 }

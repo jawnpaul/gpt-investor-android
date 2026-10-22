@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Either
@@ -8,6 +9,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.core.session.GuestSessionNotifier
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
+import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
@@ -62,6 +64,7 @@ class CompanyViewModelWatchlistTest {
 
     private fun viewModel() = CompanyViewModel(
         getCompanyBriefUseCase = mockk<GetCompanyBriefUseCase>(relaxed = true),
+        getCompanyUseCase = mockk<GetCompanyUseCase>(relaxed = true),
         savedStateHandle = SavedStateHandle(mapOf("ticker" to "AAPL")),
         getInputPromptUseCase = mockk<GetInputPromptUseCase>(relaxed = true),
         modelsRepository = modelsRepository,
@@ -100,6 +103,18 @@ class CompanyViewModelWatchlistTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { watchlistRepository.addStockToWatchList("AAPL") }
+    }
+
+    @Test
+    fun `a guest tap asks to sign in and sends no request`() = runTest(testDispatcher) {
+        every { appPreferences.isGuestLoggedIn } returns flowOf(true)
+        val vm = subscribedViewModel()
+
+        vm.companyDetailAction.test {
+            vm.handleCompanyDetailEvent(CompanyDetailEvent.AddToWatchlist)
+            assertThat(awaitItem()).isEqualTo(CompanyDetailAction.WatchlistSignInRequired)
+        }
+        coVerify(exactly = 0) { watchlistRepository.addStockToWatchList(any()) }
     }
 
     @Test

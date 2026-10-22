@@ -7,6 +7,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.utility.formatAsRelativeDate
 import com.thejawnpaul.gptinvestor.core.utility.getHourAndMinute
 import com.thejawnpaul.gptinvestor.features.conversation.data.local.dao.ConversationDao
+import com.thejawnpaul.gptinvestor.features.conversation.data.local.model.ConversationWithMessages
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.StructuredConversation
 import com.thejawnpaul.gptinvestor.features.history.domain.repository.IHistoryRepository
 import kotlinx.coroutines.flow.Flow
@@ -25,15 +26,7 @@ class HistoryRepository(
                 .groupBy { it.conversation.timestamp.formatAsRelativeDate() }
 
             val conversations = separated.map { (date, entities) ->
-                date to entities.map { entity ->
-                    with(entity) {
-                        StructuredConversation(
-                            id = conversation.conversationId,
-                            title = conversation.title,
-                            lastMessageTime = conversation.timestamp.getHourAndMinute()
-                        )
-                    }
-                }
+                date to entities.map { it.toHistoryItem() }
             }
             emit(Either.Right(conversations.toMap()))
         } catch (e: Exception) {
@@ -62,3 +55,14 @@ class HistoryRepository(
         }
     }
 }
+
+internal fun ConversationWithMessages.toHistoryItem(): StructuredConversation = StructuredConversation(
+    id = conversation.conversationId,
+    title = conversation.title,
+    messageList = messages
+        .filter { it.companyDetailRemoteResponse == null }
+        .minByOrNull { it.messageId }
+        ?.let { mutableListOf(it.toGenAiMessage()) }
+        ?: mutableListOf(),
+    lastMessageTime = conversation.timestamp.getHourAndMinute()
+)

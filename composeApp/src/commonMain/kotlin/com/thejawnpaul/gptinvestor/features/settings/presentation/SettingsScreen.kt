@@ -32,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
@@ -76,6 +75,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiButton
 import com.thejawnpaul.gptinvestor.theme.components.GiDialog
 import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiSheetSubtitle
 import com.thejawnpaul.gptinvestor.theme.components.GiText
 import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
@@ -181,7 +181,8 @@ private fun DigestTimePickerSheet(currentHour: Int?, onSave: (Int) -> Unit, onDi
         sheetState = sheetState,
         title = stringResource(Res.string.digest_delivery_time),
         closeContentDescription = stringResource(Res.string.close),
-        subtitle = stringResource(Res.string.digest_picker_body)
+        subtitle = stringResource(Res.string.digest_picker_body),
+        subtitleStyle = GiSheetSubtitle.Below
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -347,7 +348,7 @@ private fun DialLabel(
             }
             .size(labelSize)
             .clip(GiRadius.full)
-            .background(if (selected) colors.violet else Color.Transparent)
+            .background(if (selected) colors.violet else colors.tile)
             .selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {

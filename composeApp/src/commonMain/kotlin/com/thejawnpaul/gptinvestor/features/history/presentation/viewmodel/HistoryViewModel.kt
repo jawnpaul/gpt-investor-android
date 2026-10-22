@@ -7,6 +7,10 @@ import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionEvent
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionNotifier
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionReason
+import com.thejawnpaul.gptinvestor.core.session.GuestSessionSource
 import com.thejawnpaul.gptinvestor.core.session.rateLimitRetryMessage
 import com.thejawnpaul.gptinvestor.features.conversation.data.error.GenAIException
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
@@ -18,6 +22,8 @@ import com.thejawnpaul.gptinvestor.features.conversation.domain.model.answerFail
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.stopAnswer
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.withFailedAnswer
+import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.withdrawFailedAnswer
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
 import com.thejawnpaul.gptinvestor.features.history.domain.usecases.GetAllHistoryUseCase
 import com.thejawnpaul.gptinvestor.features.history.domain.usecases.GetSingleHistoryUseCase
@@ -45,7 +51,8 @@ class HistoryViewModel(
     private val modelsRepository: ModelsRepository,
     private val premiumEventBus: PremiumEventBus,
     @Provided private val analyticsLogger: AnalyticsLogger,
-    private val guestRateLimitNotifier: GuestRateLimitNotifier
+    private val guestRateLimitNotifier: GuestRateLimitNotifier,
+    private val guestSessionNotifier: GuestSessionNotifier
 ) : ViewModel() {
 
     private val _historyScreenViewState = MutableStateFlow(HistoryScreenView())
@@ -145,18 +152,24 @@ class HistoryViewModel(
 
     private fun retryAnswer(query: String) {
         if (query.isBlank() || conversation.value.loading) return
-        ask(query = query, source = null)
+        val current = conversation.value.conversation as? StructuredConversation
+        val failed = current?.let { withdrawFailedAnswer(it.messageList, query) }
+        if (current != null && failed != null) {
+            conversationView.update {
+                it.copy(conversation = current.copy(messageList = failed.messages.toMutableList()))
+            }
+        }
+        ask(query = query, source = null, replacesMessageId = failed?.messageId)
     }
 
-    private fun ask(query: String, source: String?) {
+    private fun ask(query: String, source: String?, replacesMessageId: Long? = null) {
         answerGeneration++
         val generation = answerGeneration
         conversationView.update {
             it.copy(
                 loading = true,
                 pendingQuery = query,
-                query = if (source == null) it.query else "",
-                answerOffline = false
+                query = if (source == null) it.query else ""
             )
         }
         requestStartTime = Clock.System.now().toEpochMilliseconds()
@@ -164,7 +177,8 @@ class HistoryViewModel(
         answerJob = getInputPromptUseCase(
             ConversationPrompt(
                 conversationId = conversationId ?: -1L,
-                query = query
+                query = query,
+                replacesMessageId = replacesMessageId
             )
         ) {
             if (generation == answerGeneration) {
@@ -180,6 +194,10 @@ class HistoryViewModel(
         answerGeneration++
         answerJob?.cancel()
         answerJob = null
+        withdrawAnswer()
+    }
+
+    private fun withdrawAnswer() {
         conversationView.update { state ->
             val conversation = state.conversation as? StructuredConversation
             val stopped = conversation?.let { stopAnswer(it.messageList) }
@@ -196,6 +214,15 @@ class HistoryViewModel(
     }
 
     private fun handleInputResponseFailure(failure: Failure) {
+        if (failure is Failure.GuestLimitReached) {
+            withdrawAnswer()
+            if (conversation.value.isGuest) {
+                guestSessionNotifier.notify(
+                    GuestSessionEvent(reason = GuestSessionReason.QuestionLimit, source = GuestSessionSource.Stream)
+                )
+            }
+            return
+        }
         var shownInline = false
         conversationView.update { state ->
             val updatedConversation =
@@ -220,7 +247,10 @@ class HistoryViewModel(
                 conversation = updatedConversation,
                 pendingQuery = null,
                 query = state.pendingQuery ?: state.query,
-                answerOffline = failure is Failure.NetworkConnection
+                offlineAnswerIds = state.offlineAnswerIds.withFailedAnswer(
+                    updatedConversation,
+                    offline = failure is Failure.NetworkConnection
+                )
             )
         }
         when (failure) {
@@ -280,6 +310,7 @@ class HistoryViewModel(
 
     private fun handleInputResponseSuccess(conversation: Conversation) {
         conversation as StructuredConversation
+        if (conversationId != conversation.id) savedStateHandle["conversationId"] = conversation.id
 
         if (conversation.streamComplete) {
             val duration = Clock.System.now().toEpochMilliseconds() - requestStartTime
@@ -412,8 +443,8 @@ class HistoryViewModel(
                 }
             }
 
-            HistoryDetailEvent.GoToSignUp -> {
-                processHistoryDetailAction(HistoryDetailAction.OnGoToSignUp)
+            HistoryDetailEvent.GoToLogin -> {
+                processHistoryDetailAction(HistoryDetailAction.OnGoToLogin)
             }
 
             HistoryDetailEvent.StopAnswering -> {
@@ -531,7 +562,7 @@ sealed interface HistoryDetailEvent {
     data class SelectWaitlistOption(val option: String) : HistoryDetailEvent
 
     data class ShowRateLimitBottomSheet(val showBottomSheet: Boolean) : HistoryDetailEvent
-    data object GoToSignUp : HistoryDetailEvent
+    data object GoToLogin : HistoryDetailEvent
     data object StopAnswering : HistoryDetailEvent
     data class RetryAnswer(val query: String) : HistoryDetailEvent
     data class ShareAnswer(val text: String) : HistoryDetailEvent
@@ -544,7 +575,7 @@ sealed interface HistoryDetailAction {
     data class OnGoToWebView(val url: String) : HistoryDetailAction
     data class OnCopy(val text: String) : HistoryDetailAction
     data class ShowToast(val message: String) : HistoryDetailAction
-    data object OnGoToSignUp : HistoryDetailAction
+    data object OnGoToLogin : HistoryDetailAction
     data class OnShare(val text: String) : HistoryDetailAction
     data object OnGoToHistory : HistoryDetailAction
     data class OnOpenCompany(val ticker: String) : HistoryDetailAction

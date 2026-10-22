@@ -10,10 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Article
-import androidx.compose.material.icons.outlined.Headphones
-import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -299,13 +295,13 @@ private class TidbitContentType(val icon: ImageVector, val label: StringResource
 
 private fun TidbitPresentation.contentType(): TidbitContentType = when (this) {
     is TidbitPresentation.ArticlePresentation ->
-        TidbitContentType(Icons.AutoMirrored.Outlined.Article, Res.string.tidbit_type_article)
+        TidbitContentType(GiIcons.article, Res.string.tidbit_type_article)
     is TidbitPresentation.VideoPresentation -> TidbitContentType(
-        Icons.Outlined.PlayCircle,
+        GiIcons.playCircle,
         Res.string.tidbit_type_video
     )
     is TidbitPresentation.AudioPresentation -> TidbitContentType(
-        Icons.Outlined.Headphones,
+        GiIcons.headphones,
         Res.string.tidbit_type_audio
     )
 }

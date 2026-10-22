@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.thejawnpaul.gptinvestor.theme.GiEdge
 import com.thejawnpaul.gptinvestor.theme.GiElevation
 import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
@@ -97,6 +99,7 @@ private fun GiDialogContent(
             .dropShadow(shape = GiRadius.lg, shadow = GiElevation.overlay(colors.isDark))
             .clip(GiRadius.lg)
             .background(colors.raised)
+            .border(GiEdge.width, colors.line, GiRadius.lg)
             .padding(GiSpace.x6),
         verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
     ) {
@@ -116,20 +119,27 @@ private fun GiDialogContent(
                 )
             }
         }
-        GiText(text = title, modifier = Modifier.semantics { heading() }, style = GiTextStyle.StatNumber)
-        GiText(text = body, style = GiTextStyle.BodySmall)
-        GiButton(
-            text = confirmText,
-            onClick = onConfirm,
-            modifier = Modifier.fillMaxWidth(),
-            variant = if (destructive) GiButtonVariant.Destructive else GiButtonVariant.Primary
-        )
-        GiButton(
-            text = dismissText,
-            onClick = onDismiss,
-            modifier = Modifier.fillMaxWidth(),
-            variant = GiButtonVariant.Secondary
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
+            GiText(text = title, modifier = Modifier.semantics { heading() }, style = GiTextStyle.StatNumber)
+            GiText(text = body, style = GiTextStyle.Body, color = colors.body)
+        }
+        Column(
+            modifier = Modifier.padding(top = GiSpace.x1),
+            verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
+        ) {
+            GiButton(
+                text = confirmText,
+                onClick = onConfirm,
+                modifier = Modifier.fillMaxWidth(),
+                variant = if (destructive) GiButtonVariant.Destructive else GiButtonVariant.Primary
+            )
+            GiButton(
+                text = dismissText,
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth(),
+                variant = GiButtonVariant.Secondary
+            )
+        }
     }
 }
 

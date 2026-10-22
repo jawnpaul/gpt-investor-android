@@ -20,13 +20,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Language
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,20 +70,17 @@ import com.thejawnpaul.gptinvestor.theme.components.GiSkeleton
 import com.thejawnpaul.gptinvestor.theme.components.GiText
 import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.theme.components.GiToastHost
-import com.thejawnpaul.gptinvestor.theme.components.GiToastResult
+import com.thejawnpaul.gptinvestor.theme.components.GiToastState
 import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
 import com.thejawnpaul.gptinvestor.tidbit_error_title
 import com.thejawnpaul.gptinvestor.tidbit_loading
 import com.thejawnpaul.gptinvestor.tidbit_read_minutes
 import com.thejawnpaul.gptinvestor.tidbit_read_source
 import com.thejawnpaul.gptinvestor.tidbit_save
-import com.thejawnpaul.gptinvestor.tidbit_saved_to_library
 import com.thejawnpaul.gptinvestor.tidbit_share
 import com.thejawnpaul.gptinvestor.tidbit_short_summary_body
 import com.thejawnpaul.gptinvestor.tidbit_short_summary_title
 import com.thejawnpaul.gptinvestor.try_again
-import com.thejawnpaul.gptinvestor.view
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -94,24 +88,10 @@ fun TidbitDetailScreen(
     state: TidbitDetailState,
     onEvent: (TidbitDetailEvent) -> Unit,
     modifier: Modifier = Modifier,
-    onOpenSavedList: (() -> Unit)? = null
+    toastState: GiToastState = rememberGiToastState()
 ) {
     val colors = GiTheme.colors
     val scrollState = rememberScrollState()
-    val toastState = rememberGiToastState()
-    val scope = rememberCoroutineScope()
-    val savedMessage = stringResource(Res.string.tidbit_saved_to_library)
-    val viewLabel = stringResource(Res.string.view)
-    val onSave: () -> Unit = {
-        scope.launch {
-            val result = toastState.show(
-                message = savedMessage,
-                icon = GiIcons.check,
-                actionText = if (onOpenSavedList != null) viewLabel else null
-            )
-            if (result == GiToastResult.ActionPerformed) onOpenSavedList?.invoke()
-        }
-    }
 
     Box(
         modifier = modifier
@@ -152,7 +132,7 @@ fun TidbitDetailScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = GiSpace.gutter, end = GiSpace.gutter, bottom = GiSpace.x2),
-                        onClick = { onEvent(TidbitDetailEvent.GoToSignUp) }
+                        onClick = { onEvent(TidbitDetailEvent.GoToLogin) }
                     )
                 }
             }
@@ -163,9 +143,9 @@ fun TidbitDetailScreen(
                 presentation != null -> TidbitArticle(
                     presentation = presentation,
                     isGuest = state.isGuestSession,
+                    isBookmarked = state.isBookmarked,
                     scrollState = scrollState,
-                    onEvent = onEvent,
-                    onSave = onSave
+                    onEvent = onEvent
                 )
                 else -> GiErrorState(
                     title = stringResource(Res.string.tidbit_error_title),
@@ -190,14 +170,13 @@ fun TidbitDetailScreen(
 private fun TidbitArticle(
     presentation: TidbitPresentation,
     isGuest: Boolean,
+    isBookmarked: Boolean,
     scrollState: androidx.compose.foundation.ScrollState,
-    onEvent: (TidbitDetailEvent) -> Unit,
-    onSave: () -> Unit
+    onEvent: (TidbitDetailEvent) -> Unit
 ) {
     val colors = GiTheme.colors
     val navBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     var isLiked by remember(presentation.id) { mutableStateOf(presentation.isLiked) }
-    var isBookmarked by remember(presentation.id) { mutableStateOf(presentation.isBookmarked) }
     val sourceUrl = when (presentation) {
         is TidbitPresentation.ArticlePresentation -> presentation.sourceUrl
         is TidbitPresentation.VideoPresentation -> presentation.sourceUrl
@@ -279,8 +258,6 @@ private fun TidbitArticle(
                         checked = isBookmarked,
                         onCheckedChange = {
                             onEvent(TidbitDetailEvent.OnClickBookmark(id = presentation.id, newValue = it))
-                            isBookmarked = it
-                            if (it) onSave()
                         },
                         icon = GiIcons.bookmarkSimple,
                         checkedIcon = ContentBookmarkFill,
@@ -308,7 +285,7 @@ private fun TidbitArticle(
                     modifier = buttonModifier,
                     size = GiButtonSize.Medium,
                     variant = GiButtonVariant.Secondary,
-                    leadingIcon = Icons.Outlined.Language
+                    leadingIcon = GiIcons.globe
                 )
             }
         }

@@ -29,7 +29,12 @@ fun TopGuestLabel(onClick: () -> Unit, modifier: Modifier = Modifier) {
         modifier = modifier,
         subtitle = stringResource(Res.string.sign_in_to_save_stocks),
         leading = {
-            GiIconTile(icon = GiIcons.mark, size = GiIconTileSize.Medium, tone = GiIconTileTone.Raised)
+            GiIconTile(
+                icon = GiIcons.mark,
+                size = GiIconTileSize.Medium,
+                tone = GiIconTileTone.Raised,
+                iconTint = GiTheme.colors.violet
+            )
         },
         tone = GiBannerTone.Violet,
         subtitleStyle = GiTextStyle.Meta,

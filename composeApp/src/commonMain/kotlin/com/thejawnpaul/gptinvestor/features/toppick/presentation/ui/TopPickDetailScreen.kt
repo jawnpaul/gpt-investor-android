@@ -1,120 +1,124 @@
 package com.thejawnpaul.gptinvestor.features.toppick.presentation.ui
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.ZeroCornerSize
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.drawOutline
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
-import com.thejawnpaul.gptinvestor.about_company_name
+import com.thejawnpaul.gptinvestor.add_to_watchlist
+import com.thejawnpaul.gptinvestor.added_to_watchlist_success
+import com.thejawnpaul.gptinvestor.ask_anything_about
 import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.check_connection_try_again
 import com.thejawnpaul.gptinvestor.close
+import com.thejawnpaul.gptinvestor.couldn_t_load_brief
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
+import com.thejawnpaul.gptinvestor.features.company.domain.model.KeyNumber
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.CompanyKeyNumberSheet
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.briefChartMotion
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.briefItemMotion
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.companyBriefItems
+import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.questionRes
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.ContentBookmarkFill
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickAction
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickEvent
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPickDetailView
+import com.thejawnpaul.gptinvestor.features.watchlist.presentation.ui.RemoveFromWatchlistDialog
 import com.thejawnpaul.gptinvestor.helpful
+import com.thejawnpaul.gptinvestor.loading_brief
+import com.thejawnpaul.gptinvestor.remove_from_watchlist
+import com.thejawnpaul.gptinvestor.retry
+import com.thejawnpaul.gptinvestor.send
 import com.thejawnpaul.gptinvestor.sources
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
-import com.thejawnpaul.gptinvestor.theme.GiEasing
-import com.thejawnpaul.gptinvestor.theme.GiEdge
 import com.thejawnpaul.gptinvestor.theme.GiIconSize
-import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.components.GiAskComposer
+import com.thejawnpaul.gptinvestor.theme.components.GiBanner
+import com.thejawnpaul.gptinvestor.theme.components.GiBannerTone
 import com.thejawnpaul.gptinvestor.theme.components.GiBottomSheet
+import com.thejawnpaul.gptinvestor.theme.components.GiButton
+import com.thejawnpaul.gptinvestor.theme.components.GiButtonSize
+import com.thejawnpaul.gptinvestor.theme.components.GiButtonVariant
+import com.thejawnpaul.gptinvestor.theme.components.GiComposerBar
 import com.thejawnpaul.gptinvestor.theme.components.GiDeltaPill
 import com.thejawnpaul.gptinvestor.theme.components.GiDivider
 import com.thejawnpaul.gptinvestor.theme.components.GiErrorState
+import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
 import com.thejawnpaul.gptinvestor.theme.components.GiIconButton
 import com.thejawnpaul.gptinvestor.theme.components.GiIconButtonVariant
 import com.thejawnpaul.gptinvestor.theme.components.GiIconToggleButton
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiListGroup
 import com.thejawnpaul.gptinvestor.theme.components.GiLogoTile
 import com.thejawnpaul.gptinvestor.theme.components.GiPriceDisplay
-import com.thejawnpaul.gptinvestor.theme.components.GiPriceSize
+import com.thejawnpaul.gptinvestor.theme.components.GiSheetSubtitle
 import com.thejawnpaul.gptinvestor.theme.components.GiSkeleton
-import com.thejawnpaul.gptinvestor.theme.components.GiTabs
 import com.thejawnpaul.gptinvestor.theme.components.GiText
 import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.theme.components.GiToastHost
-import com.thejawnpaul.gptinvestor.theme.components.GiToastResult
+import com.thejawnpaul.gptinvestor.theme.components.GiToastState
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
-import com.thejawnpaul.gptinvestor.theme.components.GiTopBarTitleStyle
 import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
 import com.thejawnpaul.gptinvestor.today
 import com.thejawnpaul.gptinvestor.top_pick_disclaimer
 import com.thejawnpaul.gptinvestor.top_pick_error_title
-import com.thejawnpaul.gptinvestor.top_pick_key_metrics
-import com.thejawnpaul.gptinvestor.top_pick_key_risks
 import com.thejawnpaul.gptinvestor.top_pick_label
 import com.thejawnpaul.gptinvestor.top_pick_loading
-import com.thejawnpaul.gptinvestor.top_pick_rationale
 import com.thejawnpaul.gptinvestor.top_pick_save
-import com.thejawnpaul.gptinvestor.top_pick_saved_to_picks
+import com.thejawnpaul.gptinvestor.top_pick_score
 import com.thejawnpaul.gptinvestor.top_pick_share
 import com.thejawnpaul.gptinvestor.top_pick_sources_subtitle
-import com.thejawnpaul.gptinvestor.top_pick_tab_key_ratios
-import com.thejawnpaul.gptinvestor.top_pick_tab_news
-import com.thejawnpaul.gptinvestor.top_pick_tab_overview
 import com.thejawnpaul.gptinvestor.try_again
-import com.thejawnpaul.gptinvestor.view
 import com.thejawnpaul.gptinvestor.yahoo_finance
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -123,142 +127,253 @@ fun TopPickDetailScreen(
     state: TopPickDetailView,
     onEvent: (TopPickEvent) -> Unit,
     onAction: (TopPickAction) -> Unit,
-    modifier: Modifier = Modifier,
-    onOpenSavedList: (() -> Unit)? = null
+    toastState: GiToastState,
+    modifier: Modifier = Modifier
 ) {
     val colors = GiTheme.colors
-    val scrollState = rememberScrollState()
-    val toastState = rememberGiToastState()
-    val scope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
     val uriHandler = LocalUriHandler.current
-    var headerHeight by remember { mutableIntStateOf(0) }
-    val collapsed by remember(scrollState) { derivedStateOf { headerHeight > 0 && scrollState.value > headerHeight } }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val haptics = LocalHapticFeedback.current
     val pick = state.topPick
     val company = state.companyPresentation
-    val savedMessage = stringResource(Res.string.top_pick_saved_to_picks)
-    val viewLabel = stringResource(Res.string.view)
+    val brief = state.brief
+    val isWatched = brief?.isWatched == true
+    val signedIn = state.isSignedIn
+    val companyName = brief?.name ?: company?.name ?: pick?.companyName.orEmpty()
+    val watchedMessage = stringResource(Res.string.added_to_watchlist_success)
     var isLiked by remember { mutableStateOf(false) }
+    var query by remember { mutableStateOf("") }
+    var selectedKeyNumber by remember { mutableStateOf<KeyNumber?>(null) }
+    var showRemoveDialog by remember { mutableStateOf(false) }
+    val openUrl: (String) -> Unit = { url -> runCatching { uriHandler.openUri(url) } }
 
-    Scaffold(
-        modifier = modifier,
-        containerColor = colors.bg,
-        contentWindowInsets = WindowInsets(0),
-        topBar = {
-            Column {
-                AnimatedContent(
-                    targetState = if (collapsed) pick else null,
-                    transitionSpec = {
-                        fadeIn(tween(GiMotion.FAST, easing = GiEasing.emphasised)) togetherWith
-                            fadeOut(tween(GiMotion.INSTANT, easing = GiEasing.emphasised))
-                    },
-                    contentKey = { it != null },
-                    label = "pickTopBar"
-                ) { collapsedPick ->
-                    if (collapsedPick != null) {
-                        GiTopBar(
-                            title = null,
-                            onBack = { onAction(TopPickAction.OnGoBack) },
-                            backContentDescription = stringResource(Res.string.back),
-                            scrolled = true,
-                            center = { CompactPickHeader(pick = collapsedPick, company = company) }
+    var lastWatched by remember { mutableStateOf<Boolean?>(null) }
+    LaunchedEffect(brief?.isWatched) {
+        val now = brief?.isWatched ?: return@LaunchedEffect
+        val added = lastWatched == false && now
+        lastWatched = now
+        if (added) {
+            haptics.performHapticFeedback(GiHaptics.Confirm)
+            toastState.show(message = watchedMessage, icon = GiIcons.checkCircle)
+        }
+    }
+
+    Box(modifier = modifier) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = colors.bg,
+            contentWindowInsets = WindowInsets(0),
+            topBar = {
+                Column {
+                    GiTopBar(
+                        title = null,
+                        onBack = { onAction(TopPickAction.OnGoBack) },
+                        backContentDescription = stringResource(Res.string.back),
+                        scrolled = listState.canScrollBackward
+                    ) {
+                        GiIconButton(
+                            icon = GiIcons.shareNetwork,
+                            contentDescription = stringResource(Res.string.top_pick_share),
+                            onClick = { onEvent(TopPickEvent.ShareTopPick) },
+                            enabled = pick != null
                         )
-                    } else {
-                        GiTopBar(
-                            title = stringResource(Res.string.top_pick_label),
-                            onBack = { onAction(TopPickAction.OnGoBack) },
-                            backContentDescription = stringResource(Res.string.back),
-                            titleStyle = GiTopBarTitleStyle.Centered
-                        )
-                    }
-                }
-                if (state.isGuestSession) {
-                    TopGuestLabel(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(colors.bg)
-                            .padding(start = GiSpace.gutter, end = GiSpace.gutter, bottom = GiSpace.x3),
-                        onClick = { onEvent(TopPickEvent.GoToSignUp) }
-                    )
-                }
-            }
-        },
-        bottomBar = {
-            PickActionBar(
-                isLiked = isLiked,
-                isSaved = pick?.isSaved == true,
-                enabled = pick != null,
-                onLike = {
-                    onEvent(if (it) TopPickEvent.LikeTopPick else TopPickEvent.RemoveLikeTopPick)
-                    isLiked = it
-                },
-                onSave = { save ->
-                    onEvent(if (save) TopPickEvent.BookmarkTopPick else TopPickEvent.RemoveBookmarkTopPick)
-                    if (save) {
-                        scope.launch {
-                            val result = toastState.show(
-                                message = savedMessage,
-                                icon = GiIcons.check,
-                                actionText = if (onOpenSavedList != null) viewLabel else null
+                        if (signedIn) {
+                            GiIconToggleButton(
+                                checked = isWatched,
+                                onCheckedChange = {
+                                    if (isWatched) showRemoveDialog = true else onEvent(TopPickEvent.AddToWatchlist)
+                                },
+                                checkedHaptic = null,
+                                icon = GiIcons.star,
+                                checkedIcon = GiIcons.starFill,
+                                contentDescription = stringResource(
+                                    if (isWatched) Res.string.remove_from_watchlist else Res.string.add_to_watchlist
+                                ),
+                                enabled = brief != null,
+                                loading = state.watchlistPending
                             )
-                            if (result == GiToastResult.ActionPerformed) onOpenSavedList?.invoke()
                         }
                     }
-                },
-                onShare = { onEvent(TopPickEvent.ShareTopPick) }
-            )
-        }
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-        ) {
-            when {
-                pick != null -> Column(modifier = Modifier.verticalScroll(scrollState)) {
-                    PickHeader(
-                        pick = pick,
-                        company = company,
-                        modifier = Modifier.onSizeChanged { headerHeight = it.height }
-                    )
-                    PickSheet(
-                        state = state,
-                        pick = pick,
-                        onEvent = onEvent,
-                        onOpenUrl = { url -> runCatching { uriHandler.openUri(url) } }
+                    if (state.isGuestSession) {
+                        TopGuestLabel(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(colors.bg)
+                                .padding(start = GiSpace.gutter, end = GiSpace.gutter, bottom = GiSpace.x3),
+                            onClick = { onEvent(TopPickEvent.GoToLogin) }
+                        )
+                    }
+                }
+            },
+            bottomBar = {
+                if (signedIn && pick != null) {
+                    GiComposerBar(
+                        modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime)),
+                        docked = false
+                    ) {
+                        GiAskComposer(
+                            value = query,
+                            onValueChange = { query = it },
+                            onSend = {
+                                keyboardController?.hide()
+                                onEvent(TopPickEvent.AskAboutPick(query))
+                                query = ""
+                            },
+                            placeholder = stringResource(Res.string.ask_anything_about, companyName),
+                            sendContentDescription = stringResource(Res.string.send),
+                            floating = true
+                        )
+                    }
+                }
+            }
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .padding(top = innerPadding.calculateTopPadding())
+                    .fillMaxSize()
+            ) {
+                when {
+                    pick != null -> LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = GiSpace.gutter,
+                            end = GiSpace.gutter,
+                            top = GiSpace.x1,
+                            bottom = innerPadding.calculateBottomPadding() + GiSpace.x6
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
+                    ) {
+                        val pickItems: LazyListScope.() -> Unit = {
+                            item(key = "pick", contentType = "pick") {
+                                PickCard(
+                                    pick = pick,
+                                    isLiked = isLiked,
+                                    showActions = signedIn,
+                                    onLike = {
+                                        onEvent(if (it) TopPickEvent.LikeTopPick else TopPickEvent.RemoveLikeTopPick)
+                                        isLiked = it
+                                    },
+                                    onSave = { save ->
+                                        val event = if (save) {
+                                            TopPickEvent.BookmarkTopPick
+                                        } else {
+                                            TopPickEvent.RemoveBookmarkTopPick
+                                        }
+                                        onEvent(event)
+                                    },
+                                    onReadMore = if (state.isLoggedIn) {
+                                        null
+                                    } else {
+                                        { onEvent(TopPickEvent.Authenticate(showDialog = true)) }
+                                    }
+                                )
+                            }
+                            val history = company?.historicalData.orEmpty()
+                            if (signedIn && history.isNotEmpty()) {
+                                item(key = "chart", contentType = "chart") {
+                                    PriceChartSection(
+                                        companyName = companyName,
+                                        history = history,
+                                        modifier = briefChartMotion().padding(vertical = GiSpace.x2)
+                                    )
+                                }
+                            }
+                        }
+                        val footer: @Composable ColumnScope.() -> Unit = {
+                            PickFooter(
+                                company = if (signedIn) company else null,
+                                onSources = { onEvent(TopPickEvent.ClickNewsSources(show = true)) }
+                            )
+                        }
+                        if (signedIn && brief != null) {
+                            companyBriefItems(
+                                brief = brief,
+                                onKeyNumberClick = { selectedKeyNumber = it },
+                                onNewsClick = openUrl,
+                                footer = footer,
+                                afterHero = pickItems,
+                                showVerdict = false
+                            )
+                        } else {
+                            item(key = "hero", contentType = "hero") { PickHeader(pick = pick, company = company) }
+                            pickItems()
+                            if (signedIn && state.briefFailed) {
+                                item(key = "briefError", contentType = "state") {
+                                    BriefLoadError(
+                                        onRetry = { onEvent(TopPickEvent.RetryBrief) },
+                                        modifier = briefItemMotion()
+                                    )
+                                }
+                            } else if (signedIn) {
+                                item(key = "briefLoading", contentType = "state") {
+                                    BriefSectionsSkeleton(modifier = briefItemMotion())
+                                }
+                            }
+                            item(key = "footer", contentType = "footer") {
+                                Column(modifier = briefItemMotion()) { footer() }
+                            }
+                        }
+                    }
+
+                    state.loading -> PickSkeleton()
+
+                    else -> GiErrorState(
+                        title = stringResource(Res.string.top_pick_error_title),
+                        body = stringResource(Res.string.check_connection_try_again),
+                        actionText = stringResource(Res.string.try_again),
+                        onAction = { onEvent(TopPickEvent.Retry) }
                     )
                 }
-
-                state.loading -> PickSkeleton()
-
-                else -> GiErrorState(
-                    title = stringResource(Res.string.top_pick_error_title),
-                    body = stringResource(Res.string.check_connection_try_again),
-                    actionText = stringResource(Res.string.try_again),
-                    onAction = { onEvent(TopPickEvent.Retry) }
-                )
             }
-
-            GiToastHost(
-                state = toastState,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(horizontal = GiSpace.gutter, vertical = GiSpace.x4)
-            )
         }
+
+        GiToastHost(
+            state = toastState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(horizontal = GiSpace.gutter, vertical = PickToastLift)
+        )
 
         if (state.showNewsSourcesBottomSheet && company != null) {
             GiBottomSheet(
                 onDismissRequest = { onEvent(TopPickEvent.ClickNewsSources(show = false)) },
                 title = stringResource(Res.string.sources),
                 subtitle = stringResource(Res.string.top_pick_sources_subtitle),
+                subtitleStyle = GiSheetSubtitle.Caption,
                 closeContentDescription = stringResource(Res.string.close)
             ) {
                 val yahooName = stringResource(Res.string.yahoo_finance)
                 SourceRows(
                     sources = remember(company, yahooName) { pickSources(company, yahooName) },
-                    onOpen = { url -> runCatching { uriHandler.openUri(url) } }
+                    onOpen = openUrl
                 )
             }
+        }
+
+        selectedKeyNumber?.let { keyNumber ->
+            val question = stringResource(keyNumber.key.questionRes(), keyNumber.value, companyName)
+            CompanyKeyNumberSheet(
+                keyNumber = keyNumber,
+                onDismiss = { selectedKeyNumber = null },
+                onAsk = {
+                    selectedKeyNumber = null
+                    onEvent(TopPickEvent.AskAboutPick(question))
+                }
+            )
+        }
+
+        if (showRemoveDialog && brief != null) {
+            RemoveFromWatchlistDialog(
+                ticker = brief.ticker,
+                onConfirm = {
+                    showRemoveDialog = false
+                    onEvent(TopPickEvent.RemoveFromWatchlist)
+                },
+                onDismiss = { showRemoveDialog = false }
+            )
         }
     }
 }
@@ -271,13 +386,8 @@ private fun PickHeader(
     modifier: Modifier = Modifier
 ) {
     val price = (company?.price ?: pick.currentPrice).toDouble()
-    val change = (company?.change ?: pick.percentageChange).toDouble()
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x1, bottom = GiSpace.x6),
-        verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
-    ) {
+    val change = company?.change?.toDouble()
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
         Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3), verticalAlignment = Alignment.CenterVertically) {
             GiLogoTile(
                 initials = pickInitials(pick.ticker),
@@ -297,157 +407,142 @@ private fun PickHeader(
             verticalArrangement = Arrangement.spacedBy(GiSpace.x2),
             itemVerticalAlignment = Alignment.CenterVertically
         ) {
-            GiPriceDisplay(price = price, size = GiPriceSize.Medium)
-            GiDeltaPill(percent = change, suffix = stringResource(Res.string.today))
+            GiPriceDisplay(price = price)
+            if (change != null) GiDeltaPill(percent = change, suffix = stringResource(Res.string.today))
         }
     }
 }
 
 @Composable
-private fun CompactPickHeader(pick: TopPickPresentation, company: CompanyDetailRemoteResponse?) {
-    val colors = GiTheme.colors
-    val change = (company?.change ?: pick.percentageChange).toDouble()
-    Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3), verticalAlignment = Alignment.CenterVertically) {
-        GiLogoTile(
-            initials = pickInitials(pick.ticker),
-            imageUrl = company?.formattedImageUrl?.takeIf { it.isNotBlank() } ?: pick.imageUrl,
-            size = GiSpace.x8
-        )
-        Column(modifier = Modifier.weight(1f)) {
-            GiText(
-                text = company?.name ?: pick.companyName,
-                style = GiTextStyle.Label,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            GiText(text = pick.ticker, style = GiTextStyle.Meta, maxLines = 1)
-        }
-        Column(horizontalAlignment = Alignment.End) {
-            GiText(
-                text = formatPrice((company?.price ?: pick.currentPrice).toDouble()),
-                style = GiTextStyle.LabelRegular
-            )
-            GiText(
-                text = formatPercent(change),
-                style = GiTextStyle.Caption,
-                fontWeight = FontWeight.Medium,
-                color = when {
-                    change > 0 -> colors.gain
-                    change < 0 -> colors.loss
-                    else -> colors.muted
-                }
-            )
-        }
-    }
-}
-
-@Composable
-private fun PickSheet(
-    state: TopPickDetailView,
+private fun PickCard(
     pick: TopPickPresentation,
-    onEvent: (TopPickEvent) -> Unit,
-    onOpenUrl: (String) -> Unit
+    isLiked: Boolean,
+    showActions: Boolean,
+    onLike: (Boolean) -> Unit,
+    onSave: (Boolean) -> Unit,
+    onReadMore: (() -> Unit)?,
+    modifier: Modifier = Modifier
 ) {
     val colors = GiTheme.colors
-    val company = state.companyPresentation
-    val shape = GiRadius.md.copy(bottomStart = ZeroCornerSize, bottomEnd = ZeroCornerSize)
-    var tab by remember { mutableIntStateOf(0) }
-    val lineColor = colors.line
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .clip(shape)
-            .background(colors.raised)
-            .drawBehind {
-                val stroke = GiEdge.width.toPx()
-                clipRect(bottom = GiSpace.x3.toPx() + stroke) {
-                    drawOutline(
-                        outline = shape.createOutline(size, layoutDirection, this@drawBehind),
-                        color = lineColor,
-                        style = Stroke(width = stroke * 2)
-                    )
-                }
-            }
-            .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x6, bottom = GiSpace.x6),
-        verticalArrangement = Arrangement.spacedBy(GiSpace.x8)
+            .clip(GiRadius.md)
+            .background(colors.violetSoft)
+            .padding(GiSpace.x4),
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                PickSectionTitle(text = stringResource(Res.string.top_pick_rationale), modifier = Modifier.weight(1f))
-                ScoreTag(score = pick.confidenceScore)
-            }
-            ClampedText(
-                text = pick.rationale,
-                maxLines = RATIONALE_LINES,
-                onReadMore = if (state.isLoggedIn) null else ({ onEvent(TopPickEvent.Authenticate(showDialog = true)) })
+        Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x2), verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = GiIcons.mark,
+                contentDescription = null,
+                modifier = Modifier.size(GiIconSize.sm),
+                tint = colors.violet
+            )
+            GiText(
+                text = stringResource(Res.string.top_pick_label),
+                modifier = Modifier
+                    .weight(1f)
+                    .semantics { heading() },
+                style = GiTextStyle.Label,
+                color = colors.violet
+            )
+            GiText(
+                text = stringResource(Res.string.top_pick_score, pick.confidenceScore),
+                style = GiTextStyle.Label,
+                color = colors.violet
             )
         }
-
-        if (state.isLoggedIn) {
-            if (pick.metrics.isNotEmpty()) {
-                Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
-                    PickSectionTitle(text = stringResource(Res.string.top_pick_key_metrics))
-                    MetricTiles(metrics = pick.metrics)
-                }
-            }
-            if (pick.risks.isNotEmpty()) {
-                Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
-                    PickSectionTitle(text = stringResource(Res.string.top_pick_key_risks))
-                    RiskList(risks = pick.risks)
-                }
-            }
-
-            if (company != null) {
-                Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x6)) {
-                    GiTabs(
-                        tabs = listOf(
-                            stringResource(Res.string.top_pick_tab_overview),
-                            stringResource(Res.string.top_pick_tab_key_ratios),
-                            stringResource(Res.string.top_pick_tab_news)
-                        ),
-                        selectedIndex = tab,
-                        onSelect = { tab = it },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    when (tab) {
-                        0 -> PriceChartSection(
-                            companyName = company.name ?: pick.companyName,
-                            history = company.historicalData.orEmpty()
+        ClampedText(
+            text = pick.rationale,
+            maxLines = RATIONALE_LINES,
+            onReadMore = onReadMore,
+            trailing = if (showActions) {
+                {
+                    Row(
+                        modifier = Modifier.offset(x = GiSpace.x3),
+                        horizontalArrangement = Arrangement.spacedBy(GiSpace.x1)
+                    ) {
+                        GiIconToggleButton(
+                            checked = isLiked,
+                            onCheckedChange = onLike,
+                            icon = GiIcons.thumbsUp,
+                            checkedIcon = GiIcons.thumbsUpFill,
+                            contentDescription = stringResource(Res.string.helpful),
+                            variant = GiIconButtonVariant.Ghost,
+                            iconColor = colors.ink
                         )
-                        1 -> KeyRatios(company = company)
-                        else -> PickNews(company = company, onOpen = onOpenUrl)
-                    }
-                }
-
-                if (tab == 0) {
-                    Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
-                        PickSectionTitle(
-                            text = stringResource(Res.string.about_company_name, company.name ?: pick.companyName)
-                        )
-                        company.about?.takeIf {
-                            it.isNotBlank()
-                        }?.let { ClampedText(text = it, maxLines = ABOUT_LINES) }
-                        val yahooName = stringResource(Res.string.yahoo_finance)
-                        val sourceCount = remember(company, yahooName) { pickSources(company, yahooName).size }
-                        SourcesRow(
-                            count = sourceCount,
-                            onClick = { onEvent(TopPickEvent.ClickNewsSources(show = true)) },
-                            modifier = Modifier.padding(top = GiSpace.x2)
+                        GiIconToggleButton(
+                            checked = pick.isSaved,
+                            onCheckedChange = onSave,
+                            icon = GiIcons.bookmarkSimple,
+                            checkedIcon = ContentBookmarkFill,
+                            contentDescription = stringResource(Res.string.top_pick_save),
+                            variant = GiIconButtonVariant.Ghost,
+                            iconColor = colors.ink
                         )
                     }
                 }
+            } else {
+                null
             }
+        )
+    }
+}
+
+@Composable
+private fun PickFooter(company: CompanyDetailRemoteResponse?, onSources: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
+        if (company != null) {
+            val yahooName = stringResource(Res.string.yahoo_finance)
+            val sourceCount = remember(company, yahooName) { pickSources(company, yahooName).size }
+            SourcesRow(count = sourceCount, onClick = onSources)
         }
-
         GiText(text = stringResource(Res.string.top_pick_disclaimer), style = GiTextStyle.Meta)
     }
 }
 
+@Composable
+private fun BriefSectionsSkeleton(modifier: Modifier = Modifier) {
+    val description = stringResource(Res.string.loading_brief)
+    GiListGroup(
+        modifier = modifier.clearAndSetSemantics {
+            liveRegion = LiveRegionMode.Polite
+            contentDescription = description
+        }
+    ) {
+        listOf(SKEL_SECTION_SHORT, SKEL_NAME).forEachIndexed { index, titleWidth ->
+            if (index > 0) GiDivider()
+            Column(
+                modifier = Modifier.padding(GiSpace.cardPad),
+                verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
+            ) {
+                GiSkeleton(modifier = Modifier.width(titleWidth).height(SKEL_TITLE))
+                listOf(1f, 1f, 0.6f).forEach { GiSkeleton(modifier = Modifier.fillMaxWidth(it).height(SKEL_LINE)) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BriefLoadError(onRetry: () -> Unit, modifier: Modifier = Modifier) {
+    GiBanner(
+        title = stringResource(Res.string.couldn_t_load_brief),
+        subtitle = stringResource(Res.string.check_connection_try_again),
+        modifier = modifier.semantics { liveRegion = LiveRegionMode.Polite },
+        tone = GiBannerTone.Error
+    ) {
+        GiButton(
+            text = stringResource(Res.string.retry),
+            onClick = onRetry,
+            size = GiButtonSize.Small,
+            variant = GiButtonVariant.Secondary
+        )
+    }
+}
+
 private const val RATIONALE_LINES = 4
-private const val ABOUT_LINES = 3
+private val PickToastLift = 88.dp
 
 internal fun pickSources(company: CompanyDetailRemoteResponse, yahooName: String): List<PickSource> {
     val news = company.news.orEmpty().distinctBy { it.publisher }.map { PickSource(name = it.publisher, url = it.link) }
@@ -455,76 +550,20 @@ internal fun pickSources(company: CompanyDetailRemoteResponse, yahooName: String
 }
 
 @Composable
-private fun PickActionBar(
-    isLiked: Boolean,
-    isSaved: Boolean,
-    enabled: Boolean,
-    onLike: (Boolean) -> Unit,
-    onSave: (Boolean) -> Unit,
-    onShare: () -> Unit
-) {
-    Column(modifier = Modifier.background(GiTheme.colors.raised)) {
-        GiDivider()
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(horizontal = GiSpace.x3, vertical = GiSpace.x2),
-            horizontalArrangement = Arrangement.spacedBy(GiSpace.x1),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            GiIconToggleButton(
-                checked = isLiked,
-                onCheckedChange = onLike,
-                icon = GiIcons.thumbsUp,
-                checkedIcon = GiIcons.thumbsUpFill,
-                contentDescription = stringResource(Res.string.helpful),
-                variant = GiIconButtonVariant.Ghost,
-                enabled = enabled
-            )
-            GiIconToggleButton(
-                checked = isSaved,
-                onCheckedChange = onSave,
-                icon = GiIcons.bookmarkSimple,
-                checkedIcon = ContentBookmarkFill,
-                contentDescription = stringResource(Res.string.top_pick_save),
-                variant = GiIconButtonVariant.Ghost,
-                enabled = enabled
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            GiIconButton(
-                icon = GiIcons.shareNetwork,
-                contentDescription = stringResource(Res.string.top_pick_share),
-                onClick = onShare,
-                variant = GiIconButtonVariant.Ghost,
-                enabled = enabled
-            )
-        }
-    }
-}
-
-@Composable
 private fun PickSkeleton() {
     val colors = GiTheme.colors
     val loading = stringResource(Res.string.top_pick_loading)
-    val shape = GiRadius.md.copy(bottomStart = ZeroCornerSize, bottomEnd = ZeroCornerSize)
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .semantics {
+            .clearAndSetSemantics {
                 contentDescription = loading
                 liveRegion = LiveRegionMode.Polite
             }
+            .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x1),
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
     ) {
-        Column(
-            modifier = Modifier.padding(
-                start = GiSpace.gutter,
-                end = GiSpace.gutter,
-                top = GiSpace.x1,
-                bottom = GiSpace.x6
-            ),
-            verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
-        ) {
+        Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
                 verticalAlignment = Alignment.CenterVertically
@@ -545,29 +584,21 @@ private fun PickSkeleton() {
         }
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .clip(shape)
-                .background(colors.raised)
-                .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x6),
-            verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
+                .fillMaxWidth()
+                .clip(GiRadius.md)
+                .background(colors.violetSoft)
+                .padding(GiSpace.x4),
+            verticalArrangement = Arrangement.spacedBy(GiSpace.x3)
         ) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                GiSkeleton(modifier = Modifier.width(SKEL_SECTION).height(SKEL_TITLE))
-                GiSkeleton(modifier = Modifier.width(SKEL_SCORE).height(GiSpace.x6), shape = GiRadius.xs)
+                GiSkeleton(modifier = Modifier.width(SKEL_SCORE).height(GiSpace.x4))
+                GiSkeleton(modifier = Modifier.width(SKEL_SCORE).height(GiSpace.x4))
             }
-            listOf(1f, 1f, 0.92f, 0.55f).forEach {
-                GiSkeleton(modifier = Modifier.fillMaxWidth(it).height(SKEL_LINE))
-            }
-            Spacer(modifier = Modifier.height(GiSpace.x2))
-            GiSkeleton(modifier = Modifier.width(SKEL_NAME).height(SKEL_TITLE))
-            Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
-                repeat(3) { GiSkeleton(modifier = Modifier.weight(1f).height(SKEL_TILE)) }
-            }
-            Spacer(modifier = Modifier.height(GiSpace.x2))
-            GiSkeleton(modifier = Modifier.width(SKEL_SECTION_SHORT).height(SKEL_TITLE))
-            GiSkeleton(modifier = Modifier.fillMaxWidth(0.8f).height(SKEL_LINE))
-            GiSkeleton(modifier = Modifier.fillMaxWidth(0.7f).height(SKEL_LINE))
+            listOf(1f, 1f, 1f, 0.6f).forEach { GiSkeleton(modifier = Modifier.fillMaxWidth(it).height(SKEL_LINE)) }
         }
+        GiSkeleton(modifier = Modifier.fillMaxWidth().height(SKEL_RANGE), shape = GiRadius.full)
+        GiSkeleton(modifier = Modifier.fillMaxWidth().height(SKEL_CHART), shape = GiRadius.md)
+        BriefSectionsSkeleton()
     }
 }
 
@@ -575,12 +606,12 @@ private val SKEL_NAME = 120.dp
 private val SKEL_TICKER = 150.dp
 private val SKEL_PRICE = 128.dp
 private val SKEL_PILL = 104.dp
-private val SKEL_SECTION = 180.dp
 private val SKEL_SECTION_SHORT = 100.dp
 private val SKEL_SCORE = 80.dp
 private val SKEL_TITLE = 22.dp
 private val SKEL_LINE = 14.dp
-private val SKEL_TILE = 66.dp
+private val SKEL_RANGE = 42.dp
+private val SKEL_CHART = 140.dp
 
 @PreviewLightDark
 @Preview(name = "200%", fontScale = 2f)
@@ -604,7 +635,8 @@ private fun TopPickDetailScreenPreview() {
                 )
             ),
             onEvent = {},
-            onAction = {}
+            onAction = {},
+            toastState = rememberGiToastState()
         )
     }
 }
@@ -613,6 +645,11 @@ private fun TopPickDetailScreenPreview() {
 @Composable
 private fun TopPickDetailLoadingPreview() {
     GPTInvestorTheme {
-        TopPickDetailScreen(state = TopPickDetailView(loading = true), onEvent = {}, onAction = {})
+        TopPickDetailScreen(
+            state = TopPickDetailView(loading = true),
+            onEvent = {},
+            onAction = {},
+            toastState = rememberGiToastState()
+        )
     }
 }

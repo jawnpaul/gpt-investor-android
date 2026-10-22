@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Sms
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,7 +39,7 @@ fun SearchPromptRow(prompt: PromptItem, onClick: () -> Unit, modifier: Modifier 
             horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            GiIconTile(icon = Icons.Outlined.Sms, size = GiIconTileSize.Small)
+            GiIconTile(icon = GiIcons.chatText, size = GiIconTileSize.Small)
             GiText(text = prompt.label, modifier = Modifier.weight(1f), style = GiTextStyle.LabelRegular)
             Icon(
                 imageVector = GiIcons.arrowUp,

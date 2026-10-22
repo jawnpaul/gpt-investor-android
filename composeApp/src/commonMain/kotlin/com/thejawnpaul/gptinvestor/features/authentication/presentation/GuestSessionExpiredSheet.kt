@@ -11,10 +11,13 @@ import com.thejawnpaul.gptinvestor.close
 import com.thejawnpaul.gptinvestor.core.session.GuestSessionReason
 import com.thejawnpaul.gptinvestor.guest_session_expired_body_expired
 import com.thejawnpaul.gptinvestor.guest_session_expired_body_limit
+import com.thejawnpaul.gptinvestor.guest_session_expired_body_questions
 import com.thejawnpaul.gptinvestor.guest_session_expired_have_account
 import com.thejawnpaul.gptinvestor.guest_session_expired_sign_up
 import com.thejawnpaul.gptinvestor.guest_session_expired_title_expired
 import com.thejawnpaul.gptinvestor.guest_session_expired_title_limit
+import com.thejawnpaul.gptinvestor.guest_session_expired_title_questions
+import com.thejawnpaul.gptinvestor.login
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.components.GiBottomSheet
 import com.thejawnpaul.gptinvestor.theme.components.GiButton
@@ -31,18 +34,21 @@ fun GuestSessionExpiredSheet(
     onLogin: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val expired = reason == GuestSessionReason.Expired
     GiBottomSheet(
         onDismissRequest = onDismiss,
         title = stringResource(
-            if (expired) {
-                Res.string.guest_session_expired_title_expired
-            } else {
-                Res.string.guest_session_expired_title_limit
+            when (reason) {
+                GuestSessionReason.Expired -> Res.string.guest_session_expired_title_expired
+                GuestSessionReason.Limit -> Res.string.guest_session_expired_title_limit
+                GuestSessionReason.QuestionLimit -> Res.string.guest_session_expired_title_questions
             }
         ),
         subtitle = stringResource(
-            if (expired) Res.string.guest_session_expired_body_expired else Res.string.guest_session_expired_body_limit
+            when (reason) {
+                GuestSessionReason.Expired -> Res.string.guest_session_expired_body_expired
+                GuestSessionReason.Limit -> Res.string.guest_session_expired_body_limit
+                GuestSessionReason.QuestionLimit -> Res.string.guest_session_expired_body_questions
+            }
         ),
         closeContentDescription = stringResource(Res.string.close),
         modifier = modifier
@@ -54,7 +60,13 @@ fun GuestSessionExpiredSheet(
                 modifier = Modifier.fillMaxWidth()
             )
             GiButton(
-                text = stringResource(Res.string.guest_session_expired_have_account),
+                text = stringResource(
+                    if (reason == GuestSessionReason.QuestionLimit) {
+                        Res.string.login
+                    } else {
+                        Res.string.guest_session_expired_have_account
+                    }
+                ),
                 onClick = onLogin,
                 modifier = Modifier.fillMaxWidth(),
                 variant = GiButtonVariant.Secondary

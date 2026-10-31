@@ -12,5 +12,6 @@ data class WatchlistItemRemote(
     @SerialName("logo_url") val logoUrl: String = "",
     @SerialName("current_price") val currentPrice: Double? = null,
     @SerialName("price_change") val priceChange: Double? = null,
+    @SerialName("currency_symbol") val currencySymbol: String? = null,
     @SerialName("digest_status") val digestStatus: String? = null
 )

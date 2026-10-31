@@ -339,9 +339,9 @@
     <string name="not_financial_advice">مالی مشورہ نہیں۔</string>
     <string name="couldn_t_load_brief">یہ مختصر رپورٹ لوڈ نہیں ہو سکی</string>
     <string name="key_question_market_cap">%1$s کی مارکیٹ کیپ %2$s کے بارے میں کیا بتاتی ہے؟</string>
-    <string name="key_question_pe_ratio">کیا %2$s کے لیے %1$s کا P/E تناسب زیادہ ہے؟</string>
+    <string name="key_question_pe_ratio">کیا %2$s کے لیے %1$s کا قیمت/آمدنی تناسب زیادہ ہے؟</string>
     <string name="key_question_revenue_growth">%1$s کی آمدنی میں اضافہ %2$s کے لیے کیا معنی رکھتا ہے؟</string>
-    <string name="key_question_dividend_yield">کیا %2$s کے لیے %1$s کا ڈیویڈنڈ منافع اچھا ہے؟</string>
+    <string name="key_question_dividend_yield">کیا %2$s کے لیے %1$s کی ڈیویڈنڈ کی پیداوار اچھی ہے؟</string>
     <plurals name="brief_footer_sources">
         <item quantity="one">%1$d ذریعہ۔ مالی مشورہ نہیں۔</item>
         <item quantity="other">%1$d ذرائع۔ مالی مشورہ نہیں۔</item>

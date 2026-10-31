@@ -56,6 +56,7 @@ import com.thejawnpaul.gptinvestor.browse_empty_all
 import com.thejawnpaul.gptinvestor.browse_empty_in_sector
 import com.thejawnpaul.gptinvestor.browse_empty_market_sector
 import com.thejawnpaul.gptinvestor.browse_empty_query
+import com.thejawnpaul.gptinvestor.browse_empty_query_market
 import com.thejawnpaul.gptinvestor.browse_empty_sector
 import com.thejawnpaul.gptinvestor.browse_error_body
 import com.thejawnpaul.gptinvestor.browse_error_title
@@ -329,8 +330,8 @@ private fun SectorChips(
     sectors: List<SectorInput>,
     selected: SectorInput,
     onSelect: (SectorInput) -> Unit,
-    modifier: Modifier = Modifier,
-    marketChip: (@Composable () -> Unit)? = null
+    marketChip: (@Composable () -> Unit)?,
+    modifier: Modifier = Modifier
 ) {
     val groupLabel = stringResource(Res.string.browse_sector)
     val chip: @Composable (SectorInput) -> Unit = { sector ->
@@ -462,6 +463,12 @@ private fun BrowseEmptyState(
     when {
         market != null && sector != null && query.isEmpty() -> {
             body = stringResource(Res.string.browse_empty_market_sector, market.name, sector.sectorName)
+            actionText = stringResource(Res.string.browse_show_all_markets)
+            onAction = { onEvent(BrowseStocksEvent.SelectMarket(null)) }
+        }
+
+        market != null && query.isNotEmpty() -> {
+            body = stringResource(Res.string.browse_empty_query_market, market.name, query)
             actionText = stringResource(Res.string.browse_show_all_markets)
             onAction = { onEvent(BrowseStocksEvent.SelectMarket(null)) }
         }

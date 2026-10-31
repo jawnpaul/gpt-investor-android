@@ -101,20 +101,35 @@ class BrowseStocksViewModelTest {
         val vm = subscribedViewModel()
 
         assertThat(vm.state.value.selectedMarketKey).isNull()
-        assertThat(queries.map { it.market }).containsExactly(null)
+        assertThat(queries.last().market).isNull()
         coVerify { repository.setBrowseMarket(null) }
     }
 
     @Test
-    fun `should keep a saved market when the market list fails to load`() = runTest(testDispatcher) {
-        every { repository.browseMarket } returns flowOf("NG")
-        coEvery { repository.getMarkets(any()) } returns Either.Left(Failure.NetworkConnection)
+    fun `should show all markets without forgetting the saved one when the market list fails`() =
+        runTest(testDispatcher) {
+            every { repository.browseMarket } returns flowOf("NG")
+            coEvery { repository.getMarkets(any()) } returns Either.Left(Failure.NetworkConnection)
 
+            val vm = subscribedViewModel()
+
+            assertThat(vm.state.value.selectedMarketKey).isNull()
+            assertThat(queries.last().market).isNull()
+            coVerify(exactly = 0) { repository.setBrowseMarket(any()) }
+        }
+
+    @Test
+    fun `should keep the saved market when a sector's market list leaves it out`() = runTest(testDispatcher) {
+        every { repository.browseMarket } returns flowOf("NG")
         val vm = subscribedViewModel()
+        coEvery { repository.getMarkets("energy") } returns Either.Right(listOf(unitedStates))
+
+        vm.handleEvent(BrowseStocksEvent.SelectSector(SectorInput.CustomSector("Energy", "energy")))
+        advanceUntilIdle()
 
         assertThat(vm.state.value.selectedMarketKey).isEqualTo("NG")
-        assertThat(vm.state.value.showMarketFilter).isFalse()
-        assertThat(queries.map { it.market }).containsExactly("NG")
+        assertThat(queries.last().market).isEqualTo("NG")
+        coVerify(exactly = 0) { repository.setBrowseMarket(any()) }
     }
 
     @Test

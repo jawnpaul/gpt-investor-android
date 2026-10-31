@@ -391,6 +391,7 @@
     <string name="browse_market_all">Alle Märkte</string>
     <string name="browse_market_chip_description">Markt: %1$s. Markt ändern</string>
     <string name="browse_empty_market_sector">%1$s hat noch keine Unternehmen in %2$s. Versuchen Sie alle Märkte.</string>
+    <string name="browse_empty_query_market">In %1$s passt nichts zu „%2$s“. Versuchen Sie alle Märkte.</string>
     <string name="browse_show_all_markets">Alle Märkte anzeigen</string>
     <plurals name="browse_company_count">
         <item quantity="one">%1$d Unternehmen</item>

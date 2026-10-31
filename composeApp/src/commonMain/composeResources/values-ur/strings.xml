@@ -391,6 +391,7 @@
     <string name="browse_market_all">تمام مارکیٹس</string>
     <string name="browse_market_chip_description">مارکیٹ: %1$s۔ مارکیٹ تبدیل کریں</string>
     <string name="browse_empty_market_sector">%1$s میں ابھی %2$s کی کوئی کمپنی نہیں ہے۔ تمام مارکیٹس آزمائیں۔</string>
+    <string name="browse_empty_query_market">%1$s میں “%2$s” سے کچھ نہیں ملتا۔ تمام مارکیٹس آزمائیں۔</string>
     <string name="browse_show_all_markets">تمام مارکیٹس دکھائیں</string>
     <plurals name="browse_company_count">
         <item quantity="one">%1$d کمپنی</item>

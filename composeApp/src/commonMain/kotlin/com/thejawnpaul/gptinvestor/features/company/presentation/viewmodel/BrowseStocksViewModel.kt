@@ -78,20 +78,21 @@ class BrowseStocksViewModel(
     private val filter = MutableStateFlow(
         SearchCompanyQuery(sector = savedStateHandle.get<String>("sector"), query = "")
     )
-    private val isMarketReady = MutableStateFlow(false)
+    private val isSavedMarketRead = MutableStateFlow(false)
     private var marketsJob: Job? = null
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val companiesPaging: Flow<PagingData<CompanyPresentation>> =
-        combine(filter, isMarketReady) { filter, ready -> filter.takeIf { ready } }
+        combine(filter, isSavedMarketRead) { filter, ready -> filter.takeIf { ready } }
             .filterNotNull()
             .distinctUntilChanged()
-            .flatMapLatest { filter ->
-                _state.update { it.copy(totalCompanies = null) }
-                repository.searchCompaniesPaged(filter) { total -> _state.update { it.copy(totalCompanies = total) } }
-                    .map { pagingData -> pagingData.map { it.toPresentation() } }
-                    .cachedIn(viewModelScope)
+            .flatMapLatest { query ->
+                repository.searchCompaniesPaged(query) { total ->
+                    if (filter.value == query) _state.update { it.copy(totalCompanies = total) }
+                }
             }
+            .map { pagingData -> pagingData.map { it.toPresentation() } }
+            .cachedIn(viewModelScope)
 
     init {
         loadSectors()
@@ -100,35 +101,40 @@ class BrowseStocksViewModel(
 
     private fun loadInitialMarket() {
         viewModelScope.launch {
-            val sectorKey = savedStateHandle.get<String>("sector")
             val savedMarket = repository.browseMarket.first()
-            if (savedMarket == null) {
-                isMarketReady.value = true
-                loadMarkets(sectorKey)
-            } else {
+            if (savedMarket != null) {
                 _state.update { it.copy(selectedMarketKey = savedMarket) }
                 filter.update { it.copy(market = savedMarket) }
-                loadMarkets(sectorKey).join()
-                isMarketReady.value = true
             }
+            isSavedMarketRead.value = true
+            loadMarkets(filter.value.sector, validateSelection = true)
         }
     }
 
-    private fun loadMarkets(sectorKey: String?): Job {
+    private fun loadMarkets(sectorKey: String?, validateSelection: Boolean = false) {
         marketsJob?.cancel()
-        return viewModelScope.launch { fetchMarkets(sectorKey) }.also { marketsJob = it }
+        marketsJob = viewModelScope.launch { fetchMarkets(sectorKey, validateSelection) }
     }
 
-    private suspend fun fetchMarkets(sectorKey: String?) {
-        val markets = (repository.getMarkets(sectorKey) as? Either.Right)?.b ?: return
+    private suspend fun fetchMarkets(sectorKey: String?, validateSelection: Boolean) {
+        val result = repository.getMarkets(sectorKey)
+        val markets = (result as? Either.Right)?.b
         val selected = _state.value.selectedMarketKey
-        val isSelectedVisible = markets.size >= 2 && markets.any { it.key == selected }
+        if (markets == null) {
+            if (validateSelection && selected != null) clearMarket()
+            return
+        }
         _state.update { it.copy(markets = markets) }
-        if (selected != null && !isSelectedVisible) {
-            _state.update { it.copy(selectedMarketKey = null) }
-            filter.update { it.copy(market = null) }
+        val isSelectedVisible = markets.size >= 2 && markets.any { it.key == selected }
+        if (validateSelection && selected != null && !isSelectedVisible) {
+            clearMarket()
             repository.setBrowseMarket(null)
         }
+    }
+
+    private fun clearMarket() {
+        _state.update { it.copy(selectedMarketKey = null) }
+        filter.update { it.copy(market = null) }
     }
 
     private fun loadSectors() {

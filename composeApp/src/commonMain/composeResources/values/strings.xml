@@ -199,9 +199,10 @@
     <string name="loading_brief">Loading the brief</string>
     <string name="key_period_today">Today</string>
     <string name="key_period_last_12_months">Last 12 months</string>
+    <string name="key_period_latest_quarter">Latest quarter</string>
     <string name="key_definition_market_cap">Market cap is the total value of all the company’s shares at today’s price.</string>
     <string name="key_definition_pe_ratio">The P/E ratio compares the share price with the company’s profit per share over the last year.</string>
-    <string name="key_definition_revenue_growth">Revenue growth compares this year’s sales with last year’s.</string>
+    <string name="key_definition_revenue_growth">Revenue growth compares the latest quarter’s sales with the same quarter last year.</string>
     <string name="key_definition_dividend_yield">Dividend yield is the yearly cash paid to shareholders as a share of today’s price.</string>
 
     <string name="ask_me_anything_about_markets">Ask me anything about markets…</string>

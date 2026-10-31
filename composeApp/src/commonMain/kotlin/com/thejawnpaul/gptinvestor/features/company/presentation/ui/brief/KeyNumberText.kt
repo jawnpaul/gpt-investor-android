@@ -9,6 +9,7 @@ import com.thejawnpaul.gptinvestor.key_definition_revenue_growth
 import com.thejawnpaul.gptinvestor.key_dividend_yield
 import com.thejawnpaul.gptinvestor.key_pe_ratio
 import com.thejawnpaul.gptinvestor.key_period_last_12_months
+import com.thejawnpaul.gptinvestor.key_period_latest_quarter
 import com.thejawnpaul.gptinvestor.key_period_today
 import com.thejawnpaul.gptinvestor.key_question_dividend_yield
 import com.thejawnpaul.gptinvestor.key_question_market_cap
@@ -28,8 +29,8 @@ internal fun KeyNumberType.labelRes(): StringResource = when (this) {
 internal fun KeyNumberType.periodRes(): StringResource = when (this) {
     KeyNumberType.MarketCap -> Res.string.key_period_today
     KeyNumberType.PeRatio,
-    KeyNumberType.RevenueGrowth,
     KeyNumberType.DividendYield -> Res.string.key_period_last_12_months
+    KeyNumberType.RevenueGrowth -> Res.string.key_period_latest_quarter
 }
 
 internal fun KeyNumberType.definitionRes(): StringResource = when (this) {

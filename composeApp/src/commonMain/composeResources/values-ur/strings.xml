@@ -436,6 +436,7 @@
     <string name="profile_upgrade_body">لامحدود AI سوالات، آپ کی واچ لسٹ کے لیے مکمل بریف، اور پریمیم ریسرچ۔</string>
     <string name="profile_see_premium">Premium دیکھیں</string>
     <string name="profile_questions">سوالات</string>
+    <string name="profile_app_version">GPT Investor · ورژن %1$s</string>
     <string name="settings_on">آن</string>
     <string name="settings_off">آف</string>
     <string name="sign_out_title">سائن آؤٹ کریں؟</string>

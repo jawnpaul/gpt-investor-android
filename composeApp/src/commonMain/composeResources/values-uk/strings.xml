@@ -444,6 +444,7 @@
     <string name="profile_upgrade_body">Необмежені запитання до ШІ, повні брифінги для вашого списку спостереження та преміум-аналітика.</string>
     <string name="profile_see_premium">Переглянути Premium</string>
     <string name="profile_questions">Запитання</string>
+    <string name="profile_app_version">GPT Investor · Версія %1$s</string>
     <string name="settings_on">Увімк.</string>
     <string name="settings_off">Вимк.</string>
     <string name="sign_out_title">Вийти?</string>

@@ -453,6 +453,7 @@
     <string name="profile_upgrade_body">Unlimited AI questions, full brief coverage for your watchlist, and premium research.</string>
     <string name="profile_see_premium">See Premium</string>
     <string name="profile_questions">Questions</string>
+    <string name="profile_app_version">GPT Investor · Version %1$s</string>
     <string name="settings_on">On</string>
     <string name="settings_off">Off</string>
     <string name="sign_out_title">Sign out?</string>

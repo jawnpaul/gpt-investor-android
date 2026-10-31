@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.thejawnpaul.gptinvestor.Res
@@ -45,6 +46,7 @@ import com.thejawnpaul.gptinvestor.notifications
 import com.thejawnpaul.gptinvestor.preferences
 import com.thejawnpaul.gptinvestor.privacy
 import com.thejawnpaul.gptinvestor.profile
+import com.thejawnpaul.gptinvestor.profile_app_version
 import com.thejawnpaul.gptinvestor.profile_free_plan
 import com.thejawnpaul.gptinvestor.profile_guest
 import com.thejawnpaul.gptinvestor.profile_premium_plan
@@ -143,6 +145,13 @@ fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, modifi
                     )
                 }
             }
+
+            GiText(
+                text = stringResource(Res.string.profile_app_version, state.appVersion),
+                modifier = Modifier.fillMaxWidth(),
+                style = GiTextStyle.Meta,
+                textAlign = TextAlign.Center
+            )
         }
     }
 
@@ -392,7 +401,8 @@ private fun ProfileScreenPreview() {
                 userName = "Diogo",
                 queryCount = 3,
                 savedTidbitsCount = 2,
-                isNotificationsEnabled = true
+                isNotificationsEnabled = true,
+                appVersion = "1.2.6"
             ),
             onEvent = {}
         )

@@ -17,7 +17,8 @@ data class ProfileUiState(
     val isNotificationsEnabled: Boolean = false,
     val requestNotificationPermission: Boolean = false,
     val currentTheme: StringResource = Res.string.system,
-    val themeList: List<StringResource> = emptyList()
+    val themeList: List<StringResource> = emptyList(),
+    val appVersion: String = ""
 ) {
     val savedPicksCountString: String = savedPicksCount.toString()
     val savedTidbitsCountString: String = savedTidbitsCount.toString()

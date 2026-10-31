@@ -52,11 +52,15 @@ data class HistoricalData(
 data class CompanyDetailRemoteResponse(
     @SerialName("ticker") val ticker: String,
     @SerialName("summary") val about: String? = null,
-    @SerialName("market_cap") val marketCap: Long? = null,
+    @Serializable(with = WholeNumberSerializer::class)
+    @SerialName("market_cap")
+    val marketCap: Long? = null,
     @SerialName("news") val news: List<CompanyNews>? = null,
     @SerialName("pe_ratio") val peRatio: Float? = null,
     @SerialName("percentage_change") val change: Float? = null,
-    @SerialName("revenue") val revenue: Long? = null,
+    @Serializable(with = WholeNumberSerializer::class)
+    @SerialName("revenue")
+    val revenue: Long? = null,
     @SerialName("current_price") val price: Float? = null,
     @SerialName("market") val market: String? = null,
     @SerialName("currency") val currency: String? = null,

@@ -46,4 +46,24 @@ class CompanyBriefTest {
 
         assertThat(brief.change).isNull()
     }
+
+    @Test
+    fun `reads a market cap and revenue sent with decimals`() {
+        val remote = Json { ignoreUnknownKeys = true }.decodeFromString<CompanyBriefRemote>(
+            """{"ticker": "INTENEGINS.NG", "market_cap": 2311200000.75, "revenue": 15000000.4}"""
+        )
+
+        assertThat(remote.marketCap).isEqualTo(2_311_200_001L)
+        assertThat(remote.revenue).isEqualTo(15_000_000L)
+    }
+
+    @Test
+    fun `reads a whole-number market cap and a missing one`() {
+        val json = Json { ignoreUnknownKeys = true }
+
+        assertThat(json.decodeFromString<CompanyBriefRemote>("""{"ticker": "AAPL", "market_cap": 4000}""").marketCap)
+            .isEqualTo(4000L)
+        assertThat(json.decodeFromString<CompanyBriefRemote>("""{"ticker": "AAPL", "market_cap": null}""").marketCap)
+            .isNull()
+    }
 }

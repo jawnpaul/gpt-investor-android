@@ -16,7 +16,9 @@ data class CompanyFinancialsRemote(
     @SerialName("high") val high: Float,
     @SerialName("historical_data") val historicalData: String,
     @SerialName("low") val low: Float,
-    @SerialName("market_cap") val marketCap: Long,
+    @Serializable(with = WholeNumberSerializer::class)
+    @SerialName("market_cap")
+    val marketCap: Long,
     @SerialName("news") val news: List<CompanyNews>
 ) {
     fun toDomainObject() = CompanyFinancials(

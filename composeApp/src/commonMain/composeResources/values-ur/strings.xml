@@ -525,4 +525,20 @@
         <item quantity="one">تھوڑا آہستہ چلیں۔ %1$d گھنٹے میں دوبارہ کوشش کریں۔</item>
         <item quantity="other">تھوڑا آہستہ چلیں۔ %1$d گھنٹے میں دوبارہ کوشش کریں۔</item>
     </plurals>
+    <string name="add_to_watchlist">واچ لسٹ میں شامل کریں</string>
+    <string name="added_to_watchlist_success">واچ لسٹ میں شامل ہو گیا</string>
+    <string name="added_to_watchlist_error">واچ لسٹ میں شامل نہیں ہو سکا</string>
+    <string name="share_brief_text">GPTInvestor پر %1$s (%2$s) کی مختصر رپورٹ دیکھیں:\nhttps://gptinvestorapp.com/brief/%3$s</string>
+    <string name="activity">سرگرمی</string>
+    <string name="preferences">ترجیحات</string>
+    <string name="notifications">اطلاعات</string>
+    <string name="appearance">ظاہری شکل</string>
+    <string name="privacy">رازداری</string>
+    <string name="watching">زیرِ نظر</string>
+    <string name="saved">محفوظ</string>
+    <string name="light">لائٹ</string>
+    <string name="dark">ڈارک</string>
+    <string name="system">سسٹم</string>
+    <string name="log_in_with_apple">Apple کے ساتھ لاگ اِن کریں</string>
+    <string name="sign_up_with_apple">Apple کے ساتھ سائن اپ کریں</string>
 </resources>

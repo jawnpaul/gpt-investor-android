@@ -82,7 +82,7 @@
     <string name="sources">ذرائع</string>
     <string name="sign_up">Sign up</string>
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
-    <string name="continue_with_google">Google کے ساتھ جاری رکھیں</string>
+    <string name="continue_with_google">‏Google کے ساتھ جاری رکھیں</string>
     <string name="continue_with_email">ای میل کے ساتھ جاری رکھیں</string>
     <string name="ask_anything_learn_everything">کچھ بھی پوچھیں۔ \n سب کچھ سیکھیں۔</string>
     <string name="next">اگلا</string>
@@ -121,8 +121,8 @@
     <string name="guest_limit_reached_title">مہمان کی حد پوری ہو گئی</string>
     <string name="guest_limit_reached_description">GPT Investor سے سوالات پوچھتے رہنے کے لیے سائن اپ کریں۔</string>
     <string name="or">یا</string>
-    <string name="log_in_with_google">Google کے ساتھ لاگ اِن کریں</string>
-    <string name="sign_up_with_google">Google کے ساتھ سائن اپ کریں</string>
+    <string name="log_in_with_google">‏Google کے ساتھ لاگ اِن کریں</string>
+    <string name="sign_up_with_google">‏Google کے ساتھ سائن اپ کریں</string>
     <string name="you_re_in_guest_mode_click_here_to_sign_in">آپ مہمان موڈ میں ہیں، سائن اِن کرنے کے لیے یہاں کلک کریں</string>
     <string name="section_summary">خلاصہ</string>
     <string name="section_key_numbers">اہم اعداد</string>
@@ -525,4 +525,20 @@
         <item quantity="one">تھوڑا آہستہ چلیں۔ %1$d گھنٹے میں دوبارہ کوشش کریں۔</item>
         <item quantity="other">تھوڑا آہستہ چلیں۔ %1$d گھنٹے میں دوبارہ کوشش کریں۔</item>
     </plurals>
+    <string name="add_to_watchlist">واچ لسٹ میں شامل کریں</string>
+    <string name="added_to_watchlist_success">واچ لسٹ میں شامل ہو گیا</string>
+    <string name="added_to_watchlist_error">واچ لسٹ میں شامل نہیں ہو سکا</string>
+    <string name="share_brief_text">‏GPTInvestor پر %1$s (%2$s) کی مختصر رپورٹ دیکھیں:\nhttps://gptinvestorapp.com/brief/%3$s</string>
+    <string name="activity">سرگرمی</string>
+    <string name="preferences">ترجیحات</string>
+    <string name="notifications">اطلاعات</string>
+    <string name="appearance">ظاہری شکل</string>
+    <string name="privacy">رازداری</string>
+    <string name="watching">زیرِ نظر</string>
+    <string name="saved">محفوظ</string>
+    <string name="light">لائٹ</string>
+    <string name="dark">ڈارک</string>
+    <string name="system">سسٹم</string>
+    <string name="log_in_with_apple">‏Apple کے ساتھ لاگ اِن کریں</string>
+    <string name="sign_up_with_apple">‏Apple کے ساتھ سائن اپ کریں</string>
 </resources>

@@ -525,4 +525,20 @@
         <item quantity="one">Etwas langsamer, bitte. Versuchen Sie es in %1$d Stunde erneut.</item>
         <item quantity="other">Etwas langsamer, bitte. Versuchen Sie es in %1$d Stunden erneut.</item>
     </plurals>
+    <string name="add_to_watchlist">Zur Watchlist hinzufügen</string>
+    <string name="added_to_watchlist_success">Zur Watchlist hinzugefügt</string>
+    <string name="added_to_watchlist_error">Nicht zur Watchlist hinzugefügt</string>
+    <string name="share_brief_text">Sehen Sie sich die Kurzanalyse zu %1$s (%2$s) auf GPTInvestor an:\nhttps://gptinvestorapp.com/brief/%3$s</string>
+    <string name="activity">Aktivität</string>
+    <string name="preferences">Optionen</string>
+    <string name="notifications">Benachrichtigungen</string>
+    <string name="appearance">Darstellung</string>
+    <string name="privacy">Datenschutz</string>
+    <string name="watching">Beobachtet</string>
+    <string name="saved">Gespeichert</string>
+    <string name="light">Hell</string>
+    <string name="dark">Dunkel</string>
+    <string name="system">System</string>
+    <string name="log_in_with_apple">Mit Apple anmelden</string>
+    <string name="sign_up_with_apple">Mit Apple registrieren</string>
 </resources>

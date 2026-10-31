@@ -436,6 +436,7 @@
     <string name="profile_upgrade_body">Unbegrenzte KI-Fragen, vollständige Briefings für Ihre Watchlist und Premium-Research.</string>
     <string name="profile_see_premium">Premium ansehen</string>
     <string name="profile_questions">Fragen</string>
+    <string name="profile_app_version">GPT Investor · Version %1$s</string>
     <string name="settings_on">An</string>
     <string name="settings_off">Aus</string>
     <string name="sign_out_title">Abmelden?</string>

@@ -174,7 +174,7 @@ class CompanyViewModel(
                                 companyTicker = company.ticker,
                                 companyLogo = company.logoUrl,
                                 price = company.price,
-                                percentageChange = company.change,
+                                percentageChange = company.change ?: 0f,
                                 companyName = company.name
                             ),
                             brief = company

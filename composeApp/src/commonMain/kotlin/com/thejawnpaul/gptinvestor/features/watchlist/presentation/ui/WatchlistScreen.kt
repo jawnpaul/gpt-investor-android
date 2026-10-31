@@ -73,7 +73,7 @@ import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.Recommended
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.tickerStock
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistBriefStatus
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistItem
-import com.thejawnpaul.gptinvestor.features.watchlist.presentation.formatUsdPrice
+import com.thejawnpaul.gptinvestor.features.watchlist.presentation.formatPrice
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.PopularStockUiModel
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.WatchlistLoadError
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.state.WatchlistUiState
@@ -453,12 +453,16 @@ private fun WatchlistStockRow(item: WatchlistItem, offline: Boolean, onClick: ()
     GiStockRow(
         stock = stock,
         onClick = onClick,
-        price = if (offline) null else item.currentPrice?.let(::formatUsdPrice),
+        price = if (offline) null else item.currentPrice?.let { formatPrice(it, item.currencySymbol) },
         status = item.briefStatus?.let { status -> { BriefStatusLine(status = status) } },
         trailing = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (offline && (item.currentPrice != null || item.priceChange != null)) {
-                    OfflinePrice(price = item.currentPrice, change = item.priceChange)
+                    OfflinePrice(
+                        price = item.currentPrice,
+                        change = item.priceChange,
+                        currencySymbol = item.currencySymbol
+                    )
                 }
                 GiIconButton(
                     icon = GiIcons.trash,
@@ -472,12 +476,12 @@ private fun WatchlistStockRow(item: WatchlistItem, offline: Boolean, onClick: ()
 }
 
 @Composable
-private fun OfflinePrice(price: Double?, change: Double?) {
+private fun OfflinePrice(price: Double?, change: Double?, currencySymbol: String) {
     val colors = GiTheme.colors
     Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(GiSpace.x0_5)) {
         price?.let {
             Text(
-                text = formatUsdPrice(it),
+                text = formatPrice(it, currencySymbol),
                 style = GiTheme.type.labelRegular.merge(TextStyle(fontFeatureSettings = "tnum")),
                 color = colors.muted,
                 maxLines = 1

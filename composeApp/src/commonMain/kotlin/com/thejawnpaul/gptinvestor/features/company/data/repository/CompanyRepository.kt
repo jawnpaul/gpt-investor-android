@@ -28,10 +28,12 @@ import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.company.domain.model.TrendingCompany
 import com.thejawnpaul.gptinvestor.features.company.domain.model.toBrief
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
+import io.ktor.serialization.ContentConvertException
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.serialization.SerializationException
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
 
@@ -187,7 +189,8 @@ class CompanyRepository(
                     "user_type" to userType
                 )
             )
-            emit(Either.Left(Failure.NetworkConnection))
+            val isUnreadable = e is ContentConvertException || e is SerializationException
+            emit(Either.Left(if (isUnreadable) Failure.DataError else Failure.NetworkConnection))
         }
     }
 

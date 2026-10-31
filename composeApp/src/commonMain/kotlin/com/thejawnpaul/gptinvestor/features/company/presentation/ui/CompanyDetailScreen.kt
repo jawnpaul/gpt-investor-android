@@ -58,6 +58,7 @@ import com.thejawnpaul.gptinvestor.add_to_watchlist
 import com.thejawnpaul.gptinvestor.ask_about_company
 import com.thejawnpaul.gptinvestor.ask_anything_about
 import com.thejawnpaul.gptinvestor.back
+import com.thejawnpaul.gptinvestor.brief_error_body
 import com.thejawnpaul.gptinvestor.brief_footer_sources
 import com.thejawnpaul.gptinvestor.check_connection_try_again
 import com.thejawnpaul.gptinvestor.company_context_title
@@ -279,7 +280,13 @@ fun CompanyDetailScreen(
                         }
                         CompanyDisplay.Error -> GiErrorState(
                             title = stringResource(Res.string.couldn_t_load_brief),
-                            body = stringResource(Res.string.check_connection_try_again),
+                            body = stringResource(
+                                if (state.isErrorOffline) {
+                                    Res.string.check_connection_try_again
+                                } else {
+                                    Res.string.brief_error_body
+                                }
+                            ),
                             actionText = stringResource(Res.string.try_again),
                             onAction = { onEvent(CompanyDetailEvent.RetryLoad) },
                             modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars)

@@ -338,6 +338,7 @@
     <string name="ask_about_this">اس کے بارے میں پوچھیں</string>
     <string name="not_financial_advice">مالی مشورہ نہیں۔</string>
     <string name="couldn_t_load_brief">یہ مختصر رپورٹ لوڈ نہیں ہو سکی</string>
+    <string name="brief_error_body">ہماری طرف کچھ غلط ہو گیا۔ تھوڑی دیر میں دوبارہ کوشش کریں۔</string>
     <string name="key_question_market_cap">%1$s کی مارکیٹ کیپ %2$s کے بارے میں کیا بتاتی ہے؟</string>
     <string name="key_question_pe_ratio">کیا %2$s کے لیے %1$s کا قیمت/آمدنی تناسب زیادہ ہے؟</string>
     <string name="key_question_revenue_growth">%1$s کی آمدنی میں اضافہ %2$s کے لیے کیا معنی رکھتا ہے؟</string>

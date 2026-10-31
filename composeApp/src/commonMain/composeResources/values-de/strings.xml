@@ -338,6 +338,7 @@
     <string name="ask_about_this">Dazu fragen</string>
     <string name="not_financial_advice">Keine Finanzberatung.</string>
     <string name="couldn_t_load_brief">Kurzanalyse konnte nicht geladen werden</string>
+    <string name="brief_error_body">Bei uns ist etwas schiefgelaufen. Versuchen Sie es gleich noch einmal.</string>
     <string name="key_question_market_cap">Was sagt eine Marktkapitalisierung von %1$s über %2$s aus?</string>
     <string name="key_question_pe_ratio">Ist ein KGV von %1$s für %2$s hoch?</string>
     <string name="key_question_revenue_growth">Was bedeutet ein Umsatzwachstum von %1$s für %2$s?</string>

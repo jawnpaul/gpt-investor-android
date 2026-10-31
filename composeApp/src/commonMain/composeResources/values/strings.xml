@@ -153,6 +153,7 @@
     <string name="ask_about_this">Ask about this</string>
     <string name="not_financial_advice">Not financial advice.</string>
     <string name="couldn_t_load_brief">Couldn’t load this brief</string>
+    <string name="brief_error_body">Something went wrong on our side. Try again in a moment.</string>
     <string name="key_question_market_cap">What does a market cap of %1$s say about %2$s?</string>
     <string name="key_question_pe_ratio">Is a P/E ratio of %1$s high for %2$s?</string>
     <string name="key_question_revenue_growth">What does revenue growth of %1$s mean for %2$s?</string>

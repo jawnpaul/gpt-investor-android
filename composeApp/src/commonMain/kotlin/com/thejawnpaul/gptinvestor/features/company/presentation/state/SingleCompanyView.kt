@@ -11,6 +11,7 @@ data class SingleCompanyView(
     val loading: Boolean = false,
     val conversation: Conversation = CompanyDetailDefaultConversation(id = 0, response = null),
     val error: String? = null,
+    val isErrorOffline: Boolean = false,
     val companyName: String = "",
     val ticker: String = "",
     val priceHistory: List<HistoricalData> = emptyList(),

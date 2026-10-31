@@ -96,7 +96,7 @@ fun CompanyBriefRemote.toBrief(now: Long = Clock.System.now().epochSeconds): Com
     logoUrl = logoUrl?.toHttpsUrl().orEmpty(),
     price = currentPrice?.toFloat() ?: 0f,
     change = percentageChange?.toFloat(),
-    currencySymbol = currencySymbol ?: DEFAULT_CURRENCY_SYMBOL,
+    currencySymbol = resolvedCurrencySymbol,
     sentiment = sentiment?.toSentiment(),
     sentimentSummary = sentimentSummary,
     summary = summary?.takeIf { it.isNotBlank() },
@@ -107,13 +107,14 @@ fun CompanyBriefRemote.toBrief(now: Long = Clock.System.now().epochSeconds): Com
     isWatched = isWatched ?: false
 )
 
+private val CompanyBriefRemote.resolvedCurrencySymbol: String get() = currencySymbol ?: DEFAULT_CURRENCY_SYMBOL
+
 private fun CompanyBriefRemote.buildBriefKeyNumbers(): List<KeyNumber> = buildList {
-    val symbol = currencySymbol ?: DEFAULT_CURRENCY_SYMBOL
     marketCap?.takeIf { it > 0 }?.let {
         add(
             KeyNumber(
                 key = KeyNumberType.MarketCap,
-                value = symbol + it.toReadable(),
+                value = resolvedCurrencySymbol + it.toReadable(),
                 insight = marketCapInsight,
                 tone = marketCapInsightTone.toToneOrNeutral()
             )

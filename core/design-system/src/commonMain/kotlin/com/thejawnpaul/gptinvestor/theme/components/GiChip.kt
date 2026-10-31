@@ -74,6 +74,7 @@ fun GiChip(
     style: GiChipStyle = GiChipStyle.Filter,
     size: GiChipSize = GiChipSize.Medium,
     leadingIcon: ImageVector? = null,
+    trailingIcon: ImageVector? = null,
     enabled: Boolean = true,
     singleChoice: Boolean = false
 ) {
@@ -99,6 +100,14 @@ fun GiChip(
             indication = null,
             enabled = enabled,
             role = Role.Button,
+            onClick = onClick
+        )
+    } else if (trailingIcon != null) {
+        Modifier.clickable(
+            interactionSource = interactionSource,
+            indication = null,
+            enabled = enabled,
+            role = Role.DropdownList,
             onClick = onClick
         )
     } else {
@@ -134,7 +143,11 @@ fun GiChip(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (leadingIcon != null) {
-            GiChipIcon(icon = leadingIcon, tint = { content.value })
+            GiChipIcon(
+                icon = leadingIcon,
+                tint = { content.value },
+                modifier = Modifier.padding(end = GiSpace.x1_5)
+            )
         } else if (!isQuiet) {
             GiChipCheck(visible = selected, tint = { content.value }, reducedMotion = reducedMotion)
         }
@@ -145,6 +158,13 @@ fun GiChip(
             ),
             color = { content.value }
         )
+        if (trailingIcon != null) {
+            GiChipIcon(
+                icon = trailingIcon,
+                tint = { content.value },
+                modifier = Modifier.padding(start = GiSpace.x1)
+            )
+        }
     }
 }
 
@@ -167,7 +187,7 @@ private fun RowScope.GiChipCheck(visible: Boolean, tint: () -> Color, reducedMot
                 fadeOut(tween(GiMotion.INSTANT, easing = GiEasing.linear))
         }
     ) {
-        GiChipIcon(icon = GiIcons.check, tint = tint)
+        GiChipIcon(icon = GiIcons.check, tint = tint, modifier = Modifier.padding(end = GiSpace.x1_5))
     }
 }
 
@@ -176,7 +196,6 @@ private fun GiChipIcon(icon: ImageVector, tint: () -> Color, modifier: Modifier 
     val painter = rememberVectorPainter(icon)
     Spacer(
         modifier = modifier
-            .padding(end = GiSpace.x1_5)
             .size(GiIconSize.sm)
             .drawBehind { with(painter) { draw(size, colorFilter = ColorFilter.tint(tint())) } }
     )
@@ -198,6 +217,17 @@ private fun GiChipPreview() {
                 listOf("All", "Tech", "Banking", "Energy").forEach { label ->
                     GiChip(text = label, onClick = { selected = label }, selected = label == selected)
                 }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
+                GiChip(
+                    text = "Nigeria",
+                    onClick = {},
+                    selected = true,
+                    leadingIcon = GiIcons.globe,
+                    trailingIcon = GiIcons.caretDown
+                )
+                GiChip(text = "All markets", onClick = {
+                }, leadingIcon = GiIcons.globe, trailingIcon = GiIcons.caretDown)
             }
             Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
                 GiChip(text = "Is Apple a buy?", onClick = {}, style = GiChipStyle.Quiet)

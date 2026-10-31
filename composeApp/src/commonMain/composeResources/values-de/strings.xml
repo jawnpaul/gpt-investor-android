@@ -173,7 +173,7 @@
     <string name="key_period_latest_quarter">Jüngstes Quartal</string>
     <string name="key_definition_market_cap">Die Marktkapitalisierung ist der Gesamtwert aller Aktien des Unternehmens zum heutigen Kurs.</string>
     <string name="key_definition_pe_ratio">Das KGV (P/E) vergleicht den Aktienkurs mit dem Gewinn je Aktie des Unternehmens im vergangenen Jahr.</string>
-    <string name="key_definition_revenue_growth">Das Umsatzwachstum vergleicht den Umsatz des letzten Quartals mit demselben Quartal des Vorjahres.</string>
+    <string name="key_definition_revenue_growth">Das Umsatzwachstum vergleicht den Umsatz des jüngsten Quartals mit demselben Quartal des Vorjahres.</string>
     <string name="key_definition_dividend_yield">Die Dividendenrendite ist die jährliche Ausschüttung an die Aktionäre im Verhältnis zum heutigen Kurs.</string>
 
     <string name="ask_me_anything_about_markets">Fragen Sie mich alles über die Märkte …</string>

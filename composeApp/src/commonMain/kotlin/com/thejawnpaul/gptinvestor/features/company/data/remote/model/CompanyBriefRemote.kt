@@ -7,6 +7,8 @@ import kotlinx.serialization.Serializable
 data class CompanyBriefRemote(
     @SerialName("company_name") val companyName: String? = null,
     @SerialName("current_price") val currentPrice: Double? = null,
+    @SerialName("market") val market: String? = null,
+    @SerialName("currency") val currency: String? = null,
     @SerialName("currency_symbol") val currencySymbol: String? = null,
     @SerialName("dividend_yield") val dividendYield: Double? = null,
     @SerialName("dividend_yield_insight") val dividendYieldInsight: String? = null,

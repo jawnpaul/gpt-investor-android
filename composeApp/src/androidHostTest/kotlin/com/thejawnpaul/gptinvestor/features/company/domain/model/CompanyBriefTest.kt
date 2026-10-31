@@ -2,6 +2,7 @@ package com.thejawnpaul.gptinvestor.features.company.domain.model
 
 import com.google.common.truth.Truth.assertThat
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyBriefRemote
+import kotlinx.serialization.json.Json
 import org.junit.Test
 
 class CompanyBriefTest {
@@ -25,6 +26,18 @@ class CompanyBriefTest {
 
         assertThat(brief.currencySymbol).isEqualTo("$")
         assertThat(brief.keyNumbers.single { it.key == KeyNumberType.MarketCap }.value).startsWith("$")
+    }
+
+    @Test
+    fun `reads market and currency fields as the API sends them`() {
+        val remote = Json { ignoreUnknownKeys = true }.decodeFromString<CompanyBriefRemote>(
+            """{"ticker": "ZENITHBANK.NG", "market": "NG", "currency": "NGN", "currency_symbol": "₦",
+                "current_price": 119, "percentage_change": -0.83}"""
+        )
+
+        assertThat(remote.market).isEqualTo("NG")
+        assertThat(remote.currency).isEqualTo("NGN")
+        assertThat(remote.toBrief().currencySymbol).isEqualTo("₦")
     }
 
     @Test

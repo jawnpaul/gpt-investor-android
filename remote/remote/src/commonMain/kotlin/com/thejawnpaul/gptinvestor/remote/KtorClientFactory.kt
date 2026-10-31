@@ -48,6 +48,7 @@ object KtorClientFactory {
     fun create(
         tokenStorage: TokenStorage,
         unauthorizedCallback: UnauthorizedCallback,
+        clientInfo: ClientInfo,
         engineFactory: HttpClientEngineFactory<*> = getHttpClientEngine()
     ): HttpClient {
         return HttpClient(engineFactory) {
@@ -149,6 +150,7 @@ object KtorClientFactory {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 header("Accept-Language", getCurrentLocale())
+                header("X-Client", "${clientInfo.platform}/${clientInfo.versionName}")
             }
         }
     }

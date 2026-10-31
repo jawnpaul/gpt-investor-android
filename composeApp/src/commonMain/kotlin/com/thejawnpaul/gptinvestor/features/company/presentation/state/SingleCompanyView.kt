@@ -1,16 +1,21 @@
 package com.thejawnpaul.gptinvestor.features.company.presentation.state
 
+import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.brief_error_body
+import com.thejawnpaul.gptinvestor.check_connection_try_again
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.HistoricalData
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyBrief
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.AvailableModel
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.CompanyDetailDefaultConversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.Conversation
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.DefaultModel
+import org.jetbrains.compose.resources.StringResource
 
 data class SingleCompanyView(
     val loading: Boolean = false,
     val conversation: Conversation = CompanyDetailDefaultConversation(id = 0, response = null),
     val error: String? = null,
+    val isErrorOffline: Boolean = false,
     val companyName: String = "",
     val ticker: String = "",
     val priceHistory: List<HistoricalData> = emptyList(),
@@ -37,6 +42,9 @@ data class SingleCompanyView(
     val watchlistPending: Boolean = false
 ) {
     val enableSend = inputQuery.trim().isNotEmpty()
+
+    val errorBody: StringResource
+        get() = if (isErrorOffline) Res.string.check_connection_try_again else Res.string.brief_error_body
 }
 
 data class CompanyHeaderPresentation(

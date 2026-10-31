@@ -134,7 +134,11 @@ class CompanyViewModel(
             getCompanyBriefUseCase(ticker) {
                 it.onFailure { failure ->
                     _selectedCompany.update { state ->
-                        state.copy(loading = false, error = "Something went wrong.")
+                        state.copy(
+                            loading = false,
+                            error = "Something went wrong.",
+                            isErrorOffline = failure is Failure.NetworkConnection
+                        )
                     }
                     when (failure) {
                         is Failure.GuestSessionExpired -> {

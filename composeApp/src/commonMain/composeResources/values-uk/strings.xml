@@ -338,6 +338,7 @@
     <string name="ask_about_this">Запитати про це</string>
     <string name="not_financial_advice">Не є фінансовою порадою.</string>
     <string name="couldn_t_load_brief">Не вдалося завантажити огляд</string>
+    <string name="brief_error_body">Щось пішло не так на нашому боці. Спробуйте ще раз за мить.</string>
     <string name="key_question_market_cap">Що ринкова капіталізація %1$s говорить про %2$s?</string>
     <string name="key_question_pe_ratio">Чи високий коефіцієнт P/E %1$s для %2$s?</string>
     <string name="key_question_revenue_growth">Що означає зростання виручки на %1$s для %2$s?</string>

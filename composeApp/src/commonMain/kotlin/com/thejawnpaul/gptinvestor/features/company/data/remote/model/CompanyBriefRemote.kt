@@ -15,7 +15,9 @@ data class CompanyBriefRemote(
     @SerialName("dividend_yield_insight_tone") val dividendYieldInsightTone: String? = null,
     @SerialName("historical_data") val historicalData: List<BriefHistoricalData>? = null,
     @SerialName("logo_url") val logoUrl: String? = null,
-    @SerialName("market_cap") val marketCap: Long? = null,
+    @Serializable(with = WholeNumberSerializer::class)
+    @SerialName("market_cap")
+    val marketCap: Long? = null,
     @SerialName("market_cap_insight") val marketCapInsight: String? = null,
     @SerialName("market_cap_insight_tone") val marketCapInsightTone: String? = null,
     @SerialName("news") val news: List<BriefNewsItem>? = null,
@@ -24,7 +26,9 @@ data class CompanyBriefRemote(
     @SerialName("pe_ratio_insight") val peRatioInsight: String? = null,
     @SerialName("pe_ratio_insight_tone") val peRatioInsightTone: String? = null,
     @SerialName("percentage_change") val percentageChange: Double? = null,
-    @SerialName("revenue") val revenue: Long? = null,
+    @Serializable(with = WholeNumberSerializer::class)
+    @SerialName("revenue")
+    val revenue: Long? = null,
     @SerialName("revenue_growth") val revenueGrowth: Double? = null,
     @SerialName("revenue_growth_insight") val revenueGrowthInsight: String? = null,
     @SerialName("revenue_growth_insight_tone") val revenueGrowthInsightTone: String? = null,
@@ -44,14 +48,18 @@ data class BriefHistoricalData(
     @SerialName("High") val high: Double? = null,
     @SerialName("Low") val low: Double? = null,
     @SerialName("Open") val open: Double? = null,
-    @SerialName("Volume") val volume: Long? = null
+    @Serializable(with = WholeNumberSerializer::class)
+    @SerialName("Volume")
+    val volume: Long? = null
 )
 
 @Serializable
 data class BriefNewsItem(
     @SerialName("headline") val headline: String? = null,
     @SerialName("impact") val impact: String? = null,
-    @SerialName("publishedAt") val publishedAt: Long? = null,
+    @Serializable(with = WholeNumberSerializer::class)
+    @SerialName("publishedAt")
+    val publishedAt: Long? = null,
     @SerialName("publisher") val publisher: String? = null,
     @SerialName("url") val url: String? = null
 )

@@ -7,17 +7,24 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
+import com.thejawnpaul.gptinvestor.features.company.domain.model.Market
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SearchCompanyQuery
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -28,11 +35,23 @@ import org.koin.core.annotation.Provided
 data class BrowseStocksState(
     val sectors: List<SectorInput> = emptyList(),
     val selectedSector: SectorInput = SectorInput.AllSector,
-    val query: String = ""
-)
+    val query: String = "",
+    val markets: List<Market> = emptyList(),
+    val selectedMarketKey: String? = null,
+    val totalCompanies: Int? = null,
+    val isMarketSheetOpen: Boolean = false
+) {
+    val showMarketFilter: Boolean get() = markets.size >= 2
+    val selectedMarket: Market? get() = markets.firstOrNull { it.key == selectedMarketKey }
+    val allMarketsCount: Int get() = markets.sumOf { it.count }
+    val countLine: Int? get() = totalCompanies.takeIf { showMarketFilter }
+}
 
 sealed interface BrowseStocksEvent {
     data class SelectSector(val sector: SectorInput) : BrowseStocksEvent
+    data object OpenMarketSheet : BrowseStocksEvent
+    data object DismissMarketSheet : BrowseStocksEvent
+    data class SelectMarket(val marketKey: String?) : BrowseStocksEvent
     data class UpdateQuery(val query: String) : BrowseStocksEvent
     data class GoToCompanyDetail(val ticker: String) : BrowseStocksEvent
     data object GoBack : BrowseStocksEvent
@@ -59,17 +78,57 @@ class BrowseStocksViewModel(
     private val filter = MutableStateFlow(
         SearchCompanyQuery(sector = savedStateHandle.get<String>("sector"), query = "")
     )
+    private val isMarketReady = MutableStateFlow(false)
+    private var marketsJob: Job? = null
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val companiesPaging: Flow<PagingData<CompanyPresentation>> =
-        filter.flatMapLatest { filter ->
-            repository.searchCompaniesPaged(filter)
-                .map { pagingData -> pagingData.map { it.toPresentation() } }
-                .cachedIn(viewModelScope)
-        }
+        combine(filter, isMarketReady) { filter, ready -> filter.takeIf { ready } }
+            .filterNotNull()
+            .distinctUntilChanged()
+            .flatMapLatest { filter ->
+                _state.update { it.copy(totalCompanies = null) }
+                repository.searchCompaniesPaged(filter) { total -> _state.update { it.copy(totalCompanies = total) } }
+                    .map { pagingData -> pagingData.map { it.toPresentation() } }
+                    .cachedIn(viewModelScope)
+            }
 
     init {
         loadSectors()
+        loadInitialMarket()
+    }
+
+    private fun loadInitialMarket() {
+        viewModelScope.launch {
+            val sectorKey = savedStateHandle.get<String>("sector")
+            val savedMarket = repository.browseMarket.first()
+            if (savedMarket == null) {
+                isMarketReady.value = true
+                loadMarkets(sectorKey)
+            } else {
+                _state.update { it.copy(selectedMarketKey = savedMarket) }
+                filter.update { it.copy(market = savedMarket) }
+                loadMarkets(sectorKey).join()
+                isMarketReady.value = true
+            }
+        }
+    }
+
+    private fun loadMarkets(sectorKey: String?): Job {
+        marketsJob?.cancel()
+        return viewModelScope.launch { fetchMarkets(sectorKey) }.also { marketsJob = it }
+    }
+
+    private suspend fun fetchMarkets(sectorKey: String?) {
+        val markets = (repository.getMarkets(sectorKey) as? Either.Right)?.b ?: return
+        val selected = _state.value.selectedMarketKey
+        val isSelectedVisible = markets.size >= 2 && markets.any { it.key == selected }
+        _state.update { it.copy(markets = markets) }
+        if (selected != null && !isSelectedVisible) {
+            _state.update { it.copy(selectedMarketKey = null) }
+            filter.update { it.copy(market = null) }
+            repository.setBrowseMarket(null)
+        }
     }
 
     private fun loadSectors() {
@@ -100,6 +159,27 @@ class BrowseStocksViewModel(
                     eventName = "browse-sector-selected",
                     params = mapOf("sector" to (sectorKey ?: "all"))
                 )
+                loadMarkets(sectorKey)
+            }
+
+            BrowseStocksEvent.OpenMarketSheet -> {
+                _state.update { it.copy(isMarketSheetOpen = true) }
+                analyticsLogger.logEvent(
+                    eventName = "browse-market-sheet-opened",
+                    params = mapOf("market" to (_state.value.selectedMarketKey ?: "all"))
+                )
+            }
+
+            BrowseStocksEvent.DismissMarketSheet -> _state.update { it.copy(isMarketSheetOpen = false) }
+
+            is BrowseStocksEvent.SelectMarket -> {
+                _state.update { it.copy(selectedMarketKey = event.marketKey, isMarketSheetOpen = false) }
+                filter.update { it.copy(market = event.marketKey) }
+                analyticsLogger.logEvent(
+                    eventName = "browse-market-selected",
+                    params = mapOf("market" to (event.marketKey ?: "all"))
+                )
+                viewModelScope.launch { repository.setBrowseMarket(event.marketKey) }
             }
 
             is BrowseStocksEvent.UpdateQuery -> {

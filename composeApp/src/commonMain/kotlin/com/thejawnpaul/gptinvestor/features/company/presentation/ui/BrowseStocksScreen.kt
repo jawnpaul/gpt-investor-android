@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.company.presentation.ui
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,12 +21,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -48,21 +51,27 @@ import androidx.paging.compose.itemKey
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.browse_companies_title
+import com.thejawnpaul.gptinvestor.browse_company_count
 import com.thejawnpaul.gptinvestor.browse_empty_all
 import com.thejawnpaul.gptinvestor.browse_empty_in_sector
+import com.thejawnpaul.gptinvestor.browse_empty_market_sector
 import com.thejawnpaul.gptinvestor.browse_empty_query
 import com.thejawnpaul.gptinvestor.browse_empty_sector
 import com.thejawnpaul.gptinvestor.browse_error_body
 import com.thejawnpaul.gptinvestor.browse_error_title
 import com.thejawnpaul.gptinvestor.browse_loading
+import com.thejawnpaul.gptinvestor.browse_market_all
+import com.thejawnpaul.gptinvestor.browse_market_chip_description
 import com.thejawnpaul.gptinvestor.browse_more_error
 import com.thejawnpaul.gptinvestor.browse_search_all_sectors
 import com.thejawnpaul.gptinvestor.browse_search_placeholder
 import com.thejawnpaul.gptinvestor.browse_sector
 import com.thejawnpaul.gptinvestor.browse_sector_all
+import com.thejawnpaul.gptinvestor.browse_show_all_markets
 import com.thejawnpaul.gptinvestor.browse_stocks_empty
 import com.thejawnpaul.gptinvestor.clear_search
 import com.thejawnpaul.gptinvestor.features.company.data.local.model.PriceChange
+import com.thejawnpaul.gptinvestor.features.company.domain.model.Market
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.BrowseStocksEvent
@@ -71,6 +80,9 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.t
 import com.thejawnpaul.gptinvestor.features.search.presentation.ui.SearchArtTile
 import com.thejawnpaul.gptinvestor.features.search.presentation.ui.SearchCopyMaxWidth
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GiEasing
+import com.thejawnpaul.gptinvestor.theme.GiEdge
+import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.components.GiButton
@@ -88,9 +100,12 @@ import com.thejawnpaul.gptinvestor.theme.components.GiText
 import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
 import com.thejawnpaul.gptinvestor.theme.components.giLazyListGroup
+import com.thejawnpaul.gptinvestor.theme.giAnimatePlacement
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 import com.thejawnpaul.gptinvestor.try_again
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val LARGE_TEXT_FONT_SCALE = 1.5f
@@ -142,6 +157,15 @@ fun BrowseStocksScreen(
                 .imePadding()
         )
     }
+    if (state.isMarketSheetOpen) {
+        BrowseMarketSheet(
+            markets = state.markets,
+            selectedMarketKey = state.selectedMarketKey,
+            allMarketsCount = state.allMarketsCount,
+            onSelect = { onEvent(BrowseStocksEvent.SelectMarket(it)) },
+            onDismiss = { onEvent(BrowseStocksEvent.DismissMarketSheet) }
+        )
+    }
 }
 
 @Composable
@@ -165,12 +189,35 @@ private fun BrowseStocksContent(
         contentPadding = PaddingValues(top = GiSpace.x3)
     ) {
         item(key = "sectors", contentType = "sectors") {
-            if (state.sectors.isNotEmpty()) {
+            if (state.sectors.isNotEmpty() || state.showMarketFilter) {
                 SectorChips(
                     sectors = state.sectors,
                     selected = state.selectedSector,
                     onSelect = { onEvent(BrowseStocksEvent.SelectSector(it)) },
-                    modifier = Modifier.padding(bottom = GiSpace.x4)
+                    modifier = Modifier.padding(bottom = GiSpace.x4),
+                    marketChip = if (state.showMarketFilter) {
+                        {
+                            MarketChip(market = state.selectedMarket, onClick = {
+                                onEvent(BrowseStocksEvent.OpenMarketSheet)
+                            })
+                        }
+                    } else {
+                        null
+                    }
+                )
+            }
+        }
+
+        val countLine = state.countLine
+        if (countLine != null && !isEmpty) {
+            item(key = "countLine", contentType = "countLine") {
+                CountLine(
+                    count = countLine,
+                    market = state.selectedMarket,
+                    sector = state.selectedSector as? SectorInput.CustomSector,
+                    modifier = Modifier
+                        .then(countLineMotion())
+                        .padding(start = GiSpace.gutter, end = GiSpace.gutter, bottom = GiSpace.x3)
                 )
             }
         }
@@ -282,13 +329,10 @@ private fun SectorChips(
     sectors: List<SectorInput>,
     selected: SectorInput,
     onSelect: (SectorInput) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    marketChip: (@Composable () -> Unit)? = null
 ) {
     val groupLabel = stringResource(Res.string.browse_sector)
-    val groupModifier = modifier
-        .fillMaxWidth()
-        .semantics { contentDescription = groupLabel }
-        .selectableGroup()
     val chip: @Composable (SectorInput) -> Unit = { sector ->
         GiChip(
             text = sector.label(),
@@ -300,22 +344,106 @@ private fun SectorChips(
     }
     if (LocalDensity.current.fontScale >= LARGE_TEXT_FONT_SCALE) {
         FlowRow(
-            modifier = groupModifier.padding(horizontal = GiSpace.gutter),
+            modifier = modifier
+                .fillMaxWidth()
+                .semantics { contentDescription = groupLabel }
+                .selectableGroup()
+                .padding(horizontal = GiSpace.gutter),
             horizontalArrangement = Arrangement.spacedBy(GiSpace.x2),
             verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
         ) {
-            sectors.forEach { chip(it) }
+            if (marketChip != null) {
+                Box(modifier = Modifier.giAnimatePlacement()) { marketChip() }
+            }
+            sectors.forEach { Box(modifier = Modifier.giAnimatePlacement()) { chip(it) } }
         }
     } else {
+        val rowState = rememberLazyListState()
+        val hasMarketChip = marketChip != null
+        LaunchedEffect(hasMarketChip) {
+            if (hasMarketChip && rowState.firstVisibleItemIndex <= MARKET_ROW_ITEMS) rowState.scrollToItem(0)
+        }
         LazyRow(
-            modifier = groupModifier,
+            modifier = modifier
+                .fillMaxWidth()
+                .semantics { contentDescription = groupLabel }
+                .selectableGroup(),
+            state = rowState,
             contentPadding = PaddingValues(horizontal = GiSpace.gutter),
             horizontalArrangement = Arrangement.spacedBy(GiSpace.x2),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            items(items = sectors, key = { it.key() }, contentType = { "sector" }) { chip(it) }
+            if (marketChip != null) {
+                item(key = "market", contentType = "market") { Box(modifier = chipRowMotion()) { marketChip() } }
+                item(key = "marketDivider", contentType = "marketDivider") {
+                    MarketDivider(modifier = chipRowMotion())
+                }
+            }
+            items(items = sectors, key = { it.key() }, contentType = { "sector" }) {
+                Box(modifier = chipRowMotion()) { chip(it) }
+            }
         }
     }
+}
+
+@Composable
+private fun LazyItemScope.chipRowMotion(): Modifier = if (isReducedMotionEnabled()) {
+    Modifier.animateItem(fadeInSpec = null, placementSpec = null, fadeOutSpec = null)
+} else {
+    Modifier.animateItem(
+        fadeInSpec = tween(GiMotion.FAST, easing = GiEasing.emphasised),
+        placementSpec = GiMotion.smooth(),
+        fadeOutSpec = tween(GiMotion.INSTANT, easing = GiEasing.linear)
+    )
+}
+
+@Composable
+private fun LazyItemScope.countLineMotion(): Modifier = if (isReducedMotionEnabled()) {
+    Modifier.animateItem(fadeInSpec = null, placementSpec = null, fadeOutSpec = null)
+} else {
+    Modifier.animateItem(
+        fadeInSpec = tween(GiMotion.FAST, easing = GiEasing.emphasised),
+        placementSpec = null,
+        fadeOutSpec = tween(GiMotion.INSTANT, easing = GiEasing.linear)
+    )
+}
+
+@Composable
+private fun MarketChip(market: Market?, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val label = market?.name ?: stringResource(Res.string.browse_market_all)
+    val description = stringResource(Res.string.browse_market_chip_description, label)
+    GiChip(
+        text = label,
+        onClick = onClick,
+        modifier = modifier.semantics { contentDescription = description },
+        selected = market != null,
+        leadingIcon = GiIcons.globe,
+        trailingIcon = GiIcons.caretDown
+    )
+}
+
+@Composable
+private fun MarketDivider(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(width = GiEdge.width, height = MarketDividerHeight)
+            .background(GiTheme.colors.line)
+    )
+}
+
+@Composable
+private fun CountLine(count: Int, market: Market?, sector: SectorInput.CustomSector?, modifier: Modifier = Modifier) {
+    val text = listOfNotNull(
+        pluralStringResource(Res.plurals.browse_company_count, count, count),
+        market?.name,
+        sector?.sectorName
+    ).joinToString(separator = " · ")
+    GiText(
+        text = text,
+        modifier = modifier.semantics { liveRegion = LiveRegionMode.Polite },
+        style = GiTextStyle.BodySmall,
+        color = GiTheme.colors.muted
+    )
 }
 
 @Composable
@@ -326,11 +454,18 @@ private fun BrowseEmptyState(
     modifier: Modifier = Modifier
 ) {
     val sector = state.selectedSector as? SectorInput.CustomSector
+    val market = state.selectedMarket
     val query = state.query.trim()
     val body: String
     val actionText: String
     val onAction: () -> Unit
     when {
+        market != null && sector != null && query.isEmpty() -> {
+            body = stringResource(Res.string.browse_empty_market_sector, market.name, sector.sectorName)
+            actionText = stringResource(Res.string.browse_show_all_markets)
+            onAction = { onEvent(BrowseStocksEvent.SelectMarket(null)) }
+        }
+
         sector != null && query.isNotEmpty() -> {
             body = stringResource(Res.string.browse_empty_in_sector, sector.sectorName, query)
             actionText = stringResource(Res.string.browse_search_all_sectors)
@@ -428,8 +563,10 @@ private fun BrowseErrorState(onRetry: () -> Unit, modifier: Modifier = Modifier)
 }
 
 private const val COMPANY_CONTENT_TYPE = "company"
+private const val MARKET_ROW_ITEMS = 2
 
 private val BrowseEmptyTop = 56.dp
+private val MarketDividerHeight = 20.dp
 private val BrowseErrorTop = 72.dp
 
 @Composable

@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.company.domain.model
 
+import com.thejawnpaul.gptinvestor.core.utility.DEFAULT_CURRENCY_SYMBOL
 import com.thejawnpaul.gptinvestor.core.utility.relativeTime
 import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.core.utility.toReadable
@@ -16,7 +17,8 @@ data class CompanyBrief(
     val name: String,
     val logoUrl: String,
     val price: Float,
-    val change: Float,
+    val change: Float?,
+    val currencySymbol: String,
     val sentiment: BriefSentiment?,
     val sentimentSummary: String?,
     val summary: String?,
@@ -93,7 +95,8 @@ fun CompanyBriefRemote.toBrief(now: Long = Clock.System.now().epochSeconds): Com
     name = companyName.orEmpty(),
     logoUrl = logoUrl?.toHttpsUrl().orEmpty(),
     price = currentPrice?.toFloat() ?: 0f,
-    change = percentageChange?.toFloat() ?: 0f,
+    change = percentageChange?.toFloat(),
+    currencySymbol = currencySymbol ?: DEFAULT_CURRENCY_SYMBOL,
     sentiment = sentiment?.toSentiment(),
     sentimentSummary = sentimentSummary,
     summary = summary?.takeIf { it.isNotBlank() },
@@ -105,11 +108,12 @@ fun CompanyBriefRemote.toBrief(now: Long = Clock.System.now().epochSeconds): Com
 )
 
 private fun CompanyBriefRemote.buildBriefKeyNumbers(): List<KeyNumber> = buildList {
+    val symbol = currencySymbol ?: DEFAULT_CURRENCY_SYMBOL
     marketCap?.takeIf { it > 0 }?.let {
         add(
             KeyNumber(
                 key = KeyNumberType.MarketCap,
-                value = "$" + it.toReadable(),
+                value = symbol + it.toReadable(),
                 insight = marketCapInsight,
                 tone = marketCapInsightTone.toToneOrNeutral()
             )

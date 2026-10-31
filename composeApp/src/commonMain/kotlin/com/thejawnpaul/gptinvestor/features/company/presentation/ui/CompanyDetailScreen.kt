@@ -486,7 +486,7 @@ private fun BoxScope.CompanyPinnedRow(visible: Boolean, brief: CompanyBrief?) {
                         ticker = brief.ticker,
                         title = brief.name,
                         subtitle = brief.ticker,
-                        percent = brief.change.toDouble(),
+                        percent = brief.change?.toDouble(),
                         imageUrl = brief.logoUrl.ifBlank { null }
                     ),
                     modifier = Modifier
@@ -532,6 +532,7 @@ private fun CompanyDetailScreenPreview() {
                     logoUrl = "",
                     price = 182.30f,
                     change = 1.42f,
+                    currencySymbol = "$",
                     sentiment = BriefSentiment.Bullish,
                     sentimentSummary = "Services growth and steady cash flow keep the long-term outlook strong.",
                     summary = "Apple is the world's largest consumer-electronics company, best known for the iPhone. " +

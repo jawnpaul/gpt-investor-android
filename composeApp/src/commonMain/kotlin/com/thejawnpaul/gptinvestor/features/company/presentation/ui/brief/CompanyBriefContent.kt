@@ -250,8 +250,8 @@ private fun BriefHero(
             verticalArrangement = Arrangement.spacedBy(GiSpace.x2),
             itemVerticalAlignment = Alignment.CenterVertically
         ) {
-            GiPriceDisplay(price = brief.price.toDouble())
-            GiDeltaPill(percent = brief.change.toDouble(), suffix = stringResource(Res.string.today))
+            GiPriceDisplay(price = brief.price.toDouble(), currencySymbol = brief.currencySymbol)
+            brief.change?.let { GiDeltaPill(percent = it.toDouble(), suffix = stringResource(Res.string.today)) }
         }
     }
 }
@@ -593,6 +593,7 @@ internal val previewCompanyBrief = CompanyBrief(
     logoUrl = "",
     price = 379.07f,
     change = -0.95f,
+    currencySymbol = "$",
     sentiment = BriefSentiment.Neutral,
     sentimentSummary = "Tesla faces both exciting opportunities in clean energy and real risks from competition.",
     summary = "Tesla makes electric cars and energy storage systems, which are important for the world's shift " +

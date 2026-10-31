@@ -58,6 +58,7 @@ data class CompanyDetailRemoteResponse(
     @SerialName("percentage_change") val change: Float? = null,
     @SerialName("revenue") val revenue: Long? = null,
     @SerialName("current_price") val price: Float? = null,
+    @SerialName("currency_symbol") val currencySymbol: String? = null,
     @SerialName("historical_data") val historicalData: List<HistoricalData>? = null,
     @SerialName("company_name") val name: String? = null,
     @SerialName("logo_url") val imageUrl: String? = null,

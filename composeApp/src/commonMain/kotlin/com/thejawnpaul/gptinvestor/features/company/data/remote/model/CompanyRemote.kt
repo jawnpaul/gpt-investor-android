@@ -45,7 +45,9 @@ data class HistoricalData(
     @SerialName("High") val high: Float,
     @SerialName("Low") val low: Float,
     @SerialName("Open") val open: Float,
-    @SerialName("Volume") val volume: Long
+    @Serializable(with = WholeNumberSerializer::class)
+    @SerialName("Volume")
+    val volume: Long
 )
 
 @Serializable

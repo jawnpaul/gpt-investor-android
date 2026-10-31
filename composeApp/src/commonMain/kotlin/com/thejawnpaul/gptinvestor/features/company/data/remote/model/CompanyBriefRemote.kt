@@ -48,14 +48,18 @@ data class BriefHistoricalData(
     @SerialName("High") val high: Double? = null,
     @SerialName("Low") val low: Double? = null,
     @SerialName("Open") val open: Double? = null,
-    @SerialName("Volume") val volume: Long? = null
+    @Serializable(with = WholeNumberSerializer::class)
+    @SerialName("Volume")
+    val volume: Long? = null
 )
 
 @Serializable
 data class BriefNewsItem(
     @SerialName("headline") val headline: String? = null,
     @SerialName("impact") val impact: String? = null,
-    @SerialName("publishedAt") val publishedAt: Long? = null,
+    @Serializable(with = WholeNumberSerializer::class)
+    @SerialName("publishedAt")
+    val publishedAt: Long? = null,
     @SerialName("publisher") val publisher: String? = null,
     @SerialName("url") val url: String? = null
 )

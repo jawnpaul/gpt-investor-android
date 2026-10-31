@@ -8,15 +8,18 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.JsonPrimitive
 
 object WholeNumberSerializer : KSerializer<Long> {
     override val descriptor = PrimitiveSerialDescriptor("WholeNumber", PrimitiveKind.LONG)
 
     override fun deserialize(decoder: Decoder): Long {
-        val content = (decoder as JsonDecoder).decodeJsonElement().jsonPrimitive.content
+        val json = decoder as? JsonDecoder ?: return decoder.decodeLong()
+        val element = json.decodeJsonElement()
+        val content = (element as? JsonPrimitive)?.content
+            ?: throw SerializationException("Expected a number but got $element")
         return content.toLongOrNull()
-            ?: content.toDoubleOrNull()?.roundToLong()
+            ?: content.toDoubleOrNull()?.takeIf { it.isFinite() }?.roundToLong()
             ?: throw SerializationException("Expected a number but got $content")
     }
 

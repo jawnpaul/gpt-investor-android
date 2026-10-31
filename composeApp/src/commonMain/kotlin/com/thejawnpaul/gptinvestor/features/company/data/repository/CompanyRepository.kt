@@ -28,6 +28,7 @@ import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.company.domain.model.TrendingCompany
 import com.thejawnpaul.gptinvestor.features.company.domain.model.toBrief
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
+import io.ktor.client.call.NoTransformationFoundException
 import io.ktor.serialization.ContentConvertException
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
@@ -189,7 +190,8 @@ class CompanyRepository(
                     "user_type" to userType
                 )
             )
-            val isUnreadable = e is ContentConvertException || e is SerializationException
+            val isUnreadable =
+                e is ContentConvertException || e is SerializationException || e is NoTransformationFoundException
             emit(Either.Left(if (isUnreadable) Failure.DataError else Failure.NetworkConnection))
         }
     }

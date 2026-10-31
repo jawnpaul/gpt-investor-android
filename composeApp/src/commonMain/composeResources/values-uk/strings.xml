@@ -538,19 +538,19 @@
         <item quantity="other">Трохи повільніше. Спробуйте ще раз через %1$d години.</item>
     </plurals>
     <string name="add_to_watchlist">Додати до списку спостереження</string>
-    <string name="added_to_watchlist_success">Додано до списку спостереження</string>
-    <string name="added_to_watchlist_error">Не вдалося додати до списку спостереження</string>
+    <string name="added_to_watchlist_success">Додано до списку</string>
+    <string name="added_to_watchlist_error">Не вдалося додати</string>
     <string name="share_brief_text">Перегляньте огляд %1$s (%2$s) у GPTInvestor:\nhttps://gptinvestorapp.com/brief/%3$s</string>
     <string name="activity">Активність</string>
-    <string name="preferences">Уподобання</string>
+    <string name="preferences">Параметри</string>
     <string name="notifications">Сповіщення</string>
     <string name="appearance">Вигляд</string>
     <string name="privacy">Конфіденційність</string>
     <string name="watching">Відстежуються</string>
-    <string name="saved">Збережено</string>
-    <string name="light">Світла</string>
-    <string name="dark">Темна</string>
-    <string name="system">Системна</string>
-    <string name="log_in_with_apple">Увійти через Apple</string>
-    <string name="sign_up_with_apple">Зареєструватися через Apple</string>
+    <string name="saved">Збережені</string>
+    <string name="light">Світлий</string>
+    <string name="dark">Темний</string>
+    <string name="system">Системний</string>
+    <string name="log_in_with_apple">Увійти з Apple</string>
+    <string name="sign_up_with_apple">Зареєструватися з Apple</string>
 </resources>

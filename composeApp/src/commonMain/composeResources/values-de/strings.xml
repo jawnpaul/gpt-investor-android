@@ -527,10 +527,10 @@
     </plurals>
     <string name="add_to_watchlist">Zur Watchlist hinzufügen</string>
     <string name="added_to_watchlist_success">Zur Watchlist hinzugefügt</string>
-    <string name="added_to_watchlist_error">Konnte nicht zur Watchlist hinzugefügt werden</string>
+    <string name="added_to_watchlist_error">Nicht zur Watchlist hinzugefügt</string>
     <string name="share_brief_text">Sehen Sie sich die Kurzanalyse zu %1$s (%2$s) auf GPTInvestor an:\nhttps://gptinvestorapp.com/brief/%3$s</string>
     <string name="activity">Aktivität</string>
-    <string name="preferences">Präferenzen</string>
+    <string name="preferences">Optionen</string>
     <string name="notifications">Benachrichtigungen</string>
     <string name="appearance">Darstellung</string>
     <string name="privacy">Datenschutz</string>

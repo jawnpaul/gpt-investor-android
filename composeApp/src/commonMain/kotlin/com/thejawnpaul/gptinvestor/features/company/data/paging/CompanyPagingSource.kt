@@ -11,7 +11,9 @@ import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
 class CompanyPagingSource(
     private val apiService: KtorApiService,
     private val query: String? = null,
-    private val sector: String? = null
+    private val sector: String? = null,
+    private val market: String? = null,
+    private val onTotalCount: (Int?) -> Unit = {}
 ) : PagingSource<Int, Company>() {
 
     override fun getRefreshKey(state: PagingState<Int, Company>): Int? = state.anchorPosition?.let { anchorPosition ->
@@ -27,18 +29,20 @@ class CompanyPagingSource(
             query = query,
             page = page,
             sector = sector,
-            pageSize = pageSize
+            pageSize = pageSize,
+            market = market
         )
 
         if (response.isSuccessful) {
             response.body?.let { data ->
+                if (page == 1) onTotalCount(data.totalCompanies)
                 val companies = data.data.map { remote ->
                     with(remote) {
                         Company(
                             ticker = ticker,
-                            summary = summary,
+                            summary = summary.orEmpty(),
                             name = name,
-                            logo = logoUrl.toHttpsUrl(),
+                            logo = logoUrl.orEmpty().toHttpsUrl(),
                             change = PriceChange(change = 0f, date = 1L)
                         )
                     }

@@ -22,6 +22,7 @@ import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyLog
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyBrief
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyFinancials
+import com.thejawnpaul.gptinvestor.features.company.domain.model.Market
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SearchCompanyQuery
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.company.domain.model.TrendingCompany
@@ -278,7 +279,10 @@ class CompanyRepository(
         }
     }
 
-    override fun searchCompaniesPaged(query: SearchCompanyQuery): Flow<PagingData<Company>> = Pager(
+    override fun searchCompaniesPaged(
+        query: SearchCompanyQuery,
+        onTotalCount: (Int?) -> Unit
+    ): Flow<PagingData<Company>> = Pager(
         config = PagingConfig(
             pageSize = CompanyPagingSource.PAGE_SIZE,
             enablePlaceholders = false,
@@ -288,10 +292,31 @@ class CompanyRepository(
             CompanyPagingSource(
                 apiService = apiService,
                 query = query.query.ifBlank { null },
-                sector = query.sector
+                sector = query.sector,
+                market = query.market,
+                onTotalCount = onTotalCount
             )
         }
     ).flow
+
+    override suspend fun getMarkets(sector: String?): Either<Failure, List<Market>> = try {
+        val response = apiService.getMarkets(sector = sector)
+        val body = response.body
+        if (response.isSuccessful && body != null) {
+            Either.Right(body.markets.map { Market(key = it.key, name = it.name, count = it.count) })
+        } else {
+            Either.Left(Failure.ServerError)
+        }
+    } catch (e: Exception) {
+        Logger.e(e.stackTraceToString())
+        Either.Left(Failure.NetworkConnection)
+    }
+
+    override val browseMarket: Flow<String?> get() = appPreferences.browseMarket
+
+    override suspend fun setBrowseMarket(market: String?) {
+        appPreferences.setBrowseMarket(market)
+    }
 
     override suspend fun searchCompany(query: SearchCompanyQuery): Flow<Either<Failure, List<Company>>> = flow {
         try {
@@ -321,9 +346,9 @@ class CompanyRepository(
             val companies = response.body?.data?.map { remote ->
                 Company(
                     ticker = remote.ticker,
-                    summary = remote.summary,
+                    summary = remote.summary.orEmpty(),
                     name = remote.name,
-                    logo = remote.logoUrl.toHttpsUrl(),
+                    logo = remote.logoUrl.orEmpty().toHttpsUrl(),
                     change = PriceChange(change = 0f, date = 1L)
                 )
             } ?: emptyList()

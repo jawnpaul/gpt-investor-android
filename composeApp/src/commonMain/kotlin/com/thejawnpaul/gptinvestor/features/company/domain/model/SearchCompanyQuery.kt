@@ -1,3 +1,3 @@
 package com.thejawnpaul.gptinvestor.features.company.domain.model
 
-data class SearchCompanyQuery(val sector: String? = null, val query: String)
+data class SearchCompanyQuery(val sector: String? = null, val query: String, val market: String? = null)

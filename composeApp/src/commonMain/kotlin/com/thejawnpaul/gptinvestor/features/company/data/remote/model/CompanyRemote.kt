@@ -8,30 +8,30 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CompanyRemote(
     @SerialName("ticker") val ticker: String,
-    @SerialName("summary") val summary: String,
-    @SerialName("industry") val industry: String,
-    @SerialName("industry_key") val industryKey: String,
-    @SerialName("sector") val sector: String,
-    @SerialName("sector_key") val sectorKey: String,
-    @SerialName("country") val country: String,
+    @SerialName("summary") val summary: String? = null,
+    @SerialName("industry") val industry: String? = null,
+    @SerialName("industry_key") val industryKey: String? = null,
+    @SerialName("sector") val sector: String? = null,
+    @SerialName("sector_key") val sectorKey: String? = null,
+    @SerialName("country") val country: String? = null,
     @SerialName("name") val name: String,
-    @SerialName("logo_url") val logoUrl: String,
-    @SerialName("website") val website: String,
-    @SerialName("date") val date: String,
+    @SerialName("logo_url") val logoUrl: String? = null,
+    @SerialName("website") val website: String? = null,
+    @SerialName("date") val date: String? = null,
     @SerialName("is_watched") val isWatched: Boolean? = null
 ) {
     fun toEntity() = CompanyEntity(
         ticker = ticker,
-        summary = summary,
-        industry = industry,
-        industryKey = industryKey,
-        sector = sector,
-        sectorKey = sectorKey,
-        country = country,
+        summary = summary.orEmpty(),
+        industry = industry.orEmpty(),
+        industryKey = industryKey.orEmpty(),
+        sector = sector.orEmpty(),
+        sectorKey = sectorKey.orEmpty(),
+        country = country.orEmpty(),
         name = name,
-        logoUrl = logoUrl.toHttpsUrl(),
-        website = website,
-        date = date
+        logoUrl = logoUrl.orEmpty().toHttpsUrl(),
+        website = website.orEmpty(),
+        date = date.orEmpty()
     )
 }
 

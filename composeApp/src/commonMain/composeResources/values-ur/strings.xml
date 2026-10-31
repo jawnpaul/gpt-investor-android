@@ -386,6 +386,17 @@
     <string name="browse_error_title">اسٹاکس لوڈ نہیں ہو سکے</string>
     <string name="browse_error_body">کمپنیوں کی فہرست دکھانے کے لیے کنکشن ضروری ہے۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
     <string name="browse_more_error">ہم مزید کمپنیاں لوڈ نہیں کر سکے۔</string>
+    <string name="browse_market">مارکیٹ</string>
+    <string name="browse_market_subtitle">جہاں کمپنی لسٹڈ ہے</string>
+    <string name="browse_market_all">تمام مارکیٹس</string>
+    <string name="browse_market_chip_description">مارکیٹ: %1$s۔ مارکیٹ تبدیل کریں</string>
+    <string name="browse_empty_market_sector">%1$s میں ابھی %2$s کی کوئی کمپنی نہیں ہے۔ تمام مارکیٹس آزمائیں۔</string>
+    <string name="browse_empty_query_market">%1$s میں “%2$s” سے کچھ نہیں ملتا۔ تمام مارکیٹس آزمائیں۔</string>
+    <string name="browse_show_all_markets">تمام مارکیٹس دکھائیں</string>
+    <plurals name="browse_company_count">
+        <item quantity="one">%1$d کمپنی</item>
+        <item quantity="other">%1$d کمپنیاں</item>
+    </plurals>
     <string name="history_title">آپ کی GPT Investor ہسٹری</string>
     <string name="history_empty_title">ابھی کوئی چیٹ نہیں</string>
     <string name="history_empty_body">آپ GPT Investor سے جو سوال پوچھتے ہیں وہ یہاں نظر آتے ہیں، تاکہ آپ انہیں بعد میں جاری رکھ سکیں۔</string>

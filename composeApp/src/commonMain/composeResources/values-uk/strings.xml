@@ -388,6 +388,19 @@
     <string name="browse_error_title">Не вдалося завантажити акції</string>
     <string name="browse_error_body">Щоб показати список компаній, потрібне з’єднання. Перевірте з’єднання та спробуйте ще раз.</string>
     <string name="browse_more_error">Не вдалося завантажити більше компаній.</string>
+    <string name="browse_market">Ринок</string>
+    <string name="browse_market_subtitle">Де компанія котирується</string>
+    <string name="browse_market_all">Усі ринки</string>
+    <string name="browse_market_chip_description">Ринок: %1$s. Змінити ринок</string>
+    <string name="browse_empty_market_sector">На ринку %1$s ще немає компаній у секторі %2$s. Спробуйте всі ринки.</string>
+    <string name="browse_empty_query_market">На ринку %1$s немає збігів для «%2$s». Спробуйте всі ринки.</string>
+    <string name="browse_show_all_markets">Показати всі ринки</string>
+    <plurals name="browse_company_count">
+        <item quantity="one">%1$d компанія</item>
+        <item quantity="few">%1$d компанії</item>
+        <item quantity="many">%1$d компаній</item>
+        <item quantity="other">%1$d компанії</item>
+    </plurals>
     <string name="history_title">Ваша історія GPT Investor</string>
     <string name="history_empty_title">Ще немає чатів</string>
     <string name="history_empty_body">Запитання, які ви ставите GPT Investor, з’являються тут, щоб ви могли повернутися до них пізніше.</string>

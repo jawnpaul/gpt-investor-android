@@ -6,6 +6,7 @@ import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDet
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyBrief
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyFinancials
+import com.thejawnpaul.gptinvestor.features.company.domain.model.Market
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SearchCompanyQuery
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
 import com.thejawnpaul.gptinvestor.features.company.domain.model.TrendingCompany
@@ -25,7 +26,16 @@ interface ICompanyRepository {
 
     suspend fun searchCompany(query: SearchCompanyQuery): Flow<Either<Failure, List<Company>>>
 
-    fun searchCompaniesPaged(query: SearchCompanyQuery): Flow<androidx.paging.PagingData<Company>>
+    fun searchCompaniesPaged(
+        query: SearchCompanyQuery,
+        onTotalCount: (Int?) -> Unit = {}
+    ): Flow<androidx.paging.PagingData<Company>>
+
+    suspend fun getMarkets(sector: String?): Either<Failure, List<Market>>
+
+    val browseMarket: Flow<String?>
+
+    suspend fun setBrowseMarket(market: String?)
 
     suspend fun searchCompaniesFromNetwork(query: String): Flow<Either<Failure, List<Company>>>
 

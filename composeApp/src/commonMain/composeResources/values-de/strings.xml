@@ -386,6 +386,17 @@
     <string name="browse_error_title">Aktien konnten nicht geladen werden</string>
     <string name="browse_error_body">Für die Unternehmensliste brauchen wir eine Verbindung. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.</string>
     <string name="browse_more_error">Weitere Unternehmen konnten nicht geladen werden.</string>
+    <string name="browse_market">Markt</string>
+    <string name="browse_market_subtitle">Wo das Unternehmen gelistet ist</string>
+    <string name="browse_market_all">Alle Märkte</string>
+    <string name="browse_market_chip_description">Markt: %1$s. Markt ändern</string>
+    <string name="browse_empty_market_sector">%1$s hat noch keine Unternehmen in %2$s. Versuchen Sie alle Märkte.</string>
+    <string name="browse_empty_query_market">In %1$s passt nichts zu „%2$s“. Versuchen Sie alle Märkte.</string>
+    <string name="browse_show_all_markets">Alle Märkte anzeigen</string>
+    <plurals name="browse_company_count">
+        <item quantity="one">%1$d Unternehmen</item>
+        <item quantity="other">%1$d Unternehmen</item>
+    </plurals>
     <string name="history_title">Ihr GPT Investor-Verlauf</string>
     <string name="history_empty_title">Noch keine Chats</string>
     <string name="history_empty_body">Fragen, die Sie GPT Investor stellen, erscheinen hier, damit Sie später daran anknüpfen können.</string>

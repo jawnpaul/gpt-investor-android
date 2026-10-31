@@ -408,6 +408,17 @@
     <string name="browse_error_title">Couldn’t load stocks</string>
     <string name="browse_error_body">We need a connection to show the company list. Check your connection and try again.</string>
     <string name="browse_more_error">We couldn’t load more companies.</string>
+    <string name="browse_market">Market</string>
+    <string name="browse_market_subtitle">Where the company is listed</string>
+    <string name="browse_market_all">All markets</string>
+    <string name="browse_market_chip_description">Market: %1$s. Change market</string>
+    <string name="browse_empty_market_sector">%1$s has no companies in %2$s yet. Try all markets.</string>
+    <string name="browse_empty_query_market">Nothing in %1$s matches “%2$s”. Try all markets.</string>
+    <string name="browse_show_all_markets">Show all markets</string>
+    <plurals name="browse_company_count">
+        <item quantity="one">%1$d company</item>
+        <item quantity="other">%1$d companies</item>
+    </plurals>
     <string name="history_title">Your GPT Investor history</string>
     <string name="history_empty_title">No chats yet</string>
     <string name="history_empty_body">Questions you ask GPT Investor show up here, so you can pick them up later.</string>

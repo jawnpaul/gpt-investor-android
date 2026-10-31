@@ -3,7 +3,6 @@ package com.thejawnpaul.gptinvestor.features.watchlist.presentation
 import kotlin.math.abs
 import kotlin.math.roundToLong
 
-/** (382.7, "$") -> "$382.70", (1234.5, "₦") -> "₦1,234.50". */
 internal fun formatPrice(price: Double, currencySymbol: String): String {
     val cents = (abs(price) * 100).roundToLong()
     val dollars = (cents / 100).toString().reversed().chunked(3).joinToString(",").reversed()

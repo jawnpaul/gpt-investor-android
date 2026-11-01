@@ -66,7 +66,8 @@ class WatchlistRepositoryImpl(
                     currentPrice = it.currentPrice,
                     priceChange = it.priceChange,
                     currencySymbol = it.currencySymbol ?: DEFAULT_CURRENCY_SYMBOL,
-                    briefStatus = watchlistBriefStatusOf(it.digestStatus, it.locked)
+                    briefStatus = watchlistBriefStatusOf(it.digestStatus, it.locked),
+                    market = it.market
                 )
             } ?: emptyList()
             val recommendations = response.body?.recommendedDigestCompany ?: emptyList()

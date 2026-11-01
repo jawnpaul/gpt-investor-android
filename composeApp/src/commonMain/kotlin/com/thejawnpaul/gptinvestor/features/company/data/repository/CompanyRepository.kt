@@ -168,11 +168,12 @@ class CompanyRepository(
                 response.body?.let {
                     analyticsLogger.logEvent(
                         eventName = "brief-completed",
-                        params = mapOf(
-                            "ticker" to ticker,
-                            "duration_ms" to (Clock.System.now().toEpochMilliseconds() - startMs),
-                            "user_type" to userType
-                        )
+                        params = buildMap {
+                            put("ticker", ticker)
+                            put("duration_ms", Clock.System.now().toEpochMilliseconds() - startMs)
+                            put("user_type", userType)
+                            it.market?.let { market -> put("market", market) }
+                        }
                     )
                     emit(Either.Right(it.toBrief()))
                 }

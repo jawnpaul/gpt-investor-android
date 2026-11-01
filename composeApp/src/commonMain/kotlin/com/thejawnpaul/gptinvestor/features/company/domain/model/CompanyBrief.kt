@@ -26,7 +26,8 @@ data class CompanyBrief(
     val news: List<NewsBrief>,
     val risk: BriefSection?,
     val opportunity: BriefSection?,
-    val isWatched: Boolean = false
+    val isWatched: Boolean = false,
+    val market: String? = null
 )
 
 enum class BriefSentiment { Bullish, Bearish, Neutral }
@@ -97,6 +98,7 @@ fun CompanyBriefRemote.toBrief(now: Long = Clock.System.now().epochSeconds): Com
     price = currentPrice?.toFloat() ?: 0f,
     change = percentageChange?.toFloat(),
     currencySymbol = resolvedCurrencySymbol,
+    market = market,
     sentiment = sentiment?.toSentiment(),
     sentimentSummary = sentimentSummary,
     summary = summary?.takeIf { it.isNotBlank() },

@@ -11,7 +11,8 @@ data class WatchlistItem(
     val currentPrice: Double? = null,
     val priceChange: Double? = null,
     val briefStatus: WatchlistBriefStatus? = null,
-    val currencySymbol: String = DEFAULT_CURRENCY_SYMBOL
+    val currencySymbol: String = DEFAULT_CURRENCY_SYMBOL,
+    val market: String? = null
 )
 
 /** Where a stock stands in the Morning Brief, from the API's `digest_status`. */

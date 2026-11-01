@@ -563,7 +563,11 @@ class CompanyViewModel(
                         {
                             analyticsLogger.logEvent(
                                 eventName = "stock-added-to-watchlist",
-                                params = mapOf("ticker" to ticker, "source" to "company_brief")
+                                params = buildMap {
+                                    put("ticker", ticker)
+                                    put("source", "company_brief")
+                                    _selectedCompany.value.brief?.market?.let { put("market", it) }
+                                }
                             )
                             _selectedCompany.update { it.copy(brief = it.brief?.copy(isWatched = true)) }
                             processCompanyDetailAction(CompanyDetailAction.WatchlistAdded)
@@ -585,7 +589,11 @@ class CompanyViewModel(
                         {
                             analyticsLogger.logEvent(
                                 eventName = "stock-removed-from-watchlist",
-                                params = mapOf("ticker" to ticker, "source" to "company_brief")
+                                params = buildMap {
+                                    put("ticker", ticker)
+                                    put("source", "company_brief")
+                                    _selectedCompany.value.brief?.market?.let { put("market", it) }
+                                }
                             )
                             _selectedCompany.update { it.copy(brief = it.brief?.copy(isWatched = false)) }
                             processCompanyDetailAction(CompanyDetailAction.WatchlistRemoved(ticker))

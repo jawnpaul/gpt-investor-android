@@ -222,7 +222,7 @@ class OnboardingViewModel(
     }
 
     private fun showSuggestions(suggestions: OnboardingSuggestions, source: String) {
-        if (_uiState.value.selectedTicker != null || suggestions.stocks.isEmpty()) return
+        if (_uiState.value.currentScreen >= PICK_SCREEN || suggestions.stocks.isEmpty()) return
         suggestionsSource = source
         suggestionsMarket = suggestions.market
         _uiState.update { it.copy(suggestedStocks = suggestions.stocks) }

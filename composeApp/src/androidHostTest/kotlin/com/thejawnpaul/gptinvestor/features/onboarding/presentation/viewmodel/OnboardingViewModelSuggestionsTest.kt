@@ -116,14 +116,14 @@ class OnboardingViewModelSuggestionsTest {
     }
 
     @Test
-    fun `should keep the list once a stock is tapped`() = runTest(testDispatcher) {
+    fun `should keep the list once the picker is showing`() = runTest(testDispatcher) {
         val response = CompletableDeferred<Either<Failure, OnboardingSuggestions>>()
         coEvery { onboardingRepository.fetchSuggestions() } coAnswers { response.await() }
         val vm = viewModel()
         advanceUntilIdle()
         val shown = vm.uiState.value.suggestedStocks
 
-        vm.onStockSelected("AAPL", "Apple", "suggested", null)
+        vm.openPicker()
         response.complete(Either.Right(nigeria))
         advanceUntilIdle()
 

@@ -612,34 +612,8 @@ private fun SuggestedStocksGrid(
     modifier: Modifier = Modifier
 ) {
     val columns = if (isLargeText()) LARGE_TEXT_GRID_COLUMNS else GRID_COLUMNS
-    AnimatedContent(
-        targetState = stocks,
-        modifier = modifier,
-        contentKey = { shown -> shown.map { it.ticker } },
-        transitionSpec = {
-            fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart)) togetherWith
-                fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing))
-        },
-        label = "suggestedStocks"
-    ) { shownStocks ->
-        SuggestedStocksRows(
-            stocks = shownStocks,
-            columns = columns,
-            onSelectStock = onSelectStock,
-            logoModifierFor = logoModifierFor
-        )
-    }
-}
-
-@Composable
-private fun SuggestedStocksRows(
-    stocks: List<SuggestedStock>,
-    columns: Int,
-    onSelectStock: (SuggestedStock) -> Unit,
-    logoModifierFor: @Composable (ticker: String) -> Modifier
-) {
     val rows = remember(stocks, columns) { stocks.chunked(columns) }
-    Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
         rows.forEach { rowStocks ->
             Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
                 rowStocks.forEach { stock ->

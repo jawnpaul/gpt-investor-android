@@ -9,6 +9,7 @@ import com.thejawnpaul.gptinvestor.features.authentication.domain.Authentication
 import com.thejawnpaul.gptinvestor.features.company.data.repository.CompanyRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyBrief
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.repository.IOnboardingRepository
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.BriefView
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -36,12 +37,15 @@ class OnboardingViewModelBriefTest {
     private val appPreferences: AppPreferences = mockk(relaxed = true)
     private val analyticsLogger: AnalyticsLogger = mockk(relaxed = true)
     private val authRepository: AuthenticationRepository = mockk(relaxed = true)
+    private val onboardingRepository: IOnboardingRepository = mockk()
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         every { appPreferences.isUserLoggedIn } returns flowOf(false)
         coEvery { authRepository.acquireGuestToken() } returns Result.success(Unit)
+        coEvery { onboardingRepository.getSavedSuggestions() } returns null
+        coEvery { onboardingRepository.fetchSuggestions() } returns Either.Left(Failure.NetworkConnection)
     }
 
     @After
@@ -54,6 +58,7 @@ class OnboardingViewModelBriefTest {
         companyRepository = mockk<CompanyRepository>(relaxed = true),
         appPreferences = appPreferences,
         authRepository = authRepository,
+        onboardingRepository = onboardingRepository,
         analyticsLogger = analyticsLogger
     )
 

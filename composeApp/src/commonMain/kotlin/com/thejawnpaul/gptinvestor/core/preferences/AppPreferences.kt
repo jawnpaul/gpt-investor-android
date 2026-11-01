@@ -69,5 +69,8 @@ interface AppPreferences {
     val browseMarket: Flow<String?>
     suspend fun setBrowseMarket(market: String?)
 
+    val onboardingSuggestions: Flow<String?>
+    suspend fun setOnboardingSuggestions(json: String)
+
     suspend fun clearSessionData()
 }

@@ -78,9 +78,9 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.Compan
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.companyBriefItems
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.brief.previewCompanyBrief
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.tickerStock
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.SuggestedStock
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.BriefView
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.OnboardingUiState
-import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.SuggestedStock
 import com.thejawnpaul.gptinvestor.gpt_investor
 import com.thejawnpaul.gptinvestor.onboarding_body_value_prop
 import com.thejawnpaul.gptinvestor.onboarding_brief_disclaimer

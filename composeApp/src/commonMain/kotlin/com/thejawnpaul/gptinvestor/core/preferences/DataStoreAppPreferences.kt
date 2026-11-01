@@ -35,6 +35,7 @@ class DataStoreAppPreferences(private val dataStore: DataStore<Preferences>) : A
             booleanPreferencesKey("has_completed_post_auth_onboarding_preference")
         private val HAS_SEEN_BRIEF_SPOTLIGHT_KEY = booleanPreferencesKey("has_seen_brief_spotlight_preference")
         private val BROWSE_MARKET_KEY = stringPreferencesKey("browse_market_preference")
+        private val ONBOARDING_SUGGESTIONS_KEY = stringPreferencesKey("onboarding_suggestions_preference")
     }
 
     override val themePreference: Flow<String?> = dataStore.data.map { preferences ->
@@ -291,6 +292,16 @@ class DataStoreAppPreferences(private val dataStore: DataStore<Preferences>) : A
     override suspend fun setBrowseMarket(market: String?) {
         dataStore.edit { preferences ->
             if (market == null) preferences.remove(BROWSE_MARKET_KEY) else preferences[BROWSE_MARKET_KEY] = market
+        }
+    }
+
+    override val onboardingSuggestions: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[ONBOARDING_SUGGESTIONS_KEY]
+    }
+
+    override suspend fun setOnboardingSuggestions(json: String) {
+        dataStore.edit { preferences ->
+            preferences[ONBOARDING_SUGGESTIONS_KEY] = json
         }
     }
 

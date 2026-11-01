@@ -16,12 +16,18 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.platform.ActivityContextHolder
+import com.thejawnpaul.gptinvestor.features.notification.analytics.EVENT_NOTIFICATION_OPENED
+import com.thejawnpaul.gptinvestor.features.notification.analytics.notificationOpenedParams
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
 
     private val deepLinkRouteState = mutableStateOf<String?>(null)
+
+    private val analyticsLogger: AnalyticsLogger by inject()
 
     private lateinit var appUpdateManager: AppUpdateManager
 
@@ -42,6 +48,7 @@ class MainActivity : ComponentActivity() {
         appUpdateManager = AppUpdateManagerFactory.create(this)
         checkForUpdates()
 
+        if (savedInstanceState == null) trackNotificationOpen(intent)
         handleDeepLinkFromIntent(intent) { route ->
             deepLinkRouteState.value = route
         }
@@ -60,12 +67,25 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         intent.let { newIntent ->
             setIntent(newIntent)
+            trackNotificationOpen(newIntent)
             handleDeepLinkFromIntent(newIntent) { route ->
                 lifecycleScope.launch {
                     deepLinkRouteState.value = route
                 }
             }
         }
+    }
+
+    private fun trackNotificationOpen(intent: Intent?) {
+        intent ?: return
+        if (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) return
+        val fromNotification = intent.getBooleanExtra(EXTRA_FROM_NOTIFICATION, false) ||
+            intent.hasExtra("google.message_id")
+        if (!fromNotification) return
+        analyticsLogger.logEvent(
+            eventName = EVENT_NOTIFICATION_OPENED,
+            params = notificationOpenedParams(intent.getStringExtra("deep_link"))
+        )
     }
 
     private fun handleDeepLinkFromIntent(intent: Intent?, onDeepLink: (String) -> Unit) {
@@ -117,5 +137,9 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         ActivityContextHolder.clear()
+    }
+
+    companion object {
+        const val EXTRA_FROM_NOTIFICATION = "from_notification"
     }
 }

@@ -84,6 +84,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         // Create intent for when notification is clicked
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(MainActivity.EXTRA_FROM_NOTIFICATION, true)
             deepLinkRoute?.let { route ->
                 putExtra("deep_link", route)
             }

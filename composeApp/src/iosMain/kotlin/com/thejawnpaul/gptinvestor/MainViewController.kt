@@ -3,12 +3,14 @@ package com.thejawnpaul.gptinvestor
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.window.ComposeUIViewController
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.analytics.mixpanel.MixpanelProvider
 import com.thejawnpaul.gptinvestor.analytics.mixpanel.mixpanelProviderModule
 import com.thejawnpaul.gptinvestor.core.di.GPTKoinApp
@@ -18,6 +20,7 @@ import com.thejawnpaul.gptinvestor.core.platform.YoutubePlayerProvider
 import com.thejawnpaul.gptinvestor.core.platform.youtubePlayerProviderModule
 import com.thejawnpaul.gptinvestor.features.authentication.domain.googleSignInProviderModule
 import org.koin.compose.KoinApplication
+import org.koin.compose.koinInject
 import org.koin.plugin.module.dsl.koinConfiguration
 import platform.UIKit.UIViewController
 
@@ -48,6 +51,8 @@ fun mainViewController(
             )
         }
     ) {
+        val analyticsLogger: AnalyticsLogger = koinInject()
+        LaunchedEffect(analyticsLogger) { IosNotificationBridge.attachAnalytics(analyticsLogger) }
         val deepLinkRoute by IosNotificationBridge.pendingDeepLink.collectAsState()
         val focusManager = LocalFocusManager.current
         Box(

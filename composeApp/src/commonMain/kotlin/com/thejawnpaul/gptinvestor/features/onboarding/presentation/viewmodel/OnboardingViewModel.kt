@@ -15,6 +15,8 @@ import com.thejawnpaul.gptinvestor.features.company.data.repository.CompanyRepos
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SearchCompanyQuery
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.CompanyPresentation
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.OnboardingSuggestions
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.repository.IOnboardingRepository
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.BriefView
 import com.thejawnpaul.gptinvestor.features.onboarding.presentation.state.OnboardingUiState
 import kotlin.concurrent.Volatile
@@ -43,6 +45,7 @@ class OnboardingViewModel(
     private val companyRepository: CompanyRepository,
     private val appPreferences: AppPreferences,
     private val authRepository: AuthenticationRepository,
+    private val onboardingRepository: IOnboardingRepository,
     @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
@@ -56,6 +59,10 @@ class OnboardingViewModel(
 
     private val onboardingStartTime = Clock.System.now().toEpochMilliseconds()
     private var briefStartTime = 0L
+
+    private var suggestionsSource = SUGGESTIONS_SOURCE_DEFAULT
+    private var suggestionsMarket: String? = DEFAULT_SUGGESTIONS_MARKET
+    private var hasLoggedPickerViewed = false
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val searchResults: Flow<PagingData<CompanyPresentation>> = appliedSearchQuery
@@ -76,13 +83,17 @@ class OnboardingViewModel(
     init {
         logOnboardingStarted()
         viewModelScope.launch {
-            guestToken.await()
-            loadSuggestedStockLogos()
+            val hasGuestToken = guestToken.await().isSuccess
+            launch { loadDefaultSuggestionLogos() }
+            if (hasGuestToken) {
+                onboardingRepository.fetchSuggestions().onSuccess { showSuggestions(it, SUGGESTIONS_SOURCE_NETWORK) }
+            }
         }
     }
 
     fun onNextScreen() {
         _uiState.update { it.copy(currentScreen = it.currentScreen + 1) }
+        if (_uiState.value.currentScreen == PICK_SCREEN) logPickerViewed()
     }
 
     fun onPreviousScreen() {
@@ -210,18 +221,37 @@ class OnboardingViewModel(
         }
     }
 
-    private suspend fun loadSuggestedStockLogos() {
-        val tickers = listOf("AAPL", "TSLA", "NVDA", "MSFT", "AMZN", "GOOGL")
+    private fun showSuggestions(suggestions: OnboardingSuggestions, source: String) {
+        if (_uiState.value.currentScreen >= PICK_SCREEN || suggestions.stocks.isEmpty()) return
+        suggestionsSource = source
+        suggestionsMarket = suggestions.market
+        _uiState.update { it.copy(suggestedStocks = suggestions.stocks) }
+    }
+
+    private suspend fun loadDefaultSuggestionLogos() {
+        val tickers = _uiState.value.suggestedStocks.map { it.ticker }
         companyRepository.getCompanyLogos(tickers).onSuccess { logos ->
+            if (suggestionsSource != SUGGESTIONS_SOURCE_DEFAULT) return@onSuccess
             _uiState.update { state ->
                 state.copy(
                     suggestedStocks = state.suggestedStocks.map { stock ->
-                        val logoUrl = logos[stock.ticker]
-                        if (logoUrl != null) stock.copy(logoUrl = logoUrl) else stock
+                        logos[stock.ticker]?.let { stock.copy(logoUrl = it) } ?: stock
                     }
                 )
             }
         }
+    }
+
+    private fun logPickerViewed() {
+        if (hasLoggedPickerViewed) return
+        hasLoggedPickerViewed = true
+        analyticsLogger.logEvent(
+            eventName = "onboarding-stock-picker-viewed",
+            params = buildMap {
+                put("suggestions_source", suggestionsSource)
+                suggestionsMarket?.let { put("suggestions_market", it) }
+            }
+        )
     }
 }
 
@@ -229,3 +259,8 @@ sealed interface OnboardingAction {
     data object NavigateToHome : OnboardingAction
     data object NavigateToSignUp : OnboardingAction
 }
+
+private const val PICK_SCREEN = 2
+private const val SUGGESTIONS_SOURCE_NETWORK = "network"
+private const val SUGGESTIONS_SOURCE_DEFAULT = "default"
+private const val DEFAULT_SUGGESTIONS_MARKET = "US"

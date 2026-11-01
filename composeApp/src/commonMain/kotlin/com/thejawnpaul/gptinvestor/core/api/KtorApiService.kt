@@ -32,6 +32,7 @@ import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.DigestRespo
 import com.thejawnpaul.gptinvestor.features.guest.data.remote.GuestLoginRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenResponse
+import com.thejawnpaul.gptinvestor.features.onboarding.data.remote.OnboardingSuggestionsRemote
 import com.thejawnpaul.gptinvestor.features.postauthonboarding.data.remote.SaveOnboardingAnswersRequest
 import com.thejawnpaul.gptinvestor.features.postauthonboarding.data.remote.SaveOnboardingAnswersResponse
 import com.thejawnpaul.gptinvestor.features.search.data.remote.ClearHistoryResponse
@@ -77,6 +78,9 @@ class KtorApiService(@Provided private val client: HttpClient) {
         client.post("v1/company") {
             setBody(request)
         }.toKtorResponse()
+
+    suspend fun getOnboardingSuggestions(): KtorResponse<OnboardingSuggestionsRemote> =
+        client.get("v1.1/onboarding/suggestions").toKtorResponse()
 
     suspend fun getTrendingTickers(): KtorResponse<List<TrendingRemote>> =
         client.get("v1.1/trending-tickers").toKtorResponse()

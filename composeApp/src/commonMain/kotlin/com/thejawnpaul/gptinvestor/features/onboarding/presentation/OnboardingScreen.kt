@@ -164,6 +164,7 @@ private const val PICK_STEP = 2
 private const val BRIEF_SCREEN = 3
 private const val MAX_SEARCH_RESULTS = 20
 private const val SOURCE_SUGGESTED = "suggested"
+private const val NIGERIA_TICKER_SUFFIX = ".NG"
 private const val SOURCE_SEARCH = "search"
 
 @Immutable
@@ -611,8 +612,33 @@ private fun SuggestedStocksGrid(
     modifier: Modifier = Modifier
 ) {
     val columns = if (isLargeText()) LARGE_TEXT_GRID_COLUMNS else GRID_COLUMNS
+    AnimatedContent(
+        targetState = stocks,
+        modifier = modifier,
+        transitionSpec = {
+            fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart)) togetherWith
+                fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing))
+        },
+        label = "suggestedStocks"
+    ) { shownStocks ->
+        SuggestedStocksRows(
+            stocks = shownStocks,
+            columns = columns,
+            onSelectStock = onSelectStock,
+            logoModifierFor = logoModifierFor
+        )
+    }
+}
+
+@Composable
+private fun SuggestedStocksRows(
+    stocks: List<SuggestedStock>,
+    columns: Int,
+    onSelectStock: (SuggestedStock) -> Unit,
+    logoModifierFor: @Composable (ticker: String) -> Modifier
+) {
     val rows = remember(stocks, columns) { stocks.chunked(columns) }
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
+    Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
         rows.forEach { rowStocks ->
             Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3)) {
                 rowStocks.forEach { stock ->
@@ -664,7 +690,12 @@ private fun SuggestedStockTile(
                 modifier = logoModifier,
                 imageUrl = logo.imageUrl
             )
-            GiText(text = stock.ticker, style = GiTextStyle.Label)
+            GiText(
+                text = stock.ticker.removeSuffix(NIGERIA_TICKER_SUFFIX),
+                style = GiTextStyle.Label,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
             GiText(
                 text = stock.name,
                 style = GiTextStyle.Meta,

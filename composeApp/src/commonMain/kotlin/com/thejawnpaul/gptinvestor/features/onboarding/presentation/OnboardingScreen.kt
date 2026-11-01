@@ -164,7 +164,6 @@ private const val PICK_STEP = 2
 private const val BRIEF_SCREEN = 3
 private const val MAX_SEARCH_RESULTS = 20
 private const val SOURCE_SUGGESTED = "suggested"
-private const val NIGERIA_TICKER_SUFFIX = ".NG"
 private const val SOURCE_SEARCH = "search"
 
 @Immutable
@@ -666,7 +665,7 @@ private fun SuggestedStockTile(
                 imageUrl = logo.imageUrl
             )
             GiText(
-                text = stock.ticker.removeSuffix(NIGERIA_TICKER_SUFFIX),
+                text = stock.displayTicker,
                 style = GiTextStyle.Label,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

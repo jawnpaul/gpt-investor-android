@@ -83,9 +83,8 @@ class OnboardingViewModel(
     init {
         logOnboardingStarted()
         viewModelScope.launch {
-            onboardingRepository.getSavedSuggestions()?.let { showSuggestions(it, SUGGESTIONS_SOURCE_SAVED) }
             val hasGuestToken = guestToken.await().isSuccess
-            if (suggestionsSource == SUGGESTIONS_SOURCE_DEFAULT) launch { loadDefaultSuggestionLogos() }
+            launch { loadDefaultSuggestionLogos() }
             if (hasGuestToken) {
                 onboardingRepository.fetchSuggestions().onSuccess { showSuggestions(it, SUGGESTIONS_SOURCE_NETWORK) }
             }
@@ -263,6 +262,5 @@ sealed interface OnboardingAction {
 
 private const val PICK_SCREEN = 2
 private const val SUGGESTIONS_SOURCE_NETWORK = "network"
-private const val SUGGESTIONS_SOURCE_SAVED = "saved"
 private const val SUGGESTIONS_SOURCE_DEFAULT = "default"
 private const val DEFAULT_SUGGESTIONS_MARKET = "US"

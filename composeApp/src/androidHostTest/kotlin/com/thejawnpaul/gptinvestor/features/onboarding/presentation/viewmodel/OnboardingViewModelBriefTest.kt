@@ -44,7 +44,6 @@ class OnboardingViewModelBriefTest {
         Dispatchers.setMain(testDispatcher)
         every { appPreferences.isUserLoggedIn } returns flowOf(false)
         coEvery { authRepository.acquireGuestToken() } returns Result.success(Unit)
-        coEvery { onboardingRepository.getSavedSuggestions() } returns null
         coEvery { onboardingRepository.fetchSuggestions() } returns Either.Left(Failure.NetworkConnection)
     }
 

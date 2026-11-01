@@ -5,6 +5,5 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.OnboardingSuggestions
 
 interface IOnboardingRepository {
-    suspend fun getSavedSuggestions(): OnboardingSuggestions?
     suspend fun fetchSuggestions(): Either<Failure, OnboardingSuggestions>
 }

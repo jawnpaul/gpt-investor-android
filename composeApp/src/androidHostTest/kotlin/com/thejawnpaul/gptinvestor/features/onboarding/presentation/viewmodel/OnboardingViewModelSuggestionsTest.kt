@@ -49,17 +49,11 @@ class OnboardingViewModelSuggestionsTest {
         )
     )
 
-    private val saved = OnboardingSuggestions(
-        market = "NG",
-        stocks = listOf(SuggestedStock("DANGCEM.NG", "Dangote Cement", "https://logo/dangcem.png"))
-    )
-
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         every { appPreferences.isUserLoggedIn } returns flowOf(false)
         coEvery { authRepository.acquireGuestToken() } returns Result.success(Unit)
-        coEvery { onboardingRepository.getSavedSuggestions() } returns null
         coEvery { companyRepository.getCompanyLogos(any()) } returns Either.Right(emptyMap())
         every { getCompanyBriefUseCase(any(), any()) } returns Job()
     }
@@ -122,21 +116,6 @@ class OnboardingViewModelSuggestionsTest {
     }
 
     @Test
-    fun `should show the saved list before the server answers`() = runTest(testDispatcher) {
-        val response = CompletableDeferred<Either<Failure, OnboardingSuggestions>>()
-        coEvery { onboardingRepository.getSavedSuggestions() } returns saved
-        coEvery { onboardingRepository.fetchSuggestions() } coAnswers { response.await() }
-        val vm = viewModel()
-
-        advanceUntilIdle()
-
-        assertThat(vm.uiState.value.suggestedStocks).isEqualTo(saved.stocks)
-        response.complete(Either.Right(nigeria))
-        advanceUntilIdle()
-        assertThat(vm.uiState.value.suggestedStocks).isEqualTo(nigeria.stocks)
-    }
-
-    @Test
     fun `should keep the list once a stock is tapped`() = runTest(testDispatcher) {
         val response = CompletableDeferred<Either<Failure, OnboardingSuggestions>>()
         coEvery { onboardingRepository.fetchSuggestions() } coAnswers { response.await() }
@@ -163,18 +142,6 @@ class OnboardingViewModelSuggestionsTest {
         val stocks = vm.uiState.value.suggestedStocks
         assertThat(stocks.map { it.ticker }).containsExactly("AAPL", "TSLA", "NVDA", "MSFT", "AMZN", "GOOGL").inOrder()
         assertThat(stocks.first().logoUrl).isEqualTo("https://logo/aapl.png")
-    }
-
-    @Test
-    fun `should keep the saved list without loading logos when the request fails`() = runTest(testDispatcher) {
-        coEvery { onboardingRepository.getSavedSuggestions() } returns saved
-        coEvery { onboardingRepository.fetchSuggestions() } returns Either.Left(Failure.NetworkConnection)
-        val vm = viewModel()
-
-        advanceUntilIdle()
-
-        assertThat(vm.uiState.value.suggestedStocks).isEqualTo(saved.stocks)
-        coVerify(exactly = 0) { companyRepository.getCompanyLogos(any()) }
     }
 
     @Test

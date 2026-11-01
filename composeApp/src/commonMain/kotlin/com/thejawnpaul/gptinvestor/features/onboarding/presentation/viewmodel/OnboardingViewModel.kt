@@ -62,7 +62,6 @@ class OnboardingViewModel(
 
     private var suggestionsSource = SUGGESTIONS_SOURCE_DEFAULT
     private var suggestionsMarket: String? = DEFAULT_SUGGESTIONS_MARKET
-    private var hasSelectedStock = false
     private var hasLoggedPickerViewed = false
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -85,12 +84,11 @@ class OnboardingViewModel(
         logOnboardingStarted()
         viewModelScope.launch {
             onboardingRepository.getSavedSuggestions()?.let { showSuggestions(it, SUGGESTIONS_SOURCE_SAVED) }
-            if (guestToken.await().isSuccess) {
-                val result = onboardingRepository.fetchSuggestions()
-                result.onSuccess { showSuggestions(it, SUGGESTIONS_SOURCE_NETWORK) }
-                if (result.isRight) return@launch
+            val hasGuestToken = guestToken.await().isSuccess
+            if (suggestionsSource == SUGGESTIONS_SOURCE_DEFAULT) launch { loadDefaultSuggestionLogos() }
+            if (hasGuestToken) {
+                onboardingRepository.fetchSuggestions().onSuccess { showSuggestions(it, SUGGESTIONS_SOURCE_NETWORK) }
             }
-            if (suggestionsSource == SUGGESTIONS_SOURCE_DEFAULT) loadDefaultSuggestionLogos()
         }
     }
 
@@ -112,7 +110,6 @@ class OnboardingViewModel(
     }
 
     fun onStockSelected(ticker: String, companyName: String, source: String, logoUrl: String?) {
-        hasSelectedStock = true
         analyticsLogger.logEvent(
             eventName = "onboarding-stock-selected",
             params = mapOf("ticker" to ticker, "source" to source)
@@ -226,7 +223,7 @@ class OnboardingViewModel(
     }
 
     private fun showSuggestions(suggestions: OnboardingSuggestions, source: String) {
-        if (hasSelectedStock || suggestions.stocks.isEmpty()) return
+        if (_uiState.value.selectedTicker != null || suggestions.stocks.isEmpty()) return
         suggestionsSource = source
         suggestionsMarket = suggestions.market
         _uiState.update { it.copy(suggestedStocks = suggestions.stocks) }

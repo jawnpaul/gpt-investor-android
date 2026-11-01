@@ -71,6 +71,16 @@ class OnboardingRepositoryTest {
     }
 
     @Test
+    fun `should still return the list when saving it fails`() = runTest {
+        coEvery { appPreferences.setOnboardingSuggestions(any()) } throws IllegalStateException("disk full")
+        stubResponse(remote)
+
+        val result = repository.fetchSuggestions()
+
+        assertThat(result).isEqualTo(Either.Right(expected))
+    }
+
+    @Test
     fun `should fail without saving when the list is empty`() = runTest {
         stubResponse(OnboardingSuggestionsRemote(market = "US", stocks = emptyList()))
 

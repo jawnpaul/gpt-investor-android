@@ -91,7 +91,34 @@ class OnboardingViewModelSuggestionsTest {
         advanceUntilIdle()
 
         assertThat(vm.uiState.value.suggestedStocks).isEqualTo(nigeria.stocks)
-        coVerify(exactly = 0) { companyRepository.getCompanyLogos(any()) }
+    }
+
+    @Test
+    fun `should keep the server list when built-in logos arrive later`() = runTest(testDispatcher) {
+        val logos = CompletableDeferred<Either<Failure, Map<String, String>>>()
+        coEvery { companyRepository.getCompanyLogos(any()) } coAnswers { logos.await() }
+        coEvery { onboardingRepository.fetchSuggestions() } returns Either.Right(nigeria)
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        logos.complete(Either.Right(mapOf("AAPL" to "https://logo/old-aapl.png")))
+        advanceUntilIdle()
+
+        assertThat(vm.uiState.value.suggestedStocks).isEqualTo(nigeria.stocks)
+    }
+
+    @Test
+    fun `should load built-in logos without waiting for the server list`() = runTest(testDispatcher) {
+        val response = CompletableDeferred<Either<Failure, OnboardingSuggestions>>()
+        coEvery { onboardingRepository.fetchSuggestions() } coAnswers { response.await() }
+        coEvery { companyRepository.getCompanyLogos(any()) } returns
+            Either.Right(mapOf("AAPL" to "https://logo/aapl.png"))
+        val vm = viewModel()
+
+        advanceUntilIdle()
+
+        assertThat(vm.uiState.value.suggestedStocks.first().logoUrl).isEqualTo("https://logo/aapl.png")
+        response.complete(Either.Left(Failure.ServerError))
     }
 
     @Test

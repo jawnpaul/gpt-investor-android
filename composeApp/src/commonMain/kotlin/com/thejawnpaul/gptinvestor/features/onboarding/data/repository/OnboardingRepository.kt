@@ -34,7 +34,7 @@ class OnboardingRepository(private val apiService: KtorApiService, private val a
         val response = apiService.getOnboardingSuggestions()
         val body = response.body
         if (response.isSuccessful && body != null && body.stocks.isNotEmpty()) {
-            appPreferences.setOnboardingSuggestions(json.encodeToString(body))
+            save(body)
             Either.Right(body.toSuggestions())
         } else {
             Either.Left(Failure.ServerError)
@@ -42,6 +42,14 @@ class OnboardingRepository(private val apiService: KtorApiService, private val a
     } catch (e: Exception) {
         if (e is CancellationException) throw e
         Either.Left(Failure.NetworkConnection)
+    }
+
+    private suspend fun save(suggestions: OnboardingSuggestionsRemote) {
+        try {
+            appPreferences.setOnboardingSuggestions(json.encodeToString(suggestions))
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+        }
     }
 
     private fun OnboardingSuggestionsRemote.toSuggestions() = OnboardingSuggestions(

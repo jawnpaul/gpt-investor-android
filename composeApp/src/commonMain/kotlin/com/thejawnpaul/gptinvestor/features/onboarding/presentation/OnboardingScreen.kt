@@ -615,6 +615,7 @@ private fun SuggestedStocksGrid(
     AnimatedContent(
         targetState = stocks,
         modifier = modifier,
+        contentKey = { shown -> shown.map { it.ticker } },
         transitionSpec = {
             fadeIn(tween(GiMotion.BASE, easing = EaseOutQuart)) togetherWith
                 fadeOut(tween(GiMotion.INSTANT, easing = LinearEasing))

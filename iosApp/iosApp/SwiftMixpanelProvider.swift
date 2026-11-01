@@ -22,7 +22,7 @@ final class SwiftMixpanelProvider: NSObject, MixpanelProvider {
     private let mixpanel: MixpanelInstance
 
     init(token: String) {
-        Mixpanel.initialize(token: token, trackAutomaticEvents: false)
+        Mixpanel.initialize(token: token, trackAutomaticEvents: true)
         self.mixpanel = Mixpanel.mainInstance()
         super.init()
     }

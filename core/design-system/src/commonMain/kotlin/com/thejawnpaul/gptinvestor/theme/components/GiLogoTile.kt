@@ -7,23 +7,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.isSpecified
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
-import coil3.compose.AsyncImagePainter
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
@@ -39,7 +32,6 @@ fun GiLogoTile(
     brandTextColor: Color = Color.Unspecified
 ) {
     val colors = GiTheme.colors
-    var isLogoLoaded by remember(imageUrl) { mutableStateOf(false) }
     val background = if (brandColor.isSpecified) brandColor else colors.inkTile
     val initialsColor = when {
         brandTextColor.isSpecified -> brandTextColor
@@ -54,17 +46,8 @@ fun GiLogoTile(
             .clearAndSetSemantics { },
         contentAlignment = Alignment.Center
     ) {
-        if (!isLogoLoaded) {
+        GiImage(url = imageUrl, modifier = Modifier.fillMaxSize()) {
             GiText(text = initials, style = GiTextStyle.TileInitials, color = initialsColor, maxLines = 1)
-        }
-        if (!imageUrl.isNullOrBlank()) {
-            AsyncImage(
-                model = imageUrl,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-                onState = { isLogoLoaded = it is AsyncImagePainter.State.Success }
-            )
         }
     }
 }

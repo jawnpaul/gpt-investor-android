@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -76,7 +77,8 @@ fun GiChip(
     leadingIcon: ImageVector? = null,
     trailingIcon: ImageVector? = null,
     enabled: Boolean = true,
-    singleChoice: Boolean = false
+    singleChoice: Boolean = false,
+    leadingImageUrl: String? = null
 ) {
     val colors = GiTheme.colors
     val haptics = LocalHapticFeedback.current
@@ -143,11 +145,7 @@ fun GiChip(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (leadingIcon != null) {
-            GiChipIcon(
-                icon = leadingIcon,
-                tint = { content.value },
-                modifier = Modifier.padding(end = GiSpace.x1_5)
-            )
+            GiChipLeading(icon = leadingIcon, imageUrl = leadingImageUrl, tint = { content.value })
         } else if (!isQuiet) {
             GiChipCheck(visible = selected, tint = { content.value }, reducedMotion = reducedMotion)
         }
@@ -188,6 +186,17 @@ private fun RowScope.GiChipCheck(visible: Boolean, tint: () -> Color, reducedMot
         }
     ) {
         GiChipIcon(icon = GiIcons.check, tint = tint, modifier = Modifier.padding(end = GiSpace.x1_5))
+    }
+}
+
+@Composable
+private fun GiChipLeading(icon: ImageVector, imageUrl: String?, tint: () -> Color, modifier: Modifier = Modifier) {
+    GiImage(
+        url = imageUrl,
+        modifier = modifier.padding(end = GiSpace.x1_5).size(GiIconSize.sm),
+        contentScale = ContentScale.Fit
+    ) {
+        GiChipIcon(icon = icon, tint = tint)
     }
 }
 

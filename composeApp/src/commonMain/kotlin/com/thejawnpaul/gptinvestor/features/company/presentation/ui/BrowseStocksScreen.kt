@@ -419,7 +419,8 @@ private fun MarketChip(market: Market?, onClick: () -> Unit, modifier: Modifier 
         modifier = modifier.semantics { contentDescription = description },
         selected = market != null,
         leadingIcon = GiIcons.globe,
-        trailingIcon = GiIcons.caretDown
+        trailingIcon = GiIcons.caretDown,
+        leadingImageUrl = market?.countryFlag
     )
 }
 

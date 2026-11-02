@@ -309,7 +309,16 @@ class CompanyRepository(
         val response = apiService.getMarkets(sector = sector)
         val body = response.body
         if (response.isSuccessful && body != null) {
-            Either.Right(body.markets.map { Market(key = it.key, name = it.name, count = it.count) })
+            Either.Right(
+                body.markets.map {
+                    Market(
+                        key = it.key,
+                        name = it.name,
+                        count = it.count,
+                        countryFlag = it.countryFlag?.takeIf(String::isNotBlank)?.toHttpsUrl()
+                    )
+                }
+            )
         } else {
             Either.Left(Failure.ServerError)
         }

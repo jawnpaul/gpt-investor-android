@@ -16,6 +16,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -36,6 +37,7 @@ import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.components.GiBottomSheet
 import com.thejawnpaul.gptinvestor.theme.components.GiDivider
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiImage
 import com.thejawnpaul.gptinvestor.theme.components.GiRadioRow
 import com.thejawnpaul.gptinvestor.theme.components.GiSheetSubtitle
 import kotlinx.coroutines.launch
@@ -89,7 +91,7 @@ fun BrowseMarketSheet(
                     detail = pluralStringResource(Res.plurals.browse_company_count, market.count, market.count),
                     selected = market.key == selectedMarketKey,
                     onClick = { select(market.key) },
-                    leading = { MarketTile { MarketCode(code = market.key) } }
+                    leading = { MarketTile { MarketFlag(code = market.key, flagUrl = market.countryFlag) } }
                 )
             }
         }
@@ -120,6 +122,17 @@ private fun MarketCode(code: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
+private fun MarketFlag(code: String, flagUrl: String?, modifier: Modifier = Modifier) {
+    GiImage(
+        url = flagUrl,
+        modifier = modifier.size(MarketFlagSize),
+        contentScale = ContentScale.Fit
+    ) {
+        MarketCode(code = code)
+    }
+}
+
+@Composable
 private fun MarketGlobe(modifier: Modifier = Modifier) {
     Icon(
         imageVector = GiIcons.globe,
@@ -130,6 +143,7 @@ private fun MarketGlobe(modifier: Modifier = Modifier) {
 }
 
 private val MarketTileSize = 32.dp
+private val MarketFlagSize = 24.dp
 
 @PreviewLightDark
 @Composable

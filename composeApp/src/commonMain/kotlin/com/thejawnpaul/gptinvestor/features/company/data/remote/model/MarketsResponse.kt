@@ -10,5 +10,6 @@ data class MarketsResponse(@SerialName("markets") val markets: List<MarketRemote
 data class MarketRemote(
     @SerialName("key") val key: String,
     @SerialName("name") val name: String,
-    @SerialName("count") val count: Int
+    @SerialName("count") val count: Int,
+    @SerialName("country_flag") val countryFlag: String? = null
 )

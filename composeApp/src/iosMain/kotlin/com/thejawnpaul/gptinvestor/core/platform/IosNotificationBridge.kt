@@ -1,5 +1,8 @@
 package com.thejawnpaul.gptinvestor.core.platform
 
+import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
+import com.thejawnpaul.gptinvestor.features.notification.analytics.EVENT_NOTIFICATION_OPENED
+import com.thejawnpaul.gptinvestor.features.notification.analytics.notificationOpenedParams
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +21,25 @@ object IosNotificationBridge : KoinComponent {
     // Held until App() navigates, so a tap that cold-starts the app isn't lost before the nav graph is ready.
     private val _pendingDeepLink = MutableStateFlow<String?>(null)
     val pendingDeepLink: StateFlow<String?> = _pendingDeepLink.asStateFlow()
+
+    private var analyticsLogger: AnalyticsLogger? = null
+    private val pendingOpens = mutableListOf<Map<String, Any>>()
+
+    fun onNotificationOpened(deepLink: String?) {
+        val params = notificationOpenedParams(deepLink)
+        val logger = analyticsLogger
+        if (logger != null) {
+            logger.logEvent(EVENT_NOTIFICATION_OPENED, params)
+        } else {
+            pendingOpens.add(params)
+        }
+    }
+
+    fun attachAnalytics(logger: AnalyticsLogger) {
+        analyticsLogger = logger
+        pendingOpens.forEach { logger.logEvent(EVENT_NOTIFICATION_OPENED, it) }
+        pendingOpens.clear()
+    }
 
     fun onNotificationTapped(deepLink: String) {
         _pendingDeepLink.value = deepLink
@@ -45,4 +67,8 @@ fun onFcmTokenReceived(token: String) {
 
 fun onNotificationTapped(deepLink: String) {
     IosNotificationBridge.onNotificationTapped(deepLink)
+}
+
+fun onNotificationOpened(deepLink: String?) {
+    IosNotificationBridge.onNotificationOpened(deepLink)
 }

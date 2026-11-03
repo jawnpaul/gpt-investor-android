@@ -44,6 +44,11 @@ class KtorClientFactoryTest {
         override suspend fun guestUniqueId(): String = "installation-id"
     }
 
+    private class FakeClientInfo : ClientInfo {
+        override val platform: String = "android"
+        override val versionName: String = "1.2.6"
+    }
+
     private class Backend(
         val onExpiredTokenSent: () -> Unit = {},
         val onGuestLogin: () -> Unit = {},
@@ -54,12 +59,14 @@ class KtorClientFactoryTest {
     private val tokenStorage = InMemoryTokenStorage(storedAccessToken = "expired-guest-token")
     private val unauthorizedCallback = FakeUnauthorizedCallback()
     private val onboardingAuthHeaders = mutableListOf<String?>()
+    private val clientHeaders = mutableListOf<String?>()
     private lateinit var client: HttpClient
 
     private fun createClient(backend: Backend) {
         client = KtorClientFactory.create(
             tokenStorage = tokenStorage,
             unauthorizedCallback = unauthorizedCallback,
+            clientInfo = FakeClientInfo(),
             engineFactory = mockEngineFactory(backend)
         )
     }
@@ -84,6 +91,7 @@ class KtorClientFactoryTest {
 
     private fun MockRequestHandleScope.handle(request: HttpRequestData, backend: Backend): HttpResponseData {
         val jsonHeaders = headersOf(HttpHeaders.ContentType, "application/json")
+        clientHeaders.add(request.headers["X-Client"])
         return when {
             request.url.encodedPath.endsWith("v1/guest-login") -> {
                 backend.onGuestLogin()
@@ -118,6 +126,19 @@ class KtorClientFactoryTest {
                 }
             }
         }
+    }
+
+    @Test
+    fun `should send the platform and app version on every request, including token refresh`() = runTest {
+        tokenStorage.storedAccessToken = "expired-user-token"
+        tokenStorage.storedRefreshToken = "user-refresh-token"
+        createClient(Backend())
+
+        val response = client.post("v1/user/onboarding")
+
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(clientHeaders).hasSize(3)
+        assertThat(clientHeaders.toSet()).containsExactly("android/1.2.6")
     }
 
     @Test

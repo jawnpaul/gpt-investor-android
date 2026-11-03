@@ -28,7 +28,13 @@ actual class MixpanelLogger(context: Context) : AnalyticsLogger {
     }
 
     actual override fun identifyUser(eventName: String, params: Map<String, Any>) {
-        mixpanel.track(eventName)
+        val eventProps = JSONObject()
+        params.forEach { (key, value) ->
+            if (key != "email") {
+                eventProps.put(key, value)
+            }
+        }
+        mixpanel.track(eventName, eventProps)
         val props = JSONObject()
         params.forEach { (key, value) ->
             if (key != "user_id") {

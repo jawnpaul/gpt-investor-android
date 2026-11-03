@@ -1,5 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.watchlist.domain.model
 
+import com.thejawnpaul.gptinvestor.core.utility.DEFAULT_CURRENCY_SYMBOL
+
 data class WatchlistItem(
     val ticker: String,
     val companyName: String,
@@ -8,7 +10,9 @@ data class WatchlistItem(
     val logoUrl: String,
     val currentPrice: Double? = null,
     val priceChange: Double? = null,
-    val briefStatus: WatchlistBriefStatus? = null
+    val briefStatus: WatchlistBriefStatus? = null,
+    val currencySymbol: String = DEFAULT_CURRENCY_SYMBOL,
+    val market: String? = null
 )
 
 /** Where a stock stands in the Morning Brief, from the API's `digest_status`. */

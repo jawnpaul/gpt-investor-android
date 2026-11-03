@@ -18,6 +18,7 @@ import io.mockk.justRun
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.SerializationException
 import org.junit.Before
 import org.junit.Test
 
@@ -143,6 +144,18 @@ class CompanyRepositoryRoutingTest {
         repository.getCompanyBrief("AAPL").test {
             val result = awaitItem()
             assertThat((result as Either.Left).a).isEqualTo(Failure.NetworkConnection)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `unreadable response returns DataError, not NetworkConnection`() = runTest {
+        stubGuest(isGuest = false)
+        coEvery { apiService.getCompanyBrief("AAPL") } throws SerializationException("Unexpected symbol '.'")
+
+        repository.getCompanyBrief("AAPL").test {
+            val result = awaitItem()
+            assertThat((result as Either.Left).a).isEqualTo(Failure.DataError)
             awaitComplete()
         }
     }

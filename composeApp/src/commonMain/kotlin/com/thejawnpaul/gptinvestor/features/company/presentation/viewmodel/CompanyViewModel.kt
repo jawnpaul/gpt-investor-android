@@ -134,7 +134,11 @@ class CompanyViewModel(
             getCompanyBriefUseCase(ticker) {
                 it.onFailure { failure ->
                     _selectedCompany.update { state ->
-                        state.copy(loading = false, error = "Something went wrong.")
+                        state.copy(
+                            loading = false,
+                            error = "Something went wrong.",
+                            isErrorOffline = failure is Failure.NetworkConnection
+                        )
                     }
                     when (failure) {
                         is Failure.GuestSessionExpired -> {
@@ -174,7 +178,7 @@ class CompanyViewModel(
                                 companyTicker = company.ticker,
                                 companyLogo = company.logoUrl,
                                 price = company.price,
-                                percentageChange = company.change,
+                                percentageChange = company.change ?: 0f,
                                 companyName = company.name
                             ),
                             brief = company
@@ -559,7 +563,11 @@ class CompanyViewModel(
                         {
                             analyticsLogger.logEvent(
                                 eventName = "stock-added-to-watchlist",
-                                params = mapOf("ticker" to ticker, "source" to "company_brief")
+                                params = buildMap {
+                                    put("ticker", ticker)
+                                    put("source", "company_brief")
+                                    _selectedCompany.value.brief?.market?.let { put("market", it) }
+                                }
                             )
                             _selectedCompany.update { it.copy(brief = it.brief?.copy(isWatched = true)) }
                             processCompanyDetailAction(CompanyDetailAction.WatchlistAdded)
@@ -581,7 +589,11 @@ class CompanyViewModel(
                         {
                             analyticsLogger.logEvent(
                                 eventName = "stock-removed-from-watchlist",
-                                params = mapOf("ticker" to ticker, "source" to "company_brief")
+                                params = buildMap {
+                                    put("ticker", ticker)
+                                    put("source", "company_brief")
+                                    _selectedCompany.value.brief?.market?.let { put("market", it) }
+                                }
                             )
                             _selectedCompany.update { it.copy(brief = it.brief?.copy(isWatched = false)) }
                             processCompanyDetailAction(CompanyDetailAction.WatchlistRemoved(ticker))

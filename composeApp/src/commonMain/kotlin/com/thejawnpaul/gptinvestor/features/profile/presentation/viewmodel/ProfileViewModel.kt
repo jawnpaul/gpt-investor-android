@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
+import com.thejawnpaul.gptinvestor.core.platform.AppInfo
 import com.thejawnpaul.gptinvestor.core.platform.NotificationPermissionController
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.dark
@@ -46,13 +47,16 @@ class ProfileViewModel(
     private val watchlistRepository: WatchlistRepository,
     private val notificationRepository: NotificationRepository,
     private val notificationPermissionController: NotificationPermissionController,
+    appInfo: AppInfo,
     @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
     val themeMap =
         mapOf(Res.string.light to "Light", Res.string.dark to "Dark", Res.string.system to "System")
 
-    private val _state = MutableStateFlow(ProfileUiState(themeList = themeMap.keys.toList()))
+    private val _state = MutableStateFlow(
+        ProfileUiState(themeList = themeMap.keys.toList(), appVersion = appInfo.versionName)
+    )
 
     private val _actions = MutableSharedFlow<ProfileAction>()
     val actions = _actions.asSharedFlow()
@@ -88,7 +92,7 @@ class ProfileViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ProfileUiState()
+        initialValue = _state.value
     )
 
     init {

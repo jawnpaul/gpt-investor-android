@@ -58,6 +58,8 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
 
         print(userInfo)
 
+        IosNotificationBridgeKt.onNotificationOpened(deepLink: userInfo["deep_link"] as? String)
+
         if let deepLink = userInfo["deep_link"] as? String {
             IosNotificationBridgeKt.onNotificationTapped(deepLink: deepLink)
         }

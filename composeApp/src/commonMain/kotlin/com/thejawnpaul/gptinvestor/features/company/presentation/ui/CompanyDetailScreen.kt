@@ -59,7 +59,6 @@ import com.thejawnpaul.gptinvestor.ask_about_company
 import com.thejawnpaul.gptinvestor.ask_anything_about
 import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.brief_footer_sources
-import com.thejawnpaul.gptinvestor.check_connection_try_again
 import com.thejawnpaul.gptinvestor.company_context_title
 import com.thejawnpaul.gptinvestor.couldn_t_load_brief
 import com.thejawnpaul.gptinvestor.features.company.domain.model.BriefSection
@@ -279,7 +278,7 @@ fun CompanyDetailScreen(
                         }
                         CompanyDisplay.Error -> GiErrorState(
                             title = stringResource(Res.string.couldn_t_load_brief),
-                            body = stringResource(Res.string.check_connection_try_again),
+                            body = stringResource(state.errorBody),
                             actionText = stringResource(Res.string.try_again),
                             onAction = { onEvent(CompanyDetailEvent.RetryLoad) },
                             modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars)
@@ -486,7 +485,7 @@ private fun BoxScope.CompanyPinnedRow(visible: Boolean, brief: CompanyBrief?) {
                         ticker = brief.ticker,
                         title = brief.name,
                         subtitle = brief.ticker,
-                        percent = brief.change.toDouble(),
+                        percent = brief.change?.toDouble(),
                         imageUrl = brief.logoUrl.ifBlank { null }
                     ),
                     modifier = Modifier
@@ -532,6 +531,7 @@ private fun CompanyDetailScreenPreview() {
                     logoUrl = "",
                     price = 182.30f,
                     change = 1.42f,
+                    currencySymbol = "$",
                     sentiment = BriefSentiment.Bullish,
                     sentimentSummary = "Services growth and steady cash flow keep the long-term outlook strong.",
                     summary = "Apple is the world's largest consumer-electronics company, best known for the iPhone. " +

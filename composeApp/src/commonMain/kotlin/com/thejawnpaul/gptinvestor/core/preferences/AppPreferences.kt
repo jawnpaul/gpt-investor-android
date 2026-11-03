@@ -66,5 +66,8 @@ interface AppPreferences {
     val hasBriefSpotlightSeen: Flow<Boolean?>
     suspend fun setHasBriefSpotlightSeen(seen: Boolean)
 
+    val browseMarket: Flow<String?>
+    suspend fun setBrowseMarket(market: String?)
+
     suspend fun clearSessionData()
 }

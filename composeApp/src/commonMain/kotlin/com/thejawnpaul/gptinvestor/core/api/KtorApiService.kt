@@ -20,6 +20,7 @@ import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyLog
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyPriceRequest
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyPriceResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyRemote
+import com.thejawnpaul.gptinvestor.features.company.data.remote.model.MarketsResponse
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.TrendingRemote
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.AddToWaitlistRequest
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.AddToWaitlistResponse
@@ -31,6 +32,7 @@ import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.DigestRespo
 import com.thejawnpaul.gptinvestor.features.guest.data.remote.GuestLoginRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenResponse
+import com.thejawnpaul.gptinvestor.features.onboarding.data.remote.OnboardingSuggestionsRemote
 import com.thejawnpaul.gptinvestor.features.postauthonboarding.data.remote.SaveOnboardingAnswersRequest
 import com.thejawnpaul.gptinvestor.features.postauthonboarding.data.remote.SaveOnboardingAnswersResponse
 import com.thejawnpaul.gptinvestor.features.search.data.remote.ClearHistoryResponse
@@ -76,6 +78,9 @@ class KtorApiService(@Provided private val client: HttpClient) {
         client.post("v1/company") {
             setBody(request)
         }.toKtorResponse()
+
+    suspend fun getOnboardingSuggestions(): KtorResponse<OnboardingSuggestionsRemote> =
+        client.get("v1.1/onboarding/suggestions").toKtorResponse()
 
     suspend fun getTrendingTickers(): KtorResponse<List<TrendingRemote>> =
         client.get("v1.1/trending-tickers").toKtorResponse()
@@ -199,14 +204,20 @@ class KtorApiService(@Provided private val client: HttpClient) {
         query: String? = null,
         page: Int = 1,
         sector: String? = null,
-        pageSize: Int = 20
+        pageSize: Int = 20,
+        market: String? = null
     ): KtorResponse<com.thejawnpaul.gptinvestor.features.company.data.remote.model.AllCompanyResponse> =
         client.get("v1.1/companies") {
             if (!query.isNullOrBlank()) parameter("query", query)
             parameter("page", page)
             if (!sector.isNullOrBlank()) parameter("sector", sector)
+            if (!market.isNullOrBlank()) parameter("market", market)
             parameter("page_size", pageSize)
         }.toKtorResponse()
+
+    suspend fun getMarkets(sector: String? = null): KtorResponse<MarketsResponse> = client.get("v1.1/markets") {
+        if (!sector.isNullOrBlank()) parameter("sector", sector)
+    }.toKtorResponse()
 
     suspend fun guestLogin(request: GuestLoginRequest): KtorResponse<LoginResponse> = client.post("v1/guest-login") {
         setBody(request)

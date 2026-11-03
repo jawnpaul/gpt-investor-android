@@ -187,7 +187,11 @@ class TopPickViewModel(
                 {
                     analyticsLogger.logEvent(
                         eventName = if (watch) "stock-added-to-watchlist" else "stock-removed-from-watchlist",
-                        params = mapOf("ticker" to ticker, "source" to "top_pick")
+                        params = buildMap {
+                            put("ticker", ticker)
+                            put("source", "top_pick")
+                            state.brief?.market?.let { put("market", it) }
+                        }
                     )
                     _topPickView.update { it.copy(brief = it.brief?.copy(isWatched = watch)) }
                     if (!watch) processAction(TopPickAction.WatchlistRemoved(ticker))

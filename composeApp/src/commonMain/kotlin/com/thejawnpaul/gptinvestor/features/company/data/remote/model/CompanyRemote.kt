@@ -8,30 +8,30 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CompanyRemote(
     @SerialName("ticker") val ticker: String,
-    @SerialName("summary") val summary: String,
-    @SerialName("industry") val industry: String,
-    @SerialName("industry_key") val industryKey: String,
-    @SerialName("sector") val sector: String,
-    @SerialName("sector_key") val sectorKey: String,
-    @SerialName("country") val country: String,
+    @SerialName("summary") val summary: String? = null,
+    @SerialName("industry") val industry: String? = null,
+    @SerialName("industry_key") val industryKey: String? = null,
+    @SerialName("sector") val sector: String? = null,
+    @SerialName("sector_key") val sectorKey: String? = null,
+    @SerialName("country") val country: String? = null,
     @SerialName("name") val name: String,
-    @SerialName("logo_url") val logoUrl: String,
-    @SerialName("website") val website: String,
-    @SerialName("date") val date: String,
+    @SerialName("logo_url") val logoUrl: String? = null,
+    @SerialName("website") val website: String? = null,
+    @SerialName("date") val date: String? = null,
     @SerialName("is_watched") val isWatched: Boolean? = null
 ) {
     fun toEntity() = CompanyEntity(
         ticker = ticker,
-        summary = summary,
-        industry = industry,
-        industryKey = industryKey,
-        sector = sector,
-        sectorKey = sectorKey,
-        country = country,
+        summary = summary.orEmpty(),
+        industry = industry.orEmpty(),
+        industryKey = industryKey.orEmpty(),
+        sector = sector.orEmpty(),
+        sectorKey = sectorKey.orEmpty(),
+        country = country.orEmpty(),
         name = name,
-        logoUrl = logoUrl.toHttpsUrl(),
-        website = website,
-        date = date
+        logoUrl = logoUrl.orEmpty().toHttpsUrl(),
+        website = website.orEmpty(),
+        date = date.orEmpty()
     )
 }
 
@@ -45,19 +45,28 @@ data class HistoricalData(
     @SerialName("High") val high: Float,
     @SerialName("Low") val low: Float,
     @SerialName("Open") val open: Float,
-    @SerialName("Volume") val volume: Long
+    @Serializable(with = WholeNumberSerializer::class)
+    @SerialName("Volume")
+    val volume: Long
 )
 
 @Serializable
 data class CompanyDetailRemoteResponse(
     @SerialName("ticker") val ticker: String,
     @SerialName("summary") val about: String? = null,
-    @SerialName("market_cap") val marketCap: Long? = null,
+    @Serializable(with = WholeNumberSerializer::class)
+    @SerialName("market_cap")
+    val marketCap: Long? = null,
     @SerialName("news") val news: List<CompanyNews>? = null,
     @SerialName("pe_ratio") val peRatio: Float? = null,
     @SerialName("percentage_change") val change: Float? = null,
-    @SerialName("revenue") val revenue: Long? = null,
+    @Serializable(with = WholeNumberSerializer::class)
+    @SerialName("revenue")
+    val revenue: Long? = null,
     @SerialName("current_price") val price: Float? = null,
+    @SerialName("market") val market: String? = null,
+    @SerialName("currency") val currency: String? = null,
+    @SerialName("currency_symbol") val currencySymbol: String? = null,
     @SerialName("historical_data") val historicalData: List<HistoricalData>? = null,
     @SerialName("company_name") val name: String? = null,
     @SerialName("logo_url") val imageUrl: String? = null,

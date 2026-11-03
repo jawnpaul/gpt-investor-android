@@ -129,7 +129,7 @@
     <string name="section_whats_happening">Що відбувається</string>
     <string name="section_risk_opportunity">Ризик і можливість</string>
     <string name="key_pe_ratio">Коефіцієнт P/E</string>
-    <string name="key_revenue_growth">Зростання доходу</string>
+    <string name="key_revenue_growth">Зростання виручки</string>
     <string name="key_dividend_yield">Дивідендна дохідність</string>
     <string name="what_it_means">Що це означає</string>
     <string name="the_risk">Ризик</string>
@@ -170,9 +170,10 @@
     <string name="loading_brief">Завантажуємо огляд</string>
     <string name="key_period_today">Сьогодні</string>
     <string name="key_period_last_12_months">Останні 12 місяців</string>
+    <string name="key_period_latest_quarter">Останній квартал</string>
     <string name="key_definition_market_cap">Ринкова капіталізація — це загальна вартість усіх акцій компанії за сьогоднішньою ціною.</string>
     <string name="key_definition_pe_ratio">Коефіцієнт P/E порівнює ціну акції з прибутком компанії на одну акцію за останній рік.</string>
-    <string name="key_definition_revenue_growth">Зростання доходу порівнює продажі цього року з продажами минулого року.</string>
+    <string name="key_definition_revenue_growth">Зростання доходу порівнює продажі останнього кварталу з тим самим кварталом минулого року.</string>
     <string name="key_definition_dividend_yield">Дивідендна дохідність — це щорічні виплати акціонерам як частка від сьогоднішньої ціни.</string>
 
     <string name="ask_me_anything_about_markets">Запитайте мене що завгодно про ринки…</string>
@@ -337,6 +338,7 @@
     <string name="ask_about_this">Запитати про це</string>
     <string name="not_financial_advice">Не є фінансовою порадою.</string>
     <string name="couldn_t_load_brief">Не вдалося завантажити огляд</string>
+    <string name="brief_error_body">Щось пішло не так на нашому боці. Спробуйте ще раз за мить.</string>
     <string name="key_question_market_cap">Що ринкова капіталізація %1$s говорить про %2$s?</string>
     <string name="key_question_pe_ratio">Чи високий коефіцієнт P/E %1$s для %2$s?</string>
     <string name="key_question_revenue_growth">Що означає зростання виручки на %1$s для %2$s?</string>
@@ -387,6 +389,19 @@
     <string name="browse_error_title">Не вдалося завантажити акції</string>
     <string name="browse_error_body">Щоб показати список компаній, потрібне з’єднання. Перевірте з’єднання та спробуйте ще раз.</string>
     <string name="browse_more_error">Не вдалося завантажити більше компаній.</string>
+    <string name="browse_market">Ринок</string>
+    <string name="browse_market_subtitle">Де компанія котирується</string>
+    <string name="browse_market_all">Усі ринки</string>
+    <string name="browse_market_chip_description">Ринок: %1$s. Змінити ринок</string>
+    <string name="browse_empty_market_sector">На ринку %1$s ще немає компаній у секторі %2$s. Спробуйте всі ринки.</string>
+    <string name="browse_empty_query_market">На ринку %1$s немає збігів для «%2$s». Спробуйте всі ринки.</string>
+    <string name="browse_show_all_markets">Показати всі ринки</string>
+    <plurals name="browse_company_count">
+        <item quantity="one">%1$d компанія</item>
+        <item quantity="few">%1$d компанії</item>
+        <item quantity="many">%1$d компаній</item>
+        <item quantity="other">%1$d компанії</item>
+    </plurals>
     <string name="history_title">Ваша історія GPT Investor</string>
     <string name="history_empty_title">Ще немає чатів</string>
     <string name="history_empty_body">Запитання, які ви ставите GPT Investor, з’являються тут, щоб ви могли повернутися до них пізніше.</string>
@@ -444,6 +459,7 @@
     <string name="profile_upgrade_body">Необмежені запитання до ШІ, повні брифінги для вашого списку спостереження та преміум-аналітика.</string>
     <string name="profile_see_premium">Переглянути Premium</string>
     <string name="profile_questions">Запитання</string>
+    <string name="profile_app_version">GPT Investor · Версія %1$s</string>
     <string name="settings_on">Увімк.</string>
     <string name="settings_off">Вимк.</string>
     <string name="sign_out_title">Вийти?</string>
@@ -535,4 +551,20 @@
         <item quantity="many">Трохи повільніше. Спробуйте ще раз через %1$d годин.</item>
         <item quantity="other">Трохи повільніше. Спробуйте ще раз через %1$d години.</item>
     </plurals>
+    <string name="add_to_watchlist">Додати до списку спостереження</string>
+    <string name="added_to_watchlist_success">Додано до списку</string>
+    <string name="added_to_watchlist_error">Не вдалося додати</string>
+    <string name="share_brief_text">Перегляньте огляд %1$s (%2$s) у GPTInvestor:\nhttps://gptinvestorapp.com/brief/%3$s</string>
+    <string name="activity">Активність</string>
+    <string name="preferences">Параметри</string>
+    <string name="notifications">Сповіщення</string>
+    <string name="appearance">Вигляд</string>
+    <string name="privacy">Конфіденційність</string>
+    <string name="watching">Відстежуються</string>
+    <string name="saved">Збережені</string>
+    <string name="light">Світлий</string>
+    <string name="dark">Темний</string>
+    <string name="system">Системний</string>
+    <string name="log_in_with_apple">Увійти з Apple</string>
+    <string name="sign_up_with_apple">Зареєструватися з Apple</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.onboarding.presentation.state
 
 import com.thejawnpaul.gptinvestor.features.company.domain.model.CompanyBrief
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.SuggestedStock
 
 sealed interface BriefView {
     data object Loading : BriefView
@@ -8,8 +9,6 @@ sealed interface BriefView {
     data class Error(val message: String) : BriefView
     data object LimitReached : BriefView
 }
-
-data class SuggestedStock(val ticker: String, val name: String, val logoUrl: String = "")
 
 data class OnboardingUiState(
     val currentScreen: Int = 0,

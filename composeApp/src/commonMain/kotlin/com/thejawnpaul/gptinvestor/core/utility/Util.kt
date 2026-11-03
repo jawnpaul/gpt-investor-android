@@ -25,6 +25,8 @@ fun String.toHttpsUrl(): String = replace("http://", "https://")
 
 fun Float.toTwoDecimalPlaces(): Float = kotlin.math.round(this * 100) / 100f
 
+const val DEFAULT_CURRENCY_SYMBOL = "$"
+
 fun getCurrencySymbol(currency: String): String = when (currency.lowercase()) {
     "ngn" -> {
         "₦"

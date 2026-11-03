@@ -10,13 +10,17 @@ data class CompanyFinancialsRemote(
     @SerialName("balance_sheet") val balanceSheet: String,
     @SerialName("close") val close: Float,
     @SerialName("open") val open: Float,
-    @SerialName("volume") val volume: Long,
+    @Serializable(with = WholeNumberSerializer::class)
+    @SerialName("volume")
+    val volume: Long,
     @SerialName("currency") val currency: String,
     @SerialName("financials") val financials: String,
     @SerialName("high") val high: Float,
     @SerialName("historical_data") val historicalData: String,
     @SerialName("low") val low: Float,
-    @SerialName("market_cap") val marketCap: Long,
+    @Serializable(with = WholeNumberSerializer::class)
+    @SerialName("market_cap")
+    val marketCap: Long,
     @SerialName("news") val news: List<CompanyNews>
 ) {
     fun toDomainObject() = CompanyFinancials(

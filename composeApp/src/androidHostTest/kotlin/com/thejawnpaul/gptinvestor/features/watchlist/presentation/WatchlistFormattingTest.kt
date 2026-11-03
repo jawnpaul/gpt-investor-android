@@ -8,11 +8,17 @@ import org.junit.Test
 class WatchlistFormattingTest {
 
     @Test
-    fun `formats USD prices with two decimals and thousands separators`() {
-        assertThat(formatUsdPrice(382.7)).isEqualTo("$382.70")
-        assertThat(formatUsdPrice(1234.5)).isEqualTo("$1,234.50")
-        assertThat(formatUsdPrice(1_000_000.0)).isEqualTo("$1,000,000.00")
-        assertThat(formatUsdPrice(0.456)).isEqualTo("$0.46")
+    fun `formats prices with two decimals and thousands separators`() {
+        assertThat(formatPrice(382.7, "$")).isEqualTo("$382.70")
+        assertThat(formatPrice(1234.5, "$")).isEqualTo("$1,234.50")
+        assertThat(formatPrice(1_000_000.0, "$")).isEqualTo("$1,000,000.00")
+        assertThat(formatPrice(0.456, "$")).isEqualTo("$0.46")
+    }
+
+    @Test
+    fun `formats prices with the company's currency symbol`() {
+        assertThat(formatPrice(126.0, "₦")).isEqualTo("₦126.00")
+        assertThat(formatPrice(1234.5, "₦")).isEqualTo("₦1,234.50")
     }
 
     @Test

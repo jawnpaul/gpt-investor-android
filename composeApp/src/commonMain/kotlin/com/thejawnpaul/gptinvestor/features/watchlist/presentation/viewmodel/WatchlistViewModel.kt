@@ -168,13 +168,17 @@ class WatchlistViewModel(
     }
 
     private fun removeFromWatchlist(ticker: String) {
+        val market = _uiState.value.watchlistItems.firstOrNull { it.ticker == ticker }?.market
         viewModelScope.launch {
             watchlistRepository.removeFromWatchlist(ticker).fold(
                 { emitAction(WatchlistAction.ShowRemoveErrorMessage(ticker)) },
                 {
                     analyticsLogger.logEvent(
                         eventName = "stock-removed-from-watchlist",
-                        params = mapOf("ticker" to ticker)
+                        params = buildMap {
+                            put("ticker", ticker)
+                            market?.let { put("market", it) }
+                        }
                     )
                     emitAction(WatchlistAction.ShowRemovedMessage(ticker))
                 }

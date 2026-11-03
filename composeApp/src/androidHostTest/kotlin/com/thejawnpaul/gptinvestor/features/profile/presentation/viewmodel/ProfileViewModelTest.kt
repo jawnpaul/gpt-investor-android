@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.Either
+import com.thejawnpaul.gptinvestor.core.platform.AppInfo
 import com.thejawnpaul.gptinvestor.core.platform.NotificationPermissionController
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
@@ -51,6 +52,7 @@ class ProfileViewModelTest {
     private val watchlistRepository: WatchlistRepository = mockk()
     private val notificationRepository: NotificationRepository = mockk(relaxed = true)
     private val notificationPermissionController: NotificationPermissionController = mockk()
+    private val appInfo: AppInfo = mockk()
 
     @Before
     fun setUp() {
@@ -69,6 +71,7 @@ class ProfileViewModelTest {
         coEvery { watchlistRepository.getWatchlist() } returns
             Either.Right(WatchlistData(items = emptyList(), recommendations = emptyList()))
         coEvery { appPreferences.setNotificationPermission(any()) } returns Unit
+        every { appInfo.versionName } returns "1.2.6"
     }
 
     @After
@@ -87,6 +90,7 @@ class ProfileViewModelTest {
         watchlistRepository,
         notificationRepository,
         notificationPermissionController,
+        appInfo,
         analyticsLogger
     )
 
@@ -102,6 +106,15 @@ class ProfileViewModelTest {
         assertThat(vm.state.value.userName).isEqualTo("Alice")
         assertThat(vm.state.value.queryCount).isEqualTo(7)
         assertThat(vm.state.value.showSignOutConfirmation).isFalse()
+    }
+
+    @Test
+    fun `state shows the app version`() = runTest(testDispatcher) {
+        val vm = buildViewModel()
+        backgroundScope.launch { vm.state.collect { } }
+        advanceUntilIdle()
+
+        assertThat(vm.state.value.appVersion).isEqualTo("1.2.6")
     }
 
     @Test

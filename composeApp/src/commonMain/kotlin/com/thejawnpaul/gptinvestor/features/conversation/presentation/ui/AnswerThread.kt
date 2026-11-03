@@ -36,6 +36,7 @@ import com.thejawnpaul.gptinvestor.answer_error_title
 import com.thejawnpaul.gptinvestor.answer_offline_body
 import com.thejawnpaul.gptinvestor.answer_offline_title
 import com.thejawnpaul.gptinvestor.copy
+import com.thejawnpaul.gptinvestor.core.utility.DEFAULT_CURRENCY_SYMBOL
 import com.thejawnpaul.gptinvestor.core.utility.toCurrency
 import com.thejawnpaul.gptinvestor.features.company.data.remote.model.CompanyDetailRemoteResponse
 import com.thejawnpaul.gptinvestor.features.conversation.domain.model.GenAiEntityMessage
@@ -391,7 +392,8 @@ private fun AnswerCompanyCard(
     modifier: Modifier = Modifier
 ) {
     val name = company.name ?: company.ticker
-    val subtitle = company.price?.let { "${company.ticker} · ${it.toCurrency("$")}" } ?: company.ticker
+    val currencySymbol = company.currencySymbol ?: DEFAULT_CURRENCY_SYMBOL
+    val subtitle = company.price?.let { "${company.ticker} · ${it.toCurrency(currencySymbol)}" } ?: company.ticker
     GiListGroup(modifier = modifier) {
         GiStockRow(
             stock = tickerStock(

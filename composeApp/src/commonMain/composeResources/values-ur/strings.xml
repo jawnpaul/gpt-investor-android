@@ -82,7 +82,7 @@
     <string name="sources">ذرائع</string>
     <string name="sign_up">Sign up</string>
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
-    <string name="continue_with_google">Google کے ساتھ جاری رکھیں</string>
+    <string name="continue_with_google">‏Google کے ساتھ جاری رکھیں</string>
     <string name="continue_with_email">ای میل کے ساتھ جاری رکھیں</string>
     <string name="ask_anything_learn_everything">کچھ بھی پوچھیں۔ \n سب کچھ سیکھیں۔</string>
     <string name="next">اگلا</string>
@@ -121,8 +121,8 @@
     <string name="guest_limit_reached_title">مہمان کی حد پوری ہو گئی</string>
     <string name="guest_limit_reached_description">GPT Investor سے سوالات پوچھتے رہنے کے لیے سائن اپ کریں۔</string>
     <string name="or">یا</string>
-    <string name="log_in_with_google">Google کے ساتھ لاگ اِن کریں</string>
-    <string name="sign_up_with_google">Google کے ساتھ سائن اپ کریں</string>
+    <string name="log_in_with_google">‏Google کے ساتھ لاگ اِن کریں</string>
+    <string name="sign_up_with_google">‏Google کے ساتھ سائن اپ کریں</string>
     <string name="you_re_in_guest_mode_click_here_to_sign_in">آپ مہمان موڈ میں ہیں، سائن اِن کرنے کے لیے یہاں کلک کریں</string>
     <string name="section_summary">خلاصہ</string>
     <string name="section_key_numbers">اہم اعداد</string>
@@ -170,9 +170,10 @@
     <string name="loading_brief">مختصر رپورٹ لوڈ ہو رہی ہے</string>
     <string name="key_period_today">آج</string>
     <string name="key_period_last_12_months">پچھلے 12 مہینے</string>
+    <string name="key_period_latest_quarter">تازہ ترین سہ ماہی</string>
     <string name="key_definition_market_cap">مارکیٹ کیپ آج کی قیمت پر کمپنی کے تمام شیئرز کی کل مالیت ہے۔</string>
     <string name="key_definition_pe_ratio">قیمت/آمدنی تناسب شیئر کی قیمت کا موازنہ پچھلے سال میں کمپنی کے فی شیئر منافع سے کرتا ہے۔</string>
-    <string name="key_definition_revenue_growth">آمدنی میں اضافہ اس سال کی فروخت کا موازنہ پچھلے سال کی فروخت سے کرتا ہے۔</string>
+    <string name="key_definition_revenue_growth">آمدنی میں اضافہ تازہ ترین سہ ماہی کی فروخت کا موازنہ پچھلے سال کی اسی سہ ماہی سے کرتا ہے۔</string>
     <string name="key_definition_dividend_yield">ڈیویڈنڈ کی پیداوار شیئر ہولڈرز کو ملنے والی سالانہ نقد رقم ہے، جو آج کی قیمت کے تناسب سے ظاہر کی جاتی ہے۔</string>
 
     <string name="ask_me_anything_about_markets">مجھ سے مارکیٹس کے بارے میں کچھ بھی پوچھیں…</string>
@@ -337,10 +338,11 @@
     <string name="ask_about_this">اس کے بارے میں پوچھیں</string>
     <string name="not_financial_advice">مالی مشورہ نہیں۔</string>
     <string name="couldn_t_load_brief">یہ مختصر رپورٹ لوڈ نہیں ہو سکی</string>
+    <string name="brief_error_body">ہماری طرف کچھ غلط ہو گیا۔ تھوڑی دیر میں دوبارہ کوشش کریں۔</string>
     <string name="key_question_market_cap">%1$s کی مارکیٹ کیپ %2$s کے بارے میں کیا بتاتی ہے؟</string>
-    <string name="key_question_pe_ratio">کیا %2$s کے لیے %1$s کا P/E تناسب زیادہ ہے؟</string>
+    <string name="key_question_pe_ratio">کیا %2$s کے لیے %1$s کا قیمت/آمدنی تناسب زیادہ ہے؟</string>
     <string name="key_question_revenue_growth">%1$s کی آمدنی میں اضافہ %2$s کے لیے کیا معنی رکھتا ہے؟</string>
-    <string name="key_question_dividend_yield">کیا %2$s کے لیے %1$s کا ڈیویڈنڈ منافع اچھا ہے؟</string>
+    <string name="key_question_dividend_yield">کیا %2$s کے لیے %1$s کی ڈیویڈنڈ کی پیداوار اچھی ہے؟</string>
     <plurals name="brief_footer_sources">
         <item quantity="one">%1$d ذریعہ۔ مالی مشورہ نہیں۔</item>
         <item quantity="other">%1$d ذرائع۔ مالی مشورہ نہیں۔</item>
@@ -385,6 +387,17 @@
     <string name="browse_error_title">اسٹاکس لوڈ نہیں ہو سکے</string>
     <string name="browse_error_body">کمپنیوں کی فہرست دکھانے کے لیے کنکشن ضروری ہے۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔</string>
     <string name="browse_more_error">ہم مزید کمپنیاں لوڈ نہیں کر سکے۔</string>
+    <string name="browse_market">مارکیٹ</string>
+    <string name="browse_market_subtitle">جہاں کمپنی لسٹڈ ہے</string>
+    <string name="browse_market_all">تمام مارکیٹس</string>
+    <string name="browse_market_chip_description">مارکیٹ: %1$s۔ مارکیٹ تبدیل کریں</string>
+    <string name="browse_empty_market_sector">%1$s میں ابھی %2$s کی کوئی کمپنی نہیں ہے۔ تمام مارکیٹس آزمائیں۔</string>
+    <string name="browse_empty_query_market">%1$s میں “%2$s” سے کچھ نہیں ملتا۔ تمام مارکیٹس آزمائیں۔</string>
+    <string name="browse_show_all_markets">تمام مارکیٹس دکھائیں</string>
+    <plurals name="browse_company_count">
+        <item quantity="one">%1$d کمپنی</item>
+        <item quantity="other">%1$d کمپنیاں</item>
+    </plurals>
     <string name="history_title">آپ کی GPT Investor ہسٹری</string>
     <string name="history_empty_title">ابھی کوئی چیٹ نہیں</string>
     <string name="history_empty_body">آپ GPT Investor سے جو سوال پوچھتے ہیں وہ یہاں نظر آتے ہیں، تاکہ آپ انہیں بعد میں جاری رکھ سکیں۔</string>
@@ -436,6 +449,7 @@
     <string name="profile_upgrade_body">لامحدود AI سوالات، آپ کی واچ لسٹ کے لیے مکمل بریف، اور پریمیم ریسرچ۔</string>
     <string name="profile_see_premium">Premium دیکھیں</string>
     <string name="profile_questions">سوالات</string>
+    <string name="profile_app_version">GPT Investor · ورژن %1$s</string>
     <string name="settings_on">آن</string>
     <string name="settings_off">آف</string>
     <string name="sign_out_title">سائن آؤٹ کریں؟</string>
@@ -523,4 +537,20 @@
         <item quantity="one">تھوڑا آہستہ چلیں۔ %1$d گھنٹے میں دوبارہ کوشش کریں۔</item>
         <item quantity="other">تھوڑا آہستہ چلیں۔ %1$d گھنٹے میں دوبارہ کوشش کریں۔</item>
     </plurals>
+    <string name="add_to_watchlist">واچ لسٹ میں شامل کریں</string>
+    <string name="added_to_watchlist_success">واچ لسٹ میں شامل ہو گیا</string>
+    <string name="added_to_watchlist_error">واچ لسٹ میں شامل نہیں ہو سکا</string>
+    <string name="share_brief_text">‏GPTInvestor پر %1$s (%2$s) کی مختصر رپورٹ دیکھیں:\nhttps://gptinvestorapp.com/brief/%3$s</string>
+    <string name="activity">سرگرمی</string>
+    <string name="preferences">ترجیحات</string>
+    <string name="notifications">اطلاعات</string>
+    <string name="appearance">ظاہری شکل</string>
+    <string name="privacy">رازداری</string>
+    <string name="watching">زیرِ نظر</string>
+    <string name="saved">محفوظ</string>
+    <string name="light">لائٹ</string>
+    <string name="dark">ڈارک</string>
+    <string name="system">سسٹم</string>
+    <string name="log_in_with_apple">‏Apple کے ساتھ لاگ اِن کریں</string>
+    <string name="sign_up_with_apple">‏Apple کے ساتھ سائن اپ کریں</string>
 </resources>

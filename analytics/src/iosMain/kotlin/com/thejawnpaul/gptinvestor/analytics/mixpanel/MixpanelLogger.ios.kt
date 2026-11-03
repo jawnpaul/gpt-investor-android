@@ -20,11 +20,13 @@ actual class MixpanelLogger(
     }
 
     actual override fun identifyUser(eventName: String, params: Map<String, Any>) {
+        provider.logEvent(eventName, params - "email")
         val userId = params["user_id"]?.toString() ?: return
-        provider.identifyUser(userId, params)
+        provider.identifyUser(userId, params - "user_id")
     }
 
     actual override fun resetUser(eventName: String) {
+        provider.logEvent(eventName, emptyMap())
         provider.resetUser()
     }
 

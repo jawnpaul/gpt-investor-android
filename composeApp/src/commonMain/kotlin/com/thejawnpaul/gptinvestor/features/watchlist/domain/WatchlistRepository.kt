@@ -4,6 +4,7 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.core.utility.DEFAULT_CURRENCY_SYMBOL
 import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistRequest
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistData
@@ -64,7 +65,9 @@ class WatchlistRepositoryImpl(
                     logoUrl = it.logoUrl.toHttpsUrl(),
                     currentPrice = it.currentPrice,
                     priceChange = it.priceChange,
-                    briefStatus = watchlistBriefStatusOf(it.digestStatus, it.locked)
+                    currencySymbol = it.currencySymbol ?: DEFAULT_CURRENCY_SYMBOL,
+                    briefStatus = watchlistBriefStatusOf(it.digestStatus, it.locked),
+                    market = it.market
                 )
             } ?: emptyList()
             val recommendations = response.body?.recommendedDigestCompany ?: emptyList()

@@ -9,15 +9,18 @@ import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.news.domain.NewsRepository
 import com.thejawnpaul.gptinvestor.features.news.domain.model.NewsFeedMeta
 import com.thejawnpaul.gptinvestor.features.news.domain.model.NewsTopic
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -34,6 +37,8 @@ class NewsFeedViewModelTest {
     private val repository: NewsRepository = mockk()
     private val appPreferences: AppPreferences = mockk(relaxed = true)
     private val analyticsLogger: AnalyticsLogger = mockk(relaxed = true)
+    private val watchlistRepository: WatchlistRepository = mockk()
+    private val watchlistChanges = MutableSharedFlow<Unit>()
     private val lastSeen = MutableStateFlow<Long?>(null)
     private val guest = MutableStateFlow<Boolean?>(false)
     private val energy = NewsTopic(id = "energy", label = "Energy")
@@ -47,6 +52,7 @@ class NewsFeedViewModelTest {
         Dispatchers.setMain(testDispatcher)
         every { appPreferences.newsLastSeenAt } returns lastSeen
         every { appPreferences.isGuestLoggedIn } returns guest
+        every { watchlistRepository.changes } returns watchlistChanges
         every { repository.getFeedPaged(any(), any()) } answers {
             secondArg<(NewsFeedMeta) -> Unit>().invoke(meta)
             flowOf(PagingData.from(listOf(testStory("s1"))))
@@ -58,7 +64,7 @@ class NewsFeedViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() = NewsFeedViewModel(repository, appPreferences, analyticsLogger)
+    private fun viewModel() = NewsFeedViewModel(repository, appPreferences, watchlistRepository, analyticsLogger)
 
     @Test
     fun `should take topics and the new-stories time from the first page`() = runTest(testDispatcher) {
@@ -109,6 +115,43 @@ class NewsFeedViewModelTest {
         }
 
         coVerify { appPreferences.setNewsLastSeenAt(500L) }
+    }
+
+    @Test
+    fun `should reload for you when a stock is added during the cold start`() = runTest(testDispatcher) {
+        every { repository.getFeedPaged("for_you", any()) } answers {
+            secondArg<(NewsFeedMeta) -> Unit>().invoke(meta.copy(personalised = false))
+            flowOf(PagingData.from(listOf(testStory("s1"))))
+        }
+        val vm = viewModel()
+        vm.handleEvent(NewsFeedEvent.SelectFilter(NewsFilter.ForYou))
+        backgroundScope.launch { vm.stories.collect {} }
+        advanceUntilIdle()
+        watchlistChanges.emit(Unit)
+        advanceUntilIdle()
+
+        verify(exactly = 2) { repository.getFeedPaged("for_you", any()) }
+    }
+
+    @Test
+    fun `should not reload a personalised for you when the watchlist changes`() = runTest(testDispatcher) {
+        val vm = viewModel()
+        vm.handleEvent(NewsFeedEvent.SelectFilter(NewsFilter.ForYou))
+        backgroundScope.launch { vm.stories.collect {} }
+        advanceUntilIdle()
+        watchlistChanges.emit(Unit)
+        advanceUntilIdle()
+
+        verify(exactly = 1) { repository.getFeedPaged("for_you", any()) }
+    }
+
+    @Test
+    fun `should log where browse stocks was opened from`() = runTest(testDispatcher) {
+        val vm = viewModel()
+        vm.handleEvent(NewsFeedEvent.AddStocks)
+        advanceUntilIdle()
+
+        verify { analyticsLogger.logEvent("browse-stocks-opened", mapOf("source" to "news_for_you")) }
     }
 
     @Test

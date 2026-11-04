@@ -52,6 +52,16 @@ class DiscoverViewModelAnalyticsTest {
     )
 
     @Test
+    fun `tapping browse logs where browse stocks was opened from`() = runTest(testDispatcher) {
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        vm.handleEvent(DiscoveryEvent.GoToBrowse)
+
+        verify { analyticsLogger.logEvent("browse-stocks-opened", mapOf("source" to "discover_picks")) }
+    }
+
+    @Test
     fun `tapping a top pick logs the top pick event`() = runTest(testDispatcher) {
         val vm = viewModel()
         advanceUntilIdle()

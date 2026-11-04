@@ -11,6 +11,7 @@ import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.news.domain.NewsRepository
 import com.thejawnpaul.gptinvestor.features.news.domain.model.NewsTopic
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import kotlin.time.Clock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -20,8 +21,11 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,6 +36,7 @@ import org.koin.core.annotation.Provided
 class NewsFeedViewModel(
     private val newsRepository: NewsRepository,
     private val appPreferences: AppPreferences,
+    private val watchlistRepository: WatchlistRepository,
     @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
 
@@ -49,6 +54,7 @@ class NewsFeedViewModel(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val stories: Flow<PagingData<StoryCardUi>> = filter
+        .flatMapLatest { selected -> reloads(selected).map { selected } }
         .flatMapLatest { selected ->
             newsRepository.getFeedPaged(selected.id) { meta ->
                 if (filter.value == selected) {
@@ -90,13 +96,22 @@ class NewsFeedViewModel(
 
             NewsFeedEvent.PasteLink -> emit(NewsFeedAction.OpenChat)
             NewsFeedEvent.ManageWatchlist -> emit(NewsFeedAction.OpenWatchlist)
-            NewsFeedEvent.AddStocks -> emit(NewsFeedAction.OpenBrowse)
+            NewsFeedEvent.AddStocks -> {
+                analyticsLogger.logEvent("browse-stocks-opened", mapOf("source" to "news_for_you"))
+                emit(NewsFeedAction.OpenBrowse)
+            }
             NewsFeedEvent.ShowAll -> handleEvent(NewsFeedEvent.SelectFilter(NewsFilter.All))
             NewsFeedEvent.MarkSeen -> {
                 val latest = _state.value.latestPublishedAt
                 if (latest > 0L) viewModelScope.launch { appPreferences.setNewsLastSeenAt(latest) }
             }
         }
+    }
+
+    private fun reloads(selected: NewsFilter): Flow<Unit> = if (selected == NewsFilter.ForYou) {
+        watchlistRepository.changes.filter { !_state.value.personalised }.onStart { emit(Unit) }
+    } else {
+        flowOf(Unit)
     }
 
     private fun emit(action: NewsFeedAction) {

@@ -30,6 +30,10 @@ import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityRe
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityResponse
 import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.DigestResponse
 import com.thejawnpaul.gptinvestor.features.guest.data.remote.GuestLoginRequest
+import com.thejawnpaul.gptinvestor.features.news.data.remote.ExplainerRemote
+import com.thejawnpaul.gptinvestor.features.news.data.remote.NewsFeedRemote
+import com.thejawnpaul.gptinvestor.features.news.data.remote.StoryRemote
+import com.thejawnpaul.gptinvestor.features.news.data.remote.TopStoryRemote
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenResponse
 import com.thejawnpaul.gptinvestor.features.onboarding.data.remote.OnboardingSuggestionsRemote
@@ -69,6 +73,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.encodeURLPathPart
 import io.ktor.http.isSuccess
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
@@ -273,6 +278,22 @@ class KtorApiService(@Provided private val client: HttpClient) {
         }.toKtorResponse()
 
     suspend fun getDailyDigest(): KtorResponse<DigestResponse> = client.get("v1/digest").toKtorResponse()
+
+    suspend fun getNewsFeed(filter: String, page: Int, pageSize: Int, asOf: Long?): KtorResponse<NewsFeedRemote> =
+        client.get("v1/news") {
+            parameter("filter", filter)
+            parameter("page", page)
+            parameter("page_size", pageSize)
+            if (asOf != null) parameter("as_of", asOf)
+        }.toKtorResponse()
+
+    suspend fun getStory(id: String): KtorResponse<StoryRemote> =
+        client.get("v1/news/${id.encodeURLPathPart()}").toKtorResponse()
+
+    suspend fun getTopStory(): KtorResponse<TopStoryRemote> = client.get("v1/news/top-story").toKtorResponse()
+
+    suspend fun getExplainer(storyId: String): KtorResponse<ExplainerRemote> =
+        client.get("v1/news/${storyId.encodeURLPathPart()}/explainer").toKtorResponse()
 
     suspend fun startFreeTrial(): KtorResponse<StartTrialResponse> = client.post("v1/trial/start").toKtorResponse()
 

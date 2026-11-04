@@ -46,6 +46,14 @@ sealed class GuestScreen(val route: String) {
 
     data object GuestAllTopPicks : GuestScreen("guest_all_top_picks_screen")
 
+    data object GuestStory : GuestScreen("guest_story_screen/{storyId}") {
+        fun createRoute(storyId: String) = "guest_story_screen/${storyId.encodeURLParameter()}"
+    }
+
+    data object GuestExplainer : GuestScreen("guest_explainer_screen/{storyId}") {
+        fun createRoute(storyId: String) = "guest_explainer_screen/${storyId.encodeURLParameter()}"
+    }
+
     data object GuestSavedTopPicks : GuestScreen("guest_saved_top_picks_screen")
 
     data object GuestTidbitDetail : GuestScreen("guest_tidbit_detail_screen/{tidbitId}") {

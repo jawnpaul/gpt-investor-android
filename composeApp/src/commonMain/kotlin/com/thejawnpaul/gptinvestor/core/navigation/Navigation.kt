@@ -107,6 +107,7 @@ fun SetUpNavGraph(
                         conversationNavGraph(navController, platformActions)
                         historyNavGraph(navController, platformActions)
                         topPickNavGraph(navController, platformActions)
+                        newsNavGraph(navController, platformActions)
                         tidbitNavGraph(navController, platformActions)
                         settingsNavGraph(navController)
                         searchNavGraph(navController)

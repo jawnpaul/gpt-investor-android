@@ -26,6 +26,14 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
 
     data object AllTopPicksScreen : Screen("all_top_picks_screen", false)
 
+    data object StoryScreen : Screen("story_screen/{storyId}", false) {
+        fun createRoute(storyId: String) = "story_screen/${storyId.encodeURLParameter()}"
+    }
+
+    data object ExplainerScreen : Screen("explainer_screen/{storyId}", false) {
+        fun createRoute(storyId: String) = "explainer_screen/${storyId.encodeURLParameter()}"
+    }
+
     data object SavedTopPicksScreen : Screen("saved_top_picks", false)
 
     data object SettingsScreen : Screen("settings_screen", false)

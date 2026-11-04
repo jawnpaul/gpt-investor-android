@@ -16,11 +16,20 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,7 +40,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.check_connection_try_again
 import com.thejawnpaul.gptinvestor.curated_for_you
@@ -44,6 +52,9 @@ import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
+import com.thejawnpaul.gptinvestor.news_new_stories
+import com.thejawnpaul.gptinvestor.news_section_news
+import com.thejawnpaul.gptinvestor.news_section_picks
 import com.thejawnpaul.gptinvestor.search_a_stock_to_analyse
 import com.thejawnpaul.gptinvestor.see_all
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
@@ -58,66 +69,119 @@ import com.thejawnpaul.gptinvestor.theme.components.GiEyebrow
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
 import com.thejawnpaul.gptinvestor.theme.components.GiLargeTopBar
 import com.thejawnpaul.gptinvestor.theme.components.GiSectionHeader
+import com.thejawnpaul.gptinvestor.theme.components.GiSegmentedControl
 import com.thejawnpaul.gptinvestor.theme.components.GiText
 import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 import com.thejawnpaul.gptinvestor.top_picks_today
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun DiscoverScreen(state: DiscoveryScreenState, onEvent: (DiscoveryEvent) -> Unit, modifier: Modifier = Modifier) {
+fun DiscoverScreen(
+    pagerState: PagerState,
+    isGuestSession: Boolean,
+    hasNewStories: Boolean,
+    onGoToLogin: () -> Unit,
+    picks: @Composable () -> Unit,
+    news: @Composable () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val scope = rememberCoroutineScope()
+    val reducedMotion = isReducedMotionEnabled()
+    var selectedPage by rememberSaveable { mutableIntStateOf(pagerState.settledPage) }
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.settledPage }.collect { selectedPage = it }
+    }
     Scaffold(
         modifier = modifier,
         containerColor = GiTheme.colors.bg,
         contentWindowInsets = WindowInsets(0),
         topBar = { GiLargeTopBar(title = stringResource(Res.string.discover)) }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(
-                start = GiSpace.gutter,
-                end = GiSpace.gutter,
-                top = GiSpace.x2,
-                bottom = GiSpace.sectionGap
-            ),
-            verticalArrangement = Arrangement.spacedBy(if (state.isGuestSession) GiSpace.x5 else GiSpace.x4)
-        ) {
-            if (state.isGuestSession) {
-                item(key = "guest") {
-                    TopGuestLabel(onClick = { onEvent(DiscoveryEvent.GoToLogin) })
-                }
-            }
-            item(key = "search") {
-                DiscoverSearchEntry(onClick = { onEvent(DiscoveryEvent.GoToSearch) })
-            }
-            item(key = "browse") {
-                BrowseCompaniesCard(onClick = { onEvent(DiscoveryEvent.GoToBrowse) })
-            }
-            item(key = "picks") {
-                TopPicksSection(
-                    view = state.topPicksView,
-                    picks = state.previewTopPicks,
-                    onSeeAll = { onEvent(DiscoveryEvent.GoToAllTopPicks) },
-                    onRetry = { onEvent(DiscoveryEvent.RetryTopPicks) },
-                    onClickPick = { onEvent(DiscoveryEvent.ClickTopPick(id = it)) },
-                    modifier = Modifier.padding(top = if (state.isGuestSession) 0.dp else GiSpace.x2)
+        Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+            Column(
+                modifier = Modifier.padding(horizontal = GiSpace.gutter).padding(top = GiSpace.x2, bottom = GiSpace.x4),
+                verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
+            ) {
+                if (isGuestSession) TopGuestLabel(onClick = onGoToLogin)
+                GiSegmentedControl(
+                    options = listOf(
+                        stringResource(Res.string.news_section_picks),
+                        stringResource(Res.string.news_section_news)
+                    ),
+                    selectedIndex = selectedPage,
+                    onSelect = { page ->
+                        selectedPage = page
+                        scope.launch {
+                            if (reducedMotion) {
+                                pagerState.scrollToPage(page)
+                            } else {
+                                pagerState.animateScrollToPage(page, animationSpec = GiMotion.snappy())
+                            }
+                        }
+                    },
+                    dotIndices = if (hasNewStories && selectedPage != NEWS_PAGE) {
+                        setOf(NEWS_PAGE)
+                    } else {
+                        emptySet()
+                    },
+                    dotDescription = stringResource(Res.string.news_new_stories),
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
-            item(key = "tidbit") {
-                val placement = if (isReducedMotionEnabled()) {
-                    Modifier
-                } else {
-                    Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null, placementSpec = GiMotion.smooth())
-                }
-                TidbitSection(
-                    tidbit = state.homeTidbitView,
-                    onRetry = { onEvent(DiscoveryEvent.RetryTidbit) },
-                    onClick = { onEvent(DiscoveryEvent.ClickTidbit(id = it)) },
-                    modifier = placement.padding(top = GiSpace.x2)
-                )
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.Top,
+                beyondViewportPageCount = 1,
+                key = { it }
+            ) { page ->
+                if (page == NEWS_PAGE) news() else picks()
             }
+        }
+    }
+}
+
+const val PICKS_PAGE = 0
+const val NEWS_PAGE = 1
+const val DISCOVER_PAGE_COUNT = 2
+
+@Composable
+fun DiscoverPicksTab(state: DiscoveryScreenState, onEvent: (DiscoveryEvent) -> Unit, modifier: Modifier = Modifier) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = GiSpace.gutter, end = GiSpace.gutter, bottom = GiSpace.sectionGap),
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
+    ) {
+        item(key = "search") {
+            DiscoverSearchEntry(onClick = { onEvent(DiscoveryEvent.GoToSearch) })
+        }
+        item(key = "browse") {
+            BrowseCompaniesCard(onClick = { onEvent(DiscoveryEvent.GoToBrowse) })
+        }
+        item(key = "picks") {
+            TopPicksSection(
+                view = state.topPicksView,
+                picks = state.previewTopPicks,
+                onSeeAll = { onEvent(DiscoveryEvent.GoToAllTopPicks) },
+                onRetry = { onEvent(DiscoveryEvent.RetryTopPicks) },
+                onClickPick = { onEvent(DiscoveryEvent.ClickTopPick(id = it)) },
+                modifier = Modifier.padding(top = GiSpace.x2)
+            )
+        }
+        item(key = "tidbit") {
+            val placement = if (isReducedMotionEnabled()) {
+                Modifier
+            } else {
+                Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null, placementSpec = GiMotion.smooth())
+            }
+            TidbitSection(
+                tidbit = state.homeTidbitView,
+                onRetry = { onEvent(DiscoveryEvent.RetryTidbit) },
+                onClick = { onEvent(DiscoveryEvent.ClickTidbit(id = it)) },
+                modifier = placement.padding(top = GiSpace.x2)
+            )
         }
     }
 }
@@ -252,46 +316,48 @@ private val previewTidbit = HomeTidbitView(
     title = "Rethink early retirement: lessons from the FIRE movement"
 )
 
+@Composable
+private fun DiscoverPreview(state: DiscoveryScreenState) {
+    GPTInvestorTheme {
+        DiscoverScreen(
+            pagerState = rememberPagerState { DISCOVER_PAGE_COUNT },
+            isGuestSession = state.isGuestSession,
+            hasNewStories = true,
+            onGoToLogin = {},
+            picks = { DiscoverPicksTab(state = state, onEvent = {}) },
+            news = {}
+        )
+    }
+}
+
 @PreviewLightDark
 @Preview(name = "200%", fontScale = 2f)
 @Composable
 private fun DiscoverScreenLoadedPreview() {
-    GPTInvestorTheme {
-        DiscoverScreen(
-            state = DiscoveryScreenState(
-                topPicksView = TopPicksView(topPicks = previewPicks),
-                homeTidbitView = previewTidbit
-            ),
-            onEvent = {}
-        )
-    }
+    DiscoverPreview(
+        DiscoveryScreenState(topPicksView = TopPicksView(topPicks = previewPicks), homeTidbitView = previewTidbit)
+    )
 }
 
 @PreviewLightDark
 @Composable
 private fun DiscoverScreenLoadingPreview() {
-    GPTInvestorTheme {
-        DiscoverScreen(
-            state = DiscoveryScreenState(
-                topPicksView = TopPicksView(loading = true),
-                homeTidbitView = HomeTidbitView(loading = true)
-            ),
-            onEvent = {}
+    DiscoverPreview(
+        DiscoveryScreenState(
+            topPicksView = TopPicksView(loading = true),
+            homeTidbitView = HomeTidbitView(loading = true)
         )
-    }
+    )
 }
 
 @PreviewLightDark
 @Composable
 private fun DiscoverScreenGuestErrorPreview() {
-    GPTInvestorTheme {
-        DiscoverScreen(
-            state = DiscoveryScreenState(
-                isGuestSession = true,
-                topPicksView = TopPicksView(error = "Something went wrong"),
-                homeTidbitView = HomeTidbitView(error = "Something went wrong")
-            ),
-            onEvent = {}
+    DiscoverPreview(
+        DiscoveryScreenState(
+            isGuestSession = true,
+            topPicksView = TopPicksView(error = "Something went wrong"),
+            homeTidbitView = HomeTidbitView(error = "Something went wrong")
         )
-    }
+    )
 }

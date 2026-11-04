@@ -553,6 +553,9 @@
     <string name="system">System</string>
     <string name="log_in_with_apple">Mit Apple anmelden</string>
     <string name="sign_up_with_apple">Mit Apple registrieren</string>
+    <string name="news_section_picks">Empfehlungen</string>
+    <string name="news_section_news">Nachrichten</string>
+    <string name="news_new_stories">Neue Meldungen</string>
     <string name="news_paste_link_title">Eine Meldung woanders gesehen?</string>
     <string name="news_paste_link_body">Fügen Sie den Link in den Chat ein, um die zugehörigen Aktien zu sehen</string>
     <string name="news_filter_all">Alle</string>

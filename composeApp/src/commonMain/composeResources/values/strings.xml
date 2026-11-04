@@ -554,6 +554,9 @@
         <item quantity="one">Slow down a little. Try again in %1$d hour.</item>
         <item quantity="other">Slow down a little. Try again in %1$d hours.</item>
     </plurals>
+    <string name="news_section_picks">Picks</string>
+    <string name="news_section_news">News</string>
+    <string name="news_new_stories">New stories</string>
     <string name="news_paste_link_title">Saw a story somewhere else?</string>
     <string name="news_paste_link_body">Paste the link in chat to see its stocks</string>
     <string name="news_filter_all">All</string>

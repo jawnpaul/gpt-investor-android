@@ -567,6 +567,9 @@
     <string name="system">Системний</string>
     <string name="log_in_with_apple">Увійти з Apple</string>
     <string name="sign_up_with_apple">Зареєструватися з Apple</string>
+    <string name="news_section_picks">Вибори</string>
+    <string name="news_section_news">Новини</string>
+    <string name="news_new_stories">Свіжі новини</string>
     <string name="news_paste_link_title">Бачили новину деінде?</string>
     <string name="news_paste_link_body">Вставте посилання в чат, щоб побачити пов’язані акції</string>
     <string name="news_filter_all">Усі</string>

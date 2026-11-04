@@ -553,6 +553,9 @@
     <string name="system">سسٹم</string>
     <string name="log_in_with_apple">‏Apple کے ساتھ لاگ اِن کریں</string>
     <string name="sign_up_with_apple">‏Apple کے ساتھ سائن اپ کریں</string>
+    <string name="news_section_picks">انتخاب</string>
+    <string name="news_section_news">خبریں</string>
+    <string name="news_new_stories">نئی خبریں</string>
     <string name="news_paste_link_title">کوئی خبر کہیں اور دیکھی؟</string>
     <string name="news_paste_link_body">اس کے اسٹاکس دیکھنے کے لیے لنک چیٹ میں پیسٹ کریں</string>
     <string name="news_filter_all">سب</string>

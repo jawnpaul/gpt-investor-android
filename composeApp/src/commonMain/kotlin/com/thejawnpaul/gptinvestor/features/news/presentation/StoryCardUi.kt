@@ -6,6 +6,7 @@ import com.thejawnpaul.gptinvestor.features.news.domain.model.Story
 import com.thejawnpaul.gptinvestor.features.news.domain.model.StoryStock
 
 private const val CARD_MOVERS = 3
+private const val WATCH_TAGS = 2
 
 sealed interface NewsFilter {
     val id: String
@@ -33,12 +34,12 @@ data class StoryCardUi(
     val moreMovers: Int,
     val movedCount: Int,
     val connectedCount: Int,
-    val watchedTicker: String?,
+    val watchedTickers: List<String>,
     val topic: NewsTopic?
 ) {
     val hasMovers: Boolean get() = movers.isNotEmpty()
 
-    val hasWhyTags: Boolean get() = watchedTicker != null || topic != null
+    val hasWhyTags: Boolean get() = watchedTickers.isNotEmpty() || topic != null
 }
 
 fun storyMeta(publisher: String, publishedAt: Long, now: Long): String =
@@ -56,7 +57,7 @@ fun Story.toCard(now: Long, showWhy: Boolean): StoryCardUi {
         moreMovers = (movedCount - shown.size).coerceAtLeast(0),
         movedCount = movedCount,
         connectedCount = connectedCount,
-        watchedTicker = if (showWhy) watchedTickers.firstOrNull() else null,
+        watchedTickers = if (showWhy) watchedTickers.take(WATCH_TAGS) else emptyList(),
         topic = if (showWhy) topics.firstOrNull() else null
     )
 }

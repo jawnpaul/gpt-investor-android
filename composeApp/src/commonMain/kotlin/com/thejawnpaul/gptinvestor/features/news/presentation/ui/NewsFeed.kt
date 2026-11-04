@@ -68,7 +68,6 @@ import com.thejawnpaul.gptinvestor.news_loading_more
 import com.thejawnpaul.gptinvestor.news_manage
 import com.thejawnpaul.gptinvestor.news_more
 import com.thejawnpaul.gptinvestor.news_more_error
-import com.thejawnpaul.gptinvestor.news_none_moved_yet
 import com.thejawnpaul.gptinvestor.news_paste_link_body
 import com.thejawnpaul.gptinvestor.news_paste_link_title
 import com.thejawnpaul.gptinvestor.news_popular_now
@@ -360,22 +359,22 @@ internal fun StoryCard(card: StoryCardUi, onClick: () -> Unit, modifier: Modifie
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (card.hasWhyTags) WhyTags(watchedTicker = card.watchedTicker, topic = card.topic)
+                if (card.hasWhyTags) WhyTags(watchedTickers = card.watchedTickers, topic = card.topic)
             }
             StoryThumb(imageUrl = card.imageUrl, size = StoryThumbSize)
         }
-        MoversLine(card = card, modifier = Modifier.padding(top = GiSpace.x1))
+        if (card.hasMovers) MoversLine(card = card, modifier = Modifier.padding(top = GiSpace.x1))
     }
 }
 
 @Composable
-private fun WhyTags(watchedTicker: String?, topic: NewsTopic?) {
+private fun WhyTags(watchedTickers: List<String>, topic: NewsTopic?) {
     FlowRow(
         modifier = Modifier.padding(top = GiSpace.x1),
         horizontalArrangement = Arrangement.spacedBy(GiSpace.x1_5),
         verticalArrangement = Arrangement.spacedBy(GiSpace.x1)
     ) {
-        watchedTicker?.let {
+        watchedTickers.forEach {
             NewsTag(text = stringResource(Res.string.news_watch_reason, it), icon = GiIcons.starFill, accent = true)
         }
         topic?.let { NewsTag(text = it.label, icon = GiIcons.newspaper) }
@@ -417,31 +416,27 @@ private fun MoversLine(card: StoryCardUi, modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.spacedBy(GiSpace.x3),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (card.hasMovers) LogoStack(stocks = card.movers)
+            LogoStack(stocks = card.movers)
             Column(modifier = Modifier.weight(1f)) {
-                if (card.hasMovers) {
+                GiText(
+                    text = stringResource(Res.string.news_connected_moved, card.movedCount, card.connectedCount),
+                    style = GiTextStyle.BodySmall,
+                    color = GiTheme.colors.ink
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x1)) {
                     GiText(
-                        text = stringResource(Res.string.news_connected_moved, card.movedCount, card.connectedCount),
-                        style = GiTextStyle.BodySmall,
-                        color = GiTheme.colors.ink
+                        text = card.moverNames,
+                        style = GiTextStyle.Meta,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
-                    Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x1)) {
+                    if (card.moreMovers > 0) {
                         GiText(
-                            text = card.moverNames,
-                            style = GiTextStyle.Meta,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f, fill = false)
+                            text = stringResource(Res.string.news_more, card.moreMovers),
+                            style = GiTextStyle.Meta
                         )
-                        if (card.moreMovers > 0) {
-                            GiText(
-                                text = stringResource(Res.string.news_more, card.moreMovers),
-                                style = GiTextStyle.Meta
-                            )
-                        }
                     }
-                } else {
-                    GiText(text = stringResource(Res.string.news_none_moved_yet), style = GiTextStyle.Meta)
                 }
             }
         }

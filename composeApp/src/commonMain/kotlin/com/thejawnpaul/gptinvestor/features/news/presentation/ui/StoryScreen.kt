@@ -73,7 +73,6 @@ import com.thejawnpaul.gptinvestor.news_disclaimer_story_time
 import com.thejawnpaul.gptinvestor.news_explainer_meta
 import com.thejawnpaul.gptinvestor.news_info_disclaimer
 import com.thejawnpaul.gptinvestor.news_moved_since
-import com.thejawnpaul.gptinvestor.news_none_moved_yet
 import com.thejawnpaul.gptinvestor.news_read_full_story
 import com.thejawnpaul.gptinvestor.news_share_story
 import com.thejawnpaul.gptinvestor.news_sheet_ask
@@ -253,17 +252,15 @@ private fun StoryBody(
         }
         item(key = "moved") {
             Column(verticalArrangement = Arrangement.spacedBy(GiSpace.titleToContent)) {
-                GiSectionHeader(
-                    title = stringResource(Res.string.news_moved_since),
-                    trailingText = stringResource(
-                        Res.string.news_connected_count,
-                        story.movedCount,
-                        story.connectedCount
+                if (state.hasMoved) {
+                    GiSectionHeader(
+                        title = stringResource(Res.string.news_moved_since),
+                        trailingText = stringResource(
+                            Res.string.news_connected_count,
+                            story.movedCount,
+                            story.connectedCount
+                        )
                     )
-                )
-                if (story.moved.isEmpty()) {
-                    GiText(text = stringResource(Res.string.news_none_moved_yet), style = GiTextStyle.BodySmall)
-                } else {
                     StoryStockList(stocks = story.moved, watch = state.watch, onEvent = onEvent)
                 }
                 state.barelyMoved?.let { barelyMoved ->

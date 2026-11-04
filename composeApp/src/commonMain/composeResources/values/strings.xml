@@ -563,7 +563,6 @@
     <string name="news_filter_for_you">For you</string>
     <string name="news_connected_moved">%1$d of %2$d connected stocks moved</string>
     <string name="news_more">+%1$d more</string>
-    <string name="news_none_moved_yet">None moved more than usual yet</string>
     <string name="news_empty_title">No stories yet</string>
     <string name="news_empty_body">Stories that touch US stocks show up here as they come in.</string>
     <string name="news_filter_empty_title">No stories here this week</string>

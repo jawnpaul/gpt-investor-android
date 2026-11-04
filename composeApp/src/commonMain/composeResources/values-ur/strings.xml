@@ -562,7 +562,6 @@
     <string name="news_filter_for_you">آپ کے لیے</string>
     <string name="news_connected_moved">%2$d متعلقہ اسٹاکس میں سے %1$d میں تبدیلی آئی</string>
     <string name="news_more">+%1$d مزید</string>
-    <string name="news_none_moved_yet">ابھی تک کسی میں معمول سے زیادہ تبدیلی نہیں آئی</string>
     <string name="news_empty_title">ابھی کوئی خبر نہیں</string>
     <string name="news_empty_body">امریکی اسٹاکس سے متعلق خبریں آتے ہی یہاں نظر آئیں گی۔</string>
     <string name="news_filter_empty_title">اس ہفتے یہاں کوئی خبر نہیں</string>

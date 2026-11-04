@@ -562,7 +562,6 @@
     <string name="news_filter_for_you">Für Sie</string>
     <string name="news_connected_moved">%1$d von %2$d verknüpften Aktien bewegt</string>
     <string name="news_more">+%1$d weitere</string>
-    <string name="news_none_moved_yet">Noch keine ungewöhnliche Bewegung</string>
     <string name="news_empty_title">Noch keine Meldungen</string>
     <string name="news_empty_body">Meldungen zu US-Aktien erscheinen hier, sobald sie eintreffen.</string>
     <string name="news_filter_empty_title">Diese Woche keine Meldungen hier</string>

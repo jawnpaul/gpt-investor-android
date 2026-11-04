@@ -207,6 +207,9 @@ data class StoryState(
     val disclaimer: StoryDisclaimer?
         get() = story?.disclaimer()
 
+    val hasMoved: Boolean
+        get() = story?.moved?.isNotEmpty() == true
+
     val barelyMoved: BarelyMovedUi?
         get() = story?.barelyMovedUi()
 

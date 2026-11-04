@@ -576,7 +576,6 @@
     <string name="news_filter_for_you">Для вас</string>
     <string name="news_connected_moved">Ціна змінилася в %1$d з %2$d пов’язаних акцій</string>
     <string name="news_more">ще %1$d</string>
-    <string name="news_none_moved_yet">Жодна ще не змінилася більше, ніж зазвичай</string>
     <string name="news_empty_title">Новин поки немає</string>
     <string name="news_empty_body">Новини, що стосуються акцій США, з’являтимуться тут щойно надходитимуть.</string>
     <string name="news_filter_empty_title">Цього тижня тут немає новин</string>

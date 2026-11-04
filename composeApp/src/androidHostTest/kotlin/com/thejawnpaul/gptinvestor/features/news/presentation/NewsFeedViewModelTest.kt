@@ -133,7 +133,7 @@ class NewsFeedViewModelTest {
         val story = testStory(
             id = "s2",
             moved = listOf(testStock("DAL"), testStock("XOM"), testStock("CVX"), testStock("UPS"))
-        ).copy(watchedTickers = listOf("DAL"), movedCount = 5, connectedCount = 9)
+        ).copy(watchedTickers = listOf("DAL", "XOM", "CVX"), movedCount = 5, connectedCount = 9)
 
         val forYou = story.toCard(now = 1_000L, showWhy = true)
         val all = story.toCard(now = 1_000L, showWhy = false)
@@ -141,7 +141,7 @@ class NewsFeedViewModelTest {
         assertThat(forYou.movers.map { it.ticker }).containsExactly("DAL", "XOM", "CVX").inOrder()
         assertThat(forYou.moverNames).isEqualTo("DAL, XOM, CVX")
         assertThat(forYou.moreMovers).isEqualTo(2)
-        assertThat(forYou.watchedTicker).isEqualTo("DAL")
+        assertThat(forYou.watchedTickers).containsExactly("DAL", "XOM").inOrder()
         assertThat(forYou.topic?.label).isEqualTo("Energy")
         assertThat(all.hasWhyTags).isFalse()
     }

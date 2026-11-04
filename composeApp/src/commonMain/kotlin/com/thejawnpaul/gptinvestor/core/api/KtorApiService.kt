@@ -47,9 +47,12 @@ import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitLikeRespons
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitRemote
 import com.thejawnpaul.gptinvestor.features.toppick.data.remote.TopPickRemote
 import com.thejawnpaul.gptinvestor.features.trial.data.remote.model.StartTrialResponse
+import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistBatchResponse
 import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistRequest
 import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistResponse
+import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.RemoveWatchlistBatchResponse
 import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.RemoveWatchlistResponse
+import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.WatchlistBatchRequest
 import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.WatchlistResponse
 import com.thejawnpaul.gptinvestor.remote.TokenResponse
 import io.ktor.client.HttpClient
@@ -258,6 +261,16 @@ class KtorApiService(@Provided private val client: HttpClient) {
 
     suspend fun removeFromWatchlist(ticker: String): KtorResponse<RemoveWatchlistResponse> =
         client.delete("v1/watchlist/$ticker").toKtorResponse()
+
+    suspend fun addToWatchlistBatch(request: WatchlistBatchRequest): KtorResponse<AddWatchlistBatchResponse> =
+        client.post("v1/watchlist/batch") {
+            setBody(request)
+        }.toKtorResponse()
+
+    suspend fun removeFromWatchlistBatch(request: WatchlistBatchRequest): KtorResponse<RemoveWatchlistBatchResponse> =
+        client.post("v1/watchlist/batch/remove") {
+            setBody(request)
+        }.toKtorResponse()
 
     suspend fun getDailyDigest(): KtorResponse<DigestResponse> = client.get("v1/digest").toKtorResponse()
 

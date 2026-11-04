@@ -108,7 +108,7 @@ class StoryViewModelTest {
     @Test
     fun `should add nothing and offer premium when the watchlist is full`() = runTest(testDispatcher) {
         coEvery { watchlistRepository.addStocksToWatchlist(any()) } returns
-            Either.Left(WatchlistFailure.WatchlistFull(cap = 5))
+            Either.Left(WatchlistFailure.WatchlistFull(cap = 5, used = 3))
         val vm = viewModel()
         vm.state.test {
             advanceUntilIdle()
@@ -118,7 +118,14 @@ class StoryViewModelTest {
             assertThat(state.watch.isWatched("XOM")).isFalse()
             assertThat(state.watchAll?.enabled).isTrue()
         }
-        verify { premiumEventBus.requestPremium(PREMIUM_SOURCE_WATCHLIST_FULL, 5, "XOM") }
+        verify {
+            premiumEventBus.requestPremium(
+                source = PREMIUM_SOURCE_WATCHLIST_FULL,
+                watchlistCap = 5,
+                ticker = null,
+                watchlistUsed = 3
+            )
+        }
     }
 
     @Test

@@ -138,10 +138,11 @@ class WatchlistRepositoryImpl(
         409 -> {
             val body = errorBody?.let { runCatching { Json.parseToJsonElement(it).jsonObject }.getOrNull() }
             val cap = body?.get("cap")?.jsonPrimitive?.content?.toIntOrNull()
+            val used = body?.get("used")?.jsonPrimitive?.content?.toIntOrNull()
             if (body?.get("error")?.jsonPrimitive?.content == ERROR_WATCHLIST_FULL) {
                 logWatchlistFull(cap)
             }
-            Either.Left(WatchlistFailure.WatchlistFull(cap ?: 0))
+            Either.Left(WatchlistFailure.WatchlistFull(cap ?: 0, used))
         }
         400 -> {
             val message = errorBody?.let {

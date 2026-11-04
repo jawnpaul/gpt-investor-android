@@ -95,7 +95,12 @@ class StockWatchController(
                 }
                 .onFailure { failure ->
                     if (failure is WatchlistFailure.WatchlistFull) {
-                        premiumEventBus.requestPremium(PREMIUM_SOURCE_WATCHLIST_FULL, failure.cap, tickers.first())
+                        premiumEventBus.requestPremium(
+                            source = PREMIUM_SOURCE_WATCHLIST_FULL,
+                            watchlistCap = failure.cap,
+                            ticker = tickers.singleOrNull(),
+                            watchlistUsed = failure.used
+                        )
                     } else {
                         emit(StockWatchEvent.AddFailed)
                     }

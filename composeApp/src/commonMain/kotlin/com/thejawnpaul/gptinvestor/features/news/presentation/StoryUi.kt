@@ -111,9 +111,8 @@ fun Story.barelyMovedUi(): BarelyMovedUi? = barelyMoved.takeIf { it.isNotEmpty()
 fun watchAllUi(stocks: List<StoryStock>, watch: StockWatchState): WatchAllUi? {
     if (stocks.size < WATCH_ALL_MIN_STOCKS) return null
     val unwatched = watch.unwatched(stocks).size
-    val pending = stocks.count { watch.isPending(it.ticker) }
-    val enabled = pending == 0
-    val loading = pending > 1
+    val enabled = !watch.addingAll
+    val loading = watch.addingAll
     return when (unwatched) {
         0 -> WatchAllUi.AllWatched(stocks.size)
         stocks.size -> WatchAllUi.AddAll(stocks.size, enabled, loading)
@@ -142,7 +141,7 @@ fun StoryStock.chartUi(): StoryChartUi? {
         closes = history.map { it.close },
         storyIndex = index,
         storyDay = newsDayMonth(history[index].date),
-        rising = (price.changePercent ?: 0.0) >= 0.0
+        rising = history.last().close >= history.first().close
     )
 }
 

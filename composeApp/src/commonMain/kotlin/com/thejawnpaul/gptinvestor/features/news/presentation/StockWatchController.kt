@@ -15,10 +15,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class StockWatchState(val watched: Set<String> = emptySet(), val pending: Set<String> = emptySet()) {
+data class StockWatchState(
+    val watched: Set<String> = emptySet(),
+    val pending: Set<String> = emptySet(),
+    val addingAll: Boolean = false
+) {
     fun isWatched(ticker: String) = ticker in watched
 
     fun isPending(ticker: String) = ticker in pending
+
+    fun showsRowSpinner(ticker: String) = isPending(ticker) && !addingAll
 
     fun unwatched(stocks: List<StoryStock>): List<String> = stocks.map { it.ticker }.filterNot { it in watched }
 }
@@ -76,9 +82,9 @@ class StockWatchController(
     }
 
     private fun add(tickers: List<String>, all: Boolean) {
-        _state.update { it.copy(pending = it.pending + tickers) }
+        _state.update { it.copy(pending = it.pending + tickers, addingAll = it.addingAll || all) }
         addStocks(tickers) { result ->
-            _state.update { it.copy(pending = it.pending - tickers.toSet()) }
+            _state.update { it.copy(pending = it.pending - tickers.toSet(), addingAll = it.addingAll && !all) }
             result
                 .onSuccess { batch ->
                     _state.update { it.copy(watched = it.watched + batch.watched) }

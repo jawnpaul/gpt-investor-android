@@ -84,7 +84,7 @@ internal fun ConnectedStockList(
         stocks.forEachIndexed { index, stock ->
             if (index > 0) GiDivider()
             val watched = watch.isWatched(stock.ticker)
-            val pending = watch.isPending(stock.ticker)
+            val pending = watch.showsRowSpinner(stock.ticker)
             GiStockRow(
                 stock = tickerStock(
                     ticker = stock.ticker,

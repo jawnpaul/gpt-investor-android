@@ -144,9 +144,12 @@ fun StoryScreen(
             }
         },
         snackbarHost = {
-            if (state.sheet == null) {
-                GiToastHost(state = toastState, modifier = Modifier.padding(horizontal = GiSpace.gutter))
-            }
+            GiToastHost(
+                state = toastState,
+                modifier = Modifier
+                    .padding(horizontal = GiSpace.gutter)
+                    .graphicsLayer { alpha = if (state.screenToastVisible) 1f else 0f }
+            )
         },
         bottomBar = {
             if (story != null) {
@@ -250,44 +253,46 @@ private fun StoryBody(
                 ExplainerCard(explainer = explainer, onClick = { onEvent(StoryEvent.OpenExplainer) })
             }
         }
-        item(key = "moved") {
-            Column(verticalArrangement = Arrangement.spacedBy(GiSpace.titleToContent)) {
-                if (state.hasMoved) {
-                    GiSectionHeader(
-                        title = stringResource(Res.string.news_moved_since),
-                        trailingText = stringResource(
-                            Res.string.news_connected_count,
-                            story.movedCount,
-                            story.connectedCount
+        if (state.hasStocks) {
+            item(key = "moved") {
+                Column(verticalArrangement = Arrangement.spacedBy(GiSpace.titleToContent)) {
+                    if (state.hasMoved) {
+                        GiSectionHeader(
+                            title = stringResource(Res.string.news_moved_since),
+                            trailingText = stringResource(
+                                Res.string.news_connected_count,
+                                story.movedCount,
+                                story.connectedCount
+                            )
                         )
-                    )
-                    StoryStockList(stocks = story.moved, watch = state.watch, onEvent = onEvent)
-                }
-                state.barelyMoved?.let { barelyMoved ->
-                    BarelyMovedCard(
-                        ui = barelyMoved,
-                        expanded = state.showBarelyMoved,
-                        onToggle = { onEvent(StoryEvent.ToggleBarelyMoved) }
-                    )
-                    AnimatedVisibility(
-                        visible = state.showBarelyMoved,
-                        enter = if (reducedMotion) {
-                            EnterTransition.None
-                        } else {
-                            expandVertically(GiMotion.smooth(), expandFrom = Alignment.Top) +
-                                fadeIn(tween(GiMotion.BASE, easing = GiEasing.emphasised))
-                        },
-                        exit = if (reducedMotion) {
-                            ExitTransition.None
-                        } else {
-                            shrinkVertically(GiMotion.smooth(), shrinkTowards = Alignment.Top) +
-                                fadeOut(tween(GiMotion.FAST, easing = GiEasing.emphasised))
+                        StoryStockList(stocks = story.moved, watch = state.watch, onEvent = onEvent)
+                    }
+                    state.barelyMoved?.let { barelyMoved ->
+                        BarelyMovedCard(
+                            ui = barelyMoved,
+                            expanded = state.showBarelyMoved,
+                            onToggle = { onEvent(StoryEvent.ToggleBarelyMoved) }
+                        )
+                        AnimatedVisibility(
+                            visible = state.showBarelyMoved,
+                            enter = if (reducedMotion) {
+                                EnterTransition.None
+                            } else {
+                                expandVertically(GiMotion.smooth(), expandFrom = Alignment.Top) +
+                                    fadeIn(tween(GiMotion.BASE, easing = GiEasing.emphasised))
+                            },
+                            exit = if (reducedMotion) {
+                                ExitTransition.None
+                            } else {
+                                shrinkVertically(GiMotion.smooth(), shrinkTowards = Alignment.Top) +
+                                    fadeOut(tween(GiMotion.FAST, easing = GiEasing.emphasised))
+                            }
+                        ) {
+                            StoryStockList(stocks = story.barelyMoved, watch = state.watch, onEvent = onEvent)
                         }
-                    ) {
-                        StoryStockList(stocks = story.barelyMoved, watch = state.watch, onEvent = onEvent)
+                    state.watchAll?.let { WatchAllButton(ui = it, onClick = { onEvent(StoryEvent.WatchAll) }) }
                     }
                 }
-                state.watchAll?.let { WatchAllButton(ui = it, onClick = { onEvent(StoryEvent.WatchAll) }) }
             }
         }
         state.disclaimer?.let { disclaimer ->

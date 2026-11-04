@@ -222,6 +222,12 @@ data class StoryState(
     val hasMoved: Boolean
         get() = story?.moved?.isNotEmpty() == true
 
+    val hasStocks: Boolean
+        get() = story?.allStocks?.isNotEmpty() == true
+
+    val screenToastVisible: Boolean
+        get() = sheetTicker == null
+
     val barelyMoved: BarelyMovedUi?
         get() = story?.barelyMovedUi()
 

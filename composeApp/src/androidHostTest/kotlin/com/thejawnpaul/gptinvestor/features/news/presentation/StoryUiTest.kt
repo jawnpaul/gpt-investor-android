@@ -84,9 +84,15 @@ class StoryUiTest {
             .isEqualTo(WatchAllUi.AddRest(count = 1, enabled = true, loading = false))
         assertThat(watchAllUi(stocks, StockWatchState(watched = setOf("DAL", "XOM"))))
             .isEqualTo(WatchAllUi.AllWatched(count = 2))
-        assertThat(watchAllUi(stocks, StockWatchState(pending = setOf("XOM")))?.enabled).isFalse()
-        assertThat(watchAllUi(stocks, StockWatchState(pending = setOf("XOM")))?.loading).isFalse()
-        assertThat(watchAllUi(stocks, StockWatchState(pending = setOf("DAL", "XOM")))?.loading).isTrue()
+        val oneStar = StockWatchState(pending = setOf("XOM"))
+        val twoStars = StockWatchState(pending = setOf("DAL", "XOM"))
+        val addingAll = StockWatchState(pending = setOf("DAL", "XOM"), addingAll = true)
+        assertThat(watchAllUi(stocks, oneStar)?.enabled).isTrue()
+        assertThat(watchAllUi(stocks, twoStars)?.loading).isFalse()
+        assertThat(watchAllUi(stocks, addingAll)?.loading).isTrue()
+        assertThat(watchAllUi(stocks, addingAll)?.enabled).isFalse()
+        assertThat(addingAll.showsRowSpinner("XOM")).isFalse()
+        assertThat(oneStar.showsRowSpinner("XOM")).isTrue()
         assertThat(watchAllUi(stocks.take(1), StockWatchState())).isNull()
         assertThat(watchAllUi(emptyList(), StockWatchState())).isNull()
     }
@@ -145,9 +151,18 @@ class StoryUiTest {
     }
 
     @Test
-    fun `should colour the chart down when the stock fell since the story`() {
-        val fell = testStock("XOM").let { it.copy(price = it.price.copy(changePercent = -2.4)) }
+    fun `should colour the chart by the line it draws, not the move since the story`() {
+        val upSinceStory = testStock("XOM").let { it.copy(price = it.price.copy(changePercent = 0.4)) }
+        val falling = history.reversed()
 
-        assertThat(fell.copy(history = history, historyStoryIndex = 0).chartUi()?.rising).isFalse()
+        assertThat(upSinceStory.copy(history = falling, historyStoryIndex = 0).chartUi()?.rising).isFalse()
+    }
+
+    @Test
+    fun `should show a malformed chart date as it came`() {
+        val odd = listOf(PricePoint("2026-11", 10.0), PricePoint("", 11.0))
+
+        assertThat(testStock("DAL").copy(history = odd, historyStoryIndex = 0).chartUi()?.storyDay).isEqualTo("2026-11")
+        assertThat(testStock("DAL").copy(history = odd, historyStoryIndex = 1).chartUi()?.storyDay).isEqualTo("")
     }
 }

@@ -6,6 +6,8 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 private val DAY_NAMES = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+private const val ISO_DATE_LENGTH = 10
+
 private val MONTH_NAMES = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
 private fun Long.local(timeZone: TimeZone): LocalDateTime = Instant.fromEpochSeconds(this).toLocalDateTime(timeZone)
@@ -19,6 +21,7 @@ internal fun newsWeekday(epochSeconds: Long, timeZone: TimeZone = TimeZone.curre
     DAY_NAMES[epochSeconds.local(timeZone).dayOfWeek.ordinal]
 
 internal fun newsDayMonth(isoDate: String): String {
+    if (isoDate.length < ISO_DATE_LENGTH) return isoDate
     val month = isoDate.substring(5, 7).toIntOrNull() ?: return isoDate
     val day = isoDate.substring(8, 10).toIntOrNull() ?: return isoDate
     return "$day ${MONTH_NAMES.getOrElse(month - 1) { "" }}"

@@ -7,6 +7,7 @@ import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.features.company.data.local.model.PriceChange
 import com.thejawnpaul.gptinvestor.features.company.domain.model.Company
+import kotlin.coroutines.cancellation.CancellationException
 
 class CompanyPagingSource(
     private val apiService: KtorApiService,
@@ -65,6 +66,8 @@ class CompanyPagingSource(
         } else {
             LoadResult.Error(Exception("Failed to fetch companies: ${response.code}"))
         }
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         Logger.e(e.stackTraceToString())
         LoadResult.Error(e)

@@ -5,6 +5,7 @@ import androidx.paging.PagingState
 import co.touchlab.kermit.Logger
 import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.model.Tidbit
+import kotlin.coroutines.cancellation.CancellationException
 
 class TidbitPagingSource(private val apiService: KtorApiService, private val tidbitType: TidbitType) :
     PagingSource<Int, Tidbit>() {
@@ -62,6 +63,8 @@ class TidbitPagingSource(private val apiService: KtorApiService, private val tid
         } else {
             LoadResult.Error(Exception("Failed to fetch tidbits: ${response.code}"))
         }
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         Logger.e(e.stackTraceToString())
         LoadResult.Error(e)

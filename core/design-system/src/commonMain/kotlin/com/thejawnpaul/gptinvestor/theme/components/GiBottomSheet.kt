@@ -2,6 +2,7 @@ package com.thejawnpaul.gptinvestor.theme.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -53,6 +54,7 @@ fun GiBottomSheet(
     subtitleStyle: GiSheetSubtitle = GiSheetSubtitle.Beside,
     leading: (@Composable () -> Unit)? = null,
     headerAction: (@Composable () -> Unit)? = null,
+    toastState: GiToastState? = null,
     sheetState: SheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
         enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
@@ -75,25 +77,36 @@ fun GiBottomSheet(
         dragHandle = null,
         contentWindowInsets = { WindowInsets(0) }
     ) {
-        GiBottomSheetContent(
-            title = title,
-            closeContentDescription = closeContentDescription,
-            eyebrow = eyebrow,
-            subtitle = subtitle,
-            subtitleStyle = subtitleStyle,
-            leading = leading,
-            headerAction = headerAction,
-            onClose = {
-                scope.launch { sheetState.hide() }.invokeOnCompletion {
-                    if (!sheetState.isVisible) onDismissRequest()
-                }
-            },
-            modifier = Modifier
-                .heightIn(max = maxHeight)
-                .verticalScroll(rememberScrollState())
-                .windowInsetsPadding(WindowInsets.navigationBars),
-            content = content
-        )
+        Box {
+            GiBottomSheetContent(
+                title = title,
+                closeContentDescription = closeContentDescription,
+                eyebrow = eyebrow,
+                subtitle = subtitle,
+                subtitleStyle = subtitleStyle,
+                leading = leading,
+                headerAction = headerAction,
+                onClose = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) onDismissRequest()
+                    }
+                },
+                modifier = Modifier
+                    .heightIn(max = maxHeight)
+                    .verticalScroll(rememberScrollState())
+                    .windowInsetsPadding(WindowInsets.navigationBars),
+                content = content
+            )
+            if (toastState != null) {
+                GiToastHost(
+                    state = toastState,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .windowInsetsPadding(WindowInsets.navigationBars)
+                        .padding(horizontal = GiSpace.gutter, vertical = GiSpace.x4)
+                )
+            }
+        }
     }
 }
 

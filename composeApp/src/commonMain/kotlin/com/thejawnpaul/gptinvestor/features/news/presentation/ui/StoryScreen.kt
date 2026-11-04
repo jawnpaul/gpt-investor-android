@@ -143,7 +143,11 @@ fun StoryScreen(
                 }
             }
         },
-        snackbarHost = { GiToastHost(state = toastState, modifier = Modifier.padding(horizontal = GiSpace.gutter)) },
+        snackbarHost = {
+            if (state.sheet == null) {
+                GiToastHost(state = toastState, modifier = Modifier.padding(horizontal = GiSpace.gutter))
+            }
+        },
         bottomBar = {
             if (story != null) {
                 Box(
@@ -208,7 +212,7 @@ fun StoryScreen(
         }
     }
 
-    state.sheet?.let { StoryCompanySheet(sheet = it, onEvent = onEvent) }
+    state.sheet?.let { StoryCompanySheet(sheet = it, toastState = toastState, onEvent = onEvent) }
     state.sharePreview?.let { preview ->
         SharePreviewSheet(
             preview = preview,
@@ -408,7 +412,7 @@ private fun BarelyMovedCard(ui: BarelyMovedUi, expanded: Boolean, onToggle: () -
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun StoryCompanySheet(sheet: StockSheetUi, onEvent: (StoryEvent) -> Unit) {
+private fun StoryCompanySheet(sheet: StockSheetUi, toastState: GiToastState, onEvent: (StoryEvent) -> Unit) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
@@ -431,6 +435,7 @@ private fun StoryCompanySheet(sheet: StockSheetUi, onEvent: (StoryEvent) -> Unit
         },
         closeContentDescription = stringResource(Res.string.close),
         sheetState = sheetState,
+        toastState = toastState,
         leading = { GiLogoTile(initials = sheet.ticker.take(2), imageUrl = sheet.logoUrl) },
         headerAction = {
             WatchStar(

@@ -640,4 +640,12 @@
     <string name="news_more_error">Weitere Meldungen konnten nicht geladen werden.</string>
     <string name="news_sheet_subtitle_watched">%1$s · Auf Ihrer Watchlist</string>
     <string name="news_undo_failed">Rückgängig fehlgeschlagen</string>
+    <string name="news_share_title">Diese Meldung teilen</string>
+    <string name="news_chart_story">Meldung · %1$s</string>
+    <string name="news_chart_description">Tägliche Schlusskurse von %1$s der letzten %2$d Handelstage. Die Meldung erschien am %3$s.</string>
+    <plurals name="news_chart_title">
+        <item quantity="one">Letzter %1$d Handelstag</item>
+        <item quantity="other">Letzte %1$d Handelstage</item>
+    </plurals>
+    <string name="news_share_preview_description">Vorschau der Meldungskarte, die Sie teilen</string>
 </resources>

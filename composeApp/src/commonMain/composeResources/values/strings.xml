@@ -641,4 +641,12 @@
     <string name="news_more_error">We couldn’t load more stories.</string>
     <string name="news_sheet_subtitle_watched">%1$s · On your watchlist</string>
     <string name="news_undo_failed">Couldn’t undo the add</string>
+    <string name="news_share_title">Share this story</string>
+    <string name="news_chart_story">Story · %1$s</string>
+    <string name="news_chart_description">%1$s daily closing prices for the last %2$d trading days. The story came out on %3$s.</string>
+    <plurals name="news_chart_title">
+        <item quantity="one">Last %1$d trading day</item>
+        <item quantity="other">Last %1$d trading days</item>
+    </plurals>
+    <string name="news_share_preview_description">Preview of the story card you’ll share</string>
 </resources>

@@ -11,6 +11,7 @@ import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.formatPrice
 import kotlinx.datetime.TimeZone
 
 private const val LOGO_STACK_MAX = 3
+private const val CHART_MIN_POINTS = 2
 
 sealed interface StoryDisclaimer {
     data class SinceStoryTime(val time: String) : StoryDisclaimer
@@ -73,8 +74,15 @@ data class StockSheetUi(
     val pending: Boolean,
     val connection: String,
     val source: StorySource?,
-    val price: PriceTilesUi
+    val price: PriceTilesUi,
+    val chart: StoryChartUi?
 )
+
+data class StoryChartUi(val closes: List<Double>, val storyIndex: Int, val storyDay: String, val rising: Boolean) {
+    val days: Int get() = closes.size
+}
+
+data class SharePreviewUi(val imageUrl: String, val preparing: Boolean)
 
 data class ExplainerSectionUi(val heading: String, val paragraphs: List<String>)
 
@@ -116,8 +124,20 @@ fun StoryStock.sheetUi(story: Story, watch: StockWatchState, timeZone: TimeZone 
         pending = watch.isPending(ticker),
         connection = connection ?: "$reason: “${story.title}”",
         source = source,
-        price = price.tilesUi(timeZone)
+        price = price.tilesUi(timeZone),
+        chart = chartUi()
     )
+
+fun StoryStock.chartUi(): StoryChartUi? {
+    val index = historyStoryIndex ?: return null
+    if (history.size < CHART_MIN_POINTS || index !in history.indices) return null
+    return StoryChartUi(
+        closes = history.map { it.close },
+        storyIndex = index,
+        storyDay = newsDayMonth(history[index].date),
+        rising = (price.changePercent ?: 0.0) >= 0.0
+    )
+}
 
 fun StoryPrice.tilesUi(timeZone: TimeZone = TimeZone.currentSystemDefault()): PriceTilesUi {
     val closed = status == StoryPriceStatus.MARKET_CLOSED

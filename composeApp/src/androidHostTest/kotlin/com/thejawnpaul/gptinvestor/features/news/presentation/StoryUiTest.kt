@@ -2,6 +2,7 @@ package com.thejawnpaul.gptinvestor.features.news.presentation
 
 import com.google.common.truth.Truth.assertThat
 import com.thejawnpaul.gptinvestor.features.news.domain.model.ExplainerSection
+import com.thejawnpaul.gptinvestor.features.news.domain.model.PricePoint
 import com.thejawnpaul.gptinvestor.features.news.domain.model.StoryPriceBasis
 import com.thejawnpaul.gptinvestor.features.news.domain.model.StoryPriceStatus
 import kotlinx.datetime.TimeZone
@@ -113,5 +114,35 @@ class StoryUiTest {
         val ui = ExplainerSection(heading = "What happened", body = "One.\n\n  Two.  \n\n\n").toUi()
 
         assertThat(ui.paragraphs).containsExactly("One.", "Two.").inOrder()
+    }
+
+    private val history = listOf(
+        PricePoint("2026-10-20", 10.0),
+        PricePoint("2026-10-21", 11.0),
+        PricePoint("2026-10-22", 12.0)
+    )
+
+    @Test
+    fun `should mark the story day the backend gives on the chart`() {
+        val ui = testStock("DAL").copy(history = history, historyStoryIndex = 1).chartUi()
+
+        assertThat(ui?.storyIndex).isEqualTo(1)
+        assertThat(ui?.storyDay).isEqualTo("21 Oct")
+        assertThat(ui?.days).isEqualTo(3)
+        assertThat(ui?.rising).isTrue()
+    }
+
+    @Test
+    fun `should draw no chart without enough history or a valid story day`() {
+        assertThat(testStock("DAL").copy(history = history.take(1), historyStoryIndex = 0).chartUi()).isNull()
+        assertThat(testStock("DAL").copy(history = history, historyStoryIndex = null).chartUi()).isNull()
+        assertThat(testStock("DAL").copy(history = history, historyStoryIndex = 5).chartUi()).isNull()
+    }
+
+    @Test
+    fun `should colour the chart down when the stock fell since the story`() {
+        val fell = testStock("XOM").let { it.copy(price = it.price.copy(changePercent = -2.4)) }
+
+        assertThat(fell.copy(history = history, historyStoryIndex = 0).chartUi()?.rising).isFalse()
     }
 }

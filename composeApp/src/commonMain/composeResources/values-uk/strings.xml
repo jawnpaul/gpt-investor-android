@@ -662,4 +662,14 @@
     <string name="news_more_error">Не вдалося завантажити більше новин.</string>
     <string name="news_sheet_subtitle_watched">%1$s · У вашому списку спостереження</string>
     <string name="news_undo_failed">Не вдалося скасувати</string>
+    <string name="news_share_title">Поділитися цією новиною</string>
+    <string name="news_chart_story">Новина · %1$s</string>
+    <string name="news_chart_description">Щоденні ціни закриття %1$s за останні %2$d торгових днів. Новина вийшла %3$s.</string>
+    <plurals name="news_chart_title">
+        <item quantity="one">Останній %1$d торговий день</item>
+        <item quantity="few">Останні %1$d торгові дні</item>
+        <item quantity="many">Останні %1$d торгових днів</item>
+        <item quantity="other">Останні %1$d торгового дня</item>
+    </plurals>
+    <string name="news_share_preview_description">Попередній перегляд картки новини, якою ви поділитеся</string>
 </resources>

@@ -640,4 +640,12 @@
     <string name="news_more_error">مزید خبریں لوڈ نہیں ہو سکیں۔</string>
     <string name="news_sheet_subtitle_watched">%1$s · آپ کی واچ لسٹ میں</string>
     <string name="news_undo_failed">واپس نہیں ہو سکا</string>
+    <string name="news_share_title">یہ خبر شیئر کریں</string>
+    <string name="news_chart_story">خبر · %1$s</string>
+    <string name="news_chart_description">%1$s کی پچھلے %2$d ٹریڈنگ دنوں کی روزانہ بندش قیمتیں۔ خبر %3$s کو آئی۔</string>
+    <plurals name="news_chart_title">
+        <item quantity="one">پچھلا %1$d ٹریڈنگ دن</item>
+        <item quantity="other">پچھلے %1$d ٹریڈنگ دن</item>
+    </plurals>
+    <string name="news_share_preview_description">اس خبر کارڈ کا پیش منظر جو آپ شیئر کریں گے</string>
 </resources>

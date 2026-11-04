@@ -9,5 +9,6 @@ expect class PlatformActions {
     fun copyToClipboard(label: String, text: String)
     fun openUrl(url: String)
     fun shareText(text: String)
+    fun shareImage(png: ByteArray, text: String)
     fun openNotificationSettings()
 }

@@ -6,6 +6,7 @@ import com.thejawnpaul.gptinvestor.core.api.KtorResponse
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.news.data.remote.NewsTopicRemote
+import com.thejawnpaul.gptinvestor.features.news.data.remote.PricePointRemote
 import com.thejawnpaul.gptinvestor.features.news.data.remote.StoryPriceRemote
 import com.thejawnpaul.gptinvestor.features.news.data.remote.StoryRemote
 import com.thejawnpaul.gptinvestor.features.news.data.remote.StoryStockRemote
@@ -36,6 +37,8 @@ class NewsRepositoryImplTest {
         logoUrl = "http://logo/dal.png",
         reason = "Jet fuel is a big cost",
         onWatchlist = true,
+        history = listOf(PricePointRemote("2026-10-20", 55.0), PricePointRemote("2026-10-21", 56.63)),
+        historyStoryIndex = 1,
         price = StoryPriceRemote(
             basis = "story_time",
             atStory = 56.63,
@@ -78,6 +81,8 @@ class NewsRepositoryImplTest {
         assertThat(mapped.moved.single().logoUrl).isEqualTo("https://logo/dal.png")
         assertThat(mapped.moved.single().price.status).isEqualTo(StoryPriceStatus.LIVE)
         assertThat(mapped.barelyMoved.single().ticker).isEqualTo("KO")
+        assertThat(mapped.moved.single().history.map { it.close }).containsExactly(55.0, 56.63).inOrder()
+        assertThat(mapped.moved.single().historyStoryIndex).isEqualTo(1)
     }
 
     @Test

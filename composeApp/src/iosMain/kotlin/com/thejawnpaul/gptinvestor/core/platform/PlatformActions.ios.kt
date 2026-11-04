@@ -47,6 +47,10 @@ actual class PlatformActions(private val toastMessenger: ToastMessenger) {
         )
     }
 
+    actual fun shareImage(png: ByteArray, text: String) {
+        shareText(text)
+    }
+
     actual fun openNotificationSettings() {
         val url = NSURL.URLWithString(UIApplicationOpenSettingsURLString) ?: return
         UIApplication.sharedApplication.openURL(url, options = emptyMap<Any?, Any>(), completionHandler = null)

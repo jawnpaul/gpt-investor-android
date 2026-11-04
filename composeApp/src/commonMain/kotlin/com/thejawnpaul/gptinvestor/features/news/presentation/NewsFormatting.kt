@@ -18,6 +18,12 @@ internal fun newsClock(epochSeconds: Long, timeZone: TimeZone = TimeZone.current
 internal fun newsWeekday(epochSeconds: Long, timeZone: TimeZone = TimeZone.currentSystemDefault()): String =
     DAY_NAMES[epochSeconds.local(timeZone).dayOfWeek.ordinal]
 
+internal fun newsDayMonth(isoDate: String): String {
+    val month = isoDate.substring(5, 7).toIntOrNull() ?: return isoDate
+    val day = isoDate.substring(8, 10).toIntOrNull() ?: return isoDate
+    return "$day ${MONTH_NAMES.getOrElse(month - 1) { "" }}"
+}
+
 internal fun newsDayMonth(epochSeconds: Long, timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
     val local = epochSeconds.local(timeZone)
     return "${local.day} ${MONTH_NAMES[local.month.ordinal]}"

@@ -205,4 +205,59 @@ class StoryViewModelTest {
             assertThat(awaitItem()).isEqualTo(StoryAction.Watch(StockWatchEvent.UndoFailed))
         }
     }
+
+    @Test
+    fun `should share text straight away when the backend has no share image`() = runTest(testDispatcher) {
+        val vm = viewModel()
+        vm.actions.test {
+            vm.state.test {
+                advanceUntilIdle()
+                vm.handleEvent(StoryEvent.Share)
+                advanceUntilIdle()
+                assertThat(expectMostRecentItem().sharePreview).isNull()
+            }
+            assertThat(awaitItem()).isEqualTo(StoryAction.ShareText(story))
+        }
+    }
+
+    @Test
+    fun `should preview then share the downloaded image`() = runTest(testDispatcher) {
+        val withImage = story.copy(shareImageUrl = "https://cdn/s1.png")
+        val png = byteArrayOf(1, 2, 3)
+        coEvery { repository.getStory("s1") } returns Either.Right(withImage)
+        coEvery { repository.getShareImage("https://cdn/s1.png") } returns Either.Right(png)
+        val vm = viewModel()
+        vm.actions.test {
+            vm.state.test {
+                advanceUntilIdle()
+                vm.handleEvent(StoryEvent.Share)
+                advanceUntilIdle()
+                assertThat(expectMostRecentItem().sharePreview).isEqualTo(SharePreviewUi("https://cdn/s1.png", false))
+                vm.handleEvent(StoryEvent.ConfirmShare)
+                advanceUntilIdle()
+                assertThat(expectMostRecentItem().sharePreview).isNull()
+            }
+            val action = awaitItem() as StoryAction.ShareImage
+            assertThat(action.png).isEqualTo(png)
+        }
+    }
+
+    @Test
+    fun `should fall back to text when the share image fails to download`() = runTest(testDispatcher) {
+        val withImage = story.copy(shareImageUrl = "https://cdn/s1.png")
+        coEvery { repository.getStory("s1") } returns Either.Right(withImage)
+        coEvery { repository.getShareImage(any()) } returns Either.Left(Failure.NetworkConnection)
+        val vm = viewModel()
+        vm.actions.test {
+            vm.state.test {
+                advanceUntilIdle()
+                vm.handleEvent(StoryEvent.Share)
+                advanceUntilIdle()
+                vm.handleEvent(StoryEvent.ConfirmShare)
+                advanceUntilIdle()
+                cancelAndIgnoreRemainingEvents()
+            }
+            assertThat(awaitItem()).isEqualTo(StoryAction.ShareText(withImage))
+        }
+    }
 }

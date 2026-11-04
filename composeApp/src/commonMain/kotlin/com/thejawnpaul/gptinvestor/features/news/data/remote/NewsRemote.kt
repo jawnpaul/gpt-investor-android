@@ -6,6 +6,7 @@ import com.thejawnpaul.gptinvestor.features.news.domain.model.ExplainerRef
 import com.thejawnpaul.gptinvestor.features.news.domain.model.ExplainerSection
 import com.thejawnpaul.gptinvestor.features.news.domain.model.NewsFeedMeta
 import com.thejawnpaul.gptinvestor.features.news.domain.model.NewsTopic
+import com.thejawnpaul.gptinvestor.features.news.domain.model.PricePoint
 import com.thejawnpaul.gptinvestor.features.news.domain.model.Story
 import com.thejawnpaul.gptinvestor.features.news.domain.model.StoryPrice
 import com.thejawnpaul.gptinvestor.features.news.domain.model.StoryPriceBasis
@@ -47,7 +48,8 @@ data class StoryRemote(
     @SerialName("moves_basis") val movesBasis: String? = null,
     @SerialName("moved") val moved: List<StoryStockRemote> = emptyList(),
     @SerialName("barely_moved") val barelyMoved: List<StoryStockRemote> = emptyList(),
-    @SerialName("explainer") val explainer: ExplainerRefRemote? = null
+    @SerialName("explainer") val explainer: ExplainerRefRemote? = null,
+    @SerialName("share_image_url") val shareImageUrl: String? = null
 )
 
 @Serializable
@@ -60,8 +62,13 @@ data class StoryStockRemote(
     @SerialName("connection") val connection: String? = null,
     @SerialName("source") val source: StorySourceRemote? = null,
     @SerialName("on_watchlist") val onWatchlist: Boolean = false,
-    @SerialName("price") val price: StoryPriceRemote = StoryPriceRemote()
+    @SerialName("price") val price: StoryPriceRemote = StoryPriceRemote(),
+    @SerialName("history") val history: List<PricePointRemote> = emptyList(),
+    @SerialName("history_story_index") val historyStoryIndex: Int? = null
 )
+
+@Serializable
+data class PricePointRemote(@SerialName("date") val date: String, @SerialName("close") val close: Double)
 
 @Serializable
 data class StoryPriceRemote(
@@ -129,7 +136,8 @@ fun StoryRemote.toDomain() = Story(
     movesBasis = StoryPriceBasis.of(movesBasis),
     moved = moved.map { it.toDomain() },
     barelyMoved = barelyMoved.map { it.toDomain() },
-    explainer = explainer?.let { ExplainerRef(id = it.id, title = it.title, readMinutes = it.readMinutes) }
+    explainer = explainer?.let { ExplainerRef(id = it.id, title = it.title, readMinutes = it.readMinutes) },
+    shareImageUrl = shareImageUrl?.takeIf { it.isNotBlank() }?.toHttpsUrl()
 )
 
 fun StoryStockRemote.toDomain() = StoryStock(
@@ -141,6 +149,8 @@ fun StoryStockRemote.toDomain() = StoryStock(
     connection = connection?.takeIf { it.isNotBlank() },
     source = source?.toDomain(),
     isOnWatchlist = onWatchlist,
+    history = history.map { PricePoint(date = it.date, close = it.close) },
+    historyStoryIndex = historyStoryIndex,
     price = StoryPrice(
         basis = StoryPriceBasis.of(price.basis),
         atStory = price.atStory,

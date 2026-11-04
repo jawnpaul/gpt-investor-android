@@ -209,6 +209,13 @@ fun StoryScreen(
     }
 
     state.sheet?.let { StoryCompanySheet(sheet = it, onEvent = onEvent) }
+    state.sharePreview?.let { preview ->
+        SharePreviewSheet(
+            preview = preview,
+            onShare = { onEvent(StoryEvent.ConfirmShare) },
+            onDismiss = { onEvent(StoryEvent.CloseShare) }
+        )
+    }
 }
 
 @Composable
@@ -441,6 +448,7 @@ private fun StoryCompanySheet(sheet: StockSheetUi, onEvent: (StoryEvent) -> Unit
             }
             sheet.source?.let { source -> SourceCard(source = source, onOpen = { onEvent(StoryEvent.OpenSource(it)) }) }
             StoryPriceTiles(ui = sheet.price)
+            sheet.chart?.let { StoryPriceChart(ui = it, stockName = sheet.name, modifier = Modifier.fillMaxWidth()) }
             GiButton(
                 text = stringResource(Res.string.news_sheet_view_company, sheet.name),
                 onClick = { hideThen(StoryEvent.ViewCompany(sheet.ticker)) },

@@ -95,4 +95,21 @@ class NewsRepositoryImpl(
             Either.Left(e.toNewsFailure())
         }
     }
+
+    override suspend fun getShareImage(url: String): Either<Failure, ByteArray> = withContext(ioDispatcher) {
+        try {
+            val response = apiService.getShareImage(url)
+            val body = response.body
+            if (response.isSuccessful && body != null && body.isNotEmpty()) {
+                Either.Right(body)
+            } else {
+                Either.Left(Failure.ServerError)
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Logger.e(e.stackTraceToString())
+            Either.Left(e.toNewsFailure())
+        }
+    }
 }

@@ -124,9 +124,11 @@ class StoryViewModel(
             StoryEvent.ReadFullStory -> story?.let { emit(StoryAction.OpenUrl(it.link)) }
             is StoryEvent.OpenSource -> emit(StoryAction.OpenUrl(event.url))
             StoryEvent.Share -> story?.let {
-                analyticsLogger.logEvent("story-shared", mapOf("story_id" to it.id))
-                emit(StoryAction.Share(it))
+                if (it.shareImageUrl == null) shareText(it) else _state.update { s -> s.copy(sharePreviewOpen = true) }
             }
+
+            StoryEvent.CloseShare -> _state.update { it.copy(sharePreviewOpen = false) }
+            StoryEvent.ConfirmShare -> confirmShare(story)
         }
     }
 
@@ -134,6 +136,29 @@ class StoryViewModel(
         hasLoaded = true
         load()
         viewModelScope.launch { watchlistRepository.changes.collect { load() } }
+    }
+
+    private fun confirmShare(story: Story?) {
+        val url = story?.shareImageUrl ?: return
+        if (_state.value.preparingShare) return
+        _state.update { it.copy(preparingShare = true) }
+        viewModelScope.launch {
+            newsRepository.getShareImage(url)
+                .onSuccess { png ->
+                    analyticsLogger.logEvent("story-shared", mapOf("story_id" to story.id, "format" to "image"))
+                    _state.update { it.copy(preparingShare = false, sharePreviewOpen = false) }
+                    emit(StoryAction.ShareImage(png = png, story = story))
+                }
+                .onFailure {
+                    _state.update { it.copy(preparingShare = false, sharePreviewOpen = false) }
+                    shareText(story)
+                }
+        }
+    }
+
+    private fun shareText(story: Story) {
+        analyticsLogger.logEvent("story-shared", mapOf("story_id" to story.id, "format" to "text"))
+        emit(StoryAction.ShareText(story))
     }
 
     private fun load() {
@@ -174,6 +199,8 @@ data class StoryState(
     val unavailable: Boolean = false,
     val showBarelyMoved: Boolean = false,
     val sheetTicker: String? = null,
+    val sharePreviewOpen: Boolean = false,
+    val preparingShare: Boolean = false,
     val isGuestSession: Boolean = false,
     val watch: StockWatchState = StockWatchState()
 ) {
@@ -193,6 +220,9 @@ data class StoryState(
 
     val watchAll: WatchAllUi?
         get() = story?.let { watchAllUi(it.allStocks, watch) }
+
+    val sharePreview: SharePreviewUi?
+        get() = story?.shareImageUrl?.takeIf { sharePreviewOpen }?.let { SharePreviewUi(it, preparingShare) }
 
     val sheet: StockSheetUi?
         get() {
@@ -225,6 +255,8 @@ sealed interface StoryEvent {
     data object ReadFullStory : StoryEvent
     data class OpenSource(val url: String) : StoryEvent
     data object Share : StoryEvent
+    data object CloseShare : StoryEvent
+    data object ConfirmShare : StoryEvent
 }
 
 sealed interface StoryAction {
@@ -233,6 +265,7 @@ sealed interface StoryAction {
     data class OpenChat(val input: String, val title: String) : StoryAction
     data class OpenExplainer(val storyId: String) : StoryAction
     data class OpenUrl(val url: String) : StoryAction
-    data class Share(val story: Story) : StoryAction
+    class ShareImage(val png: ByteArray, val story: Story) : StoryAction
+    data class ShareText(val story: Story) : StoryAction
     data class Watch(val event: StockWatchEvent) : StoryAction
 }

@@ -19,7 +19,8 @@ data class Story(
     val movesBasis: StoryPriceBasis,
     val moved: List<StoryStock>,
     val barelyMoved: List<StoryStock>,
-    val explainer: ExplainerRef?
+    val explainer: ExplainerRef?,
+    val shareImageUrl: String? = null
 )
 
 data class StoryStock(
@@ -31,8 +32,12 @@ data class StoryStock(
     val connection: String?,
     val source: StorySource?,
     val isOnWatchlist: Boolean,
-    val price: StoryPrice
+    val price: StoryPrice,
+    val history: List<PricePoint> = emptyList(),
+    val historyStoryIndex: Int? = null
 )
+
+data class PricePoint(val date: String, val close: Double)
 
 data class StoryPrice(
     val basis: StoryPriceBasis,

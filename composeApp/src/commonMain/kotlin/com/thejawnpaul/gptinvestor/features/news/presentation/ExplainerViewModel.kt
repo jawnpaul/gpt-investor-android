@@ -16,6 +16,7 @@ import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.usecases.AddStocksToWatchlistUseCase
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.usecases.RemoveStocksFromWatchlistUseCase
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -61,6 +62,7 @@ class ExplainerViewModel(
     )
 
     private var hasLoaded = false
+    private var loadJob: Job? = null
 
     val state: StateFlow<ExplainerState> = combine(_state, watch.state, appPreferences.isGuestLoggedIn) {
             state,
@@ -126,7 +128,8 @@ class ExplainerViewModel(
 
     private fun load() {
         _state.update { it.copy(loading = it.explainer == null, error = false, unavailable = false) }
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             newsRepository.getExplainer(storyId)
                 .onSuccess { explainer ->
                     watch.sync(explainer.stocks)

@@ -23,12 +23,14 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -103,6 +105,28 @@ class StoryViewModelTest {
             assertThat(awaitItem()).isEqualTo(StoryAction.Watch(StockWatchEvent.AddedAll(listOf("XOM", "CVX"))))
         }
         coVerify(exactly = 1) { watchlistRepository.addStocksToWatchlist(any()) }
+    }
+
+    @Test
+    fun `should keep the newest reload when an older one answers last`() = runTest(testDispatcher) {
+        val stale =
+            testStory(id = "s1", moved = listOf(testStock("DAL", watched = true), testStock("XOM", watched = true)))
+        val fresh = testStory(id = "s1", moved = listOf(testStock("DAL", watched = true), testStock("XOM")))
+        val replies = ArrayDeque(listOf(0L to story, 1_000L to stale, 10L to fresh))
+        coEvery { repository.getStory("s1") } coAnswers {
+            val (wait, reply) = replies.removeFirst()
+            delay(wait)
+            Either.Right(reply)
+        }
+        val vm = viewModel()
+        vm.state.test {
+            advanceUntilIdle()
+            watchlistChanges.emit(Unit)
+            runCurrent()
+            watchlistChanges.emit(Unit)
+            advanceUntilIdle()
+            assertThat(expectMostRecentItem().watch.isWatched("XOM")).isFalse()
+        }
     }
 
     @Test

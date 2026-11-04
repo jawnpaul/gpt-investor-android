@@ -16,6 +16,7 @@ import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.usecases.AddStocksToWatchlistUseCase
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.usecases.RemoveStocksFromWatchlistUseCase
 import kotlin.time.Clock
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -59,6 +60,7 @@ class StoryViewModel(
 
     private val _state = MutableStateFlow(StoryState())
     private var hasLoaded = false
+    private var loadJob: Job? = null
 
     val state: StateFlow<StoryState> = combine(_state, watch.state, appPreferences.isGuestLoggedIn) {
             state,
@@ -163,7 +165,8 @@ class StoryViewModel(
 
     private fun load() {
         _state.update { it.copy(loading = it.story == null, error = false, unavailable = false) }
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             newsRepository.getStory(storyId)
                 .onSuccess { story ->
                     watch.sync(story.allStocks)

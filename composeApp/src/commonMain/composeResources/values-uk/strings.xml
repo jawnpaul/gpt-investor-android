@@ -576,7 +576,7 @@
     <string name="news_filter_for_you">Для вас</string>
     <string name="news_connected_moved">Ціна змінилася в %1$d з %2$d пов’язаних акцій</string>
     <string name="news_more">ще %1$d</string>
-    <string name="news_none_moved_yet">Жодна ще не змінилася на 1% або більше</string>
+    <string name="news_none_moved_yet">Жодна ще не змінилася більше, ніж зазвичай</string>
     <string name="news_empty_title">Новин поки немає</string>
     <string name="news_empty_body">Новини, що стосуються акцій США, з’являтимуться тут щойно надходитимуть.</string>
     <string name="news_filter_empty_title">Цього тижня тут немає новин</string>
@@ -586,8 +586,8 @@
     <string name="news_read_full_story">Читати повністю</string>
     <string name="news_moved_since">Зміна після новини</string>
     <string name="news_connected_count">%1$d з %2$d пов’язаних</string>
-    <string name="news_barely_moved">Майже не змінилися: %1$d</string>
-    <string name="news_disclaimer">Зміни від останнього закриття перед новиною. Інші новини також можуть впливати на ціни. Лише для інформації. Це не фінансова порада. Проводьте власне дослідження.</string>
+    <string name="news_barely_moved">У межах звичайного дня: %1$d</string>
+    <string name="news_disclaimer">Зміни від останнього закриття перед новиною. Акція вважається такою, що змінилася, якщо зміна більш ніж удвічі перевищує її звичайну денну зміну. Інші новини також можуть впливати на ціни. Лише для інформації. Це не фінансова порада. Проводьте власне дослідження.</string>
     <string name="news_ask_about_story">Запитати про цю новину</string>
     <string name="news_share_story">Поділитися новиною</string>
     <string name="news_story_unavailable_title">Ця новина недоступна</string>
@@ -607,7 +607,7 @@
     <string name="news_big_move">Значна зміна. Інші новини також можуть впливати на ціни.</string>
     <string name="news_cold_start_title">Налаштуйте цю стрічку під себе</string>
     <string name="news_cold_start_body">Додайте акції до списку спостереження, і їхні новини з’являтимуться тут. А поки що — те, що зараз рухає ринок.</string>
-    <string name="news_disclaimer_story_time">Зміни з %1$s, коли вийшла новина. Інші новини також можуть впливати на ціни. Лише для інформації. Це не фінансова порада. Проводьте власне дослідження.</string>
+    <string name="news_disclaimer_story_time">Зміни з %1$s, коли вийшла новина. Акція вважається такою, що змінилася, якщо зміна більш ніж удвічі перевищує її звичайну денну зміну. Інші новини також можуть впливати на ціни. Лише для інформації. Це не фінансова порада. Проводьте власне дослідження.</string>
     <string name="news_explainer_byline">%1$s · %2$d хв читання · Оновлено %3$s</string>
     <string name="news_explainer_disclaimer">Пояснення розповідають, що сталося і чому це важливо. Вони не радять купувати чи продавати. Лише для інформації. Це не фінансова порада. Проводьте власне дослідження.</string>
     <string name="news_explainer_error_title">Не вдалося завантажити пояснення</string>

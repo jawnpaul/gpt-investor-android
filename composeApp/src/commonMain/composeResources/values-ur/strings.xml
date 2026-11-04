@@ -562,7 +562,7 @@
     <string name="news_filter_for_you">آپ کے لیے</string>
     <string name="news_connected_moved">%2$d متعلقہ اسٹاکس میں سے %1$d میں تبدیلی آئی</string>
     <string name="news_more">+%1$d مزید</string>
-    <string name="news_none_moved_yet">ابھی تک کسی میں 1% یا زیادہ تبدیلی نہیں آئی</string>
+    <string name="news_none_moved_yet">ابھی تک کسی میں معمول سے زیادہ تبدیلی نہیں آئی</string>
     <string name="news_empty_title">ابھی کوئی خبر نہیں</string>
     <string name="news_empty_body">امریکی اسٹاکس سے متعلق خبریں آتے ہی یہاں نظر آئیں گی۔</string>
     <string name="news_filter_empty_title">اس ہفتے یہاں کوئی خبر نہیں</string>
@@ -572,8 +572,8 @@
     <string name="news_read_full_story">پوری خبر پڑھیں</string>
     <string name="news_moved_since">خبر کے بعد سے تبدیلی</string>
     <string name="news_connected_count">%2$d میں سے %1$d متعلقہ</string>
-    <string name="news_barely_moved">%1$d میں معمولی تبدیلی</string>
-    <string name="news_disclaimer">خبر سے پہلے کی آخری بندش قیمت سے تبدیلی۔ دوسری خبریں بھی قیمتوں پر اثر ڈال سکتی ہیں۔ صرف معلومات کے لیے۔ یہ مالی مشورہ نہیں ہے۔ خود تحقیق کریں۔</string>
+    <string name="news_barely_moved">%1$d میں معمول کے مطابق تبدیلی</string>
+    <string name="news_disclaimer">خبر سے پہلے کی آخری بندش قیمت سے تبدیلی۔ کسی اسٹاک کو تب بدلا ہوا مانا جاتا ہے جب اس کی تبدیلی اس کی عام روزانہ تبدیلی سے دگنی سے زیادہ ہو۔ دوسری خبریں بھی قیمتوں پر اثر ڈال سکتی ہیں۔ صرف معلومات کے لیے۔ یہ مالی مشورہ نہیں ہے۔ خود تحقیق کریں۔</string>
     <string name="news_ask_about_story">اس خبر کے بارے میں پوچھیں</string>
     <string name="news_share_story">خبر شیئر کریں</string>
     <string name="news_story_unavailable_title">یہ خبر دستیاب نہیں</string>
@@ -593,7 +593,7 @@
     <string name="news_big_move">بڑی تبدیلی۔ دوسری خبریں بھی قیمتوں پر اثر ڈال سکتی ہیں۔</string>
     <string name="news_cold_start_title">اس فیڈ کو اپنا بنائیں</string>
     <string name="news_cold_start_body">اپنی واچ لسٹ میں اسٹاکس شامل کریں اور ان کی خبریں یہاں نظر آئیں گی۔ تب تک، دیکھیں مارکیٹ میں کیا چل رہا ہے۔</string>
-    <string name="news_disclaimer_story_time">%1$s سے تبدیلی، جب خبر آئی۔ دوسری خبریں بھی قیمتوں پر اثر ڈال سکتی ہیں۔ صرف معلومات کے لیے۔ یہ مالی مشورہ نہیں ہے۔ خود تحقیق کریں۔</string>
+    <string name="news_disclaimer_story_time">%1$s سے تبدیلی، جب خبر آئی۔ کسی اسٹاک کو تب بدلا ہوا مانا جاتا ہے جب اس کی تبدیلی اس کی عام روزانہ تبدیلی سے دگنی سے زیادہ ہو۔ دوسری خبریں بھی قیمتوں پر اثر ڈال سکتی ہیں۔ صرف معلومات کے لیے۔ یہ مالی مشورہ نہیں ہے۔ خود تحقیق کریں۔</string>
     <string name="news_explainer_byline">%1$s · %2$d منٹ کا مطالعہ · %3$s کو اپ ڈیٹ ہوا</string>
     <string name="news_explainer_disclaimer">وضاحتیں بتاتی ہیں کہ کیا ہوا اور یہ کیوں اہم ہے۔ یہ خریدنے یا بیچنے کا مشورہ نہیں دیتیں۔ صرف معلومات کے لیے۔ یہ مالی مشورہ نہیں ہے۔ خود تحقیق کریں۔</string>
     <string name="news_explainer_error_title">وضاحت لوڈ نہیں ہو سکی</string>

@@ -562,7 +562,7 @@
     <string name="news_filter_for_you">Für Sie</string>
     <string name="news_connected_moved">%1$d von %2$d verknüpften Aktien bewegt</string>
     <string name="news_more">+%1$d weitere</string>
-    <string name="news_none_moved_yet">Noch keine Bewegung von 1 % oder mehr</string>
+    <string name="news_none_moved_yet">Noch keine ungewöhnliche Bewegung</string>
     <string name="news_empty_title">Noch keine Meldungen</string>
     <string name="news_empty_body">Meldungen zu US-Aktien erscheinen hier, sobald sie eintreffen.</string>
     <string name="news_filter_empty_title">Diese Woche keine Meldungen hier</string>
@@ -572,8 +572,8 @@
     <string name="news_read_full_story">Ganze Meldung lesen</string>
     <string name="news_moved_since">Bewegung seit der Meldung</string>
     <string name="news_connected_count">%1$d von %2$d verknüpft</string>
-    <string name="news_barely_moved">%1$d kaum bewegt</string>
-    <string name="news_disclaimer">Kursänderungen seit dem letzten Schlusskurs vor der Meldung. Auch andere Nachrichten können Kurse bewegen. Nur zur Information. Keine Finanzberatung. Recherchieren Sie selbst.</string>
+    <string name="news_barely_moved">%1$d im üblichen Rahmen</string>
+    <string name="news_disclaimer">Kursänderungen seit dem letzten Schlusskurs vor der Meldung. Eine Aktie gilt als bewegt, wenn sie sich mehr als doppelt so stark bewegt wie an einem üblichen Tag. Auch andere Nachrichten können Kurse bewegen. Nur zur Information. Keine Finanzberatung. Recherchieren Sie selbst.</string>
     <string name="news_ask_about_story">Fragen zu dieser Meldung</string>
     <string name="news_share_story">Meldung teilen</string>
     <string name="news_story_unavailable_title">Diese Meldung ist nicht verfügbar</string>
@@ -593,7 +593,7 @@
     <string name="news_big_move">Eine große Bewegung. Auch andere Nachrichten können Kurse bewegen.</string>
     <string name="news_cold_start_title">Gestalten Sie diesen Feed selbst</string>
     <string name="news_cold_start_body">Fügen Sie Aktien zu Ihrer Watchlist hinzu, dann erscheinen ihre Meldungen hier. Bis dahin sehen Sie, was den Markt bewegt.</string>
-    <string name="news_disclaimer_story_time">Kursänderungen seit %1$s, als die Meldung erschien. Auch andere Nachrichten können Kurse bewegen. Nur zur Information. Keine Finanzberatung. Recherchieren Sie selbst.</string>
+    <string name="news_disclaimer_story_time">Kursänderungen seit %1$s, als die Meldung erschien. Eine Aktie gilt als bewegt, wenn sie sich mehr als doppelt so stark bewegt wie an einem üblichen Tag. Auch andere Nachrichten können Kurse bewegen. Nur zur Information. Keine Finanzberatung. Recherchieren Sie selbst.</string>
     <string name="news_explainer_byline">%1$s · %2$d Min. Lesezeit · Aktualisiert %3$s</string>
     <string name="news_explainer_disclaimer">Erklärungen zeigen, was passiert ist und warum es wichtig ist. Sie sagen Ihnen nicht, ob Sie kaufen oder verkaufen sollen. Nur zur Information. Keine Finanzberatung. Recherchieren Sie selbst.</string>
     <string name="news_explainer_error_title">Die Erklärung konnte nicht geladen werden</string>

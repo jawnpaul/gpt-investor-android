@@ -563,7 +563,7 @@
     <string name="news_filter_for_you">For you</string>
     <string name="news_connected_moved">%1$d of %2$d connected stocks moved</string>
     <string name="news_more">+%1$d more</string>
-    <string name="news_none_moved_yet">None moved 1% or more yet</string>
+    <string name="news_none_moved_yet">None moved more than usual yet</string>
     <string name="news_empty_title">No stories yet</string>
     <string name="news_empty_body">Stories that touch US stocks show up here as they come in.</string>
     <string name="news_filter_empty_title">No stories here this week</string>
@@ -573,8 +573,8 @@
     <string name="news_read_full_story">Read the full story</string>
     <string name="news_moved_since">Moved since the news</string>
     <string name="news_connected_count">%1$d of %2$d connected</string>
-    <string name="news_barely_moved">%1$d barely moved</string>
-    <string name="news_disclaimer">Moves since the last close before the story. Other news can move prices too. For information only. Not financial advice. Do your own research.</string>
+    <string name="news_barely_moved">%1$d within a normal day</string>
+    <string name="news_disclaimer">Moves since the last close before the story. A stock counts as moved when its move is more than twice its usual daily move. Other news can move prices too. For information only. Not financial advice. Do your own research.</string>
     <string name="news_ask_about_story">Ask about this story</string>
     <string name="news_share_story">Share story</string>
     <string name="news_story_unavailable_title">This story isn’t available</string>
@@ -594,7 +594,7 @@
     <string name="news_big_move">A big move. Other news can move prices too.</string>
     <string name="news_cold_start_title">Make this feed yours</string>
     <string name="news_cold_start_body">Add stocks to your watchlist and their news shows up here. Until then, here’s what’s moving the market.</string>
-    <string name="news_disclaimer_story_time">Moves since %1$s, when the story came out. Other news can move prices too. For information only. Not financial advice. Do your own research.</string>
+    <string name="news_disclaimer_story_time">Moves since %1$s, when the story came out. A stock counts as moved when its move is more than twice its usual daily move. Other news can move prices too. For information only. Not financial advice. Do your own research.</string>
     <string name="news_explainer_byline">%1$s · %2$d min read · Updated %3$s</string>
     <string name="news_explainer_disclaimer">Explainers say what happened and why it matters. They don’t tell you to buy or sell. For information only. Not financial advice. Do your own research.</string>
     <string name="news_explainer_error_title">Couldn’t load the explainer</string>

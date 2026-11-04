@@ -77,12 +77,17 @@ class StoryUiTest {
     fun `should word add all by how many are already watched`() {
         val stocks = listOf(testStock("DAL"), testStock("XOM"))
 
-        assertThat(watchAllUi(stocks, StockWatchState())).isEqualTo(WatchAllUi.AddAll(count = 2, enabled = true))
+        assertThat(
+            watchAllUi(stocks, StockWatchState())
+        ).isEqualTo(WatchAllUi.AddAll(count = 2, enabled = true, loading = false))
         assertThat(watchAllUi(stocks, StockWatchState(watched = setOf("DAL"))))
-            .isEqualTo(WatchAllUi.AddRest(count = 1, enabled = true))
+            .isEqualTo(WatchAllUi.AddRest(count = 1, enabled = true, loading = false))
         assertThat(watchAllUi(stocks, StockWatchState(watched = setOf("DAL", "XOM"))))
             .isEqualTo(WatchAllUi.AllWatched(count = 2))
         assertThat(watchAllUi(stocks, StockWatchState(pending = setOf("XOM")))?.enabled).isFalse()
+        assertThat(watchAllUi(stocks, StockWatchState(pending = setOf("XOM")))?.loading).isFalse()
+        assertThat(watchAllUi(stocks, StockWatchState(pending = setOf("DAL", "XOM")))?.loading).isTrue()
+        assertThat(watchAllUi(stocks.take(1), StockWatchState())).isNull()
         assertThat(watchAllUi(emptyList(), StockWatchState())).isNull()
     }
 

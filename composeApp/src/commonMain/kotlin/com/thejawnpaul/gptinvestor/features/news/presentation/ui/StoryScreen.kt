@@ -98,6 +98,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiEmptyState
 import com.thejawnpaul.gptinvestor.theme.components.GiErrorState
 import com.thejawnpaul.gptinvestor.theme.components.GiEyebrow
 import com.thejawnpaul.gptinvestor.theme.components.GiIconButton
+import com.thejawnpaul.gptinvestor.theme.components.GiIconTile
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
 import com.thejawnpaul.gptinvestor.theme.components.GiLogoTile
 import com.thejawnpaul.gptinvestor.theme.components.GiSectionHeader
@@ -349,22 +350,14 @@ private fun StoryHeader(story: Story, meta: String, onReadFull: () -> Unit) {
 
 @Composable
 private fun ExplainerCard(explainer: ExplainerRef, onClick: () -> Unit) {
-    GiCard(modifier = Modifier.fillMaxWidth(), onClick = onClick, contentPadding = PaddingValues(GiSpace.x4)) {
+    GiCard(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        contentPadding = PaddingValues(GiSpace.x4),
+        borderColor = GiTheme.colors.violet
+    ) {
         Row(horizontalArrangement = Arrangement.spacedBy(GiSpace.x3), verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(GiRadius.sm)
-                    .background(GiTheme.colors.violetSoft),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = GiIcons.lightbulb,
-                    contentDescription = null,
-                    modifier = Modifier.size(GiIconSize.md),
-                    tint = GiTheme.colors.violet
-                )
-            }
+            GiIconTile(icon = GiIcons.bookOpen)
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 GiText(
                     text = stringResource(Res.string.news_explainer_meta, explainer.readMinutes),

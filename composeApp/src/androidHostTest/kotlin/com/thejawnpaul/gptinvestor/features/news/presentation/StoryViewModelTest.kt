@@ -84,7 +84,7 @@ class StoryViewModelTest {
             advanceUntilIdle()
             val state = expectMostRecentItem()
             assertThat(state.watch.isWatched("DAL")).isTrue()
-            assertThat(state.watchAll).isEqualTo(WatchAllUi.AddRest(count = 3, enabled = true))
+            assertThat(state.watchAll).isEqualTo(WatchAllUi.AddRest(count = 3, enabled = true, loading = false))
         }
     }
 

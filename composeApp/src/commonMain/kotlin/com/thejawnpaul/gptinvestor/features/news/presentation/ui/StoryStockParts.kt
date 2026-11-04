@@ -62,6 +62,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiButton
 import com.thejawnpaul.gptinvestor.theme.components.GiButtonVariant
 import com.thejawnpaul.gptinvestor.theme.components.GiDeltaPill
 import com.thejawnpaul.gptinvestor.theme.components.GiDivider
+import com.thejawnpaul.gptinvestor.theme.components.GiIconButtonVariant
 import com.thejawnpaul.gptinvestor.theme.components.GiIconToggleButton
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
 import com.thejawnpaul.gptinvestor.theme.components.GiListGroup
@@ -98,6 +99,7 @@ internal fun ConnectedStockList(
                         name = stock.name,
                         watched = watched,
                         pending = pending,
+                        variant = GiIconButtonVariant.Ghost,
                         onToggle = { onToggleWatch(stock.ticker) }
                     )
                 }
@@ -107,7 +109,13 @@ internal fun ConnectedStockList(
 }
 
 @Composable
-internal fun WatchStar(name: String, watched: Boolean, pending: Boolean, onToggle: () -> Unit) {
+internal fun WatchStar(
+    name: String,
+    watched: Boolean,
+    pending: Boolean,
+    onToggle: () -> Unit,
+    variant: GiIconButtonVariant = GiIconButtonVariant.Default
+) {
     GiIconToggleButton(
         checked = watched,
         onCheckedChange = { onToggle() },
@@ -118,6 +126,7 @@ internal fun WatchStar(name: String, watched: Boolean, pending: Boolean, onToggl
             name
         ),
         loading = pending,
+        variant = variant,
         checkedHaptic = null
     )
 }
@@ -134,8 +143,9 @@ internal fun WatchAllButton(ui: WatchAllUi, onClick: () -> Unit, modifier: Modif
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         variant = GiButtonVariant.Secondary,
-        leadingIcon = if (ui is WatchAllUi.AllWatched) GiIcons.check else GiIcons.plus,
-        enabled = ui.enabled
+        leadingIcon = if (ui is WatchAllUi.AllWatched) GiIcons.check else GiIcons.star,
+        enabled = ui.enabled,
+        loading = ui.loading
     )
 }
 

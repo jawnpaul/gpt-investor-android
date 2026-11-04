@@ -12,6 +12,7 @@ import kotlinx.datetime.TimeZone
 
 private const val LOGO_STACK_MAX = 3
 private const val CHART_MIN_POINTS = 2
+private const val WATCH_ALL_MIN_STOCKS = 2
 
 sealed interface StoryDisclaimer {
     data class SinceStoryTime(val time: String) : StoryDisclaimer
@@ -23,8 +24,10 @@ data class BarelyMovedUi(val count: Int, val logos: List<StoryStock>, val names:
 sealed interface WatchAllUi {
     val enabled: Boolean
 
-    data class AddRest(val count: Int, override val enabled: Boolean) : WatchAllUi
-    data class AddAll(val count: Int, override val enabled: Boolean) : WatchAllUi
+    val loading: Boolean get() = false
+
+    data class AddRest(val count: Int, override val enabled: Boolean, override val loading: Boolean) : WatchAllUi
+    data class AddAll(val count: Int, override val enabled: Boolean, override val loading: Boolean) : WatchAllUi
     data class AllWatched(val count: Int) : WatchAllUi {
         override val enabled = false
     }
@@ -104,13 +107,15 @@ fun Story.barelyMovedUi(): BarelyMovedUi? = barelyMoved.takeIf { it.isNotEmpty()
 }
 
 fun watchAllUi(stocks: List<StoryStock>, watch: StockWatchState): WatchAllUi? {
-    if (stocks.isEmpty()) return null
+    if (stocks.size < WATCH_ALL_MIN_STOCKS) return null
     val unwatched = watch.unwatched(stocks).size
-    val enabled = stocks.none { watch.isPending(it.ticker) }
+    val pending = stocks.count { watch.isPending(it.ticker) }
+    val enabled = pending == 0
+    val loading = pending > 1
     return when (unwatched) {
         0 -> WatchAllUi.AllWatched(stocks.size)
-        stocks.size -> WatchAllUi.AddAll(stocks.size, enabled)
-        else -> WatchAllUi.AddRest(unwatched, enabled)
+        stocks.size -> WatchAllUi.AddAll(stocks.size, enabled, loading)
+        else -> WatchAllUi.AddRest(unwatched, enabled, loading)
     }
 }
 

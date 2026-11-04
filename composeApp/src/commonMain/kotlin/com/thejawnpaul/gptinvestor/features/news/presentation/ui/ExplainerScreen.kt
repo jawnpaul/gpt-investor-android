@@ -174,21 +174,27 @@ private fun ExplainerBody(
     ) {
         item(key = "header") {
             Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
-                ExplainerLabel()
                 GiText(
                     text = explainer.title,
                     style = GiTextStyle.PageTitle,
                     modifier = Modifier.semantics { heading() }
                 )
-                GiText(
-                    text = stringResource(
-                        Res.string.news_explainer_byline,
-                        explainer.author,
-                        explainer.readMinutes,
-                        state.updatedTime
-                    ),
-                    style = GiTextStyle.Meta
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(GiSpace.x2),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    GiText(
+                        text = stringResource(
+                            Res.string.news_explainer_byline,
+                            explainer.author,
+                            explainer.readMinutes,
+                            state.updatedTime
+                        ),
+                        style = GiTextStyle.Meta,
+                        modifier = Modifier.weight(1f)
+                    )
+                    ExplainerLabel()
+                }
             }
         }
         itemsIndexed(
@@ -244,26 +250,15 @@ private fun ExplainerBody(
 
 @Composable
 private fun ExplainerLabel() {
-    Row(
+    GiText(
+        text = stringResource(Res.string.news_explainer_label),
+        style = GiTextStyle.Tag,
+        color = GiTheme.colors.violet,
         modifier = Modifier
             .clip(GiRadius.xs)
             .background(GiTheme.colors.violetSoft)
-            .padding(horizontal = GiSpace.x2, vertical = 2.dp),
-        horizontalArrangement = Arrangement.spacedBy(GiSpace.x1),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = GiIcons.lightbulb,
-            contentDescription = null,
-            modifier = Modifier.size(12.dp),
-            tint = GiTheme.colors.violet
-        )
-        GiText(
-            text = stringResource(Res.string.news_explainer_label),
-            style = GiTextStyle.Tag,
-            color = GiTheme.colors.violet
-        )
-    }
+            .padding(horizontal = GiSpace.x2, vertical = 2.dp)
+    )
 }
 
 @Composable

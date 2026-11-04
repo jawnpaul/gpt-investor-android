@@ -51,6 +51,8 @@ fun GiBottomSheet(
     eyebrow: (@Composable () -> Unit)? = null,
     subtitle: String? = null,
     subtitleStyle: GiSheetSubtitle = GiSheetSubtitle.Beside,
+    leading: (@Composable () -> Unit)? = null,
+    headerAction: (@Composable () -> Unit)? = null,
     sheetState: SheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
         enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
@@ -79,6 +81,8 @@ fun GiBottomSheet(
             eyebrow = eyebrow,
             subtitle = subtitle,
             subtitleStyle = subtitleStyle,
+            leading = leading,
+            headerAction = headerAction,
             onClose = {
                 scope.launch { sheetState.hide() }.invokeOnCompletion {
                     if (!sheetState.isVisible) onDismissRequest()
@@ -102,6 +106,8 @@ private fun GiBottomSheetContent(
     eyebrow: (@Composable () -> Unit)? = null,
     subtitle: String? = null,
     subtitleStyle: GiSheetSubtitle = GiSheetSubtitle.Beside,
+    leading: (@Composable () -> Unit)? = null,
+    headerAction: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
@@ -120,6 +126,7 @@ private fun GiBottomSheetContent(
                 Alignment.Top
             }
         ) {
+            leading?.invoke()
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(
@@ -134,6 +141,7 @@ private fun GiBottomSheetContent(
                     GiText(text = subtitle, style = GiTextStyle.MetaRelaxed, color = GiTheme.colors.muted)
                 }
             }
+            headerAction?.invoke()
             GiIconButton(
                 icon = GiIcons.x,
                 contentDescription = closeContentDescription,

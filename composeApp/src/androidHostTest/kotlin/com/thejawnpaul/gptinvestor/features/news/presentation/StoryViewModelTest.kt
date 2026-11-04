@@ -281,13 +281,37 @@ class StoryViewModelTest {
                 advanceUntilIdle()
                 vm.handleEvent(StoryEvent.Share)
                 advanceUntilIdle()
-                assertThat(expectMostRecentItem().sharePreview).isEqualTo(SharePreviewUi("https://cdn/s1.png", false))
+                assertThat(expectMostRecentItem().sharePreview?.image).isEqualTo(png)
                 vm.handleEvent(StoryEvent.ConfirmShare)
                 advanceUntilIdle()
                 assertThat(expectMostRecentItem().sharePreview).isNull()
             }
             val action = awaitItem() as StoryAction.ShareImage
             assertThat(action.png).isEqualTo(png)
+        }
+        coVerify(exactly = 1) { repository.getShareImage("https://cdn/s1.png") }
+    }
+
+    @Test
+    fun `should cancel the download and share nothing when the preview is closed`() = runTest(testDispatcher) {
+        val withImage = story.copy(shareImageUrl = "https://cdn/s1.png")
+        coEvery { repository.getStory("s1") } returns Either.Right(withImage)
+        coEvery { repository.getShareImage(any()) } coAnswers {
+            delay(1_000)
+            Either.Right(byteArrayOf(1))
+        }
+        val vm = viewModel()
+        vm.actions.test {
+            vm.state.test {
+                advanceUntilIdle()
+                vm.handleEvent(StoryEvent.Share)
+                runCurrent()
+                assertThat(expectMostRecentItem().sharePreview?.ready).isFalse()
+                vm.handleEvent(StoryEvent.CloseShare)
+                advanceUntilIdle()
+                assertThat(expectMostRecentItem().sharePreview).isNull()
+            }
+            expectNoEvents()
         }
     }
 
@@ -302,8 +326,7 @@ class StoryViewModelTest {
                 advanceUntilIdle()
                 vm.handleEvent(StoryEvent.Share)
                 advanceUntilIdle()
-                vm.handleEvent(StoryEvent.ConfirmShare)
-                advanceUntilIdle()
+                assertThat(expectMostRecentItem().sharePreview).isNull()
                 cancelAndIgnoreRemainingEvents()
             }
             assertThat(awaitItem()).isEqualTo(StoryAction.ShareText(withImage))

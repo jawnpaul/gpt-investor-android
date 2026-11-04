@@ -61,6 +61,8 @@ import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.Watchlis
 import com.thejawnpaul.gptinvestor.remote.TokenResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.auth.AuthCircuitBreaker
+import io.ktor.client.request.accept
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -295,7 +297,10 @@ class KtorApiService(@Provided private val client: HttpClient) {
     suspend fun getExplainer(storyId: String): KtorResponse<ExplainerRemote> =
         client.get("v1/news/${storyId.encodeURLPathPart()}/explainer").toKtorResponse()
 
-    suspend fun getShareImage(url: String): KtorResponse<ByteArray> = client.get(url).toKtorResponse()
+    suspend fun getShareImage(url: String): KtorResponse<ByteArray> = client.get(url) {
+        attributes.put(AuthCircuitBreaker, Unit)
+        accept(ContentType.Image.PNG)
+    }.toKtorResponse()
 
     suspend fun startFreeTrial(): KtorResponse<StartTrialResponse> = client.post("v1/trial/start").toKtorResponse()
 

@@ -85,7 +85,9 @@ data class StoryChartUi(val closes: List<Double>, val storyIndex: Int, val story
     val days: Int get() = closes.size
 }
 
-data class SharePreviewUi(val imageUrl: String, val preparing: Boolean)
+data class SharePreviewUi(val image: ByteArray?) {
+    val ready: Boolean get() = image != null
+}
 
 data class ExplainerSectionUi(val heading: String, val paragraphs: List<String>)
 

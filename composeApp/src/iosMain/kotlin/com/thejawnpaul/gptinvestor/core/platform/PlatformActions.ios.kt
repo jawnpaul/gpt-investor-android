@@ -47,7 +47,7 @@ actual class PlatformActions(private val toastMessenger: ToastMessenger) {
         )
     }
 
-    actual fun shareImage(png: ByteArray, text: String) {
+    actual suspend fun shareImage(png: ByteArray, text: String) {
         shareText(text)
     }
 

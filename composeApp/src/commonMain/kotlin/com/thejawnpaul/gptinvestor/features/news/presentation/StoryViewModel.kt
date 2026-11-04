@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
+import com.thejawnpaul.gptinvestor.core.platform.isIos
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.news.domain.NewsFailure
 import com.thejawnpaul.gptinvestor.features.news.domain.NewsRepository
@@ -61,6 +62,7 @@ class StoryViewModel(
     private val _state = MutableStateFlow(StoryState())
     private var hasLoaded = false
     private var loadJob: Job? = null
+    private var shareJob: Job? = null
 
     val state: StateFlow<StoryState> = combine(_state, watch.state, appPreferences.isGuestLoggedIn) {
             state,
@@ -114,11 +116,8 @@ class StoryViewModel(
 
             StoryEvent.ReadFullStory -> story?.let { emit(StoryAction.OpenUrl(it.link)) }
             is StoryEvent.OpenSource -> emit(StoryAction.OpenUrl(event.url))
-            StoryEvent.Share -> story?.let {
-                if (it.shareImageUrl == null) shareText(it) else _state.update { s -> s.copy(sharePreviewOpen = true) }
-            }
-
-            StoryEvent.CloseShare -> _state.update { it.copy(sharePreviewOpen = false) }
+            StoryEvent.Share -> story?.let(::openShare)
+            StoryEvent.CloseShare -> closeShare()
             StoryEvent.ConfirmShare -> confirmShare(story)
         }
     }
@@ -129,22 +128,35 @@ class StoryViewModel(
         viewModelScope.launch { watchlistRepository.changes.collect { load() } }
     }
 
-    private fun confirmShare(story: Story?) {
-        val url = story?.shareImageUrl ?: return
-        if (_state.value.preparingShare) return
-        _state.update { it.copy(preparingShare = true) }
-        viewModelScope.launch {
+    private fun openShare(story: Story) {
+        val url = story.shareImageUrl
+        if (url == null || isIos) {
+            shareText(story)
+            return
+        }
+        shareJob?.cancel()
+        _state.update { it.copy(sharePreviewOpen = true, shareImage = null) }
+        shareJob = viewModelScope.launch {
             newsRepository.getShareImage(url)
-                .onSuccess { png ->
-                    analyticsLogger.logEvent("story-shared", mapOf("story_id" to story.id, "format" to "image"))
-                    _state.update { it.copy(preparingShare = false, sharePreviewOpen = false) }
-                    emit(StoryAction.ShareImage(png = png, story = story))
-                }
+                .onSuccess { png -> _state.update { it.copy(shareImage = png) } }
                 .onFailure {
-                    _state.update { it.copy(preparingShare = false, sharePreviewOpen = false) }
+                    _state.update { it.copy(sharePreviewOpen = false) }
                     shareText(story)
                 }
         }
+    }
+
+    private fun closeShare() {
+        shareJob?.cancel()
+        _state.update { it.copy(sharePreviewOpen = false, shareImage = null) }
+    }
+
+    private fun confirmShare(story: Story?) {
+        val png = _state.value.shareImage ?: return
+        if (story == null) return
+        analyticsLogger.logEvent("story-shared", mapOf("story_id" to story.id, "format" to "image"))
+        _state.update { it.copy(sharePreviewOpen = false, shareImage = null) }
+        emit(StoryAction.ShareImage(png = png, story = story))
     }
 
     private fun shareText(story: Story) {
@@ -192,7 +204,7 @@ data class StoryState(
     val showBarelyMoved: Boolean = false,
     val sheetTicker: String? = null,
     val sharePreviewOpen: Boolean = false,
-    val preparingShare: Boolean = false,
+    val shareImage: ByteArray? = null,
     val isGuestSession: Boolean = false,
     val watch: StockWatchState = StockWatchState()
 ) {
@@ -217,7 +229,7 @@ data class StoryState(
         get() = story?.let { watchAllUi(it.allStocks, watch) }
 
     val sharePreview: SharePreviewUi?
-        get() = story?.shareImageUrl?.takeIf { sharePreviewOpen }?.let { SharePreviewUi(it, preparingShare) }
+        get() = if (sharePreviewOpen) SharePreviewUi(shareImage) else null
 
     val sheet: StockSheetUi?
         get() {

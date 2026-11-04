@@ -11,6 +11,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Factory
 
 @Factory
@@ -49,13 +51,15 @@ actual class PlatformActions(private val context: Context, private val toastMess
         context.startActivity(chooser)
     }
 
-    actual fun shareImage(png: ByteArray, text: String) {
-        val uri = runCatching {
-            val dir = File(context.cacheDir, SHARE_DIR).apply { mkdirs() }
-            val file = File(dir, SHARE_FILE)
-            file.writeBytes(png)
-            FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-        }.getOrNull()
+    actual suspend fun shareImage(png: ByteArray, text: String) {
+        val uri = withContext(Dispatchers.IO) {
+            runCatching {
+                val dir = File(context.cacheDir, SHARE_DIR).apply { mkdirs() }
+                val file = File(dir, SHARE_FILE)
+                file.writeBytes(png)
+                FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+            }.getOrNull()
+        }
         if (uri == null) {
             shareText(text)
             return

@@ -29,6 +29,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.Compa
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ConversationScreen
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationViewModel
+import com.thejawnpaul.gptinvestor.features.discover.DiscoverSection
 import com.thejawnpaul.gptinvestor.features.discover.DiscoverViewModel
 import com.thejawnpaul.gptinvestor.features.discover.DiscoveryAction
 import com.thejawnpaul.gptinvestor.features.guest.presentation.GuestScreen
@@ -122,6 +123,12 @@ fun NavGraphBuilder.guestNavGraph(
                             route = GuestScreen.GuestDiscoverTab.createRoute(),
                             homeRoute = GuestScreen.GuestHomeTab.route
                         )
+                    }
+
+                    is HomeAction.NavigateToNewsStory -> navController.openStory(action.id, isGuest = true)
+
+                    HomeAction.NavigateToDiscoverNews -> {
+                        navController.navigateToDiscover(DiscoverSection.NEWS, isGuest = true)
                     }
 
                     HomeAction.NavigateToDigestDetail -> {

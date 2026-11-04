@@ -1,5 +1,11 @@
 package com.thejawnpaul.gptinvestor.features.investor.presentation.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -43,6 +50,8 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.H
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.component.homeGreeting
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeUiState
+import com.thejawnpaul.gptinvestor.features.news.presentation.StoryCardUi
+import com.thejawnpaul.gptinvestor.features.news.presentation.ui.HomeTopStory
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
@@ -52,6 +61,8 @@ import com.thejawnpaul.gptinvestor.movers_right_now
 import com.thejawnpaul.gptinvestor.profile
 import com.thejawnpaul.gptinvestor.send
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
+import com.thejawnpaul.gptinvestor.theme.GiEasing
+import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.components.GiAskComposer
@@ -71,6 +82,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.theme.components.GiToastHost
 import com.thejawnpaul.gptinvestor.theme.components.GiToastState
 import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 import com.thejawnpaul.gptinvestor.trending_today
 import com.thejawnpaul.gptinvestor.you_re_on_the_list
 import com.thejawnpaul.gptinvestor.you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge
@@ -174,6 +186,12 @@ private fun HomeScreenContent(
                     onRetry = { onEvent(HomeEvent.RetryDailyDigest) }
                 )
 
+                TopStorySection(
+                    story = state.topStory,
+                    onOpen = { onEvent(HomeEvent.OpenTopStory) },
+                    onSeeAll = { onEvent(HomeEvent.SeeAllNews) }
+                )
+
                 Column(verticalArrangement = Arrangement.spacedBy(GiSpace.titleToContent)) {
                     GiSectionHeader(
                         title = stringResource(Res.string.movers_right_now),
@@ -198,6 +216,36 @@ private fun HomeScreenContent(
                     onDismiss = { onEvent(HomeEvent.UpgradeModel(showBottomSheet = false)) }
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun TopStorySection(
+    story: StoryCardUi?,
+    onOpen: () -> Unit,
+    onSeeAll: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val reducedMotion = isReducedMotionEnabled()
+    AnimatedVisibility(
+        visible = story != null,
+        modifier = modifier,
+        enter = if (reducedMotion) {
+            EnterTransition.None
+        } else {
+            fadeIn(tween(GiMotion.BASE, easing = GiEasing.emphasised)) +
+                expandVertically(GiMotion.smooth(), expandFrom = Alignment.Top)
+        },
+        exit = ExitTransition.None
+    ) {
+        if (story != null) {
+            HomeTopStory(
+                card = story,
+                onOpen = onOpen,
+                onSeeAll = onSeeAll,
+                modifier = Modifier.padding(horizontal = GiSpace.gutter)
+            )
         }
     }
 }

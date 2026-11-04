@@ -576,6 +576,8 @@
     <string name="news_barely_moved">%1$d within a normal day</string>
     <string name="news_disclaimer">Moves since the last close before the story. A stock counts as moved when its move is more than twice its usual daily move. Other news can move prices too. For information only. Not financial advice. Do your own research.</string>
     <string name="news_ask_about_story">Ask about this story</string>
+    <string name="news_ask_story_prompt">What does this story mean for its stocks?</string>
+    <string name="news_ask_stock_prompt">How is %1$s connected to this story?</string>
     <string name="news_share_story">Share story</string>
     <string name="news_story_unavailable_title">This story isn’t available</string>
     <string name="news_story_unavailable_body">It may be more than a few days old. Go back to see today’s stories.</string>

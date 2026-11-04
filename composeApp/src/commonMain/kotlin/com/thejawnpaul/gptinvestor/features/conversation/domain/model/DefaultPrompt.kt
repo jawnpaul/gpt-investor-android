@@ -4,7 +4,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-data class DefaultPrompt(val title: String, val query: String)
+data class DefaultPrompt(
+    val title: String,
+    val query: String,
+    val tickerSymbol: String? = null,
+    val storyId: String? = null
+)
 
 @Serializable
 data class RemoteConfigPrompt(

@@ -95,24 +95,13 @@ class StoryViewModel(
             is StoryEvent.AskFollowUp -> {
                 val stock = story?.allStocks?.firstOrNull { it.ticker == event.ticker } ?: return
                 _state.update { it.copy(sheetTicker = null) }
-                emit(
-                    StoryAction.OpenChat(
-                        input = "How is ${stock.name} (${stock.ticker}) connected to this news: " +
-                            "\"${story.title}\"? ${story.link}",
-                        title = story.title
-                    )
-                )
+                emit(StoryAction.OpenChat(storyId = story.id, title = story.title, stock = stock))
             }
 
             StoryEvent.AskAboutStory -> {
                 if (story == null) return
                 analyticsLogger.logEvent("story-ask-tapped", mapOf("story_id" to story.id))
-                emit(
-                    StoryAction.OpenChat(
-                        input = "What does this news mean for stocks? \"${story.title}\" ${story.link}",
-                        title = story.title
-                    )
-                )
+                emit(StoryAction.OpenChat(storyId = story.id, title = story.title, stock = null))
             }
 
             StoryEvent.OpenExplainer -> story?.explainer?.let {
@@ -265,7 +254,7 @@ sealed interface StoryEvent {
 sealed interface StoryAction {
     data object GoBack : StoryAction
     data class OpenCompany(val ticker: String) : StoryAction
-    data class OpenChat(val input: String, val title: String) : StoryAction
+    data class OpenChat(val storyId: String, val title: String, val stock: StoryStock?) : StoryAction
     data class OpenExplainer(val storyId: String) : StoryAction
     data class OpenUrl(val url: String) : StoryAction
     class ShareImage(val png: ByteArray, val story: Story) : StoryAction

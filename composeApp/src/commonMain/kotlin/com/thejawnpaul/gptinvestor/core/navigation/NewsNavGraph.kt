@@ -27,6 +27,8 @@ import com.thejawnpaul.gptinvestor.features.news.presentation.ui.ExplainerScreen
 import com.thejawnpaul.gptinvestor.features.news.presentation.ui.StoryScreen
 import com.thejawnpaul.gptinvestor.login
 import com.thejawnpaul.gptinvestor.news_added_all
+import com.thejawnpaul.gptinvestor.news_ask_stock_prompt
+import com.thejawnpaul.gptinvestor.news_ask_story_prompt
 import com.thejawnpaul.gptinvestor.news_share_text
 import com.thejawnpaul.gptinvestor.news_undo_failed
 import com.thejawnpaul.gptinvestor.removed_from_watchlist
@@ -69,7 +71,14 @@ private fun StoryDestination(navController: NavHostController, platformActions: 
             when (action) {
                 StoryAction.GoBack -> navController.navigateUp()
                 is StoryAction.OpenCompany -> navController.openCompany(action.ticker, isGuest)
-                is StoryAction.OpenChat -> navController.openChat(action.input, action.title, isGuest)
+                is StoryAction.OpenChat -> navController.openChat(
+                    input = action.stock?.let { getString(Res.string.news_ask_stock_prompt, it.name) }
+                        ?: getString(Res.string.news_ask_story_prompt),
+                    title = action.title,
+                    isGuest = isGuest,
+                    ticker = action.stock?.ticker,
+                    storyId = action.storyId
+                )
                 is StoryAction.OpenExplainer -> navController.navigate(
                     if (isGuest) {
                         GuestScreen.GuestExplainer.createRoute(action.storyId)
@@ -193,11 +202,17 @@ private fun NavHostController.openCompany(ticker: String, isGuest: Boolean) = na
     if (isGuest) GuestScreen.GuestCompanyDetail.createRoute(ticker) else Screen.CompanyDetailScreen.createRoute(ticker)
 )
 
-private fun NavHostController.openChat(input: String, title: String?, isGuest: Boolean) = navigate(
+private fun NavHostController.openChat(
+    input: String,
+    title: String?,
+    isGuest: Boolean,
+    ticker: String? = null,
+    storyId: String? = null
+) = navigate(
     if (isGuest) {
-        GuestScreen.GuestConversation.createRoute(chatInput = input, title = title)
+        GuestScreen.GuestConversation.createRoute(chatInput = input, title = title, ticker = ticker, storyId = storyId)
     } else {
-        Screen.ConversationScreen.createRoute(chatInput = input, title = title)
+        Screen.ConversationScreen.createRoute(chatInput = input, title = title, ticker = ticker, storyId = storyId)
     }
 )
 

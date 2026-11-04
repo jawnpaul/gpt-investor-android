@@ -575,6 +575,8 @@
     <string name="news_barely_moved">%1$d میں معمول کے مطابق تبدیلی</string>
     <string name="news_disclaimer">خبر سے پہلے کی آخری بندش قیمت سے تبدیلی۔ کسی اسٹاک کو تب بدلا ہوا مانا جاتا ہے جب اس کی تبدیلی اس کی عام روزانہ تبدیلی سے دگنی سے زیادہ ہو۔ دوسری خبریں بھی قیمتوں پر اثر ڈال سکتی ہیں۔ صرف معلومات کے لیے۔ یہ مالی مشورہ نہیں ہے۔ خود تحقیق کریں۔</string>
     <string name="news_ask_about_story">اس خبر کے بارے میں پوچھیں</string>
+    <string name="news_ask_story_prompt">اس خبر کا اس کے اسٹاکس کے لیے کیا مطلب ہے؟</string>
+    <string name="news_ask_stock_prompt">%1$s کا اس خبر سے کیا تعلق ہے؟</string>
     <string name="news_share_story">خبر شیئر کریں</string>
     <string name="news_story_unavailable_title">یہ خبر دستیاب نہیں</string>
     <string name="news_story_unavailable_body">ہو سکتا ہے یہ چند دن سے زیادہ پرانی ہو۔ آج کی خبریں دیکھنے کے لیے واپس جائیں۔</string>

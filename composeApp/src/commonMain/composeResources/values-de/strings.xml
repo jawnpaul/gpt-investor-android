@@ -575,6 +575,8 @@
     <string name="news_barely_moved">%1$d im üblichen Rahmen</string>
     <string name="news_disclaimer">Kursänderungen seit dem letzten Schlusskurs vor der Meldung. Eine Aktie gilt als bewegt, wenn sie sich mehr als doppelt so stark bewegt wie an einem üblichen Tag. Auch andere Nachrichten können Kurse bewegen. Nur zur Information. Keine Finanzberatung. Recherchieren Sie selbst.</string>
     <string name="news_ask_about_story">Fragen zu dieser Meldung</string>
+    <string name="news_ask_story_prompt">Was bedeutet diese Meldung für die betroffenen Aktien?</string>
+    <string name="news_ask_stock_prompt">Wie hängt %1$s mit dieser Meldung zusammen?</string>
     <string name="news_share_story">Meldung teilen</string>
     <string name="news_story_unavailable_title">Diese Meldung ist nicht verfügbar</string>
     <string name="news_story_unavailable_body">Sie ist möglicherweise älter als ein paar Tage. Gehen Sie zurück, um die heutigen Meldungen zu sehen.</string>

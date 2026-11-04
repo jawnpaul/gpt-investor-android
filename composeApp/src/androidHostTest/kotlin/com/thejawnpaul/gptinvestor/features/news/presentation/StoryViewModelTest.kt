@@ -184,6 +184,24 @@ class StoryViewModelTest {
     }
 
     @Test
+    fun `should open chat with the story id and no link`() = runTest(testDispatcher) {
+        val vm = viewModel()
+        vm.actions.test {
+            vm.state.test {
+                advanceUntilIdle()
+                vm.handleEvent(StoryEvent.AskAboutStory)
+                vm.handleEvent(StoryEvent.AskFollowUp("XOM"))
+                advanceUntilIdle()
+                cancelAndIgnoreRemainingEvents()
+            }
+            assertThat(awaitItem()).isEqualTo(StoryAction.OpenChat(storyId = "s1", title = story.title, stock = null))
+            assertThat(awaitItem()).isEqualTo(
+                StoryAction.OpenChat(storyId = "s1", title = story.title, stock = story.moved[1])
+            )
+        }
+    }
+
+    @Test
     fun `should show the unavailable state for an expired story`() = runTest(testDispatcher) {
         coEvery { repository.getStory("s1") } returns Either.Left(NewsFailure.NotFound)
         val vm = viewModel()

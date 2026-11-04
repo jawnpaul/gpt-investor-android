@@ -19,11 +19,20 @@ sealed class GuestScreen(val route: String) {
 
     data object GuestProfileTab : GuestScreen("guest_profile_tab_screen")
 
-    data object GuestConversation : GuestScreen("guest_conversation_screen?chatInput={chatInput}&title={title}") {
-        fun createRoute(chatInput: String, title: String? = null): String {
+    data object GuestConversation : GuestScreen(
+        "guest_conversation_screen?chatInput={chatInput}&title={title}&ticker={ticker}&storyId={storyId}"
+    ) {
+        fun createRoute(
+            chatInput: String,
+            title: String? = null,
+            ticker: String? = null,
+            storyId: String? = null
+        ): String {
             val params = mutableListOf<String>()
             if (chatInput.isNotEmpty()) params.add("chatInput=${chatInput.encodeURLParameter()}")
             if (title != null) params.add("title=${title.encodeURLParameter()}")
+            ticker?.let { params.add("ticker=${it.encodeURLParameter()}") }
+            storyId?.let { params.add("storyId=${it.encodeURLParameter()}") }
             return if (params.isEmpty()) {
                 "guest_conversation_screen"
             } else {

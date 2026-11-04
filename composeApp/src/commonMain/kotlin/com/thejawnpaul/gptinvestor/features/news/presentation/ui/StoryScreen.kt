@@ -44,12 +44,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.check_connection_try_again
@@ -99,6 +97,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiEyebrow
 import com.thejawnpaul.gptinvestor.theme.components.GiIconButton
 import com.thejawnpaul.gptinvestor.theme.components.GiIconTile
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiImage
 import com.thejawnpaul.gptinvestor.theme.components.GiLogoTile
 import com.thejawnpaul.gptinvestor.theme.components.GiSectionHeader
 import com.thejawnpaul.gptinvestor.theme.components.GiSpinner
@@ -290,8 +289,8 @@ private fun StoryBody(
                         ) {
                             StoryStockList(stocks = story.barelyMoved, watch = state.watch, onEvent = onEvent)
                         }
-                    state.watchAll?.let { WatchAllButton(ui = it, onClick = { onEvent(StoryEvent.WatchAll) }) }
                     }
+                    state.watchAll?.let { WatchAllButton(ui = it, onClick = { onEvent(StoryEvent.WatchAll) }) }
                 }
             }
         }
@@ -323,15 +322,14 @@ private fun StoryStockList(stocks: List<StoryStock>, watch: StockWatchState, onE
 private fun StoryHeader(story: Story, meta: String, onReadFull: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
         if (story.imageUrl != null) {
-            AsyncImage(
-                model = story.imageUrl,
-                contentDescription = null,
+            GiImage(
+                url = story.imageUrl,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(180.dp)
                     .clip(GiRadius.md)
                     .background(GiTheme.colors.tile),
-                contentScale = ContentScale.Crop
+                shape = GiRadius.md
             )
         }
         GiText(

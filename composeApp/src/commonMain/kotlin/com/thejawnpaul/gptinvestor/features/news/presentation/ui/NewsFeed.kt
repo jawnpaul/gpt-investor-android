@@ -27,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -42,7 +41,6 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
-import coil3.compose.AsyncImage
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.check_connection_try_again
 import com.thejawnpaul.gptinvestor.features.news.domain.model.NewsTopic
@@ -91,6 +89,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiEmptyState
 import com.thejawnpaul.gptinvestor.theme.components.GiErrorState
 import com.thejawnpaul.gptinvestor.theme.components.GiEyebrow
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
+import com.thejawnpaul.gptinvestor.theme.components.GiImage
 import com.thejawnpaul.gptinvestor.theme.components.GiLogoTile
 import com.thejawnpaul.gptinvestor.theme.components.GiSectionHeader
 import com.thejawnpaul.gptinvestor.theme.components.GiSkeleton
@@ -467,13 +466,14 @@ internal fun LogoStack(stocks: List<StoryStock>, modifier: Modifier = Modifier) 
 
 @Composable
 internal fun StoryThumb(imageUrl: String?, size: Dp, modifier: Modifier = Modifier) {
-    Box(
+    GiImage(
+        url = imageUrl,
         modifier = modifier
             .size(size)
             .clip(GiRadius.sm)
             .background(GiTheme.colors.violetSoft)
             .clearAndSetSemantics {},
-        contentAlignment = Alignment.Center
+        shape = GiRadius.sm
     ) {
         Icon(
             imageVector = GiIcons.mark,
@@ -481,14 +481,6 @@ internal fun StoryThumb(imageUrl: String?, size: Dp, modifier: Modifier = Modifi
             modifier = Modifier.size(GiIconSize.lg),
             tint = GiTheme.colors.violet
         )
-        if (imageUrl != null) {
-            AsyncImage(
-                model = imageUrl,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-        }
     }
 }
 

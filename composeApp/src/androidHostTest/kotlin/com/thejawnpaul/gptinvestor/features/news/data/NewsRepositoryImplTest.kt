@@ -5,6 +5,8 @@ import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.api.KtorResponse
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfigClient
+import com.thejawnpaul.gptinvestor.core.utility.Constants.WEBSITE_DOMAIN_KEY
 import com.thejawnpaul.gptinvestor.features.news.data.remote.NewsTopicRemote
 import com.thejawnpaul.gptinvestor.features.news.data.remote.PricePointRemote
 import com.thejawnpaul.gptinvestor.features.news.data.remote.StoryPriceRemote
@@ -15,6 +17,7 @@ import com.thejawnpaul.gptinvestor.features.news.domain.NewsFailure
 import com.thejawnpaul.gptinvestor.features.news.domain.model.StoryPriceBasis
 import com.thejawnpaul.gptinvestor.features.news.domain.model.StoryPriceStatus
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -24,7 +27,8 @@ import org.junit.Test
 class NewsRepositoryImplTest {
 
     private val apiService: KtorApiService = mockk()
-    private val repository = NewsRepositoryImpl(apiService, UnconfinedTestDispatcher())
+    private val remoteConfig: RemoteConfigClient = mockk()
+    private val repository = NewsRepositoryImpl(apiService, remoteConfig, UnconfinedTestDispatcher())
 
     private fun <T> ok(body: T) = KtorResponse(isSuccessful = true, body = body, errorBody = null, code = 200)
 
@@ -120,5 +124,19 @@ class NewsRepositoryImplTest {
         coEvery { apiService.getTopStory() } returns ok(TopStoryRemote(story = null))
 
         assertThat(repository.getTopStory()).isEqualTo(Either.Right(null))
+    }
+
+    @Test
+    fun `should build the share link on the website domain`() {
+        every { remoteConfig.fetchAndActivateStringValue(WEBSITE_DOMAIN_KEY) } returns "https://gptinvestorapp.com/"
+
+        assertThat(repository.getShareUrl("s1")).isEqualTo("https://gptinvestorapp.com/news/s1")
+    }
+
+    @Test
+    fun `should fall back to the default domain when remote config has none`() {
+        every { remoteConfig.fetchAndActivateStringValue(WEBSITE_DOMAIN_KEY) } returns null
+
+        assertThat(repository.getShareUrl("s1")).isEqualTo("https://gptinvestorapp.com/news/s1")
     }
 }

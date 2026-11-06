@@ -616,7 +616,7 @@
     <string name="news_price_story_date">خبر کے وقت، %1$s</string>
     <string name="news_price_unavailable_updated">قیمت دستیاب نہیں۔ آخری اپ ڈیٹ %1$s۔</string>
     <string name="news_read_story">خبر پڑھیں</string>
-    <string name="news_share_text">%1$s\n\nخبر پڑھیں: %2$s\nGPT Investor کے ذریعے۔ صرف معلومات کے لیے۔ یہ مالی مشورہ نہیں ہے۔</string>
+    <string name="news_share_text">%1$s\n\nGPT Investor پر پڑھیں: %2$s\nصرف معلومات کے لیے۔ یہ مالی مشورہ نہیں ہے۔</string>
     <string name="news_story_error_title">یہ خبر لوڈ نہیں ہو سکی</string>
     <string name="news_watch_add">%1$s کو واچ لسٹ میں شامل کریں</string>
     <string name="news_watch_remove">%1$s کو واچ لسٹ سے ہٹائیں</string>

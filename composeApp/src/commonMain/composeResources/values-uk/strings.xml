@@ -630,7 +630,7 @@
     <string name="news_price_story_date">На момент новини, %1$s</string>
     <string name="news_price_unavailable_updated">Ціна недоступна. Востаннє оновлено о %1$s.</string>
     <string name="news_read_story">Читати новину</string>
-    <string name="news_share_text">%1$s\n\nЧитати новину: %2$s\nЧерез GPT Investor. Лише для інформації. Це не фінансова порада.</string>
+    <string name="news_share_text">%1$s\n\nЧитати в GPT Investor: %2$s\nЛише для інформації. Це не фінансова порада.</string>
     <string name="news_story_error_title">Не вдалося завантажити цю новину</string>
     <string name="news_watch_add">Додати %1$s до списку спостереження</string>
     <string name="news_watch_remove">Видалити %1$s зі списку спостереження</string>

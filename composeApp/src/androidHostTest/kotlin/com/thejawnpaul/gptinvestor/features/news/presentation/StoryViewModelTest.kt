@@ -61,6 +61,7 @@ class StoryViewModelTest {
         every { appPreferences.isGuestLoggedIn } returns guest
         coEvery { repository.getStory("s1") } returns Either.Right(story)
         every { watchlistRepository.changes } returns watchlistChanges
+        every { repository.getShareUrl("s1") } returns SHARE_URL
     }
 
     @After
@@ -265,7 +266,7 @@ class StoryViewModelTest {
                 advanceUntilIdle()
                 assertThat(expectMostRecentItem().sharePreview).isNull()
             }
-            assertThat(awaitItem()).isEqualTo(StoryAction.ShareText(story))
+            assertThat(awaitItem()).isEqualTo(StoryAction.ShareText(story, SHARE_URL))
         }
     }
 
@@ -288,6 +289,7 @@ class StoryViewModelTest {
             }
             val action = awaitItem() as StoryAction.ShareImage
             assertThat(action.png).isEqualTo(png)
+            assertThat(action.url).isEqualTo(SHARE_URL)
         }
         coVerify(exactly = 1) { repository.getShareImage("https://cdn/s1.png") }
     }
@@ -329,7 +331,11 @@ class StoryViewModelTest {
                 assertThat(expectMostRecentItem().sharePreview).isNull()
                 cancelAndIgnoreRemainingEvents()
             }
-            assertThat(awaitItem()).isEqualTo(StoryAction.ShareText(withImage))
+            assertThat(awaitItem()).isEqualTo(StoryAction.ShareText(withImage, SHARE_URL))
         }
+    }
+
+    private companion object {
+        const val SHARE_URL = "https://gptinvestorapp.com/news/s1"
     }
 }

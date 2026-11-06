@@ -90,11 +90,11 @@ private fun StoryDestination(navController: NavHostController, platformActions: 
                 is StoryAction.OpenUrl -> platformActions.openUrl(action.url)
                 is StoryAction.ShareImage -> platformActions.shareImage(
                     png = action.png,
-                    text = getString(Res.string.news_share_text, action.story.title, action.story.link)
+                    text = getString(Res.string.news_share_text, action.story.title, action.url)
                 )
 
                 is StoryAction.ShareText -> platformActions.shareText(
-                    getString(Res.string.news_share_text, action.story.title, action.story.link)
+                    getString(Res.string.news_share_text, action.story.title, action.url)
                 )
 
                 is StoryAction.Watch -> launch {

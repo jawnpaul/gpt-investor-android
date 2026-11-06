@@ -8,6 +8,8 @@ import com.thejawnpaul.gptinvestor.core.api.KtorApiService
 import com.thejawnpaul.gptinvestor.core.di.IoDispatcher
 import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.functional.Failure
+import com.thejawnpaul.gptinvestor.core.remoteconfig.RemoteConfigClient
+import com.thejawnpaul.gptinvestor.core.utility.Constants
 import com.thejawnpaul.gptinvestor.features.news.data.paging.NewsPagingSource
 import com.thejawnpaul.gptinvestor.features.news.data.remote.toDomain
 import com.thejawnpaul.gptinvestor.features.news.domain.NewsFailure
@@ -16,6 +18,7 @@ import com.thejawnpaul.gptinvestor.features.news.domain.model.Explainer
 import com.thejawnpaul.gptinvestor.features.news.domain.model.NewsFeedMeta
 import com.thejawnpaul.gptinvestor.features.news.domain.model.Story
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.encodeURLPathPart
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -26,6 +29,7 @@ import org.koin.core.annotation.Singleton
 @Singleton(binds = [NewsRepository::class])
 class NewsRepositoryImpl(
     private val apiService: KtorApiService,
+    private val remoteConfig: RemoteConfigClient,
     @Provided @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : NewsRepository {
 
@@ -111,5 +115,16 @@ class NewsRepositoryImpl(
             Logger.e(e.stackTraceToString())
             Either.Left(e.toNewsFailure())
         }
+    }
+
+    override fun getShareUrl(storyId: String): String {
+        val domain = remoteConfig.fetchAndActivateStringValue(Constants.WEBSITE_DOMAIN_KEY)
+            ?.takeIf { it.isNotBlank() }
+            ?: DEFAULT_WEBSITE_DOMAIN
+        return "${domain.trimEnd('/')}/news/${storyId.encodeURLPathPart()}"
+    }
+
+    private companion object {
+        const val DEFAULT_WEBSITE_DOMAIN = "https://gptinvestorapp.com"
     }
 }

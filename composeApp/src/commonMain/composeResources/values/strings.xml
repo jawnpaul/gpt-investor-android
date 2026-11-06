@@ -617,7 +617,7 @@
     <string name="news_price_story_date">At the story, %1$s</string>
     <string name="news_price_unavailable_updated">Price unavailable. Last updated %1$s.</string>
     <string name="news_read_story">Read the story</string>
-    <string name="news_share_text">%1$s\n\nRead the story: %2$s\nVia GPT Investor. For information only. Not financial advice.</string>
+    <string name="news_share_text">%1$s\n\nRead it on GPT Investor: %2$s\nFor information only. Not financial advice.</string>
     <string name="news_story_error_title">Couldn’t load this story</string>
     <string name="news_watch_add">Add %1$s to watchlist</string>
     <string name="news_watch_remove">Remove %1$s from watchlist</string>

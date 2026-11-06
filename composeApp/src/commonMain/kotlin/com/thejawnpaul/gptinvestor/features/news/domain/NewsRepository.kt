@@ -18,4 +18,6 @@ interface NewsRepository {
     suspend fun getExplainer(storyId: String): Either<Failure, Explainer>
 
     suspend fun getShareImage(url: String): Either<Failure, ByteArray>
+
+    fun getShareUrl(storyId: String): String
 }

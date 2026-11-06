@@ -155,12 +155,12 @@ class StoryViewModel(
         if (story == null) return
         analyticsLogger.logEvent("story-shared", mapOf("story_id" to story.id, "format" to "image"))
         _state.update { it.copy(sharePreviewOpen = false, shareImage = null) }
-        emit(StoryAction.ShareImage(png = png, story = story))
+        emit(StoryAction.ShareImage(png = png, story = story, url = newsRepository.getShareUrl(story.id)))
     }
 
     private fun shareText(story: Story) {
         analyticsLogger.logEvent("story-shared", mapOf("story_id" to story.id, "format" to "text"))
-        emit(StoryAction.ShareText(story))
+        emit(StoryAction.ShareText(story, newsRepository.getShareUrl(story.id)))
     }
 
     private fun load() {
@@ -277,7 +277,7 @@ sealed interface StoryAction {
     data class OpenChat(val storyId: String, val title: String, val stock: StoryStock?) : StoryAction
     data class OpenExplainer(val storyId: String) : StoryAction
     data class OpenUrl(val url: String) : StoryAction
-    class ShareImage(val png: ByteArray, val story: Story) : StoryAction
-    data class ShareText(val story: Story) : StoryAction
+    class ShareImage(val png: ByteArray, val story: Story, val url: String) : StoryAction
+    data class ShareText(val story: Story, val url: String) : StoryAction
     data class Watch(val event: StockWatchEvent) : StoryAction
 }

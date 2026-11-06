@@ -616,7 +616,7 @@
     <string name="news_price_story_date">Zur Meldung, %1$s</string>
     <string name="news_price_unavailable_updated">Kurs nicht verfügbar. Zuletzt aktualisiert %1$s.</string>
     <string name="news_read_story">Meldung lesen</string>
-    <string name="news_share_text">%1$s\n\nMeldung lesen: %2$s\nÜber GPT Investor. Nur zur Information. Keine Finanzberatung.</string>
+    <string name="news_share_text">%1$s\n\nAuf GPT Investor lesen: %2$s\nNur zur Information. Keine Finanzberatung.</string>
     <string name="news_story_error_title">Diese Meldung konnte nicht geladen werden</string>
     <string name="news_watch_add">%1$s zur Watchlist hinzufügen</string>
     <string name="news_watch_remove">%1$s von der Watchlist entfernen</string>

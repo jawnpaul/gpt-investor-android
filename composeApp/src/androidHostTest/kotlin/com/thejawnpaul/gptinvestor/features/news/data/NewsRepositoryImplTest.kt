@@ -63,7 +63,7 @@ class NewsRepositoryImplTest {
         movedCount = 3,
         movesBasis = "story_time",
         moved = listOf(stock),
-        barelyMoved = listOf(stock.copy(ticker = "KO", name = "Coca-Cola", onWatchlist = false))
+        barelyMoved = listOf(stock.copy(ticker = "KO", name = "Coca-Cola", onWatchlist = false, currencySymbol = "₦"))
     )
 
     @Test
@@ -83,6 +83,8 @@ class NewsRepositoryImplTest {
         assertThat(mapped.barelyMoved.single().ticker).isEqualTo("KO")
         assertThat(mapped.moved.single().history.map { it.close }).containsExactly(55.0, 56.63).inOrder()
         assertThat(mapped.moved.single().historyStoryIndex).isEqualTo(1)
+        assertThat(mapped.moved.single().currencySymbol).isEqualTo("$")
+        assertThat(mapped.barelyMoved.single().currencySymbol).isEqualTo("₦")
     }
 
     @Test

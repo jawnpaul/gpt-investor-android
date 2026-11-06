@@ -7,7 +7,7 @@ import com.thejawnpaul.gptinvestor.features.news.domain.model.StoryPriceBasis
 import com.thejawnpaul.gptinvestor.features.news.domain.model.StoryPriceStatus
 import com.thejawnpaul.gptinvestor.features.news.domain.model.StorySource
 import com.thejawnpaul.gptinvestor.features.news.domain.model.StoryStock
-import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.formatPrice
+import com.thejawnpaul.gptinvestor.features.watchlist.presentation.formatPrice
 import kotlinx.datetime.TimeZone
 
 private const val LOGO_STACK_MAX = 3
@@ -130,7 +130,7 @@ fun StoryStock.sheetUi(story: Story, watch: StockWatchState, timeZone: TimeZone 
         pending = watch.isPending(ticker),
         connection = connection ?: "$reason: “${story.title}”",
         source = source,
-        price = price.tilesUi(timeZone),
+        price = price.tilesUi(currencySymbol, timeZone),
         chart = chartUi()
     )
 
@@ -145,13 +145,13 @@ fun StoryStock.chartUi(): StoryChartUi? {
     )
 }
 
-fun StoryPrice.tilesUi(timeZone: TimeZone = TimeZone.currentSystemDefault()): PriceTilesUi {
+fun StoryPrice.tilesUi(currencySymbol: String, timeZone: TimeZone = TimeZone.currentSystemDefault()): PriceTilesUi {
     val closed = status == StoryPriceStatus.MARKET_CLOSED
     return PriceTilesUi(
         atStoryLabel = atStoryLabel(timeZone),
-        atStoryValue = atStory?.let(::formatPrice),
+        atStoryValue = atStory?.let { formatPrice(it, currencySymbol) },
         nowLabel = nowLabel(timeZone),
-        nowValue = now?.takeIf { !closed }?.let(::formatPrice),
+        nowValue = now?.takeIf { !closed }?.let { formatPrice(it, currencySymbol) },
         badge = when {
             status == StoryPriceStatus.HALTED -> PriceBadge.Halted
             status == StoryPriceStatus.LIVE && changePercent != null -> PriceBadge.Change(changePercent)

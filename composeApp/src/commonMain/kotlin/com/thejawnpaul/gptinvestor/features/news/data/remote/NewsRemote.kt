@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.news.data.remote
 
+import com.thejawnpaul.gptinvestor.core.utility.DEFAULT_CURRENCY_SYMBOL
 import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.features.news.domain.model.Explainer
 import com.thejawnpaul.gptinvestor.features.news.domain.model.ExplainerRef
@@ -63,6 +64,7 @@ data class StoryStockRemote(
     @SerialName("source") val source: StorySourceRemote? = null,
     @SerialName("on_watchlist") val onWatchlist: Boolean = false,
     @SerialName("price") val price: StoryPriceRemote = StoryPriceRemote(),
+    @SerialName("currency_symbol") val currencySymbol: String? = null,
     @SerialName("history") val history: List<PricePointRemote> = emptyList(),
     @SerialName("history_story_index") val historyStoryIndex: Int? = null
 )
@@ -149,6 +151,7 @@ fun StoryStockRemote.toDomain() = StoryStock(
     connection = connection?.takeIf { it.isNotBlank() },
     source = source?.toDomain(),
     isOnWatchlist = onWatchlist,
+    currencySymbol = currencySymbol?.takeIf { it.isNotBlank() } ?: DEFAULT_CURRENCY_SYMBOL,
     history = history.map { PricePoint(date = it.date, close = it.close) },
     historyStoryIndex = historyStoryIndex,
     price = StoryPrice(

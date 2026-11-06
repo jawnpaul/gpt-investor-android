@@ -17,7 +17,7 @@ class StoryUiTest {
 
     @Test
     fun `should label a live move from the story time`() {
-        val ui = price.tilesUi(utc)
+        val ui = price.tilesUi("$", utc)
 
         assertThat(ui.atStoryLabel).isEqualTo(AtStoryLabel.AtTime("15:12"))
         assertThat(ui.nowLabel).isEqualTo(NowLabel.AtTime("17:30"))
@@ -27,8 +27,16 @@ class StoryUiTest {
     }
 
     @Test
+    fun `should format prices in the stock's own currency`() {
+        val ui = price.copy(atStory = 1234.5, now = 1300.0).tilesUi("₦", utc)
+
+        assertThat(ui.atStoryValue).isEqualTo("₦1,234.50")
+        assertThat(ui.nowValue).isEqualTo("₦1,300.00")
+    }
+
+    @Test
     fun `should show market closed with the next open and no current price`() {
-        val ui = price.copy(status = StoryPriceStatus.MARKET_CLOSED, nextOpenTime = nowTime).tilesUi(utc)
+        val ui = price.copy(status = StoryPriceStatus.MARKET_CLOSED, nextOpenTime = nowTime).tilesUi("$", utc)
 
         assertThat(ui.nowLabel).isEqualTo(NowLabel.MarketClosed)
         assertThat(ui.nowValue).isNull()
@@ -38,7 +46,7 @@ class StoryUiTest {
 
     @Test
     fun `should say when an unavailable price last updated`() {
-        val ui = price.copy(status = StoryPriceStatus.UNAVAILABLE, now = null).tilesUi(utc)
+        val ui = price.copy(status = StoryPriceStatus.UNAVAILABLE, now = null).tilesUi("$", utc)
 
         assertThat(ui.nowLabel).isEqualTo(NowLabel.Now)
         assertThat(ui.note).isEqualTo(PriceNote.UnavailableSince("17:30"))
@@ -46,13 +54,13 @@ class StoryUiTest {
 
     @Test
     fun `should show halted instead of a change`() {
-        assertThat(price.copy(status = StoryPriceStatus.HALTED).tilesUi(utc).badge).isEqualTo(PriceBadge.Halted)
+        assertThat(price.copy(status = StoryPriceStatus.HALTED).tilesUi("$", utc).badge).isEqualTo(PriceBadge.Halted)
     }
 
     @Test
     fun `should name the dates for an older story and the weekday for a previous close`() {
-        val older = price.copy(basis = StoryPriceBasis.STORY_DATE).tilesUi(utc)
-        val beforeOpen = price.copy(basis = StoryPriceBasis.PREVIOUS_CLOSE).tilesUi(utc)
+        val older = price.copy(basis = StoryPriceBasis.STORY_DATE).tilesUi("$", utc)
+        val beforeOpen = price.copy(basis = StoryPriceBasis.PREVIOUS_CLOSE).tilesUi("$", utc)
 
         assertThat(older.atStoryLabel).isEqualTo(AtStoryLabel.StoryDate("21 Oct"))
         assertThat(older.nowLabel).isEqualTo(NowLabel.SinceDate("21 Oct"))
@@ -61,7 +69,7 @@ class StoryUiTest {
 
     @Test
     fun `should remind on big moves`() {
-        assertThat(price.copy(bigMove = true).tilesUi(utc).note).isEqualTo(PriceNote.BigMove)
+        assertThat(price.copy(bigMove = true).tilesUi("$", utc).note).isEqualTo(PriceNote.BigMove)
     }
 
     @Test

@@ -16,6 +16,7 @@ internal fun testStock(ticker: String, watched: Boolean = false) = StoryStock(
     connection = null,
     source = null,
     isOnWatchlist = watched,
+    currencySymbol = "$",
     price = StoryPrice(
         basis = StoryPriceBasis.STORY_TIME,
         atStory = 10.0,

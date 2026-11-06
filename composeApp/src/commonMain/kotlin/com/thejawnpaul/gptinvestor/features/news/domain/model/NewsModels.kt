@@ -33,6 +33,7 @@ data class StoryStock(
     val source: StorySource?,
     val isOnWatchlist: Boolean,
     val price: StoryPrice,
+    val currencySymbol: String,
     val history: List<PricePoint> = emptyList(),
     val historyStoryIndex: Int? = null
 )

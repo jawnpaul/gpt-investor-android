@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
-import com.thejawnpaul.gptinvestor.core.platform.isIos
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.news.domain.NewsFailure
 import com.thejawnpaul.gptinvestor.features.news.domain.NewsRepository
@@ -130,7 +129,7 @@ class StoryViewModel(
 
     private fun openShare(story: Story) {
         val url = story.shareImageUrl
-        if (url == null || isIos) {
+        if (url == null) {
             shareText(story)
             return
         }

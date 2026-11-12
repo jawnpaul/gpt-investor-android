@@ -578,6 +578,7 @@
     <string name="news_ask_stock_prompt">Wie hängt %1$s mit dieser Meldung zusammen?</string>
     <string name="news_share_story">Meldung teilen</string>
     <string name="news_story_unavailable_title">Diese Meldung ist nicht verfügbar</string>
+    <string name="news_story_loading">Meldung wird geladen</string>
     <string name="news_story_unavailable_body">Sie ist möglicherweise älter als ein paar Tage. Gehen Sie zurück, um die heutigen Meldungen zu sehen.</string>
     <string name="news_sheet_connected">So hängt sie mit dieser Meldung zusammen</string>
     <string name="news_sheet_at_story">Letzter Schlusskurs vor der Meldung</string>

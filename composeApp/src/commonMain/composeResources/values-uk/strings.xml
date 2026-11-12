@@ -592,6 +592,7 @@
     <string name="news_ask_stock_prompt">Як компанія %1$s пов’язана з цією новиною?</string>
     <string name="news_share_story">Поділитися новиною</string>
     <string name="news_story_unavailable_title">Ця новина недоступна</string>
+    <string name="news_story_loading">Завантаження новини</string>
     <string name="news_story_unavailable_body">Можливо, їй уже кілька днів. Поверніться, щоб переглянути сьогоднішні новини.</string>
     <string name="news_sheet_connected">Як вона пов’язана з цією новиною</string>
     <string name="news_sheet_at_story">Останнє закриття перед новиною</string>

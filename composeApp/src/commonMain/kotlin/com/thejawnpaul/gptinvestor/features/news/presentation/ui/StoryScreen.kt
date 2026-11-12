@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,7 +45,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -78,6 +82,7 @@ import com.thejawnpaul.gptinvestor.news_sheet_connected
 import com.thejawnpaul.gptinvestor.news_sheet_subtitle_watched
 import com.thejawnpaul.gptinvestor.news_sheet_view_company
 import com.thejawnpaul.gptinvestor.news_story_error_title
+import com.thejawnpaul.gptinvestor.news_story_loading
 import com.thejawnpaul.gptinvestor.news_story_unavailable_body
 import com.thejawnpaul.gptinvestor.news_story_unavailable_title
 import com.thejawnpaul.gptinvestor.source
@@ -100,7 +105,7 @@ import com.thejawnpaul.gptinvestor.theme.components.GiIcons
 import com.thejawnpaul.gptinvestor.theme.components.GiImage
 import com.thejawnpaul.gptinvestor.theme.components.GiLogoTile
 import com.thejawnpaul.gptinvestor.theme.components.GiSectionHeader
-import com.thejawnpaul.gptinvestor.theme.components.GiSpinner
+import com.thejawnpaul.gptinvestor.theme.components.GiSkeleton
 import com.thejawnpaul.gptinvestor.theme.components.GiText
 import com.thejawnpaul.gptinvestor.theme.components.GiTextStyle
 import com.thejawnpaul.gptinvestor.theme.components.GiToastHost
@@ -192,7 +197,7 @@ fun StoryScreen(
                     modifier = contentModifier
                 )
 
-                StoryContent.Loading -> Box(contentModifier, contentAlignment = Alignment.Center) { GiSpinner() }
+                StoryContent.Loading -> StorySkeleton(modifier = contentModifier)
 
                 StoryContent.Unavailable -> GiEmptyState(
                     icon = GiIcons.newspaper,
@@ -345,6 +350,29 @@ private fun StoryHeader(story: Story, meta: String, onReadFull: () -> Unit) {
             variant = GiButtonVariant.Text,
             leadingIcon = GiIcons.arrowSquareOut
         )
+    }
+}
+
+@Composable
+private fun StorySkeleton(modifier: Modifier = Modifier) {
+    val loading = stringResource(Res.string.news_story_loading)
+    Column(
+        modifier = modifier
+            .padding(start = GiSpace.gutter, end = GiSpace.gutter, top = GiSpace.x2)
+            .semantics {
+                contentDescription = loading
+                liveRegion = LiveRegionMode.Polite
+            },
+        verticalArrangement = Arrangement.spacedBy(GiSpace.x2)
+    ) {
+        GiSkeleton(modifier = Modifier.fillMaxWidth().height(180.dp), shape = GiRadius.md)
+        GiSkeleton(modifier = Modifier.padding(top = GiSpace.x1).fillMaxWidth(0.4f).height(12.dp))
+        GiSkeleton(modifier = Modifier.fillMaxWidth().height(GiSpace.x7))
+        GiSkeleton(modifier = Modifier.fillMaxWidth(0.7f).height(GiSpace.x7))
+        Spacer(modifier = Modifier.height(GiSpace.x1))
+        listOf(1f, 1f, 1f, 0.62f).forEach { fraction ->
+            GiSkeleton(modifier = Modifier.fillMaxWidth(fraction).height(14.dp))
+        }
     }
 }
 

@@ -578,6 +578,7 @@
     <string name="news_ask_stock_prompt">%1$s کا اس خبر سے کیا تعلق ہے؟</string>
     <string name="news_share_story">خبر شیئر کریں</string>
     <string name="news_story_unavailable_title">یہ خبر دستیاب نہیں</string>
+    <string name="news_story_loading">خبر لوڈ ہو رہی ہے</string>
     <string name="news_story_unavailable_body">ہو سکتا ہے یہ چند دن سے زیادہ پرانی ہو۔ آج کی خبریں دیکھنے کے لیے واپس جائیں۔</string>
     <string name="news_sheet_connected">اس خبر سے اس کا تعلق</string>
     <string name="news_sheet_at_story">خبر سے پہلے کی آخری بندش قیمت</string>

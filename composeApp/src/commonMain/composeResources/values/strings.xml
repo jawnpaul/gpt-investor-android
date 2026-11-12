@@ -579,6 +579,7 @@
     <string name="news_ask_stock_prompt">How is %1$s connected to this story?</string>
     <string name="news_share_story">Share story</string>
     <string name="news_story_unavailable_title">This story isn’t available</string>
+    <string name="news_story_loading">Loading story</string>
     <string name="news_story_unavailable_body">It may be more than a few days old. Go back to see today’s stories.</string>
     <string name="news_sheet_connected">How it’s connected to this story</string>
     <string name="news_sheet_at_story">Last close before the story</string>

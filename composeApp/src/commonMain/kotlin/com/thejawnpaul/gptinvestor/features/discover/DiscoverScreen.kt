@@ -135,6 +135,7 @@ fun DiscoverScreen(
                 modifier = Modifier.fillMaxSize(),
                 verticalAlignment = Alignment.Top,
                 beyondViewportPageCount = 1,
+                userScrollEnabled = false,
                 key = { it }
             ) { page ->
                 if (page == NEWS_PAGE) news() else picks()

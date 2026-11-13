@@ -29,7 +29,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.Compa
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.ui.ConversationScreen
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationAction
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.ConversationViewModel
-import com.thejawnpaul.gptinvestor.features.discover.DiscoverScreen
+import com.thejawnpaul.gptinvestor.features.discover.DiscoverSection
 import com.thejawnpaul.gptinvestor.features.discover.DiscoverViewModel
 import com.thejawnpaul.gptinvestor.features.discover.DiscoveryAction
 import com.thejawnpaul.gptinvestor.features.guest.presentation.GuestScreen
@@ -125,6 +125,12 @@ fun NavGraphBuilder.guestNavGraph(
                         )
                     }
 
+                    is HomeAction.NavigateToNewsStory -> navController.openStory(action.id, isGuest = true)
+
+                    HomeAction.NavigateToDiscoverNews -> {
+                        navController.navigateToDiscover(DiscoverSection.NEWS, isGuest = true)
+                    }
+
                     HomeAction.NavigateToDigestDetail -> {
                     }
 
@@ -195,10 +201,12 @@ fun NavGraphBuilder.guestNavGraph(
             }.launchIn(scope)
         }
 
-        DiscoverScreen(
-            modifier = Modifier,
-            state = state.value,
-            onEvent = viewModel::handleEvent
+        DiscoverTabsDestination(
+            navController = navController,
+            backStackEntry = it,
+            isGuest = true,
+            picksState = state.value,
+            onPicksEvent = viewModel::handleEvent
         )
     }
 
@@ -240,6 +248,14 @@ fun NavGraphBuilder.guestNavGraph(
                 nullable = true
             },
             navArgument("title") {
+                type = NavType.StringType
+                nullable = true
+            },
+            navArgument("ticker") {
+                type = NavType.StringType
+                nullable = true
+            },
+            navArgument("storyId") {
                 type = NavType.StringType
                 nullable = true
             }

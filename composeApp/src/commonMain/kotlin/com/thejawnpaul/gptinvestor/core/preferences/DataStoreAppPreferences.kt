@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -35,6 +36,7 @@ class DataStoreAppPreferences(private val dataStore: DataStore<Preferences>) : A
             booleanPreferencesKey("has_completed_post_auth_onboarding_preference")
         private val HAS_SEEN_BRIEF_SPOTLIGHT_KEY = booleanPreferencesKey("has_seen_brief_spotlight_preference")
         private val BROWSE_MARKET_KEY = stringPreferencesKey("browse_market_preference")
+        private val NEWS_LAST_SEEN_AT_KEY = longPreferencesKey("news_last_seen_at_preference")
     }
 
     override val themePreference: Flow<String?> = dataStore.data.map { preferences ->
@@ -291,6 +293,16 @@ class DataStoreAppPreferences(private val dataStore: DataStore<Preferences>) : A
     override suspend fun setBrowseMarket(market: String?) {
         dataStore.edit { preferences ->
             if (market == null) preferences.remove(BROWSE_MARKET_KEY) else preferences[BROWSE_MARKET_KEY] = market
+        }
+    }
+
+    override val newsLastSeenAt: Flow<Long?> = dataStore.data.map { preferences ->
+        preferences[NEWS_LAST_SEEN_AT_KEY]
+    }
+
+    override suspend fun setNewsLastSeenAt(epochSeconds: Long) {
+        dataStore.edit { preferences ->
+            preferences[NEWS_LAST_SEEN_AT_KEY] = epochSeconds
         }
     }
 

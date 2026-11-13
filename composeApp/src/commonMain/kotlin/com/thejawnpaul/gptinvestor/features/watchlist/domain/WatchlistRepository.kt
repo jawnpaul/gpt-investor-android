@@ -7,9 +7,12 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.utility.DEFAULT_CURRENCY_SYMBOL
 import com.thejawnpaul.gptinvestor.core.utility.toHttpsUrl
 import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistRequest
+import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.WatchlistBatchRequest
+import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistBatchResult
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistData
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.WatchlistItem
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.model.watchlistBriefStatusOf
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -26,6 +29,8 @@ interface WatchlistRepository {
     suspend fun addStockToWatchList(ticker: String): Either<Failure, Unit>
     suspend fun getWatchlist(): Either<Failure, WatchlistData>
     suspend fun removeFromWatchlist(ticker: String): Either<Failure, Unit>
+    suspend fun addStocksToWatchlist(tickers: List<String>): Either<Failure, WatchlistBatchResult>
+    suspend fun removeStocksFromWatchlist(tickers: List<String>): Either<Failure, List<String>>
 }
 
 @Singleton(binds = [WatchlistRepository::class])
@@ -96,6 +101,36 @@ class WatchlistRepositoryImpl(
         Either.Left(Failure.NetworkConnection)
     }
 
+    override suspend fun addStocksToWatchlist(tickers: List<String>): Either<Failure, WatchlistBatchResult> = try {
+        val response = apiService.addToWatchlistBatch(WatchlistBatchRequest(tickers = tickers))
+        val body = response.body
+        if (response.isSuccessful && body != null) {
+            _changes.tryEmit(Unit)
+            Either.Right(WatchlistBatchResult(added = body.added, alreadyWatched = body.alreadyWatched))
+        } else {
+            mapErrorResponse(response.code, response.errorBody)
+        }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Either.Left(Failure.NetworkConnection)
+    }
+
+    override suspend fun removeStocksFromWatchlist(tickers: List<String>): Either<Failure, List<String>> = try {
+        val response = apiService.removeFromWatchlistBatch(WatchlistBatchRequest(tickers = tickers))
+        val body = response.body
+        if (response.isSuccessful && body != null) {
+            _changes.tryEmit(Unit)
+            Either.Right(body.removed)
+        } else {
+            mapErrorResponse(response.code, response.errorBody)
+        }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Either.Left(Failure.NetworkConnection)
+    }
+
     private fun mapErrorResponse(code: Int, errorBody: String?): Either.Left<Failure> = when (code) {
         401 -> Either.Left(Failure.ServerError)
         403 -> Either.Left(WatchlistFailure.SignUpRequired)
@@ -103,10 +138,11 @@ class WatchlistRepositoryImpl(
         409 -> {
             val body = errorBody?.let { runCatching { Json.parseToJsonElement(it).jsonObject }.getOrNull() }
             val cap = body?.get("cap")?.jsonPrimitive?.content?.toIntOrNull()
+            val used = body?.get("used")?.jsonPrimitive?.content?.toIntOrNull()
             if (body?.get("error")?.jsonPrimitive?.content == ERROR_WATCHLIST_FULL) {
                 logWatchlistFull(cap)
             }
-            Either.Left(WatchlistFailure.WatchlistFull(cap ?: 0))
+            Either.Left(WatchlistFailure.WatchlistFull(cap ?: 0, used))
         }
         400 -> {
             val message = errorBody?.let {

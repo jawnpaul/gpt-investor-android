@@ -32,6 +32,7 @@ fun GiCard(
     onClick: (() -> Unit)? = null,
     contentPadding: PaddingValues = PaddingValues(GiSpace.cardPad),
     spacing: Dp = GiSpace.x3,
+    borderColor: Color? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = GiTheme.colors
@@ -41,7 +42,7 @@ fun GiCard(
         modifier = modifier
             .clip(GiRadius.md)
             .background(colors.raised)
-            .border(GiEdge.width, colors.line, GiRadius.md)
+            .border(GiEdge.width, borderColor ?: colors.line, GiRadius.md)
             .then(
                 if (onClick != null) {
                     Modifier.clickable(

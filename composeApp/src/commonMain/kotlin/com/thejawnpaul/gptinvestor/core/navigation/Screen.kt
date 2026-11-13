@@ -26,6 +26,14 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
 
     data object AllTopPicksScreen : Screen("all_top_picks_screen", false)
 
+    data object StoryScreen : Screen("story_screen/{storyId}", false) {
+        fun createRoute(storyId: String) = "story_screen/${storyId.encodeURLParameter()}"
+    }
+
+    data object ExplainerScreen : Screen("explainer_screen/{storyId}", false) {
+        fun createRoute(storyId: String) = "explainer_screen/${storyId.encodeURLParameter()}"
+    }
+
     data object SavedTopPicksScreen : Screen("saved_top_picks", false)
 
     data object SettingsScreen : Screen("settings_screen", false)
@@ -33,9 +41,14 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
     data object AuthenticationScreen : Screen("authentication_screen", false)
 
     data object ConversationScreen :
-        Screen("conversation_screen?chatInput={chatInput}&title={title}", false) {
+        Screen("conversation_screen?chatInput={chatInput}&title={title}&ticker={ticker}&storyId={storyId}", false) {
 
-        fun createRoute(chatInput: String, title: String? = null): String {
+        fun createRoute(
+            chatInput: String,
+            title: String? = null,
+            ticker: String? = null,
+            storyId: String? = null
+        ): String {
             val params = mutableListOf<String>()
 
             if (chatInput.isNotEmpty()) {
@@ -47,6 +60,9 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
             if (title != null) {
                 params.add("title=${title.encodeURLParameter()}")
             }
+
+            ticker?.let { params.add("ticker=${it.encodeURLParameter()}") }
+            storyId?.let { params.add("storyId=${it.encodeURLParameter()}") }
 
             return if (params.isEmpty()) {
                 "conversation_screen"

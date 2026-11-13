@@ -30,6 +30,14 @@ fun NavGraphBuilder.conversationNavGraph(navController: NavHostController, platf
             navArgument("title") {
                 type = NavType.StringType
                 nullable = true
+            },
+            navArgument("ticker") {
+                type = NavType.StringType
+                nullable = true
+            },
+            navArgument("storyId") {
+                type = NavType.StringType
+                nullable = true
             }
         )
     ) {

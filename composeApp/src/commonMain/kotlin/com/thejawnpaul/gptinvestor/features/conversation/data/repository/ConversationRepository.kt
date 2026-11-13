@@ -128,7 +128,11 @@ class ConversationRepository(
             )
             emit(Either.Right(structuredConversation))
 
-            val aiChatRequest = AiChatRequest(prompt = prompt.query)
+            val aiChatRequest = AiChatRequest(
+                prompt = prompt.query,
+                tickerSymbol = prompt.tickerSymbol,
+                storyId = prompt.storyId
+            )
             val isGuest = appPreferences.isGuestLoggedIn.first() == true
             apiService.chatAiResponse(aiChatRequest) { chatResponse ->
                 if (chatResponse.status.value in 200..299) {
@@ -219,7 +223,8 @@ class ConversationRepository(
             val aiChatRequest = AiChatRequest(
                 prompt = prompt.query,
                 conversationId = entity?.remoteId,
-                tickerSymbol = prompt.tickerSymbol
+                tickerSymbol = prompt.tickerSymbol,
+                storyId = prompt.storyId
             )
             val isGuestInput = appPreferences.isGuestLoggedIn.first() == true
             apiService.chatAiResponse(aiChatRequest) { chatResponse ->

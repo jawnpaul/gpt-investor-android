@@ -61,6 +61,7 @@ class SearchViewModel(
             }
             is SearchEvent.OnSectorClick -> {
                 analyticsLogger.logEvent("search-sector-tapped", mapOf("sector_key" to event.key))
+                analyticsLogger.logEvent("browse-stocks-opened", mapOf("source" to "search_sector"))
                 emitAction(SearchAction.OnNavigateToSector(event.key))
             }
             is SearchEvent.OnPromptClick -> {

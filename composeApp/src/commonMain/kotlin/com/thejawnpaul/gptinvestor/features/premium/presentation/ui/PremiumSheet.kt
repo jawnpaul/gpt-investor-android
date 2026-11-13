@@ -48,20 +48,21 @@ fun PremiumSheet(
     modifier: Modifier = Modifier
 ) {
     val cap = state.watchlistCap
+    val used = state.slotsUsed
     GiBottomSheet(
         onDismissRequest = onDismiss,
         title = stringResource(Res.string.premium_sheet_title),
         closeContentDescription = stringResource(Res.string.close),
         modifier = modifier,
         eyebrow = { GiProTag(tone = GiProTagTone.Standalone) },
-        subtitle = if (cap != null) {
-            stringResource(Res.string.premium_sheet_subtitle_watchlist_full, cap, cap)
+        subtitle = if (cap != null && used != null) {
+            stringResource(Res.string.premium_sheet_subtitle_watchlist_full, used, cap)
         } else {
             stringResource(Res.string.premium_sheet_subtitle)
         }
     ) {
-        if (cap != null) {
-            WatchlistSlotMeter(cap = cap, ticker = state.ticker)
+        if (cap != null && used != null) {
+            WatchlistSlotMeter(cap = cap, used = used, ticker = state.ticker)
         }
         Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
             GiPerkRow(
@@ -104,13 +105,13 @@ fun PremiumSheet(
 }
 
 @Composable
-private fun WatchlistSlotMeter(cap: Int, ticker: String?, modifier: Modifier = Modifier) {
+private fun WatchlistSlotMeter(cap: Int, used: Int, ticker: String?, modifier: Modifier = Modifier) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
         if (cap <= MAX_METER_SEGMENTS) {
             GiStepBar(
                 count = cap,
-                current = cap - 1,
-                contentDescription = stringResource(Res.string.watchlist_slots_used, cap, cap)
+                current = used - 1,
+                contentDescription = stringResource(Res.string.watchlist_slots_used, used, cap)
             )
         }
         GiText(

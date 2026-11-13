@@ -90,7 +90,10 @@ class DiscoverViewModel(
                 processAction(DiscoveryAction.OnGoToSearch)
             }
 
-            DiscoveryEvent.GoToBrowse -> processAction(DiscoveryAction.OnGoToBrowse)
+            DiscoveryEvent.GoToBrowse -> {
+                analyticsLogger.logEvent("browse-stocks-opened", mapOf("source" to "discover_picks"))
+                processAction(DiscoveryAction.OnGoToBrowse)
+            }
             DiscoveryEvent.GoToAllTopPicks -> processAction(DiscoveryAction.OnGoToAllTopPicks)
             DiscoveryEvent.RetryTidbit -> getTodayTidbit()
             DiscoveryEvent.RetryTopPicks -> getTopPicks()

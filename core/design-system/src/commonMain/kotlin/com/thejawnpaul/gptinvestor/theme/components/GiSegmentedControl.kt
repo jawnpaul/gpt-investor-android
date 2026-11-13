@@ -1,5 +1,13 @@
 package com.thejawnpaul.gptinvestor.theme.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -10,6 +18,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
@@ -24,17 +33,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.thejawnpaul.gptinvestor.theme.GiEasing
 import com.thejawnpaul.gptinvestor.theme.GiEdge
 import com.thejawnpaul.gptinvestor.theme.GiMotion
 import com.thejawnpaul.gptinvestor.theme.GiRadius
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 
 @Composable
 fun GiSegmentedControl(
@@ -42,7 +55,9 @@ fun GiSegmentedControl(
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    dotIndices: Set<Int> = emptySet(),
+    dotDescription: String? = null
 ) {
     val colors = GiTheme.colors
     Row(
@@ -61,7 +76,8 @@ fun GiSegmentedControl(
                 selected = index == selectedIndex,
                 enabled = enabled,
                 onClick = { onSelect(index) },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                dotDescription = if (index in dotIndices) dotDescription.orEmpty() else null
             )
         }
     }
@@ -73,7 +89,8 @@ private fun GiSegment(
     selected: Boolean,
     enabled: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    dotDescription: String? = null
 ) {
     val colors = GiTheme.colors
     val haptics = LocalHapticFeedback.current
@@ -99,18 +116,54 @@ private fun GiSegment(
                 }
             )
             .background(colors.ink.copy(alpha = if (selected) 0f else pressedLayerAlpha(interactionSource)))
-            .padding(horizontal = GiSpace.x3),
+            .padding(horizontal = GiSpace.x3)
+            .then(
+                if (!dotDescription.isNullOrEmpty()) {
+                    Modifier.semantics {
+                        stateDescription = dotDescription
+                    }
+                } else {
+                    Modifier
+                }
+            ),
         contentAlignment = Alignment.Center
     ) {
-        GiText(
-            text = text,
-            style = GiTextStyle.BodySmall,
-            color = if (selected) colors.ink else colors.muted,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        val reducedMotion = isReducedMotionEnabled()
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            GiText(
+                text = text,
+                style = GiTextStyle.BodySmall,
+                color = if (selected) colors.ink else colors.muted,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false)
+            )
+            AnimatedVisibility(
+                visible = dotDescription != null,
+                enter = if (reducedMotion) {
+                    EnterTransition.None
+                } else {
+                    expandHorizontally(GiMotion.snappy(), expandFrom = Alignment.Start) +
+                        fadeIn(tween(GiMotion.FAST, easing = GiEasing.emphasised))
+                },
+                exit = if (reducedMotion) {
+                    ExitTransition.None
+                } else {
+                    shrinkHorizontally(GiMotion.snappy(), shrinkTowards = Alignment.Start) +
+                        fadeOut(tween(GiMotion.FAST, easing = GiEasing.emphasised))
+                }
+            ) {
+                Box(
+                    modifier = Modifier
+                        .padding(start = GiSpace.x1_5)
+                        .size(6.dp)
+                        .clip(GiRadius.full)
+                        .background(colors.violet)
+                )
+            }
+        }
     }
 }
 

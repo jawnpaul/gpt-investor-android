@@ -69,5 +69,8 @@ interface AppPreferences {
     val browseMarket: Flow<String?>
     suspend fun setBrowseMarket(market: String?)
 
+    val newsLastSeenAt: Flow<Long?>
+    suspend fun setNewsLastSeenAt(epochSeconds: Long)
+
     suspend fun clearSessionData()
 }

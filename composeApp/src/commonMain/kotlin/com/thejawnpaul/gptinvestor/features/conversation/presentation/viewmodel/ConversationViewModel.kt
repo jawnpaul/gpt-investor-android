@@ -69,6 +69,8 @@ class ConversationViewModel(
 
     val title: String? = savedStateHandle["title"]
     val chatInput: String? = savedStateHandle["chatInput"]
+    private val contextTicker: String? = savedStateHandle["ticker"]
+    private val contextStoryId: String? = savedStateHandle["storyId"]
 
     private var requestStartTime: Long = 0L
 
@@ -165,6 +167,8 @@ class ConversationViewModel(
             ConversationPrompt(
                 conversationId = selectedConversationId.value,
                 query = query,
+                tickerSymbol = contextTicker,
+                storyId = contextStoryId,
                 replacesMessageId = replacesMessageId
             )
         ) {
@@ -533,7 +537,9 @@ class ConversationViewModel(
                 ConversationEvent.DefaultPromptClicked(
                     prompt = DefaultPrompt(
                         title = resolved.first!!,
-                        query = resolved.second
+                        query = resolved.second,
+                        tickerSymbol = contextTicker,
+                        storyId = contextStoryId
                     )
                 )
             )

@@ -34,12 +34,50 @@ fun GiImage(
     shape: Shape = RectangleShape,
     fallback: @Composable () -> Unit = {}
 ) {
-    var isLoaded by remember(url) { mutableStateOf(false) }
+    GiModelImage(
+        model = url?.takeIf { it.isNotBlank() },
+        contentDescription = contentDescription,
+        contentScale = contentScale,
+        shape = shape,
+        modifier = modifier,
+        fallback = fallback
+    )
+}
+
+@Composable
+fun GiImage(
+    bytes: ByteArray?,
+    modifier: Modifier = Modifier,
+    contentDescription: String? = null,
+    contentScale: ContentScale = ContentScale.Crop,
+    shape: Shape = RectangleShape,
+    fallback: @Composable () -> Unit = {}
+) {
+    GiModelImage(
+        model = bytes,
+        contentDescription = contentDescription,
+        contentScale = contentScale,
+        shape = shape,
+        modifier = modifier,
+        fallback = fallback
+    )
+}
+
+@Composable
+private fun GiModelImage(
+    model: Any?,
+    contentDescription: String?,
+    contentScale: ContentScale,
+    shape: Shape,
+    modifier: Modifier = Modifier,
+    fallback: @Composable () -> Unit
+) {
+    var isLoaded by remember(model) { mutableStateOf(false) }
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         if (!isLoaded) fallback()
-        if (!url.isNullOrBlank()) {
+        if (model != null) {
             AsyncImage(
-                model = url,
+                model = model,
                 contentDescription = contentDescription,
                 modifier = Modifier.matchParentSize().clip(shape),
                 contentScale = contentScale,

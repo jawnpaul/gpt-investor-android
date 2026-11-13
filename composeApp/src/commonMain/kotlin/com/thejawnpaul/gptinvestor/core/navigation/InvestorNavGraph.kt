@@ -9,6 +9,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.DigestDetailScreen
+import com.thejawnpaul.gptinvestor.features.discover.DiscoverSection
 import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeEvent
@@ -60,6 +61,12 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController) {
 
                     HomeAction.NavigateToDiscover -> {
                         navController.navigateToTab(Screen.DiscoverTabScreen.route, Screen.HomeTabScreen.route)
+                    }
+
+                    is HomeAction.NavigateToNewsStory -> navController.openStory(action.id, isGuest = false)
+
+                    HomeAction.NavigateToDiscoverNews -> {
+                        navController.navigateToDiscover(DiscoverSection.NEWS, isGuest = false)
                     }
 
                     HomeAction.NavigateToDigestDetail -> {

@@ -29,6 +29,9 @@ import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.LockedStockDi
 import com.thejawnpaul.gptinvestor.features.digest.presentation.ui.StockDigestPresentation
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction.OnStartConversation
+import com.thejawnpaul.gptinvestor.features.news.domain.NewsRepository
+import com.thejawnpaul.gptinvestor.features.news.presentation.StoryCardUi
+import com.thejawnpaul.gptinvestor.features.news.presentation.toCard
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
 import com.thejawnpaul.gptinvestor.features.premium.domain.PREMIUM_SOURCE_WATCHLIST_FULL
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
@@ -69,7 +72,8 @@ class HomeViewModel(
     private val digestRepository: DigestRepository,
     private val watchlistRepository: WatchlistRepository,
     private val premiumEventBus: PremiumEventBus,
-    private val billingRepository: IBillingRepository
+    private val billingRepository: IBillingRepository,
+    private val newsRepository: NewsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -108,6 +112,7 @@ class HomeViewModel(
         getCurrentUser()
         logHomeScreenViewed()
         getDailyDigest()
+        getTopStory()
 
         viewModelScope.launch {
             billingRepository.purchaseVerified.collect { getDailyDigest() }
@@ -440,6 +445,16 @@ class HomeViewModel(
 
                 HomeEvent.RetryDailyDigest -> getDailyDigest()
 
+                HomeEvent.OpenTopStory -> _uiState.value.topStory?.let { story ->
+                    analyticsLogger.logEvent(
+                        eventName = "story-opened",
+                        params = mapOf("story_id" to story.id, "source" to "home_card")
+                    )
+                    _actions.emit(HomeAction.NavigateToNewsStory(story.id))
+                }
+
+                HomeEvent.SeeAllNews -> _actions.emit(HomeAction.NavigateToDiscoverNews)
+
                 is HomeEvent.ClickDigestStock -> {
                     analyticsLogger.logEvent(
                         eventName = "digest-stock-tapped",
@@ -509,6 +524,15 @@ class HomeViewModel(
                     "is_returning_user" to !isFirstInstall
                 )
             )
+        }
+    }
+
+    private fun getTopStory() {
+        viewModelScope.launch {
+            newsRepository.getTopStory().onSuccess { story ->
+                val now = Clock.System.now().epochSeconds
+                _uiState.update { it.copy(topStory = story?.toCard(now, showWhy = false)) }
+            }
         }
     }
 
@@ -657,7 +681,8 @@ data class HomeUiState(
     val timePeriod: TimePeriod = TimePeriod.MORNING,
     val todayLabel: String? = null,
     val firstName: String? = null,
-    val dailyDigestView: DailyDigestView = DailyDigestView(loading = true)
+    val dailyDigestView: DailyDigestView = DailyDigestView(loading = true),
+    val topStory: StoryCardUi? = null
 )
 
 sealed interface HomeEvent {
@@ -683,6 +708,8 @@ sealed interface HomeEvent {
     data object DigestDetailUnlockPremium : HomeEvent
     data object RetryDailyDigest : HomeEvent
     data class ClickDigestStock(val ticker: String) : HomeEvent
+    data object OpenTopStory : HomeEvent
+    data object SeeAllNews : HomeEvent
 }
 
 sealed interface HomeAction {
@@ -696,4 +723,6 @@ sealed interface HomeAction {
     data object NavigateToDiscover : HomeAction
     data object NavigateToDigestDetail : HomeAction
     data object NavigateToProfile : HomeAction
+    data class NavigateToNewsStory(val id: String) : HomeAction
+    data object NavigateToDiscoverNews : HomeAction
 }

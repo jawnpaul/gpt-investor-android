@@ -30,6 +30,10 @@ import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityRe
 import com.thejawnpaul.gptinvestor.features.conversation.data.remote.GetEntityResponse
 import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.DigestResponse
 import com.thejawnpaul.gptinvestor.features.guest.data.remote.GuestLoginRequest
+import com.thejawnpaul.gptinvestor.features.news.data.remote.ExplainerRemote
+import com.thejawnpaul.gptinvestor.features.news.data.remote.NewsFeedRemote
+import com.thejawnpaul.gptinvestor.features.news.data.remote.StoryRemote
+import com.thejawnpaul.gptinvestor.features.news.data.remote.TopStoryRemote
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenResponse
 import com.thejawnpaul.gptinvestor.features.onboarding.data.remote.OnboardingSuggestionsRemote
@@ -47,13 +51,18 @@ import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitLikeRespons
 import com.thejawnpaul.gptinvestor.features.tidbit.data.remote.TidbitRemote
 import com.thejawnpaul.gptinvestor.features.toppick.data.remote.TopPickRemote
 import com.thejawnpaul.gptinvestor.features.trial.data.remote.model.StartTrialResponse
+import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistBatchResponse
 import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistRequest
 import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.AddWatchlistResponse
+import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.RemoveWatchlistBatchResponse
 import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.RemoveWatchlistResponse
+import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.WatchlistBatchRequest
 import com.thejawnpaul.gptinvestor.features.watchlist.data.remote.model.WatchlistResponse
 import com.thejawnpaul.gptinvestor.remote.TokenResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.auth.AuthCircuitBreaker
+import io.ktor.client.request.accept
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -66,6 +75,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.encodeURLPathPart
 import io.ktor.http.isSuccess
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
@@ -259,7 +269,38 @@ class KtorApiService(@Provided private val client: HttpClient) {
     suspend fun removeFromWatchlist(ticker: String): KtorResponse<RemoveWatchlistResponse> =
         client.delete("v1/watchlist/$ticker").toKtorResponse()
 
+    suspend fun addToWatchlistBatch(request: WatchlistBatchRequest): KtorResponse<AddWatchlistBatchResponse> =
+        client.post("v1/watchlist/batch") {
+            setBody(request)
+        }.toKtorResponse()
+
+    suspend fun removeFromWatchlistBatch(request: WatchlistBatchRequest): KtorResponse<RemoveWatchlistBatchResponse> =
+        client.post("v1/watchlist/batch/remove") {
+            setBody(request)
+        }.toKtorResponse()
+
     suspend fun getDailyDigest(): KtorResponse<DigestResponse> = client.get("v1/digest").toKtorResponse()
+
+    suspend fun getNewsFeed(filter: String, page: Int, pageSize: Int, asOf: Long?): KtorResponse<NewsFeedRemote> =
+        client.get("v1/news") {
+            parameter("filter", filter)
+            parameter("page", page)
+            parameter("page_size", pageSize)
+            if (asOf != null) parameter("as_of", asOf)
+        }.toKtorResponse()
+
+    suspend fun getStory(id: String): KtorResponse<StoryRemote> =
+        client.get("v1/news/${id.encodeURLPathPart()}").toKtorResponse()
+
+    suspend fun getTopStory(): KtorResponse<TopStoryRemote> = client.get("v1/news/top-story").toKtorResponse()
+
+    suspend fun getExplainer(storyId: String): KtorResponse<ExplainerRemote> =
+        client.get("v1/news/${storyId.encodeURLPathPart()}/explainer").toKtorResponse()
+
+    suspend fun getShareImage(url: String): KtorResponse<ByteArray> = client.get(url) {
+        attributes.put(AuthCircuitBreaker, Unit)
+        accept(ContentType.Image.PNG)
+    }.toKtorResponse()
 
     suspend fun startFreeTrial(): KtorResponse<StartTrialResponse> = client.post("v1/trial/start").toKtorResponse()
 

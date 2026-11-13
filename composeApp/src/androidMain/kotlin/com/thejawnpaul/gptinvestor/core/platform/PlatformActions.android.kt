@@ -8,7 +8,11 @@ import android.os.Build
 import android.provider.Settings
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Factory
 
 @Factory
@@ -47,6 +51,31 @@ actual class PlatformActions(private val context: Context, private val toastMess
         context.startActivity(chooser)
     }
 
+    actual suspend fun shareImage(png: ByteArray, text: String) {
+        val uri = withContext(Dispatchers.IO) {
+            runCatching {
+                val dir = File(context.cacheDir, SHARE_DIR).apply { mkdirs() }
+                val file = File(dir, SHARE_FILE)
+                file.writeBytes(png)
+                FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+            }.getOrNull()
+        }
+        if (uri == null) {
+            shareText(text)
+            return
+        }
+        val sendIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "image/png"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            putExtra(Intent.EXTRA_TEXT, text)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        val chooser = Intent.createChooser(sendIntent, "Share via").apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        context.startActivity(chooser)
+    }
+
     actual fun openNotificationSettings() {
         val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
@@ -55,5 +84,10 @@ actual class PlatformActions(private val context: Context, private val toastMess
         }
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         runCatching { context.startActivity(intent) }
+    }
+
+    private companion object {
+        const val SHARE_DIR = "shared"
+        const val SHARE_FILE = "gpt-investor-story.png"
     }
 }

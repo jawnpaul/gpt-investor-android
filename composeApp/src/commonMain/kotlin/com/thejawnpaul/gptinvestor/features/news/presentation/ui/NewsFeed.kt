@@ -35,6 +35,8 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -44,6 +46,9 @@ import androidx.paging.compose.itemKey
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.check_connection_try_again
 import com.thejawnpaul.gptinvestor.features.news.domain.model.NewsTopic
+import com.thejawnpaul.gptinvestor.features.news.domain.model.StoryPrice
+import com.thejawnpaul.gptinvestor.features.news.domain.model.StoryPriceBasis
+import com.thejawnpaul.gptinvestor.features.news.domain.model.StoryPriceStatus
 import com.thejawnpaul.gptinvestor.features.news.domain.model.StoryStock
 import com.thejawnpaul.gptinvestor.features.news.presentation.NewsFeedContent
 import com.thejawnpaul.gptinvestor.features.news.presentation.NewsFeedEvent
@@ -74,6 +79,7 @@ import com.thejawnpaul.gptinvestor.news_show_all
 import com.thejawnpaul.gptinvestor.news_top_story_eyebrow
 import com.thejawnpaul.gptinvestor.news_top_story_title
 import com.thejawnpaul.gptinvestor.news_watch_reason
+import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.GiEasing
 import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
@@ -119,11 +125,15 @@ fun NewsTab(
         contentPadding = PaddingValues(start = GiSpace.gutter, end = GiSpace.gutter, bottom = GiSpace.sectionGap),
         verticalArrangement = Arrangement.spacedBy(GiSpace.x4)
     ) {
-        item(key = "news-filters", contentType = "news-filters") {
+        stickyHeader(key = "news-filters", contentType = "news-filters") {
             FilterRow(
                 filters = state.filters,
                 selected = state.filter,
-                onSelect = { onEvent(NewsFeedEvent.SelectFilter(it)) }
+                onSelect = { onEvent(NewsFeedEvent.SelectFilter(it)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(GiTheme.colors.bg)
+                    .padding(vertical = GiSpace.x2)
             )
         }
         when (content) {
@@ -279,9 +289,14 @@ private fun LazyItemScope.newsItemMotion(reducedMotion: Boolean): Modifier = if 
 }
 
 @Composable
-private fun FilterRow(filters: List<NewsFilter>, selected: NewsFilter, onSelect: (NewsFilter) -> Unit) {
+private fun FilterRow(
+    filters: List<NewsFilter>,
+    selected: NewsFilter,
+    onSelect: (NewsFilter) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .bleedHorizontally()
             .horizontalScroll(rememberScrollState())
             .padding(horizontal = GiSpace.gutter),
@@ -554,3 +569,86 @@ private fun Modifier.bleedHorizontally(): Modifier = layout { measurable, constr
 
 private val NewsFilter.icon: ImageVector?
     get() = if (this == NewsFilter.ForYou) GiIcons.sparkle else null
+
+private fun previewStock(ticker: String, name: String) = StoryStock(
+    ticker = ticker,
+    name = name,
+    exchange = "NASDAQ",
+    logoUrl = null,
+    reason = "",
+    connection = null,
+    source = null,
+    isOnWatchlist = false,
+    price = StoryPrice(
+        basis = StoryPriceBasis.LAST_CLOSE,
+        atStory = null,
+        atStoryTime = null,
+        now = null,
+        nowTime = null,
+        changePercent = null,
+        status = StoryPriceStatus.UNAVAILABLE,
+        nextOpenTime = null,
+        bigMove = false
+    ),
+    currencySymbol = "$"
+)
+
+private val previewCard = StoryCardUi(
+    id = "1",
+    meta = "Reuters · 2h ago",
+    title = "Chipmakers rally as demand for AI hardware outpaces supply forecasts",
+    imageUrl = null,
+    movers = listOf(previewStock("NVDA", "NVIDIA"), previewStock("AVGO", "Broadcom"), previewStock("AMD", "AMD")),
+    moverNames = "NVIDIA, Broadcom, AMD",
+    moreMovers = 2,
+    movedCount = 5,
+    connectedCount = 7,
+    watchedTickers = listOf("NVDA"),
+    topic = NewsTopic("ai", "AI")
+)
+
+@PreviewLightDark
+@Preview(name = "200%", fontScale = 2f)
+@Composable
+private fun StoryCardPreview() {
+    GPTInvestorTheme {
+        Column(modifier = Modifier.padding(GiSpace.gutter), verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
+            StoryCard(card = previewCard, onClick = {})
+            StoryCard(
+                card = previewCard.copy(
+                    movers = emptyList(),
+                    watchedTickers = emptyList(),
+                    topic = null,
+                    moreMovers = 0
+                ),
+                onClick = {}
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun NewsFeedPartsPreview() {
+    GPTInvestorTheme {
+        Column(modifier = Modifier.padding(GiSpace.gutter), verticalArrangement = Arrangement.spacedBy(GiSpace.x4)) {
+            FilterRow(
+                filters = listOf(NewsFilter.All, NewsFilter.ForYou, NewsFilter.Topic(NewsTopic("ai", "AI"))),
+                selected = NewsFilter.ForYou,
+                onSelect = {}
+            )
+            ForYouStrip(onManage = {})
+            ColdStartCard(onAddStocks = {})
+            PasteLinkCard(onClick = {})
+            StoryCardSkeleton()
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun HomeTopStoryPreview() {
+    GPTInvestorTheme {
+        HomeTopStory(card = previewCard, onOpen = {}, onSeeAll = {}, modifier = Modifier.padding(GiSpace.gutter))
+    }
+}

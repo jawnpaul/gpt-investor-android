@@ -74,6 +74,9 @@ actual class PlatformActions(private val toastMessenger: ToastMessenger) {
         while (top?.presentedViewController != null) {
             top = top.presentedViewController
         }
+        while (top?.isBeingDismissed() == true) {
+            top = top.presentingViewController
+        }
         return top
     }
 

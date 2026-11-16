@@ -44,8 +44,7 @@ fun SetUpNavGraph(
     modifier: Modifier = Modifier,
     isUserSignedIn: Boolean = false,
     isGuestSignedIn: Boolean = false,
-    hasCompletedOnboarding: Boolean = false,
-    hasCompletedPostAuthOnboarding: Boolean = false
+    hasCompletedOnboarding: Boolean = false
 ) {
     val platformContext: PlatformContext = koinInject()
     val platformActions: PlatformActions = koinInject()
@@ -58,8 +57,7 @@ fun SetUpNavGraph(
         initialDestination(
             isUserSignedIn,
             isGuestSignedIn,
-            hasCompletedOnboarding,
-            hasCompletedPostAuthOnboarding
+            hasCompletedOnboarding
         )
     }
 
@@ -98,8 +96,7 @@ fun SetUpNavGraph(
                         modifier = Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding)
                     ) {
                         onboardingNavGraph(navController)
-                        postAuthOnboardingNavGraph(navController)
-                        authenticationNavGraph(navController, platformActions, hasCompletedPostAuthOnboarding)
+                        authenticationNavGraph(navController, platformActions)
                         investorNavGraph(navController)
                         discoverNavGraph(navController)
                         browseStocksNavGraph(navController)
@@ -141,10 +138,6 @@ fun SetUpNavGraph(
                     navController.navigate(GuestScreen.GuestHomeTab.route) {
                         popUpTo(currentRoute) { inclusive = true }
                     }
-                } else if (!hasCompletedPostAuthOnboarding) {
-                    navController.navigate(Screen.PostAuthOnboardingScreen.route) {
-                        popUpTo(currentRoute) { inclusive = true }
-                    }
                 } else {
                     navigateToHome(navController, currentRoute)
                 }
@@ -163,10 +156,8 @@ fun SetUpNavGraph(
 private fun initialDestination(
     isUserSignedIn: Boolean,
     isGuestSignedIn: Boolean,
-    hasCompletedOnboarding: Boolean,
-    hasCompletedPostAuthOnboarding: Boolean
+    hasCompletedOnboarding: Boolean
 ): String = when {
-    isUserSignedIn && !hasCompletedPostAuthOnboarding -> Screen.PostAuthOnboardingScreen.route
     isUserSignedIn -> Screen.HomeTabScreen.route
     isGuestSignedIn -> GuestScreen.GuestHomeTab.route
     !hasCompletedOnboarding -> Screen.OnboardingScreen.route

@@ -193,22 +193,10 @@
     <string name="search_a_stock_to_analyse">Знайдіть акцію для аналізу</string>
     <string name="sign_in_action">Sign in</string>
 
-    <string name="post_auth_onboarding_title">Допоможіть нам персоналізувати ваш досвід</string>
-    <string name="post_auth_onboarding_subtitle">Ваші відповіді визначають, які висновки та рекомендації ми вам показуватимемо.</string>
     <string name="post_auth_onboarding_experience_label">Як би ви описали свій досвід інвестування?</string>
     <string name="post_auth_onboarding_experience_beginner">Я новачок в інвестуванні</string>
     <string name="post_auth_onboarding_experience_intermediate">Маю певний досвід</string>
     <string name="post_auth_onboarding_experience_experienced">Досвідчений інвестор</string>
-    <string name="post_auth_onboarding_goal_label">Яка ваша основна інвестиційна мета?</string>
-    <string name="post_auth_onboarding_goal_grow_wealth">Довгострокове збільшення капіталу</string>
-    <string name="post_auth_onboarding_goal_generate_income">Отримувати дохід</string>
-    <string name="post_auth_onboarding_goal_learn_basics">Вивчити основи</string>
-    <string name="post_auth_onboarding_goal_just_curious">Просто цікаво</string>
-    <string name="post_auth_onboarding_risk_label">Як ви ставитеся до ризику?</string>
-    <string name="post_auth_onboarding_risk_conservative">Обираю обережний підхід</string>
-    <string name="post_auth_onboarding_risk_balanced">Збалансований підхід</string>
-    <string name="post_auth_onboarding_risk_aggressive">Спокійно ставлюся до волатильності</string>
-    <string name="post_auth_onboarding_save_error">Не вдалося зберегти ваші відповіді. Спробуйте ще раз.</string>
 
     <string name="verify_email_title">Перевірте свою електронну пошту</string>
     <string name="verify_email_body">Підтвердьте свою електронну адресу перед входом. Перевірте вхідні повідомлення на наявність посилання для підтвердження.</string>
@@ -674,4 +662,12 @@
         <item quantity="other">Останні %1$d торгового дня</item>
     </plurals>
     <string name="news_share_preview_description">Попередній перегляд картки новини, якою ви поділитеся</string>
+    <string name="onboarding_experience_sheet_body">Ми подаватимемо кожен огляд на вашому рівні. Змінити це можна будь-коли в профілі.</string>
+    <string name="not_now">Не зараз</string>
+    <string name="alerts_ask_title">Хочете отримувати сповіщення, коли %1$s рухається?</string>
+    <string name="alerts_ask_body">Ми повідомлятимемо про великі зміни ціни та новини щодо акцій у вашому списку спостереження. Нічого більше.</string>
+    <string name="alerts_ask_accept">Увімкнути сповіщення</string>
+    <string name="experience_hint_beginner">Простою мовою, без жаргону</string>
+    <string name="experience_hint_intermediate">Простою мовою з поясненням ключових термінів</string>
+    <string name="experience_hint_experienced">Показники та ринковий контекст</string>
 </resources>

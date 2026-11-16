@@ -124,6 +124,7 @@ class OnboardingViewModel(
         }
         briefStartTime = Clock.System.now().toEpochMilliseconds()
         fetchBrief(ticker)
+        viewModelScope.launch { onboardingRepository.savePickedStock(ticker) }
     }
 
     fun onRetryBrief() {

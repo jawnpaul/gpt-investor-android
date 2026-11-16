@@ -193,22 +193,10 @@
     <string name="search_a_stock_to_analyse">تجزیے کے لیے اسٹاک تلاش کریں</string>
     <string name="sign_in_action">سائن اِن</string>
 
-    <string name="post_auth_onboarding_title">اپنا تجربہ ذاتی نوعیت کا بنانے میں ہماری مدد کریں</string>
-    <string name="post_auth_onboarding_subtitle">آپ کے جوابات طے کرتے ہیں کہ ہم آپ کو کون سی بصیرتیں اور انتخاب دکھائیں گے۔</string>
     <string name="post_auth_onboarding_experience_label">آپ اپنی سرمایہ کاری کے تجربے کو کیسے بیان کریں گے؟</string>
     <string name="post_auth_onboarding_experience_beginner">میں سرمایہ کاری میں نیا ہوں</string>
     <string name="post_auth_onboarding_experience_intermediate">کچھ تجربہ ہے</string>
     <string name="post_auth_onboarding_experience_experienced">تجربہ کار سرمایہ کار</string>
-    <string name="post_auth_onboarding_goal_label">آپ کا بنیادی سرمایہ کاری کا مقصد کیا ہے؟</string>
-    <string name="post_auth_onboarding_goal_grow_wealth">طویل مدت میں دولت بڑھانا</string>
-    <string name="post_auth_onboarding_goal_generate_income">آمدنی پیدا کرنا</string>
-    <string name="post_auth_onboarding_goal_learn_basics">بنیادی باتیں سیکھنا</string>
-    <string name="post_auth_onboarding_goal_just_curious">بس تجسس ہے</string>
-    <string name="post_auth_onboarding_risk_label">آپ خطرے کو کیسے دیکھتے ہیں؟</string>
-    <string name="post_auth_onboarding_risk_conservative">محفوظ راستہ اختیار کرنا</string>
-    <string name="post_auth_onboarding_risk_balanced">متوازن انداز</string>
-    <string name="post_auth_onboarding_risk_aggressive">اتار چڑھاؤ سے مطمئن ہوں</string>
-    <string name="post_auth_onboarding_save_error">ہم آپ کے جوابات محفوظ نہیں کر سکے۔ دوبارہ کوشش کریں۔</string>
 
     <string name="verify_email_title">اپنی ای میل چیک کریں</string>
     <string name="verify_email_body">لاگ اِن کرنے سے پہلے اپنی ای میل ایڈریس کی تصدیق کریں۔ تصدیقی لنک کے لیے اپنا ان باکس چیک کریں۔</string>
@@ -650,4 +638,12 @@
         <item quantity="other">پچھلے %1$d ٹریڈنگ دن</item>
     </plurals>
     <string name="news_share_preview_description">اس خبر کارڈ کا پیش منظر جو آپ شیئر کریں گے</string>
+    <string name="onboarding_experience_sheet_body">ہم ہر بریف کو آپ کی سطح کے مطابق پیش کریں گے۔ آپ اسے کسی بھی وقت پروفائل میں بدل سکتے ہیں۔</string>
+    <string name="not_now">ابھی نہیں</string>
+    <string name="alerts_ask_title">کیا آپ چاہتے ہیں کہ %1$s میں حرکت ہونے پر آپ کو اطلاع ملے؟</string>
+    <string name="alerts_ask_body">ہم آپ کی واچ لسٹ کے اسٹاکس کی قیمت میں بڑی تبدیلیوں اور خبروں کی اطلاع دیں گے۔ اس کے علاوہ کچھ نہیں۔</string>
+    <string name="alerts_ask_accept">الرٹس آن کریں</string>
+    <string name="experience_hint_beginner">آسان زبان، کوئی اصطلاحات نہیں</string>
+    <string name="experience_hint_intermediate">آسان زبان، اہم اصطلاحات کی وضاحت کے ساتھ</string>
+    <string name="experience_hint_experienced">تناسب اور مارکیٹ کا پس منظر</string>
 </resources>

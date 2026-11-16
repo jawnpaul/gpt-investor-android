@@ -644,6 +644,14 @@
     <string name="alerts_ask_title">Want a heads-up when %1$s moves?</string>
     <string name="alerts_ask_body">We’ll tell you about big price moves and news for the stocks on your watchlist. Nothing else.</string>
     <string name="alerts_ask_accept">Turn on alerts</string>
+    <string name="goal_banner_title">What are you investing for?</string>
+    <string name="goal_banner_subtitle">We’ll tune your top picks. Change it anytime.</string>
+    <string name="goal_filter_label">Filter picks by goal</string>
+    <string name="goal_filter_for_you">For you</string>
+    <string name="goal_filter_growth">Growth</string>
+    <string name="goal_filter_income">Income</string>
+    <string name="goal_filter_learning">Learning</string>
+    <string name="goal_filter_empty">No picks for this goal today. Here are all of today’s picks.</string>
     <string name="experience_hint_beginner">Plain English, no jargon</string>
     <string name="experience_hint_intermediate">Plain English with the key terms explained</string>
     <string name="experience_hint_experienced">Ratios and market context</string>

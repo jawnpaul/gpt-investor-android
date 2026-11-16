@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.company.data.repository.CompanyRepository
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.repository.IOnboardingQuestionRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
 import io.mockk.coEvery
@@ -29,12 +30,14 @@ class DiscoverViewModelAnalyticsTest {
     private val analyticsLogger: AnalyticsLogger = mockk(relaxed = true)
     private val appPreferences: AppPreferences = mockk(relaxed = true)
     private val tidbitRepository: TidbitRepository = mockk()
+    private val onboardingQuestionRepository: IOnboardingQuestionRepository = mockk(relaxed = true)
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         every { appPreferences.isGuestLoggedIn } returns flowOf(false)
         coEvery { tidbitRepository.getTodayTidbit() } returns Result.failure(Exception())
+        every { onboardingQuestionRepository.getQuestionState(any()) } returns flowOf(null)
     }
 
     @After
@@ -48,6 +51,10 @@ class DiscoverViewModelAnalyticsTest {
         appPreferences = appPreferences,
         savedStateHandle = SavedStateHandle(),
         tidbitRepository = tidbitRepository,
+        onboardingQuestionRepository = onboardingQuestionRepository,
+        getQuestionToAsk = mockk(relaxed = true),
+        markQuestionAsked = mockk(relaxed = true),
+        saveAnswer = mockk(relaxed = true),
         analyticsLogger = analyticsLogger
     )
 

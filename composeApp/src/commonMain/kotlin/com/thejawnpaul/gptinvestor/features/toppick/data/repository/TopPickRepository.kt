@@ -66,7 +66,8 @@ class TopPickRepository(
                                 isSaved = false,
                                 imageUrl = imageUrl?.toHttpsUrl() ?: "",
                                 percentageChange = percentageChange ?: 0f,
-                                currentPrice = 0f
+                                currentPrice = 0f,
+                                goalTags = goalTags
                             )
                         }
                     }

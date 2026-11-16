@@ -643,6 +643,14 @@
     <string name="alerts_ask_title">کیا آپ چاہتے ہیں کہ %1$s میں حرکت ہونے پر آپ کو اطلاع ملے؟</string>
     <string name="alerts_ask_body">ہم آپ کی واچ لسٹ کے اسٹاکس کی قیمت میں بڑی تبدیلیوں اور خبروں کی اطلاع دیں گے۔ اس کے علاوہ کچھ نہیں۔</string>
     <string name="alerts_ask_accept">الرٹس آن کریں</string>
+    <string name="goal_banner_title">آپ کس مقصد کے لیے سرمایہ کاری کر رہے ہیں؟</string>
+    <string name="goal_banner_subtitle">ہم آپ کے ٹاپ پکس کو آپ کے مطابق بنائیں گے۔ آپ اسے کسی بھی وقت بدل سکتے ہیں۔</string>
+    <string name="goal_filter_label">مقصد کے لحاظ سے پکس فلٹر کریں</string>
+    <string name="goal_filter_for_you">آپ کے لیے</string>
+    <string name="goal_filter_growth">ترقی</string>
+    <string name="goal_filter_income">آمدنی</string>
+    <string name="goal_filter_learning">سیکھنا</string>
+    <string name="goal_filter_empty">آج اس مقصد کے لیے کوئی پکس نہیں ہیں۔ یہ آج کے تمام پکس ہیں۔</string>
     <string name="experience_hint_beginner">آسان زبان، کوئی اصطلاحات نہیں</string>
     <string name="experience_hint_intermediate">آسان زبان، اہم اصطلاحات کی وضاحت کے ساتھ</string>
     <string name="experience_hint_experienced">تناسب اور مارکیٹ کا پس منظر</string>

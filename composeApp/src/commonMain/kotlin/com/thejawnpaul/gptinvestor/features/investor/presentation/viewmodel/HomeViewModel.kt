@@ -3,6 +3,8 @@ package com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.added_to_watchlist
 import com.thejawnpaul.gptinvestor.analytics.AnalyticsLogger
 import com.thejawnpaul.gptinvestor.core.functional.onFailure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
@@ -32,7 +34,18 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.Home
 import com.thejawnpaul.gptinvestor.features.news.domain.NewsRepository
 import com.thejawnpaul.gptinvestor.features.news.presentation.StoryCardUi
 import com.thejawnpaul.gptinvestor.features.news.presentation.toCard
-import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.AskTrigger
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.InvestingExperience
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.OnboardingQuestion
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.usecases.GetQuestionToAskUseCase
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.usecases.MarkQuestionAskedUseCase
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.usecases.SaveAnswerUseCase
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.usecases.SyncOnboardingQuestionsUseCase
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionController
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionEvent
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.EVENT_QUESTION_ANSWERED
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.EVENT_QUESTION_DISMISSED
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.EVENT_QUESTION_SHOWN
 import com.thejawnpaul.gptinvestor.features.premium.domain.PREMIUM_SOURCE_WATCHLIST_FULL
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
@@ -56,6 +69,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
+import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.koin.core.annotation.Provided
 
@@ -67,13 +81,17 @@ class HomeViewModel(
     remoteConfig: RemoteConfigClient,
     private val preferences: AppPreferences,
     @Provided private val analyticsLogger: AnalyticsLogger,
-    private val notificationRepository: NotificationRepository,
     private val modelsRepository: ModelsRepository,
     private val digestRepository: DigestRepository,
     private val watchlistRepository: WatchlistRepository,
     private val premiumEventBus: PremiumEventBus,
     private val billingRepository: IBillingRepository,
-    private val newsRepository: NewsRepository
+    private val newsRepository: NewsRepository,
+    private val syncOnboardingQuestions: SyncOnboardingQuestionsUseCase,
+    private val getQuestionToAsk: GetQuestionToAskUseCase,
+    private val markQuestionAsked: MarkQuestionAskedUseCase,
+    private val saveAnswer: SaveAnswerUseCase,
+    private val alertsQuestionController: AlertsQuestionController
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -101,7 +119,12 @@ class HomeViewModel(
     val actions get() = _actions
 
     val theme = preferences.themePreference
-    val notificationPermission = preferences.notificationPermission
+
+    val alertsQuestion = alertsQuestionController.state
+
+    init {
+        alertsQuestionController.bind(viewModelScope)
+    }
 
     private var upgradeModelId: String? = null
 
@@ -113,6 +136,7 @@ class HomeViewModel(
         logHomeScreenViewed()
         getDailyDigest()
         getTopStory()
+        syncOnboarding()
 
         viewModelScope.launch {
             billingRepository.purchaseVerified.collect { getDailyDigest() }
@@ -121,11 +145,6 @@ class HomeViewModel(
         viewModelScope.launch {
             preferences.themePreference.collect { theme ->
                 _uiState.update { it.copy(theme = theme) }
-            }
-        }
-        viewModelScope.launch {
-            preferences.notificationPermission.collect { permission ->
-                _uiState.update { it.copy(requestForNotificationPermission = permission) }
             }
         }
     }
@@ -231,9 +250,63 @@ class HomeViewModel(
         }
     }
 
+    private fun syncOnboarding() {
+        viewModelScope.launch {
+            if (preferences.isUserLoggedIn.first() != true || preferences.isGuestLoggedIn.first() == true) return@launch
+            syncOnboardingQuestions(SyncOnboardingQuestionsUseCase.None()) { result ->
+                result.onSuccess { sync ->
+                    sync.addedStock?.let(::onOnboardingStockAdded)
+                    askExperienceQuestion()
+                }
+            }
+        }
+    }
+
+    private fun onOnboardingStockAdded(ticker: String) {
+        analyticsLogger.logEvent(
+            eventName = "stock-added-to-watchlist",
+            params = mapOf("ticker" to ticker, "source" to "onboarding")
+        )
+        getDailyDigest()
+        viewModelScope.launch { _actions.emit(HomeAction.ShowToast(getString(Res.string.added_to_watchlist, ticker))) }
+    }
+
+    private fun askExperienceQuestion() {
+        getQuestionToAsk(GetQuestionToAskUseCase.Params(AskTrigger.HOME, isGuest = false)) { result ->
+            result.onSuccess { question ->
+                _uiState.update { it.copy(showExperienceQuestion = true) }
+                markQuestionAsked(question)
+                logExperienceQuestionEvent(EVENT_QUESTION_SHOWN)
+            }
+        }
+    }
+
+    private fun logExperienceQuestionEvent(event: String, extra: Map<String, Any> = emptyMap()) {
+        analyticsLogger.logEvent(event, mapOf("question" to "experience", "source" to "home_sheet") + extra)
+    }
+
+    fun onAlertsQuestionEvent(event: AlertsQuestionEvent) = alertsQuestionController.handleEvent(event)
+
     fun handleEvent(event: HomeEvent) {
         viewModelScope.launch {
             when (event) {
+                is HomeEvent.SelectExperience -> {
+                    _uiState.update { it.copy(selectedExperience = event.experience) }
+                }
+
+                HomeEvent.ConfirmExperience -> {
+                    val experience = _uiState.value.selectedExperience ?: return@launch
+                    _uiState.update { it.copy(showExperienceQuestion = false) }
+                    saveAnswer(SaveAnswerUseCase.Params(OnboardingQuestion.EXPERIENCE, experience.name))
+                    logExperienceQuestionEvent(EVENT_QUESTION_ANSWERED, mapOf("answer" to experience.name))
+                }
+
+                HomeEvent.DismissExperienceQuestion -> {
+                    if (!_uiState.value.showExperienceQuestion) return@launch
+                    _uiState.update { it.copy(showExperienceQuestion = false) }
+                    logExperienceQuestionEvent(EVENT_QUESTION_DISMISSED)
+                }
+
                 is HomeEvent.ChatInputChanged -> {
                     _uiState.update { it.copy(chatInput = event.input) }
                 }
@@ -241,23 +314,6 @@ class HomeViewModel(
                 is HomeEvent.SendClick -> {
                     _actions.emit(OnStartConversation(_uiState.value.chatInput))
                     _uiState.update { it.copy(chatInput = null) }
-                }
-
-                HomeEvent.NotificationPermissionDenied -> {
-                    preferences.setNotificationPermission(false)
-                }
-
-                HomeEvent.NotificationPermissionGranted -> {
-                    if (notificationPermission.first() == true) {
-                        return@launch
-                    }
-                    preferences.setNotificationPermission(true)
-                    analyticsLogger.logEvent(
-                        eventName = "notification-permission-granted",
-                        params = mapOf("permission" to true)
-                    )
-                    // firebase token generation
-                    notificationRepository.syncTokenIfNeeded()
                 }
 
                 is HomeEvent.ModelChanged -> {
@@ -344,6 +400,7 @@ class HomeViewModel(
                                 params = mapOf("ticker" to event.ticker, "source" to "digest_card")
                             )
                             processAction(HomeAction.AddStockFinished(added = true))
+                            alertsQuestionController.onStockAdded(event.ticker)
                             _uiState.update { state ->
                                 state.copy(
                                     dailyDigestView = state.dailyDigestView.copy(
@@ -662,7 +719,6 @@ data class HomeUiState(
     val currentUser: User? = null,
     val chatInput: String? = null,
     val theme: String? = "Dark",
-    val requestForNotificationPermission: Boolean? = null,
     val availableModels: List<AvailableModel> = emptyList(),
     val selectedModel: AvailableModel = DefaultModel(),
     val showWaitlistBottomSheet: Boolean = false,
@@ -682,14 +738,17 @@ data class HomeUiState(
     val todayLabel: String? = null,
     val firstName: String? = null,
     val dailyDigestView: DailyDigestView = DailyDigestView(loading = true),
-    val topStory: StoryCardUi? = null
-)
+    val topStory: StoryCardUi? = null,
+    val showExperienceQuestion: Boolean = false,
+    val selectedExperience: InvestingExperience? = null
+) {
+    val canConfirmExperience: Boolean
+        get() = selectedExperience != null
+}
 
 sealed interface HomeEvent {
     data class ChatInputChanged(val input: String) : HomeEvent
     data object SendClick : HomeEvent
-    data object NotificationPermissionGranted : HomeEvent
-    data object NotificationPermissionDenied : HomeEvent
     data class ModelChanged(val model: AvailableModel) : HomeEvent
     data class UpgradeModel(val showBottomSheet: Boolean, val modelId: String? = null) : HomeEvent
     data class SelectWaitListOption(val option: String) : HomeEvent
@@ -710,6 +769,9 @@ sealed interface HomeEvent {
     data class ClickDigestStock(val ticker: String) : HomeEvent
     data object OpenTopStory : HomeEvent
     data object SeeAllNews : HomeEvent
+    data class SelectExperience(val experience: InvestingExperience) : HomeEvent
+    data object ConfirmExperience : HomeEvent
+    data object DismissExperienceQuestion : HomeEvent
 }
 
 sealed interface HomeAction {

@@ -14,6 +14,7 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.ui.HomeScreen
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeAction
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeEvent
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeViewModel
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.ui.AlertsQuestion
 import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
 import com.thejawnpaul.gptinvestor.theme.components.rememberGiToastState
 import kotlinx.coroutines.flow.launchIn
@@ -87,6 +88,10 @@ fun NavGraphBuilder.investorNavGraph(navController: NavHostController) {
             onEvent = homeViewModel::handleEvent,
             toastState = toastState,
             composerModifier = askComposerTransition()
+        )
+        AlertsQuestion(
+            state = homeViewModel.alertsQuestion.collectAsState().value,
+            onEvent = homeViewModel::onAlertsQuestionEvent
         )
     }
 

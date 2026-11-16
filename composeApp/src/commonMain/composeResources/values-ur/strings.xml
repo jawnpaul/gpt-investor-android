@@ -651,6 +651,10 @@
     <string name="goal_filter_income">آمدنی</string>
     <string name="goal_filter_learning">سیکھنا</string>
     <string name="goal_filter_empty">آج اس مقصد کے لیے کوئی پکس نہیں ہیں۔ یہ آج کے تمام پکس ہیں۔</string>
+    <string name="profile_investing_profile">آپ کا سرمایہ کاری پروفائل</string>
+    <string name="profile_experience">تجربہ</string>
+    <string name="profile_not_set">طے نہیں</string>
+    <string name="profile_experience_footnote">طے کرتا ہے کہ بریفس کیسے سمجھائے جائیں۔</string>
     <string name="experience_hint_beginner">آسان زبان، کوئی اصطلاحات نہیں</string>
     <string name="experience_hint_intermediate">آسان زبان، اہم اصطلاحات کی وضاحت کے ساتھ</string>
     <string name="experience_hint_experienced">تناسب اور مارکیٹ کا پس منظر</string>

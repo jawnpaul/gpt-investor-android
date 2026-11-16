@@ -651,6 +651,10 @@
     <string name="goal_filter_income">Einkommen</string>
     <string name="goal_filter_learning">Lernen</string>
     <string name="goal_filter_empty">Heute gibt es keine Picks für dieses Ziel. Hier sind alle Picks von heute.</string>
+    <string name="profile_investing_profile">Ihr Anlegerprofil</string>
+    <string name="profile_experience">Erfahrung</string>
+    <string name="profile_not_set">Nicht festgelegt</string>
+    <string name="profile_experience_footnote">Bestimmt, wie Analysen erklärt werden.</string>
     <string name="experience_hint_beginner">Einfache Sprache, kein Fachjargon</string>
     <string name="experience_hint_intermediate">Einfache Sprache, Fachbegriffe erklärt</string>
     <string name="experience_hint_experienced">Kennzahlen und Marktkontext</string>

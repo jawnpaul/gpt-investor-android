@@ -124,6 +124,7 @@ fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, modifi
                 }
                 StatsRow(state = state, onEvent = onEvent)
                 ActivitySection(state = state, onEvent = onEvent)
+                InvestingProfileSection(state = state, onEvent = onEvent)
             }
 
             PreferencesSection(state = state, onEvent = onEvent)

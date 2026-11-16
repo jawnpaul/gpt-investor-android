@@ -652,6 +652,10 @@
     <string name="goal_filter_income">Income</string>
     <string name="goal_filter_learning">Learning</string>
     <string name="goal_filter_empty">No picks for this goal today. Here are all of today’s picks.</string>
+    <string name="profile_investing_profile">Your investing profile</string>
+    <string name="profile_experience">Experience</string>
+    <string name="profile_not_set">Not set</string>
+    <string name="profile_experience_footnote">Shapes how briefs are explained.</string>
     <string name="experience_hint_beginner">Plain English, no jargon</string>
     <string name="experience_hint_intermediate">Plain English with the key terms explained</string>
     <string name="experience_hint_experienced">Ratios and market context</string>

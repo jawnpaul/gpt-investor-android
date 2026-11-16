@@ -12,6 +12,12 @@ import com.thejawnpaul.gptinvestor.dark
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.InvestingExperience
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.OnboardingQuestion
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.QuestionState
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.repository.IOnboardingQuestionRepository
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.usecases.SaveAnswerUseCase
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.EVENT_QUESTION_ANSWERED
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.profile.presentation.state.ProfileUiState
 import com.thejawnpaul.gptinvestor.features.settings.domain.SettingsRepository
@@ -47,6 +53,8 @@ class ProfileViewModel(
     private val watchlistRepository: WatchlistRepository,
     private val notificationRepository: NotificationRepository,
     private val notificationPermissionController: NotificationPermissionController,
+    private val onboardingQuestionRepository: IOnboardingQuestionRepository,
+    private val saveAnswer: SaveAnswerUseCase,
     appInfo: AppInfo,
     @Provided private val analyticsLogger: AnalyticsLogger
 ) : ViewModel() {
@@ -69,6 +77,7 @@ class ProfileViewModel(
         topPickRepository.getSavedTopPicksCount(),
         tidbitRepository.getSavedTidbitsCount().onStart { emit(0) },
         appPreferences.isGuestLoggedIn,
+        onboardingQuestionRepository.getQuestionState(OnboardingQuestion.EXPERIENCE),
         _state
     ) { args ->
         val userName = args[0] as String?
@@ -78,7 +87,8 @@ class ProfileViewModel(
         val savedPicksCount = args[4] as Int
         val savedTidbitsCount = args[5] as Int
         val isGuestLoggedIn = args[6] as Boolean?
-        val currentState = args[7] as ProfileUiState
+        val experience = args[7] as QuestionState?
+        val currentState = args[8] as ProfileUiState
 
         currentState.copy(
             userName = userName.orEmpty(),
@@ -87,7 +97,8 @@ class ProfileViewModel(
             isPremiumUser = isPremium,
             savedPicksCount = savedPicksCount,
             savedTidbitsCount = savedTidbitsCount,
-            isGuestSession = isGuestLoggedIn == true
+            isGuestSession = isGuestLoggedIn == true,
+            experience = InvestingExperience.fromAnswer(experience?.answer)
         )
     }.stateIn(
         scope = viewModelScope,
@@ -97,11 +108,17 @@ class ProfileViewModel(
 
     init {
         getTheme()
+        viewModelScope.launch {
+            if (appPreferences.isGuestLoggedIn.first() != true) onboardingQuestionRepository.getProgress()
+        }
     }
 
     fun handleEvent(event: ProfileEvent) {
         when (event) {
             ProfileEvent.SignOutClicked -> _state.update { it.copy(showSignOutConfirmation = true) }
+            ProfileEvent.ExperienceClicked -> _state.update { it.copy(showExperienceSheet = true) }
+            ProfileEvent.DismissExperienceSheet -> _state.update { it.copy(showExperienceSheet = false) }
+            is ProfileEvent.ExperienceSelected -> selectExperience(event.experience)
             ProfileEvent.DismissSignOutDialog -> _state.update { it.copy(showSignOutConfirmation = false) }
             ProfileEvent.ConfirmSignOut -> {
                 _state.update { it.copy(showSignOutConfirmation = false) }
@@ -216,9 +233,21 @@ class ProfileViewModel(
         }
     }
 
+    private fun selectExperience(experience: InvestingExperience) {
+        _state.update { it.copy(showExperienceSheet = false) }
+        if (experience == state.value.experience) return
+        saveAnswer(SaveAnswerUseCase.Params(OnboardingQuestion.EXPERIENCE, experience.name))
+        analyticsLogger.logEvent(
+            EVENT_QUESTION_ANSWERED,
+            mapOf("question" to "experience", "source" to "profile", "answer" to experience.name)
+        )
+    }
+
     private suspend fun syncNotificationPermission() {
         val enabled = notificationPermissionController.areNotificationsEnabled()
-        if (appPreferences.notificationPermission.first() == enabled) return
+        val stored = appPreferences.notificationPermission.first()
+        if (!enabled && stored == null) return
+        if (stored == enabled) return
         appPreferences.setNotificationPermission(enabled)
         if (enabled) notificationRepository.syncTokenIfNeeded()
     }

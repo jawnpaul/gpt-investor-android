@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.profile.presentation.viewmodel
 
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.InvestingExperience
 import org.jetbrains.compose.resources.StringResource
 
 sealed interface ProfileEvent {
@@ -21,4 +22,7 @@ sealed interface ProfileEvent {
     data object SignInClicked : ProfileEvent
     data object CreateAccountClicked : ProfileEvent
     data class ChangeTheme(val theme: StringResource) : ProfileEvent
+    data object ExperienceClicked : ProfileEvent
+    data object DismissExperienceSheet : ProfileEvent
+    data class ExperienceSelected(val experience: InvestingExperience) : ProfileEvent
 }

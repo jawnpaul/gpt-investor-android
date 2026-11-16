@@ -675,6 +675,10 @@
     <string name="goal_filter_income">Дохід</string>
     <string name="goal_filter_learning">Навчання</string>
     <string name="goal_filter_empty">Сьогодні немає ідей для цієї мети. Ось усі сьогоднішні ідеї.</string>
+    <string name="profile_investing_profile">Ваш інвестиційний профіль</string>
+    <string name="profile_experience">Досвід</string>
+    <string name="profile_not_set">Не вказано</string>
+    <string name="profile_experience_footnote">Визначає, як пояснюються огляди.</string>
     <string name="experience_hint_beginner">Простою мовою, без жаргону</string>
     <string name="experience_hint_intermediate">Простою мовою з поясненням ключових термінів</string>
     <string name="experience_hint_experienced">Показники та ринковий контекст</string>

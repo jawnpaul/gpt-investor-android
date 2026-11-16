@@ -11,6 +11,8 @@ import com.thejawnpaul.gptinvestor.features.news.domain.NewsFailure
 import com.thejawnpaul.gptinvestor.features.news.domain.NewsRepository
 import com.thejawnpaul.gptinvestor.features.news.domain.model.Story
 import com.thejawnpaul.gptinvestor.features.news.domain.model.StoryStock
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionController
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionEvent
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.usecases.AddStocksToWatchlistUseCase
@@ -39,8 +41,17 @@ class StoryViewModel(
     premiumEventBus: PremiumEventBus,
     private val watchlistRepository: WatchlistRepository,
     savedStateHandle: SavedStateHandle,
-    @Provided private val analyticsLogger: AnalyticsLogger
+    @Provided private val analyticsLogger: AnalyticsLogger,
+    private val alertsQuestionController: AlertsQuestionController
 ) : ViewModel() {
+
+    val alertsQuestion = alertsQuestionController.state
+
+    init {
+        alertsQuestionController.bind(viewModelScope)
+    }
+
+    fun onAlertsQuestionEvent(event: AlertsQuestionEvent) = alertsQuestionController.handleEvent(event)
 
     private val storyId: String = savedStateHandle.get<String>("storyId").orEmpty()
 
@@ -55,7 +66,10 @@ class StoryViewModel(
         scope = viewModelScope,
         source = "story",
         isGuest = { state.value.isGuestSession },
-        onEvent = { _actions.emit(StoryAction.Watch(it)) }
+        onEvent = { event ->
+            watchedTicker(event)?.let(alertsQuestionController::onStockAdded)
+            _actions.emit(StoryAction.Watch(event))
+        }
     )
 
     private val _state = MutableStateFlow(StoryState())

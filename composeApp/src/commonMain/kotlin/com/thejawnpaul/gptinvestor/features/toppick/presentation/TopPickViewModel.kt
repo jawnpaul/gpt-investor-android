@@ -13,6 +13,8 @@ import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionController
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionEvent
 import com.thejawnpaul.gptinvestor.features.premium.domain.PREMIUM_SOURCE_WATCHLIST_FULL
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
@@ -53,8 +55,17 @@ class TopPickViewModel(
     private val getCompanyBriefUseCase: GetCompanyBriefUseCase,
     private val watchlistRepository: WatchlistRepository,
     private val premiumEventBus: PremiumEventBus,
-    @Provided private val analyticsLogger: AnalyticsLogger
+    @Provided private val analyticsLogger: AnalyticsLogger,
+    private val alertsQuestionController: AlertsQuestionController
 ) : ViewModel() {
+
+    val alertsQuestion = alertsQuestionController.state
+
+    init {
+        alertsQuestionController.bind(viewModelScope)
+    }
+
+    fun onAlertsQuestionEvent(event: AlertsQuestionEvent) = alertsQuestionController.handleEvent(event)
 
     private val topPickId: String?
         get() = savedStateHandle.get<String>("topPickId")
@@ -194,6 +205,7 @@ class TopPickViewModel(
                         }
                     )
                     _topPickView.update { it.copy(brief = it.brief?.copy(isWatched = watch)) }
+                    if (watch) alertsQuestionController.onStockAdded(ticker)
                     if (!watch) processAction(TopPickAction.WatchlistRemoved(ticker))
                 }
             )

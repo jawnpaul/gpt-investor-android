@@ -45,7 +45,15 @@ class OnboardingQuestionRepositoryImplTest {
         every { preferences.userId } returns flowOf(USER_ID)
         coEvery { preferences.setHasCompletedPostAuthOnboarding(any()) } returns Unit
         coEvery { apiService.saveOnboardingAnswers(any(), any()) } returns ok
-        coEvery { apiService.markOnboardingQuestionAsked(any(), any()) } returns ok
+        coEvery { apiService.markOnboardingQuestionAsked(any(), any()) } returns
+            KtorResponse(
+                isSuccessful = true,
+                body = buildJsonObject {
+                    put("question", "x")
+                },
+                errorBody = null,
+                code = 200
+            )
     }
 
     private fun serverReturns(response: OnboardingSyncResponse) {
@@ -141,6 +149,38 @@ class OnboardingQuestionRepositoryImplTest {
 
         coVerify(exactly = 2) { apiService.syncOnboarding(any()) }
         assertThat((progress as Either.Right).b.owner).isEqualTo(USER_ID)
+    }
+
+    @Test
+    fun `answers cached for one account are not shown to the next person`() = runTest {
+        serverReturns(OnboardingSyncResponse(answers = mapOf("goal" to "GROW_WEALTH")))
+        repository.sync()
+
+        every { preferences.userId } returns flowOf("user-2")
+
+        assertThat(repository.getQuestionState(OnboardingQuestion.GOAL).first()).isNull()
+    }
+
+    @Test
+    fun `saving with nothing loaded fetches the saved state so screens update`() = runTest {
+        serverReturns(OnboardingSyncResponse(answers = mapOf("experience" to "EXPERIENCED")))
+
+        repository.saveAnswer(OnboardingQuestion.EXPERIENCE, "EXPERIENCED")
+
+        assertThat(repository.getQuestionState(OnboardingQuestion.EXPERIENCE).first()?.answer)
+            .isEqualTo("EXPERIENCED")
+    }
+
+    @Test
+    fun `a guest sync leaves the old-screen flag for the account`() = runTest {
+        every { preferences.hasCompletedPostAuthOnboarding } returns flowOf(true)
+        every { preferences.isGuestLoggedIn } returns flowOf(true)
+        serverReturns(OnboardingSyncResponse())
+
+        repository.sync()
+
+        coVerify(exactly = 0) { apiService.markOnboardingQuestionAsked(any(), any()) }
+        coVerify(exactly = 0) { preferences.setHasCompletedPostAuthOnboarding(any()) }
     }
 
     @Test

@@ -54,7 +54,7 @@ class AlertsQuestionController(
                 .onSuccess { question ->
                     _state.update { it.copy(ticker = ticker) }
                     logQuestionEvent(EVENT_QUESTION_SHOWN, mapOf("ticker" to ticker))
-                    scope.launch { markQuestionAsked.run(question).first() }
+                    markQuestionAsked(question)
                 }
         }
     }

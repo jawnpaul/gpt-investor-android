@@ -15,6 +15,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
@@ -38,7 +39,7 @@ class AlertsQuestionControllerTest {
         every { preferences.notificationPermission } returns flowOf(null)
         every { preferences.isGuestLoggedIn } returns flowOf(false)
         coEvery { notificationPermissionController.areNotificationsEnabled() } returns false
-        coEvery { markQuestionAsked.run(any()) } returns flowOf(Either.Right(Unit))
+        every { markQuestionAsked(any(), any()) } returns mockk(relaxed = true)
     }
 
     private fun TestScope.controller() = AlertsQuestionController(
@@ -63,7 +64,7 @@ class AlertsQuestionControllerTest {
         advanceUntilIdle()
 
         assertThat(controller.state.value).isEqualTo(AlertsQuestionState(ticker = "AAPL"))
-        coVerify { markQuestionAsked.run(OnboardingQuestion.ALERTS) }
+        verify { markQuestionAsked(OnboardingQuestion.ALERTS, any()) }
     }
 
     @Test

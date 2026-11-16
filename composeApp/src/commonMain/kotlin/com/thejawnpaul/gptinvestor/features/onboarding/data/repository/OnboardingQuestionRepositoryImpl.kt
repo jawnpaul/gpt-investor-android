@@ -15,9 +15,9 @@ import com.thejawnpaul.gptinvestor.features.onboarding.domain.repository.IOnboar
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -36,7 +36,9 @@ class OnboardingQuestionRepositoryImpl(
     private val syncLock = Mutex()
 
     override fun getQuestionState(question: OnboardingQuestion): Flow<QuestionState?> =
-        progress.map { it?.stateOf(question) }.distinctUntilChanged()
+        combine(progress, ownerFlow()) { current, owner ->
+            current?.takeIf { it.owner == owner }?.stateOf(question)
+        }.distinctUntilChanged()
 
     override suspend fun getProgress(): Either<Failure, OnboardingProgress> = syncLock.withLock {
         progress.value?.takeIf { it.owner == owner() }?.let { return@withLock Either.Right(it) }
@@ -79,25 +81,47 @@ class OnboardingQuestionRepositoryImpl(
     }
 
     override suspend fun markAsked(question: OnboardingQuestion): Either<Failure, Unit> {
-        progress.update { it?.copy(asked = it.asked + question.id) }
-        return call { apiService.markOnboardingQuestionAsked(installationId(), MarkQuestionAskedRequest(question.id)) }
+        syncLock.withLock { recordAsked(question) }
+        return postAsked(question)
     }
 
     override suspend fun saveAnswer(question: OnboardingQuestion, answer: String): Either<Failure, Unit> {
-        progress.update { it?.copy(answers = it.answers + (question.id to answer), asked = it.asked + question.id) }
-        return call { apiService.saveOnboardingAnswers(installationId(), buildJsonObject { put(question.id, answer) }) }
+        val isCached = syncLock.withLock {
+            progress.update { it?.copy(answers = it.answers + (question.id to answer), asked = it.asked + question.id) }
+            progress.value?.owner == owner()
+        }
+        val result =
+            call { apiService.saveOnboardingAnswers(installationId(), buildJsonObject { put(question.id, answer) }) }
+        if (result is Either.Right && !isCached) getProgress()
+        return result
     }
 
+    private fun recordAsked(question: OnboardingQuestion) {
+        progress.update { it?.copy(asked = it.asked + question.id) }
+    }
+
+    private suspend fun postAsked(question: OnboardingQuestion): Either<Failure, Unit> =
+        call { apiService.markOnboardingQuestionAsked(installationId(), MarkQuestionAskedRequest(question.id)) }
+
     private suspend fun migrateLegacyScreen(current: OnboardingProgress) {
+        if (current.owner == GUEST_OWNER) return
         if (preferences.hasCompletedPostAuthOnboarding.first() != true) return
-        val results = LEGACY_SCREEN_QUESTIONS.filterNot { current.stateOf(it).isSettled }.map { markAsked(it) }
+        val results = LEGACY_SCREEN_QUESTIONS.filterNot { current.stateOf(it).isSettled }.map { question ->
+            recordAsked(question)
+            postAsked(question)
+        }
         if (results.all { it is Either.Right }) preferences.setHasCompletedPostAuthOnboarding(false)
     }
 
-    private suspend fun owner(): String {
-        val isAccount = preferences.isUserLoggedIn.first() == true && preferences.isGuestLoggedIn.first() != true
-        return preferences.userId.first()?.takeIf { isAccount } ?: GUEST_OWNER
+    private fun ownerFlow(): Flow<String> = combine(
+        preferences.isUserLoggedIn,
+        preferences.isGuestLoggedIn,
+        preferences.userId
+    ) { isUserLoggedIn, isGuestLoggedIn, userId ->
+        userId?.takeIf { isUserLoggedIn == true && isGuestLoggedIn != true } ?: GUEST_OWNER
     }
+
+    private suspend fun owner(): String = ownerFlow().first()
 
     private suspend fun call(request: suspend () -> KtorResponse<*>): Either<Failure, Unit> = try {
         if (request().isSuccessful) Either.Right(Unit) else Either.Left(Failure.ServerError)

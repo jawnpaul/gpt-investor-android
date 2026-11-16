@@ -268,18 +268,16 @@ class KtorApiService(@Provided private val client: HttpClient) {
     suspend fun markOnboardingQuestionAsked(
         installationId: String,
         request: MarkQuestionAskedRequest
-    ): KtorResponse<SaveOnboardingAnswersResponse> = client.post("v1/user/onboarding/asked") {
+    ): KtorResponse<JsonObject> = client.post("v1/user/onboarding/asked") {
         header(INSTALLATION_ID_HEADER, installationId)
         setBody(request)
     }.toKtorResponse()
 
-    suspend fun savePickedStock(
-        installationId: String,
-        request: PickedStockRequest
-    ): KtorResponse<SaveOnboardingAnswersResponse> = client.post("v1/onboarding/picked-stock") {
-        header(INSTALLATION_ID_HEADER, installationId)
-        setBody(request)
-    }.toKtorResponse()
+    suspend fun savePickedStock(installationId: String, request: PickedStockRequest): KtorResponse<JsonObject> =
+        client.post("v1/onboarding/picked-stock") {
+            header(INSTALLATION_ID_HEADER, installationId)
+            setBody(request)
+        }.toKtorResponse()
 
     suspend fun getWatchlist(page: Int = 1, pageSize: Int = 20): KtorResponse<WatchlistResponse> =
         client.get("v1/watchlist") {

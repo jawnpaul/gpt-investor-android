@@ -9,6 +9,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.news.domain.NewsFailure
 import com.thejawnpaul.gptinvestor.features.news.domain.NewsRepository
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionController
 import com.thejawnpaul.gptinvestor.features.premium.domain.PREMIUM_SOURCE_WATCHLIST_FULL
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistFailure
@@ -77,7 +78,8 @@ class StoryViewModelTest {
         premiumEventBus = premiumEventBus,
         watchlistRepository = watchlistRepository,
         savedStateHandle = SavedStateHandle(mapOf("storyId" to "s1")),
-        analyticsLogger = analyticsLogger
+        analyticsLogger = analyticsLogger,
+        alertsQuestionController = mockk<AlertsQuestionController>(relaxed = true)
     )
 
     @Test

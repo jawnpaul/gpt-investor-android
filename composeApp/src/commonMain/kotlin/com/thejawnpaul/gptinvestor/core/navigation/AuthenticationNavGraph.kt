@@ -31,11 +31,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import org.koin.compose.viewmodel.koinViewModel
 
-fun NavGraphBuilder.authenticationNavGraph(
-    navController: NavHostController,
-    platformActions: PlatformActions,
-    hasCompletedPostAuthOnboarding: Boolean
-) {
+fun NavGraphBuilder.authenticationNavGraph(navController: NavHostController, platformActions: PlatformActions) {
     composable(route = Screen.DefaultAuthenticationScreen.route) {
         val viewModel = koinViewModel<DefaultAuthenticationViewModel>()
         val state = viewModel.loading.collectAsState()
@@ -89,7 +85,7 @@ fun NavGraphBuilder.authenticationNavGraph(
                     }
 
                     LoginUiAction.OnGoToHome -> {
-                        navigateAfterAuth(navController, hasCompletedPostAuthOnboarding)
+                        navigateAfterAuth(navController)
                     }
 
                     is LoginUiAction.OnGoToForgotPassword -> {
@@ -147,7 +143,7 @@ fun NavGraphBuilder.authenticationNavGraph(
                     }
 
                     SignUpUiAction.OnGoToHome -> {
-                        navigateAfterAuth(navController, hasCompletedPostAuthOnboarding)
+                        navigateAfterAuth(navController)
                     }
 
                     SignUpUiAction.OnGoToLogin -> {
@@ -174,11 +170,6 @@ fun NavGraphBuilder.authenticationNavGraph(
     }
 }
 
-private fun navigateAfterAuth(navController: NavHostController, hasCompletedPostAuthOnboarding: Boolean) {
-    val route = if (hasCompletedPostAuthOnboarding) {
-        Screen.HomeTabScreen.route
-    } else {
-        Screen.PostAuthOnboardingScreen.route
-    }
-    navController.navigateClearingBackStack(route)
+private fun navigateAfterAuth(navController: NavHostController) {
+    navController.navigateClearingBackStack(Screen.HomeTabScreen.route)
 }

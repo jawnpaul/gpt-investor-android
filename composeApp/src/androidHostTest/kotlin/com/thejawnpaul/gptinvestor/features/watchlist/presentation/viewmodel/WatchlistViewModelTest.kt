@@ -8,6 +8,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
 import com.thejawnpaul.gptinvestor.features.digest.data.remote.model.RecommendedDigestCompany
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionController
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumRequest
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistFailure
@@ -65,7 +66,8 @@ class WatchlistViewModelTest {
                 companyRepository,
                 premiumEventBus,
                 billingRepository,
-                analyticsLogger
+                analyticsLogger,
+                mockk<AlertsQuestionController>(relaxed = true)
             )
         backgroundScope.launch { vm.uiState.collect { } }
         advanceUntilIdle()
@@ -74,7 +76,14 @@ class WatchlistViewModelTest {
 
     @Test
     fun `does not load until the screen subscribes`() = runTest(testDispatcher) {
-        WatchlistViewModel(watchlistRepository, companyRepository, premiumEventBus, billingRepository, analyticsLogger)
+        WatchlistViewModel(
+            watchlistRepository,
+            companyRepository,
+            premiumEventBus,
+            billingRepository,
+            analyticsLogger,
+            mockk<AlertsQuestionController>(relaxed = true)
+        )
         advanceUntilIdle()
 
         coVerify(exactly = 0) { watchlistRepository.getWatchlist() }
@@ -151,7 +160,8 @@ class WatchlistViewModelTest {
                 companyRepository,
                 premiumEventBus,
                 billingRepository,
-                analyticsLogger
+                analyticsLogger,
+                mockk<AlertsQuestionController>(relaxed = true)
             )
 
         vm.actions.test {
@@ -168,7 +178,8 @@ class WatchlistViewModelTest {
                 companyRepository,
                 premiumEventBus,
                 billingRepository,
-                analyticsLogger
+                analyticsLogger,
+                mockk<AlertsQuestionController>(relaxed = true)
             )
 
         vm.actions.test {

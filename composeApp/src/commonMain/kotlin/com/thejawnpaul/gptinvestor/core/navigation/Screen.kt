@@ -97,7 +97,6 @@ sealed class Screen(val route: String, val isTopLevel: Boolean) {
         fun createRoute(email: String) = "forgot_password_screen?email=${email.encodeURLParameter()}"
     }
     data object OnboardingScreen : Screen("onboarding_screen", false)
-    data object PostAuthOnboardingScreen : Screen("post_auth_onboarding_screen", false)
     data object SearchScreen : Screen("search_screen", false)
     data object AllTrendingScreen : Screen("all_trending_screen", false)
     data object DigestDetailScreen : Screen("digest_detail_screen", false)

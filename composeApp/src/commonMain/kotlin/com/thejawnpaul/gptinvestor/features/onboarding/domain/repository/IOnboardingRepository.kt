@@ -6,4 +6,6 @@ import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.OnboardingSu
 
 interface IOnboardingRepository {
     suspend fun fetchSuggestions(): Either<Failure, OnboardingSuggestions>
+
+    suspend fun savePickedStock(ticker: String): Either<Failure, Unit>
 }

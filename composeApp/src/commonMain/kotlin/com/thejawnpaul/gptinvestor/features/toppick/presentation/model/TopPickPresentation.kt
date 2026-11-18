@@ -11,5 +11,6 @@ data class TopPickPresentation(
     val isSaved: Boolean,
     val percentageChange: Float,
     val imageUrl: String = "",
-    val currentPrice: Float
+    val currentPrice: Float,
+    val goalTags: List<String> = emptyList()
 )

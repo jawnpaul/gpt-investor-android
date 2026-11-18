@@ -7,6 +7,8 @@ import com.thejawnpaul.gptinvestor.core.functional.Failure
 import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.features.billing.domain.repository.IBillingRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.repository.ICompanyRepository
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionController
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionEvent
 import com.thejawnpaul.gptinvestor.features.premium.domain.PREMIUM_SOURCE_WATCHLIST_FULL
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistFailure
@@ -42,8 +44,17 @@ class WatchlistViewModel(
     private val companyRepository: ICompanyRepository,
     private val premiumEventBus: PremiumEventBus,
     billingRepository: IBillingRepository,
-    @Provided private val analyticsLogger: AnalyticsLogger
+    @Provided private val analyticsLogger: AnalyticsLogger,
+    private val alertsQuestionController: AlertsQuestionController
 ) : ViewModel() {
+
+    val alertsQuestion = alertsQuestionController.state
+
+    init {
+        alertsQuestionController.bind(viewModelScope)
+    }
+
+    fun onAlertsQuestionEvent(event: AlertsQuestionEvent) = alertsQuestionController.handleEvent(event)
     private val _uiState = MutableStateFlow(WatchlistUiState(isLoading = true))
     private val retryRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
@@ -162,6 +173,7 @@ class WatchlistViewModel(
                     )
                     _uiState.update { it.copy(isLoading = false) }
                     emitAction(WatchlistAction.ShowAddedMessage(ticker))
+                    alertsQuestionController.onStockAdded(ticker)
                 }
             )
         }

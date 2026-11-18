@@ -9,10 +9,21 @@ import com.thejawnpaul.gptinvestor.core.functional.onSuccess
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.company.data.repository.CompanyRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.model.SectorInput
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.AskTrigger
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.InvestingGoal
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.OnboardingQuestion
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.repository.IOnboardingQuestionRepository
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.usecases.GetQuestionToAskUseCase
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.usecases.MarkQuestionAskedUseCase
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.usecases.SaveAnswerUseCase
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.EVENT_QUESTION_ANSWERED
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.EVENT_QUESTION_DISMISSED
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.EVENT_QUESTION_SHOWN
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.picksForGoal
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 import kotlin.collections.map
 import kotlin.onFailure
@@ -22,6 +33,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -35,6 +47,10 @@ class DiscoverViewModel(
     private val appPreferences: AppPreferences,
     private val savedStateHandle: SavedStateHandle,
     private val tidbitRepository: TidbitRepository,
+    private val onboardingQuestionRepository: IOnboardingQuestionRepository,
+    private val getQuestionToAsk: GetQuestionToAskUseCase,
+    private val markQuestionAsked: MarkQuestionAskedUseCase,
+    private val saveAnswer: SaveAnswerUseCase,
     @Provided private val analyticsLogger: AnalyticsLogger
 
 ) : ViewModel() {
@@ -42,9 +58,10 @@ class DiscoverViewModel(
     private val _discoveryScreenState = MutableStateFlow(DiscoveryScreenState())
     val discoveryScreenState = combine(
         _discoveryScreenState,
-        appPreferences.isGuestLoggedIn
-    ) { state, isGuestLoggedIn ->
-        state.copy(isGuestSession = isGuestLoggedIn == true)
+        appPreferences.isGuestLoggedIn,
+        onboardingQuestionRepository.getQuestionState(OnboardingQuestion.GOAL)
+    ) { state, isGuestLoggedIn, goal ->
+        state.copy(isGuestSession = isGuestLoggedIn == true, savedGoal = InvestingGoal.fromAnswer(goal?.answer))
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -57,10 +74,39 @@ class DiscoverViewModel(
     init {
         getTopPicks()
         getTodayTidbit()
+        askGoalQuestion()
+    }
+
+    private fun askGoalQuestion() {
+        viewModelScope.launch {
+            val isGuest = appPreferences.isGuestLoggedIn.first() == true
+            getQuestionToAsk(GetQuestionToAskUseCase.Params(AskTrigger.DISCOVER, isGuest)) { result ->
+                result.onSuccess { question ->
+                    _discoveryScreenState.update { it.copy(showGoalBanner = true) }
+                    markQuestionAsked(question)
+                    logGoalQuestionEvent(EVENT_QUESTION_SHOWN)
+                }
+            }
+        }
+    }
+
+    private fun logGoalQuestionEvent(event: String, extra: Map<String, Any> = emptyMap()) {
+        analyticsLogger.logEvent(event, mapOf("question" to "goal", "source" to "discover_banner") + extra)
     }
 
     fun handleEvent(event: DiscoveryEvent) {
         when (event) {
+            is DiscoveryEvent.AnswerGoal -> {
+                _discoveryScreenState.update { it.copy(showGoalBanner = false) }
+                saveAnswer(SaveAnswerUseCase.Params(OnboardingQuestion.GOAL, event.goal.name))
+                logGoalQuestionEvent(EVENT_QUESTION_ANSWERED, mapOf("answer" to event.goal.name))
+            }
+
+            DiscoveryEvent.DismissGoalBanner -> {
+                _discoveryScreenState.update { it.copy(showGoalBanner = false) }
+                logGoalQuestionEvent(EVENT_QUESTION_DISMISSED)
+            }
+
             is DiscoveryEvent.GoToCompanyDetail -> {
                 processAction(DiscoveryAction.OnNavigateToCompanyDetail(ticker = event.ticker))
             }
@@ -148,7 +194,8 @@ class DiscoverViewModel(
                                     isSaved = pick.isSaved,
                                     percentageChange = pick.percentageChange,
                                     imageUrl = pick.imageUrl,
-                                    currentPrice = pick.currentPrice
+                                    currentPrice = pick.currentPrice,
+                                    goalTags = pick.goalTags
                                 )
                             }
                         )
@@ -202,15 +249,27 @@ data class DiscoveryScreenState(
     val selected: SectorInput? = null,
     val isGuestSession: Boolean = false,
     val homeTidbitView: HomeTidbitView = HomeTidbitView(),
-    val topPicksView: TopPicksView = TopPicksView()
+    val topPicksView: TopPicksView = TopPicksView(),
+    val savedGoal: InvestingGoal? = null,
+    val showGoalBanner: Boolean = false
 ) {
+    private val goalPicks: List<TopPickPresentation> = picksForGoal(topPicksView.topPicks, savedGoal)
+
+    val noPicksForGoal: Boolean
+        get() = goalPicks.isEmpty() && topPicksView.topPicks.isNotEmpty()
+
     val previewTopPicks: List<TopPickPresentation>
-        get() = topPicksView.topPicks.take(PREVIEW_TOP_PICK_COUNT)
+        get() = (goalPicks.ifEmpty { topPicksView.topPicks }).take(PREVIEW_TOP_PICK_COUNT)
+
+    val showTopPicksSection: Boolean
+        get() = topPicksView.loading || topPicksView.showError || topPicksView.topPicks.isNotEmpty()
 }
 
 private const val PREVIEW_TOP_PICK_COUNT = 2
 
 sealed interface DiscoveryEvent {
+    data class AnswerGoal(val goal: InvestingGoal) : DiscoveryEvent
+    data object DismissGoalBanner : DiscoveryEvent
     data class ClickTopPick(val id: String) : DiscoveryEvent
     data class ClickTidbit(val id: String) : DiscoveryEvent
     data class GoToCompanyDetail(val ticker: String) : DiscoveryEvent

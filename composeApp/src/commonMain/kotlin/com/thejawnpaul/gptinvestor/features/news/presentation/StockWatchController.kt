@@ -139,3 +139,9 @@ class StockWatchController(
         scope.launch { onEvent(event) }
     }
 }
+
+internal fun watchedTicker(event: StockWatchEvent): String? = when (event) {
+    is StockWatchEvent.Added -> event.ticker
+    is StockWatchEvent.AddedAll -> event.tickers.firstOrNull()
+    else -> null
+}

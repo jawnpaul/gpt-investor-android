@@ -16,6 +16,7 @@ import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUs
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.ModelsRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.usecases.GetInputPromptUseCase
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionController
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
 import io.mockk.coEvery
@@ -73,7 +74,8 @@ class CompanyViewModelBriefErrorTest {
             watchlistRepository = mockk<WatchlistRepository>(relaxed = true),
             premiumEventBus = PremiumEventBus(),
             analyticsLogger = mockk<AnalyticsLogger>(relaxed = true),
-            guestSessionNotifier = mockk<GuestSessionNotifier>(relaxed = true)
+            guestSessionNotifier = mockk<GuestSessionNotifier>(relaxed = true),
+            alertsQuestionController = mockk<AlertsQuestionController>(relaxed = true)
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.selectedCompany.collect { } }
         advanceUntilIdle()

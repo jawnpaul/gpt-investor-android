@@ -1,6 +1,7 @@
 package com.thejawnpaul.gptinvestor.features.profile.presentation.state
 
 import com.thejawnpaul.gptinvestor.Res
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.InvestingExperience
 import com.thejawnpaul.gptinvestor.system
 import org.jetbrains.compose.resources.StringResource
 
@@ -18,7 +19,9 @@ data class ProfileUiState(
     val requestNotificationPermission: Boolean = false,
     val currentTheme: StringResource = Res.string.system,
     val themeList: List<StringResource> = emptyList(),
-    val appVersion: String = ""
+    val appVersion: String = "",
+    val experience: InvestingExperience? = null,
+    val showExperienceSheet: Boolean = false
 ) {
     val savedPicksCountString: String = savedPicksCount.toString()
     val savedTidbitsCountString: String = savedTidbitsCount.toString()

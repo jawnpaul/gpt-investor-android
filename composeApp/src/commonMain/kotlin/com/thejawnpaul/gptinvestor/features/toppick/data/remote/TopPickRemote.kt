@@ -15,5 +15,6 @@ data class TopPickRemote(
     @SerialName("date") val date: String,
     @SerialName("price") val price: Float? = null,
     @SerialName("change") val percentageChange: Float? = null,
-    @SerialName("logo_url") val imageUrl: String? = null
+    @SerialName("logo_url") val imageUrl: String? = null,
+    @SerialName("goal_tags") val goalTags: List<String> = emptyList()
 )

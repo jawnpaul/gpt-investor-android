@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.toppick.presentation.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,14 +22,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.back
+import com.thejawnpaul.gptinvestor.check_connection_try_again
+import com.thejawnpaul.gptinvestor.discover_picks_error_title
+import com.thejawnpaul.gptinvestor.features.discover.DiscoverSectionError
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.ContentEmptyState
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.contentItemMotion
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.AllTopPicksEvent
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.AllTopPicksUiState
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 import com.thejawnpaul.gptinvestor.top_picks
 import com.thejawnpaul.gptinvestor.top_picks_empty_body
 import com.thejawnpaul.gptinvestor.top_picks_empty_title
@@ -37,23 +44,52 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun AllTopPicksScreen(
-    state: TopPicksView,
+    state: AllTopPicksUiState,
+    onEvent: (AllTopPicksEvent) -> Unit,
     onGoBack: () -> Unit,
     onGoToDetail: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     TopPickListScaffold(
         title = stringResource(Res.string.top_picks),
-        state = state,
+        state = state.topPicksView.copy(topPicks = state.shownPicks),
         onGoBack = onGoBack,
         onGoToDetail = onGoToDetail,
-        modifier = modifier
+        modifier = modifier,
+        header = if (state.showGoalFilters) {
+            {
+                val reducedMotion = isReducedMotionEnabled()
+                Column {
+                    GoalFilterChips(
+                        selected = state.goalFilter,
+                        onSelect = { onEvent(AllTopPicksEvent.SelectGoal(it)) }
+                    )
+                    AnimatedVisibility(
+                        visible = state.noPicksForGoal,
+                        enter = revealEnter(reducedMotion),
+                        exit = revealExit(reducedMotion)
+                    ) {
+                        NoPicksForGoalNote(modifier = Modifier.padding(top = GiSpace.x2))
+                    }
+                }
+            }
+        } else {
+            null
+        }
     ) {
-        ContentEmptyState(
-            icon = GiIcons.starFill,
-            title = stringResource(Res.string.top_picks_empty_title),
-            body = stringResource(Res.string.top_picks_empty_body)
-        )
+        if (state.topPicksView.showError) {
+            DiscoverSectionError(
+                title = stringResource(Res.string.discover_picks_error_title),
+                body = stringResource(Res.string.check_connection_try_again),
+                onRetry = { onEvent(AllTopPicksEvent.Retry) }
+            )
+        } else {
+            ContentEmptyState(
+                icon = GiIcons.starFill,
+                title = stringResource(Res.string.top_picks_empty_title),
+                body = stringResource(Res.string.top_picks_empty_body)
+            )
+        }
     }
 }
 
@@ -65,6 +101,7 @@ internal fun TopPickListScaffold(
     onGoToDetail: (String) -> Unit,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
+    header: (@Composable () -> Unit)? = null,
     empty: @Composable () -> Unit
 ) {
     val navBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
@@ -109,8 +146,15 @@ internal fun TopPickListScaffold(
 
                 state.topPicks.isEmpty() -> item(key = "empty") { empty() }
 
-                else -> items(items = state.topPicks, key = { it.id }, contentType = { "pick" }) { pick ->
-                    SingleTopPickItem(pickPresentation = pick, onClick = onGoToDetail, modifier = contentItemMotion())
+                else -> {
+                    if (header != null) item(key = "header", contentType = "header") { header() }
+                    items(items = state.topPicks, key = { it.id }, contentType = { "pick" }) { pick ->
+                        SingleTopPickItem(
+                            pickPresentation = pick,
+                            onClick = onGoToDetail,
+                            modifier = contentItemMotion()
+                        )
+                    }
                 }
             }
         }
@@ -123,9 +167,12 @@ internal fun TopPickListScaffold(
 private fun AllTopPicksPreview() {
     GPTInvestorTheme {
         AllTopPicksScreen(
-            state = TopPicksView(
-                topPicks = listOf(previewPick, previewPick.copy(id = "2", companyName = "Broadcom Inc."))
+            state = AllTopPicksUiState(
+                topPicksView = TopPicksView(
+                    topPicks = listOf(previewPick, previewPick.copy(id = "2", companyName = "Broadcom Inc."))
+                )
             ),
+            onEvent = {},
             onGoBack = {},
             onGoToDetail = {}
         )

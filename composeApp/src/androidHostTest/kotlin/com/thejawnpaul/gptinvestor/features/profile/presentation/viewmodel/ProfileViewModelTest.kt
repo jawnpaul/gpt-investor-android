@@ -10,6 +10,8 @@ import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.conversation.domain.repository.IConversationRepository
 import com.thejawnpaul.gptinvestor.features.notification.domain.NotificationRepository
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.repository.IOnboardingQuestionRepository
+import com.thejawnpaul.gptinvestor.features.onboarding.domain.usecases.SaveAnswerUseCase
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.settings.domain.SettingsRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
@@ -53,6 +55,9 @@ class ProfileViewModelTest {
     private val notificationRepository: NotificationRepository = mockk(relaxed = true)
     private val notificationPermissionController: NotificationPermissionController = mockk()
     private val appInfo: AppInfo = mockk()
+    private val onboardingQuestionRepository: IOnboardingQuestionRepository = mockk(relaxed = true) {
+        every { getQuestionState(any()) } returns flowOf(null)
+    }
 
     @Before
     fun setUp() {
@@ -90,6 +95,8 @@ class ProfileViewModelTest {
         watchlistRepository,
         notificationRepository,
         notificationPermissionController,
+        onboardingQuestionRepository,
+        mockk<SaveAnswerUseCase>(relaxed = true),
         appInfo,
         analyticsLogger
     )
@@ -333,6 +340,17 @@ class ProfileViewModelTest {
 
         coVerify { appPreferences.setNotificationPermission(true) }
         coVerify { notificationRepository.syncTokenIfNeeded() }
+    }
+
+    @Test
+    fun `never asked and off by default stays unanswered so the alerts ask can still show`() = runTest(testDispatcher) {
+        every { appPreferences.notificationPermission } returns flowOf(null)
+        val vm = buildViewModel()
+
+        vm.handleEvent(ProfileEvent.ScreenShown)
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { appPreferences.setNotificationPermission(any()) }
     }
 
     @Test

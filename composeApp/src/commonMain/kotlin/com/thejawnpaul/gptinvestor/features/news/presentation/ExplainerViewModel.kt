@@ -11,6 +11,8 @@ import com.thejawnpaul.gptinvestor.features.news.domain.NewsFailure
 import com.thejawnpaul.gptinvestor.features.news.domain.NewsRepository
 import com.thejawnpaul.gptinvestor.features.news.domain.model.Explainer
 import com.thejawnpaul.gptinvestor.features.news.domain.model.StoryStock
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionController
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionEvent
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
@@ -40,8 +42,17 @@ class ExplainerViewModel(
     premiumEventBus: PremiumEventBus,
     private val watchlistRepository: WatchlistRepository,
     savedStateHandle: SavedStateHandle,
-    @Provided private val analyticsLogger: AnalyticsLogger
+    @Provided private val analyticsLogger: AnalyticsLogger,
+    private val alertsQuestionController: AlertsQuestionController
 ) : ViewModel() {
+
+    val alertsQuestion = alertsQuestionController.state
+
+    init {
+        alertsQuestionController.bind(viewModelScope)
+    }
+
+    fun onAlertsQuestionEvent(event: AlertsQuestionEvent) = alertsQuestionController.handleEvent(event)
 
     private val storyId: String = savedStateHandle.get<String>("storyId").orEmpty()
 
@@ -58,7 +69,10 @@ class ExplainerViewModel(
         scope = viewModelScope,
         source = "explainer",
         isGuest = { state.value.isGuestSession },
-        onEvent = { _actions.emit(ExplainerAction.Watch(it)) }
+        onEvent = { event ->
+            watchedTicker(event)?.let(alertsQuestionController::onStockAdded)
+            _actions.emit(ExplainerAction.Watch(event))
+        }
     )
 
     private var hasLoaded = false

@@ -44,6 +44,7 @@ class OnboardingViewModelBriefTest {
         Dispatchers.setMain(testDispatcher)
         every { appPreferences.isUserLoggedIn } returns flowOf(false)
         coEvery { authRepository.acquireGuestToken() } returns Result.success(Unit)
+        coEvery { onboardingRepository.savePickedStock(any()) } returns Either.Right(Unit)
         coEvery { onboardingRepository.fetchSuggestions() } returns Either.Left(Failure.NetworkConnection)
     }
 
@@ -84,6 +85,17 @@ class OnboardingViewModelBriefTest {
                 mapOf("ticker" to "TSLA", "error_type" to "guest_limit")
             )
         }
+    }
+
+    @Test
+    fun `the picked stock is sent to the server to watch after sign-up`() = runTest(testDispatcher) {
+        stubBrief(Either.Left(Failure.ServerError))
+        val vm = viewModel()
+
+        vm.onStockSelected("TSLA", "Tesla", "suggested", null)
+        advanceUntilIdle()
+
+        coVerify { onboardingRepository.savePickedStock("TSLA") }
     }
 
     @Test

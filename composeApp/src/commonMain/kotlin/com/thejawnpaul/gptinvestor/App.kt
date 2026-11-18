@@ -65,7 +65,6 @@ fun App(
     val isUserSignedIn by preferences.isUserLoggedIn.collectAsState(initial = false)
     val isGuestSignedIn by preferences.isGuestLoggedIn.collectAsState(initial = false)
     val hasCompletedOnboarding by preferences.hasCompletedOnboarding.collectAsState(initial = null)
-    val hasCompletedPostAuthOnboarding by preferences.hasCompletedPostAuthOnboarding.collectAsState(initial = null)
 
     var showSplash by remember { mutableStateOf(true) }
     var isNavGraphReady by remember { mutableStateOf(false) }
@@ -135,8 +134,8 @@ fun App(
     }
 
     // After sign-in, return to context (company screen) if we have a pending ticker
-    LaunchedEffect(isUserSignedIn, hasCompletedPostAuthOnboarding, isNavGraphReady) {
-        if (isNavGraphReady && isUserSignedIn == true && hasCompletedPostAuthOnboarding == true) {
+    LaunchedEffect(isUserSignedIn, isNavGraphReady) {
+        if (isNavGraphReady && isUserSignedIn == true) {
             val ticker = pendingReturnTicker
             if (ticker != null) {
                 pendingReturnTicker = null
@@ -198,8 +197,7 @@ fun App(
                     navController = navController,
                     isUserSignedIn = isUserSignedIn == true,
                     isGuestSignedIn = isGuestSignedIn == true,
-                    hasCompletedOnboarding = hasCompletedOnboarding ?: false,
-                    hasCompletedPostAuthOnboarding = hasCompletedPostAuthOnboarding ?: false
+                    hasCompletedOnboarding = hasCompletedOnboarding ?: false
                 )
 
                 if (showGuestRateLimitSheet) {

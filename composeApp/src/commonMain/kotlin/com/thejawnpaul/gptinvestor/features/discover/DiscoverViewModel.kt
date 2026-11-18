@@ -96,13 +96,9 @@ class DiscoverViewModel(
     fun handleEvent(event: DiscoveryEvent) {
         when (event) {
             is DiscoveryEvent.AnswerGoal -> {
-                _discoveryScreenState.update { it.copy(showGoalBanner = false, selectedGoalFilter = event.goal) }
+                _discoveryScreenState.update { it.copy(showGoalBanner = false) }
                 saveAnswer(SaveAnswerUseCase.Params(OnboardingQuestion.GOAL, event.goal.name))
                 logGoalQuestionEvent(EVENT_QUESTION_ANSWERED, mapOf("answer" to event.goal.name))
-            }
-
-            is DiscoveryEvent.SelectGoalFilter -> {
-                _discoveryScreenState.update { it.copy(selectedGoalFilter = event.goal) }
             }
 
             DiscoveryEvent.DismissGoalBanner -> {
@@ -254,13 +250,9 @@ data class DiscoveryScreenState(
     val homeTidbitView: HomeTidbitView = HomeTidbitView(),
     val topPicksView: TopPicksView = TopPicksView(),
     val savedGoal: InvestingGoal? = null,
-    val selectedGoalFilter: InvestingGoal? = null,
     val showGoalBanner: Boolean = false
 ) {
-    val goalFilter: InvestingGoal?
-        get() = selectedGoalFilter ?: savedGoal
-
-    private val goalPicks: List<TopPickPresentation> = picksForGoal(topPicksView.topPicks, goalFilter)
+    private val goalPicks: List<TopPickPresentation> = picksForGoal(topPicksView.topPicks, savedGoal)
 
     val noPicksForGoal: Boolean
         get() = goalPicks.isEmpty() && topPicksView.topPicks.isNotEmpty()
@@ -270,9 +262,6 @@ data class DiscoveryScreenState(
 
     val showTopPicksSection: Boolean
         get() = topPicksView.loading || topPicksView.showError || topPicksView.topPicks.isNotEmpty()
-
-    val showGoalFilters: Boolean
-        get() = goalFilter != null && !showGoalBanner && topPicksView.topPicks.isNotEmpty()
 }
 
 internal fun picksForGoal(picks: List<TopPickPresentation>, goal: InvestingGoal?): List<TopPickPresentation> =
@@ -282,7 +271,6 @@ private const val PREVIEW_TOP_PICK_COUNT = 2
 
 sealed interface DiscoveryEvent {
     data class AnswerGoal(val goal: InvestingGoal) : DiscoveryEvent
-    data class SelectGoalFilter(val goal: InvestingGoal) : DiscoveryEvent
     data object DismissGoalBanner : DiscoveryEvent
     data class ClickTopPick(val id: String) : DiscoveryEvent
     data class ClickTidbit(val id: String) : DiscoveryEvent

@@ -229,28 +229,6 @@ class TopPickRepository(
 
     override fun getSavedTopPicksCount(): Flow<Int> = topPickDao.getSavedTopPicksCountFlow()
 
-    override fun getLocalTopPicks(): Flow<Either<Failure, List<TopPick>>> = flow {
-        val today = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
-        val local = topPickDao.getAllTopPicks().map { entity ->
-            with(entity) {
-                TopPick(
-                    id = id,
-                    companyName = companyName,
-                    ticker = ticker,
-                    rationale = rationale,
-                    metrics = metrics,
-                    risks = risks,
-                    confidenceScore = confidenceScore,
-                    isSaved = isSaved,
-                    imageUrl = imageUrl,
-                    percentageChange = change,
-                    currentPrice = price
-                )
-            }
-        }.sortedByDescending { it.confidenceScore }
-        emit(Either.Right(local))
-    }
-
     override fun getTopPicksByDate(): Flow<List<TopPick>> {
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
         return try {

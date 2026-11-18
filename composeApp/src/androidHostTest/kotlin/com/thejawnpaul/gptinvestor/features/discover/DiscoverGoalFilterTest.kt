@@ -57,20 +57,6 @@ class DiscoverGoalFilterTest {
     }
 
     @Test
-    fun `filter chips appear once a goal is chosen and the banner is gone`() {
-        assertThat(DiscoveryScreenState(savedGoal = null).showGoalFilters).isFalse()
-        assertThat(
-            DiscoveryScreenState(savedGoal = InvestingGoal.GROW_WEALTH, showGoalBanner = true).showGoalFilters
-        ).isFalse()
-        assertThat(
-            DiscoveryScreenState(
-                topPicksView = TopPicksView(topPicks = listOf(pick("a"))),
-                savedGoal = InvestingGoal.GROW_WEALTH
-            ).showGoalFilters
-        ).isTrue()
-    }
-
-    @Test
     fun `top picks section shows while loading, on error or with picks, and hides when empty`() {
         assertThat(DiscoveryScreenState().showTopPicksSection).isFalse()
         assertThat(DiscoveryScreenState(topPicksView = TopPicksView(loading = true)).showTopPicksSection).isTrue()
@@ -78,23 +64,5 @@ class DiscoverGoalFilterTest {
         assertThat(
             DiscoveryScreenState(topPicksView = TopPicksView(topPicks = listOf(pick("a")))).showTopPicksSection
         ).isTrue()
-    }
-
-    @Test
-    fun `filter chips are hidden while there are no picks`() {
-        assertThat(DiscoveryScreenState(savedGoal = InvestingGoal.GROW_WEALTH).showGoalFilters).isFalse()
-    }
-
-    @Test
-    fun `a chip filters without replacing the saved goal`() {
-        val state = DiscoveryScreenState(
-            topPicksView = TopPicksView(topPicks = picks),
-            savedGoal = InvestingGoal.GROW_WEALTH,
-            selectedGoalFilter = InvestingGoal.GENERATE_INCOME
-        )
-
-        assertThat(state.goalFilter).isEqualTo(InvestingGoal.GENERATE_INCOME)
-        assertThat(state.savedGoal).isEqualTo(InvestingGoal.GROW_WEALTH)
-        assertThat(state.previewTopPicks.map { it.id }).containsExactly("PAY", "BOTH").inOrder()
     }
 }

@@ -60,7 +60,6 @@ import com.thejawnpaul.gptinvestor.discover_lesson_error_body
 import com.thejawnpaul.gptinvestor.discover_lesson_error_title
 import com.thejawnpaul.gptinvestor.discover_picks_error_title
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
-import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.InvestingGoal
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
@@ -188,10 +187,7 @@ fun DiscoverPicksTab(state: DiscoveryScreenState, onEvent: (DiscoveryEvent) -> U
                 TopPicksSection(
                     view = state.topPicksView,
                     picks = state.previewTopPicks,
-                    goal = state.goalFilter,
-                    showGoalFilters = state.showGoalFilters,
                     noPicksForGoal = state.noPicksForGoal,
-                    onSelectGoal = { onEvent(DiscoveryEvent.SelectGoalFilter(it)) },
                     onSeeAll = { onEvent(DiscoveryEvent.GoToAllTopPicks) },
                     onRetry = { onEvent(DiscoveryEvent.RetryTopPicks) },
                     onClickPick = { onEvent(DiscoveryEvent.ClickTopPick(id = it)) },
@@ -222,10 +218,7 @@ private fun TopPicksSection(
     onSeeAll: () -> Unit,
     onRetry: () -> Unit,
     onClickPick: (String) -> Unit,
-    goal: InvestingGoal? = null,
-    showGoalFilters: Boolean = false,
-    noPicksForGoal: Boolean = false,
-    onSelectGoal: (InvestingGoal) -> Unit = {},
+    noPicksForGoal: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.titleToContent)) {
@@ -238,14 +231,7 @@ private fun TopPicksSection(
         )
         val reducedMotion = isReducedMotionEnabled()
         AnimatedVisibility(
-            visible = showGoalFilters,
-            enter = revealEnter(reducedMotion),
-            exit = revealExit(reducedMotion)
-        ) {
-            GoalFilterChips(selected = goal, onSelect = onSelectGoal)
-        }
-        AnimatedVisibility(
-            visible = showGoalFilters && noPicksForGoal,
+            visible = noPicksForGoal,
             enter = revealEnter(reducedMotion),
             exit = revealExit(reducedMotion)
         ) {

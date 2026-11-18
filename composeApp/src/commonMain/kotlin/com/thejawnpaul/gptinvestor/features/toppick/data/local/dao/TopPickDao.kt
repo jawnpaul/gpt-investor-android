@@ -15,9 +15,6 @@ interface TopPickDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertTopPicks(list: List<TopPickEntity>)
 
-    @Query("SELECT * FROM top_picks_table ORDER BY id")
-    suspend fun getAllTopPicks(): List<TopPickEntity>
-
     @Query("DELETE FROM top_picks_table WHERE isSaved = 0")
     suspend fun deleteUnsavedTopPicks()
 

@@ -10,6 +10,7 @@ import com.thejawnpaul.gptinvestor.features.onboarding.domain.repository.IOnboar
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.AllTopPicksUiState
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -32,7 +33,7 @@ class AllTopPicksViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = AllTopPicksUiState()
+        initialValue = AllTopPicksUiState(topPicksView = TopPicksView(loading = true))
     )
 
     init {

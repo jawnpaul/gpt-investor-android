@@ -1,5 +1,6 @@
 package com.thejawnpaul.gptinvestor.features.toppick.presentation.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,8 +25,6 @@ import com.thejawnpaul.gptinvestor.back
 import com.thejawnpaul.gptinvestor.check_connection_try_again
 import com.thejawnpaul.gptinvestor.discover_picks_error_title
 import com.thejawnpaul.gptinvestor.features.discover.DiscoverSectionError
-import com.thejawnpaul.gptinvestor.features.discover.GoalFilterChips
-import com.thejawnpaul.gptinvestor.features.discover.NoPicksForGoalNote
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.ContentEmptyState
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.contentItemMotion
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.AllTopPicksEvent
@@ -36,6 +35,7 @@ import com.thejawnpaul.gptinvestor.theme.GiSpace
 import com.thejawnpaul.gptinvestor.theme.GiTheme
 import com.thejawnpaul.gptinvestor.theme.components.GiIcons
 import com.thejawnpaul.gptinvestor.theme.components.GiTopBar
+import com.thejawnpaul.gptinvestor.theme.isReducedMotionEnabled
 import com.thejawnpaul.gptinvestor.top_picks
 import com.thejawnpaul.gptinvestor.top_picks_empty_body
 import com.thejawnpaul.gptinvestor.top_picks_empty_title
@@ -58,12 +58,19 @@ fun AllTopPicksScreen(
         modifier = modifier,
         header = if (state.showGoalFilters) {
             {
-                Column(verticalArrangement = Arrangement.spacedBy(GiSpace.x2)) {
+                val reducedMotion = isReducedMotionEnabled()
+                Column {
                     GoalFilterChips(
                         selected = state.goalFilter,
                         onSelect = { onEvent(AllTopPicksEvent.SelectGoal(it)) }
                     )
-                    if (state.noPicksForGoal) NoPicksForGoalNote()
+                    AnimatedVisibility(
+                        visible = state.noPicksForGoal,
+                        enter = revealEnter(reducedMotion),
+                        exit = revealExit(reducedMotion)
+                    ) {
+                        NoPicksForGoalNote(modifier = Modifier.padding(top = GiSpace.x2))
+                    }
                 }
             }
         } else {

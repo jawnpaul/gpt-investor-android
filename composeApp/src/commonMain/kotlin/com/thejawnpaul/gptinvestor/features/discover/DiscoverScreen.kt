@@ -5,10 +5,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -63,6 +61,9 @@ import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.NoPicksForGoalNote
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.revealEnter
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.revealExit
 import com.thejawnpaul.gptinvestor.news_new_stories
 import com.thejawnpaul.gptinvestor.news_section_news
 import com.thejawnpaul.gptinvestor.news_section_picks
@@ -275,20 +276,6 @@ private fun LazyItemScope.discoverItemMotion(reducedMotion: Boolean): Modifier =
         placementSpec = GiMotion.smooth(),
         fadeOutSpec = tween(GiMotion.FAST, easing = GiEasing.emphasised)
     )
-}
-
-private fun revealEnter(reducedMotion: Boolean): EnterTransition = if (reducedMotion) {
-    EnterTransition.None
-} else {
-    expandVertically(GiMotion.smooth(), expandFrom = Alignment.Top) +
-        fadeIn(tween(GiMotion.BASE, easing = GiEasing.emphasised))
-}
-
-private fun revealExit(reducedMotion: Boolean): ExitTransition = if (reducedMotion) {
-    ExitTransition.None
-} else {
-    shrinkVertically(GiMotion.smooth(), shrinkTowards = Alignment.Top) +
-        fadeOut(tween(GiMotion.FAST, easing = GiEasing.emphasised))
 }
 
 @Composable

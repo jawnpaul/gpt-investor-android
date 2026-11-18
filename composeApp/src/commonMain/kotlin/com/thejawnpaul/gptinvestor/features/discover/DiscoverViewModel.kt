@@ -23,6 +23,7 @@ import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.picksForGoal
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 import kotlin.collections.map
 import kotlin.onFailure
@@ -263,9 +264,6 @@ data class DiscoveryScreenState(
     val showTopPicksSection: Boolean
         get() = topPicksView.loading || topPicksView.showError || topPicksView.topPicks.isNotEmpty()
 }
-
-internal fun picksForGoal(picks: List<TopPickPresentation>, goal: InvestingGoal?): List<TopPickPresentation> =
-    if (goal == null || goal == InvestingGoal.JUST_CURIOUS) picks else picks.filter { goal.name in it.goalTags }
 
 private const val PREVIEW_TOP_PICK_COUNT = 2
 

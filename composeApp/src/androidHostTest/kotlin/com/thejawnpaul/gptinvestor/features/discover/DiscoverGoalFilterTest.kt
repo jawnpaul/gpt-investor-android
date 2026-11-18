@@ -3,6 +3,7 @@ package com.thejawnpaul.gptinvestor.features.discover
 import com.google.common.truth.Truth.assertThat
 import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.InvestingGoal
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.picksForGoal
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
 import org.junit.Test
 

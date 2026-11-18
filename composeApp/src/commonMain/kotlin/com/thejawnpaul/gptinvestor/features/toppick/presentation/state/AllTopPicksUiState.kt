@@ -1,8 +1,8 @@
 package com.thejawnpaul.gptinvestor.features.toppick.presentation.state
 
-import com.thejawnpaul.gptinvestor.features.discover.picksForGoal
 import com.thejawnpaul.gptinvestor.features.onboarding.domain.model.InvestingGoal
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.picksForGoal
 
 data class AllTopPicksUiState(
     val topPicksView: TopPicksView = TopPicksView(),

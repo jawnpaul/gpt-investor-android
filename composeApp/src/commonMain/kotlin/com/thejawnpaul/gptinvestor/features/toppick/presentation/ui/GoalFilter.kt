@@ -10,11 +10,13 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.thejawnpaul.gptinvestor.Res
@@ -58,7 +60,9 @@ internal fun GoalFilterChips(
     val label = stringResource(Res.string.goal_filter_label)
     Row(
         modifier = modifier
+            .bleedHorizontally()
             .horizontalScroll(rememberScrollState())
+            .padding(horizontal = GiSpace.gutter)
             .selectableGroup()
             .semantics { contentDescription = label },
         horizontalArrangement = Arrangement.spacedBy(GiSpace.x2)
@@ -96,4 +100,12 @@ internal fun revealExit(reducedMotion: Boolean): ExitTransition = if (reducedMot
 } else {
     shrinkVertically(GiMotion.smooth(), shrinkTowards = Alignment.Top) +
         fadeOut(tween(GiMotion.FAST, easing = GiEasing.emphasised))
+}
+
+private fun Modifier.bleedHorizontally(): Modifier = layout { measurable, constraints ->
+    val bleed = GiSpace.gutter.roundToPx()
+    val placeable = measurable.measure(
+        constraints.copy(minWidth = constraints.maxWidth + bleed * 2, maxWidth = constraints.maxWidth + bleed * 2)
+    )
+    layout(constraints.maxWidth, placeable.height) { placeable.place(-bleed, 0) }
 }

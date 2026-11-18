@@ -36,6 +36,8 @@ import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.withFailedAnswer
 import com.thejawnpaul.gptinvestor.features.conversation.presentation.viewmodel.withdrawFailedAnswer
 import com.thejawnpaul.gptinvestor.features.feedback.FeedbackRepository
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionController
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionEvent
 import com.thejawnpaul.gptinvestor.features.premium.domain.PREMIUM_SOURCE_WATCHLIST_FULL
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistFailure
@@ -65,8 +67,17 @@ class CompanyViewModel(
     private val watchlistRepository: WatchlistRepository,
     private val premiumEventBus: PremiumEventBus,
     @Provided private val analyticsLogger: AnalyticsLogger,
-    private val guestSessionNotifier: GuestSessionNotifier
+    private val guestSessionNotifier: GuestSessionNotifier,
+    private val alertsQuestionController: AlertsQuestionController
 ) : ViewModel() {
+
+    val alertsQuestion = alertsQuestionController.state
+
+    init {
+        alertsQuestionController.bind(viewModelScope)
+    }
+
+    fun onAlertsQuestionEvent(event: AlertsQuestionEvent) = alertsQuestionController.handleEvent(event)
 
     private val _selectedCompany = MutableStateFlow(SingleCompanyView())
     private val isGuestSession = MutableStateFlow(false)
@@ -571,6 +582,7 @@ class CompanyViewModel(
                             )
                             _selectedCompany.update { it.copy(brief = it.brief?.copy(isWatched = true)) }
                             processCompanyDetailAction(CompanyDetailAction.WatchlistAdded)
+                            alertsQuestionController.onStockAdded(ticker)
                         }
                     )
                 }

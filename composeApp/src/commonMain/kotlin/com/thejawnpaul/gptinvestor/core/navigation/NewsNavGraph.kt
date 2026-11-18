@@ -25,6 +25,7 @@ import com.thejawnpaul.gptinvestor.features.news.presentation.StoryEvent
 import com.thejawnpaul.gptinvestor.features.news.presentation.StoryViewModel
 import com.thejawnpaul.gptinvestor.features.news.presentation.ui.ExplainerScreen
 import com.thejawnpaul.gptinvestor.features.news.presentation.ui.StoryScreen
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.ui.AlertsQuestion
 import com.thejawnpaul.gptinvestor.login
 import com.thejawnpaul.gptinvestor.news_added_all
 import com.thejawnpaul.gptinvestor.news_ask_stock_prompt
@@ -106,6 +107,12 @@ private fun StoryDestination(navController: NavHostController, platformActions: 
         }
     }
     StoryScreen(state = state, onEvent = viewModel::handleEvent, toastState = toastState)
+    if (!isGuest) {
+        AlertsQuestion(
+            state = viewModel.alertsQuestion.collectAsState().value,
+            onEvent = viewModel::onAlertsQuestionEvent
+        )
+    }
 }
 
 @Composable
@@ -133,6 +140,12 @@ private fun ExplainerDestination(navController: NavHostController, platformActio
         }
     }
     ExplainerScreen(state = state, onEvent = viewModel::handleEvent, toastState = toastState)
+    if (!isGuest) {
+        AlertsQuestion(
+            state = viewModel.alertsQuestion.collectAsState().value,
+            onEvent = viewModel::onAlertsQuestionEvent
+        )
+    }
 }
 
 private suspend fun showWatchToast(

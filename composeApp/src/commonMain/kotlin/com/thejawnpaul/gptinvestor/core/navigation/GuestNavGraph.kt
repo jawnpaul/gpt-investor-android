@@ -53,6 +53,7 @@ import com.thejawnpaul.gptinvestor.features.tidbit.presentation.ui.TidbitScreen
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitAction
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitDetailAction
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.viewmodel.TidbitViewModel
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.AllTopPicksViewModel
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickAction
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewModel
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.AllTopPicksScreen
@@ -520,11 +521,12 @@ fun NavGraphBuilder.guestNavGraph(
     }
 
     composable(route = GuestScreen.GuestAllTopPicks.route) {
-        val viewModel = koinViewModel<TopPickViewModel>()
-        val state = viewModel.allTopPicks.collectAsState()
+        val viewModel = koinViewModel<AllTopPicksViewModel>()
+        val state = viewModel.state.collectAsState()
         AllTopPicksScreen(
             modifier = Modifier,
             state = state.value,
+            onEvent = viewModel::handleEvent,
             onGoBack = { navController.navigateUp() },
             onGoToDetail = { id -> navController.navigate(GuestScreen.GuestTopPickDetail.createRoute(id)) }
         )

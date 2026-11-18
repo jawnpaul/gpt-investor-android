@@ -8,6 +8,7 @@ import com.thejawnpaul.gptinvestor.core.functional.Either
 import com.thejawnpaul.gptinvestor.core.preferences.AppPreferences
 import com.thejawnpaul.gptinvestor.features.news.domain.NewsRepository
 import com.thejawnpaul.gptinvestor.features.news.domain.model.Explainer
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionController
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.tidbit.domain.TidbitRepository
 import com.thejawnpaul.gptinvestor.features.watchlist.domain.WatchlistRepository
@@ -62,7 +63,8 @@ class ExplainerViewModelTest {
         premiumEventBus = mockk<PremiumEventBus>(relaxed = true),
         watchlistRepository = watchlistRepository,
         savedStateHandle = SavedStateHandle(mapOf("storyId" to "s1")),
-        analyticsLogger = mockk<AnalyticsLogger>(relaxed = true)
+        analyticsLogger = mockk<AnalyticsLogger>(relaxed = true),
+        alertsQuestionController = mockk<AlertsQuestionController>(relaxed = true)
     )
 
     private fun explainer(xomWatched: Boolean) = Explainer(

@@ -54,6 +54,7 @@ class OnboardingViewModelSuggestionsTest {
         Dispatchers.setMain(testDispatcher)
         every { appPreferences.isUserLoggedIn } returns flowOf(false)
         coEvery { authRepository.acquireGuestToken() } returns Result.success(Unit)
+        coEvery { onboardingRepository.savePickedStock(any()) } returns Either.Right(Unit)
         coEvery { companyRepository.getCompanyLogos(any()) } returns Either.Right(emptyMap())
         every { getCompanyBriefUseCase(any(), any()) } returns Job()
     }

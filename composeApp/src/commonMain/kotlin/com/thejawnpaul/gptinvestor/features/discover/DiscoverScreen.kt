@@ -1,5 +1,13 @@
 package com.thejawnpaul.gptinvestor.features.discover
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,6 +24,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -52,6 +61,9 @@ import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.NoPicksForGoalNote
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.revealEnter
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.ui.revealExit
 import com.thejawnpaul.gptinvestor.news_new_stories
 import com.thejawnpaul.gptinvestor.news_section_news
 import com.thejawnpaul.gptinvestor.news_section_picks
@@ -59,6 +71,7 @@ import com.thejawnpaul.gptinvestor.search_a_stock_to_analyse
 import com.thejawnpaul.gptinvestor.see_all
 import com.thejawnpaul.gptinvestor.theme.GPTInvestorTheme
 import com.thejawnpaul.gptinvestor.theme.GiControlHeight
+import com.thejawnpaul.gptinvestor.theme.GiEasing
 import com.thejawnpaul.gptinvestor.theme.GiEdge
 import com.thejawnpaul.gptinvestor.theme.GiIconSize
 import com.thejawnpaul.gptinvestor.theme.GiMotion
@@ -161,15 +174,27 @@ fun DiscoverPicksTab(state: DiscoveryScreenState, onEvent: (DiscoveryEvent) -> U
         item(key = "browse") {
             BrowseCompaniesCard(onClick = { onEvent(DiscoveryEvent.GoToBrowse) })
         }
-        item(key = "picks") {
-            TopPicksSection(
-                view = state.topPicksView,
-                picks = state.previewTopPicks,
-                onSeeAll = { onEvent(DiscoveryEvent.GoToAllTopPicks) },
-                onRetry = { onEvent(DiscoveryEvent.RetryTopPicks) },
-                onClickPick = { onEvent(DiscoveryEvent.ClickTopPick(id = it)) },
-                modifier = Modifier.padding(top = GiSpace.x2)
-            )
+        if (state.showGoalBanner) {
+            item(key = "goal_banner", contentType = "goal_banner") {
+                GoalBanner(
+                    onSelect = { onEvent(DiscoveryEvent.AnswerGoal(it)) },
+                    onDismiss = { onEvent(DiscoveryEvent.DismissGoalBanner) },
+                    modifier = discoverItemMotion(isReducedMotionEnabled()).padding(top = GiSpace.x2)
+                )
+            }
+        }
+        if (state.showTopPicksSection) {
+            item(key = "picks", contentType = "picks") {
+                TopPicksSection(
+                    view = state.topPicksView,
+                    picks = state.previewTopPicks,
+                    noPicksForGoal = state.noPicksForGoal,
+                    onSeeAll = { onEvent(DiscoveryEvent.GoToAllTopPicks) },
+                    onRetry = { onEvent(DiscoveryEvent.RetryTopPicks) },
+                    onClickPick = { onEvent(DiscoveryEvent.ClickTopPick(id = it)) },
+                    modifier = discoverItemMotion(isReducedMotionEnabled()).padding(top = GiSpace.x2)
+                )
+            }
         }
         item(key = "tidbit") {
             val placement = if (isReducedMotionEnabled()) {
@@ -194,6 +219,7 @@ private fun TopPicksSection(
     onSeeAll: () -> Unit,
     onRetry: () -> Unit,
     onClickPick: (String) -> Unit,
+    noPicksForGoal: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(GiSpace.titleToContent)) {
@@ -204,6 +230,14 @@ private fun TopPicksSection(
             trailingText = stringResource(Res.string.see_all),
             onTrailingClick = onSeeAll
         )
+        val reducedMotion = isReducedMotionEnabled()
+        AnimatedVisibility(
+            visible = noPicksForGoal,
+            enter = revealEnter(reducedMotion),
+            exit = revealExit(reducedMotion)
+        ) {
+            NoPicksForGoalNote()
+        }
         when {
             view.loading && view.topPicks.isEmpty() -> TopPicksSkeleton()
             view.showError -> DiscoverSectionError(
@@ -211,11 +245,37 @@ private fun TopPicksSection(
                 body = stringResource(Res.string.check_connection_try_again),
                 onRetry = onRetry
             )
-            else -> picks.forEach { pick ->
-                TopPickCard(pick = pick, onClick = { onClickPick(pick.id) })
+            else -> AnimatedContent(
+                targetState = picks,
+                contentKey = { list -> list.map { it.id } },
+                transitionSpec = {
+                    if (reducedMotion) {
+                        EnterTransition.None togetherWith ExitTransition.None
+                    } else {
+                        fadeIn(tween(GiMotion.BASE, easing = GiEasing.emphasised)) togetherWith
+                            fadeOut(tween(GiMotion.FAST, easing = GiEasing.emphasised))
+                    }
+                },
+                label = "topPicksForGoal"
+            ) { shown ->
+                Column(verticalArrangement = Arrangement.spacedBy(GiSpace.titleToContent)) {
+                    shown.forEach { pick ->
+                        TopPickCard(pick = pick, onClick = { onClickPick(pick.id) })
+                    }
+                }
             }
         }
     }
+}
+
+private fun LazyItemScope.discoverItemMotion(reducedMotion: Boolean): Modifier = if (reducedMotion) {
+    Modifier.animateItem(fadeInSpec = null, placementSpec = null, fadeOutSpec = null)
+} else {
+    Modifier.animateItem(
+        fadeInSpec = tween(GiMotion.BASE, easing = GiEasing.emphasised),
+        placementSpec = GiMotion.smooth(),
+        fadeOutSpec = tween(GiMotion.FAST, easing = GiEasing.emphasised)
+    )
 }
 
 @Composable

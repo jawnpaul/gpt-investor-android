@@ -13,10 +13,12 @@ import com.thejawnpaul.gptinvestor.core.session.GuestRateLimitNotifier
 import com.thejawnpaul.gptinvestor.features.authentication.domain.AuthenticationRepository
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyBriefUseCase
 import com.thejawnpaul.gptinvestor.features.company.domain.usecases.GetCompanyUseCase
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionController
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.AlertsQuestionEvent
 import com.thejawnpaul.gptinvestor.features.premium.domain.PREMIUM_SOURCE_WATCHLIST_FULL
 import com.thejawnpaul.gptinvestor.features.premium.domain.PremiumEventBus
 import com.thejawnpaul.gptinvestor.features.toppick.domain.model.TopPick
-import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetLocalTopPicksUseCase
+import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetSavedTopPicksUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.GetSingleTopPickUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.RemoveTopPickFromSavedUseCase
 import com.thejawnpaul.gptinvestor.features.toppick.domain.usecases.SaveTopPickUseCase
@@ -42,7 +44,7 @@ import org.koin.core.annotation.Provided
 class TopPickViewModel(
     private val getSingleTopPickUseCase: GetSingleTopPickUseCase,
     private val savedStateHandle: SavedStateHandle,
-    private val getLocalTopPicksUseCase: GetLocalTopPicksUseCase,
+    private val getSavedTopPicksUseCase: GetSavedTopPicksUseCase,
     private val authenticationRepository: AuthenticationRepository,
     private val saveTopPickUseCase: SaveTopPickUseCase,
     private val removeTopPickFromSavedUseCase: RemoveTopPickFromSavedUseCase,
@@ -53,8 +55,17 @@ class TopPickViewModel(
     private val getCompanyBriefUseCase: GetCompanyBriefUseCase,
     private val watchlistRepository: WatchlistRepository,
     private val premiumEventBus: PremiumEventBus,
-    @Provided private val analyticsLogger: AnalyticsLogger
+    @Provided private val analyticsLogger: AnalyticsLogger,
+    private val alertsQuestionController: AlertsQuestionController
 ) : ViewModel() {
+
+    val alertsQuestion = alertsQuestionController.state
+
+    init {
+        alertsQuestionController.bind(viewModelScope)
+    }
+
+    fun onAlertsQuestionEvent(event: AlertsQuestionEvent) = alertsQuestionController.handleEvent(event)
 
     private val topPickId: String?
         get() = savedStateHandle.get<String>("topPickId")
@@ -74,9 +85,6 @@ class TopPickViewModel(
     private val _actions = MutableSharedFlow<TopPickAction>()
     val actions get() = _actions
 
-    private val _allTopPicks = MutableStateFlow(TopPicksView())
-    val allTopPicks get() = _allTopPicks
-
     private val _savedTopPicks = MutableStateFlow(TopPicksView())
     val savedTopPicks get() = _savedTopPicks
 
@@ -91,7 +99,7 @@ class TopPickViewModel(
                 isGuestSession.value = isGuest == true
             }
         }
-        getAllTopPicks()
+        getSavedTopPicks()
         getTopPick()
     }
 
@@ -194,24 +202,18 @@ class TopPickViewModel(
                         }
                     )
                     _topPickView.update { it.copy(brief = it.brief?.copy(isWatched = watch)) }
+                    if (watch) alertsQuestionController.onStockAdded(ticker)
                     if (!watch) processAction(TopPickAction.WatchlistRemoved(ticker))
                 }
             )
         }
     }
 
-    fun getAllTopPicks() {
-        _allTopPicks.update { it.copy(loading = true) }
+    fun getSavedTopPicks() {
         _savedTopPicks.update { it.copy(loading = true) }
 
-        getLocalTopPicksUseCase(GetLocalTopPicksUseCase.None()) {
+        getSavedTopPicksUseCase(GetSavedTopPicksUseCase.None()) {
             it.onFailure {
-                _allTopPicks.update { state ->
-                    state.copy(
-                        loading = false,
-                        error = "Something went wrong."
-                    )
-                }
                 _savedTopPicks.update { state ->
                     state.copy(
                         loading = false,
@@ -221,36 +223,26 @@ class TopPickViewModel(
             }
 
             it.onSuccess { result ->
-
-                val allTopPicks = result.map { topPick ->
-                    with(topPick) {
-                        TopPickPresentation(
-                            id = id,
-                            companyName = companyName,
-                            ticker = ticker,
-                            rationale = rationale,
-                            metrics = metrics,
-                            risks = risks,
-                            confidenceScore = confidenceScore,
-                            isSaved = isSaved,
-                            imageUrl = imageUrl,
-                            percentageChange = percentageChange,
-                            currentPrice = currentPrice
-                        )
-                    }
-                }
-
-                _allTopPicks.update { state ->
-                    state.copy(
-                        loading = false,
-                        topPicks = allTopPicks
-                    )
-                }
-
                 _savedTopPicks.update { state ->
                     state.copy(
                         loading = false,
-                        topPicks = allTopPicks.filter { pick -> pick.isSaved }
+                        topPicks = result.sortedByDescending { pick -> pick.confidenceScore }.map { topPick ->
+                            with(topPick) {
+                                TopPickPresentation(
+                                    id = id,
+                                    companyName = companyName,
+                                    ticker = ticker,
+                                    rationale = rationale,
+                                    metrics = metrics,
+                                    risks = risks,
+                                    confidenceScore = confidenceScore,
+                                    isSaved = isSaved,
+                                    imageUrl = imageUrl,
+                                    percentageChange = percentageChange,
+                                    currentPrice = currentPrice
+                                )
+                            }
+                        }
                     )
                 }
             }

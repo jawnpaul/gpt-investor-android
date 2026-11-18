@@ -41,7 +41,6 @@ import com.thejawnpaul.gptinvestor.ask_me_anything_about_markets
 import com.thejawnpaul.gptinvestor.choose_the_capabilities_you_d_love_in_the_advanced_ai_model
 import com.thejawnpaul.gptinvestor.close
 import com.thejawnpaul.gptinvestor.continue_
-import com.thejawnpaul.gptinvestor.core.platform.NotificationPermissionController
 import com.thejawnpaul.gptinvestor.features.company.presentation.model.TrendingStockPresentation
 import com.thejawnpaul.gptinvestor.features.guest.presentation.TopGuestLabel
 import com.thejawnpaul.gptinvestor.features.investor.presentation.state.TrendingCompaniesView
@@ -52,6 +51,7 @@ import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.Home
 import com.thejawnpaul.gptinvestor.features.investor.presentation.viewmodel.HomeUiState
 import com.thejawnpaul.gptinvestor.features.news.presentation.StoryCardUi
 import com.thejawnpaul.gptinvestor.features.news.presentation.ui.HomeTopStory
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.ui.ExperienceQuestionSheet
 import com.thejawnpaul.gptinvestor.features.tidbit.presentation.state.HomeTidbitView
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.model.TopPickPresentation
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.state.TopPicksView
@@ -87,7 +87,6 @@ import com.thejawnpaul.gptinvestor.trending_today
 import com.thejawnpaul.gptinvestor.you_re_on_the_list
 import com.thejawnpaul.gptinvestor.you_re_one_step_closer_to_unlocking_the_power_of_quantum_edge
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
 
 @Composable
 fun HomeScreen(
@@ -97,12 +96,9 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     composerModifier: Modifier = Modifier
 ) {
-    val notificationPermissionController: NotificationPermissionController = koinInject()
-
     HomeScreenContent(
         state = state,
         onEvent = onEvent,
-        notificationPermissionController = notificationPermissionController,
         toastState = toastState,
         modifier = modifier,
         composerModifier = composerModifier
@@ -113,16 +109,10 @@ fun HomeScreen(
 private fun HomeScreenContent(
     state: HomeUiState,
     onEvent: (HomeEvent) -> Unit,
-    notificationPermissionController: NotificationPermissionController,
     toastState: GiToastState,
     modifier: Modifier = Modifier,
     composerModifier: Modifier = Modifier
 ) {
-    notificationPermissionController.RequestPermissionIfNeeded(
-        shouldRequest = state.requestForNotificationPermission == null && !state.isGuestSession,
-        onGrant = { onEvent(HomeEvent.NotificationPermissionGranted) },
-        onDeny = { onEvent(HomeEvent.NotificationPermissionDenied) }
-    )
     val gutter = Modifier.padding(horizontal = GiSpace.gutter)
     Scaffold(
         modifier = modifier,
@@ -214,6 +204,16 @@ private fun HomeScreenContent(
                     onSelectOption = { onEvent(HomeEvent.SelectWaitListOption(it)) },
                     onJoinWaitList = { onEvent(HomeEvent.JoinWaitlist) },
                     onDismiss = { onEvent(HomeEvent.UpgradeModel(showBottomSheet = false)) }
+                )
+            }
+
+            if (state.showExperienceQuestion) {
+                ExperienceQuestionSheet(
+                    selected = state.selectedExperience,
+                    canContinue = state.canConfirmExperience,
+                    onSelect = { onEvent(HomeEvent.SelectExperience(it)) },
+                    onContinue = { onEvent(HomeEvent.ConfirmExperience) },
+                    onDismiss = { onEvent(HomeEvent.DismissExperienceQuestion) }
                 )
             }
         }
@@ -432,18 +432,7 @@ private fun HomeScreenPreview() {
                 )
             ),
             onEvent = {},
-            toastState = rememberGiToastState(),
-            notificationPermissionController = object : NotificationPermissionController {
-                @Composable
-                override fun RequestPermissionIfNeeded(
-                    shouldRequest: Boolean,
-                    onGrant: () -> Unit,
-                    onDeny: () -> Unit
-                ) {
-                }
-
-                override suspend fun areNotificationsEnabled(): Boolean = true
-            }
+            toastState = rememberGiToastState()
         )
     }
 }

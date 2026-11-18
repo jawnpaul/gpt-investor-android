@@ -17,7 +17,7 @@ import org.junit.Test
 class OnboardingRepositoryTest {
 
     private val apiService: KtorApiService = mockk()
-    private val repository = OnboardingRepository(apiService)
+    private val repository = OnboardingRepository(apiService, mockk(relaxed = true))
 
     private val remote = OnboardingSuggestionsRemote(
         market = "NG",

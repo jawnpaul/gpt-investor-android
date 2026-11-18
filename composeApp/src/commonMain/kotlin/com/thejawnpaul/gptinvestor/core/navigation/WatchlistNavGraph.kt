@@ -10,6 +10,7 @@ import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.added_to_watchlist
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.failed_to_remove_from_watchlist
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.ui.AlertsQuestion
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.ui.WatchlistScreen
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.viewmodel.WatchlistAction
 import com.thejawnpaul.gptinvestor.features.watchlist.presentation.viewmodel.WatchlistViewModel
@@ -49,6 +50,10 @@ fun NavGraphBuilder.watchlistNavGraph(navController: NavHostController, platform
         WatchlistScreen(
             state = state,
             onEvent = viewModel::onEvent
+        )
+        AlertsQuestion(
+            state = viewModel.alertsQuestion.collectAsState().value,
+            onEvent = viewModel::onAlertsQuestionEvent
         )
     }
 }

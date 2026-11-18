@@ -19,6 +19,7 @@ import com.thejawnpaul.gptinvestor.features.company.presentation.ui.CompanyDetai
 import com.thejawnpaul.gptinvestor.features.company.presentation.ui.WebViewScreen
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyDetailAction
 import com.thejawnpaul.gptinvestor.features.company.presentation.viewmodel.CompanyViewModel
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.ui.AlertsQuestion
 import com.thejawnpaul.gptinvestor.removed_from_watchlist
 import com.thejawnpaul.gptinvestor.share_brief_text
 import com.thejawnpaul.gptinvestor.theme.components.GiHaptics
@@ -131,6 +132,10 @@ fun NavGraphBuilder.companyNavGraph(navController: NavHostController, platformAc
             onEvent = parentViewModel::handleCompanyDetailEvent,
             onAction = parentViewModel::processCompanyDetailAction,
             toastState = toastState
+        )
+        AlertsQuestion(
+            state = parentViewModel.alertsQuestion.collectAsState().value,
+            onEvent = parentViewModel::onAlertsQuestionEvent
         )
     }
 

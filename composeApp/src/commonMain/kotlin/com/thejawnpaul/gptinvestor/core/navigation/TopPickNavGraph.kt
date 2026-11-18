@@ -14,6 +14,8 @@ import com.thejawnpaul.gptinvestor.Res
 import com.thejawnpaul.gptinvestor.added_to_watchlist_error
 import com.thejawnpaul.gptinvestor.core.platform.PlatformActions
 import com.thejawnpaul.gptinvestor.failed_to_remove_from_watchlist
+import com.thejawnpaul.gptinvestor.features.onboarding.presentation.ui.AlertsQuestion
+import com.thejawnpaul.gptinvestor.features.toppick.presentation.AllTopPicksViewModel
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickAction
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickEvent
 import com.thejawnpaul.gptinvestor.features.toppick.presentation.TopPickViewModel
@@ -126,14 +128,19 @@ fun NavGraphBuilder.topPickNavGraph(navController: NavHostController, platformAc
             onAction = viewModel::processAction,
             toastState = toastState
         )
+        AlertsQuestion(
+            state = viewModel.alertsQuestion.collectAsState().value,
+            onEvent = viewModel::onAlertsQuestionEvent
+        )
     }
 
     composable(route = Screen.AllTopPicksScreen.route) {
-        val viewModel = koinViewModel<TopPickViewModel>()
-        val state = viewModel.allTopPicks.collectAsState()
+        val viewModel = koinViewModel<AllTopPicksViewModel>()
+        val state = viewModel.state.collectAsState()
         AllTopPicksScreen(
             modifier = Modifier,
             state = state.value,
+            onEvent = viewModel::handleEvent,
             onGoBack = { navController.navigateUp() },
             onGoToDetail = { id -> navController.navigate(Screen.TopPickDetailScreen.createRoute(id)) }
         )

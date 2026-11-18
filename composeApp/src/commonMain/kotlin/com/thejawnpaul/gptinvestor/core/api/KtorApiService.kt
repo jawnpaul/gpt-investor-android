@@ -36,9 +36,11 @@ import com.thejawnpaul.gptinvestor.features.news.data.remote.StoryRemote
 import com.thejawnpaul.gptinvestor.features.news.data.remote.TopStoryRemote
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenRequest
 import com.thejawnpaul.gptinvestor.features.notification.data.RegisterTokenResponse
+import com.thejawnpaul.gptinvestor.features.onboarding.data.remote.MarkQuestionAskedRequest
 import com.thejawnpaul.gptinvestor.features.onboarding.data.remote.OnboardingSuggestionsRemote
-import com.thejawnpaul.gptinvestor.features.postauthonboarding.data.remote.SaveOnboardingAnswersRequest
-import com.thejawnpaul.gptinvestor.features.postauthonboarding.data.remote.SaveOnboardingAnswersResponse
+import com.thejawnpaul.gptinvestor.features.onboarding.data.remote.OnboardingSyncResponse
+import com.thejawnpaul.gptinvestor.features.onboarding.data.remote.PickedStockRequest
+import com.thejawnpaul.gptinvestor.features.onboarding.data.remote.SaveOnboardingAnswersResponse
 import com.thejawnpaul.gptinvestor.features.search.data.remote.ClearHistoryResponse
 import com.thejawnpaul.gptinvestor.features.search.data.remote.SearchResponse
 import com.thejawnpaul.gptinvestor.features.settings.data.remote.model.UpdateUserSettingsRequest
@@ -77,6 +79,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.encodeURLPathPart
 import io.ktor.http.isSuccess
+import kotlinx.serialization.json.JsonObject
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Singleton
 
@@ -249,11 +252,32 @@ class KtorApiService(@Provided private val client: HttpClient) {
     suspend fun clearSearchHistory(): KtorResponse<ClearHistoryResponse> =
         client.delete("v1.1/search/history").toKtorResponse()
 
+    suspend fun syncOnboarding(installationId: String): KtorResponse<OnboardingSyncResponse> =
+        client.post("v1/user/onboarding/sync") {
+            header(INSTALLATION_ID_HEADER, installationId)
+        }.toKtorResponse()
+
     suspend fun saveOnboardingAnswers(
-        request: SaveOnboardingAnswersRequest
+        installationId: String,
+        answers: JsonObject
     ): KtorResponse<SaveOnboardingAnswersResponse> = client.post("v1/user/onboarding") {
+        header(INSTALLATION_ID_HEADER, installationId)
+        setBody(answers)
+    }.toKtorResponse()
+
+    suspend fun markOnboardingQuestionAsked(
+        installationId: String,
+        request: MarkQuestionAskedRequest
+    ): KtorResponse<JsonObject> = client.post("v1/user/onboarding/asked") {
+        header(INSTALLATION_ID_HEADER, installationId)
         setBody(request)
     }.toKtorResponse()
+
+    suspend fun savePickedStock(installationId: String, request: PickedStockRequest): KtorResponse<JsonObject> =
+        client.post("v1/onboarding/picked-stock") {
+            header(INSTALLATION_ID_HEADER, installationId)
+            setBody(request)
+        }.toKtorResponse()
 
     suspend fun getWatchlist(page: Int = 1, pageSize: Int = 20): KtorResponse<WatchlistResponse> =
         client.get("v1/watchlist") {
@@ -316,6 +340,8 @@ class KtorApiService(@Provided private val client: HttpClient) {
             setBody(request)
         }.toKtorResponse()
 }
+
+private const val INSTALLATION_ID_HEADER = "X-Installation-Id"
 
 class KtorResponse<T>(val isSuccessful: Boolean, val body: T?, val errorBody: String?, val code: Int)
 

@@ -21,8 +21,6 @@ interface ITopPickRepository {
 
     fun getSavedTopPicksCount(): Flow<Int>
 
-    fun getLocalTopPicks(): Flow<Either<Failure, List<TopPick>>>
-
     fun getTopPicksByDate(): Flow<List<TopPick>>
 
     fun searchTopPicks(query: String): Flow<List<TopPick>>

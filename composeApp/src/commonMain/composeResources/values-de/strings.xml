@@ -193,22 +193,10 @@
     <string name="search_a_stock_to_analyse">Suchen Sie eine Aktie zur Analyse</string>
     <string name="sign_in_action">Anmelden</string>
 
-    <string name="post_auth_onboarding_title">Helfen Sie uns, Ihre Erfahrung zu personalisieren</string>
-    <string name="post_auth_onboarding_subtitle">Ihre Antworten bestimmen, welche Erkenntnisse und Empfehlungen wir Ihnen zeigen.</string>
     <string name="post_auth_onboarding_experience_label">Wie würden Sie Ihre Anlageerfahrung beschreiben?</string>
     <string name="post_auth_onboarding_experience_beginner">Ich bin neu beim Investieren</string>
     <string name="post_auth_onboarding_experience_intermediate">Etwas Erfahrung</string>
     <string name="post_auth_onboarding_experience_experienced">Erfahrener Anleger</string>
-    <string name="post_auth_onboarding_goal_label">Was ist Ihr wichtigstes Anlageziel?</string>
-    <string name="post_auth_onboarding_goal_grow_wealth">Langfristig Vermögen aufbauen</string>
-    <string name="post_auth_onboarding_goal_generate_income">Einkommen erzielen</string>
-    <string name="post_auth_onboarding_goal_learn_basics">Die Grundlagen lernen</string>
-    <string name="post_auth_onboarding_goal_just_curious">Nur neugierig</string>
-    <string name="post_auth_onboarding_risk_label">Wie gehen Sie mit Risiko um?</string>
-    <string name="post_auth_onboarding_risk_conservative">Lieber auf Nummer sicher gehen</string>
-    <string name="post_auth_onboarding_risk_balanced">Ausgewogener Ansatz</string>
-    <string name="post_auth_onboarding_risk_aggressive">Ich fühle mich mit Kursschwankungen wohl</string>
-    <string name="post_auth_onboarding_save_error">Wir konnten Ihre Antworten nicht speichern. Versuchen Sie es erneut.</string>
 
     <string name="verify_email_title">Prüfen Sie Ihre E-Mails</string>
     <string name="verify_email_body">Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich anmelden. Prüfen Sie Ihren Posteingang auf den Bestätigungslink.</string>
@@ -554,7 +542,7 @@
     <string name="log_in_with_apple">Mit Apple anmelden</string>
     <string name="sign_up_with_apple">Mit Apple registrieren</string>
     <string name="news_section_picks">Empfehlungen</string>
-    <string name="news_section_news">Nachrichten</string>
+    <string name="news_section_news">Markt-Updates</string>
     <string name="news_new_stories">Neue Meldungen</string>
     <string name="news_paste_link_title">Eine Meldung woanders gesehen?</string>
     <string name="news_paste_link_body">Fügen Sie den Link in den Chat ein, um die zugehörigen Aktien zu sehen</string>
@@ -650,4 +638,24 @@
         <item quantity="other">Letzte %1$d Handelstage</item>
     </plurals>
     <string name="news_share_preview_description">Vorschau der Meldungskarte, die Sie teilen</string>
+    <string name="onboarding_experience_sheet_body">Wir passen jede Analyse an Ihr Niveau an. Sie können das jederzeit im Profil ändern.</string>
+    <string name="not_now">Nicht jetzt</string>
+    <string name="alerts_ask_title">Möchten Sie benachrichtigt werden, wenn sich %1$s bewegt?</string>
+    <string name="alerts_ask_body">Wir informieren Sie über große Kursbewegungen und Nachrichten zu den Aktien auf Ihrer Watchlist. Sonst nichts.</string>
+    <string name="alerts_ask_accept">Benachrichtigungen aktivieren</string>
+    <string name="goal_banner_title">Wofür investieren Sie?</string>
+    <string name="goal_banner_subtitle">Wir passen Ihre Top-Picks an. Sie können das jederzeit ändern.</string>
+    <string name="goal_filter_label">Picks nach Ziel filtern</string>
+    <string name="goal_filter_for_you">Für Sie</string>
+    <string name="goal_filter_growth">Wachstum</string>
+    <string name="goal_filter_income">Einkommen</string>
+    <string name="goal_filter_learning">Lernen</string>
+    <string name="goal_filter_empty">Heute gibt es keine Picks für dieses Ziel. Hier sind alle Picks von heute.</string>
+    <string name="profile_investing_profile">Ihr Anlegerprofil</string>
+    <string name="profile_experience">Erfahrung</string>
+    <string name="profile_not_set">Nicht festgelegt</string>
+    <string name="profile_experience_footnote">Bestimmt, wie Analysen erklärt werden.</string>
+    <string name="experience_hint_beginner">Einfache Sprache, kein Fachjargon</string>
+    <string name="experience_hint_intermediate">Einfache Sprache, Fachbegriffe erklärt</string>
+    <string name="experience_hint_experienced">Kennzahlen und Marktkontext</string>
 </resources>
